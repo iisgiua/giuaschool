@@ -8,14 +8,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Alunno;
-use App\Entity\DefinizioneRichiesta;
 use App\Entity\Genitore;
 use App\Entity\Richiesta;
 use App\Entity\Uscita;
+use App\Form\FiltroType;
 use App\Form\RichiestaType;
 use App\Form\UscitaType;
-use App\Form\FiltroType;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\RichiesteUtil;
@@ -23,7 +21,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
@@ -60,7 +57,6 @@ class RichiesteController extends BaseController {
    * Crea una nuova richiesta
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RichiesteUtil $ric Funzioni di utilità per la gestione dei moduli di richiesta
    * @param LogHandler $dblogger Gestore dei log su database
@@ -74,7 +70,7 @@ class RichiesteController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function addAction(Request $request, RequestStack $reqstack, TranslatorInterface $trans,
+  public function addAction(Request $request, TranslatorInterface $trans,
                             RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
     // inizializza
     $info = [];
@@ -82,7 +78,7 @@ class RichiesteController extends BaseController {
     $varSessione = '/APP/FILE/richieste_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
-      $reqstack->getSession()->set($varSessione, []);
+      $this->reqstack->getSession()->set($varSessione, []);
     }
     $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla modulo richiesta
@@ -112,7 +108,7 @@ class RichiesteController extends BaseController {
       ->setUtente($utente);
     $this->em->persist($richiesta);
     // informazioni per la visualizzazione
-    $info['modulo'] = 'PERSONALI/moduli/'.$definizioneRichiesta->getModulo();
+    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['formMode' => 'add',
@@ -138,7 +134,7 @@ class RichiesteController extends BaseController {
           $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
         } else {
           // controlla scadenza
-          $oraScadenza = $reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
+          $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
           $scadenza = clone ($form->get('data')->getData());
           $scadenza->modify('-1 day +'.substr($oraScadenza, 0, 2).' hour +'.substr($oraScadenza, 3, 2).' minute');
           if ($invio > $scadenza) {
@@ -158,10 +154,10 @@ class RichiesteController extends BaseController {
         }
       }
       // controlla allegati
-      $allegatiTemp = $reqstack->getSession()->get($varSessione, []);
+      $allegatiTemp = $this->reqstack->getSession()->get($varSessione, []);
       if (count($allegatiTemp) < $info['allegati']) {
         $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
-        $reqstack->getSession()->remove($varSessione);
+        $this->reqstack->getSession()->remove($varSessione);
       }
       if ($form->isValid()) {
         // data richiesta
@@ -170,7 +166,7 @@ class RichiesteController extends BaseController {
         list($documento, $documentoId) = $ric->creaPdf($definizioneRichiesta, $utente, $valori, $data, $invio);
         // imposta eventuali allegati
         $allegati = $ric->impostaAllegati($utente, $documentoId, $allegatiTemp);
-        $reqstack->getSession()->remove($varSessione);
+        $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
           ->setValori($valori)
@@ -488,7 +484,6 @@ class RichiesteController extends BaseController {
    * Gestione delle richieste
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -499,30 +494,30 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, RequestStack $reqstack, int $pagina): Response {
+  public function gestioneAction(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
     $dati = [];
     // criteri di ricerca
     $criteri = array();
-    $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo', '');
-    $criteri['stato'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'I');
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo', '');
+    $criteri['stato'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'I');
     $sede = $this->em->getRepository('App\Entity\Sede')->find(
-      (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/sede', 0));
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/sede', 0));
     $criteri['sede'] = $sede ? $sede->getId() : 0;
     $classe = $this->em->getRepository('App\Entity\Classe')->find(
-      (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/classe', 0));
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/classe', 0));
     $criteri['classe'] = $classe ? $classe->getId() : 0;
-    $criteri['residenza'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/residenza', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/cognome', '');
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/nome', '');
+    $criteri['residenza'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/residenza', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
     // lista sedi
     if ($this->getUser()->getSede()) {
@@ -575,14 +570,14 @@ class RichiesteController extends BaseController {
       $criteri['nome'] = $form->get('nome')->getData();
       $pagina = 1;
       // memorizza in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/tipo', $criteri['tipo']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/stato', $criteri['stato']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/sede', $criteri['sede']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/residenza', $criteri['residenza']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/stato', $criteri['stato']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/sede', $criteri['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/residenza', $criteri['residenza']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
     // recupera dati
     $dati = $this->em->getRepository('App\Entity\Richiesta')->lista($this->getUser(), $criteri, $pagina);

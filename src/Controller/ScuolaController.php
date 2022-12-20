@@ -8,9 +8,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Amministratore;
 use App\Entity\Classe;
-use App\Entity\Configurazione;
 use App\Entity\Corso;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\DefinizioneScrutinio;
@@ -20,7 +18,6 @@ use App\Entity\Materia;
 use App\Entity\Orario;
 use App\Entity\Preside;
 use App\Entity\ScansioneOraria;
-use App\Entity\Scrutinio;
 use App\Entity\Sede;
 use App\Form\AmministratoreType;
 use App\Form\ClasseType;
@@ -34,13 +31,11 @@ use App\Form\OrarioType;
 use App\Form\PresideType;
 use App\Form\ScansioneOrariaSettimanaleType;
 use App\Form\SedeType;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -57,8 +52,6 @@ class ScuolaController extends BaseController {
    * Gestisce la modifica dei dati degli scrutini
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param string $periodo Periodo dello scrutinio
    *
@@ -69,30 +62,28 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function scrutiniAction(Request $request, EntityManagerInterface $em,
-                                 RequestStack $reqstack, TranslatorInterface $trans,
-                                 $periodo): Response {
+  public function scrutiniAction(Request $request, TranslatorInterface $trans, $periodo): Response {
     // init
     $dati = [];
     $info = [];
     // lista periodi scrutinio
-    $info['listaPeriodi'] = $em->getRepository('App\Entity\Configurazione')->infoScrutini();
+    $info['listaPeriodi'] = $this->em->getRepository('App\Entity\Configurazione')->infoScrutini();
     $info['listaPeriodi']['G'] = $trans->trans('label.scrutini_periodo_G');
     $info['listaPeriodi']['R'] = $trans->trans('label.scrutini_periodo_R');
     $info['listaPeriodi']['X'] = $trans->trans('label.scrutini_periodo_X');
     // periodo predefinito
     if (empty($periodo)) {
       // ultimo periodo configurato
-      $periodo = $em->getRepository('App\Entity\DefinizioneScrutinio')->ultimo();
+      $periodo = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->ultimo();
     }
     $info['periodo'] = $periodo;
     // legge dati
-    $definizione = $em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $definizione = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     if ($definizione) {
       // controlla dati mancanti
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
-        ['periodo' => ($periodo == 'P' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
-        ($periodo == 'S' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
+        ['periodo' => ($periodo == 'P' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
       $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
       $struttura[1] = ['ScrutinioInizio', false, []];
       $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
@@ -105,8 +96,8 @@ class ScuolaController extends BaseController {
     } else {
       // nuova definizione
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
-        ['periodo' => ($periodo == 'P' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
-        ($periodo == 'S' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
+        ['periodo' => ($periodo == 'P' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
       $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
       $struttura[1] = ['ScrutinioInizio', false, []];
       $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
@@ -119,7 +110,7 @@ class ScuolaController extends BaseController {
         ->setPeriodo($periodo)
         ->setArgomenti($argomenti)
         ->setStruttura($struttura);
-      $em->persist($definizione);
+      $this->em->persist($definizione);
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
@@ -136,12 +127,12 @@ class ScuolaController extends BaseController {
       }
       $definizione->setClassiVisibili($classiVisibili);
       // aggiorna classi visibili di scrutini
-      $subquery = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+      $subquery = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.anno=:anno')
         ->getDQL();
       for ($cl = 1; $cl <= 5; $cl++) {
-        $risultato = $em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+        $risultato = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
           ->update()
           ->set('s.modificato', ':modificato')
           ->set('s.visibile', ':visibile')
@@ -152,7 +143,7 @@ class ScuolaController extends BaseController {
           ->getResult();
       }
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
     }
@@ -164,7 +155,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati dell'amministratore (un solo utente possibile)
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -173,12 +163,12 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function amministratoreAction(Request $request, EntityManagerInterface $em): Response {
+  public function amministratoreAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // legge dati
-    $amministratore = $em->getRepository('App\Entity\Amministratore')->findOneBy([]);
+    $amministratore = $this->em->getRepository('App\Entity\Amministratore')->findOneBy([]);
     if (!$amministratore) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -189,7 +179,7 @@ class ScuolaController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
     }
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'amministratore', $dati, $info, [$form->createView(), 'message.required_fields']);
@@ -199,7 +189,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati del Dirigente Scolastico (un solo utente possibile)
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -208,18 +197,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function dirigenteAction(Request $request, EntityManagerInterface $em): Response {
+  public function dirigenteAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // legge dati
-    $preside = $em->getRepository('App\Entity\Preside')->findOneBy([]);
+    $preside = $this->em->getRepository('App\Entity\Preside')->findOneBy([]);
     if (!$preside) {
       // crea nuovo utente
       $preside = (new Preside())
         ->setPassword('NOPASSWORD')
         ->setAbilitato(true);
-      $em->persist($preside);
+      $this->em->persist($preside);
     }
     // assicura che l'utente sia abilitato
     $preside->setAbilitato(true);
@@ -228,7 +217,7 @@ class ScuolaController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
     }
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'dirigente', $dati, $info, [$form->createView(), 'message.required_fields']);
@@ -238,7 +227,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati dell'istituto (un solo istituto possibile)
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -247,23 +235,23 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function istitutoAction(Request $request, EntityManagerInterface $em): Response {
+  public function istitutoAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // legge dati
-    $istituto = $em->getRepository('App\Entity\Istituto')->findOneBy([]);
+    $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
     if (!$istituto) {
       // crea nuovo utente
       $istituto = new Istituto();
-      $em->persist($istituto);
+      $this->em->persist($istituto);
     }
     // form
     $form = $this->createForm(IstitutoType::class, $istituto, ['returnUrl' => $this->generateUrl('scuola_istituto')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
     }
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'istituto', $dati, $info, [$form->createView(), 'message.required_fields']);
@@ -273,7 +261,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati delle sedi scolastiche
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -282,12 +269,12 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediAction(Request $request, EntityManagerInterface $em): Response {
+  public function sediAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Sede')->findBY([], ['ordinamento' => 'ASC']);
+    $dati = $this->em->getRepository('App\Entity\Sede')->findBY([], ['ordinamento' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'sedi', $dati, $info);
   }
@@ -296,7 +283,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati di una sede scolastica
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -307,14 +293,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function sediEditAction(Request $request, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $sede = $em->getRepository('App\Entity\Sede')->find($id);
+      $sede = $this->em->getRepository('App\Entity\Sede')->find($id);
       if (!$sede) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -322,14 +308,14 @@ class ScuolaController extends BaseController {
     } else {
       // azione add
       $sede = new Sede();
-      $em->persist($sede);
+      $this->em->persist($sede);
     }
     // form
     $form = $this->createForm(SedeType::class, $sede, ['returnUrl' => $this->generateUrl('scuola_sedi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -343,7 +329,6 @@ class ScuolaController extends BaseController {
    * Cancella una sede scolastica
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -353,18 +338,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function sediDeleteAction(Request $request, $id): Response {
     // controlla sede
-    $sede = $em->getRepository('App\Entity\Sede')->find($id);
+    $sede = $this->em->getRepository('App\Entity\Sede')->find($id);
     if (!$sede) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella sede
-      $em->remove($sede);
+      $this->em->remove($sede);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -379,7 +364,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati dei corsi scolastici
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -388,12 +372,12 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiAction(Request $request, EntityManagerInterface $em): Response {
+  public function corsiAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Corso')->findBY([], ['nome' => 'ASC']);
+    $dati = $this->em->getRepository('App\Entity\Corso')->findBY([], ['nome' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'corsi', $dati, $info);
   }
@@ -402,7 +386,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati di un corso scolastico
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -413,14 +396,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function corsiEditAction(Request $request, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $corso = $em->getRepository('App\Entity\Corso')->find($id);
+      $corso = $this->em->getRepository('App\Entity\Corso')->find($id);
       if (!$corso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -428,14 +411,14 @@ class ScuolaController extends BaseController {
     } else {
       // azione add
       $corso = new Corso();
-      $em->persist($corso);
+      $this->em->persist($corso);
     }
     // form
     $form = $this->createForm(CorsoType::class, $corso, ['returnUrl' => $this->generateUrl('scuola_corsi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -449,7 +432,6 @@ class ScuolaController extends BaseController {
    * Cancella un corso scolastico
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -459,18 +441,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function corsiDeleteAction(Request $request, $id): Response {
     // controlla corso
-    $corso = $em->getRepository('App\Entity\Corso')->find($id);
+    $corso = $this->em->getRepository('App\Entity\Corso')->find($id);
     if (!$corso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella corso
-      $em->remove($corso);
+      $this->em->remove($corso);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -485,7 +467,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati delle materie scolastiche
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -494,12 +475,12 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieAction(Request $request, EntityManagerInterface $em): Response {
+  public function materieAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
+    $dati = $this->em->getRepository('App\Entity\Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'materie', $dati, $info);
   }
@@ -508,7 +489,6 @@ class ScuolaController extends BaseController {
    * Modifica dati di una materia scolastica
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -519,14 +499,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function materieEditAction(Request $request, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $materia = $em->getRepository('App\Entity\Materia')->find($id);
+      $materia = $this->em->getRepository('App\Entity\Materia')->find($id);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -534,14 +514,14 @@ class ScuolaController extends BaseController {
     } else {
       // azione add
       $materia = new Materia();
-      $em->persist($materia);
+      $this->em->persist($materia);
     }
     // form
     $form = $this->createForm(MateriaType::class, $materia, ['returnUrl' => $this->generateUrl('scuola_materie')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -555,7 +535,6 @@ class ScuolaController extends BaseController {
    * Cancella una materia scolastica
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -565,18 +544,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function materieDeleteAction(Request $request, $id): Response {
     // controlla materia
-    $materia = $em->getRepository('App\Entity\Materia')->find($id);
+    $materia = $this->em->getRepository('App\Entity\Materia')->find($id);
     if (!$materia) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella materia
-      $em->remove($materia);
+      $this->em->remove($materia);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -591,8 +570,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati delle classi
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -604,21 +581,20 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                               $pagina): Response {
+  public function classiAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera pagina di visualizzazione
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/scuola_classi/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/scuola_classi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/scuola_classi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/scuola_classi/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Classe')->cerca($pagina);
+    $dati = $this->em->getRepository('App\Entity\Classe')->cerca($pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'classi', $dati, $info);
@@ -628,7 +604,6 @@ class ScuolaController extends BaseController {
    * Modifica dati di una classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -639,14 +614,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function classiEditAction(Request $request, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App\Entity\Classe')->find($id);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -654,14 +629,14 @@ class ScuolaController extends BaseController {
     } else {
       // azione add
       $classe = new Classe();
-      $em->persist($classe);
+      $this->em->persist($classe);
     }
     // form
     $form = $this->createForm(ClasseType::class, $classe, ['returnUrl' => $this->generateUrl('scuola_classi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -675,7 +650,6 @@ class ScuolaController extends BaseController {
    * Cancella una classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -685,18 +659,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function classiDeleteAction(Request $request, $id): Response {
     // controlla classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($id);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella classe
-      $em->remove($classe);
+      $this->em->remove($classe);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -711,8 +685,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati delle festività
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -724,21 +696,20 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                  $pagina): Response {
+  public function festivitaAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera pagina di visualizzazione
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/scuola_festivita/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/scuola_festivita/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/scuola_festivita/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/scuola_festivita/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Festivita')->cerca($pagina);
+    $dati = $this->em->getRepository('App\Entity\Festivita')->cerca($pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'festivita', $dati, $info);
@@ -748,7 +719,6 @@ class ScuolaController extends BaseController {
    * Modifica dati di una festività
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
@@ -760,15 +730,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaEditAction(Request $request, EntityManagerInterface $em,
-                                      TranslatorInterface $trans, $id): Response {
+  public function festivitaEditAction(Request $request, TranslatorInterface $trans, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $festivita = $em->getRepository('App\Entity\Festivita')->find($id);
+      $festivita = $this->em->getRepository('App\Entity\Festivita')->find($id);
       if (!$festivita) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -777,7 +746,7 @@ class ScuolaController extends BaseController {
       // azione add
       $festivita = (new Festivita())
         ->setData(new \DateTime('today'));
-      $em->persist($festivita);
+      $this->em->persist($festivita);
     }
     // form
     $form = $this->createForm(FestivitaType::class, $festivita, [
@@ -792,18 +761,18 @@ class ScuolaController extends BaseController {
       if ($form->isValid()) {
         if (!$id) {
           // imposta festività in intervallo di date
-          $em->remove($festivita);
+          $this->em->remove($festivita);
           $data = $form->get('dataInizio')->getData();
           while ($data <= $form->get('dataFine')->getData()) {
             $festivita = (new Festivita())
               ->setData(clone $data)
               ->setDescrizione($form->get('descrizione')->getData());
-            $em->persist($festivita);
+            $this->em->persist($festivita);
             $data->modify('+1 day');
           }
         }
         // memorizza modifiche
-        $em->flush();
+        $this->em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -818,7 +787,6 @@ class ScuolaController extends BaseController {
    * Cancella una festività
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -828,18 +796,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function festivitaDeleteAction(Request $request, $id): Response {
     // controlla festività
-    $festivita = $em->getRepository('App\Entity\Festivita')->find($id);
+    $festivita = $this->em->getRepository('App\Entity\Festivita')->find($id);
     if (!$festivita) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella festivita
-      $em->remove($festivita);
+      $this->em->remove($festivita);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -854,7 +822,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati degli orari scolastici
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -863,12 +830,12 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioAction(Request $request, EntityManagerInterface $em): Response {
+  public function orarioAction(Request $request): Response {
     // init
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
+    $dati = $this->em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
       ->join('o.sede', 's')
       ->orderBy('o.inizio,s.ordinamento', 'ASC')
       ->getQuery()
@@ -881,7 +848,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati di un orario scolastico
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
@@ -893,15 +859,14 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                   $id): Response {
+  public function orarioEditAction(Request $request, TranslatorInterface $trans, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $orario = $em->getRepository('App\Entity\Orario')->find($id);
+      $orario = $this->em->getRepository('App\Entity\Orario')->find($id);
       if (!$orario) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -909,7 +874,7 @@ class ScuolaController extends BaseController {
     } else {
       // azione add
       $orario = new Orario();
-      $em->persist($orario);
+      $this->em->persist($orario);
     }
     // form
     $form = $this->createForm(OrarioType::class, $orario, ['returnUrl' => $this->generateUrl('scuola_orario')]);
@@ -919,13 +884,13 @@ class ScuolaController extends BaseController {
       if ($form->get('inizio')->getData() > $form->get('fine')->getData()) {
         // errore: intervallo non valido
         $form->addError(new FormError($trans->trans('exception.intervallo_date_invalido')));
-      } elseif ($em->getRepository('App\Entity\Orario')->sovrapposizioni($orario)) {
+      } elseif ($this->em->getRepository('App\Entity\Orario')->sovrapposizioni($orario)) {
         // errore: sovrapposizione con un periodo esistente
         $form->addError(new FormError($trans->trans('exception.periodo_sovrapposto')));
       }
       if ($form->isValid()) {
         // memorizza modifiche
-        $em->flush();
+        $this->em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -940,7 +905,6 @@ class ScuolaController extends BaseController {
    * Cancella un orario scolastico
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -950,18 +914,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function orarioDeleteAction(Request $request, $id): Response {
     // controlla orario
-    $orario = $em->getRepository('App\Entity\Orario')->find($id);
+    $orario = $this->em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     try {
       // cancella orario
-      $em->remove($orario);
+      $this->em->remove($orario);
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.delete_ok');
     } catch (\Exception $e) {
@@ -976,7 +940,6 @@ class ScuolaController extends BaseController {
    * Modifica dei dati della scansione oraria relativa ad un dato orario scolastico
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
@@ -988,19 +951,18 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioScansioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                        $id): Response {
+  public function orarioScansioneAction(Request $request, TranslatorInterface $trans, $id): Response {
     // init
     $dati = [];
     $info = [];
     // controlla orario
-    $orario = $em->getRepository('App\Entity\Orario')->find($id);
+    $orario = $this->em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge scansione oraria
-    $scansione = $em->getRepository('App\Entity\ScansioneOraria')->orario($orario);
+    $scansione = $this->em->getRepository('App\Entity\ScansioneOraria')->orario($orario);
     // form
     $form = $this->createForm(ScansioneOrariaSettimanaleType::class, null,
       ['returnUrl' => $this->generateUrl('scuola_orario'), 'data' => $scansione]);
@@ -1024,7 +986,7 @@ class ScuolaController extends BaseController {
             ->setInizio($datiOra->get('inizio')->getData())
             ->setFine($datiOra->get('fine')->getData())
             ->setDurata($datiOra->get('durata')->getData());
-          $em->persist($scansioneNuova[$giorno][$ora]);
+          $this->em->persist($scansioneNuova[$giorno][$ora]);
           // controlla orari
           if ($datiOra->get('inizio')->getData() > $datiOra->get('fine')->getData()) {
             // errore: intervallo ore sbagliato
@@ -1042,11 +1004,11 @@ class ScuolaController extends BaseController {
         // rimuove dati inutili
         foreach ($scansione as $giorno) {
           foreach ($giorno as $ora) {
-            $em->remove($ora);
+            $this->em->remove($ora);
           }
         }
         // memorizza modifiche
-        $em->flush();
+        $this->em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -1098,7 +1060,7 @@ class ScuolaController extends BaseController {
     // init
     $fs = new Filesystem();
     $finder = new Finder();
-    $path = $this->getParameter('kernel.project_dir').'/templates/PERSONALI/moduli';
+    $path = $this->getParameter('kernel.project_dir').'/PERSONAL/data/moduli';
     $dati = [];
     $info = [];
     // controlla azione

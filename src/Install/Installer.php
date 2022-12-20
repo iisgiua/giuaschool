@@ -1097,8 +1097,6 @@ class Installer {
       "OAUTH_GOOGLE_CLIENT_ID='".$this->env['OAUTH_GOOGLE_CLIENT_ID']."'\n".
       "OAUTH_GOOGLE_CLIENT_SECRET='".$this->env['OAUTH_GOOGLE_CLIENT_SECRET']."'\n".
       "OAUTH_GOOGLE_CLIENT_HD='".$this->env['OAUTH_GOOGLE_CLIENT_HD']."'\n\n".
-      "### percorso per immagini personalizzate\n".
-      "LOCAL_PATH='".$this->env['LOCAL_PATH']."'\n\n".
       "### imposta il livello del log del sistema in produzione\n".
       "LOG_LEVEL='".$this->env['LOG_LEVEL']."'\n\n".
       "### imposta la password di installazione\n".
@@ -1125,7 +1123,6 @@ class Installer {
     $env['OAUTH_GOOGLE_CLIENT_ID'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_ID']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_ID']);
     $env['OAUTH_GOOGLE_CLIENT_SECRET'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_SECRET']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_SECRET']);
     $env['OAUTH_GOOGLE_CLIENT_HD'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_HD']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_HD']);
-    $env['LOCAL_PATH'] = (empty($this->env['LOCAL_PATH']) ? '' : $this->env['LOCAL_PATH']);
     $env['LOG_LEVEL'] = (empty($this->env['LOG_LEVEL']) ? 'warning' : $this->env['LOG_LEVEL']);
     $env['INSTALLATION_PSW'] = (empty($this->env['INSTALLATION_PSW']) ? '' : $this->env['INSTALLATION_PSW']);
     $this->env = $env;

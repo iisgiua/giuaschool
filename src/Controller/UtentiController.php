@@ -8,30 +8,25 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\Alunno;
+use App\Entity\Docente;
+use App\Util\LogHandler;
+use App\Util\OtpUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use App\Entity\Genitore;
-use App\Entity\Alunno;
-use App\Entity\Docente;
-use App\Entity\App;
-use App\Util\LogHandler;
-use App\Util\OtpUtil;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -39,7 +34,7 @@ use App\Util\OtpUtil;
  *
  * @author Antonello Dessì
  */
-class UtentiController extends AbstractController {
+class UtentiController extends BaseController {
 
   /**
    * Mostra il profilo dell'utente connesso
@@ -62,8 +57,6 @@ class UtentiController extends AbstractController {
    * Modifica l'email del profilo dell'utente connesso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
@@ -75,8 +68,8 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                              TranslatorInterface $trans, ValidatorInterface $validator, LogHandler $dblogger) {
+  public function emailAction(Request $request, TranslatorInterface $trans, ValidatorInterface $validator,
+                              LogHandler $dblogger) {
     $success = null;
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
@@ -93,7 +86,7 @@ class UtentiController extends AbstractController {
     if ($form->isSubmitted() && $form->isValid()) {
       $vecchia_email = $this->getUser()->getEmail();
       // legge configurazione: id_provider
-      $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+      $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
       // validazione
       $this->getUser()->setEmail($form->get('email')->getData());
       $errors = $validator->validate($this->getUser());
@@ -104,7 +97,7 @@ class UtentiController extends AbstractController {
         $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
       } else {
         // memorizza modifica
-        $em->flush();
+        $this->em->flush();
         $success = 'message.update_ok';
         // log azione
         $dblogger->logAzione('SICUREZZA', 'Cambio Email', array(
@@ -126,11 +119,9 @@ class UtentiController extends AbstractController {
    * Modifica la password dell'utente connesso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -141,8 +132,8 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
-                                 TranslatorInterface $trans, ValidatorInterface $validator, RequestStack $reqstack,
+  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
+                                 TranslatorInterface $trans, ValidatorInterface $validator,
                                  OtpUtil $otp, LogHandler $dblogger) {
     $success = null;
     $errore = null;
@@ -182,7 +173,7 @@ class UtentiController extends AbstractController {
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // legge configurazione: id_provider
-        $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+        $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
         if ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
           // errore: docente/staff/preside/alunno
           $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
@@ -228,7 +219,7 @@ class UtentiController extends AbstractController {
             $this->getUser()->setUltimoOtp($codice);
           }
           // memorizza password
-          $em->flush();
+          $this->em->flush();
           $success = 'message.update_ok';
           // log azione
           $dblogger->logAzione('SICUREZZA', 'Cambio Password', array(
@@ -251,8 +242,6 @@ class UtentiController extends AbstractController {
    * Abilita i docenti all'uso dell'OTP.
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
@@ -264,15 +253,15 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function otpAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                             TranslatorInterface $trans, OtpUtil $otp, LogHandler $dblogger) {
+  public function otpAction(Request $request, TranslatorInterface $trans, OtpUtil $otp,
+                            LogHandler $dblogger) {
     // inizializza
     $docente = $this->getUser();
     $msg = null;
     $qrcode = null;
     $form = null;
     // legge configurazione: id_provider
-    $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+    $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
     if ($id_provider) {
       // errore: docente/staff/preside/alunno
       $msg = array('tipo' => 'danger', 'messaggio' => 'exception.invalid_user_type_recovery');
@@ -283,11 +272,11 @@ class UtentiController extends AbstractController {
       // prima associazione con un dispositivo
       if ($request->getMethod() == 'POST') {
         // legge token esistente
-        $token = $reqstack->getSession()->get('/APP/ROUTE/utenti_otp/token');
+        $token = $this->reqstack->getSession()->get('/APP/ROUTE/utenti_otp/token');
       } else {
         // crea token
         $token = $otp->creaToken($docente->getUsername());
-        $reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', $token);
+        $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', $token);
       }
       // crea qrcode
       $qrcode = $otp->qrcode($docente->getUsername(), 'Registro Elettronico', $token);
@@ -308,9 +297,9 @@ class UtentiController extends AbstractController {
         if ($otp->controllaOtp($token, $form->get('otp')->getData())) {
           // ok, abilita otp
           $docente->setOtp($token);
-          $em->flush();
+          $this->em->flush();
           // cancella sessione
-          $reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
+          $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
           // messaggio di successo
           $msg = array('tipo' => 'success', 'messaggio' => 'message.otp_abilitato');
           // log azione
@@ -337,7 +326,6 @@ class UtentiController extends AbstractController {
    * Gestione delle notifiche per i docenti e gli ATA.
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -347,7 +335,7 @@ class UtentiController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function notificheAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger) {
+  public function notificheAction(Request $request, LogHandler $dblogger) {
     $msg = null;
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_notifiche', FormType::class)
@@ -367,7 +355,7 @@ class UtentiController extends AbstractController {
       $notifica = array();
       if ($form->get('abilita')->getData() === true) {
         // abilita
-        $app = $em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
+        $app = $this->em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
           'abilitati' => 'DT', 'attiva' => 1]);
         if ($app) {
           // memorizza servizio invio email
@@ -377,7 +365,7 @@ class UtentiController extends AbstractController {
       // memorizza modifica
       $old = $this->getUser()->getNotifica();
       $this->getUser()->setNotifica($notifica);
-      $em->flush();
+      $this->em->flush();
       // messaggio di successo
       $msg = 'message.dato_memorizzato';
       // log azione

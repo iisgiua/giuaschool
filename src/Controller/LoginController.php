@@ -11,17 +11,13 @@ namespace App\Controller;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
 use App\Entity\Ata;
-use App\Entity\Avviso;
-use App\Entity\AvvisoIndividuale;
 use App\Entity\Docente;
 use App\Entity\Genitore;
-use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use App\Util\NotificheUtil;
 use App\Util\OtpUtil;
 use App\Util\StaffUtil;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -30,7 +26,6 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -55,7 +50,6 @@ class LoginController extends BaseController {
   /**
    * Login dell'utente attraverso username e password
    *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
@@ -64,8 +58,7 @@ class LoginController extends BaseController {
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
    */
-  public function formAction(RequestStack $reqstack, AuthenticationUtils $auth,
-                             ConfigLoader $config) {
+  public function formAction(AuthenticationUtils $auth, ConfigLoader $config) {
     if ($this->isGranted('ROLE_UTENTE')) {
       // reindirizza a pagina HOME
       return $this->redirectToRoute('login_home');
@@ -74,9 +67,9 @@ class LoginController extends BaseController {
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -133,8 +126,6 @@ class LoginController extends BaseController {
    * Recupero della password per gli utenti abilitati
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
@@ -148,17 +139,16 @@ class LoginController extends BaseController {
    * @Route("/login/recovery/", name="login_recovery",
    *    methods={"GET", "POST"})
    */
-  public function recoveryAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 ConfigLoader $config, UserPasswordHasherInterface $hasher, OtpUtil $otp,
-                                 StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger) {
+  public function recoveryAction(Request $request, ConfigLoader $config,
+                                 UserPasswordHasherInterface $hasher, OtpUtil $otp, StaffUtil $staff,
+                                 MailerInterface $mailer, LoggerInterface $logger, LogHandler $dblogger) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     $errore = null;
     $successo = null;
     // crea form inserimento email
@@ -172,21 +162,21 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $email = $form->get('email')->getData();
-      $utente = $em->getRepository('App\Entity\Utente')->findOneBy(['email' => $email, 'abilitato' => 1]);
+      $this->email = $form->get('email')->getData();
+      $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $this->email, 'abilitato' => 1]);
       // legge configurazione: id_provider
-      $idProvider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
-      $idProviderTipo = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
+      $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
+      $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
       if (!$utente) {
         // utente non esiste
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', array(
-          'email' => $email,
+          'email' => $this->email,
           'ip' => $request->getClientIp()));
         $errore = 'exception.invalid_recovery_email';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
         // errore: niente recupero password per utente su id provider
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', array(
-          'email' => $email,
+          'email' => $this->email,
           'ip' => $request->getClientIp()));
         $errore = 'exception.invalid_user_type_recovery';
       } else {
@@ -233,18 +223,18 @@ class LoginController extends BaseController {
         $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
         $utente->setPassword($pswd);
         // memorizza su db
-        $em->flush();
+        $this->em->flush();
         // log azione
         $logger->warning('Richiesta di recupero Password', array(
           'Username' => $utente->getUsername(),
-          'Email' => $email,
+          'Email' => $this->email,
           'Ruolo' => $utente->getRoles()[0],
           ));
         // crea messaggio
         $message = (new Email())
-          ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
-          ->to($email)
-          ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
+          ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+          ->to($this->email)
+          ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
           ->text($this->renderView($template_txt,
             array(
               'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
@@ -267,7 +257,7 @@ class LoginController extends BaseController {
           // errore di spedizione
           $logger->error('Errore di spedizione email nella richiesta di recupero password.', array(
             'username' => $utente->getUsername(),
-            'email' => $email,
+            'email' => $this->email,
             'ip' => $request->getClientIp(),
             'errore' => $err->getMessage()));
           $errore = 'exception.error_recovery';
@@ -287,8 +277,8 @@ class LoginController extends BaseController {
    * Scelta del profilo tra quelli di uno stesso utente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param EventDispatcherInterface $disp Gestore degli eventi
+   * @param TokenStorageInterface $tokenStorage Gestore dei token di autenticazione
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -298,14 +288,13 @@ class LoginController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                EventDispatcherInterface $disp, TokenStorageInterface $tokenStorage,
-                                LogHandler $dblogger) {
+  public function profiloAction(Request $request, EventDispatcherInterface $disp,
+                                TokenStorageInterface $tokenStorage, LogHandler $dblogger) {
     // imposta profili
     $lista = [];
-    foreach ($reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
+    foreach ($this->reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
-        $utente = $em->getRepository('App\Entity\Utente')->find($id);
+        $utente = $this->em->getRepository('App\Entity\Utente')->find($id);
         $nome = $ruolo.' ';
         if ($ruolo == 'GENITORE') {
           // profilo genitore
@@ -335,13 +324,13 @@ class LoginController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       $utenteIniziale = $this->getUser();
       $profiloId = (int) $form->get('profilo')->getData();
-      if ($profiloId && (!$reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
-          $reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
+      if ($profiloId && (!$this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
+          $this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
-        $utente = $em->getRepository('App\Entity\Utente')->find($profiloId);
+        $utente = $this->em->getRepository('App\Entity\Utente')->find($profiloId);
         // imposta ultimo accesso
         $accesso = $utente->getUltimoAccesso();
-        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+        $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
         $utente->setUltimoAccesso(new \DateTime());
         // log azione
         $dblogger->logAzione('ACCESSO', 'Cambio profilo', array(
@@ -354,7 +343,7 @@ class LoginController extends BaseController {
         $event = new InteractiveLoginEvent($request, $token);
         $disp->dispatch($event, SecurityEvents::INTERACTIVE_LOGIN);
         // memorizza profilo in uso
-        $reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
+        $this->reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
       }
       // redirezione alla pagina iniziale
       return $this->redirectToRoute('login_home', ['reload' => 'yes']);

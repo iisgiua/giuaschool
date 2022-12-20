@@ -1,8 +1,6 @@
 # config/packages/twig.yaml
 
 twig:
-  globals:
-    LOCAL_PATH: '%env(LOCAL_PATH)%'
   date:
     format: '%locale_date%'
   number_format:
@@ -12,3 +10,6 @@ twig:
   form_themes: ['form.html.twig']
   strict_variables: '%kernel.debug%'
   exception_controller: null
+  paths:
+    'PERSONAL/templates': ~
+    'PERSONAL/data': 'data'

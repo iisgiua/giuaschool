@@ -8,42 +8,33 @@
 
 namespace App\Controller;
 
-use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
+use App\Entity\Alunno;
+use App\Entity\CambioClasse;
+use App\Entity\Genitore;
+use App\Entity\Provisioning;
+use App\Form\AlunnoGenitoreType;
+use App\Form\CambioClasseType;
+use App\Form\ImportaCsvType;
+use App\Form\RicercaType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
-use App\Form\RicercaType;
-use App\Form\AlunnoGenitoreType;
-use App\Form\ImportaCsvType;
-use App\Form\CambioClasseType;
-use App\Entity\Provisioning;
-use App\Entity\Alunno;
-use App\Entity\Assenza;
-use App\Entity\AssenzaLezione;
-use App\Entity\CambioClasse;
-use App\Entity\Classe;
-use App\Entity\Entrata;
-use App\Entity\Genitore;
-use App\Entity\Nota;
-use App\Entity\Uscita;
-use App\Entity\Valutazione;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -57,7 +48,6 @@ class AlunniController extends BaseController {
    * Importa alunni e genitori da file
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -67,15 +57,15 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, RequestStack $reqstack, CsvImporter $importer): Response {
+  public function importaAction(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
     $var_sessione = '/APP/FILE/alunni_importa';
-    $fs = new FileSystem();
+    $fs = new Filesystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -89,14 +79,14 @@ class AlunniController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
       $file = null;
-      foreach ($reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
+      foreach ($this->reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
       $dati = $importer->importaAlunni($file, $form);
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
     }
     // visualizza pagina
     return $this->renderHtml('alunni', 'importa', $dati, $info, [$form->createView(),  'message.importa_alunni']);
@@ -106,8 +96,6 @@ class AlunniController extends BaseController {
    * Gestisce la modifica dei dati dei alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -118,26 +106,25 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $lista_classi[] = -1;
     $label_classe = $trans->trans('label.nessuna_classe');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
@@ -150,16 +137,16 @@ class AlunniController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // lista alunni
-    $dati = $em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // aggiunge dati dei genitori
-    $dati['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);
     // mostra la pagina di risposta
     return $this->renderHtml('alunni', 'modifica', $dati, $info, [$form->createView()]);
   }
@@ -167,7 +154,6 @@ class AlunniController extends BaseController {
   /**
    * Abilitazione o disabilitazione degli alunni
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    * @param boolean $abilita Vero per abilitare, falso per disabilitare
    *
@@ -179,15 +165,15 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
+  public function abilitaAction($id, $abilita): Response {
     // controllo alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->find($id);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($id);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // recupera genitori (anche più di uno)
-    $genitori = $em->getRepository('App\Entity\Genitore')->findBy(['alunno' => $alunno]);
+    $genitori = $this->em->getRepository('App\Entity\Genitore')->findBy(['alunno' => $alunno]);
     // abilita o disabilita
     $alunno->setAbilitato($abilita == 1);
     foreach ($genitori as $gen) {
@@ -198,9 +184,9 @@ class AlunniController extends BaseController {
       ->setUtente($alunno)
       ->setFunzione('sospendeUtente')
       ->setDati(['sospeso' => !$abilita]);
-    $em->persist($provisioning);
+    $this->em->persist($provisioning);
     // memorizza modifiche
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -211,7 +197,6 @@ class AlunniController extends BaseController {
    * Modifica i dati di un alunno e dei genitori
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -223,11 +208,11 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function modificaEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $alunno = $em->getRepository('App\Entity\Alunno')->find($id);
+      $alunno = $this->em->getRepository('App\Entity\Alunno')->find($id);
       if (!$alunno) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -249,7 +234,7 @@ class AlunniController extends BaseController {
       $alunno = (new Alunno())
         ->setAbilitato(true)
         ->setPassword('NOPASSWORD');
-      $em->persist($alunno);
+      $this->em->persist($alunno);
       $classe_old = null;
       // aggiunge genitori
       $genitore1 = (new Genitore())
@@ -257,13 +242,13 @@ class AlunniController extends BaseController {
         ->setAlunno($alunno)
         ->setSesso('M')
         ->setPassword('NOPASSWORD');
-      $em->persist($genitore1);
+      $this->em->persist($genitore1);
       $genitore2 = (new Genitore())
         ->setAbilitato(true)
         ->setAlunno($alunno)
         ->setSesso('F')
         ->setPassword('NOPASSWORD');
-      $em->persist($genitore2);
+      $this->em->persist($genitore2);
     }
     // form
     $form = $this->createForm(AlunnoGenitoreType::class, $alunno, [
@@ -297,7 +282,7 @@ class AlunniController extends BaseController {
           ->setUtente($alunno)
           ->setFunzione('creaUtente')
           ->setDati(['password' => 'NOPASSWORD']);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($alunno->getCognome() != $alunno_old['cognome'] || $alunno->getNome() != $alunno_old['nome'] ||
                 $alunno->getSesso() != $alunno_old['sesso']) {
         // modifica dati alunno
@@ -305,7 +290,7 @@ class AlunniController extends BaseController {
           ->setUtente($alunno)
           ->setFunzione('modificaUtente')
           ->setDati([]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       }
       if (!$classe_old && $alunno->getClasse()) {
         // aggiunge alunno a classe
@@ -313,24 +298,24 @@ class AlunniController extends BaseController {
           ->setUtente($alunno)
           ->setFunzione('aggiungeAlunnoClasse')
           ->setDati(['classe' => $alunno->getClasse()->getId()]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($classe_old && !$alunno->getClasse()) {
         // toglie alunno da classe
         $provisioning = (new Provisioning())
           ->setUtente($alunno)
           ->setFunzione('rimuoveAlunnoClasse')
           ->setDati(['classe' => $classe_old]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($alunno->getClasse() && $classe_old != $alunno->getClasse()->getId()) {
         // cambia classe ad alunno
         $provisioning = (new Provisioning())
           ->setUtente($alunno)
           ->setFunzione('modificaAlunnoClasse')
           ->setDati(['classe_origine' => $classe_old, 'classe_destinazione' => $alunno->getClasse()->getId()]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       }
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirezione
@@ -344,9 +329,7 @@ class AlunniController extends BaseController {
    * Generazione e invio della password agli alunni o ai genitori
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -363,15 +346,15 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $tipo, $username=null): Response {
+  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                                 LoggerInterface $logger, LogHandler $dblogger, $tipo,
+                                 $username=null): Response {
     // controlla alunno
-    $utente = $em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
+    $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
     if (!$utente) {
       // controlla genitore
-      $utente = $em->getRepository('App\Entity\Genitore')->findOneByUsername($username);
+      $utente = $this->em->getRepository('App\Entity\Genitore')->findOneByUsername($username);
       if (!$utente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -388,17 +371,17 @@ class AlunniController extends BaseController {
         ->setUtente($utente)
         ->setFunzione('passwordUtente')
         ->setDati(['password' => $utente->getPasswordNonCifrata()]);
-      $em->persist($provisioning);
+      $this->em->persist($provisioning);
     }
     // memorizza su db
-    $em->flush();
+    $this->em->flush();
     // aggiunge log
     $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
       'Username' => $utente->getUsername(),
       'Ruolo' => $utente->getRoles()[0],
       'ID' => $utente->getId()));
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     if ($utente instanceOf Alunno) {
@@ -420,9 +403,9 @@ class AlunniController extends BaseController {
     if ($tipo == 'E') {
       // invia password per email
       $message = (new Email())
-        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($utente->getEmail())
-        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
@@ -455,8 +438,6 @@ class AlunniController extends BaseController {
    * Gestione cambio classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -467,26 +448,25 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                               TranslatorInterface $trans, $pagina): Response {
+  public function classeAction(Request $request, TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $lista_classi[] = -1;
     $label_classe = $trans->trans('label.nessuna_classe');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
@@ -499,13 +479,13 @@ class AlunniController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_classe/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_classe/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_classe/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
     }
     // lista cambi classe
-    $dati = $em->getRepository('App\Entity\CambioClasse')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\CambioClasse')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('alunni', 'classe', $dati, $info, [$form->createView()]);
@@ -515,8 +495,6 @@ class AlunniController extends BaseController {
    * Modifica un cambio di classe di un alunno
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $id ID del cambio classe
    * @param string $tipo Tipo di cambio classe [I=inserito,T=trasferito,S=sezione,A=altro]
@@ -530,13 +508,12 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                   TranslatorInterface $trans, $id, $tipo): Response {
+  public function classeEditAction(Request $request, TranslatorInterface $trans, $id, $tipo): Response {
     $form_help = 'message.required_fields';
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $cambio = $em->getRepository('App\Entity\CambioClasse')->find($id);
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->find($id);
       if (!$cambio) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -544,7 +521,7 @@ class AlunniController extends BaseController {
     } else {
       // azione add
       $cambio = new CambioClasse();
-      $em->persist($cambio);
+      $this->em->persist($cambio);
       // controlla tipo di cambio
       switch ($tipo) {
         case 'I':   // inserimento
@@ -570,11 +547,11 @@ class AlunniController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // validazione
-      $anno_inizio = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-      $anno_fine = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
+      $anno_inizio = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
+      $anno_fine = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
       if ($id == 0) {
         // solo nuovi dati
-        $altro = $em->getRepository('App\Entity\CambioClasse')->findByAlunno($cambio->getAlunno());
+        $altro = $this->em->getRepository('App\Entity\CambioClasse')->findByAlunno($cambio->getAlunno());
         if (count($altro) > 0) {
           // errore: altro cambio esistente
           $form->addError(new FormError($trans->trans('exception.cambio_classe_esistente')));
@@ -589,11 +566,11 @@ class AlunniController extends BaseController {
             // errore sulla data
             $form->get('inizio')->addError(new FormError($trans->trans('exception.classe_inizio_invalido')));
           }
-          if ($em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $inizio, $fine) > 0) {
+          if ($this->em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $inizio, $fine) > 0) {
             // errore valutazioni presenti
             $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
           }
-          if ($em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $inizio, $fine) > 0) {
+          if ($this->em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $inizio, $fine) > 0) {
             // errore note presenti
             $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
           }
@@ -609,11 +586,11 @@ class AlunniController extends BaseController {
             // errore sulla data
             $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
           }
-          if ($em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine) > 0) {
+          if ($this->em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine) > 0) {
             // errore valutazioni presenti
             $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
           }
-          if ($em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine) > 0) {
+          if ($this->em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine) > 0) {
             // errore note presenti
             $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
           }
@@ -633,11 +610,11 @@ class AlunniController extends BaseController {
             // errore sulla classe
             $form->get('classe')->addError(new FormError($trans->trans('exception.classe_non_diversa')));
           }
-          if ($em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
+          if ($this->em->getRepository('App\Entity\Valutazione')->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
             // errore valutazioni presenti
             $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
           }
-          if ($em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
+          if ($this->em->getRepository('App\Entity\Nota')->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
             // errore note presenti
             $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
           }
@@ -657,10 +634,10 @@ class AlunniController extends BaseController {
             ->setNote($note);
           if ($form->get('cancella')->getData()) {
             // cancella ore di assenza incongrue
-            $em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $inizio, $fine);
-            $em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $inizio, $fine);
-            $em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $inizio, $fine);
-            $em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $this->em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $this->em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $this->em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $this->em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $inizio, $fine);
           }
         } elseif ($id == 0 && $tipo == 'T') {
           // trasferimento alunno
@@ -675,13 +652,13 @@ class AlunniController extends BaseController {
             ->setUtente($cambio->getAlunno())
             ->setFunzione('rimuoveAlunnoClasse')
             ->setDati(['classe' => $classe->getId()]);
-          $em->persist($provisioning);
+          $this->em->persist($provisioning);
           if ($form->get('cancella')->getData()) {
             // cancella ore di assenza incongrue
-            $em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
           }
         } elseif ($id == 0 && $tipo == 'S') {
           // cambio sezione alunno
@@ -697,17 +674,17 @@ class AlunniController extends BaseController {
             ->setFunzione('modificaAlunnoClasse')
             ->setDati(['classe_origine' => $classe->getId(),
               'classe_destinazione' => $cambio->getAlunno()->getClasse()->getId()]);
-          $em->persist($provisioning);
+          $this->em->persist($provisioning);
           if ($form->get('cancella')->getData()) {
             // cancella ore di assenza incongrue
-            $em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
-            $em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $this->em->getRepository('App\Entity\AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
           }
         }
         // memorizza modifiche
-        $em->flush();
+        $this->em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirezione
@@ -721,7 +698,6 @@ class AlunniController extends BaseController {
   /**
    * Cancella un cambio di classe di un alunno
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID del cambio classe
    *
    * @return Response Pagina di risposta
@@ -732,15 +708,15 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeDeleteAction(EntityManagerInterface $em, $id): Response {
-    $cambio = $em->getRepository('App\Entity\CambioClasse')->find($id);
+  public function classeDeleteAction($id): Response {
+    $cambio = $this->em->getRepository('App\Entity\CambioClasse')->find($id);
     if (!$cambio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // elimina il cambio classe
-    $em->remove($cambio);
-    $em->flush();
+    $this->em->remove($cambio);
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -751,9 +727,7 @@ class AlunniController extends BaseController {
    * Generazione e invio della password agli alunni o ai genitori
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param LoggerInterface $logger Gestore dei log su file
@@ -768,29 +742,28 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordFiltroAction(Request $request, EntityManagerInterface $em,
-                                       UserPasswordHasherInterface $hasher, RequestStack $reqstack,
-                                       PdfManager $pdf, StaffUtil $staff,
-                                       LoggerInterface $logger, LogHandler $dblogger, $genitore): Response {
+  public function passwordFiltroAction(Request $request, UserPasswordHasherInterface $hasher,
+                                       PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
+                                       LogHandler $dblogger, $genitore): Response {
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
-    $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
-    $dati['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);
+    $dati = $this->em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);
 
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // legge alunni
     foreach ($dati['lista'] as $alu) {
       if ($genitore) {
         // password genitore
-        $utenti = $em->getRepository('App\Entity\Genitore')->findBy(['alunno' => $alu]);
+        $utenti = $this->em->getRepository('App\Entity\Genitore')->findBy(['alunno' => $alu]);
       } else {
         // password alunno
         $utenti = [$alu];
@@ -807,10 +780,10 @@ class AlunniController extends BaseController {
             ->setUtente($utente)
             ->setFunzione('passwordUtente')
             ->setDati(['password' => $utente->getPasswordNonCifrata()]);
-          $em->persist($provisioning);
+          $this->em->persist($provisioning);
         }
         // memorizza su db
-        $em->flush();
+        $this->em->flush();
         // log azione
         $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
           'Username' => $utente->getUsername(),

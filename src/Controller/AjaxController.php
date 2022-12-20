@@ -8,17 +8,13 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use App\Entity\Staff;
 use App\Entity\Classe;
-use App\Entity\Alunno;
-use App\Entity\Docente;
+use App\Entity\Staff;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 
 /**
@@ -26,14 +22,14 @@ use App\Entity\Docente;
  *
  * @author Antonello Dessì
  */
-class AjaxController extends AbstractController {
+class AjaxController extends BaseController {
 
   /**
    * Restituisce la lista dei docenti trovata in base alle impostazioni date
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param string $cognome Cognome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
    * @param string $nome Nome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
+   * @param string $sede Lista id sedi, separati da "-" ("-" iniziale per evitare parametro vuoto)
    * @param string $pagina Numero della pagina della lista
    *
    * @return JsonResponse Informazioni di risposta
@@ -45,7 +41,7 @@ class AjaxController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction(EntityManagerInterface $em, $cognome, $nome, $sede, $pagina) {
+  public function docentiAjaxAction($cognome, $nome, $sede, $pagina) {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
     $dati = array();
@@ -57,7 +53,7 @@ class AjaxController extends AbstractController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $docenti = $em->getRepository('App\Entity\Docente')->cercaSede($search, $pagina, 20);
+    $docenti = $this->em->getRepository('App\Entity\Docente')->cercaSede($search, $pagina, 20);
     foreach ($docenti as $doc) {
       $dati['lista'][] = array(
         'id' => $doc->getId(),
@@ -83,7 +79,6 @@ class AjaxController extends AbstractController {
   /**
    * Restituisce la lista degli alunni trovata in base alle impostazioni date
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param string $cognome Cognome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
    * @param string $nome Nome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
    * @param int $classe Identificatore della classe degli alunni ("-" iniziale per evitare parametro vuoto)
@@ -99,7 +94,7 @@ class AjaxController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction(EntityManagerInterface $em, $cognome, $nome, $classe, $sede, $pagina) {
+  public function alunniAjaxAction($cognome, $nome, $classe, $sede, $pagina) {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
       'sede' => array());
@@ -112,7 +107,7 @@ class AjaxController extends AbstractController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $alunni = $em->getRepository('App\Entity\Alunno')->iscritti($search, $pagina, 20);
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->iscritti($search, $pagina, 20);
     foreach ($alunni as $alu) {
       $dati['lista'][] = array(
         'id' => $alu->getId(),
@@ -139,6 +134,7 @@ class AjaxController extends AbstractController {
   /**
    * Restituisce il token per la validazione CSRF
    *
+   * @param CsrfTokenManagerInterface $tokenManager Gestione dei token CSRF
    * @param string $id Identificativo per il token da generare
    *
    * @return JsonResponse Informazioni di risposta
@@ -173,7 +169,6 @@ class AjaxController extends AbstractController {
   /**
    * Restituisce la lista degli alunni della classe indicata
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param Classe $classe Classe degli alunni
    *
    * @return JsonResponse Informazioni di risposta
@@ -185,9 +180,9 @@ class AjaxController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(EntityManagerInterface $em, Classe $classe) {
+  public function classeAjaxAction(Classe $classe) {
     // legge alunni
-    $dati = $em->getRepository('App\Entity\Alunno')->classe($classe->getId());
+    $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
     // restituisce dati
     return new JsonResponse($dati);
   }

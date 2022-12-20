@@ -8,37 +8,29 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\Notifica;
+use App\Entity\Valutazione;
+use App\Form\MessageType;
+use App\Form\VotoClasseType;
+use App\Util\GenitoriUtil;
+use App\Util\LogHandler;
+use App\Util\PdfManager;
+use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\HeaderUtils;
-use App\Util\LogHandler;
-use App\Util\RegistroUtil;
-use App\Util\GenitoriUtil;
-use App\Util\PdfManager;
-use App\Form\VotoClasseType;
-use App\Form\MessageType;
-use App\Entity\Valutazione;
-use App\Entity\Notifica;
-use App\Entity\Alunno;
-use App\Entity\Cattedra;
-use App\Entity\Classe;
-use App\Entity\Lezione;
-use App\Entity\Materia;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -46,14 +38,12 @@ use App\Entity\Materia;
  *
  * @author Antonello Dessì
  */
-class VotiController extends AbstractController {
+class VotiController extends BaseController {
 
   /**
    * Quadro dei voti
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
@@ -68,8 +58,7 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
-                              $cattedra, $classe, $periodo) {
+  public function votiAction(Request $request, RegistroUtil $reg, $cattedra, $classe, $periodo) {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -79,13 +68,13 @@ class VotiController extends AbstractController {
     // parametri cattedra/classe/periodo
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -101,16 +90,16 @@ class VotiController extends AbstractController {
       $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
       $info['alunno'] = $cattedra->getAlunno();
       // memorizza parametri in sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -127,9 +116,9 @@ class VotiController extends AbstractController {
       // seleziona periodo se non indicato
       if ($periodo == 0) {
         // seleziona periodo in base alla data
-        if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
+        if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
           // recupera data da sessione
-          $data = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+          $data = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
         } else {
           // imposta data odierna
           $data = new \DateTime();
@@ -154,7 +143,7 @@ class VotiController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/voti_quadro.html.twig', array(
       'pagina_titolo' => 'page.lezioni_voti',
@@ -172,8 +161,6 @@ class VotiController extends AbstractController {
    * Gestione dei voti per le prove di classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -190,8 +177,8 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiClasseAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                   TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $tipo, $data) {
+  public function votiClasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                                   LogHandler $dblogger, $cattedra, $tipo, $data) {
     // inizializza
     $label = array();
     $visibile = true;
@@ -200,10 +187,10 @@ class VotiController extends AbstractController {
     $assenti = [];
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
+      $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->find($cattedra);
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -229,8 +216,8 @@ class VotiController extends AbstractController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
       ->add('data', DateType::class, array('label' => 'label.data',
@@ -272,7 +259,7 @@ class VotiController extends AbstractController {
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
-      $lezione = $em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
+      $lezione = $this->em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
         $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
@@ -308,10 +295,10 @@ class VotiController extends AbstractController {
           }
         }
         $conferma = 1;
-        $assenti = $em->getRepository('App\Entity\Lezione')->alunniAssenti($lezione, $alunniVoto);
-        if (!empty($assenti) && $reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
+        $assenti = $this->em->getRepository('App\Entity\Lezione')->alunniAssenti($lezione, $alunniVoto);
+        if (!empty($assenti) && $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
           // alunni assenti: richiede conferma
-          $reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
+          $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
         } else {
           // alunni presenti
           foreach ($form->get('lista')->getData() as $key=>$valutazione) {
@@ -322,10 +309,10 @@ class VotiController extends AbstractController {
               $valutazione->setVoto(10);
             }
             // legge alunno
-            $alunno = $em->getRepository('App\Entity\Alunno')->find($valutazione->getId());
+            $alunno = $this->em->getRepository('App\Entity\Alunno')->find($valutazione->getId());
             // legge vecchio voto
             $voto = ($elenco_precedente[$key]->getVotoId() ?
-              $em->getRepository('App\Entity\Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
+              $this->em->getRepository('App\Entity\Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
             if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
               // valutazione aggiunta
               $voto = (new Valutazione())
@@ -339,12 +326,12 @@ class VotiController extends AbstractController {
                 ->setAlunno($alunno)
                 ->setVoto($valutazione->getVoto())
                 ->setGiudizio($valutazione->getGiudizio());
-              $em->persist($voto);
+              $this->em->persist($voto);
               $log['create'][] = $voto;
             } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
               // valutazione cancellata
               $log['delete'][] = array($voto->getId(), $voto);
-              $em->remove($voto);
+              $this->em->remove($voto);
             } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
                       $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
                       $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
@@ -362,28 +349,28 @@ class VotiController extends AbstractController {
             }
           }
           // ok: memorizza dati
-          $em->flush();
+          $this->em->flush();
           // log azione e notifica
           foreach ($log['create'] as $obj) {
             $notifica = (new Notifica())
               ->setOggettoNome('Valutazione')
               ->setOggettoId($obj->getId())
               ->setAzione('A');
-            $em->persist($notifica);
+            $this->em->persist($notifica);
           }
           foreach ($log['edit'] as $obj) {
             $notifica = (new Notifica())
               ->setOggettoNome('Valutazione')
               ->setOggettoId($obj[0])
               ->setAzione('E');
-            $em->persist($notifica);
+            $this->em->persist($notifica);
           }
           foreach ($log['delete'] as $obj) {
             $notifica = (new Notifica())
               ->setOggettoNome('Valutazione')
               ->setOggettoId($obj[0])
               ->setAzione('D');
-            $em->persist($notifica);
+            $this->em->persist($notifica);
           }
           $dblogger->logAzione('VOTI', 'Voti della classe', array(
             'Tipo' => $tipo,
@@ -422,8 +409,6 @@ class VotiController extends AbstractController {
    * Gestione dei voti per l'alunno
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -441,16 +426,16 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAlunnoAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                   TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
+  public function votiAlunnoAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                                   LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
     // inizializza
     $label = array();
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
+      $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->find($cattedra);
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -458,7 +443,7 @@ class VotiController extends AbstractController {
     // recupera classe
     $classe = $cattedra->getClasse();
     // controllo alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->find($alunno);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -466,7 +451,7 @@ class VotiController extends AbstractController {
     // controllo voto
     if ($id) {
       // legge voto
-      $valutazione = $em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id, 'alunno' => $alunno,
+      $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id, 'alunno' => $alunno,
         'docente' => $this->getUser(), 'tipo' => $tipo]);
       if ($valutazione) {
         $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
@@ -484,7 +469,7 @@ class VotiController extends AbstractController {
         ->setMateria($cattedra->getMateria())
         ->setVisibile(true)
         ->setMedia(true);
-      $em->persist($valutazione);
+      $this->em->persist($valutazione);
       $valutazione_precedente = null;
       $data = new \DateTime();
     }
@@ -495,8 +480,8 @@ class VotiController extends AbstractController {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
     $label['bes'] = $alunno->getBes();
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
       ->add('data', DateType::class, array('label' => 'label.data',
@@ -549,7 +534,7 @@ class VotiController extends AbstractController {
       // controlli
       if ($valutazione_precedente && $form->get('delete')->isClicked()) {
         // cancella voto
-        $em->remove($valutazione);
+        $this->em->remove($valutazione);
       } else {
         // controllo data
         $errore = $reg->controlloData($form->get('data')->getData(), null);
@@ -558,7 +543,7 @@ class VotiController extends AbstractController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
-        $lezione = $em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
+        $lezione = $this->em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
           $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
@@ -582,12 +567,12 @@ class VotiController extends AbstractController {
       if ($form->isValid()) {
         // controlla presenza alunno
         $conferma = 1;
-        $assente = $em->getRepository('App\Entity\Lezione')->alunnoAssente($valutazione->getLezione(),
+        $assente = $this->em->getRepository('App\Entity\Lezione')->alunnoAssente($valutazione->getLezione(),
           $valutazione->getAlunno());
         if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
-            $reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
+            $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
           // alunno risulta assente: richiede conferma
-          $reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', $conferma);
+          $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', $conferma);
         } else {
           // alunno risulta presente
           if (!$valutazione->getVisibile()) {
@@ -595,11 +580,11 @@ class VotiController extends AbstractController {
             $valutazione->setMedia(false);
           }
           // ok: memorizza dati
-          $em->flush();
+          $this->em->flush();
           // log azione e notifica
           $notifica = (new Notifica())
             ->setOggettoNome('Valutazione');
-          $em->persist($notifica);
+          $this->em->persist($notifica);
           if ($valutazione_precedente && $form->get('delete')->isClicked()) {
             // cancellazione
             $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
@@ -657,9 +642,7 @@ class VotiController extends AbstractController {
    * Dettagli dei voti degli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
@@ -674,24 +657,24 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiDettagliAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                      RequestStack $reqstack, RegistroUtil $reg, $cattedra, $classe, $alunno) {
+  public function votiDettagliAction(Request $request, TranslatorInterface $trans,
+                                     RegistroUtil $reg, $cattedra, $classe, $alunno) {
     // inizializza variabili
     $info = null;
     $dati = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro alunno
     if ($alunno > 0) {
-      $alunno = $em->getRepository('App\Entity\Alunno')->find($alunno);
+      $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       if (!$alunno) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -700,7 +683,7 @@ class VotiController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -713,7 +696,7 @@ class VotiController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -721,7 +704,7 @@ class VotiController extends AbstractController {
     }
     if ($cattedra) {
       // lista alunni
-      $alunni = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.classe=:classe AND a.abilitato=:abilitato')
         ->setParameters(['classe' => $classe, 'abilitato' => 1])
@@ -745,7 +728,7 @@ class VotiController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/voti_dettagli.html.twig', array(
       'pagina_titolo' => 'page.lezioni_voti_dettagli',
@@ -762,9 +745,7 @@ class VotiController extends AbstractController {
    * Dettagli dei voti di un alunno con sostegno
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param int $cattedra Identificativo della cattedra
@@ -779,9 +760,8 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiSostegnoAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                      RequestStack $reqstack, RegistroUtil $reg, GenitoriUtil $gen,
-                                      $cattedra, $materia) {
+  public function votiSostegnoAction(Request $request, TranslatorInterface $trans,
+                                     RegistroUtil $reg, GenitoriUtil $gen, $cattedra, $materia) {
     // inizializza variabili
     $materie = null;
     $info = null;
@@ -789,12 +769,12 @@ class VotiController extends AbstractController {
     // parametro cattedra
     if ($cattedra == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
     }
     // controllo cattedra
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -811,7 +791,7 @@ class VotiController extends AbstractController {
     }
     // parametro materia
     if ($materia > 0) {
-      $materia = $em->getRepository('App\Entity\Materia')->find($materia);
+      $materia = $this->em->getRepository('App\Entity\Materia')->find($materia);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -835,7 +815,7 @@ class VotiController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/voti_sostegno.html.twig', array(
       'pagina_titolo' => 'page.lezioni_voti_dettagli',
@@ -852,8 +832,6 @@ class VotiController extends AbstractController {
   /**
    * Stampa del quadro dei voti
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -869,26 +847,25 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
-                                   PdfManager $pdf, $cattedra, $classe, $data) {
+  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, $cattedra, $classe, $data) {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
+      if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -902,7 +879,7 @@ class VotiController extends AbstractController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -921,7 +898,7 @@ class VotiController extends AbstractController {
     $info['periodo'] = $reg->periodo($data_obj);
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,
@@ -938,8 +915,6 @@ class VotiController extends AbstractController {
   /**
    * Esporta voti in formato CSV
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
@@ -954,26 +929,25 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiEsportaAction(EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
-                                    $cattedra, $classe, $data) {
+  public function votiEsportaAction(RegistroUtil $reg, $cattedra, $classe, $data) {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
+      if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -987,7 +961,7 @@ class VotiController extends AbstractController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -1021,12 +995,10 @@ class VotiController extends AbstractController {
     return $response;
   }
 
-
   /**
    * Cancellazione di un voto
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo del voto
@@ -1039,10 +1011,9 @@ class VotiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiCancellaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
-                                     LogHandler $dblogger, $id) {
+  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controllo voto
-    $valutazione = $em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
+    $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$valutazione) {
       // errore
@@ -1057,7 +1028,7 @@ class VotiController extends AbstractController {
     // copia per log
     $vecchiaValutazione = clone $valutazione;
     // cancella voto
-    $em->remove($valutazione);
+    $this->em->remove($valutazione);
     // memorizzazione e log
     $dblogger->logAzione('VOTI', 'Cancella voto', array(
       'Id' => $vecchiaValutazione->getId(),

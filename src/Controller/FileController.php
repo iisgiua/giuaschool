@@ -8,25 +8,16 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Util\BachecaUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Filesystem\Filesystem;
-use App\Entity\Staff;
-use App\Entity\Alunno;
-use App\Entity\Preside;
-use App\Entity\Assenza;
-use App\Entity\Avviso;
-use App\Entity\StoricoEsito;
-use App\Util\BachecaUtil;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
@@ -34,13 +25,12 @@ use App\Util\BachecaUtil;
  *
  * @author Antonello Dessì
  */
-class FileController extends AbstractController {
+class FileController extends BaseController {
 
   /**
    * Esegue l'upload di un file tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -52,7 +42,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function uploadAction(Request $request, RequestStack $reqstack, $pagina, $param) {
+  public function uploadAction(Request $request, $pagina, $param) {
     $risposta = array();
     // legge file
     $files = $request->files->get($param);
@@ -77,7 +67,7 @@ class FileController extends AbstractController {
     }
     // memorizza in sessione
     $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-    $reqstack->getSession()->set($var_sessione, array_merge($risposta, $reqstack->getSession()->get($var_sessione, [])));
+    $this->reqstack->getSession()->set($var_sessione, array_merge($risposta, $this->reqstack->getSession()->get($var_sessione, [])));
     // restituisce risposta
     return new JsonResponse($risposta);
   }
@@ -86,7 +76,6 @@ class FileController extends AbstractController {
    * Rimuove il file caricato tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -98,7 +87,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function removeAction(Request $request, RequestStack $reqstack, $pagina, $param) {
+  public function removeAction(Request $request, $pagina, $param) {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
@@ -107,7 +96,7 @@ class FileController extends AbstractController {
     if ($file) {
       $fs = new Filesystem();
       $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-      $vs = $reqstack->getSession()->get($var_sessione, []);
+      $vs = $this->reqstack->getSession()->get($var_sessione, []);
       foreach ($vs as $k=>$f) {
         if ($f['type'] == 'uploaded' && $f['temp'] == $file['temp']) {
           // trovato: cancella
@@ -122,7 +111,7 @@ class FileController extends AbstractController {
         }
       }
       // memorizza sessione
-      $reqstack->getSession()->set($var_sessione, $vs);
+      $this->reqstack->getSession()->set($var_sessione, $vs);
     }
     // restituisce risposta vuota
     return new JsonResponse([]);
@@ -131,7 +120,6 @@ class FileController extends AbstractController {
   /**
    * Esegue il download di un allegato di un avviso.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $avviso ID dell'avviso
    * @param int $allegato Numero dell'allegato
@@ -144,10 +132,9 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
-                                $avviso, $allegato) {
+  public function avvisoAction(BachecaUtil $bac, $avviso, $allegato) {
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->find($avviso);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -174,7 +161,6 @@ class FileController extends AbstractController {
   /**
    * Esegue il download dei documenti dello scrutinio per la segreteria.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param string $tipo Tipo del documento da scaricare
    * @param int $id ID dell'alunno a cui si fa riferimento
    *
@@ -186,9 +172,9 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function downloadSegreteriaAction(EntityManagerInterface $em, $tipo, $id) {
+  public function downloadSegreteriaAction($tipo, $id) {
     // controllo
-    $storico = $em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
+    $storico = $this->em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -246,7 +232,6 @@ class FileController extends AbstractController {
   /**
    * Esegue il download del certificato del tipo indicato.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param string $tipo Tipo del certificato da scaricare [D=autodichiarazione]
    * @param int $id ID dell'oggetto di riferimento
    *
@@ -258,11 +243,11 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function certificatoAction(EntityManagerInterface $em, $tipo, $id) {
+  public function certificatoAction($tipo, $id) {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $em->getRepository('App\Entity\Assenza')->find($id);
+      $assenza = $this->em->getRepository('App\Entity\Assenza')->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

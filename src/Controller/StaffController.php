@@ -8,64 +8,50 @@
 
 namespace App\Controller;
 
-use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mailer\MailerInterface;
-use App\Entity\Annotazione;
-use App\Entity\Avviso;
-use App\Entity\AvvisoUtente;
-use App\Entity\AvvisoClasse;
+use App\Entity\Alunno;
 use App\Entity\Assenza;
+use App\Entity\Avviso;
+use App\Entity\AvvisoClasse;
+use App\Entity\AvvisoUtente;
 use App\Entity\Entrata;
-use App\Entity\Uscita;
 use App\Entity\Notifica;
 use App\Entity\Provisioning;
-use App\Entity\Alunno;
-use App\Entity\Classe;
-use App\Entity\Docente;
-use App\Entity\Festivita;
-use App\Entity\Genitore;
-use App\Entity\Materia;
-use App\Entity\ScansioneOraria;
-use App\Entity\Sede;
-use App\Util\RegistroUtil;
-use App\Util\StaffUtil;
+use App\Entity\Uscita;
+use App\Form\AvvisoType;
+use App\Form\EntrataType;
+use App\Form\MessageType;
+use App\Form\UscitaType;
+use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
-use App\Util\BachecaUtil;
-use App\Form\EntrataType;
-use App\Form\UscitaType;
-use App\Form\MessageType;
-use App\Form\AvvisoType;
+use App\Util\RegistroUtil;
+use App\Util\StaffUtil;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityRepository;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -73,14 +59,12 @@ use App\Form\AvvisoType;
  *
  * @author Antonello Dessì
  */
-class StaffController extends AbstractController {
+class StaffController extends BaseController {
 
   /**
    * Gestione degli avvisi generici da parte dello staff
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -93,23 +77,22 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                               BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente');
-    $search['destinatari'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/destinatari', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe');
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente');
+    $search['destinatari'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/destinatari', '');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe');
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/pagina', $pagina);
     }
     // form di ricerca
     $limite = 20;
@@ -173,10 +156,10 @@ class StaffController extends AbstractController {
       $search['destinatari'] = ($form->get('destinatari')->getData() ? $form->get('destinatari')->getData() : '');
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/destinatari', $search['destinatari']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/docente', $search['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/destinatari', $search['destinatari']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'C');
@@ -196,8 +179,6 @@ class StaffController extends AbstractController {
    * Aggiunge o modifica un avviso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -213,17 +194,17 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                   TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function avvisiEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
+                                   RegistroUtil $reg, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
     $dir = $this->getParameter('dir_avvisi').'/';
-    $fs = new FileSystem();
+    $fs = new Filesystem();
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'C']);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'C']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -237,7 +218,7 @@ class StaffController extends AbstractController {
       if ($this->getUser()->getSede()) {
         $avviso->addSedi($this->getUser()->getSede());
       }
-      $em->persist($avviso);
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
@@ -245,7 +226,7 @@ class StaffController extends AbstractController {
     $allegati = array();
     if ($request->isMethod('POST')) {
       // pagina inviata
-      foreach ($reqstack->getSession()->get($var_sessione, []) as $f) {
+      foreach ($this->reqstack->getSession()->get($var_sessione, []) as $f) {
         if ($f['type'] != 'removed') {
           // aggiunge allegato
           $allegati[] = $f;
@@ -261,8 +242,8 @@ class StaffController extends AbstractController {
         $allegati[$k]['size'] = $f->getSize();
       }
       // modifica dati sessione
-      $reqstack->getSession()->remove($var_sessione);
-      $reqstack->getSession()->set($var_sessione, $allegati);
+      $this->reqstack->getSession()->remove($var_sessione);
+      $this->reqstack->getSession()->set($var_sessione, $allegati);
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -279,11 +260,11 @@ class StaffController extends AbstractController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'C') {
-      $dati['lista'] = $em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'M') {
-      $dati['lista'] = $em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // lista sedi
@@ -319,7 +300,7 @@ class StaffController extends AbstractController {
       $errore = false;
       if ($avviso->getFiltroTipo() == 'C') {
         // controlla classi
-        $lista = $em->getRepository('App\Entity\Classe')
+        $lista = $this->em->getRepository('App\Entity\Classe')
           ->controllaClassi($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -327,14 +308,14 @@ class StaffController extends AbstractController {
         }
       } elseif ($avviso->getFiltroTipo() == 'M') {
         // controlla materie
-        $lista = $em->getRepository('App\Entity\Materia')->controllaMaterie($form->get('filtro')->getData(), $errore);
+        $lista = $this->em->getRepository('App\Entity\Materia')->controllaMaterie($form->get('filtro')->getData(), $errore);
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
         }
       } elseif ($avviso->getFiltroTipo() == 'U') {
         // controlla utenti
-        $lista = $em->getRepository('App\Entity\Alunno')
+        $lista = $this->em->getRepository('App\Entity\Alunno')
           ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -362,7 +343,7 @@ class StaffController extends AbstractController {
       // modifica dati
       if ($form->isValid()) {
         // allegati
-        foreach ($reqstack->getSession()->get($var_sessione, []) as $f) {
+        foreach ($this->reqstack->getSession()->get($var_sessione, []) as $f) {
           if ($f['type'] == 'uploaded') {
             // aggiunge allegato
             $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_avvisi').'/'.$f['temp']);
@@ -376,13 +357,13 @@ class StaffController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -394,15 +375,15 @@ class StaffController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App\Entity\Utente', $u));
-          $em->persist($obj);
+            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+          $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($em->getReference('App\Entity\Classe', $c));
-          $em->persist($obj);
+            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+          $this->em->persist($obj);
         }
         // annotazione
         $log_annotazioni['delete'] = array();
@@ -410,7 +391,7 @@ class StaffController extends AbstractController {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
             $log_annotazioni['delete'][] = $a->getId();
-            $em->remove($a);
+            $this->em->remove($a);
           }
           $avviso->setAnnotazioni(new ArrayCollection());
         }
@@ -419,12 +400,12 @@ class StaffController extends AbstractController {
           $bac->creaAnnotazione($avviso, $dest['sedi']);
         }
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione e notifica
         $notifica = (new Notifica())
           ->setOggettoNome('Avviso')
           ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
+        $this->em->persist($notifica);
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
@@ -472,7 +453,6 @@ class StaffController extends AbstractController {
   /**
    * Mostra i dettagli di un avviso
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $id ID dell'avviso
    *
@@ -484,11 +464,11 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
+  public function avvisiDettagliAction(BachecaUtil $bac, $id) {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -505,7 +485,6 @@ class StaffController extends AbstractController {
    * Cancella avviso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -520,12 +499,12 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, BachecaUtil $bac,
+  public function avvisiDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
                                      RegistroUtil $reg, $tipo, $id) {
     $dir = $this->getParameter('dir_avvisi').'/';
-    $fs = new FileSystem();
+    $fs = new Filesystem();
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -546,16 +525,16 @@ class StaffController extends AbstractController {
     $log_annotazioni = array();
     foreach ($avviso->getAnnotazioni() as $a) {
       $log_annotazioni[] = $a->getId();
-      $em->remove($a);
+      $this->em->remove($a);
     }
     // cancella destinatari
-    $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+    $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -564,9 +543,9 @@ class StaffController extends AbstractController {
     // cancella avviso
     $avviso_id = $avviso->getId();
     $avviso_sedi = $avviso->getSedi()->toArray();
-    $em->remove($avviso);
+    $this->em->remove($avviso);
     // ok: memorizza dati
-    $em->flush();
+    $this->em->flush();
     // cancella allegati
     foreach ($avviso->getAllegati() as $a) {
       $f = new File($dir.$a);
@@ -577,7 +556,7 @@ class StaffController extends AbstractController {
       ->setOggettoNome('Avviso')
       ->setOggettoId($avviso_id)
       ->setAzione('D');
-    $em->persist($notifica);
+    $this->em->persist($notifica);
     $dblogger->logAzione('AVVISI', 'Cancella avviso', array(
       'Id' => $avviso_id,
       'Tipo' => $avviso->getTipo(),
@@ -615,8 +594,6 @@ class StaffController extends AbstractController {
    * Gestione degli avvisi sugli orari di ingresso o uscita
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param string $tipo Tipo di avviso [E=orario entrata, U=orario uscita]
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
@@ -630,22 +607,21 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                     BachecaUtil $bac, $tipo, $pagina) {
+  public function avvisiOrarioAction(Request $request, BachecaUtil $bac, $tipo, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe');
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe');
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', $pagina);
     }
     // form di ricerca
     $limite = 20;
@@ -697,9 +673,9 @@ class StaffController extends AbstractController {
       $search['docente'] = (is_object($form->get('docente')->getData()) ? $form->get('docente')->getData()->getId() : 0);
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente', $search['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), $tipo);
@@ -720,7 +696,6 @@ class StaffController extends AbstractController {
    * Aggiunge o modifica un avviso sulla modifica di orario di ingresso o uscita
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -737,12 +712,12 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
+  public function avvisiOrarioEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
                                          RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -753,7 +728,7 @@ class StaffController extends AbstractController {
       // legge ora predefinita
       if ($tipo == 'E') {
         // inizio seconda ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
-        $ora_predefinita = $em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
@@ -765,7 +740,7 @@ class StaffController extends AbstractController {
           ->getSingleScalarResult();
       } else {
         // inizio ultima ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
-        $ora_predefinita = $em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
@@ -792,7 +767,7 @@ class StaffController extends AbstractController {
       if ($this->getUser()->getSede()) {
         $avviso->addSedi($this->getUser()->getSede());
       }
-      $em->persist($avviso);
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
@@ -841,7 +816,7 @@ class StaffController extends AbstractController {
       $errore = false;
       $lista_classi = array_map(function ($o) { return $o->getId(); },
         $form->get('classi')->getData()->toArray());
-      $lista = $em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -868,13 +843,13 @@ class StaffController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -886,15 +861,15 @@ class StaffController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App\Entity\Utente', $u));
-          $em->persist($obj);
+            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+          $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($em->getReference('App\Entity\Classe', $c));
-          $em->persist($obj);
+            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+          $this->em->persist($obj);
         }
         // annotazione
         $log_annotazioni['delete'] = array();
@@ -902,19 +877,19 @@ class StaffController extends AbstractController {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
             $log_annotazioni['delete'][] = $a->getId();
-            $em->remove($a);
+            $this->em->remove($a);
           }
           $avviso->setAnnotazioni(new ArrayCollection());
         }
         // crea nuove annotazioni
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione e notifica
         $notifica = (new Notifica())
           ->setOggettoNome('Avviso')
           ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
+        $this->em->persist($notifica);
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
@@ -962,8 +937,6 @@ class StaffController extends AbstractController {
    * Gestione degli avvisi sulle attività
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -976,22 +949,21 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAttivitaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                        BachecaUtil $bac, $pagina) {
+  public function avvisiAttivitaAction(Request $request, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe');
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe');
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/pagina', $pagina);
     }
     // form di ricerca
     $limite = 20;
@@ -1043,9 +1015,9 @@ class StaffController extends AbstractController {
       $search['docente'] = (is_object($form->get('docente')->getData()) ? $form->get('docente')->getData()->getId() : 0);
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/docente', $search['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_attivita/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'A');
@@ -1065,7 +1037,6 @@ class StaffController extends AbstractController {
    * Aggiunge o modifica un avviso per le attività
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -1080,12 +1051,12 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAttivitaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
+  public function avvisiAttivitaEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
                                            RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'A']);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'A']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1107,7 +1078,7 @@ class StaffController extends AbstractController {
       if ($this->getUser()->getSede()) {
         $avviso->addSedi($this->getUser()->getSede());
       }
-      $em->persist($avviso);
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
@@ -1160,7 +1131,7 @@ class StaffController extends AbstractController {
       $errore = false;
       $lista_classi = array_map(function ($o) { return $o->getId(); },
         $form->get('classi')->getData()->toArray());
-      $lista = $em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -1187,13 +1158,13 @@ class StaffController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1205,15 +1176,15 @@ class StaffController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App\Entity\Utente', $u));
-          $em->persist($obj);
+            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+          $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($em->getReference('App\Entity\Classe', $c));
-          $em->persist($obj);
+            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+          $this->em->persist($obj);
         }
         // annotazione
         $log_annotazioni['delete'] = array();
@@ -1221,19 +1192,19 @@ class StaffController extends AbstractController {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
             $log_annotazioni['delete'][] = $a->getId();
-            $em->remove($a);
+            $this->em->remove($a);
           }
           $avviso->setAnnotazioni(new ArrayCollection());
         }
         // crea nuove annotazioni
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione e notifica
         $notifica = (new Notifica())
           ->setOggettoNome('Avviso')
           ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
+        $this->em->persist($notifica);
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
@@ -1277,8 +1248,6 @@ class StaffController extends AbstractController {
    * Gestione degli avvisi individuali per i genitori
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -1291,20 +1260,19 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiIndividualiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                          BachecaUtil $bac, $pagina) {
+  public function avvisiIndividualiAction(Request $request, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente');
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente');
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
     }
     // form di ricerca
     $limite = 20;
@@ -1335,8 +1303,8 @@ class StaffController extends AbstractController {
       // imposta criteri di ricerca
       $search['docente'] = (is_object($form->get('docente')->getData()) ? $form->get('docente')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/docente', $search['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'I');
@@ -1356,8 +1324,6 @@ class StaffController extends AbstractController {
    * Aggiunge o modifica un avviso individuale
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -1372,12 +1338,13 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiIndividualiEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                              TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function avvisiIndividualiEditAction(Request $request, TranslatorInterface $trans,
+                                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
+                                              $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'I']);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'I']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1397,7 +1364,7 @@ class StaffController extends AbstractController {
       if ($this->getUser()->getSede()) {
         $avviso->addSedi($this->getUser()->getSede());
       }
-      $em->persist($avviso);
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
@@ -1406,7 +1373,7 @@ class StaffController extends AbstractController {
       'returnUrl' => $this->generateUrl('staff_avvisi_individuali'),
       'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
-    $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     if ($form->isSubmitted()) {
       // lista sedi
       $sedi = array();
@@ -1429,7 +1396,7 @@ class StaffController extends AbstractController {
       }
       // controlla filtro
       $errore = false;
-      $lista = $em->getRepository('App\Entity\Alunno')
+      $lista = $this->em->getRepository('App\Entity\Alunno')
         ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
       if ($errore) {
         // utente non valido
@@ -1446,7 +1413,7 @@ class StaffController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1458,16 +1425,16 @@ class StaffController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App\Entity\Utente', $u));
-          $em->persist($obj);
+            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+          $this->em->persist($obj);
         }
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione e notifica
         $notifica = (new Notifica())
           ->setOggettoNome('Avviso')
           ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
+        $this->em->persist($notifica);
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
@@ -1501,7 +1468,6 @@ class StaffController extends AbstractController {
   /**
    * Restituisce gli alunni della classe indicata
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id Identificativo della classe
    *
    * @return JsonResponse Informazioni di risposta
@@ -1513,8 +1479,8 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function classeAjaxAction(EntityManagerInterface $em, $id) {
-    $alunni = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+  public function classeAjaxAction($id) {
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->where('a.classe=:classe AND a.abilitato=:abilitato')
       ->setParameters(['classe' => $id, 'abilitato' => 1])
@@ -1529,8 +1495,6 @@ class StaffController extends AbstractController {
    * Gestione dei ritardi e delle uscite anticipate
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param string $data Data per la gestione dei ritardi e delle uscita (AAAA-MM-GG)
@@ -1545,8 +1509,8 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                           RegistroUtil $reg, StaffUtil $staff, $data, $pagina) {
+  public function studentiAutorizzaAction(Request $request, RegistroUtil $reg, StaffUtil $staff,
+                                          $data, $pagina) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -1560,9 +1524,9 @@ class StaffController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data')) {
+      if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -1570,7 +1534,7 @@ class StaffController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/data', $data);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/data', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -1578,21 +1542,21 @@ class StaffController extends AbstractController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
-    $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/pagina', $pagina);
     }
     // legge sede
     $sede = $this->getUser()->getSede();
@@ -1600,10 +1564,10 @@ class StaffController extends AbstractController {
     $limite = 20;
     if ($sede) {
       // limita a classi di sede
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_autorizza', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_autorizza', ['data' => $data]))
@@ -1642,10 +1606,10 @@ class StaffController extends AbstractController {
       $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/nome', $search['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/cognome', $search['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/nome', $search['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/pagina', $pagina);
     }
     // recupera periodo
     $info['periodo'] = $reg->periodo($data_obj);
@@ -1655,9 +1619,9 @@ class StaffController extends AbstractController {
     $errore = $reg->controlloData($data_obj, null);
     if (!$errore) {
       // non festivo: recupera dati
-      $lista = $em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+      $lista = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
       $max_pagine = ceil($lista->count() / $limite);
-      $dati['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista);
+      $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
     }
@@ -1685,8 +1649,6 @@ class StaffController extends AbstractController {
    * Aggiunge, modifica o elimina un ritardo
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1702,19 +1664,19 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaEntrataAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                                  RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
-                                                  $data, $classe, $alunno) {
+  public function studentiAutorizzaEntrataAction(Request $request, RegistroUtil $reg,
+                                                 TranslatorInterface $trans, LogHandler $dblogger,
+                                                 $data, $classe, $alunno) {
     // inizializza
     $label = array();
     // controlla classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1729,7 +1691,7 @@ class StaffController extends AbstractController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla entrata
-    $entrata = $em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
       // edit
       $entrata_old = clone $entrata;
@@ -1752,7 +1714,7 @@ class StaffController extends AbstractController {
         ->setAlunno($alunno)
         ->setValido(true)
         ->setDocente($this->getUser());
-      $em->persist($entrata);
+      $this->em->persist($entrata);
     }
     // controlla permessi
     if (!$reg->azioneAssenze($data_obj, $this->getUser(), $alunno, $classe, null)) {
@@ -1781,11 +1743,11 @@ class StaffController extends AbstractController {
         if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // cancella ritardo esistente
           $id_entrata = $entrata->getId();
-          $em->remove($entrata);
+          $this->em->remove($entrata);
         } else {
           // controlla ritardo breve
           $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
-          $inizio->modify('+' . $reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
+          $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
           if ($form->get('ora')->getData() <= $inizio) {
             // ritardo breve: giustificazione automatica (non imposta docente)
             $entrata
@@ -1795,15 +1757,15 @@ class StaffController extends AbstractController {
               ->setValido(false);
           }
           // controlla se risulta assente
-          $assenza = $em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
-            $em->remove($assenza);
+            $this->em->remove($assenza);
           }
         }
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
@@ -1866,8 +1828,6 @@ class StaffController extends AbstractController {
    * Aggiunge, modifica o elimina un'uscita anticipata
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1883,19 +1843,19 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaUscitaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                                RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
+  public function studentiAutorizzaUscitaAction(Request $request, RegistroUtil $reg,
+                                                TranslatorInterface $trans, LogHandler $dblogger,
                                                 $data, $classe, $alunno) {
     // inizializza
     $label = array();
     // controlla classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1908,9 +1868,9 @@ class StaffController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
+    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
       // gestione uscita con autorizzazione
-      $richiesta = $em->getRepository('App\Entity\Richiesta')
+      $richiesta = $this->em->getRepository('App\Entity\Richiesta')
         ->richiestaAlunno('U', $alunno->getId(), $data_obj);
       if ($richiesta && (!in_array($richiesta->getStato(), ['I', 'G'], true) ||
           $richiesta->getDefinizioneRichiesta()->getUnica() ||
@@ -1925,7 +1885,7 @@ class StaffController extends AbstractController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
-    $uscita = $em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
       // edit
       $uscita_old = clone $uscita;
@@ -1957,7 +1917,7 @@ class StaffController extends AbstractController {
         ->setNote($nota)
         ->setValido(true)
         ->setDocente($this->getUser());
-      $em->persist($uscita);
+      $this->em->persist($uscita);
       $chiediGiustificazione = false;
     }
     // controlla permessi
@@ -1990,14 +1950,14 @@ class StaffController extends AbstractController {
         if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella uscita esistente
           $id_uscita = $uscita->getId();
-          $em->remove($uscita);
+          $this->em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
-            $em->remove($assenza);
+            $this->em->remove($assenza);
           }
         }
         if ($richiesta) {
@@ -2011,7 +1971,7 @@ class StaffController extends AbstractController {
             ->setDocenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
@@ -2070,8 +2030,6 @@ class StaffController extends AbstractController {
    * Gestisce l'inserimento di deroghe e annotazioni sugli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista dei alunni
    *
    * @return Response Pagina di risposta
@@ -2083,20 +2041,20 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiDerogheAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, $pagina) {
+  public function studentiDerogheAction(Request $request, $pagina) {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
-    $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // legge sede
     $sede = $this->getUser()->getSede();
@@ -2104,10 +2062,10 @@ class StaffController extends AbstractController {
     $limite = 20;
     if ($sede) {
       // limita a classi di sede
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_deroghe', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_deroghe'))
@@ -2146,14 +2104,14 @@ class StaffController extends AbstractController {
       $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/nome', $search['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/cognome', $search['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/nome', $search['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_deroghe.html.twig', array(
       'pagina_titolo' => 'page.staff_deroghe',
@@ -2171,7 +2129,6 @@ class StaffController extends AbstractController {
    * Modifica delle deroghe e annotazioni di un alunno
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $alunno ID dell'alunno
    *
@@ -2183,11 +2140,11 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiDerogheEditAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, $alunno) {
+  public function studentiDerogheEditAction(Request $request, LogHandler $dblogger, $alunno) {
     // inizializza
     $label = null;
     // controlla alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -2220,7 +2177,7 @@ class StaffController extends AbstractController {
     $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione
         $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
           'Username' => $alunno->getUsername(),
@@ -2246,8 +2203,6 @@ class StaffController extends AbstractController {
    * Mostra la situazione degli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista dei alunni
    *
    * @return Response Pagina di risposta
@@ -2259,20 +2214,20 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiSituazioneAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, $pagina) {
+  public function studentiSituazioneAction(Request $request, $pagina) {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
-    $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // legge sede
     $sede = $this->getUser()->getSede();
@@ -2280,10 +2235,10 @@ class StaffController extends AbstractController {
     $limite = 20;
     if ($sede) {
       // limita a classi di sede
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_situazione', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_situazione'))
@@ -2322,14 +2277,14 @@ class StaffController extends AbstractController {
       $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/nome', $search['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/cognome', $search['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/nome', $search['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
       'pagina_titolo' => 'page.staff_situazione',
@@ -2347,8 +2302,6 @@ class StaffController extends AbstractController {
    * Mostra le statistiche sulle ore di lezione svolte dai docenti
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
@@ -2363,28 +2316,28 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function docentiStatisticheAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                            TranslatorInterface $trans, StaffUtil $staff, PdfManager $pdf, $pagina) {
+  public function docentiStatisticheAction(Request $request, TranslatorInterface $trans,
+                                           StaffUtil $staff, PdfManager $pdf, $pagina) {
     // recupera criteri dalla sessione
     $creaPdf = false;
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/docente', null);
-    $search['inizio'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/inizio', null);
-    $search['fine'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/fine', null);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) :
+    $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/docente', null);
+    $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/inizio', null);
+    $search['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/fine', null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) :
       ($search['docente'] < 0 ? -1 : null));
     $inizio = ($search['inizio'] ? \DateTime::createFromFormat('Y-m-d', $search['inizio']) : new \DateTime());
     $fine = ($search['fine'] ? \DateTime::createFromFormat('Y-m-d', $search['fine']) : new \DateTime());
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/pagina', $pagina);
     }
     // form di ricerca
     $limite = 20;
-    $docenti = $em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+    $docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
       ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=:abilitato')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['abilitato' => 1])
@@ -2435,22 +2388,22 @@ class StaffController extends AbstractController {
         ($form->get('docente')->getData() < 0 ? -1 : null));
       $search['inizio'] = ($form->get('inizio')->getData() ? $form->get('inizio')->getData()->format('Y-m-d') : 0);
       $search['fine'] = ($form->get('fine')->getData() ? $form->get('fine')->getData()->format('Y-m-d') : 0);
-      $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) :
+      $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) :
         ($search['docente'] < 0 ? -1 : null));
       $inizio = ($form->get('inizio')->getData() ? $form->get('inizio')->getData() : new \DateTime());
       $fine = ($form->get('fine')->getData() ? $form->get('fine')->getData() : new \DateTime());
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/inizio', $search['inizio']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/fine', $search['fine']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/docente', $search['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/inizio', $search['inizio']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/fine', $search['fine']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/pagina', $pagina);
       $creaPdf = ($form->get('print')->isClicked());
     }
     // statistiche
     if ($creaPdf) {
       // crea PDF
       $lista = $staff->statisticheStampa($docente, $inizio, $fine);
-      $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+      $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
         'Statistiche sulle ore di lezione dei docenti');
       $pdf->getHandler()->SetAutoPageBreak(true, 15);
       $pdf->getHandler()->SetFooterMargin(15);
@@ -2482,8 +2435,6 @@ class StaffController extends AbstractController {
    * Gestisce la generazione della password per gli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista dei alunni
    *
    * @return Response Pagina di risposta
@@ -2495,19 +2446,19 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, $pagina) {
+  public function passwordAction(Request $request, $pagina) {
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
-    $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_password/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // legge sede
     $sede = $this->getUser()->getSede();
@@ -2515,10 +2466,10 @@ class StaffController extends AbstractController {
     $limite = 20;
     if ($sede) {
       // limita a classi di sede
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_password', FormType::class)
       ->setAction($this->generateUrl('staff_password'))
@@ -2557,14 +2508,14 @@ class StaffController extends AbstractController {
       $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_password/nome', $search['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_password/cognome', $search['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_password/classe', $search['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/nome', $search['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/password.html.twig', array(
       'pagina_titolo' => 'page.staff_password',
@@ -2581,9 +2532,7 @@ class StaffController extends AbstractController {
    * Generazione della password degli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param LogHandler $dblogger Gestore dei log su database
    * @param LoggerInterface $logger Gestore dei log su file
@@ -2600,15 +2549,14 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function passwordCreateAction(Request $request, EntityManagerInterface $em,
-                                       UserPasswordHasherInterface $hasher, RequestStack $reqstack,
+  public function passwordCreateAction(Request $request, UserPasswordHasherInterface $hasher,
                                        StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
                                        PdfManager $pdf, MailerInterface $mailer, $tipo, $username=null) {
      // controlla alunno
-     $utente = $em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
+     $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
      if (!$utente) {
        // controlla genitore
-       $utente = $em->getRepository('App\Entity\Genitore')->findOneByUsername($username);
+       $utente = $this->em->getRepository('App\Entity\Genitore')->findOneByUsername($username);
        if (!$utente) {
          // errore
          throw $this->createNotFoundException('exception.id_notfound');
@@ -2625,17 +2573,17 @@ class StaffController extends AbstractController {
         ->setUtente($utente)
         ->setFunzione('passwordUtente')
         ->setDati(['password' => $utente->getPasswordNonCifrata()]);
-      $em->persist($provisioning);
+      $this->em->persist($provisioning);
     }
     // memorizza su db
-    $em->flush();
+    $this->em->flush();
     // log azione
     $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
       'Username' => $utente->getUsername(),
       'Ruolo' => $utente->getRoles()[0],
       'ID' => $utente->getId()));
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     if ($utente instanceOf Alunno) {
@@ -2657,9 +2605,9 @@ class StaffController extends AbstractController {
     if ($tipo == 'E') {
       // invia password per email
       $message = (new Email())
-        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($utente->getEmail())
-        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
@@ -2692,8 +2640,6 @@ class StaffController extends AbstractController {
    * Gestione delle assenze di classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param string $data Data per la gestione delle assenze (AAAA-MM-GG)
@@ -2708,8 +2654,8 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAssenzeAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                         RegistroUtil $reg, LogHandler $dblogger, $data, $classe) {
+  public function studentiAssenzeAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
+                                        $data, $classe) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -2720,9 +2666,9 @@ class StaffController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data')) {
+      if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -2730,7 +2676,7 @@ class StaffController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_assenze/data', $data);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_assenze/data', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -2738,9 +2684,9 @@ class StaffController extends AbstractController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
@@ -2748,18 +2694,18 @@ class StaffController extends AbstractController {
     // parametro classe (può essere null)
     if ($classe == 0) {
       // classe non specificata
-      $classe = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/classe', 0);
+      $classe = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/classe', 0);
     }
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
     if ($sede) {
       // limita a classi di sede
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze', FormType::class)
       ->setMethod('GET')
@@ -2785,12 +2731,12 @@ class StaffController extends AbstractController {
     $form->handleRequest($request);
     if ($classe) {
       // memorizza classe
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_assenze/classe', $classe->getId());
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_assenze/classe', $classe->getId());
       if (!$errore && $reg->azioneAssenze($data_obj, $this->getUser(), null, $classe, null)) {
         // elenco alunni
         $elenco = $reg->alunniInData($data_obj, $classe);
         // elenco assenze
-        $assenti = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        $assenti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
           ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->where('a.id IN (:elenco)')
           ->setParameters(['elenco' => $elenco, 'data' => $data_obj->format('Y-m-d')])
@@ -2833,35 +2779,35 @@ class StaffController extends AbstractController {
               ->setData($data_obj)
               ->setAlunno($alu)
               ->setDocente($this->getUser());
-            $em->persist($assenza);
+            $this->em->persist($assenza);
             $log['assenza_create'][] = $assenza;
             // controlla esistenza ritardo
-            $entrata = $em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][$entrata->getId()] = $entrata;
-              $em->remove($entrata);
+              $this->em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][$uscita->getId()] = $uscita;
-              $em->remove($uscita);
+              $this->em->remove($uscita);
             }
           }
           // cancella assenti
           $cancella_assenti = array_diff($assenti, $form_assenze->get('alunni')->getData());
           foreach ($cancella_assenti as $alu) {
-            $assenza = $em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][$assenza->getId()] = $assenza;
-              $em->remove($assenza);
+              $this->em->remove($assenza);
             }
           }
           // ok: memorizza dati
-          $em->flush();
+          $this->em->flush();
           // ricalcola ore assenze
           foreach (array_merge($nuovi_assenti, $cancella_assenti) as $alu) {
             $reg->ricalcolaOreAlunno($data_obj, $alu);
@@ -2920,8 +2866,6 @@ class StaffController extends AbstractController {
    * Visualizza statistiche sulle presenze in classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param string $data Data per la gestione delle assenze (AAAA-MM-GG)
@@ -2935,8 +2879,7 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiStatisticheAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                             RegistroUtil $reg, StaffUtil $staff, $data) {
+  public function studentiStatisticheAction(Request $request, RegistroUtil $reg, StaffUtil $staff, $data) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -2947,9 +2890,9 @@ class StaffController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data')) {
+      if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -2957,7 +2900,7 @@ class StaffController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/data', $data);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/data', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -2965,30 +2908,30 @@ class StaffController extends AbstractController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
     $errore = $reg->controlloData($data_obj, null);
     // recupera criteri dalla sessione
     $search = array();
-    $search['sede'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede');
-    $sede = ($search['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe');
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede');
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
+    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     // legge sede
     $sede_staff = $this->getUser()->getSede();
     // form di ricerca
     if ($sede_staff) {
       // limita a classi di sede
       $sedi = [$sede_staff];
-      $classi = $em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede_staff], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede_staff], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $sedi = $em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
-      $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
+      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_statistiche', ['data' => $data_obj->format('Y-m-d')]))
@@ -3028,8 +2971,8 @@ class StaffController extends AbstractController {
       // imposta criteri di ricerca
       $search['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() : 0);
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/sede', $search['sede']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/sede', $search['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/classe', $search['classe']);
       // recupera dati
       $dati = $staff->statisticheAlunni($data_obj, $search);
     }
@@ -3053,8 +2996,8 @@ class StaffController extends AbstractController {
    * Gestione delle richieste dei certificati medici
    *
    //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   //-- * @param EntityManagerInterface $this->em Gestore delle entità
+   //-- * @param RequestStack $this->reqstack Gestore dello stack delle variabili globali
    //-- * @param RegistroUtil $reg Funzioni di utilità per il registro
    //-- * @param LogHandler $dblogger Gestore dei log su database
    //-- * @param string $data Data per la gestione delle assenze (AAAA-MM-GG)
@@ -3067,14 +3010,14 @@ class StaffController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiCertificatoAction(Request $request, EntityManagerInterface $em
-  //-- , RequestStack $reqstack,
+  public function studentiCertificatoAction(Request $request
+  //-- ,
                                          //-- RegistroUtil $reg, LogHandler $dblogger, $data, $classe
 ) {
     // init
     $dati = array();
     // legge alunni con richiesta certificato
-    $dati = $em->getRepository('App\Entity\Alunno')->richiestaCertificato($this->getUser()->getSede());
+    $dati = $this->em->getRepository('App\Entity\Alunno')->richiestaCertificato($this->getUser()->getSede());
 
 
     // mostra la pagina di risposta

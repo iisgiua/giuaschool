@@ -8,23 +8,16 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\Docente;
-use App\Entity\Staff;
-use App\Entity\Preside;
 use App\Entity\Ata;
-use App\Entity\Classe;
-use App\Entity\Scrutinio;
-use App\Util\PagelleUtil;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Entity\Staff;
 use App\Util\GenitoriUtil;
+use App\Util\PagelleUtil;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
@@ -32,13 +25,11 @@ use App\Util\GenitoriUtil;
  *
  * @author Antonello Dessì
  */
-class PagelleController extends AbstractController {
+class PagelleController extends BaseController {
 
   /**
    * Scarica il documento della classe generato per lo scrutinio.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle/comunicazioni
    * @param int $classe Identificativo della classe
    * @param string $tipo Tipo del documento da scaricare
@@ -52,12 +43,11 @@ class PagelleController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(EntityManagerInterface $em, RequestStack $reqstack, PagelleUtil $pag,
-                                         $classe, $tipo, $periodo) {
+  public function documentoClasseAction(PagelleUtil $pag, $classe, $tipo, $periodo) {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -68,14 +58,14 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // docente non abilitato
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore
@@ -159,8 +149,6 @@ class PagelleController extends AbstractController {
   /**
    * Scarica il documento dell'alunno generato per lo scrutinio.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle/comunicazioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param int $classe Identificativo della classe
@@ -175,12 +163,12 @@ class PagelleController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
-  public function documentoAlunnoAction(EntityManagerInterface $em, RequestStack $reqstack, PagelleUtil $pag,
-                                         GenitoriUtil $gen, $classe, $alunno, $tipo, $periodo) {
+  public function documentoAlunnoAction(PagelleUtil $pag, GenitoriUtil $gen,
+                                        $classe, $alunno, $tipo, $periodo) {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,7 +191,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore

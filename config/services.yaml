@@ -79,7 +79,6 @@ services:
     arguments:
       $root: '%dir_archivio%'
       $dirCircolari: '%dir_circolari%'
-      $localpath: '%env(LOCAL_PATH)%'
 
   # necessario per aggiungere parametro di configurazione
   App\Util\OtpUtil:

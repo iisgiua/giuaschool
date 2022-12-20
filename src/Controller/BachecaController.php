@@ -8,20 +8,16 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
+use App\Util\BachecaUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use App\Entity\Avviso;
-use App\Entity\Classe;
-use App\Util\BachecaUtil;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
@@ -29,13 +25,12 @@ use App\Util\BachecaUtil;
  *
  * @author Antonello Dessì
  */
-class BachecaController extends AbstractController {
+class BachecaController extends BaseController {
 
   /**
    * Visualizza gli avvisi destinati ai docenti
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -48,20 +43,20 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(Request $request, RequestStack $reqstack, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
-    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
+    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
+    $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi', FormType::class)
@@ -88,9 +83,9 @@ class BachecaController extends AbstractController {
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/visualizza', $cerca['visualizza']);
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/oggetto', $cerca['oggetto']);
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/visualizza', $cerca['visualizza']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/oggetto', $cerca['oggetto']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
@@ -109,7 +104,6 @@ class BachecaController extends AbstractController {
   /**
    * Mostra i dettagli di un avviso destinato al docente e segna la lettura
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $id ID dell'avviso
    *
@@ -121,11 +115,11 @@ class BachecaController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
+  public function avvisiDettagliAction(BachecaUtil $bac, $id) {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -147,7 +141,6 @@ class BachecaController extends AbstractController {
   /**
    * Mostra gli avvisi destinati agli alunni della classe
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $classe ID della classe
    *
@@ -159,11 +152,11 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniAction(EntityManagerInterface $em, BachecaUtil $bac, $classe) {
+  public function avvisiAlunniAction(BachecaUtil $bac, $classe) {
     // inizializza
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -180,7 +173,6 @@ class BachecaController extends AbstractController {
   /**
    * Conferma la lettura dell'avviso destinato agli alunni della classe
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $classe ID della classe
    * @param mixed $id ID dell'avviso o "ALL" per tutti gli avvisi della classe
@@ -193,9 +185,9 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $classe, $id) {
+  public function avvisiAlunniFirmaAction(BachecaUtil $bac, $classe, $id) {
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,7 +195,7 @@ class BachecaController extends AbstractController {
     // aggiorna firma
     $bac->letturaAvvisoAlunni($classe, $id);
     // ok: memorizza dati
-    $em->flush();
+    $this->em->flush();
     // redirect
     return $this->redirectToRoute('lezioni');
   }
@@ -212,7 +204,6 @@ class BachecaController extends AbstractController {
    * Visualizza gli avvisi destinati al personale ATA
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -225,20 +216,20 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function avvisiATAAction(Request $request, RequestStack $reqstack, BachecaUtil $bac, $pagina) {
+  public function avvisiATAAction(Request $request, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
-    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
+    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
+    $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_ata', FormType::class)
@@ -264,9 +255,9 @@ class BachecaController extends AbstractController {
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/visualizza', $cerca['visualizza']);
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/oggetto', $cerca['oggetto']);
-      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/visualizza', $cerca['visualizza']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/oggetto', $cerca['oggetto']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());

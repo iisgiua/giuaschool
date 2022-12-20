@@ -13,11 +13,11 @@ use Twig\TwigFunction;
 
 
 /**
- * File64Extension - funzione TWIG FILE64: file64(file)
+ * Image64Extension - funzione TWIG IMAGE64: image64(file)
  *
  * @author Antonello Dessì
  */
-class File64Extension extends AbstractExtension {
+class Image64Extension extends AbstractExtension {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -46,27 +46,30 @@ class File64Extension extends AbstractExtension {
    */
   public function getFunctions() {
     return [
-      new TwigFunction('file64', [$this, 'getFile64']),
+      new TwigFunction('image64', [$this, 'getImage64']),
     ];
   }
 
   /**
-   * Restituisce il contenuto del file (binario) con codifica in base 64
+   * Restituisce l'immagine con codifica in base 64
    *
-   * @param string $nomefile Percorso relativo del file (rispetto alla directory di progetto)
+   * @param string $nomefile Nome del file (rispetto alla directory di pubblica delle immagini)
    *
-   * @return string Contenuto del file codificato in base 64
+   * @return string Contenuto del file dell'immagine codificato in base 64
    */
-  public function getFile64(string $nomefile): string {
-    $path = $this->dirProgetto.'/'. $nomefile;
-    if (file_exists($path)) {
-      // legge file
-      $dati = file_get_contents($path);
-      // restituisce dati codificati
-      return base64_encode($dati);
+  public function getImage64(string $nomefile): string {
+    // immagine personalizzata
+    $path = $this->dirProgetto.'/PERSONAL/img/'. $nomefile;
+    if (!file_exists($path)) {
+      // immagine predefinita
+      $path = $this->dirProgetto.'/public/img/'. $nomefile;
+      if (!file_exists($path)) {
+        // errore
+        return '';
+      }
     }
-    // errore
-    return '';
+    // restituisce dati codificati
+    return base64_encode(file_get_contents($path));
   }
 
 }

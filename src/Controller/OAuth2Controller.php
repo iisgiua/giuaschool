@@ -9,8 +9,6 @@
 namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @author Antonello Dessì
  */
-class OAuth2Controller extends AbstractController {
+class OAuth2Controller extends BaseController {
 
   /**
    * Avvia l'autenticazione su provider esterno GSuite.
@@ -50,7 +48,7 @@ class OAuth2Controller extends AbstractController {
    */
   public function connectAppAction(ClientRegistry $clientRegistry, $email) {
     $options = array();
-    $options['login_hint'] = $email;
+    $options['login_hint'] = $this->email;
     // redirezione alla GSuite
     return $clientRegistry
       ->getClient('gsuite')

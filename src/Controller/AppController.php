@@ -9,26 +9,21 @@
 namespace App\Controller;
 
 use App\Entity\Alunno;
-use App\Entity\App;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
 use App\Entity\Log;
-use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,12 +37,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  *
  * @author Antonello Dessì
  */
-class AppController extends AbstractController {
+class AppController extends BaseController {
 
   /**
    * Login dell'utente tramite l'app
    *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param string $codice Codifica delle credenziali in BASE64
@@ -62,16 +56,16 @@ class AppController extends AbstractController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config,
+  public function loginAction(AuthenticationUtils $auth, ConfigLoader $config,
                               $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     if (!$manutenzione) {
       // conserva ultimo errore del login, se presente
       $errore = $auth->getLastAuthenticationError();
@@ -88,7 +82,6 @@ class AppController extends AbstractController {
    * Pre-login dell'utente tramite l'app
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
@@ -97,7 +90,7 @@ class AppController extends AbstractController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher) {
+  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher) {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
@@ -113,7 +106,7 @@ class AppController extends AbstractController {
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -129,7 +122,7 @@ class AppController extends AbstractController {
           // memorizza codice di pre-login
           $user->setPrelogin($risposta['token']);
           $user->setPreloginCreato(new \DateTime());
-          $em->flush();
+          $this->em->flush();
         } else {
           // errore: credenziali non corrispondono
           $risposta['errore'] = 3;
@@ -149,7 +142,6 @@ class AppController extends AbstractController {
   /**
    * Mostra la pagina informativa sulle app ufficiali
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
@@ -157,12 +149,12 @@ class AppController extends AbstractController {
    * @Route("/app/info/", name="app_info",
    *    methods={"GET"})
    */
-  public function infoAction(EntityManagerInterface $em, ConfigLoader $config) {
+  public function infoAction(ConfigLoader $config) {
     $applist = array();
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $em->getRepository('App\Entity\App')->findBy(['attiva' => 1]);
+    $apps = $this->em->getRepository('App\Entity\App')->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -186,7 +178,6 @@ class AppController extends AbstractController {
   /**
    * Esegue il download dell'app indicata.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param int $id ID dell'app da scaricare
    *
@@ -196,11 +187,11 @@ class AppController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    */
-  public function downloadAction(EntityManagerInterface $em, ConfigLoader $config, $id) {
+  public function downloadAction(ConfigLoader $config, $id) {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $em->getRepository('App\Entity\App')->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -225,7 +216,6 @@ class AppController extends AbstractController {
    * API: restituisce la lista dei presenti per le procedure di evacuazione di emergenza
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param string $token Token identificativo dell'app
    *
    * @return Response Pagina di risposta
@@ -233,11 +223,11 @@ class AppController extends AbstractController {
    * @Route("/app/presenti/{token}", name="app_presenti",
    *    methods={"GET"})
    */
-  public function presentiAction(Request $request, EntityManagerInterface $em, $token) {
+  public function presentiAction(Request $request, $token) {
     // inizializza
     $dati = array();
     // controlla servizio
-    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
       if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
@@ -255,7 +245,7 @@ class AppController extends AbstractController {
                   WHERE a.abilitato=1
                   AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
                   ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
-          $dati = $em->createQuery($dql)
+          $dati = $this->em->createQuery($dql)
             ->setParameters(['oggi' => $oggi])
             ->getArrayResult();
         }
@@ -273,19 +263,18 @@ class AppController extends AbstractController {
    * Restituisce la versione corrente dell'app indicata
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return JsonResponse Informazioni di risposta
    *
    * @Route("/app/versione/", name="app_versione",
    *    methods={"POST"})
    */
-  public function versioneAction(Request $request, EntityManagerInterface $em) {
+  public function versioneAction(Request $request) {
     $risposta = array();
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -300,7 +289,6 @@ class AppController extends AbstractController {
    * API: restituisce informazioni sull'utente studente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
@@ -308,13 +296,13 @@ class AppController extends AbstractController {
    * @Route("/app/info/studenti/", name="app_info_studenti",
    *    methods={"POST"})
    */
-  public function infoStudentiAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans) {
+  public function infoStudentiAction(Request $request, TranslatorInterface $trans) {
     // inizializza
     $dati = array();
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -330,7 +318,7 @@ class AppController extends AbstractController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';
@@ -351,8 +339,6 @@ class AppController extends AbstractController {
    * Passo iniziale per la connessione all'app: restituisce il token di sicurezza
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return JsonResponse Informazioni di risposta
    *
@@ -361,8 +347,7 @@ class AppController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function connectInitAction(Request $request, EntityManagerInterface $em,
-                                    RequestStack $reqstack): JsonResponse {
+  public function connectInitAction(Request $request): JsonResponse {
     $res = array();
     // legge dati
     $userId = $this->getUser()->getId();
@@ -374,7 +359,7 @@ class AppController extends AbstractController {
     // memorizza token
     $this->getUser()->setPrelogin($token.'-'.sha1($ip).'-'.$sessionId);
     $this->getUser()->setPreloginCreato(new \DateTime());
-    $em->flush();
+    $this->em->flush();
     // restituisce risposta
     return new JsonResponse($res);
   }
@@ -383,34 +368,32 @@ class AppController extends AbstractController {
    * Connette utente da app, tramite token di sicurezza
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    * @param LoggerInterface $logger Gestore dei log su file
    * @param ConfigLoader $config Gestore della configurazione su database
+   * @param string $token Token con le informazioni per la connessione
    *
    * @return Response Pagina di risposta
    *
    * @Route("/app/connect/{token}", name="app_connect",
    *    methods={"GET"})
    */
-  public function connectAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                LogHandler $dblogger, LoggerInterface $logger, ConfigLoader $config,
-                                $token): Response {
+  public function connectAction(Request $request, LogHandler $dblogger, LoggerInterface $logger,
+                                ConfigLoader $config, $token): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     if (!$manutenzione) {
       try {
         // legge dati
         $ip = $request->getClientIp();
         list($tokenId, $userId) = explode('-', $token);
-        $user = $em->getRepository('App\Entity\Utente')->findOneBy(['id' => $userId, 'abilitato' => 1]);
+        $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['id' => $userId, 'abilitato' => 1]);
         if (!$user) {
           // errore utente
           $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', array(
@@ -456,8 +439,8 @@ class AppController extends AbstractController {
           ->setCategoria('ACCESSO')
           ->setAzione('Connessione da app')
           ->setDati(['Token' => $token]);
-        $em->persist($log);
-        $em->flush();
+        $this->em->persist($log);
+        $this->em->flush();
         // connette a sessione esistente
         if (session_status() == PHP_SESSION_ACTIVE) {
           session_destroy();

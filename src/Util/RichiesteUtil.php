@@ -80,7 +80,7 @@ class RichiesteUtil {
     $fs = new FileSystem();
     $documentoId = $definizioneRichiesta->getId().'-'.$alunno->getId().'-'.uniqid();
     // crea template per il documento
-    $template = file_get_contents($this->dirProgetto.'/templates/PERSONALI/moduli/'.$definizioneRichiesta->getModulo());
+    $template = file_get_contents($this->dirProgetto.'/PERSONAL/data/moduli/'.$definizioneRichiesta->getModulo());
     foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
       switch ($campo[0]) {
         case 'text':
@@ -114,11 +114,11 @@ class RichiesteUtil {
       $template = preg_replace('/\{\{\s*form_widget\(\s*form\.data\s*\)\s*\}\}/',
         '<strong>{{ data ? (data|date("d/m/Y")) : "-----" }}</strong>', $template);
     }
-    $header = $fs->exists($this->dirProgetto.'/templates/PERSONALI/richieste/_intestazione_moduli.html.twig') ?
-      $this->dirProgetto.'/templates/PERSONALI/richieste/_intestazione_moduli.html.twig' :
+    $header = $fs->exists($this->dirProgetto.'/PERSONAL/templates/richieste/_intestazione_moduli.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/richieste/_intestazione_moduli.html.twig' :
       $this->dirProgetto.'/templates/richieste/_intestazione_moduli.html.twig';
-    $footer = $fs->exists($this->dirProgetto.'/templates/PERSONALI/richieste/_firma_moduli.html.twig') ?
-      $this->dirProgetto.'/templates/PERSONALI/richieste/_firma_moduli.html.twig' :
+    $footer = $fs->exists($this->dirProgetto.'/PERSONAL/templates/richieste/_firma_moduli.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/richieste/_firma_moduli.html.twig' :
       $this->dirProgetto.'/templates/richieste/_firma_moduli.html.twig';
     $template = file_get_contents($header).$template.file_get_contents($footer);
     $templateTwig = $this->tpl->createTemplate($template);

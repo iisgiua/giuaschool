@@ -151,7 +151,6 @@ class Updater {
       'OAUTH_GOOGLE_CLIENT_ID' => ['', ],
       'OAUTH_GOOGLE_CLIENT_SECRET' => ['', ],
       'OAUTH_GOOGLE_CLIENT_HD' => ['', ],
-      'LOCAL_PATH' => ['', 'percorso per immagini personalizzate'],
       'LOG_LEVEL' => ['warning', 'imposta il livello del log del sistema in produzione'],
       'INSTALLATION_PSW' => ['', 'imposta la password di installazione']];
     // inserisce variabili di ambiente
@@ -341,12 +340,14 @@ class Updater {
     uasort($updates, fn($a, $b) => version_compare($a[1], $b[1]));
     // legge informazioni sugli aggiornamenti
     $updateInfo = [
+      'fileCopy' => [],
       'fileDelete' => [],
       'sqlCommand' => [],
       'sqlCheck' => [],
       'envDelete' => []];
     foreach ($updates as $update) {
       $info = include($update[0]);
+      $updateInfo['fileCopy'] = array_merge($updateInfo['fileCopy'], $info['fileCopy']);
       $updateInfo['fileDelete'] = array_merge($updateInfo['fileDelete'], $info['fileDelete']);
       $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $info['sqlCommand']);
       $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $info['sqlCheck']);
@@ -431,20 +432,46 @@ class Updater {
   private function fileUpdate(int $step) {
     // legge aggiornamenti
     $updates = $this->readUpdates();
-    // cancella file/dir
+    // copia file: usa pattern per sorgente e dir per destinatario, oppure path per entrambi
     $success = true;
-    foreach ($updates['fileDelete'] as $delete) {
-      if (file_exists($this->projectPath.'/'.$delete)) {
-        if (substr($delete, -1) == '/') {
-          // rimuove directory
-          $success = rmdir($this->projectPath.'/'.$delete);
+    foreach ($updates['fileCopy'] as $copy) {
+      foreach (glob($this->projectPath.'/'.$copy[0], GLOB_MARK) as $file) {
+        $dest = $this->projectPath.'/'.$copy[1];
+        if (substr($file, -1) == '/') {
+          // directory: non fa nulla
         } else {
-          // cancella file
-          $success = unlink($this->projectPath.'/'.$delete);
+          // file: copia
+          if (substr($dest, -1) == '/') {
+            // directory di destinazione
+            $dest .= basename($file);
+          }
+          // crea dir se necessario
+          if (!is_dir(dirname($dest))) {
+            mkdir(dirname($dest), 0777, true);
+          }
+          // copia file
+          copy($file, $dest);
         }
         if (!$success) {
           // errore
-          throw new \Exception('Errore nella cancellazione del file "'.$delete.'"', $step);
+          throw new \Exception('Errore nel copiare il file "'.$file.'"', $step);
+        }
+      }
+    }
+    // cancella file/dir: usa pattern per destinatario
+    $success = true;
+    foreach ($updates['fileDelete'] as $delete) {
+      foreach (glob($this->projectPath.'/'.$delete, GLOB_MARK) as $file) {
+        if (substr($file, -1) == '/') {
+          // rimuove directory
+          $success = rmdir($file);
+        } else {
+          // cancella file
+          $success = unlink($file);
+        }
+        if (!$success) {
+          // errore
+          throw new \Exception('Errore nel cancellare il file "'.$file.'"', $step);
         }
       }
     }
@@ -501,7 +528,7 @@ class Updater {
         }
       }
     }
-    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');    
+    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');
     // visualizza pagina
     $page['version'] = $this->sys['version'];
     $page['step'] = $step.' - Aggiornamento database';

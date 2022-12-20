@@ -8,40 +8,26 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\FormError;
-use App\Util\StaffUtil;
-use App\Util\PdfManager;
-use App\Util\RegistroUtil;
-use App\Util\BachecaUtil;
-use App\Util\LogHandler;
-use App\Entity\Staff;
-use App\Entity\Preside;
-use App\Entity\Classe;
+use App\Entity\Annotazione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
 use App\Entity\Notifica;
-use App\Entity\Annotazione;
-use App\Entity\Alunno;
-use App\Entity\Cattedra;
-use App\Form\MessageType;
+use App\Entity\Preside;
+use App\Entity\Staff;
 use App\Form\AvvisoType;
+use App\Util\BachecaUtil;
+use App\Util\LogHandler;
+use App\Util\PdfManager;
+use App\Util\RegistroUtil;
+use App\Util\StaffUtil;
+use Doctrine\Common\Collections\ArrayCollection;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -49,12 +35,11 @@ use App\Form\AvvisoType;
  *
  * @author Antonello Dessì
  */
-class CoordinatoreController extends AbstractController {
+class CoordinatoreController extends BaseController {
 
   /**
    * Gestione delle funzioni coordinatore
    *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -63,18 +48,18 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function coordinatoreAction(RequestStack $reqstack) {
+  public function coordinatoreAction() {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (count($classi) == 1) {
         // coordinatore di una sola classe: vai
-        $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classi[0]);
+        $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classi[0]);
         return $this->redirectToRoute('coordinatore_assenze', ['classe' => $classi[0]]);
       }
     }
     // staff/preside o coordinatore di più classi
-    if ($reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore')) {
+    if ($this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore')) {
       // classe scelta, vai alle assenze
       return $this->redirectToRoute('coordinatore_assenze');
     } else {
@@ -86,8 +71,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Gestione della scelta delle classi
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -96,12 +79,12 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(EntityManagerInterface $em, RequestStack $reqstack) {
+  public function classeAction() {
     // lista classi coordinatore
-    $classi = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione', 'ASC')
-      ->setParameters(['lista' => explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
+      ->setParameters(['lista' => explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
       ->getQuery()
       ->getResult();
     // lista tutte le classi
@@ -109,7 +92,7 @@ class CoordinatoreController extends AbstractController {
     if ($this->getUser() instanceOf Staff) {
       if ($this->getUser()->getSede()) {
         // solo classi della sede
-        $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
           ->where('c.sede=:sede')
           ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
           ->setParameters(['sede' => $this->getUser()->getSede()])
@@ -117,7 +100,7 @@ class CoordinatoreController extends AbstractController {
           ->getResult();
       } else {
         // tutte le classi
-        $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
           ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
           ->getQuery()
           ->getResult();
@@ -138,9 +121,7 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra le note della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -152,20 +133,20 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(EntityManagerInterface $em, StaffUtil $staff, RequestStack $reqstack, $classe) {
+  public function noteAction(StaffUtil $staff, $classe) {
     // inizializza variabili
     $dati = null;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -173,7 +154,7 @@ class CoordinatoreController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -193,9 +174,7 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra le assenze della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -207,20 +186,20 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeAction(EntityManagerInterface $em, StaffUtil $staff, RequestStack $reqstack, $classe) {
+  public function assenzeAction(StaffUtil $staff, $classe) {
     // inizializza variabili
     $dati = null;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -228,7 +207,7 @@ class CoordinatoreController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -248,9 +227,7 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra le medie dei voti della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -262,20 +239,20 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(EntityManagerInterface $em, StaffUtil $staff, RequestStack $reqstack, $classe) {
+  public function votiAction(StaffUtil $staff, $classe) {
     // inizializza variabili
     $dati = null;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -283,7 +260,7 @@ class CoordinatoreController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -303,9 +280,7 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra la situazione dei singoli alunni.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -317,21 +292,20 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAction(EntityManagerInterface $em, StaffUtil $staff, RequestStack $reqstack,
-                                    $classe) {
+  public function situazioneAction(StaffUtil $staff, $classe) {
     // inizializza variabili
     $dati = null;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -339,7 +313,7 @@ class CoordinatoreController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -359,8 +333,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra la situazione di un singolo alunno.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $alunno Identificativo dell'alunno
@@ -375,8 +347,7 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAlunnoAction(EntityManagerInterface $em, RequestStack $reqstack, StaffUtil $staff,
-                                          PdfManager $pdf, $alunno, $tipo, $formato) {
+  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, $alunno, $tipo, $formato) {
     // inizializza variabili
     $dati = null;
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
@@ -384,7 +355,7 @@ class CoordinatoreController extends AbstractController {
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     // controllo alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->find($alunno);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -398,7 +369,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -415,7 +386,7 @@ class CoordinatoreController extends AbstractController {
     // controllo formato
     if ($formato == 'P') {
       // crea documento PDF
-      $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+      $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
       $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
         'classe' => $classe,
@@ -444,8 +415,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Stampa le assenze della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
@@ -458,12 +427,11 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeStampaAction(EntityManagerInterface $em, RequestStack $reqstack, StaffUtil $staff,
-                                       PdfManager $pdf, $classe) {
+  public function assenzeStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -471,7 +439,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -480,7 +448,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->assenze($classe);
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Assenze della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/assenze_classe.html.twig', array(
       'classe' => $classe,
@@ -495,8 +463,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Stampa le note della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
@@ -509,12 +475,11 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteStampaAction(EntityManagerInterface $em, RequestStack $reqstack, StaffUtil $staff,
-                                    PdfManager $pdf, $classe) {
+  public function noteStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -522,7 +487,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -531,7 +496,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->note($classe);
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Note disciplinari della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/note_classe.html.twig', array(
       'classe' => $classe,
@@ -546,8 +511,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Stampa le medie dei voti della classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
@@ -560,12 +523,11 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(EntityManagerInterface $em, RequestStack $reqstack,
-                                    StaffUtil $staff, PdfManager $pdf, $classe) {
+  public function votiStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -573,7 +535,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -582,7 +544,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->voti($classe);
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Medie dei voti della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $pdf->getHandler()->setPageOrientation('L', true, 20);
     $html = $this->renderView('pdf/voti_classe.html.twig', array(
@@ -598,8 +560,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Gestione degli avvisi per la classe.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $classe Identificativo della classe
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
@@ -613,8 +573,7 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(EntityManagerInterface $em, RequestStack $reqstack, BachecaUtil $bac,
-                               $classe, $pagina) {
+  public function avvisiAction(BachecaUtil $bac, $classe, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -622,22 +581,22 @@ class CoordinatoreController extends AbstractController {
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // parametro pagina
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/coordinatore_avvisi/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_avvisi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/coordinatore_avvisi/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_avvisi/pagina', $pagina);
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -645,7 +604,7 @@ class CoordinatoreController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -669,8 +628,6 @@ class CoordinatoreController extends AbstractController {
    * Aggiunge o modifica un avviso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -687,11 +644,10 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                   TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg,
-                                   LogHandler $dblogger, $classe, $id) {
+  public function avvisoEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
+                                   RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -700,7 +656,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -709,7 +665,7 @@ class CoordinatoreController extends AbstractController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -723,9 +679,9 @@ class CoordinatoreController extends AbstractController {
           ['classe' => $classe->getAnno().'ª '.$classe->getSezione()]))
         ->setData(new \DateTime('today'))
         ->addSedi($classe->getSede());
-      $em->persist($avviso);
+      $this->em->persist($avviso);
       // imposta classe tramite cattedra
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
       $avviso->setCattedra($cattedra);
     }
     // imposta autore dell'avviso
@@ -738,7 +694,7 @@ class CoordinatoreController extends AbstractController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // controllo errori
@@ -754,7 +710,7 @@ class CoordinatoreController extends AbstractController {
       $lista = array();
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $em->getRepository('App\Entity\Alunno')
+        $lista = $this->em->getRepository('App\Entity\Alunno')
           ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -784,13 +740,13 @@ class CoordinatoreController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -810,15 +766,15 @@ class CoordinatoreController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App\Entity\Utente', $u));
-          $em->persist($obj);
+            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+          $this->em->persist($obj);
         }
         // imposta classe
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($em->getReference('App\Entity\Classe', $c));
-          $em->persist($obj);
+            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+          $this->em->persist($obj);
         }
         // annotazione
         $log_annotazioni['delete'] = array();
@@ -826,7 +782,7 @@ class CoordinatoreController extends AbstractController {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
             $log_annotazioni['delete'][] = $a->getId();
-            $em->remove($a);
+            $this->em->remove($a);
           }
           $avviso->setAnnotazioni(new ArrayCollection());
         }
@@ -840,16 +796,16 @@ class CoordinatoreController extends AbstractController {
             ->setAvviso($avviso)
             ->setClasse($classe)
             ->setDocente($avviso->getDocente());
-          $em->persist($a);
+          $this->em->persist($a);
           $avviso->addAnnotazioni($a);
         }
         // ok: memorizza dati
-        $em->flush();
+        $this->em->flush();
         // log azione e notifica
         $notifica = (new Notifica())
           ->setOggettoNome('Avviso')
           ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
+        $this->em->persist($notifica);
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
@@ -891,8 +847,6 @@ class CoordinatoreController extends AbstractController {
   /**
    * Mostra i dettagli di un avviso
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $classe Identificativo della classe
    * @param int $id ID dell'avviso
@@ -905,18 +859,17 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDettagliAction(EntityManagerInterface $em, RequestStack $reqstack,
-                                       BachecaUtil $bac, $classe, $id) {
+  public function avvisoDettagliAction(BachecaUtil $bac, $classe, $id) {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -924,7 +877,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -946,8 +899,6 @@ class CoordinatoreController extends AbstractController {
    * Cancella avviso
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -962,16 +913,16 @@ class CoordinatoreController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDeleteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                     LogHandler $dblogger, BachecaUtil $bac, RegistroUtil $reg, $classe, $id) {
+  public function avvisoDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
+                                     RegistroUtil $reg, $classe, $id) {
     // controllo avviso
-    $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -979,7 +930,7 @@ class CoordinatoreController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1001,16 +952,16 @@ class CoordinatoreController extends AbstractController {
     $log_annotazioni = array();
     foreach ($avviso->getAnnotazioni() as $a) {
       $log_annotazioni[] = $a->getId();
-      $em->remove($a);
+      $this->em->remove($a);
     }
     // cancella destinatari
-    $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+    $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -1018,15 +969,15 @@ class CoordinatoreController extends AbstractController {
       ->execute();
     // cancella avviso
     $avviso_id = $avviso->getId();
-    $em->remove($avviso);
+    $this->em->remove($avviso);
     // ok: memorizza dati
-    $em->flush();
+    $this->em->flush();
     // log azione e notifica
     $notifica = (new Notifica())
       ->setOggettoNome('Avviso')
       ->setOggettoId($avviso_id)
       ->setAzione('D');
-    $em->persist($notifica);
+    $this->em->persist($notifica);
     $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),

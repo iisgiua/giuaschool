@@ -8,19 +8,12 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use App\Entity\Cattedra;
-use App\Entity\Classe;
-use App\Entity\Festivita;
-use App\Entity\Materia;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
@@ -28,12 +21,10 @@ use App\Util\StaffUtil;
  *
  * @author Antonello Dessì
  */
-class LezioniController extends AbstractController {
+class LezioniController extends BaseController {
 
   /**
    * Gestione delle lezioni
-   *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -42,14 +33,14 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function lezioniAction(RequestStack $reqstack) {
-    if (!$reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
+  public function lezioniAction() {
+    if (!$this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
       // scelta classe
       return $this->redirectToRoute('lezioni_classe');
     }
-    if ($reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')) {
+    if ($this->reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')) {
       // vai all'ultima pagina visitata
-      return $this->redirectToRoute($reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['name'], $reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['param']);
+      return $this->redirectToRoute($this->reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['name'], $this->reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['param']);
     } else {
       // vai al registro
       return $this->redirectToRoute('lezioni_registro_firme');
@@ -60,7 +51,6 @@ class LezioniController extends AbstractController {
    * Gestione della scelta delle classi
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    *
    * @return Response Pagina di risposta
    *
@@ -69,9 +59,9 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(Request $request, EntityManagerInterface $em) {
+  public function classeAction(Request $request) {
     // lista cattedre
-    $lista = $em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+    $lista = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->where('c.docente=:docente AND c.attiva=:attiva')
@@ -85,7 +75,7 @@ class LezioniController extends AbstractController {
       $cattedre[$c->getClasse()->getId()][] = $c;
     }
     // lista tutte le classi
-    $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
+    $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
       ->orderBy('cl.sede,cl.sezione,cl.anno', 'ASC')
       ->getQuery()
       ->getResult();
@@ -106,9 +96,7 @@ class LezioniController extends AbstractController {
    * Mostra gli argomenti e le attività delle lezioni svolte.
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    *
@@ -121,8 +109,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
-                                   $cattedra, $classe) {
+  public function argomentiAction(Request $request, RegistroUtil $reg, $cattedra, $classe) {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -130,17 +117,17 @@ class LezioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -153,12 +140,12 @@ class LezioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -174,7 +161,7 @@ class LezioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render($template, array(
       'pagina_titolo' => 'page.lezioni_argomenti',
@@ -188,8 +175,6 @@ class LezioniController extends AbstractController {
   /**
    * Mostra il riepilogo mensile delle lezioni svolte.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -203,8 +188,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiRiepilogoAction(EntityManagerInterface $em, RequestStack $reqstack,
-                                            RegistroUtil $reg, $cattedra, $data) {
+  public function argomentiRiepilogoAction(RegistroUtil $reg, $cattedra, $data) {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -213,9 +197,9 @@ class LezioniController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
+      if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -229,7 +213,7 @@ class LezioniController extends AbstractController {
     $formatter->setPattern('MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // lezione in propria cattedra: controlla esistenza
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -245,8 +229,8 @@ class LezioniController extends AbstractController {
     $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
-    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_fine);
-    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_inizio);
+    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_fine);
+    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_inizio);
     // recupera dati
     $dati = $reg->riepilogo($data_obj, $cattedra);
     // visualizza pagina
@@ -267,8 +251,6 @@ class LezioniController extends AbstractController {
    * Mostra le note disciplinari della classe.
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe
@@ -282,25 +264,24 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                              StaffUtil $staff, $cattedra, $classe) {
+  public function noteAction(Request $request, StaffUtil $staff, $cattedra, $classe) {
     // inizializza variabili
     $dati = null;
     $info = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -312,12 +293,12 @@ class LezioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -333,7 +314,7 @@ class LezioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/note.html.twig', array(
       'pagina_titolo' => 'page.lezioni_note',
@@ -347,8 +328,6 @@ class LezioniController extends AbstractController {
   /**
    * Crea automaticamente il programma svolto.
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    *
@@ -360,15 +339,14 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiProgrammaAction(EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
-                                            $cattedra) {
+  public function argomentiProgrammaAction(RegistroUtil $reg, $cattedra) {
     // inizializza
     $info = null;
     $dati = null;
     $dir = $this->getParameter('dir_tmp').'/';
     $nomefile = md5(uniqid()).'-'.rand(1,1000).'.docx';
     // controlla cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra || $cattedra->getMateria()->getTipo() == 'S') {
       // errore
@@ -396,7 +374,7 @@ class LezioniController extends AbstractController {
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $properties = $phpWord->getDocInfo();
-    $properties->setCreator($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'));
+    $properties->setCreator($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'));
     $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
     $properties->setDescription('');
     $properties->setSubject('');
@@ -443,14 +421,14 @@ class LezioniController extends AbstractController {
     $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText($reqstack->getSession()->get('/CONFIG/ISTITUTO/nome'),
+    $section->addText($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/nome'),
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText($reqstack->getSession()->get('/CONFIG/ISTITUTO/sede_0_citta'),
+    $section->addText($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/sede_0_citta'),
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);
-    $as = $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $section->addText('ANNO SCOLASTICO '.$as,
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));

@@ -1,9 +1,15 @@
 <?php
 
 return [
+  'fileCopy' => [
+    ['templates/PERSONALI/moduli/*', 'PERSONAL/data/moduli/'],
+  ],
   'fileDelete' => [
     'public/install/page_email.php',
-    'public/install/page_email_test.php'
+    'public/install/page_email_test.php',
+    'templates/PERSONALI/moduli/*',
+    'templates/PERSONALI/moduli/',
+    'templates/PERSONALI/',
   ],
   'sqlCommand' => [
     "DELETE FROM gs_menu_opzione;",
@@ -15,5 +21,7 @@ return [
     "",
     "",
     ""],
-  'envDelete' => []
+  'envDelete' => [
+    "LOCAL_PATH",
+  ]
 ];

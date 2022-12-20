@@ -8,41 +8,33 @@
 
 namespace App\Controller;
 
-use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
-use App\Form\RicercaType;
-use App\Form\DocenteType;
-use App\Form\ModuloType;
-use App\Form\ImportaCsvType;
+use App\Entity\Cattedra;
+use App\Entity\Docente;
+use App\Entity\Provisioning;
 use App\Form\CattedraType;
+use App\Form\DocenteType;
+use App\Form\ImportaCsvType;
+use App\Form\ModuloType;
+use App\Form\RicercaType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
-use App\Entity\Provisioning;
-use App\Entity\Cattedra;
-use App\Entity\Classe;
-use App\Entity\Docente;
-use App\Entity\Materia;
-use App\Entity\Orario;
-use App\Entity\ScansioneOraria;
-use App\Entity\Sede;
-use App\Entity\Staff;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -56,7 +48,6 @@ class DocentiController extends BaseController {
    * Importa docenti da file
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -66,15 +57,15 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, RequestStack $reqstack, CsvImporter $importer): Response {
+  public function importaAction(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
     $var_sessione = '/APP/FILE/docenti_importa';
-    $fs = new FileSystem();
+    $fs = new Filesystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -88,7 +79,7 @@ class DocentiController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
       $file = null;
-      foreach ($reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
+      foreach ($this->reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
@@ -108,7 +99,7 @@ class DocentiController extends BaseController {
       }
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
     }
     // visualizza pagina
     return $this->renderHtml('docenti', 'importa', $dati, $info, [$form->createView(),  'message.importa_docenti']);
@@ -118,8 +109,6 @@ class DocentiController extends BaseController {
    * Gestisce la modifica dei dati dei docenti
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -130,26 +119,25 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $lista_classi[] = -1;
     $label_classe = $trans->trans('label.nessuna_classe');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
@@ -162,13 +150,13 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // lista docenti
-    $dati = $em->getRepository('App\Entity\Docente')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Docente')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'modifica', $dati, $info, [$form->createView()]);
@@ -177,7 +165,6 @@ class DocentiController extends BaseController {
   /**
    * Abilitazione o disabilitazione dei docenti
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    * @param int $abilita Valore 1 per abilitare, valore 0 per disabilitare
    *
@@ -189,9 +176,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
+  public function abilitaAction($id, $abilita): Response {
     // controllo docente
-    $docente = $em->getRepository('App\Entity\Docente')->find($id);
+    $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,9 +190,9 @@ class DocentiController extends BaseController {
       ->setUtente($docente)
       ->setFunzione('sospendeUtente')
       ->setDati(['sospeso' => !$abilita]);
-    $em->persist($provisioning);
+    $this->em->persist($provisioning);
     // memorizza modifiche
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -216,7 +203,6 @@ class DocentiController extends BaseController {
    * Modifica dei dati di un docente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -228,11 +214,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function modificaEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $docente = $em->getRepository('App\Entity\Docente')->find($id);
+      $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
       if (!$docente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -244,7 +230,7 @@ class DocentiController extends BaseController {
       $docente = (new Docente())
         ->setAbilitato(true)
         ->setPassword('NOPASSWORD');
-      $em->persist($docente);
+      $this->em->persist($docente);
     }
     // form
     $form = $this->createForm(DocenteType::class, $docente, ['returnUrl' => $this->generateUrl('docenti_modifica')]);
@@ -257,7 +243,7 @@ class DocentiController extends BaseController {
           ->setUtente($docente)
           ->setFunzione('creaUtente')
           ->setDati(['password' => 'NOPASSWORD']);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($docente->getCognome() != $docente_old['cognome'] || $docente->getNome() != $docente_old['nome'] ||
                 $docente->getSesso() != $docente_old['sesso']) {
         // modifica dati docente
@@ -265,10 +251,10 @@ class DocentiController extends BaseController {
           ->setUtente($docente)
           ->setFunzione('modificaUtente')
           ->setDati([]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       }
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -282,9 +268,7 @@ class DocentiController extends BaseController {
    * Genera una nuova password e la invia all'utente docente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -301,12 +285,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $id, $tipo): Response {
+  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                                 LoggerInterface $logger, LogHandler $dblogger, $id, $tipo): Response {
     // controlla docente
-    $docente = $em->getRepository('App\Entity\Docente')->find($id);
+    $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -321,16 +304,16 @@ class DocentiController extends BaseController {
       ->setUtente($docente)
       ->setFunzione('passwordUtente')
       ->setDati(['password' => $docente->getPasswordNonCifrata()]);
-    $em->persist($provisioning);
+    $this->em->persist($provisioning);
     // memorizza su db
-    $em->flush();
+    $this->em->flush();
     // log azione
     $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
       'Username' => $docente->getUsername(),
       'Ruolo' => $docente->getRoles()[0],
       'ID' => $docente->getId()));
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(
@@ -344,9 +327,9 @@ class DocentiController extends BaseController {
     if ($tipo == 'E') {
       // invia per email
       $message = (new Email())
-        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($docente->getEmail())
-        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
@@ -379,7 +362,6 @@ class DocentiController extends BaseController {
    * Reset della funzione OTP per i docenti
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
    *
@@ -391,17 +373,16 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function resetAction(Request $request, EntityManagerInterface $em,
-                              LogHandler $dblogger, $id): Response {
+  public function resetAction(Request $request, LogHandler $dblogger, $id): Response {
     // controlla docente
-    $docente = $em->getRepository('App\Entity\Docente')->find($id);
+    $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // reset OTP
     $docente->setOtp(null);
-    $em->flush();
+    $this->em->flush();
     // log azione
     $dblogger->logAzione('SICUREZZA', 'Reset OTP', array(
       'Username' => $docente->getUsername(),
@@ -417,8 +398,6 @@ class DocentiController extends BaseController {
    * Gestione dell'assegnamento del ruolo di staff
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -430,21 +409,20 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                              $pagina): Response {
+  public function staffAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_staff/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_staff/cognome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_staff/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'utenti',
@@ -455,12 +433,12 @@ class DocentiController extends BaseController {
       $criteri['nome'] = trim($form->get('nome')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
     }
     // lista staff
-    $dati = $em->getRepository('App\Entity\Staff')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Staff')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'staff', $dati, $info, [$form->createView()]);
@@ -470,7 +448,6 @@ class DocentiController extends BaseController {
    * Modifica dei dati di configurazione dello staff
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -482,11 +459,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function staffEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $staff = $em->getRepository('App\Entity\Staff')->find($id);
+      $staff = $this->em->getRepository('App\Entity\Staff')->find($id);
       if (!$staff) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -505,7 +482,7 @@ class DocentiController extends BaseController {
       if ($staff) {
         // modifica
         $staff->setSede($form->get('sede')->getData());
-        $em->flush();
+        $this->em->flush();
       } else {
         // nuovo
         $docente_id = $form->get('docente')->getData()->getId();
@@ -513,7 +490,7 @@ class DocentiController extends BaseController {
         // cambia ruolo in staff
         $sql = "UPDATE gs_utente SET modificato=NOW(),ruolo=:ruolo,sede_id=:sede WHERE id=:id";
         $params = array('ruolo' => 'STA', 'sede' => $sede_id, 'id' => $docente_id);
-        $em->getConnection()->prepare($sql)->execute($params);
+        $this->em->getConnection()->prepare($sql)->execute($params);
       }
       // messaggio
       $this->addFlash('success', 'message.update_ok');
@@ -527,7 +504,6 @@ class DocentiController extends BaseController {
   /**
    * Cancellazione del componente dello staff
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -537,9 +513,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffDeleteAction(EntityManagerInterface $em, $id): Response {
+  public function staffDeleteAction($id): Response {
     // controlla utente staff
-    $staff = $em->getRepository('App\Entity\Staff')->find($id);
+    $staff = $this->em->getRepository('App\Entity\Staff')->find($id);
     if (!$staff) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -547,7 +523,7 @@ class DocentiController extends BaseController {
     // toglie il ruolo di staff
     $sql = "UPDATE gs_utente SET modificato=NOW(),ruolo=:ruolo,sede_id=:sede WHERE id=:id";
     $params = array('ruolo' => 'DOC', 'sede' => null, 'id' => $staff->getId());
-    $em->getConnection()->prepare($sql)->execute($params);
+    $this->em->getConnection()->prepare($sql)->execute($params);
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -558,8 +534,6 @@ class DocentiController extends BaseController {
    * Gestione dell'assegnamento del ruolo di coordinatore
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -571,26 +545,25 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                     $pagina): Response {
+  public function coordinatoriAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
       'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, null]]);
     $form->handleRequest($request);
@@ -601,13 +574,13 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // lista coordinatori
-    $dati = $em->getRepository('App\Entity\Classe')->cercaCoordinatori($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Classe')->cercaCoordinatori($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'coordinatori', $dati, $info, [$form->createView()]);
@@ -617,7 +590,6 @@ class DocentiController extends BaseController {
    * Modifica dei dati di configurazione del coordinatore di classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
@@ -629,11 +601,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function coordinatoriEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App\Entity\Classe')->find($id);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -661,7 +633,7 @@ class DocentiController extends BaseController {
           ->setUtente($docente)
           ->setFunzione('aggiungeCoordinatore')
           ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId()]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($docente->getId() != $docente_old || $classe->getId() != $classe_old) {
         // modifica dati docente
         $provisioning = (new Provisioning())
@@ -669,10 +641,10 @@ class DocentiController extends BaseController {
           ->setFunzione('modificaCoordinatore')
           ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId(),
             'docente_prec' => $docente_old, 'classe_prec' => $classe_old]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       }
       // memorizza
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -685,7 +657,6 @@ class DocentiController extends BaseController {
   /**
    * Gestione della cancellazione del ruolo di coordinatore
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
@@ -695,9 +666,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriDeleteAction(EntityManagerInterface $em, $id) {
+  public function coordinatoriDeleteAction($id) {
     // controlla classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($id);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -710,9 +681,9 @@ class DocentiController extends BaseController {
       ->setUtente($docente_old)
       ->setFunzione('rimuoveCoordinatore')
       ->setDati(['docente' => $docente_old->getId(), 'classe' => $classe->getId()]);
-    $em->persist($provisioning);
+    $this->em->persist($provisioning);
     // memorizza
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -723,8 +694,6 @@ class DocentiController extends BaseController {
    * Gestione dell'assegnamento del ruolo di segretario
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -736,26 +705,25 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                  $pagina): Response {
+  public function segretariAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/classe');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/cognome', '');
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
       'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, null]]);
     $form->handleRequest($request);
@@ -766,13 +734,13 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
     }
     // lista segretari
-    $dati = $em->getRepository('App\Entity\Classe')->cercaSegretari($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Classe')->cercaSegretari($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'segretari', $dati, $info, [$form->createView()]);
@@ -782,7 +750,6 @@ class DocentiController extends BaseController {
    * Modifica dei dati di configurazione del segretario di classe
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
@@ -794,11 +761,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function segretariEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App\Entity\Classe')->find($id);
+      $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -826,7 +793,7 @@ class DocentiController extends BaseController {
           ->setUtente($docente)
           ->setFunzione('aggiungeCoordinatore')
           ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId()]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       } elseif ($docente->getId() != $docente_old || $classe->getId() != $classe_old) {
         // modifica dati docente
         $provisioning = (new Provisioning())
@@ -834,10 +801,10 @@ class DocentiController extends BaseController {
           ->setFunzione('modificaCoordinatore')
           ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId(),
             'docente_prec' => $docente_old, 'classe_prec' => $classe_old]);
-        $em->persist($provisioning);
+        $this->em->persist($provisioning);
       }
       // memorizza
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -850,7 +817,6 @@ class DocentiController extends BaseController {
   /**
    * Gestione della cancellazione del ruolo di segretario
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -861,9 +827,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariDeleteAction(EntityManagerInterface $em, $id) {
+  public function segretariDeleteAction($id) {
     // controlla classe
-    $classe = $em->getRepository('App\Entity\Classe')->find($id);
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -876,9 +842,9 @@ class DocentiController extends BaseController {
       ->setUtente($docente_old)
       ->setFunzione('rimuoveCoordinatore')
       ->setDati(['docente' => $docente_old->getId(), 'classe' => $classe->getId()]);
-    $em->persist($provisioning);
+    $this->em->persist($provisioning);
     // memorizza
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -889,8 +855,6 @@ class DocentiController extends BaseController {
    * Gestisce la modifica delle cattedre dei docenti
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @Route("/docenti/cattedre/{pagina}", name="docenti_cattedre",
@@ -900,25 +864,24 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 $pagina): Response {
+  public function cattedreAction(Request $request, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/classe');
-    $criteri['materia'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/materia');
-    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/docente');
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
-    $materia = ($criteri['materia'] > 0 ? $em->getRepository('App\Entity\Materia')->find($criteri['materia']) : null);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : null);
+    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/classe');
+    $criteri['materia'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/materia');
+    $criteri['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/docente');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $materia = ($criteri['materia'] > 0 ? $this->em->getRepository('App\Entity\Materia')->find($criteri['materia']) : null);
+    $docente = ($criteri['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($criteri['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'cattedre',
@@ -930,13 +893,13 @@ class DocentiController extends BaseController {
       $criteri['materia'] = ($form->get('materia')->getData() ? $form->get('materia')->getData()->getId() : null);
       $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : null);
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/materia', $criteri['materia']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/docente', $criteri['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/materia', $criteri['materia']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/docente', $criteri['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // lista cattedre
-    $dati = $em->getRepository('App\Entity\Cattedra')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Cattedra')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'cattedre', $dati, $info, [$form->createView()]);
@@ -946,7 +909,6 @@ class DocentiController extends BaseController {
    * Crea o modifica una cattedra di un docente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $id ID della cattedra
    *
@@ -957,12 +919,11 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEditAction(Request $request, EntityManagerInterface $em,
-                                     TranslatorInterface $trans, $id): Response {
+  public function cattedreEditAction(Request $request, TranslatorInterface $trans, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $cattedra = $em->getRepository('App\Entity\Cattedra')->find($id);
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($id);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -973,7 +934,7 @@ class DocentiController extends BaseController {
       // azione add
       $cattedra = (new Cattedra())
         ->setAttiva(true);
-      $em->persist($cattedra);
+      $this->em->persist($cattedra);
     }
     // form
     $form = $this->createForm(CattedraType::class, $cattedra, ['returnUrl' => $this->generateUrl('docenti_cattedre')]);
@@ -991,7 +952,7 @@ class DocentiController extends BaseController {
       }
       if ($id == 0) {
         // controlla esistenza di cattedra
-        $lista = $em->getRepository('App\Entity\Cattedra')->findBy(array(
+        $lista = $this->em->getRepository('App\Entity\Cattedra')->findBy(array(
           'docente' => $cattedra->getDocente(),
           'classe' => $cattedra->getClasse(),
           'materia' => $cattedra->getMateria(),
@@ -1003,7 +964,7 @@ class DocentiController extends BaseController {
       }
       if ($form->isValid()) {
         // memorizza dati
-        $em->flush();
+        $this->em->flush();
         // provisioning
         if (!$id) {
           // crea cattedra
@@ -1011,7 +972,7 @@ class DocentiController extends BaseController {
             ->setUtente($cattedra->getDocente())
             ->setFunzione('aggiungeCattedra')
             ->setDati(['cattedra' => $cattedra->getId()]);
-          $em->persist($provisioning);
+          $this->em->persist($provisioning);
         } elseif ($cattedra->getDocente()->getId() != $cattedra_old['docente'] ||
                   $cattedra->getClasse()->getId() != $cattedra_old['classe'] ||
                   $cattedra->getMateria()->getId() != $cattedra_old['materia']) {
@@ -1021,9 +982,9 @@ class DocentiController extends BaseController {
             ->setFunzione('modificaCattedra')
             ->setDati(['cattedra' => $cattedra->getId(), 'docente' => $cattedra_old['docente'],
               'classe' => $cattedra_old['classe'], 'materia' => $cattedra_old['materia']]);
-          $em->persist($provisioning);
+          $this->em->persist($provisioning);
         }
-        $em->flush();
+        $this->em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -1037,7 +998,6 @@ class DocentiController extends BaseController {
   /**
    * Abilitazione o disabilitazione delle cattedre
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID della cattedra
    * @param int $abilita Valore 1 per abilitare, valore 0 per disabilitare
    *
@@ -1049,9 +1009,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEnableAction(EntityManagerInterface $em, $id, $abilita): Response {
+  public function cattedreEnableAction($id, $abilita): Response {
     // controllo cattedra
-    $cattedra = $em->getRepository('App\Entity\Cattedra')->find($id);
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($id);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1065,7 +1025,7 @@ class DocentiController extends BaseController {
         ->setUtente($cattedra->getDocente())
         ->setFunzione('aggiungeCattedra')
         ->setDati(['cattedra' => $cattedra->getId()]);
-      $em->persist($provisioning);
+      $this->em->persist($provisioning);
     } else {
       // rimuove cattedra
       $provisioning = (new Provisioning())
@@ -1073,10 +1033,10 @@ class DocentiController extends BaseController {
         ->setFunzione('rimuoveCattedra')
         ->setDati(['docente' => $cattedra->getDocente()->getId(), 'classe' => $cattedra->getClasse()->getId(),
           'materia' => $cattedra->getMateria()->getId()]);
-      $em->persist($provisioning);
+      $this->em->persist($provisioning);
     }
     // memorizza dati
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -1211,9 +1171,9 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesDeleteAction(EntityManagerInterface $em, $id): Response {
+  public function responsabiliBesDeleteAction($id): Response {
     // controlla utente
-    $docente = $em->getRepository('App\Entity\Docente')->find($id);
+    $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1228,6 +1188,5 @@ class DocentiController extends BaseController {
     // redirezione
     return $this->redirectToRoute('docenti_responsabiliBes');
   }
-
 
 }

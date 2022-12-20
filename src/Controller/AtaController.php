@@ -8,31 +8,28 @@
 
 namespace App\Controller;
 
-use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
+use App\Entity\Ata;
+use App\Form\AtaType;
+use App\Form\ImportaCsvType;
+use App\Form\RicercaType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
-use App\Form\AtaType;
-use App\Form\ImportaCsvType;
-use App\Form\RicercaType;
-use App\Entity\Ata;
-use App\Entity\Sede;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -46,7 +43,6 @@ class AtaController extends BaseController {
    * Importa ATA da file
    *
    * @param Request $request Pagina richiesta
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -56,15 +52,15 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, RequestStack $reqstack, CsvImporter $importer): Response {
+  public function importaAction(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
     $var_sessione = '/APP/FILE/ata_importa';
-    $fs = new FileSystem();
+    $fs = new Filesystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -78,14 +74,14 @@ class AtaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
       $file = null;
-      foreach ($reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
+      foreach ($this->reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
       $dati = $importer->importaAta($file, $form);
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione.'/file');
+      $this->reqstack->getSession()->remove($var_sessione.'/file');
     }
     // visualizza pagina
     return $this->renderHtml('ata', 'importa', $dati, $info, [$form->createView(),  'message.importa_ata']);
@@ -95,8 +91,6 @@ class AtaController extends BaseController {
    * Gestisce la modifica dei dati del personale ATA
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista degli utenti
    *
@@ -109,26 +103,25 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
-    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
-    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
+    $criteri['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/pagina', 1);
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_sedi = $em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
+    $lista_sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
     $lista_sedi[] = -1;
     $label_sede = $trans->trans('label.nessuna_sede');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'ata',
@@ -141,13 +134,13 @@ class AtaController extends BaseController {
       $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
         intval($form->get('sede')->getData()));
       $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
-      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
-      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
-      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App\Entity\Ata')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Ata')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);
@@ -156,7 +149,6 @@ class AtaController extends BaseController {
   /**
    * Abilitazione o disabilitazione degli utenti ATA
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    * @param int $abilita Valore 1 per abilitare, valore 0 per disabilitare
    *
@@ -168,16 +160,16 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
+  public function abilitaAction($id, $abilita): Response {
     // controlla ata
-    $ata = $em->getRepository('App\Entity\Ata')->find($id);
+    $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // abilita o disabilita
     $ata->setAbilitato($abilita == 1);
-    $em->flush();
+    $this->em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
@@ -188,7 +180,6 @@ class AtaController extends BaseController {
    * Modifica dei dati di un utente ATA
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -200,11 +191,11 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id): Response {
+  public function modificaEditAction(Request $request, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $ata = $em->getRepository('App\Entity\Ata')->find($id);
+      $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
       if (!$ata) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -214,14 +205,14 @@ class AtaController extends BaseController {
       $ata = (new Ata())
         ->setAbilitato(true)
         ->setPassword('NOPASSWORD');
-      $em->persist($ata);
+      $this->em->persist($ata);
     }
     // form
     $form = $this->createForm(AtaType::class, $ata, ['returnUrl' => $this->generateUrl('ata_modifica')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
-      $em->flush();
+      $this->em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect
@@ -235,9 +226,7 @@ class AtaController extends BaseController {
    * Genera una nuova password e la invia all'utente ATA
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -254,12 +243,11 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $id, $tipo): Response {
+  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                                 LoggerInterface $logger, LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
-    $ata = $em->getRepository('App\Entity\Ata')->find($id);
+    $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -270,14 +258,14 @@ class AtaController extends BaseController {
     $pswd = $hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($pswd);
     // memorizza su db
-    $em->flush();
+    $this->em->flush();
     // log azione
     $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
       'Username' => $ata->getUsername(),
       'Ruolo' => $ata->getRoles()[0],
       'ID' => $ata->getId()));
     // crea documento PDF
-    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_ata.html.twig', array(
@@ -292,9 +280,9 @@ class AtaController extends BaseController {
     if ($tipo == 'E') {
       // invia per email
       $message = (new Email())
-        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($ata->getEmail())
-        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');

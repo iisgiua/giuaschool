@@ -10,7 +10,6 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -62,8 +61,6 @@ class BaseController extends AbstractController {
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[],
                                 array $info=[], array $form=[]): Response {
-    $fs = new Filesystem();
-    $path = $this->getParameter('kernel.project_dir').'/templates/PERSONALI/';
     list($azionePrincipale) = explode('_', $azione);
     $tema = $this->reqstack->getSession()->get('/APP/APP/tema', '');
     $breadcrumb = null;
@@ -72,13 +69,10 @@ class BaseController extends AbstractController {
       $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azionePrincipale,
         $this->getUser(), $this->reqstack);
     }
-    // controlla template personalizzato
+    // imposta template
     $template = ($tema ? $tema.'/' : '').$categoria.'/'.$azione.'.html.twig';
-    if ($fs->exists($path.$template)) {
-      $template = 'PERSONALI/'.$template;
-    }
     // restituisce vista
-    return $this->render($template, [
+    return parent::render($template, [
       'pagina_titolo' => 'page.'.$categoria.'.'.$azionePrincipale,
       'titolo' => 'title.'.$categoria.'.'.$azione,
       'breadcrumb' => $breadcrumb,
