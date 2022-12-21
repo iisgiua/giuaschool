@@ -123,7 +123,6 @@ RUN \
   rm -f -r tests/*.php tests/Behat/ tests/data/ tests/features/ tests/temp/ tests/UnitTest/ && \
   rm -f -r var/cache/* var/log/* var/sessions/* && \
   rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml && \
-  rm -f -r ./*/.gitkeep ./*/*/.gitkeep ./*/*/*/.gitkeep && \
 # adjust file permissions
   chown -R www-data:www-data .
 
