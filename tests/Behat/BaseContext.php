@@ -215,6 +215,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @BeforeScenario
    */
   public function beforeScenario(BeforeScenarioScope $scope) {
+    $fs = new Filesystem();
     $this->debug = false;
     $this->stepper = false;
     if (in_array('debug', $scope->getFeature()->getTags()) ||
@@ -239,7 +240,6 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
     }
     // cancella vecchi screenshots
-    $fs = new Filesystem();
     $finder = new Finder();
     $finder->in(dirname(__DIR__).'/temp')->files()->name('*.png');
     foreach ($finder as $fl) {
