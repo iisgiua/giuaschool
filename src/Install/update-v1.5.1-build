@@ -11,6 +11,7 @@ return [
     'templates/PERSONALI/moduli/',
     'templates/PERSONALI/*',
     'templates/PERSONALI/',
+    'src/Install/update-build',
   ],
   'sqlCommand' => [
     ["DELETE FROM gs_menu_opzione;", ""],

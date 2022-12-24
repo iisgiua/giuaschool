@@ -227,8 +227,17 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // imposta modalità debug
       $this->stepper = true;
     }
-    // database iniziale
-    $this->initDatabase($scope->getFeature()->getFile());
+    if (!in_array('noReset', $scope->getFeature()->getTags()) &&
+        !in_array('noReset', $scope->getScenario()->getTags())) {
+      // database iniziale
+      $this->initDatabase($scope->getFeature()->getFile());
+      // cancella file caricati
+      $finder = new Finder();
+      $finder->in(dirname(dirname(__DIR__)).'/FILES')->files();
+      foreach ($finder as $fl) {
+        $fs->remove($fl);
+      }
+    }
     // cancella vecchi screenshots
     $fs = new Filesystem();
     $finder = new Finder();
@@ -236,12 +245,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     foreach ($finder as $fl) {
       $fs->remove($fl);
     }
-    // cancella file caricati
-    $finder = new Finder();
-    $finder->in(dirname(dirname(__DIR__)).'/FILES')->files();
-    foreach ($finder as $fl) {
-      $fs->remove($fl);
-    }
+    // log scenario
     $this->logDebug('Scenario inizio ['.$scope->getScenario()->getLine().']: '.$scope->getScenario()->getTitle());
   }
 
@@ -255,10 +259,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
   public function afterScenario(AfterScenarioScope $scope) {
     $this->logDebug('Scenario fine ['.$scope->getScenario()->getLine().']');
     $this->logWrite();
-    $dir = $this->kernel->getProjectDir();
-    foreach ($this->files as $fl) {
-      if (file_exists($dir.'/'.$fl)) {
-        unlink($dir.'/'.$fl);
+    if (!in_array('noReset', $scope->getFeature()->getTags()) &&
+        !in_array('noReset', $scope->getScenario()->getTags())) {
+      // cancella file usati nei test
+      $dir = $this->kernel->getProjectDir();
+      foreach ($this->files as $fl) {
+        if (file_exists($dir.'/'.$fl)) {
+          unlink($dir.'/'.$fl);
+        }
       }
     }
   }

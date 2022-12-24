@@ -958,10 +958,4 @@ class BrowserContext extends BaseContext {
     return $row;
   }
 
-public function test($p):self {
-  $this->logDebug($p);
-  $this->logDebug("SIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
-  return $this;
-}
-
 }
