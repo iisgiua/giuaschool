@@ -1128,6 +1128,8 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function manutenzioneCacheAction(TranslatorInterface $trans, KernelInterface $kernel): Response {
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
     // comandi per la pulizia della cache del database
     $commands = [
       new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),

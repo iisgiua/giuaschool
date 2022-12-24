@@ -12,7 +12,6 @@ namespace App\Install;
 /**
  * Updater - Gestione procedure di aggiornamento dell'applicazione
  *
- *
  * @author Antonello Dessì
  */
 class Updater {
@@ -110,7 +109,7 @@ class Updater {
     } catch (\Exception $e) {
       // visualizza pagina di errore
       $page['version'] = $this->sys['version'];
-      $page['step'] = 'ERRORE';
+      $page['step'] = $step.' - Errore';
       $page['title'] = 'Si è verificato un errore';
       $page['danger'] = $e->getMessage();
       $page['text'] = "Correggi l'errore e riprova.";
@@ -222,14 +221,26 @@ class Updater {
       // errore di sicurezza
       throw new \Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
-    // legge versione corrente
+    // controlla versione
     $version = $this->getParameter('versione');
     if (empty($version) || version_compare($version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
       throw new \Exception('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
-    } elseif (version_compare($version, $this->sys['version'], '>=')) {
+    } elseif (substr($this->sys['version'], -6) != '-build' &&
+              version_compare($version, $this->sys['version'], '>=')) {
       // sistema già aggiornato
       throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+    } elseif (substr($this->sys['version'], -6) == '-build' &&
+              version_compare($version, substr($this->sys['version'], 0, -6), '>')) {
+      // sistema già aggiornato
+      throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+    }
+    // converte nomi file per compatibilità
+    foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
+      preg_match('!/giuaschool-(release|update)-v([\d\.]+)\.zip$!', $file, $matches);
+      $newFile = $this->projectPath.'/src/Install/v'.$matches[2].
+        ($matches[1] == 'update' ? '-build' : '').'.zip';
+      rename($file, $newFile);
     }
   }
 
@@ -328,16 +339,26 @@ class Updater {
     $oldVersion = $this->getParameter('versione');
     // lista delle versioni presenti
     $updates = [];
-    foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
-      preg_match('|/update-v([^/]+$)|', $file, $matches);
-      $newVersion = $matches[1];
-      if (version_compare($newVersion, $oldVersion, '>') &&
-          version_compare($newVersion, $this->sys['version'], '<=')) {
-        $updates[] = [$file, $newVersion];
+    if ($this->sys['version'] == $oldVersion.'-build') {
+      // aggiornamento a nuova build della versione attuale
+      $file = $this->projectPath.'/src/Install/update-v'.$this->sys['version'];
+      if (file_exists($file)) {
+        $updates[] = [$file, $this->sys['version']];
       }
+    } elseif (substr($this->sys['version'], -6) != '-build') {
+      // aggiornamento di versione
+      foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
+        preg_match('|/update-v([^/]+$)|', $file, $matches);
+        $newVersion = $matches[1];
+        if (substr($newVersion, -6) != '-build' &&
+            version_compare($newVersion, $oldVersion, '>') &&
+            version_compare($newVersion, $this->sys['version'], '<=')) {
+          $updates[] = [$file, $newVersion];
+        }
+      }
+      // ordina versioni presenti
+      uasort($updates, fn($a, $b) => version_compare($a[1], $b[1]));
     }
-    // ordina versioni presenti
-    uasort($updates, fn($a, $b) => version_compare($a[1], $b[1]));
     // legge informazioni sugli aggiornamenti
     $updateInfo = [
       'fileCopy' => [],
@@ -347,10 +368,24 @@ class Updater {
       'envDelete' => []];
     foreach ($updates as $update) {
       $info = include($update[0]);
+      // comandi SQL e controllo: in array separati o in unico array
+      if (empty($info['sqlCheck'])) {
+        // separa in due array distinti
+        $sqlCommand = [];
+        $sqlCheck = [];
+        foreach ($info['sqlCommand'] as $sql) {
+          $sqlCommand[] = $sql[0];
+          $sqlCheck[] = $sql[1];
+        }
+      } else {
+        // array separati
+        $sqlCommand = $info['sqlCommand'];
+        $sqlCheck = $info['sqlCheck'];
+      }
       $updateInfo['fileCopy'] = array_merge($updateInfo['fileCopy'], $info['fileCopy']);
       $updateInfo['fileDelete'] = array_merge($updateInfo['fileDelete'], $info['fileDelete']);
-      $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $info['sqlCommand']);
-      $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $info['sqlCheck']);
+      $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $sqlCommand);
+      $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $sqlCheck);
       $updateInfo['envDelete'] = array_merge($updateInfo['envDelete'], $info['envDelete']);
     }
     // restituisce dati
@@ -464,7 +499,9 @@ class Updater {
       foreach (glob($this->projectPath.'/'.$delete, GLOB_MARK) as $file) {
         if (substr($file, -1) == '/') {
           // rimuove directory
-          $success = rmdir($file);
+          if (substr($file, -3) != '/./' && substr($file, -4) != '/../') {
+            $success = rmdir($file);
+          }
         } else {
           // cancella file
           $success = unlink($file);
@@ -477,9 +514,9 @@ class Updater {
     }
     // visualizza pagina
     $page['version'] = $this->sys['version'];
-    $page['step'] = $step.' - Rimozione file';
-    $page['title'] = 'Rimozione dei file e delle directory non necessari';
-    $page['success'] = 'I file e le directory sono state rimosse correttamente.';
+    $page['step'] = $step.' - Aggiornamento file';
+    $page['title'] = 'Aggiornamento dei file e delle directory';
+    $page['success'] = 'I file e le directory sono stati aggiornati correttamente.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
     include($this->publicPath.'/install/update_page.php');
   }
@@ -568,24 +605,19 @@ class Updater {
     // cancella contenuto delle sessioni
     $this->removeFiles($this->projectPath.'/var/sessions');
     // cancella vecchi file di installazione
-    $oldVersion = $this->getParameter('versione');
+    $newVersion = (substr($this->sys['version'], -6) == '-build') ? substr($this->sys['version'], 0, -6) :
+      $this->sys['version'];
     foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
-      preg_match('|/update-v([^/]+)$|', $file, $matches);
-      if (version_compare($matches[1], $this->sys['version'], '<')) {
+      preg_match('|/update-v([\d\.]+)(-build)?$|', $file, $matches);
+      if (version_compare($matches[1], $newVersion, '<')) {
         unlink($file);
       }
     }
     foreach (glob($this->projectPath.'/src/Install/v*.zip') as $file) {
-      preg_match('|/v([\d\.]+)\.zip$|', $file, $matches);
-      if (version_compare($matches[1], $this->sys['version'], '<')) {
-        unlink($file);
-      }
+      unlink($file);
     }
     foreach (glob($this->projectPath.'/src/Install/v*.ok') as $file) {
-      preg_match('|/v([\d\.]+)\.ok$|', $file, $matches);
-      if (version_compare($matches[1], $this->sys['version'], '<')) {
-        unlink($file);
-      }
+      unlink($file);
     }
     // visualizza pagina
     $page['version'] = $this->sys['version'];
@@ -603,7 +635,9 @@ class Updater {
    */
   private function end(int $step) {
     // imposta la nuova versione
-    $this->setParameter('versione', $this->sys['version']);
+    if (substr($this->sys['version'], -6) != '-build') {
+      $this->setParameter('versione', $this->sys['version']);
+    }
     // toglie la modalità manutenzione (se presente)
     $this->setParameter('manutenzione_inizio', '');
     $this->setParameter('manutenzione_fine', '');
