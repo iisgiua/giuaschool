@@ -262,6 +262,19 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la pagina attuale sia quella indicata dalla url
+   *
+   *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}} o {{@nome}}
+   *
+   * @Then vedi la url :testoParam
+   */
+  public function vediUrl($testoParam): void {
+    $this->assertPageStatus(200);
+    $this->assertPageUrl($this->getMinkParameter('base_url').$testoParam);
+    $this->log('SHOW', 'Pagina: '.$testoParam);
+  }
+
+  /**
    * Controlla che la pagina attuale sia quella indicata
    *  $error: codice di errore
    *

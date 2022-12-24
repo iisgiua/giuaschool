@@ -12,6 +12,7 @@ Funzionalità: Controlla i passi successivi della procedura di aggiornamento del
 
 Schema dello scenario: esegue i passi successivi della procedura di aggiornamento
   Quando vai alla url "/install/update.php?step=<passo>&token=test"
+  Allora vedi la url "/install/update.php"
   Allora la sezione "main .alert-success" contiene "<messaggio>"
   Esempi:
     | passo | messaggio       |

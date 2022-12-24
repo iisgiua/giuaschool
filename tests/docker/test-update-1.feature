@@ -12,4 +12,5 @@ Funzionalità: Controlla il passo iniziale della procedura di aggiornamento del 
 
 Scenario: esegue il passo 1 della procedura di aggiornamento
   Quando vai alla url "/install/update.php?step=1&token=test"
-  Allora la sezione "main .alert-success" contiene "/correttamente/"
+  Allora vedi la url "/install/update.php"
+  E la sezione "main .alert-success" contiene "/correttamente/"
