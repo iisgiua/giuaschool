@@ -245,7 +245,9 @@ class BrowserContext extends BaseContext {
    *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
    * @Then vedi pagina :pagina
+   * @Then vedi la pagina :pagina
    * @Then vedi pagina :pagina con parametri:
+   * @Then vedi la pagina :pagina con parametri:
    */
   public function vediPagina($pagina, TableNode $tabella=null): void {
     $this->assertPageStatus(200);
@@ -266,6 +268,7 @@ class BrowserContext extends BaseContext {
    *
    *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}} o {{@nome}}
    *
+   * @Then vedi url :testoParam
    * @Then vedi la url :testoParam
    */
   public function vediUrl($testoParam): void {

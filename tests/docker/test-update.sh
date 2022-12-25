@@ -10,14 +10,17 @@ google-chrome --headless --disable-gpu --disable-software-rasterizer --disable-d
 cd src/Install
 wget https://github.com/iisgiua/giuaschool/releases/download/update-v$1/giuaschool-update-v$1.zip
 cd ../..
-unzip -qo src/Install/giuaschool-update-v$1.zip src/Install/* 2> /dev/null
-unzip -qo src/Install/giuaschool-update-v$1.zip public/install/* 2> /dev/null
+unzip -qo src/Install/giuaschool-update-v$1.zip "src/Install/*" 2> /dev/null
+unzip -qo src/Install/giuaschool-update-v$1.zip "public/install/*" 2> /dev/null
 wget -O tests/Behat/BaseContext.php https://github.com/iisgiua/giuaschool/raw/master/tests/Behat/BaseContext.php
 wget -O tests/Behat/BrowserContext.php https://github.com/iisgiua/giuaschool/raw/master/tests/Behat/BrowserContext.php
 wget -O tests/features/test-update-1.feature https://github.com/iisgiua/giuaschool/raw/master/tests/docker/test-update-1.feature
 wget -O tests/features/test-update-2.feature https://github.com/iisgiua/giuaschool/raw/master/tests/docker/test-update-2.feature
-wget -O tests/features/Url.feature https://github.com/iisgiua/giuaschool/raw/master/tests/features/Url.feature
+wget -O tests/features/test-update-3.feature https://github.com/iisgiua/giuaschool/raw/master/tests/docker/test-update-3.feature
 chown -R www-data:www-data src/* tests/*
+rm -r var/cache/*
+echo "UPDATE gs_configurazione SET valore='$1' WHERE parametro='versione';" > .gs-updating
+mysql -uroot -proot giuaschool < .gs-updating
 echo "token='test'" > .gs-updating
 echo "version='$1-build'" >> .gs-updating
 
@@ -28,6 +31,7 @@ if [ $retval -ne 0 ]; then
   exit 1
 fi
 composer -q install --no-progress --no-scripts
+rm -r var/cache/*
 
 # Test other steps
 php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-2.feature --stop-on-failure -f progress
@@ -37,5 +41,4 @@ if [ $retval -ne 0 ]; then
 fi
 
 # Smoke test
-php bin/console app:alice:load tests/features/TestFixtures.yml --dump tests/temp/TestFixtures
-php -d memory_limit=-1 vendor/bin/behat tests/features/Url.feature --stop-on-failure -f progress
+php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-3.feature --stop-on-failure -f progress
