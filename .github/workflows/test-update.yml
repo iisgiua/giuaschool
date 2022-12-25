@@ -23,4 +23,5 @@ jobs:
 
       - name: Test update procedure
         run: |
-          docker run --rm --name gs_update --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 ghcr.io/iisgiua/giuaschool-test:${{ steps.latest-release.outputs.tag_name:1 }} tests/docker/test-update.sh ${{ steps.latest-release.outputs.tag_name:1 }}
+          VERSIONE="${{ steps.latest-release.outputs.tag_name }}"
+          docker run --rm --name gs_update --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 ghcr.io/iisgiua/giuaschool-test:${VERSIONE:1} tests/docker/test-update.sh ${VERSIONE:1}
