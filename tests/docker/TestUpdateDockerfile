@@ -1,0 +1,33 @@
+# load base image
+ARG VERSION
+FROM ghcr.io/iisgiua/giuaschool-test:$VERSION
+
+# version to update (it must be declared again)
+ARG VERSION
+
+# base directory
+WORKDIR /var/www/giuaschool
+
+# update files needed for testing
+COPY --chown=www-data:www-data src/Install/ ./src/Install/
+COPY --chown=www-data:www-data public/install/ ./public/install/
+COPY --chown=www-data:www-data tests/ ./tests/
+
+# set test environment
+RUN \
+  wget -O src/Install/giuaschool-update-v$VERSION.zip https://github.com/iisgiua/giuaschool/releases/download/update-v$VERSION/giuaschool-update-v$VERSION.zip && \
+  cp tests/docker/*.feature tests/features/ && \
+  cp tests/docker/*.yml tests/features/ && \
+  rm -r var/cache/* && \
+  chown -R www-data:www-data src/* tests/* && \
+  echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
+  service mariadb start && \
+  mysql -uroot -proot giuaschool < .gs-updating && \
+  echo "token='test'" > .gs-updating && \
+  echo "version='$VERSION-build'" >> .gs-updating
+
+# open https port
+EXPOSE 443
+
+# default command
+CMD tests/docker/test-update.sh

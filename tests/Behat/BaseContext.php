@@ -1129,7 +1129,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // stringa di testo
       $regex = '/'.($search ? preg_quote($search, '/') : '^$').'/ui';
     }
-    // restiruisce valore di espressione regolare
+    // restituisce valore di espressione regolare
     return $regex;
   }
 
