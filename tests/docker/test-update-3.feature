@@ -141,20 +141,8 @@ Schema dello scenario: Inserisce e memorizza le proposte di voto
   Esempi:
     | periodo | tipo_materia | posizioni | voto          |
     | P       | N            | -2        | 4             |
-    | P       | N            | 0         | 6             |
-    | P       | N            | 2         | 8             |
-    | P       | R            | -1        | Mediocre      |
     | P       | R            | 0         | Sufficiente   |
-    | P       | R            | 1         | Discreto      |
-    | P       | E            | -2        | 4             |
-    | P       | E            | 0         | 6             |
     | P       | E            | 2         | 8             |
-    | F       | N            | -2        | 4             |
-    | F       | N            | 0         | 6             |
     | F       | N            | 2         | 8             |
-    | F       | R            | -1        | Mediocre      |
-    | F       | R            | 0         | Sufficiente   |
     | F       | R            | 1         | Discreto      |
     | F       | E            | -2        | 4             |
-    | F       | E            | 0         | 6             |
-    | F       | E            | 2         | 8             |
