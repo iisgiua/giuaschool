@@ -2,18 +2,66 @@
 
 framework:
   messenger:
-    # reset services after consuming messages
     reset_on_message: true
-
-    # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-    # failure_transport: failed
-
+    failure_transport: errore
     transports:
-        # https://symfony.com/doc/current/messenger.html#transport-configuration
-        # async: '%env(MESSENGER_TRANSPORT_DSN)%'
-        # failed: 'doctrine://default?queue_name=failed'
-        # sync: 'sync://'
-
+      notifica:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: notifica
+        retry_strategy:
+          max_retries: 3
+          delay: 600000
+          multiplier: 4
+          max_delay: 0
+      avviso:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: avviso
+        retry_strategy:
+          max_retries: 3
+          delay: 10000
+          multiplier: 3
+          max_delay: 0
+      evento:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: evento
+        retry_strategy:
+          max_retries: 3
+          delay: 10000
+          multiplier: 3
+          max_delay: 0
+      circolare:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: circolare
+        retry_strategy:
+          max_retries: 3
+          delay: 10000
+          multiplier: 3
+          max_delay: 0
+      errore:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: errore
+        retry_strategy:
+          max_retries: 3
+          delay: 3600000
+          multiplier: 1
+          max_delay: 0
     routing:
-        # Route your messages to the transports
-        # 'App\Message\YourMessage': async
+      'App\Message\NotificaMessage': notifica
+      'App\Message\AvvisoMessage': avviso
+      'App\Message\EventoMessage': evento
+      'App\Message\CircolareMessage': circolare

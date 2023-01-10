@@ -2,7 +2,9 @@
 
 monolog:
   use_microseconds: false
-  channels: ['command']
+  channels:
+    - command
+    - messenger_logger
   handlers:
     main:
       type: rotating_file
@@ -16,3 +18,9 @@ monolog:
       path: '%kernel.logs_dir%/command_%kernel.environment%.log'
       level: notice
       channels: ['command', 'console']
+    messenger:
+      type: rotating_file
+      max_files: 10
+      path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
+      level: debug
+      channels: ['messenger_logger']

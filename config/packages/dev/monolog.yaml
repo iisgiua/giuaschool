@@ -5,12 +5,13 @@ monolog:
   channels:
     - command
     - deprecation
+    - messenger_logger
   handlers:
     main:
       type: rotating_file
       max_files: 10
       path: '%kernel.logs_dir%/app_%kernel.environment%.log'
-      level: '%env(LOG_LEVEL)%'      
+      level: '%env(LOG_LEVEL)%'
       channels: ['!command', '!deprecation', '!console', '!event']
     command:
       type: rotating_file
@@ -24,3 +25,9 @@ monolog:
       path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
       level: debug
       channels: ['deprecation']
+    messenger:
+      type: rotating_file
+      max_files: 10
+      path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
+      level: debug
+      channels: ['messenger_logger']
