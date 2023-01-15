@@ -1673,41 +1673,46 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->infoPeriodi();
     $dati = array();
+    $ore = array();
     if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di sostegno
       return $this->argomentiSostegno($cattedra);
     }
     // cattedra non di sostegno
     if ($cattedra->getTipo() == 'A') {
-      // cattedra di materia alternaativa
+      // cattedra di materia alternativa
       $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
         ->getDql();
       $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
+        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
         ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->join('f.docente', 'd')
         ->join('l.materia', 'm')
-        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))) AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->orderBy('l.data', 'DESC')
         ->addOrderBy('l.ora', 'ASC')
         ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
           'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
-          'civica' => 'E'])
+          'civica' => 'E', 'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
         ->getArrayResult();
     } else {
       // cattedra regolare
       $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
+        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
         ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->leftJoin('f.docente', 'd')
-        ->where('l.classe=:classe AND l.materia=:materia')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->orderBy('l.data', 'DESC')
         ->addOrderBy('l.ora', 'ASC')
         ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente()])
+          'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
         ->getArrayResult();
     }
@@ -1764,6 +1769,9 @@ class RegistroUtil {
           $num++;
         }
       }
+      $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
+        ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
+      $ore[$periodo] = ($ore[$periodo] ?? 0) + $l['durata'];
       $data_prec = $data;
     }
     if ($data_prec && $num == 0) {
@@ -1777,7 +1785,10 @@ class RegistroUtil {
       $dati[$periodo][$data_prec][$num]['firme'] = '';
     }
     // restituisce dati come array associativo
-    return $dati;
+    $d = [];
+    $d['lista'] = $dati;
+    $d['ore'] = $ore;
+    return $d;
   }
 
   /**
@@ -2546,7 +2557,6 @@ class RegistroUtil {
   public function programma(Cattedra $cattedra) {
     // inizializza
     $dati = array();
-
     if ($cattedra->getTipo() == 'A') {
       // cattedra di materia alternativa
       $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
