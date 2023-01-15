@@ -51,6 +51,10 @@
   {% for m in dati.rappresentanti %}
     {{ m|trans }}{{ not loop.last ? ', ' }}
   {% endfor %}
+    <br>Sedi:
+  {% for s in dati.sedi %}
+    {{ s.citta }}{{ not loop.last ? ',' }}
+  {% endfor %}
     </div>
   </div>
 {% else %}

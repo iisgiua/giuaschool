@@ -224,30 +224,34 @@ class ClasseRepository extends BaseRepository {
    * @return array Lista di ID delle classi
    */
   public function getIdClasseRappresentanti($sedi, $destinatari, $filtro) {
-    $classi = $this->createQueryBuilder('c')
-      ->select('DISTINCT c.id')
-      ->where('c.sede IN (:sedi)')
-      ->setParameters(['sedi' => $sedi]);
+    $classiId = [];
+    // classi per gli alunni rappresentanti
     if ($filtro && in_array('A', $destinatari, true)) {
       // filtro alunni
-      $classi
+      $classi = $this->createQueryBuilder('c')
+        ->select('DISTINCT c.id')
+        ->where('c.sede IN (:sedi)')
         ->join('App\Entity\Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
-        ->setParameter('lista', $filtro)
-        ->setParameter('abilitato', 1);
+        ->setParameters(['sedi' => $sedi, 'abilitato' => 1, 'lista' => $filtro])
+        ->getQuery()
+        ->getArrayResult();
+      $classiId = array_column($classi, 'id');
     }
+    // classi per i genitori rappresentanti
     if ($filtro && in_array('G', $destinatari, true)) {
       // filtro genitori
-      $classi
+      $classi = $this->createQueryBuilder('c')
+        ->select('DISTINCT c.id')
+        ->where('c.sede IN (:sedi)')
         ->join('App\Entity\Genitore', 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
         ->join('App\Entity\Alunno', 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
-        ->setParameter('lista', $filtro)
-        ->setParameter('abilitato', 1);
+        ->setParameters(['sedi' => $sedi, 'abilitato' => 1, 'lista' => $filtro])
+        ->getQuery()
+        ->getArrayResult();
+      $classiId = array_unique(array_merge($classiId, array_column($classi, 'id')));
     }
-    $classi = $classi
-      ->getQuery()
-      ->getArrayResult();
     // restituisce la lista degli ID
-    return array_column($classi, 'id');
+    return $classiId;
   }
 
 }

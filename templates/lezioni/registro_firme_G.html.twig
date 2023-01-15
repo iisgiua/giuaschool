@@ -132,6 +132,8 @@
             {% if v.alunni is not empty %}
               <strong>Destinatari ({% for d in v.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}):
                 {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+            {% elseif v.avviso and v.avviso.filtroTipo == 'R' %}
+              <strong>Destinatari ({% for f in v.avviso.filtro %}{{ ('label.rappresentante_'~(f == 'I' ? 'istituto' : 'classe'))|trans }}{{ not loop.last ? ', ' }}{% endfor %})</strong><br>
             {% endif %}
             {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }})</em></small>
