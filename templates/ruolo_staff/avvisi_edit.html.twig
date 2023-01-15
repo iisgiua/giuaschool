@@ -89,6 +89,24 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="gs-modal-rappresentanti" tabindex="-1" role="dialog" aria-labelledby="gs-modal-rappresentanti-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-rappresentanti-label" class="modal-title text-center gs-h2">{{ 'label.scegli_rappresentanti'|trans }}</h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              {{ form_widget(form.rappresentanti) }}
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-rappresentanti-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-rappresentanti-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal fade" id="gs-modal-alunni" tabindex="-1" role="dialog" aria-labelledby="gs-modal-alunni-label" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
@@ -220,12 +238,12 @@ $(document).ready(function() {
     var v = '<option class="gs-no-placeholder" value="N">Nessuno</option>';
     var v_tc = '<option class="gs-no-placeholder" value="T">Tutti</option><option class="gs-no-placeholder" value="C">Filtra per classe</option>';
     var v_m = '<option class="gs-no-placeholder" value="M">Filtra per materia</option>';
-    var v_u = '<option class="gs-no-placeholder" value="U">Filtra per utente</option>';
+    var v_ur = '<option class="gs-no-placeholder" value="R">Filtra per rappresentanti</option><option class="gs-no-placeholder" value="U">Filtra per utente</option>';
     if ($("input[name='avviso[destinatari][]']:checked").length > 0) {
       v = v_tc;
       if (!$("input[name='avviso[destinatari][]'][value='C']").is(":checked") &&
           !$("input[name='avviso[destinatari][]'][value='D']").is(":checked")) {
-        v = v + v_u;
+        v = v + v_ur;
       } else {
         if ($("input[name='avviso[destinatari][]']:checked").length == 1 &&
             $("input[name='avviso[destinatari][]'][value='D']").is(":checked")) {
@@ -237,7 +255,7 @@ $(document).ready(function() {
   });
   $("#gs-pulsanteFiltro").click(function() {
     var opt = $('#avviso_filtro').val();
-    var type = ($('#avviso_filtroTipo').val() == 'C' ? 'classi' : ($('#avviso_filtroTipo').val() == 'M' ? 'materie' : 'alunni'));
+    var type = ($('#avviso_filtroTipo').val() == 'C' ? 'classi' : ($('#avviso_filtroTipo').val() == 'M' ? 'materie' : ($('#avviso_filtroTipo').val() == 'R' ? 'rappresentanti' : 'alunni')));
     if (type == 'alunni') {
       $('#gs-modal-alunni-label').text("{{ 'label.scegli_utenti'|trans }}");
       $('#gs-modal-alunni-row').data('id', opt).data('nomi','').html('');
@@ -277,7 +295,11 @@ $(document).ready(function() {
       }
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="avviso_'+type+'_'+item+'"]').prop("checked", true).change();
+          if (type == 'rappresentanti') {
+            $('#gs-modal-rappresentanti input[name="avviso[rappresentanti][]"][value="'+item+'"]').prop("checked", true).change();
+          } else {
+            $('#gs-modal-'+type+' input[id="avviso_'+type+'_'+item+'"]').prop("checked", true).change();
+          }
         });
       }
     }
@@ -285,7 +307,7 @@ $(document).ready(function() {
   });
   $("#avviso_filtroTipo").change(function() {
     $("#avviso_filtro").val('');
-    if ($(this).val() == 'C' || $(this).val() == 'M' || $(this).val() == 'U') {
+    if ($(this).val() == 'C' || $(this).val() == 'M' || $(this).val() == 'R' || $(this).val() == 'U') {
       $("#gs-pulsanteFiltro").click();
     } else {
       $(this).data('previous', $(this).val());
@@ -331,6 +353,25 @@ $(document).ready(function() {
     $("#avviso_filtroTipo").val(old);
     $("#gs-modal-materie").modal('hide');
   });
+  $("#gs-modal-rappresentanti-confirm").click(function() {
+    var opt = $('#gs-modal-rappresentanti input[type="checkbox"]:checked');
+    var optlst = opt.map(function(){return $(this).val();}).get();
+    if (optlst == '') {
+      alert('ATTENZIONE: Devi selezionare almeno un rappresentante');
+    } else {
+      var txt = opt.map(function(){return $(this).parent().text();}).get().join(', ');
+      $("#gs-modal-rappresentanti").modal('hide');
+      $("#avviso_filtro").val(optlst);
+      $("#avviso_filtroTipo").data('previous', $("#avviso_filtroTipo").val());
+      $("#gs-pulsanteFiltro").show();
+      $("#gs-filtro").text(txt).show();
+    }
+  });
+  $("#gs-modal-rappresentanti-cancel").click(function() {
+    var old = $("#avviso_filtroTipo").data('previous');
+    $("#avviso_filtroTipo").val(old);
+    $("#gs-modal-rappresentanti").modal('hide');
+  });
   $("#gs-modal-alunni-search").click(function() {
     $('#gs-modal-waiting').modal('show');
     var par1 = "-"+encodeURIComponent($('#gs-modal-alunni-cognome').val());
@@ -373,7 +414,7 @@ $(document).ready(function() {
   $("input[name='avviso[destinatari][]']").change();
   $("#avviso_filtroTipo").val('{{ form.filtroTipo.vars.value ? form.filtroTipo.vars.value : 'N' }}');
   $("#avviso_filtro").val('{{ form.filtro.vars.value }}');
-  if ($("#avviso_filtroTipo").val() == 'C' || $("#avviso_filtroTipo").val() == 'M' || $("#avviso_filtroTipo").val() == 'U') {
+  if ($("#avviso_filtroTipo").val() == 'C' || $("#avviso_filtroTipo").val() == 'M' || $("#avviso_filtroTipo").val() == 'R' || $("#avviso_filtroTipo").val() == 'U') {
     $("#gs-pulsanteFiltro").show();
     $("#gs-filtro").html("{{ dati.lista|raw }}").show();
     if ($("#avviso_filtroTipo").val() == 'U') {

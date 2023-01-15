@@ -8,6 +8,7 @@
 
 namespace App\Form;
 
+use App\Entity\Alunno;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -200,6 +201,29 @@ class ModuloType extends AbstractType {
           'required' => false))
         ->add('email', EmailType::class, array('label' => 'label.mailserver_email',
           'required' => true));
+      } elseif ($options['formMode'] == 'rappresentanti') {
+        // form rappresentanti
+        $builder
+          ->add('utente', ChoiceType::class, array('label' => 'label.utente',
+            'data' => $options['dati'][0],
+            'choices' => $options['dati'][1],
+            'choice_label' => function ($obj) {
+              return ($obj instanceOf Alunno ?
+                $obj.' - '.$obj->getClasse() :
+                (is_object($obj) ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
+                $obj)); },
+            'choice_value' => function ($obj) {
+              return (is_object($obj) ? $obj->getId() : $obj); },
+            'placeholder' => 'label.choose_option',
+            'choice_translation_domain' => false,
+            'attr' => ['widget' => 'search'],
+            'disabled' => count($options['dati'][1]) == 1,
+            'required' => true))
+          ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+            'data' => $options['dati'][2],
+            'choices' => $options['dati'][3],
+            'placeholder' => 'label.choose_option',
+            'required' => true));
     }
     // aggiunge pulsanti al form
     if ($options['returnUrl']) {

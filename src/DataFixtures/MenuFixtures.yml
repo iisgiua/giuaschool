@@ -86,4 +86,4 @@ App\Entity\Menu:
     nome: ''
     descrizione: ''
     mega: false
-    opzioni: '<collection(@menu_opzione_ALUNNI1, @menu_opzione_ALUNNI2, @menu_opzione_ALUNNI3)>'
+    opzioni: '<collection(@menu_opzione_ALUNNI1, @menu_opzione_ALUNNI2, @menu_opzione_ALUNNI3, @menu_opzione_ALUNNI4, @menu_opzione_ALUNNI5)>'

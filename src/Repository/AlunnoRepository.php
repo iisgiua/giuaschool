@@ -220,6 +220,10 @@ class AlunnoRepository extends BaseRepository {
       // filtro classi
       $alunni
         ->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
+    } elseif ($tipo == 'R') {
+      // filtro rppresentanti
+      $alunni
+        ->andWhere('a.rappresentante IN (:tipi)')->setParameter('tipi', $filtro);
     } elseif ($tipo == 'U') {
       // filtro utente
       $alunni
@@ -355,6 +359,33 @@ class AlunnoRepository extends BaseRepository {
       ->getArrayResult();
     // restituisce lista
     return $alunni;
+  }
+
+  /**
+   * Restituisce la lista dei rappresentanti degli alunni secondo i criteri indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function rappresentanti(array $criteri, int $pagina=1): array {
+    if (empty($criteri['tipo'])) {
+      // tutti i rappresentanti
+      $tipi = ['C', 'I', 'P'];
+    } else {
+      // solo rappresentanti indicati
+      $tipi = [$criteri['tipo']];
+    }
+    // esegue query
+    $query = $this->createQueryBuilder('a')
+      ->join('a.classe', 'c')
+      ->where('a.abilitato=:abilitato AND a.rappresentante IN (:tipi) AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
+      ->orderBy('c.anno,c.sezione,a.cognome,a.nome')
+      ->setParameters(['abilitato' => 1, 'tipi' => $tipi, 'nome' => $criteri['nome'].'%',
+        'cognome' => $criteri['cognome'].'%']);
+    // restituisce dati
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

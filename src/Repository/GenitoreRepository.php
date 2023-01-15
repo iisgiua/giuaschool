@@ -17,7 +17,7 @@ use App\Entity\Alunno;
  *
  * @author Antonello Dessì
  */
-class GenitoreRepository extends UtenteRepository {
+class GenitoreRepository extends BaseRepository {
 
   /**
    * Restituisce gli utenti genitori per le sedi e il filtro indicato
@@ -39,6 +39,10 @@ class GenitoreRepository extends UtenteRepository {
       // filtro classi
       $genitori
         ->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
+    } elseif ($tipo == 'R') {
+      // filtro rppresentanti
+      $genitori
+        ->andWhere('g.rappresentante IN (:tipi)')->setParameter('tipi', $filtro);
     } elseif ($tipo == 'U') {
       // filtro utente
       $genitori
@@ -92,6 +96,34 @@ class GenitoreRepository extends UtenteRepository {
     }
     // restiruisce dati dei genitori
     return $this->datiGenitori($alunni);
+  }
+
+  /**
+   * Restituisce la lista dei rappresentanti dei genitori secondo i criteri indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function rappresentanti(array $criteri, int $pagina=1): array {
+    if (empty($criteri['tipo'])) {
+      // tutti i rappresentanti
+      $tipi = ['C', 'I'];
+    } else {
+      // solo rappresentanti indicati
+      $tipi = [$criteri['tipo']];
+    }
+    // esegue query
+    $query = $this->createQueryBuilder('g')
+      ->join('g.alunno', 'a')
+      ->join('a.classe', 'c')
+      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND g.rappresentante IN (:tipi) AND g.nome LIKE :nome AND g.cognome LIKE :cognome')
+      ->orderBy('c.anno,c.sezione,g.cognome,g.nome')
+      ->setParameters(['abilitato' => 1, 'tipi' => $tipi, 'nome' => $criteri['nome'].'%',
+        'cognome' => $criteri['cognome'].'%']);
+    // restituisce dati
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

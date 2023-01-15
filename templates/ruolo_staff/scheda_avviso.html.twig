@@ -64,6 +64,15 @@
   {% endfor %}
     </div>
   </div>
+{% elseif dati.rappresentanti|length > 0 %}
+  <div class="gs-mt-2">
+    <strong>Filtro rappresentanti:</strong>
+    <div class="gs-ml-4">
+  {% for m in dati.rappresentanti %}
+    {{ m|trans }}{{ not loop.last ? ', ' }}
+  {% endfor %}
+    </div>
+  </div>
 {% else %}
   <div class="gs-mt-2">
     <strong>Filtro sedi:</strong>

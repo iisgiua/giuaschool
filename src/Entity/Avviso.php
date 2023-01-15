@@ -155,11 +155,11 @@ class Avviso {
    private ?array $destinatari = array();
 
   /**
-   * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
+   * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), R=rappresentanti(solo genitori e alunni), U=utente (solo genitori e alunni)]
    *
    * @ORM\Column(name="filtro_tipo", type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","M","R","U"}, strict=true, message="field.choice")
    */
    private ?string $filtroTipo = 'N';
 

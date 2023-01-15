@@ -159,6 +159,20 @@ class RicercaType extends AbstractType {
           'placeholder' => 'label.qualsiasi_docente',
           'attr' => ['widget' => 'search'],
           'required' => false));
+    } elseif ($options['formMode'] == 'rappresentanti') {
+      // form rappresentanti
+      $builder
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['dati'][0],
+          'required' => false))
+        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'data' => $options['dati'][1],
+          'required' => false))
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+          'data' => $options['dati'][2],
+          'choices' => $options['dati'][3],
+          'placeholder' => 'label.tutti',
+          'required' => false));
     }
     // pulsante filtro
     $builder

@@ -46,6 +46,8 @@
             Filtro per utente
       {% elseif a.filtroTipo == 'M' %}
             Filtro per materia
+      {% elseif a.filtroTipo == 'R' %}
+            Filtro per rappresentanti
       {% elseif a.filtroTipo == 'C' %}
             Classi:
         {% for c in dati[a.id].classi %}

@@ -248,6 +248,7 @@ label.provvedimenti_disciplinari: Provvedimenti disciplinari
 label.provvedimento: Provvedimento disciplinare
 label.qualsiasi_classe: Qualsiasi classe
 label.qualsiasi_sede: Qualsiasi sede
+label.rappresentante: Rappresentante
 label.rappresentante_classe: Rappresentante di classe
 label.rappresentante_consulta: Consulta Provinciale
 label.rappresentante_istituto: Rappresentante di Istituto
@@ -346,6 +347,7 @@ label.upload_rimuove_file: Cancella
 label.uscite: Uscite
 label.uscite_anticipate: Uscite anticipate
 label.username: Nome utente
+label.utente: Utente
 label.utenti: Utenti
 label.utente_attivo: Utente attivo
 label.utente_disabilitato: Utente disabilitato
@@ -450,6 +452,7 @@ label.documenti_mancanti: Documenti mancanti
 label.documenti_tutti: Tutti i documenti
 label.programmi: Programmi svolti
 label.relazioni: Relazioni finali
+label.tutti: Tutti
 label.tutti_tipi_documento: Tutti i tipi
 label.tipo_documenti: Tipo di documenti
 label.documenti_bes_H: P.E.I.
@@ -584,6 +587,8 @@ label.mailserver_password: Password per l'accesso al server
 label.mailserver_host: Nome del server di posta
 label.mailserver_port: Porta del server di posta
 label.mailserver_email: Indirizzo a cui spedire la mail di prova
+label.scegli_rappresentanti: Scegli i rappresentanti
+label.filtro_rappresentanti: Filtro per rappresentanti
 
 
 ##### PAGINE #####
@@ -729,6 +734,12 @@ title.docenti.responsabiliBes: Configura i responsabili BES
 title.docenti.responsabiliBes_edit: Modifica i dati del responsabile BES
 page.sistema.email: Configura Email
 title.sistema.email: Configura il server per l'invio delle email
+page.alunni.rappresentanti: Rappresentanti Alunni
+title.alunni.rappresentanti: Configura i rappresentanti degli alunni
+title.alunni.rappresentanti_edit: Modifica i dati del rappresentante degli alunni
+page.alunni.rappresentantiGenitori: Rappresentanti Genitori
+title.alunni.rappresentantiGenitori: Configura i rappresentanti dei genitori
+title.alunni.rappresentantiGenitori_edit: Modifica i dati del rappresentante dei genitori
 
 
 page.agenda_compito: Agenda Compiti
@@ -1460,6 +1471,7 @@ exception.circolare_sede_nulla: Non hai indicato la sede a cui è destinata la c
 exception.circolare_destinatari_nulli: Non hai indicato nessun destinatario della circolare.
 exception.filtro_classi_invalido: Hai indicato una o più classi non valide nel filtro {dest}.
 exception.filtro_materie_invalido: Hai indicato una o più materie non valide nel filtro dei Docenti.
+exception.filtro_rappresentanti_invalido: Hai indicato nel filtro un tipo di rappresentante non valido.
 exception.filtro_utenti_invalido: Hai indicato uno o più utenti non validi nel filtro {dest}.
 exception.lista_altri_invalida: La lista degli Altri destinatari non è in un formato valido.
 exception.circolare_documento_nullo: Non hai caricato il documento della circolare.

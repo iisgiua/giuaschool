@@ -21,19 +21,6 @@
         </div>
       </div>
       {{ form_row(form.creaAnnotazione) }}
-<!--
-      <div class="form-group">
-        <label class="col-sm-2 control-label required" for="avviso_edit_staffFiltro">Destinatari dello Staff</label>
-        <div class="col-sm-10">
-          <div id="staff_filtro">
-            {# form_widget(form.staffFiltro) #}
-          </div>
-          <div id="staff_sedi" style="display:none">
-            {# form_widget(form.staffSedi) #}
-          </div>
-        </div>
-      </div>
--->
       <div class="form-group">
         <label class="col-sm-2 control-label required" for="avviso_edit_destinatari">Destinatari</label>
         <div class="col-sm-10">
@@ -156,13 +143,6 @@ $(document).ready(function() {
       $(this).parent().removeClass('active');
     }
   });
-  //-- $("#avviso_edit_staffFiltro").change(function() {
-    //-- if ($(this).val() == 'S') {
-      //-- $('#staff_sedi').show();
-    //-- } else {
-      //-- $('#staff_sedi').hide();
-    //-- }
-  //-- }).change();
   $("input[name='avviso_edit[destinatari][]']").change(function() {
     if ($(this).val() == 'C' && $(this).is(":checked")) {
       $("input[name='avviso_edit[destinatari][]'][value='D']").prop("checked", false).parent().removeClass('active');

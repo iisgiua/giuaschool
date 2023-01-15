@@ -214,4 +214,40 @@ class ClasseRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
+  /**
+   * Restituisce le classi per le sedi, i destinatari e il filtro rappresentanti indicato
+   *
+   * @param array $sedi Sedi di servizio (lista ID di Sede)
+   * @param array $destinatari Lista dei destinatari (ruolo utenti)
+   * @param array|null $filtro Lista del tipo di rappresentanti
+   *
+   * @return array Lista di ID delle classi
+   */
+  public function getIdClasseRappresentanti($sedi, $destinatari, $filtro) {
+    $classi = $this->createQueryBuilder('c')
+      ->select('DISTINCT c.id')
+      ->where('c.sede IN (:sedi)')
+      ->setParameters(['sedi' => $sedi]);
+    if ($filtro && in_array('A', $destinatari, true)) {
+      // filtro alunni
+      $classi
+        ->join('App\Entity\Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
+        ->setParameter('lista', $filtro)
+        ->setParameter('abilitato', 1);
+    }
+    if ($filtro && in_array('G', $destinatari, true)) {
+      // filtro genitori
+      $classi
+        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
+        ->join('App\Entity\Alunno', 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
+        ->setParameter('lista', $filtro)
+        ->setParameter('abilitato', 1);
+    }
+    $classi = $classi
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($classi, 'id');
+  }
+
 }

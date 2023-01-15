@@ -263,6 +263,11 @@ class StaffController extends BaseController {
       $dati['lista'] = $this->em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'M') {
       $dati['lista'] = $this->em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtro')->getData());
+    } elseif ($form->get('filtroTipo')->getData() == 'R') {
+      $rapp = array_map(fn($v) =>
+          $trans->trans($v == 'C' ? 'label.rappresentante_classe' : 'label.rappresentante_istituto'),
+        $form->get('filtro')->getData());
+      $dati['lista'] = implode(', ', $rapp);
     } elseif ($form->get('filtroTipo')->getData() == 'U') {
       $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
@@ -312,6 +317,17 @@ class StaffController extends BaseController {
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
+        }
+      } elseif ($avviso->getFiltroTipo() == 'R') {
+        // controlla rappresentanti
+        $lista = [];
+        foreach ($form->get('filtro')->getData() as $rapp) {
+          if ($rapp != 'C' && $rapp != 'I') {
+            // tipo rappresentante non valido
+            $form->addError(new FormError($trans->trans('exception.filtro_rappresentanti_invalido')));
+            break;
+          }
+          $lista[] = $rapp;
         }
       } elseif ($avviso->getFiltroTipo() == 'U') {
         // controlla utenti

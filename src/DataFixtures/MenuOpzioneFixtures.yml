@@ -603,3 +603,25 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_ALUNNI'
     sottoMenu:
+  menu_opzione_ALUNNI4:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Rappresentanti&nbsp;alunni'
+    descrizione: 'Configura i rappresentanti degli alunni'
+    url: 'alunni_rappresentanti'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_ALUNNI'
+    sottoMenu:
+  menu_opzione_ALUNNI5:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Rappresentanti&nbsp;genitori'
+    descrizione: 'Configura i rappresentanti dei genitori'
+    url: 'alunni_rappresentantiGenitori'
+    ordinamento: 5
+    abilitato: true
+    icona: ''
+    menu: '@menu_ALUNNI'
+    sottoMenu:

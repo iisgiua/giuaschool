@@ -72,6 +72,7 @@ class BachecaUtil {
     $dati['classi'] = [];
     $dati['utenti'] = [];
     $dati['materie'] = [];
+    $dati['rappresentanti'] = [];
     // legge sedi
     $dati['sedi'] = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
       ->select('s.citta')
@@ -114,6 +115,11 @@ class BachecaUtil {
         ->orderBy('m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
+    } elseif ($avviso->getFiltroTipo() == 'R') {
+      // filtro rappresentanti
+      $dati['rappresentanti'] = array_map(fn($v) =>
+          $v == 'C' ? 'label.rappresentante_classe' : 'label.rappresentante_istituto',
+        $avviso->getFiltro());
     }
     // restituisce dati
     return $dati;
@@ -191,6 +197,10 @@ class BachecaUtil {
     } elseif ($avviso->getFiltroTipo() == 'U') {
       // classi di alunni/genitori
       $classi = $this->em->getRepository('App\Entity\Classe')->getIdClasseAlunni($sedi, $avviso->getFiltro());
+    } elseif ($avviso->getFiltroTipo() == 'R') {
+      // classi di rappresentanti alunni/genitori
+      $classi = $this->em->getRepository('App\Entity\Classe')->getIdClasseRappresentanti($sedi,
+        $avviso->getDestinatari(), $avviso->getFiltro());
     }
     // crea annotazioni
     $testo = $this->testoAvviso($avviso);
@@ -571,7 +581,7 @@ class BachecaUtil {
       // aggiunge alunni
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Alunno')
         ->getIdAlunno($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
-      if ($avviso->getFiltroTipo() != 'U') {
+      if ($avviso->getFiltroTipo() != 'U' && $avviso->getFiltroTipo() != 'R') {
         // aggiunge classi
         $classi = array_merge($classi, $this->em->getRepository('App\Entity\Classe')
           ->getIdClasse($sedi, $avviso->getFiltroTipo() == 'C' ? $avviso->getFiltro() : null));

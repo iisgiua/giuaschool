@@ -94,8 +94,9 @@ class AvvisoType extends AbstractType {
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => false))
         ->add('filtroTipo', ChoiceType::class, array('label' => 'label.filtro_tipo',
-          'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T', 'label.filtro_classe' => 'C',
-            'label.filtro_materia' => 'M', 'label.filtro_utenti' => 'U'],
+          'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T',
+            'label.filtro_classe' => 'C', 'label.filtro_materia' => 'M',
+            'label.filtro_rappresentanti' => 'R', 'label.filtro_utenti' => 'U'],
           'placeholder' => false,
           'expanded' => false,
           'multiple' => false,
@@ -138,6 +139,13 @@ class AvvisoType extends AbstractType {
                 ->where("m.tipo IN ('N','R','S')")
                 ->orderBy('m.nome', 'ASC');
             },
+          'expanded' => true,
+          'multiple' => true,
+          'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
+          'required' => false,
+          'mapped' => false))
+        ->add('rappresentanti', ChoiceType::class, array('label' => 'label.scegli_rappresentanti',
+          'choices' => ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'],
           'expanded' => true,
           'multiple' => true,
           'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],

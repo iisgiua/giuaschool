@@ -15,6 +15,7 @@ use App\Entity\Provisioning;
 use App\Form\AlunnoGenitoreType;
 use App\Form\CambioClasseType;
 use App\Form\ImportaCsvType;
+use App\Form\ModuloType;
 use App\Form\RicercaType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
@@ -814,6 +815,216 @@ class AlunniController extends BaseController {
     $response = new Response($doc);
     $response->headers->set('Content-Disposition', $disposition);
     return $response;
+  }
+
+  /**
+   * Gestione inserimento dei rappresentanti degli alunni
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/rappresentanti/{pagina}", name="alunni_rappresentanti",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiAction(Request $request, int $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/nome', '');
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/tipo', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/pagina', $pagina);
+    }
+    // form di ricerca
+    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I',
+      'label.rappresentante_consulta' => 'P'];
+    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
+      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['nome'] = $form->get('nome')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/pagina', $pagina);
+    }
+    // lista rappresentanti
+    $dati = $this->em->getRepository('App\Entity\Alunno')->rappresentanti($criteri, $pagina);
+    // mostra la pagina di risposta
+    $info['pagina'] = $pagina;
+    return $this->renderHtml('alunni', 'rappresentanti', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Gestione inserimento dei rappresentanti degli alunni e dei genitori
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/rappresentantiGenitori/{pagina}", name="alunni_rappresentantiGenitori",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiGenitoriAction(Request $request, int $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/nome', '');
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/tipo', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', $pagina);
+    }
+    // form di ricerca
+    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'];
+    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
+      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['nome'] = $form->get('nome')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', $pagina);
+    }
+    // lista rappresentanti
+    $dati = $this->em->getRepository('App\Entity\Genitore')->rappresentanti($criteri, $pagina);
+    // mostra la pagina di risposta
+    $info['pagina'] = $pagina;
+    return $this->renderHtml('alunni', 'rappresentantiGenitori', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Modifica i dati di un rappresentante
+   *
+   * @param Request $request Pagina richiesta
+   * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
+   * @param int $id ID dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/rappresentanti/edit/{ruolo}/{id}", name="alunni_rappresentanti_edit",
+   *    requirements={"ruolo": "A|G", "id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiEditAction(Request $request, string $ruolo, int $id): Response {
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $utente = ($ruolo == 'A') ?
+        $this->em->getRepository('App\Entity\Alunno')->find($id) :
+        $this->em->getRepository('App\Entity\Genitore')->find($id);
+      if (!$utente) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $tipo = $utente->getRappresentante();
+      $listaUtenti = [$utente];
+    } else {
+      // azione add
+      $utente = null;
+      $tipo = null;
+      $listaUtenti = ($ruolo == 'A') ?
+        $this->em->getRepository('App\Entity\Alunno')->findBy(['abilitato' => 1,
+          'rappresentante' => ''], ['cognome' => 'ASC', 'nome' => 'ASC']) :
+        $this->em->getRepository('App\Entity\Genitore')->findBy(['abilitato' => 1,
+          'rappresentante' => ''], ['cognome' => 'ASC', 'nome' => 'ASC']);
+    }
+    // form
+    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'];
+    if ($ruolo == 'A') {
+      // solo per gli alunni
+      $listaTipi['label.rappresentante_consulta'] = 'P';
+    }
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
+      'returnUrl' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
+      'dati' => [$utente, $listaUtenti, $tipo, $listaTipi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      if (!$utente) {
+        // modifica
+        $utente = $form->get('utente')->getData();
+      }
+      // imposta tipo rappresentante
+      $utente->setRappresentante($form->get('tipo')->getData());
+      // memorizza dati
+      $this->em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.update_ok');
+      // redirect
+      return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('alunni', 'rappresentanti'.($ruolo == 'G' ? 'Genitori' : '').'_edit',
+      [], [], [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
+   * Elimina un rappresentante
+   *
+   * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
+   * @param int $id ID dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/rappresentanti/delete/{ruolo}/{id}", name="alunni_rappresentanti_delete",
+   *    requirements={"ruolo": "A|G", "id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiDeleteAction(string $ruolo, int $id): Response {
+    // controlla utente
+    $utente = ($ruolo == 'A') ?
+      $this->em->getRepository('App\Entity\Alunno')->find($id) :
+      $this->em->getRepository('App\Entity\Genitore')->find($id);
+    if (!$utente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // toglie il ruolo di rappresentante
+    $utente->setRappresentante('');
+    // memorizza dati
+    $this->em->flush();
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
+    // redirezione
+    return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
   }
 
 }

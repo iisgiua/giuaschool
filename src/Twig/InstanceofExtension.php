@@ -13,7 +13,7 @@ use Twig\TwigTest;
 
 
 /**
- * InstanceofExtension - funzione TWIG INSTANCEOF: instanceOf(file)
+ * InstanceofExtension - funzione TWIG INSTANCEOF: instanceOf(object)
  *
  * @author Antonello Dessì
  */
@@ -26,7 +26,7 @@ class InstanceofExtension extends AbstractExtension {
    */
   public function getTests() {
     return [
-      new TwigTest('instanceof', [$this, 'isInstanceOf']),
+      new TwigTest('instanceOf', [$this, 'isInstanceOf']),
     ];
   }
 
