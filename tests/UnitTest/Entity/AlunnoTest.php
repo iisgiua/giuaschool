@@ -102,7 +102,7 @@ class AlunnoTest extends DatabaseTestCase {
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'rappresentante' ? $this->faker->optional($weight = 30, $default = '')->randomElement(['C', 'I', 'P']) :
+          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null))))))))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -153,16 +153,18 @@ class AlunnoTest extends DatabaseTestCase {
     $this->assertTrue($existent->controllaRuolo('A'), $this->entity.'::controllaRuolo');
     // getCodiceFunzioni
     $existent->setDataNascita(new \DateTime('today'));
-    $existent->setRappresentante('');
+    $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante('C');
+    $existent->setRappresentante(['C']);
     $this->assertSame(['C', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante('I');
+    $existent->setRappresentante(['I']);
     $this->assertSame(['I', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante('P');
+    $existent->setRappresentante(['P']);
     $this->assertSame(['P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRappresentante(['C', 'P']);
+    $this->assertSame(['C', 'P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setDataNascita(\DateTime::createFromFormat('d/m/Y', '01/01/2000'));
-    $this->assertSame(['P', 'M', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['C', 'P', 'M', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getDataNascita()->format('d/m/Y').')', (string) $existent, $this->entity.'::toString');
     // addGenitori

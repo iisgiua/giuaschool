@@ -117,13 +117,6 @@ class Alunno extends Utente {
   private bool $giustificaOnline = true;
 
   /**
-   * @var string|null $rappresentante Indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
-   *
-   * @ORM\Column(type="string", length=1, nullable=true)
-   */
-  private ?string $rappresentante = '';
-
-  /**
    * @var bool $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
    * @ORM\Column(name="richiesta_certificato", type="boolean", nullable=false)
@@ -372,27 +365,6 @@ class Alunno extends Utente {
   }
 
   /**
-   * Indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
-   *
-   * @return string|null Indica se l'alunno è eletto come rappresentante
-   */
-  public function getRappresentante(): ?string {
-    return $this->rappresentante;
-  }
-
-  /**
-   * Modifica il valore che indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
-   *
-   * @param string $rappresentante Indica se l'alunno è eletto come rappresentante
-   *
-   * @return self Oggetto modificato
-   */
-  public function setRappresentante(string $rappresentante): self {
-    $this->rappresentante = $rappresentante;
-    return $this;
-  }
-
-  /**
    * Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
    * @return bool Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
@@ -542,11 +514,7 @@ class Alunno extends Utente {
    * @return array Lista della codifica delle funzioni
    */
   public function getCodiceFunzioni(): array {
-    if ($this->rappresentante) {
-      $lista = [$this->rappresentante];
-    } else {
-      $lista = [];
-    }
+    $lista = $this->getRappresentante() ?? [];
     // determina se è maggiorenne
     $oggi = new \DateTime('today');
     if ($oggi->diff($this->getDataNascita())->format('%y') >= 18) {

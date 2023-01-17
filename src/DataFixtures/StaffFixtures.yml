@@ -3,6 +3,7 @@
 #
 # dati dei docenti dello staff: gli stessi dei docenti più i seguentI
 #   sede: la sede di riferimento per il ruolo di staff (se definita)
+#   rappresentante: indica se il dipendente ATA è eletto come rappresentante [I=di istituto]
 ####################
 
 
@@ -37,3 +38,4 @@ App\Entity\Staff:
     sede: '70%? <ife($otp, @sede_1, @sede_2)>: <(null)>'
     responsabileBes: '<boolean(20)>'
     responsabileBesSede: '<($responsabileBes ? $sede : null)>'
+    rappresentante: '<(array())>'

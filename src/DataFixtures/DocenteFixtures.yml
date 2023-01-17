@@ -4,6 +4,7 @@
 # dati dei docenti: gli stessi degli utenti più i seguentI
 #   responsabileBes: indica se il docente ha accesso alle funzioni di responsabile BES
 #   responsabileBesSede: sede di riferimento per il responsabile BES (se definita)
+#   rappresentante: indica se il docente è eletto come rappresentante [I=di istituto, R=RSU]
 ####################
 
 
@@ -39,6 +40,7 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'
 
   # ----- docenti curricolari ITP -----
   docente_itp_{1..10}:
@@ -66,6 +68,7 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'
 
   # ----- docenti religione -----
   docente_religione_{1..5}:
@@ -93,6 +96,7 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'
 
   # ----- docenti sostegno -----
   docente_sostegno_{1..5}:
@@ -120,6 +124,7 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: '<boolean()>'
     responsabileBesSede: '<($responsabileBes ? @sede_2 : null)>'
+    rappresentante: '<(array())>'
 
   # ----- docenti senza cattedra -----
   docente_nocattedra_{1..5}:
@@ -147,3 +152,4 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'

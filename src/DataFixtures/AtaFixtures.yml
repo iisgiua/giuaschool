@@ -5,6 +5,7 @@
 #   tipo: mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
 #   segreteria: indica se il dipendente ATA ha accesso alle funzioni della segreteria
 #   sede: la sede di riferimento del dipendente ATA (se definita)
+#   rappresentante: indica se il dipendente ATA è eletto come rappresentante [I=di istituto, R=RSU]
 ####################
 
 
@@ -39,6 +40,7 @@ App\Entity\Ata:
     tipo: 'D'
     segreteria: true
     sede:
+    rappresentante: '<(array())>'
   ata_{A, T, C, U}1:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".a")>'
@@ -65,6 +67,7 @@ App\Entity\Ata:
     tipo: '<current()>'
     segreteria: '<($tipo == "A" || $tipo == "D" ? true : false)>'
     sede: '@sede_1'
+    rappresentante: '<(array())>'
   ata_{T, C}2:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".a")>'
@@ -91,3 +94,4 @@ App\Entity\Ata:
     tipo: '<current()>'
     segreteria: false
     sede: '@sede_2'
+    rappresentante: '<(array())>'

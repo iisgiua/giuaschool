@@ -249,9 +249,10 @@ label.provvedimento: Provvedimento disciplinare
 label.qualsiasi_classe: Qualsiasi classe
 label.qualsiasi_sede: Qualsiasi sede
 label.rappresentante: Rappresentante
-label.rappresentante_classe: Rappresentante di classe
-label.rappresentante_consulta: Consulta Provinciale
-label.rappresentante_istituto: Rappresentante di Istituto
+label.rappresentante_C: Rappresentante di classe
+label.rappresentante_I: Rappresentante di Istituto
+label.rappresentante_P: Consulta Provinciale
+label.rappresentante_R: Rappresentante RSU
 label.recupero_A: Studio individuale
 label.recupero_C: Corso di recupero
 label.recupero_N: Non recuperato
@@ -740,6 +741,12 @@ title.alunni.rappresentanti_edit: Modifica i dati del rappresentante degli alunn
 page.alunni.rappresentantiGenitori: Rappresentanti Genitori
 title.alunni.rappresentantiGenitori: Configura i rappresentanti dei genitori
 title.alunni.rappresentantiGenitori_edit: Modifica i dati del rappresentante dei genitori
+page.ata.rappresentanti: Rappresentanti Ata
+title.ata.rappresentanti: Configura i rappresentanti del personale ATA
+title.ata.rappresentanti_edit: Modifica i dati del rappresentante del personale ATA
+page.docenti.rappresentanti: Rappresentanti Docenti
+title.docenti.rappresentanti: Configura i rappresentanti dei docenti
+title.docenti.rappresentanti_edit: Modifica i dati del rappresentante dei docenti
 
 
 page.agenda_compito: Agenda Compiti
@@ -1578,3 +1585,4 @@ exception.mailserver_no_email: Non hai indicato l'indirizzo a cui mandare l'emai
 exception.mailserver_svuota_cache: "Impossibile eseguire i comandi per svuotare la cache. [{errore}]"
 exception.mailserver_email_test: "Errore nella spedizione della mail. [{errore}]"
 exception.token_scaduto: E' scaduto il tempo massimo per effettuare l'autenticazione. Riprova.
+exception.tipi_rappresentante_vuoto: Non hai indicato il tipo di rappresentante

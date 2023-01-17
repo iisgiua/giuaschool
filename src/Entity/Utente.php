@@ -248,6 +248,13 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?array $notifica = array();
 
   /**
+   * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   *
+   * @ORM\Column(type="simple_array", nullable=true)
+   */
+  private ?array $rappresentante = array();
+
+  /**
    * @var array|null $listaProfili Lista di profili per lo stesso utente (dato non persistente)
    *
    */
@@ -872,6 +879,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
       $notifica = unserialize(serialize($notifica));
     }
     $this->notifica = $notifica;
+    return $this;
+  }
+
+  /**
+   * Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   *
+   * @return array|null Indica se l'utente è eletto come rappresentante
+   */
+  public function getRappresentante(): ?array {
+    return $this->rappresentante;
+  }
+
+  /**
+   * Modifica il valore che indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   *
+   * @param array $rappresentante Indica se l'utente è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(array $rappresentante): self {
+    $this->rappresentante = $rappresentante;
     return $this;
   }
 

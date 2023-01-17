@@ -70,7 +70,7 @@ App\Entity\Menu:
     nome: ''
     descrizione: ''
     mega: false
-    opzioni: '<collection(@menu_opzione_ATA1, @menu_opzione_ATA2)>'
+    opzioni: '<collection(@menu_opzione_ATA1, @menu_opzione_ATA2, @menu_opzione_ATA3)>'
 
   # ----- sottomenu DOCENTI -----
   menu_DOCENTI:
@@ -78,7 +78,7 @@ App\Entity\Menu:
     nome: ''
     descrizione: ''
     mega: false
-    opzioni: '<collection(@menu_opzione_DOCENTI1, @menu_opzione_DOCENTI2, @menu_opzione_DOCENTI3, @menu_opzione_DOCENTI4, @menu_opzione_DOCENTI5, @menu_opzione_DOCENTI6, @menu_opzione_DOCENTI7)>'
+    opzioni: '<collection(@menu_opzione_DOCENTI1, @menu_opzione_DOCENTI2, @menu_opzione_DOCENTI3, @menu_opzione_DOCENTI4, @menu_opzione_DOCENTI5, @menu_opzione_DOCENTI6, @menu_opzione_DOCENTI7, @menu_opzione_DOCENTI8)>'
 
   # ----- sottomenu ALUNNI -----
   menu_ALUNNI:

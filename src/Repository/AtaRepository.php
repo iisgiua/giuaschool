@@ -77,4 +77,36 @@ class AtaRepository extends BaseRepository {
     return array_column($ata, 'id');
   }
 
+  /**
+   * Restituisce la lista dei rappresentanti del personale ATA secondo i criteri indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function rappresentanti(array $criteri, int $pagina=1): array {
+    // query base
+    $query = $this->createQueryBuilder('a')
+      ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
+      ->orderBy('a.cognome,a.nome')
+      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
+        'cognome' => $criteri['cognome'].'%']);
+    // controlla tipo
+    if (empty($criteri['tipo'])) {
+      // tutti i rappresentanti
+      $query = $query
+        ->andWhere('FIND_IN_SET(:istituto, a.rappresentante)>0 OR FIND_IN_SET(:rsu, a.rappresentante)>0')
+        ->setParameter('istituto', 'I')
+        ->setParameter('rsu', 'R');
+    } else {
+      // solo tipo selezionato
+      $query = $query
+        ->andWhere('FIND_IN_SET(:tipo, a.rappresentante)>0')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // restituisce dati
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
+
 }

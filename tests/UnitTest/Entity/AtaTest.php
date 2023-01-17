@@ -28,7 +28,7 @@ class AtaTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Ata';
     // campi da testare
-    $this->fields = ['tipo', 'segreteria', 'sede', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica'];
+    $this->fields = ['tipo', 'segreteria', 'sede', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -92,7 +92,8 @@ class AtaTest extends DatabaseTestCase {
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          null)))))))))))))))))))))))));
+          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          null))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -142,9 +143,12 @@ class AtaTest extends DatabaseTestCase {
     $this->assertTrue($existent->controllaRuolo('T'), $this->entity.'::controllaRuolo');
     // getCodiceFunzioni
     $existent->setSegreteria(false);
+    $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setSegreteria(true);
-    $this->assertSame(['E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['N', 'E'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRappresentante(['I']);
+    $this->assertSame(['N', 'E', 'I'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

@@ -147,7 +147,12 @@ class Ata extends Utente {
    * @return array Lista della codifica delle funzioni
    */
   public function getCodiceFunzioni(): array {
-    return $this->segreteria ? ['E', 'N'] : ['N'];
+    $lista = $this->getRappresentante() ?? [];
+    if ($this->segreteria) {
+      $lista[] = 'E';
+    }
+    $lista[] = 'N';
+    return $lista;
   }
 
 }

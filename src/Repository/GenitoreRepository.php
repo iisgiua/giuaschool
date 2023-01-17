@@ -107,21 +107,27 @@ class GenitoreRepository extends BaseRepository {
    * @return array Array associativo con la lista dei dati
    */
   public function rappresentanti(array $criteri, int $pagina=1): array {
-    if (empty($criteri['tipo'])) {
-      // tutti i rappresentanti
-      $tipi = ['C', 'I'];
-    } else {
-      // solo rappresentanti indicati
-      $tipi = [$criteri['tipo']];
-    }
-    // esegue query
+    // query base
     $query = $this->createQueryBuilder('g')
       ->join('g.alunno', 'a')
       ->join('a.classe', 'c')
-      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND g.rappresentante IN (:tipi) AND g.nome LIKE :nome AND g.cognome LIKE :cognome')
+      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND g.nome LIKE :nome AND g.cognome LIKE :cognome')
       ->orderBy('c.anno,c.sezione,g.cognome,g.nome')
-      ->setParameters(['abilitato' => 1, 'tipi' => $tipi, 'nome' => $criteri['nome'].'%',
+      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
         'cognome' => $criteri['cognome'].'%']);
+    // controlla tipo
+    if (empty($criteri['tipo'])) {
+      // tutti i rappresentanti
+      $query = $query
+        ->andWhere('FIND_IN_SET(:classe, g.rappresentante)>0 OR FIND_IN_SET(:istituto, g.rappresentante)>0')
+        ->setParameter('classe', 'C')
+        ->setParameter('istituto', 'I');
+    } else {
+      // solo tipo selezionato
+      $query = $query
+        ->andWhere('FIND_IN_SET(:tipo, g.rappresentante)>0')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
     // restituisce dati
     return $this->paginazione($query->getQuery(), $pagina);
   }

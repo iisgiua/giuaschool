@@ -91,7 +91,7 @@ class GenitoreTest extends DatabaseTestCase {
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'rappresentante' ? $this->faker->optional($weight = 30, $default = '')->randomElement(['C', 'I']) :
+          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -141,11 +141,11 @@ class GenitoreTest extends DatabaseTestCase {
     $this->assertFalse($existent->controllaRuolo('NUADSPTM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('G'), $this->entity.'::controllaRuolo');
     // getCodiceFunzioni
-    $existent->setRappresentante('');
+    $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante('C');
+    $existent->setRappresentante(['C']);
     $this->assertSame(['C', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante('I');
+    $existent->setRappresentante(['I']);
     $this->assertSame(['I', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 

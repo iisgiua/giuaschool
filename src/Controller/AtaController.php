@@ -11,6 +11,7 @@ namespace App\Controller;
 use App\Entity\Ata;
 use App\Form\AtaType;
 use App\Form\ImportaCsvType;
+use App\Form\ModuloType;
 use App\Form\RicercaType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
@@ -309,6 +311,159 @@ class AtaController extends BaseController {
       $response->headers->set('Content-Disposition', $disposition);
       return $response;
     }
+  }
+
+  /**
+   * Gestione inserimento dei rappresentanti ATA
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/ata/rappresentanti/{pagina}", name="ata_rappresentanti",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiAction(Request $request, int $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/nome', '');
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/tipo', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/pagina', $pagina);
+    }
+    // form di ricerca
+    $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
+    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
+      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['nome'] = $form->get('nome')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/pagina', $pagina);
+    }
+    // lista rappresentanti
+    $dati = $this->em->getRepository('App\Entity\Ata')->rappresentanti($criteri, $pagina);
+    // mostra la pagina di risposta
+    $info['pagina'] = $pagina;
+    return $this->renderHtml('ata', 'rappresentanti', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Modifica i dati di un rappresentante ATA
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/ata/rappresentanti/edit/{id}", name="ata_rappresentanti_edit",
+   *    requirements={"id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
+                                           int $id): Response {
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $utente = $this->em->getRepository('App\Entity\Ata')->find($id);
+      if (!$utente) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $tipi = $utente->getRappresentante();
+      $listaUtenti = [$utente];
+    } else {
+      // azione add
+      $utente = null;
+      $tipi = array();
+      $listaUtenti = $this->em->getRepository('App\Entity\Ata')->findBy(['abilitato' => 1,
+          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
+    }
+    // form
+    $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
+      'returnUrl' => $this->generateUrl('ata_rappresentanti'),
+      'dati' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      // controlla tipi
+      $nuoviTipi = $form->get('tipi')->getData();
+      if (empty($nuoviTipi)) {
+        // errore
+        $form->addError(new FormError($trans->trans('exception.tipi_rappresentante_vuoto')));
+      }
+      if ($form->isValid()) {
+        // controlli ok
+        if (!$utente) {
+          // modifica
+          $utente = $form->get('utente')->getData();
+        }
+        // imposta tipo rappresentante
+        $utente->setRappresentante($nuoviTipi);
+        // memorizza dati
+        $this->em->flush();
+        // messaggio
+        $this->addFlash('success', 'message.update_ok');
+        // redirect
+        return $this->redirectToRoute('ata_rappresentanti');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('ata', 'rappresentanti_edit', [], [],
+      [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
+   * Elimina un rappresentante
+   *
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/ata/rappresentanti/delete/{id}", name="ata_rappresentanti_delete",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rappresentantiDeleteAction(int $id): Response {
+    // controlla utente
+    $utente = $this->em->getRepository('App\Entity\Ata')->find($id);
+    if (!$utente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // toglie il ruolo di rappresentante
+    $utente->setRappresentante(['']);
+    // memorizza dati
+    $this->em->flush();
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
+    // redirezione
+    return $this->redirectToRoute('ata_rappresentanti');
   }
 
 }

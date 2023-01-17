@@ -849,8 +849,8 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/pagina', $pagina);
     }
     // form di ricerca
-    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I',
-      'label.rappresentante_consulta' => 'P'];
+    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I',
+      'label.rappresentante_P' => 'P'];
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
       'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
     $form->handleRequest($request);
@@ -873,7 +873,7 @@ class AlunniController extends BaseController {
   }
 
   /**
-   * Gestione inserimento dei rappresentanti degli alunni e dei genitori
+   * Gestione inserimento dei rappresentanti dei genitori
    *
    * @param Request $request Pagina richiesta
    * @param int $pagina Numero di pagina per la lista visualizzata
@@ -904,7 +904,7 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', $pagina);
     }
     // form di ricerca
-    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'];
+    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
       'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
     $form->handleRequest($request);
@@ -930,6 +930,7 @@ class AlunniController extends BaseController {
    * Modifica i dati di un rappresentante
    *
    * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
    * @param int $id ID dell'alunno
    *
@@ -942,7 +943,8 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiEditAction(Request $request, string $ruolo, int $id): Response {
+  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
+                                           string $ruolo, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -953,41 +955,50 @@ class AlunniController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $tipo = $utente->getRappresentante();
+      $tipi = $utente->getRappresentante();
       $listaUtenti = [$utente];
     } else {
       // azione add
       $utente = null;
-      $tipo = null;
+      $tipi = array();
       $listaUtenti = ($ruolo == 'A') ?
         $this->em->getRepository('App\Entity\Alunno')->findBy(['abilitato' => 1,
-          'rappresentante' => ''], ['cognome' => 'ASC', 'nome' => 'ASC']) :
+          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']) :
         $this->em->getRepository('App\Entity\Genitore')->findBy(['abilitato' => 1,
-          'rappresentante' => ''], ['cognome' => 'ASC', 'nome' => 'ASC']);
+          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
-    $listaTipi = ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'];
+    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
     if ($ruolo == 'A') {
       // solo per gli alunni
-      $listaTipi['label.rappresentante_consulta'] = 'P';
+      $listaTipi['label.rappresentante_P'] = 'P';
     }
     $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
       'returnUrl' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
-      'dati' => [$utente, $listaUtenti, $tipo, $listaTipi]]);
+      'dati' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      if (!$utente) {
-        // modifica
-        $utente = $form->get('utente')->getData();
+    if ($form->isSubmitted()) {
+      // controlla tipi
+      $nuoviTipi = $form->get('tipi')->getData();
+      if (empty($nuoviTipi)) {
+        // errore
+        $form->addError(new FormError($trans->trans('exception.tipi_rappresentante_vuoto')));
       }
-      // imposta tipo rappresentante
-      $utente->setRappresentante($form->get('tipo')->getData());
-      // memorizza dati
-      $this->em->flush();
-      // messaggio
-      $this->addFlash('success', 'message.update_ok');
-      // redirect
-      return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+      if ($form->isValid()) {
+        // controlli ok
+        if (!$utente) {
+          // modifica
+          $utente = $form->get('utente')->getData();
+        }
+        // imposta tipo rappresentante
+        $utente->setRappresentante($nuoviTipi);
+        // memorizza dati
+        $this->em->flush();
+        // messaggio
+        $this->addFlash('success', 'message.update_ok');
+        // redirect
+        return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+      }
     }
     // mostra la pagina di risposta
     return $this->renderHtml('alunni', 'rappresentanti'.($ruolo == 'G' ? 'Genitori' : '').'_edit',
@@ -1018,7 +1029,7 @@ class AlunniController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // toglie il ruolo di rappresentante
-    $utente->setRappresentante('');
+    $utente->setRappresentante(['']);
     // memorizza dati
     $this->em->flush();
     // messaggio

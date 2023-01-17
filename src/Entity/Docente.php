@@ -116,7 +116,12 @@ class Docente extends Utente {
    * @return array Lista della codifica delle funzioni
    */
   public function getCodiceFunzioni(): array {
-    return $this->responsabileBes ? ['B', 'N'] : ['N'];
+    $lista = $this->getRappresentante() ?? [];
+    if ($this->responsabileBes) {
+      $lista[] = 'B';
+    }
+    $lista[] = 'N';
+    return $lista;
   }
 
   /**

@@ -210,7 +210,7 @@ class ModuloType extends AbstractType {
             'choice_label' => function ($obj) {
               return ($obj instanceOf Alunno ?
                 $obj.' - '.$obj->getClasse() :
-                (is_object($obj) ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
+                ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
                 $obj)); },
             'choice_value' => function ($obj) {
               return (is_object($obj) ? $obj->getId() : $obj); },
@@ -219,10 +219,12 @@ class ModuloType extends AbstractType {
             'attr' => ['widget' => 'search'],
             'disabled' => count($options['dati'][1]) == 1,
             'required' => true))
-          ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+          ->add('tipi', ChoiceType::class, array('label' => 'label.tipo',
             'data' => $options['dati'][2],
             'choices' => $options['dati'][3],
             'placeholder' => 'label.choose_option',
+            'expanded' => true,
+            'multiple' => true,
             'required' => true));
     }
     // aggiunge pulsanti al form

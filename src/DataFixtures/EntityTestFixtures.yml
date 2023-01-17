@@ -41,7 +41,7 @@ App\Entity\Alunno:
     credito4: 0
     classe: '@classe_1'
     genitori: '<collection(@genitore_1)>'
-    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
+    rappresentante: '<(array())>'
 
 App\Entity\Amministratore:
   amministratore:
@@ -133,6 +133,7 @@ App\Entity\Ata:
     tipo: 'D'
     segreteria: true
     sede:
+    rappresentante: '<(array())>'
 
 App\Entity\AvvisoClasse:
   avviso_classe_{1..5}:
@@ -302,6 +303,7 @@ App\Entity\Docente:
     notifica: '<(array())>'
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'
 
 App\Entity\Documento:
   documento_{1..5}:
@@ -400,7 +402,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_<current()>'
-    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
+    rappresentante: '<(array())>'
 
 App\Entity\Istituto:
   istituto:
@@ -677,6 +679,7 @@ App\Entity\Staff:
     sede: '70%? @sede_1'
     responsabileBes: '<boolean(20)>'
     responsabileBesSede: '<($responsabileBes ? $sede : null)>'
+    rappresentante: '<(array())>'
 
 App\Entity\StoricoEsito:
   storico_esito_{1..5}:

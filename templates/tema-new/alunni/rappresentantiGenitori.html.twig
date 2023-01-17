@@ -19,7 +19,7 @@
         <tr>
           <td><small>{{ u.alunno.classe }}</small></td>
           <td><small>{{ u }} - {{ u.alunno }}</small></td>
-          <td><small>{{ ('label.rappresentante_'~(u.rappresentante == 'C' ? 'classe' : (u.rappresentante == 'I' ? 'istituto' : '')))|trans }}</small></td>
+          <td><small>{% for r in u.rappresentante %}{{ ('label.rappresentante_'~r)|trans }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
           <td class="pb-0">
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_rappresentanti_edit', {ruolo: 'G', id: u.id}) }}" role="button" title="Modifica i dati del rappresentante">{{ 'label.edit'|trans }}</a>
             <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('alunni_rappresentanti_delete', {ruolo: 'G', id: u.id}) }}" role="button" title="Elimina il rappresentante">{{ 'label.delete'|trans }}</a>

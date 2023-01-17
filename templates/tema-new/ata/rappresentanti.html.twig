@@ -8,8 +8,8 @@
     <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
       <thead class="thead-light">
         <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.classe'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.rappresentante'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.tipo'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
         </tr>
@@ -17,12 +17,12 @@
       <tbody>
   {% for u in dati.lista %}
         <tr>
-          <td><small>{{ u.classe }}</small></td>
           <td><small>{{ u }}</small></td>
+          <td><small>{{ u.sede ? u.sede.citta }}</small></td>
           <td><small>{% for r in u.rappresentante %}{{ ('label.rappresentante_'~r)|trans }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
           <td class="pb-0">
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_rappresentanti_edit', {ruolo: 'A', id: u.id}) }}" role="button" title="Modifica i dati del rappresentante">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('alunni_rappresentanti_delete', {ruolo: 'A', id: u.id}) }}" role="button" title="Elimina il rappresentante">{{ 'label.delete'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_rappresentanti_edit', {id: u.id}) }}" role="button" title="Modifica i dati del rappresentante">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('ata_rappresentanti_delete', {id: u.id}) }}" role="button" title="Elimina il rappresentante">{{ 'label.delete'|trans }}</a>
           </td>
         </tr>
   {% endfor %}
@@ -30,13 +30,13 @@
       <tfoot>
         <tr>
           <td colspan="5">
-            <a class="btn btn-primary btn-sm" href="{{ path('alunni_rappresentanti_edit', {ruolo: 'A', id: 0}) }}" role="button" title="Aggiungi un nuovo rappresentante">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('ata_rappresentanti_edit', {id: 0}) }}" role="button" title="Aggiungi un nuovo rappresentante">{{ 'label.add'|trans }}</a>
           </td>
         </tr>
       </tfoot>
     </table>
   </div>
-  {{ include('tema-new/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_rappresentanti'}) }}
+  {{ include('tema-new/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'ata_rappresentanti'}) }}
 </div>
 {% endblock %}
 
@@ -46,7 +46,7 @@
 $(document).ready(function() {
   $("#gs-paginazione").on("submit", function() {
     var p = $("#jumpToPage").val();
-    window.location.href = "{{ path('alunni_rappresentanti') }}/"+p;
+    window.location.href = "{{ path('ata_rappresentanti') }}/"+p;
     return false;
   });
 });

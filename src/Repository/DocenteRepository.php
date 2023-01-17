@@ -320,4 +320,36 @@ class DocenteRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
+  /**
+   * Restituisce la lista dei rappresentanti dei docenti secondo i criteri indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function rappresentanti(array $criteri, int $pagina=1): array {
+    // query base
+    $query = $this->createQueryBuilder('d')
+      ->where('d.abilitato=:abilitato AND d.nome LIKE :nome AND d.cognome LIKE :cognome')
+      ->orderBy('d.cognome,d.nome')
+      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
+        'cognome' => $criteri['cognome'].'%']);
+    // controlla tipo
+    if (empty($criteri['tipo'])) {
+      // tutti i rappresentanti
+      $query = $query
+        ->andWhere('FIND_IN_SET(:istituto, d.rappresentante)>0 OR FIND_IN_SET(:rsu, d.rappresentante)>0')
+        ->setParameter('istituto', 'I')
+        ->setParameter('rsu', 'R');
+    } else {
+      // solo tipo selezionato
+      $query = $query
+        ->andWhere('FIND_IN_SET(:tipo, d.rappresentante)>0')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // restituisce dati
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
+
 }
