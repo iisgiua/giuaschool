@@ -152,9 +152,9 @@ class StaffTest extends DatabaseTestCase {
     $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setResponsabileBes(true);
-    $this->assertSame(['N', 'B'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['B', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante(['I']);
-    $this->assertSame(['N', 'B', 'I'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['I', 'B', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

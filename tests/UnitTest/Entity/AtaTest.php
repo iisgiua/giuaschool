@@ -146,9 +146,9 @@ class AtaTest extends DatabaseTestCase {
     $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setSegreteria(true);
-    $this->assertSame(['N', 'E'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante(['I']);
-    $this->assertSame(['N', 'E', 'I'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['I', 'E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

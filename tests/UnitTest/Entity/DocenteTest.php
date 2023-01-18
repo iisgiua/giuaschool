@@ -152,9 +152,9 @@ class DocenteTest extends DatabaseTestCase {
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante([]);
     $existent->setResponsabileBes(true);
-    $this->assertSame(['N', 'B'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['B', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante(['I']);
-    $this->assertSame(['N', 'B', 'I'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['I', 'B', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // toString
     $this->assertSame(($existent->getSesso() == 'M' ? 'Prof. ' : 'Prof.ssa ').$existent->getCognome().' '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
