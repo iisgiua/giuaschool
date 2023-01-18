@@ -32,8 +32,8 @@ Scenario: visualizza errore per cancellazione piano di lavoro di cattedra inesis
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
   E modifica istanze di tipo "Cattedra":
-    | classe  | materia | #abilitata |
-    | $cl1    | $m1     | no         |
+    | classe  | materia | #attiva |
+    | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
     | id  | classe | materia | docente | tipo |
     | $d1 | $cl1   | $m1     | #other  | L    |
@@ -68,8 +68,8 @@ Scenario: visualizza errore per cancellazione programma di cattedra inesistente
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
   E modifica istanze di tipo "Cattedra":
-    | classe  | materia | #abilitata |
-    | $cl1    | $m1     | no         |
+    | classe  | materia | #attiva |
+    | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
     | id  | classe | materia | docente | tipo |
     | $d1 | $cl1   | $m1     | #other  | P    |
@@ -104,8 +104,8 @@ Scenario: visualizza errore per cancellazione relazione di cattedra inesistente
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
   E modifica istanze di tipo "Cattedra":
-    | classe  | materia | #abilitata |
-    | $cl1    | $m1     | no         |
+    | classe  | materia | #attiva |
+    | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
     | id  | classe | materia | docente | tipo |
     | $d1 | $cl1   | $m1     | #other  | R    |
