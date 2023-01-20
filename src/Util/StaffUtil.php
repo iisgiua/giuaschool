@@ -187,6 +187,7 @@ class StaffUtil {
       foreach ($n->getAlunni() as $alu) {
         $alunni[] = $alu->getCognome().' '.$alu->getNome();
       }
+      sort($alunni);
       $dati_periodo[$numperiodo][$data]['individuale'][] = array(
         'data' => $data_str,
         'nota' => $n->getTesto(),

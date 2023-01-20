@@ -683,15 +683,15 @@ class RegistroUtil {
       $nt['docente_provvedimento'] = ($n->getDocenteProvvedimento() ?
         $n->getDocenteProvvedimento()->getNome().' '.$n->getDocenteProvvedimento()->getCognome() : null);
       if ($n->getTipo() == 'I') {
-        $alunni = '';
         $alunni_id = '';
+        $alunni = [];
         foreach ($n->getAlunni() as $alu) {
-          $alunni .= ', '.$alu->getCognome().' '.$alu->getNome();
+          $alunni[] = $alu->getCognome().' '.$alu->getNome();
           $alunni_id .= ','.$alu->getId();
         }
-        $alunni = substr($alunni, 2);
+        sort($alunni);
         $alunni_id = substr($alunni_id, 1);
-        $nt['alunni'] = $alunni;
+        $nt['alunni'] = implode(', ', $alunni);
         $nt['alunni_id'] = $alunni_id;
       }
       // controlla azioni
