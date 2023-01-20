@@ -849,7 +849,7 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/pagina', $pagina);
     }
     // form di ricerca
-    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I',
+    $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
       'label.rappresentante_P' => 'P'];
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
       'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
@@ -904,7 +904,7 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', $pagina);
     }
     // form di ricerca
-    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
+    $listaTipi = ['label.rappresentante_L' => 'L', 'label.rappresentante_I' => 'I'];
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
       'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
     $form->handleRequest($request);
@@ -968,10 +968,11 @@ class AlunniController extends BaseController {
           'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
-    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
+    $listaTipi = ['label.rappresentante_L' => 'L', 'label.rappresentante_I' => 'I'];
     if ($ruolo == 'A') {
       // solo per gli alunni
-      $listaTipi['label.rappresentante_P'] = 'P';
+      $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
+        'label.rappresentante_P' => 'P'];
     }
     $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
       'returnUrl' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),

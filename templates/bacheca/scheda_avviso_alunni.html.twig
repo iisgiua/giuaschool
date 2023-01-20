@@ -17,6 +17,33 @@
   {% endfor %}
   </div>
   {% endif %}
+  <div class="gs-mt-2">
+    <strong>Destinatari:</strong>
+    {% if 'G' in dati.avviso.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
+    {% if 'A' in dati.avviso.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
+    {% if 'I' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_I'|trans }}</span>{% endif %}
+    {% if 'L' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_L'|trans }}</span>{% endif %}
+    {% if 'S' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_S'|trans }}</span>{% endif %}
+    {% if 'P' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
+  </div>
+  <div class="gs-mt-2">
+    <strong>Tipo di avviso:</strong>
+  {% if dati.avviso.tipo == 'U' %}
+    Uscita anticipata della classe
+  {% elseif dati.avviso.tipo == 'E' %}
+    Ingresso posticipato della classe
+  {% elseif dati.avviso.tipo == 'A' %}
+    Calendario attività
+  {% elseif dati.avviso.tipo == 'C' %}
+    Comunicazione generica
+  {% elseif dati.avviso.tipo == 'O' %}
+    Comunicazione del coordinatore
+  {% elseif dati.avviso.tipo == 'V' %}
+    Calendario verifiche
+  {% elseif dati.avviso.tipo == 'P' %}
+    Calendario compiti
+  {% endif %}
+  </div>
   <div class="text-center gs-mt-2">
     <a class="btn btn-success" href="{{ path('bacheca_avvisi_alunni_firma', {'classe': classe.id, 'id': a.id}) }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
   </div>

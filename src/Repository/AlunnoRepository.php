@@ -220,10 +220,6 @@ class AlunnoRepository extends BaseRepository {
       // filtro classi
       $alunni
         ->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
-    } elseif ($tipo == 'R') {
-      // filtro rppresentanti
-      $alunni
-        ->andWhere('a.rappresentante IN (:tipi)')->setParameter('tipi', $filtro);
     } elseif ($tipo == 'U') {
       // filtro utente
       $alunni
@@ -382,7 +378,7 @@ class AlunnoRepository extends BaseRepository {
       // tutti i rappresentanti
       $query = $query
         ->andWhere('FIND_IN_SET(:classe, a.rappresentante)>0 OR FIND_IN_SET(:istituto, a.rappresentante)>0 OR FIND_IN_SET(:provincia, a.rappresentante)>0')
-        ->setParameter('classe', 'C')
+        ->setParameter('classe', 'S')
         ->setParameter('istituto', 'I')
         ->setParameter('provincia', 'P');
     } else {

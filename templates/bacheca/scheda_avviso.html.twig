@@ -25,6 +25,11 @@
     {% if 'D' in dati.avviso.destinatari %}<span class="gs-mr-2">Docenti</span>{% endif %}
     {% if 'G' in dati.avviso.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
     {% if 'A' in dati.avviso.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
+    {% if 'R' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_R'|trans }}</span>{% endif %}
+    {% if 'I' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_I'|trans }}</span>{% endif %}
+    {% if 'L' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_L'|trans }}</span>{% endif %}
+    {% if 'S' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_S'|trans }}</span>{% endif %}
+    {% if 'P' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
     {% if 'D' in dati.avviso.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
     {% if 'A' in dati.avviso.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
   </div>
@@ -41,19 +46,6 @@
     <div class="gs-ml-4">
   {% for m in dati.materie %}
     {{ m.nome }}{{ not loop.last ? '<br>' }}
-  {% endfor %}
-    </div>
-  </div>
-{% elseif dati.rappresentanti|length > 0 %}
-  <div class="gs-mt-2">
-    <strong>Filtro rappresentanti:</strong>
-    <div class="gs-ml-4">
-  {% for m in dati.rappresentanti %}
-    {{ m|trans }}{{ not loop.last ? ', ' }}
-  {% endfor %}
-    <br>Sedi:
-  {% for s in dati.sedi %}
-    {{ s.citta }}{{ not loop.last ? ',' }}
   {% endfor %}
     </div>
   </div>

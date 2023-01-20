@@ -36,6 +36,11 @@
             {% if 'D' in a.destinatari %}<span class="gs-mr-2">Docenti</span>{% endif %}
             {% if 'G' in a.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
             {% if 'A' in a.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
+            {% if 'R' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_R'|trans }}</span>{% endif %}
+            {% if 'I' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_I'|trans }}</span>{% endif %}
+            {% if 'L' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_L'|trans }}</span>{% endif %}
+            {% if 'S' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_S'|trans }}</span>{% endif %}
+            {% if 'P' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
             {% if 'D' in a.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
             {% if 'A' in a.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
           </small>
@@ -46,8 +51,6 @@
             Filtro per utente
       {% elseif a.filtroTipo == 'M' %}
             Filtro per materia
-      {% elseif a.filtroTipo == 'R' %}
-            Filtro per rappresentanti
       {% elseif a.filtroTipo == 'C' %}
             Classi:
         {% for c in dati[a.id].classi %}

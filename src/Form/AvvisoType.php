@@ -87,7 +87,9 @@ class AvvisoType extends AbstractType {
           'required' => false))
         ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari',
           'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D', 'label.genitori' => 'G',
-            'label.alunni' => 'A'],
+            'label.alunni' => 'A', 'label.rappresentanti_R' => 'R', 'label.rappresentanti_I' => 'I',
+            'label.rappresentanti_L' => 'L', 'label.rappresentanti_S' => 'S',
+            'label.rappresentanti_P' => 'P'],
           'placeholder' => false,
           'expanded' => true,
           'multiple' => true,
@@ -96,7 +98,7 @@ class AvvisoType extends AbstractType {
         ->add('filtroTipo', ChoiceType::class, array('label' => 'label.filtro_tipo',
           'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T',
             'label.filtro_classe' => 'C', 'label.filtro_materia' => 'M',
-            'label.filtro_rappresentanti' => 'R', 'label.filtro_utenti' => 'U'],
+            'label.filtro_utenti' => 'U'],
           'placeholder' => false,
           'expanded' => false,
           'multiple' => false,
@@ -139,13 +141,6 @@ class AvvisoType extends AbstractType {
                 ->where("m.tipo IN ('N','R','S')")
                 ->orderBy('m.nome', 'ASC');
             },
-          'expanded' => true,
-          'multiple' => true,
-          'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
-          'required' => false,
-          'mapped' => false))
-        ->add('rappresentanti', ChoiceType::class, array('label' => 'label.scegli_rappresentanti',
-          'choices' => ['label.rappresentante_classe' => 'C', 'label.rappresentante_istituto' => 'I'],
           'expanded' => true,
           'multiple' => true,
           'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],

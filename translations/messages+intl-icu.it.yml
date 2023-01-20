@@ -249,10 +249,16 @@ label.provvedimento: Provvedimento disciplinare
 label.qualsiasi_classe: Qualsiasi classe
 label.qualsiasi_sede: Qualsiasi sede
 label.rappresentante: Rappresentante
-label.rappresentante_C: Rappresentante di classe
+label.rappresentante_L: Rappresentante di classe
+label.rappresentante_S: Rappresentante di classe
 label.rappresentante_I: Rappresentante di Istituto
 label.rappresentante_P: Consulta Provinciale
 label.rappresentante_R: Rappresentante RSU
+label.rappresentanti_L: Genitori rappresentanti di classe
+label.rappresentanti_S: Alunni rappresentanti di classe
+label.rappresentanti_I: Consiglio di Istituto
+label.rappresentanti_P: Consulta Provinciale
+label.rappresentanti_R: RSU
 label.recupero_A: Studio individuale
 label.recupero_C: Corso di recupero
 label.recupero_N: Non recuperato

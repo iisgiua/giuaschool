@@ -134,4 +134,92 @@ class UtenteRepository extends EntityRepository {
      $this->getEntityManager()->flush();
   }
 
+  /**
+   * Restituisce gli utenti relativi ai rappresentanti indicati
+   *
+   * @param array $destinatari Lista dei destinatari
+   *
+   * @return array Lista di ID degli utenti
+   */
+  public function getIdRappresentanti($destinatari) {
+    // seleziona destinatari
+    $test = [];
+    $param = [];
+    foreach ($destinatari as $dest) {
+      if (in_array($dest, ['R', 'I', 'P'])) {
+        $test[] = 'FIND_IN_SET(:'.$dest.', u.rappresentante)>0';
+        $param[] = $dest;
+      }
+    }
+    if (empty($test)) {
+      // nessun destinatario tra i rappresentanti
+      return [];
+    }
+    // crea query
+    $utenti = $this->createQueryBuilder('u')
+      ->select('DISTINCT u.id')
+      ->where('u.abilitato=:abilitato')
+      ->andWhere(implode(' OR ', $test))
+      ->setParameter('abilitato', 1);
+    foreach ($param as $p) {
+      $utenti->setParameter(':'.$p, $p);
+    }
+    // esegue query
+    $utenti = $utenti
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($utenti, 'id');
+  }
+
+  /**
+   * Restituisce gli utenti relativi ai rappresentanti di classe indicati
+   *
+   * @param array $filtro Lista dei destinatari
+   * @param array $sedi Sedi di servizio (lista ID di Sede)
+   * @param string $tipo Tipo di filtro [T=tutti, C=filtro classe]
+   * @param array $filtro Lista di ID per il filtro indicato
+   *
+   * @return array Lista di ID degli utenti
+   */
+  public function getIdRappresentantiClasse(array $destinatari, array $sedi, string $tipo, array $filtro) {
+    $alunni = [];
+    $genitori = [];
+    // rappresentanti alunni
+    if (in_array('S', $destinatari)) {
+      $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        ->select('DISTINCT a.id')
+        ->join('a.classe', 'cl')
+        ->where('a.abilitato=:abilitato AND FIND_IN_SET(:classe, a.rappresentante)>0 AND cl.sede IN (:sedi)')
+        ->setParameters(['abilitato' => 1, 'classe' => 'S', 'sedi' => $sedi]);
+      if ($tipo == 'C') {
+        // filtro classi
+        $alunni->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
+      }
+      // esegue query
+      $alunni = $alunni
+        ->getQuery()
+        ->getArrayResult();
+    }
+    // rappresentanti genitori
+    if (in_array('L', $destinatari)) {
+      $genitori = $this->_em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
+        ->select('DISTINCT g.id')
+        ->join('g.alunno', 'a')
+        ->join('a.classe', 'cl')
+        ->where('g.abilitato=:abilitato AND FIND_IN_SET(:classe, g.rappresentante)>0 AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
+        ->setParameters(['abilitato' => 1, 'classe' => 'L', 'sedi' => $sedi]);
+      if ($tipo == 'C') {
+        // filtro classi
+        $genitori->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
+      }
+      // esegue query
+      $genitori = $genitori
+        ->getQuery()
+        ->getArrayResult();
+    }
+    // restituisce la lista degli ID
+    return array_merge(array_column($alunni, 'id'), array_column($genitori, 'id'));
+  }
+
 }

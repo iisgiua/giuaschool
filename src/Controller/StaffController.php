@@ -119,7 +119,10 @@ class StaffController extends BaseController {
       ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari',
         'data' => $search['destinatari'] ? $search['destinatari'] : '',
         'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D',
-          'label.genitori' => 'G', 'label.alunni' => 'A', 'label.dsga' => 'S', 'label.ata' => 'T'],
+          'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
+          'label.rappresentanti_I' => 'I', 'label.rappresentanti_L' => 'L',
+          'label.rappresentanti_S' => 'S', 'label.rappresentanti_P' => 'P',
+          'label.dsga' => 'E', 'label.ata' => 'T'],
         'placeholder' => 'label.tutti_destinatari',
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => function($val, $key, $index) {
@@ -263,11 +266,6 @@ class StaffController extends BaseController {
       $dati['lista'] = $this->em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'M') {
       $dati['lista'] = $this->em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtro')->getData());
-    } elseif ($form->get('filtroTipo')->getData() == 'R') {
-      $rapp = array_map(fn($v) =>
-          $trans->trans($v == 'C' ? 'label.rappresentante_classe' : 'label.rappresentante_istituto'),
-        $form->get('filtro')->getData());
-      $dati['lista'] = implode(', ', $rapp);
     } elseif ($form->get('filtroTipo')->getData() == 'U') {
       $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
@@ -317,17 +315,6 @@ class StaffController extends BaseController {
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
-        }
-      } elseif ($avviso->getFiltroTipo() == 'R') {
-        // controlla rappresentanti
-        $lista = [];
-        foreach ($form->get('filtro')->getData() as $rapp) {
-          if ($rapp != 'C' && $rapp != 'I') {
-            // tipo rappresentante non valido
-            $form->addError(new FormError($trans->trans('exception.filtro_rappresentanti_invalido')));
-            break;
-          }
-          $lista[] = $rapp;
         }
       } elseif ($avviso->getFiltroTipo() == 'U') {
         // controlla utenti

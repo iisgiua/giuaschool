@@ -148,18 +148,18 @@ class Avviso {
    private ?array $destinatariAta = array();
 
   /**
-   * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
+   * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
    private ?array $destinatari = array();
 
   /**
-   * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), R=rappresentanti(solo genitori e alunni), U=utente (solo genitori e alunni)]
+   * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
    *
    * @ORM\Column(name="filtro_tipo", type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","M","R","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
    private ?string $filtroTipo = 'N';
 
@@ -503,7 +503,7 @@ class Avviso {
   }
 
   /**
-   * Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
+   * Indica i destinatari dell'avviso Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
    *
    * @return array|null Destinatari dell'avviso
    */
@@ -512,7 +512,7 @@ class Avviso {
   }
 
   /**
-   * Modifica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
+   * Modifica i destinatari dell'avviso Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
    *
    * @param array|null $destinatari Destinatari dell'avviso
    *

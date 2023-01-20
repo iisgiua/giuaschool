@@ -51,6 +51,11 @@
             {% if 'D' in a.avviso.destinatari %}<span class="gs-mr-2">Docenti</span>{% endif %}
             {% if 'G' in a.avviso.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
             {% if 'A' in a.avviso.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
+            {% if 'R' in a.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_R'|trans }}</span>{% endif %}
+            {% if 'I' in a.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_I'|trans }}</span>{% endif %}
+            {% if 'L' in a.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_L'|trans }}</span>{% endif %}
+            {% if 'S' in a.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_S'|trans }}</span>{% endif %}
+            {% if 'P' in a.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
             {% if 'D' in a.avviso.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
             {% if 'A' in a.avviso.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
           </small>
