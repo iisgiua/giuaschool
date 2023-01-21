@@ -9,6 +9,8 @@
 namespace App\Form;
 
 use App\Entity\Alunno;
+use App\Entity\Docente;
+use App\Entity\Genitore;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -208,10 +210,10 @@ class ModuloType extends AbstractType {
             'data' => $options['dati'][0],
             'choices' => $options['dati'][1],
             'choice_label' => function ($obj) {
-              return ($obj instanceOf Alunno ?
-                $obj.' - '.$obj->getClasse() :
+              return ($obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
                 ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
-                $obj)); },
+                ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
+                $obj))); },
             'choice_value' => function ($obj) {
               return (is_object($obj) ? $obj->getId() : $obj); },
             'placeholder' => 'label.choose_option',

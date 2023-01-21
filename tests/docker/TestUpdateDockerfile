@@ -23,6 +23,7 @@ RUN \
   cp tests/docker/*.feature tests/features/ && \
   cp tests/docker/*.yml tests/features/ && \
   rm -r var/cache/* && \
+  rm -r tests/temp/* && \
   chown -R www-data:www-data src/* tests/* && \
   echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
   service mariadb start && \
