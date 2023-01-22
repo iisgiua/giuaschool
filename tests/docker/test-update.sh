@@ -14,6 +14,7 @@ if [ $retval -ne 0 ]; then
 fi
 composer -q install --no-progress --no-scripts
 rm -r var/cache/*
+rm -r tests/temp/*
 
 # test other steps
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-2.feature --stop-on-failure -f progress" www-data
