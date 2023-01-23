@@ -19,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\Form;
@@ -1565,13 +1566,6 @@ class ScrutinioUtil {
           if (!isset($dati['voti'][$a][$m]['unico'])) {
             // mancano valutazioni
             $errori[$m] = 1;
-          //-- } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
-                     //-- $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
-            //-- // mancano recuperi
-            //-- $errori[$m] = 2;
-          //-- } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
-            // mancano debiti
-            //-- $errori[$m] = 3;
           }
         } else {
           // condotta
@@ -1593,17 +1587,6 @@ class ScrutinioUtil {
       }
     }
     if (empty($errori)) {
-      // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('P');
-      $scrutinio_dati = $scrutinio->getDati();
-      foreach ($def->getStruttura() as $step=>$args) {
-        if ($args[0] == 'Argomento') {
-          // resetta validazione
-          $scrutinio_dati['verbale'][$step]['validato'] = false;
-        }
-      }
-      // memorizza dati scrutinio
-      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
@@ -1705,7 +1688,6 @@ class ScrutinioUtil {
     // legge comunicazioni
     $dati = $this->quadroComunicazioni($docente, $classe, 'P');
     // controllo debiti
-
     foreach ($dati['debiti'] as $alu=>$d) {
       $compilato = $dati['esiti'][$alu]['debiti'];
       if (!$compilato) {
@@ -1718,6 +1700,18 @@ class ScrutinioUtil {
       }
     }
     if (empty($errore)) {
+      // legge definizione scrutinio e verbale
+      $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('P');
+      $scrutinio_dati = $scrutinio->getDati();
+      $scrutinio_dati['verbale'] = [];
+      foreach ($def->getStruttura() as $step=>$args) {
+        if ($args[0] == 'Argomento') {
+          // resetta validazione
+          $scrutinio_dati['verbale'][$step]['validato'] = false;
+        }
+      }
+      // memorizza dati scrutinio
+      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('6');
       $this->em->flush();
@@ -1901,6 +1895,11 @@ class ScrutinioUtil {
         // ora non presente
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
+      $numeroVerbale = (int) $form->get('numeroVerbale')->getData();
+      if ($numeroVerbale <= 0) {
+        // numero verbale errato
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_numero_verbale'));
+      }
       // controlla validazione argomenti
       $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('P');
       if (!isset($scrutinio->getDati()['verbale'])) {
@@ -1919,6 +1918,10 @@ class ScrutinioUtil {
       }
       // se niente errori cambia stato
       if (!$this->reqstack->getSession()->getFlashBag()->has('errore')) {
+        // imposta dati
+        $datiScrutinio = $scrutinio->getDati();
+        $datiScrutinio['numeroVerbale'] = $numeroVerbale;
+        $scrutinio->setDati($datiScrutinio);
         // imposta ora fine
         $scrutinio->setFine($form->get('fine')->getData());
         // aggiorna stato
@@ -4981,8 +4984,10 @@ class ScrutinioUtil {
     // legge ora fine
     $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
     $dati['scrutinio']['fine'] = $scrutinio->getFine() ? $scrutinio->getFine() : $ora;
-    // legge svolgimento scrutinio
-    $dati['scrutinio']['in_presenza'] = isset($dati_scrutinio['in_presenza']) ? $dati_scrutinio['in_presenza'] : null;
+    // legge numero verbale
+    $dati['scrutinio']['numeroVerbale'] = $dati_scrutinio['numeroVerbale'] ?? null;
+    //-- // legge svolgimento scrutinio
+    //-- $dati['scrutinio']['in_presenza'] = isset($dati_scrutinio['in_presenza']) ? $dati_scrutinio['in_presenza'] : null;
     // legge definizione scrutinio e verbale
     $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     $struttura = array();
@@ -5024,12 +5029,16 @@ class ScrutinioUtil {
     $form
       ->setAction($this->router->generate('coordinatore_scrutinio',
         ['classe' => $classe->getId(), 'stato' => 'C']))
-      ->add('in_presenza', ChoiceType::class, array('label' => false,
-        'data' => $dati['scrutinio']['in_presenza'],
-        'choices' => ['label.scrutinio_svolto_in_presenza' => true, 'label.scrutinio_svolto_a_distanza' => false],
-        'expanded' => true,
-        'multiple' => false,
-        'label_attr' => ['class' => 'gs-pt-0 gs-mr-5'],
+      //-- ->add('in_presenza', ChoiceType::class, array('label' => false,
+        //-- 'data' => $dati['scrutinio']['in_presenza'],
+        //-- 'choices' => ['label.scrutinio_svolto_in_presenza' => true, 'label.scrutinio_svolto_a_distanza' => false],
+        //-- 'expanded' => true,
+        //-- 'multiple' => false,
+        //-- 'label_attr' => ['class' => 'gs-pt-0 gs-mr-5'],
+        //-- 'required' => true))
+      ->add('numeroVerbale', IntegerType::class, array('label' => 'label.numero_verbale',
+        'data'=> $dati['scrutinio']['numeroVerbale'],
+        'attr' => ['min' => 1],
         'required' => true))
       ->add('fine', TimeType::class, array('label' => false,
         'data'=> $dati['scrutinio']['fine'],
@@ -5755,7 +5764,6 @@ class ScrutinioUtil {
     // legge comunicazioni
     $dati = $this->quadroComunicazioni($docente, $classe, 'S');
     // controllo debiti
-
     foreach ($dati['debiti'] as $alu=>$d) {
       $compilato = $dati['esiti'][$alu]['debiti'];
       if (!$compilato) {

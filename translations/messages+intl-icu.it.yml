@@ -1453,6 +1453,7 @@ exception.prima_inizio_anno: La data è precedente all'inizio dell'anno scolasti
 exception.quinta_sospeso_esito: Impossibile sospendere il giudizio per una classe quinta.
 exception.scrutinio_data: Data dello scrutinio non valida.
 exception.scrutinio_fine: Ora della fine dello scrutinio non valida.
+exception.scrutinio_numero_verbale: Numero del verbale non valido.
 exception.scrutinio_inizio: Ora di inizio dello scrutinio non valida.
 exception.scrutinio_lista_no_scrutinabili: Si è verificato un errore di sistema. Riprova ad inviare i dati.
 exception.scrutinio_motivazione_deroga: Non hai indicato le motivazioni della deroga per uno o più alunni.
