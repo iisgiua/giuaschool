@@ -22,6 +22,7 @@ retval=$?
 if [ $retval -ne 0 ]; then
   exit 1
 fi
+rm -r tests/temp/*
 
 # smoke test
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-3.feature --stop-on-failure -f progress" www-data
