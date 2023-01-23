@@ -11,6 +11,14 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 6: verbale e chiusura</h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
+  <div class="gs-mb-5">
+    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Numero del verbale</label>
+    <div class="form-group">
+      <div class="col-sm-3 gs-ml-5">
+        {{ form_widget(form.numeroVerbale) }}
+      </div>
+    </div>
+  </div>
     {% for step,args in dati.verbale.struttura %}
       {% if args.tipo == 'Argomento' %}
   <div class="gs-mb-5">

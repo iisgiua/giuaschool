@@ -11,7 +11,7 @@
 </table>
 <p>&nbsp;</p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
-  <p><strong>OGGETTO: Scrutinio del secondo trimestre A.S.
+  <p><strong>OGGETTO: Scrutinio del {{ app.session.get('/CONFIG/SCUOLA/periodo2_nome') }} A.S.
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione del debito formativo</strong></p>
   <br>
   <p>Il Consiglio di Classe, nella seduta dello scrutinio del
@@ -39,7 +39,7 @@
   {% endif %}
 {% endfor %}
   </table>
-  <p>Qualora le famiglie non intendano far frequentare ai propri figli gli eventuai corsi indicati,
+  <p>Qualora le famiglie non intendano far frequentare ai propri figli gli eventuali corsi indicati,
     dovranno dichiarare che provvederanno autonomamente agli interventi di recupero.</p>
   <p>In ogni caso, gli studenti dovranno colmare le lacune nel corso dell'Anno Scolastico.</p>
 {{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}

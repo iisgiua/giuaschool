@@ -874,7 +874,7 @@ class ScrutinioUtil {
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->reqstack->getSession()->getFlashBag()->clear();
-   // aggiorna stato
+    // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
@@ -5164,7 +5164,7 @@ class ScrutinioUtil {
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->reqstack->getSession()->getFlashBag()->clear();
-   // aggiorna stato
+    // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
@@ -5478,13 +5478,6 @@ class ScrutinioUtil {
           if (!isset($dati['voti'][$a][$m]['unico'])) {
             // mancano valutazioni
             $errori[$m] = 1;
-          //-- } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
-                     //-- $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
-            //-- // mancano recuperi
-            //-- $errori[$m] = 2;
-          //-- } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
-            //-- // mancano debiti
-            //-- $errori[$m] = 3;
           }
         } else {
           // condotta
@@ -5506,17 +5499,6 @@ class ScrutinioUtil {
       }
     }
     if (empty($errori)) {
-      // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('S');
-      $scrutinio_dati = $scrutinio->getDati();
-      foreach ($def->getStruttura() as $step=>$args) {
-        if ($args[0] == 'Argomento') {
-          // resetta validazione
-          $scrutinio_dati['verbale'][$step]['validato'] = false;
-        }
-      }
-      // memorizza dati scrutinio
-      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
@@ -5600,7 +5582,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 4->3 per lo scrutinio del periodo S
+   * Esegue il passaggio di stato 5->4 per lo scrutinio del periodo S
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -5652,6 +5634,11 @@ class ScrutinioUtil {
         // ora non presente
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
+      $numeroVerbale = (int) $form->get('numeroVerbale')->getData();
+      if ($numeroVerbale <= 0) {
+        // numero verbale errato
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_numero_verbale'));
+      }
       // controlla validazione argomenti
       $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('S');
       if (!isset($scrutinio->getDati()['verbale'])) {
@@ -5670,6 +5657,10 @@ class ScrutinioUtil {
       }
       // se niente errori cambia stato
       if (!$this->reqstack->getSession()->getFlashBag()->has('errore')) {
+        // imposta dati
+        $datiScrutinio = $scrutinio->getDati();
+        $datiScrutinio['numeroVerbale'] = $numeroVerbale;
+        $scrutinio->setDati($datiScrutinio);
         // imposta ora fine
         $scrutinio->setFine($form->get('fine')->getData());
         // aggiorna stato
@@ -5776,6 +5767,18 @@ class ScrutinioUtil {
       }
     }
     if (empty($errore)) {
+      // legge definizione scrutinio e verbale
+      $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('S');
+      $scrutinio_dati = $scrutinio->getDati();
+      $scrutinio_dati['verbale'] = [];
+      foreach ($def->getStruttura() as $step=>$args) {
+        if ($args[0] == 'Argomento') {
+          // resetta validazione
+          $scrutinio_dati['verbale'][$step]['validato'] = false;
+        }
+      }
+      // memorizza dati scrutinio
+      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('6');
       $this->em->flush();
