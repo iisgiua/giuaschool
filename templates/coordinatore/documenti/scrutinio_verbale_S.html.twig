@@ -14,7 +14,7 @@
     nei locali dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</em>
     di {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, si riunisce
     a seguito di regolare convocazione (circ. n. {{ str[2]['circolareNumero'] is defined ? str[2]['circolareNumero'] }} del {{ str[2]['circolareData'] is defined ? str[2]['circolareData'] }}),
-    il Consiglio della Classe della {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente Ordine del Giorno:
+    il Consiglio di Classe della {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente Ordine del Giorno:
   </p>
   <ol>
     {% for num,arg in dati.definizione.argomenti %}
@@ -68,7 +68,7 @@
     {% endif %}
   <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
     (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
-    dichiarando aperta la seduta.
+    dichiarando aperta la seduta e procedendo con la trattazione dei punti all'ordine del giorno.
   </p>
   <p>&nbsp;</p>
 {#============================== SCRUTINIO SVOLGIMENTO ==============================#}
@@ -107,7 +107,7 @@
   <p>&nbsp;</p>
 {#============================== ARGOMENTO ==============================#}
   {% elseif str[0] == 'Argomento' %}
-  <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
+  <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}</strong></p>
     {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %}
   <p>{{ str[2]['inizio']|nl2br }}
     <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em>

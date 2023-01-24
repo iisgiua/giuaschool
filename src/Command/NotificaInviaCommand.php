@@ -169,10 +169,10 @@ class NotificaInviaCommand extends Command {
     // invio dei messaggi
     foreach (array_merge($notifiche1, $notifiche2)  as $not) {
       // invia un messaggio alla volta
-      if ($not->getApp()->getNotifica() == 'E') {
+      //-- if ($not->getApp()->getNotifica() == 'E') {
         // notifica via email
         $num += $this->inviaEmail($not, $istituto);
-      }
+      //-- }
       // rende permanenti modifiche
       $this->em->flush();
     }

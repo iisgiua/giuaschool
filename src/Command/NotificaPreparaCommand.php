@@ -245,19 +245,20 @@ class NotificaPreparaCommand extends Command {
             ($utente instanceof Docente ? 'D' : ($utente instanceof Ata ? 'T' : ''))));
           $dati_notifica = $utente->getNotifica();
           $app = null;
-          if (empty($dati_notifica) && strpos('DT', $tipo) !== false) {
+          if (strpos('DT', $tipo) !== false) {
+          //-- if (empty($dati_notifica) && strpos('DT', $tipo) !== false) {
             // forza invio via email per docenti/ata
-            $app = $this->em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
-              'abilitati' => 'DT', 'attiva' => 1]);
-          } elseif (!empty($dati_notifica)) {
-            // legge app di notifica
-            $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $dati_notifica['app'],
-              'attiva' => 1]);
-          }
-          if ($app && $app->getNotifica() != 'N' && $tipo && strpos($app->getAbilitati(), $tipo) !== false) {
-            $stato = 'A';
+            //-- $app = $this->em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
+              //-- 'abilitati' => 'DT', 'attiva' => 1]);
+          //-- } elseif (!empty($dati_notifica)) {
+            //-- // legge app di notifica
+            //-- $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $dati_notifica['app'],
+              //-- 'attiva' => 1]);
+          //-- }
+          //-- if ($app && $app->getNotifica() != 'N' && $tipo && strpos($app->getAbilitati(), $tipo) !== false) {
+            //-- $stato = 'A';
             // crea messaggio
-            if ($app->getNotifica() == 'E') {
+            //-- if ($app->getNotifica() == 'E') {
               // notifica via email
               $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
               $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
@@ -271,11 +272,12 @@ class NotificaPreparaCommand extends Command {
               $dati_notifica['email'] = $utente->getEmail();
               // imposta la precedenza su altri messaggi
               $stato = 'P';
-            } else {
-              // notifica tramite messaggio
-              $testo = $this->trans->trans('message.presenti_nuove_circolari', ['num' => count($circ)]);
-              $testo = htmlspecialchars(str_replace(["\r", "\n\n"], ["\n", "\n"], $testo));
-            }
+              $app = $this->em->getRepository('App\Entity\App')->findOneByNome('NotificaEmail');
+            //-- } else {
+              //-- // notifica tramite messaggio
+              //-- $testo = $this->trans->trans('message.presenti_nuove_circolari', ['num' => count($circ)]);
+              //-- $testo = htmlspecialchars(str_replace(["\r", "\n\n"], ["\n", "\n"], $testo));
+            //-- }
             // crea notifica per l'invio
             $notifica_invio = (new NotificaInvio())
               ->setStato($stato)
