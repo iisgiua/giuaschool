@@ -61,7 +61,7 @@ App\Entity\Configurazione:
     categoria: 'SISTEMA'
     parametro: 'versione'
     descrizione: 'Numero di versione dell''applicazione\<br>[testo]'
-    valore: '1.5.1'
+    valore: '1.5.2'
     gestito: true
   configurazione_SISTEMA2:
     categoria: 'SISTEMA'
