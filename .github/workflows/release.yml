@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
+    outputs:
+      tag: ${{ steps.previous-release.outputs.tag_name }}
     steps:
 
       - name: Check out the repo
@@ -25,6 +27,12 @@ jobs:
 
       - name: Set up docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Get latest release tag
+        id: previous-release
+        uses: jossef/action-latest-release-info@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Generate changelog from latest release
         id: changelog
@@ -163,3 +171,20 @@ jobs:
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
           commit_message: 'Add changelog pages to documentation'
+
+  test-update:
+    needs: release
+    name: Test update procedure
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Test update procedure
+        run: |
+          TAG="${{ needs.release.outputs.tag }}"
+          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${{ github.event.inputs.version }}" -t gs:test -f tests/docker/TestUpdateDockerfile .
+          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test
