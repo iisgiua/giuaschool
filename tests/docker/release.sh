@@ -6,8 +6,8 @@ rm -f -r tests/
 rm -f -r var/cache/* var/log/* var/sessions/*
 
 # Adjust cache and session dirs
-mkdir var/cache/prod
-mkdir var/session/prod
+mkdir -p var/cache/prod
+mkdir -p var/session/prod
 chown -R www-data:www-data var
 
 # Rename .env to avoid overwriting on update

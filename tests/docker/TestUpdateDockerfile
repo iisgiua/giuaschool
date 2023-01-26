@@ -16,7 +16,7 @@ COPY --chown=www-data:www-data tests/ ./tests/
 
 # set test environment
 RUN \
-  if [ "$NEWVERSION" = "$VERSION-build" ] ; then DIR="update-v$VERSION" ; FILE="giuaschool-update-v$VERSION" ; else DIR="v$VERSION" ; FILE="giuaschool-release-v$VERSION" ; fi && \
+  if [ "$NEWVERSION" = "$VERSION-build" ] ; then DIR="update-v$VERSION" ; FILE="giuaschool-update-v$VERSION" ; else DIR="v$NEWVERSION" ; FILE="giuaschool-release-v$NEWVERSION" ; fi && \
   cd src/Install && \
   wget https://github.com/iisgiua/giuaschool/releases/download/$DIR/$FILE.zip && \
   cd ../../ && \
