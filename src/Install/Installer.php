@@ -213,18 +213,27 @@ class Installer {
     $this->step = 1;
     // imposta il token univoco di installazione
     $this->token = bin2hex(random_bytes(16));
+    // solo modalità installazione
+    $this->mode = 'Create';
     // controlla esistenza file .env
     $envPath = $this->projectPath.'/.env';
     if (!file_exists($envPath)) {
       // non esiste file .env
-      $this->mode = 'Create';
-      return;
+      $envPath = $this->projectPath.'/.env-dist';
+      if (!file_exists($envPath)) {
+        // scrive nuovo file .env
+        $this->writeEnv();
+      }
     }
     // legge .env e carica variabili di ambiente
     $this->env = parse_ini_file($envPath);
-    $this->env['APP_SECRET'] = '';
-    // solo modalità installazione
-    $this->mode = 'Create';
+    // legge versione corrente
+    try {
+      $this->connectDb();
+      $this->version = $this->getParameter('versione');
+    } catch (\Exception $e) {
+      // tabella di configurazione non esistente
+    }
   }
 
   /**
