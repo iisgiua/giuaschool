@@ -237,7 +237,7 @@ class Updater {
     }
     // converte nomi file per compatibilità
     foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
-      preg_match('!/giuaschool-(release|update)-v([\d\.]+)\.zip$!', $file, $matches);
+      preg_match('!/giuaschool-(release|update)-v(.+)\.zip$!', $file, $matches);
       $newFile = $this->projectPath.'/src/Install/v'.$matches[2].
         ($matches[1] == 'update' ? '-build' : '').'.zip';
       rename($file, $newFile);
