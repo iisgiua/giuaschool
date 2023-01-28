@@ -11,6 +11,7 @@ WORKDIR /var/www/giuaschool
 
 # update files needed for testing
 COPY --chown=www-data:www-data src/Install/ ./src/Install/
+COPY --chown=www-data:www-data src/DataFixtures/ ./src/DataFixtures/
 COPY --chown=www-data:www-data public/install/ ./public/install/
 COPY --chown=www-data:www-data tests/ ./tests/
 
