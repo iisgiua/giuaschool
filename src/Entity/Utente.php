@@ -252,7 +252,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
-  private ?array $rappresentante = array();
+  private ?array $rappresentante = array('');
 
   /**
    * @var array|null $listaProfili Lista di profili per lo stesso utente (dato non persistente)
