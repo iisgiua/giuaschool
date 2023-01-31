@@ -1,0 +1,13 @@
+<?php
+
+return [
+  'fileCopy' => [
+  ],
+  'fileDelete' => [
+  ],
+  'sqlCommand' => [
+    ["UPDATE gs_utente SET rappresentante='' WHERE rappresentante IS NULL OR rappresentante='a:0:{}';", ""],
+  ],
+  'envDelete' => [
+  ]
+];
