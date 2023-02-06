@@ -15,7 +15,6 @@ use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
 use App\Entity\Lezione;
 use App\Entity\Nota;
-use App\Entity\Notifica;
 use App\Form\MessageType;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
@@ -1039,36 +1038,15 @@ class RegistroController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
+        // log azione
         if (!$id) {
           // nuovo
-          if ($annotazione->getAvviso()) {
-            $notifica = (new Notifica())
-              ->setAzione('A')
-              ->setOggettoNome('Avviso')
-              ->setOggettoId($annotazione->getAvviso()->getId());
-            $this->em->persist($notifica);
-          }
           $dblogger->logAzione('REGISTRO', 'Crea annotazione', array(
             'Annotazione' => $annotazione->getId(),
             'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
             ));
         } else {
           // modifica
-          if ($annotazione->getAvviso()) {
-            if ($log_avviso) {
-              $notifica = (new Notifica())
-                ->setAzione('D')
-                ->setOggettoNome('Avviso')
-                ->setOggettoId($log_avviso);
-              $this->em->persist($notifica);
-            }
-            $notifica = (new Notifica())
-              ->setAzione('A')
-              ->setOggettoNome('Avviso')
-              ->setOggettoId($annotazione->getAvviso()->getId());
-            $this->em->persist($notifica);
-          }
           $dblogger->logAzione('REGISTRO', 'Modifica annotazione', array(
             'Annotazione' => $annotazione->getId(),
             'Docente' => $annotazione_old->getDocente()->getId(),
@@ -1153,14 +1131,7 @@ class RegistroController extends BaseController {
     $this->em->remove($annotazione);
     // ok: memorizza dati
     $this->em->flush();
-    // log azione e notifica
-    if ($log_avviso) {
-      $notifica = (new Notifica())
-        ->setAzione('D')
-        ->setOggettoNome('Avviso')
-        ->setOggettoId($log_avviso);
-      $this->em->persist($notifica);
-    }
+    // log azione
     $dblogger->logAzione('REGISTRO', 'Cancella annotazione', array(
       'Annotazione' => $annotazione_id,
       'Classe' => $annotazione->getClasse()->getId(),

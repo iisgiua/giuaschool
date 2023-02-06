@@ -510,19 +510,6 @@ App\Entity\Nota:
     docenteProvvedimento: '50%? @docente_1'
     alunni: '<collection(@alunno_1)>'
 
-App\Entity\Notifica:
-  notifica_{1..5}:
-    oggettoNome: '<substr(<text()>, 0, 255)>'
-    oggettoId: '<numberBetween(1, 100)>'
-    azione: '<randomElement(["A", "E", "D"])>'
-
-App\Entity\NotificaInvio:
-  notifica_invio_{1..5}:
-    stato: '<randomElement(["A", "P", "S", "E"])>'
-    messaggio: '<text()>'
-    app: '@app_1'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-
 App\Entity\OrarioDocente:
   orario_docente_{1..5}:
     orario: '@orario_1'

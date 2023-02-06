@@ -4,9 +4,16 @@ return [
   'fileCopy' => [
   ],
   'fileDelete' => [
+    'src/Entity/Notifica.php'
+    'src/Entity/NotificaInvio.php'
+    'src/Repository/NotificaRepository.php'
+    'src/Repository/NotificaInvioRepository.php'
   ],
   'sqlCommand' => [
     ["UPDATE gs_utente SET rappresentante='' WHERE rappresentante IS NULL OR rappresentante='a:0:{}';", ""],
+    ["DROP TABLE gs_notifica;", "SELECT 1 FROM dual UNION SELECT 1 FROM gs_notifica;"],
+    ["DROP TABLE gs_notifica_invio;", "SELECT 1 FROM dual UNION SELECT 1 FROM gs_notifica_invio;"],
+    ["UPDATE gs_configurazione SET valore='17:00',descrizione='Ora di inizio notifica giornaliera delle nuove circolari\<br>[ora in formato HH:MM]' WHERE parametro='notifica_circolari';", ""],
   ],
   'envDelete' => [
   ]

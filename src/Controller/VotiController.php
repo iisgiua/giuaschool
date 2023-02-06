@@ -8,7 +8,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Notifica;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Form\VotoClasseType;
@@ -350,28 +349,7 @@ class VotiController extends BaseController {
           }
           // ok: memorizza dati
           $this->em->flush();
-          // log azione e notifica
-          foreach ($log['create'] as $obj) {
-            $notifica = (new Notifica())
-              ->setOggettoNome('Valutazione')
-              ->setOggettoId($obj->getId())
-              ->setAzione('A');
-            $this->em->persist($notifica);
-          }
-          foreach ($log['edit'] as $obj) {
-            $notifica = (new Notifica())
-              ->setOggettoNome('Valutazione')
-              ->setOggettoId($obj[0])
-              ->setAzione('E');
-            $this->em->persist($notifica);
-          }
-          foreach ($log['delete'] as $obj) {
-            $notifica = (new Notifica())
-              ->setOggettoNome('Valutazione')
-              ->setOggettoId($obj[0])
-              ->setAzione('D');
-            $this->em->persist($notifica);
-          }
+          // log azione
           $dblogger->logAzione('VOTI', 'Voti della classe', array(
             'Tipo' => $tipo,
             'Voti creati' => implode(', ', array_map(function ($e) {
@@ -581,13 +559,9 @@ class VotiController extends BaseController {
           }
           // ok: memorizza dati
           $this->em->flush();
-          // log azione e notifica
-          $notifica = (new Notifica())
-            ->setOggettoNome('Valutazione');
-          $this->em->persist($notifica);
+          // log azione
           if ($valutazione_precedente && $form->get('delete')->isClicked()) {
             // cancellazione
-            $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
             $dblogger->logAzione('VOTI', 'Cancella voto', array(
               'Id' => $valutazione_precedente[0],
               'Tipo' => $tipo,
@@ -607,7 +581,6 @@ class VotiController extends BaseController {
                     $valutazione_precedente[1] != $valutazione->getVisibile() ||
                     $valutazione_precedente[6] != $valutazione->getMedia())) {
             // modifica
-            $notifica->setAzione('E')->setOggettoId($valutazione->getId());
             $dblogger->logAzione('VOTI', 'Modifica voto', array(
               'Id' => $valutazione_precedente[0],
               'Visibile' => $valutazione_precedente[1],
@@ -619,7 +592,6 @@ class VotiController extends BaseController {
               ));
           } elseif (!$valutazione_precedente) {
             // creazione
-            $notifica->setAzione('A')->setOggettoId($valutazione->getId());
             $dblogger->logAzione('VOTI', 'Crea voto', array(
               'Id' => $valutazione->getId()
               ));

@@ -169,8 +169,6 @@ class ConfigLoader {
     $tema = '';
     // legge impostazione tema dell'utente connesso
     $utente = $this->security->getUser();
-    //-- if ($utente && ($utente instanceOf Amministratore ||
-        //-- (isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new'))) {
     if ($utente && ($utente instanceOf Amministratore)) {
       // imposta il nuovo tema
       $tema = 'tema-new';

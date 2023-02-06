@@ -12,7 +12,6 @@ use App\Entity\Annotazione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
-use App\Entity\Notifica;
 use App\Entity\Preside;
 use App\Entity\Staff;
 use App\Form\AvvisoType;
@@ -801,14 +800,9 @@ class CoordinatoreController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $this->em->persist($notifica);
+        // log azione
         if (!$id) {
           // nuovo
-          $notifica->setAzione('A');
           $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
@@ -817,7 +811,6 @@ class CoordinatoreController extends BaseController {
           ));
         } else {
           // modifica
-          $notifica->setAzione('E');
           $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', array(
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
@@ -972,12 +965,7 @@ class CoordinatoreController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
-    // log azione e notifica
-    $notifica = (new Notifica())
-      ->setOggettoNome('Avviso')
-      ->setOggettoId($avviso_id)
-      ->setAzione('D');
-    $this->em->persist($notifica);
+    // log azione
     $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),

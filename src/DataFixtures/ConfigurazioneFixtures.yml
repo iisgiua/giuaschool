@@ -158,8 +158,8 @@ App\Entity\Configurazione:
   configurazione_SCUOLA11:
     categoria: 'SCUOLA'
     parametro: 'notifica_circolari'
-    descrizione: 'Ore di notifica giornaliera delle nuove circolari\<br>[lista separata da virgola delle ore in formato HH]'
-    valore: '15,18,20'
+    descrizione: 'Ora di inizio notifica giornaliera delle nuove circolari\<br>[ora in formato HH:MM]'
+    valore: '17:00'
     gestito: false
   configurazione_SCUOLA12:
     categoria: 'SCUOLA'

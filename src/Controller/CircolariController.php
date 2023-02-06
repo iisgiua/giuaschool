@@ -16,9 +16,10 @@ use App\Entity\CircolareClasse;
 use App\Entity\CircolareUtente;
 use App\Entity\Docente;
 use App\Entity\Genitore;
-use App\Entity\Notifica;
 use App\Entity\Staff;
 use App\Form\CircolareType;
+use App\Message\CircolareMessage;
+use App\MessageHandler\NotificaMessageHandler;
 use App\Util\CircolariUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
@@ -35,6 +36,9 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Messenger\Stamp\FlushBatchHandlersStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -551,6 +555,7 @@ class CircolariController extends BaseController {
    * Pubblica la circolare o ne rimuove la pubblicazione
    *
    * @param Request $request Pagina richiesta
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param bool $pubblica Vero se si vuole pubblicare la circolare, falso per togliere la pubblicazione
@@ -564,8 +569,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function publishAction(Request $request, LogHandler $dblogger, CircolariUtil $circ,
-                                $pubblica, $id) {
+  public function publishAction(Request $request, MessageBusInterface $msg, LogHandler $dblogger,
+                                CircolariUtil $circ, $pubblica, $id) {
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
@@ -614,18 +619,17 @@ class CircolariController extends BaseController {
     // ok: memorizza dati
     $this->em->flush();
     // log azione e notifica
-    $notifica = (new Notifica())
-      ->setOggettoNome('Circolare')
-      ->setOggettoId($circolare->getId());
-    $this->em->persist($notifica);
     if ($pubblica) {
       // pubblicazione
-      $notifica->setAzione('A');
+      $oraNotifica = explode(':', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/notifica_circolari'));
+      $tm = (new \DateTime('today'))->setTime($oraNotifica[0], $oraNotifica[1]);
+      $msg->dispatch(new CircolareMessage($circolare->getId()),
+        [DelayStamp::delayUntil($tm), new FlushBatchHandlersStamp(true)]);
       $dblogger->logAzione('CIRCOLARI', 'Pubblica circolare', array(
         'Circolare ID' => $circolare->getId()));
     } else {
       // rimuove pubblicazione
-      $notifica->setAzione('D');
+      NotificaMessageHandler::delete($this->em, (new CircolareMessage($circolare->getId()))->getTag());
       $dblogger->logAzione('CIRCOLARI', 'Rimuove pubblicazione circolare', array(
         'Circolare ID' => $circolare->getId()));
     }

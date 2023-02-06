@@ -108,6 +108,19 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     }
   }
 
+  /**
+   * Rimuove da ogni coda le notifiche relative al tag indicato
+   * NB: per le circolari, non rimuove le notifiche con raggruppamento di più circolari
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tag Testo usato per identificare la notifica
+   */
+  public static function delete(EntityManagerInterface $em, string $tag) {
+    $connection = $em->getConnection();
+    $sql = "DELETE FROM gs_messenger_messages WHERE body LIKE :tag";
+    $connection->prepare($sql)->execute(['tag' => '%'.$tag.'%']);
+  }
+
 
   //==================== METODI PRIVATI  ====================
 

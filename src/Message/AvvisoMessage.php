@@ -23,6 +23,11 @@ class AvvisoMessage {
    */
   private int $id;
 
+  /**
+   * @var string $tag Testo usato per identificare l'avviso
+   */
+  private string $tag;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -42,6 +47,16 @@ class AvvisoMessage {
    */
   public function getId(): int {
     return $this->id;
+    $this->tag = '<!AVVISO!><!'.$id.'!>';
+  }
+
+  /**
+   * Restituisce il testo usato per identificare l'avviso
+   *
+   * @return string Testo usato per identificare l'avviso
+   */
+  public function getTag(): string {
+    return $this->tag;
   }
 
 }

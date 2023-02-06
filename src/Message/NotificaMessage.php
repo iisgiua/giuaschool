@@ -29,6 +29,11 @@ class NotificaMessage {
   private string $tipo;
 
   /**
+   * @var string $tag Testo usato per identificare la notifica
+   */
+  private string $tag;
+
+  /**
    * @var array $dati Dati necessari per creare la notifica
    */
   private array $dati;
@@ -41,11 +46,13 @@ class NotificaMessage {
    *
    * @param int $utenteId Identificativo dell'utente destinatario della notifica
    * @param string $tipo Tipo di notifica
+   * @param string $tag Testo usato per identificare la notifica
    * @param array $dati Dati necessari per creare la notifica
    */
-  public function __construct(int $utenteId, string $tipo, array $dati) {
+  public function __construct(int $utenteId, string $tipo, string $tag, array $dati) {
     $this->utenteId = $utenteId;
     $this->tipo = $tipo;
+    $this->tag = $tag;
     $this->dati = $dati;
   }
 
@@ -65,6 +72,15 @@ class NotificaMessage {
    */
   public function getTipo(): string {
     return $this->tipo;
+  }
+
+  /**
+   * Restituisce il testo usato per identificare la notifica
+   *
+   * @return string Testo usato per identificare la notifica
+   */
+  public function getTag(): string {
+    return $this->tag;
   }
 
   /**

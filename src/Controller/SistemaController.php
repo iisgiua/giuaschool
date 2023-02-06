@@ -438,8 +438,6 @@ class SistemaController extends BaseController {
             "TRUNCATE gs_log;",
             "TRUNCATE gs_nota;",
             "TRUNCATE gs_nota_alunno;",
-            "TRUNCATE gs_notifica;",
-            "TRUNCATE gs_notifica_invio;",
             "TRUNCATE gs_orario;",
             "TRUNCATE gs_orario_docente;",
             "TRUNCATE gs_osservazione;",

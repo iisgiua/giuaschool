@@ -106,10 +106,11 @@ class CircolareMessageHandler implements BatchHandlerInterface {
     }
     // inserisce nella coda delle notifiche
     foreach ($destinatari as $utente => $dati) {
-      $notifica = new NotificaMessage($utente, 'circolare', $dati);
+      $tag = '<!CIRCOLARE!><!'.implode(',', array_column($dati, 'id')).'!>';
+      $notifica = new NotificaMessage($utente, 'circolare', $tag, $dati);
       $this->messageBus->dispatch($notifica);
     }
-    $this->logger->notice('CircolareMessage: crea notifica delle circolari', [$num]);
+    $this->logger->notice('CircolareMessage: crea notifica delle circolari', [$num, count($destinatari)]);
   }
 
   /**
@@ -137,7 +138,7 @@ class CircolareMessageHandler implements BatchHandlerInterface {
       $utenti = $this->em->getRepository('App\Entity\Circolare')->notifica($circolare);
       foreach ($utenti as $u) {
         // memorizza circolari per utente
-        $destinatari[$u][] = array('numero' => $circolare->getNumero(),
+        $destinatari[$u][] = array('id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
           'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto());
       }
       // segnala nuova circolare

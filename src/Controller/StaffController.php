@@ -14,7 +14,6 @@ use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
 use App\Entity\Entrata;
-use App\Entity\Notifica;
 use App\Entity\Provisioning;
 use App\Entity\Uscita;
 use App\Form\AvvisoType;
@@ -404,14 +403,9 @@ class StaffController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $this->em->persist($notifica);
+        // log azione
         if (!$id) {
           // nuovo
-          $notifica->setAzione('A');
           $dblogger->logAzione('AVVISI', 'Crea avviso generico', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
@@ -420,7 +414,6 @@ class StaffController extends BaseController {
             ));
         } else {
           // modifica
-          $notifica->setAzione('E');
           $dblogger->logAzione('AVVISI', 'Modifica avviso generico', array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
@@ -554,12 +547,7 @@ class StaffController extends BaseController {
       $f = new File($dir.$a);
       $fs->remove($f);
     }
-    // log azione e notifica
-    $notifica = (new Notifica())
-      ->setOggettoNome('Avviso')
-      ->setOggettoId($avviso_id)
-      ->setAzione('D');
-    $this->em->persist($notifica);
+    // log azione
     $dblogger->logAzione('AVVISI', 'Cancella avviso', array(
       'Id' => $avviso_id,
       'Tipo' => $avviso->getTipo(),
@@ -888,14 +876,9 @@ class StaffController extends BaseController {
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $this->em->persist($notifica);
+        // log azione
         if (!$id) {
           // nuovo
-          $notifica->setAzione('A');
           $dblogger->logAzione('AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
@@ -904,7 +887,6 @@ class StaffController extends BaseController {
             ));
         } else {
           // modifica
-          $notifica->setAzione('E');
           $dblogger->logAzione('AVVISI', 'Modifica avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
@@ -1203,14 +1185,9 @@ class StaffController extends BaseController {
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $this->em->persist($notifica);
+        // log azione
         if (!$id) {
           // nuovo
-          $notifica->setAzione('A');
           $dblogger->logAzione('AVVISI', 'Crea avviso attività', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
@@ -1219,7 +1196,6 @@ class StaffController extends BaseController {
             ));
         } else {
           // modifica
-          $notifica->setAzione('E');
           $dblogger->logAzione('AVVISI', 'Modifica avviso attività', array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
@@ -1433,20 +1409,14 @@ class StaffController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $this->em->persist($notifica);
+        // log azione
         if (!$id) {
           // nuovo
-          $notifica->setAzione('A');
           $dblogger->logAzione('AVVISI', 'Crea avviso individuale', array(
             'Avviso' => $avviso->getId(),
             ));
         } else {
           // modifica
-          $notifica->setAzione('E');
           $dblogger->logAzione('AVVISI', 'Modifica avviso individuale', array(
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),

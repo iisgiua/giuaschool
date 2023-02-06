@@ -10,7 +10,6 @@ namespace App\Controller;
 
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
-use App\Entity\Notifica;
 use App\Form\AvvisoType;
 use App\Form\MessageType;
 use App\Util\AgendaUtil;
@@ -321,14 +320,9 @@ class AgendaController extends BaseController {
           $age->creaAnnotazione($avviso);
           // ok: memorizza dati
           $this->em->flush();
-          // log azione e notifica
-          $notifica = (new Notifica())
-            ->setOggettoNome('Avviso')
-            ->setOggettoId($avviso->getId());
-          $this->em->persist($notifica);
+          // log azione
           if (!$id) {
             // nuovo
-            $notifica->setAzione('A');
             $dblogger->logAzione('AGENDA', 'Crea verifica', array(
               'Avviso' => $avviso->getId(),
               'Annotazioni' => implode(', ', array_map(function ($a) {
@@ -337,7 +331,6 @@ class AgendaController extends BaseController {
               ));
           } else {
             // modifica
-            $notifica->setAzione('E');
             $dblogger->logAzione('AGENDA', 'Modifica verifica', array(
               'Avviso' => $avviso->getId(),
               'Data' => $avviso_old->getData()->format('d/m/Y'),
@@ -481,12 +474,7 @@ class AgendaController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
-    // log azione e notifica
-    $notifica = (new Notifica())
-      ->setOggettoNome('Avviso')
-      ->setOggettoId($avviso_id)
-      ->setAzione('D');
-    $this->em->persist($notifica);
+    // log azione
     $dblogger->logAzione('AGENDA', 'Cancella verifica', array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
@@ -675,20 +663,14 @@ class AgendaController extends BaseController {
           }
           // ok: memorizza dati
           $this->em->flush();
-          // log azione e notifica
-          $notifica = (new Notifica())
-            ->setOggettoNome('Avviso')
-            ->setOggettoId($avviso->getId());
-          $this->em->persist($notifica);
+          // log azione
           if (!$id) {
             // nuovo
-            $notifica->setAzione('A');
             $dblogger->logAzione('AGENDA', 'Crea compito', array(
               'Avviso' => $avviso->getId(),
             ));
           } else {
             // modifica
-            $notifica->setAzione('E');
             $dblogger->logAzione('AGENDA', 'Modifica compito', array(
               'Avviso' => $avviso->getId(),
               'Data' => $avviso_old->getData()->format('d/m/Y'),
@@ -757,12 +739,7 @@ class AgendaController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
-    // log azione e notifica
-    $notifica = (new Notifica())
-      ->setOggettoNome('Avviso')
-      ->setOggettoId($avviso_id)
-      ->setAzione('D');
-    $this->em->persist($notifica);
+    // log azione
     $dblogger->logAzione('AGENDA', 'Cancella compito', array(
       'Avviso' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),

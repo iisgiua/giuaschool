@@ -23,6 +23,11 @@ class CircolareMessage {
    */
   private int $id;
 
+  /**
+   * @var string $tag Testo usato per identificare la circolare
+   */
+  private string $tag;
+
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -32,6 +37,7 @@ class CircolareMessage {
    */
   public function __construct(int $id) {
     $this->id = $id;
+    $this->tag = '<!CIRCOLARE!><!'.$id.'!>';
   }
 
   /**
@@ -41,6 +47,15 @@ class CircolareMessage {
    */
   public function getId(): int {
     return $this->id;
+  }
+
+  /**
+   * Restituisce il testo usato per identificare la circolare
+   *
+   * @return string Testo usato per identificare la circolare
+   */
+  public function getTag(): string {
+    return $this->tag;
   }
 
 }

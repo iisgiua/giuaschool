@@ -10,8 +10,5 @@
   {% if is_granted('ROLE_DOCENTE') and app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_otp' ? ' class="active"' }}><a href="{{ path('utenti_otp') }}" title="Abilita all'uso del codice OTP per l'accesso sicuro">Attiva OTP</a></li>
   {% endif %}
-  {#-- {% if is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA') %} #}
-    {#-- <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_notifiche' ? ' class="active"' }}><a href="{{ path('utenti_notifiche') }}" title="Abilita o disabilita le notifiche delle circolari">Gestione notifiche</a></li> #}
-  {#-- {% endif %} #}
   </ul>
 </nav>

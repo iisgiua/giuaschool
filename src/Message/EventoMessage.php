@@ -23,6 +23,11 @@ class EventoMessage {
    */
   private int $id;
 
+  /**
+   * @var string $tag Testo usato per identificare l'evento
+   */
+  private string $tag;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -33,6 +38,7 @@ class EventoMessage {
    */
   public function __construct(int $id) {
     $this->id = $id;
+    $this->tag = '<!EVENTO!><!'.$id.'!>';
   }
 
   /**
@@ -42,6 +48,15 @@ class EventoMessage {
    */
   public function getId(): int {
     return $this->id;
+  }
+
+  /**
+   * Restituisce il testo usato per identificare l'evento
+   *
+   * @return string Testo usato per identificare l'evento
+   */
+  public function getTag(): string {
+    return $this->tag;
   }
 
 }
