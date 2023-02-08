@@ -175,6 +175,9 @@ jobs:
           echo "# Ultimo aggiornamento"  >> docs/latest-build.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
+          echo "Le modifiche seguenti non sono ancora validate, per cui se ne sconsiglia l'installazione se non in ambiente di test." >> docs/latest-build.md
+          echo "{: .text-center .pb-5}" >> docs/latest-build.md
+          echo "" >> docs/latest-build.md
           echo "[**Scarica l'ultimo aggiornamento**](https://github.com/iisgiua/giuaschool/releases/download/update-${{ steps.latest-release.outputs.tag_name }}/giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip)" >> docs/latest-build.md
           echo "{: .text-center .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
