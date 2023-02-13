@@ -14,6 +14,8 @@ return [
     ["DROP TABLE gs_notifica;", "SELECT * FROM gs_notifica WHERE 2=1;"],
     ["DROP TABLE gs_notifica_invio;", "SELECT * FROM gs_notifica_invio WHERE 2=1;"],
     ["UPDATE gs_configurazione SET valore='17:00',descrizione='Ora di inizio notifica giornaliera delle nuove circolari\<br>[ora in formato HH:MM]' WHERE parametro='notifica_circolari';", ""],
+    ["CREATE TABLE gs_presenza (id INT AUTO_INCREMENT NOT NULL, alunno_id INT NOT NULL, creato DATETIME NOT NULL, modificato DATETIME NOT NULL, data DATE NOT NULL, ora_inizio TIME DEFAULT NULL, ora_fine TIME DEFAULT NULL, tipo VARCHAR(1) NOT NULL, descrizione VARCHAR(255) NOT NULL, INDEX IDX_32C5F7A67ABC9740 (alunno_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB;", "SELECT 1 FROM dual UNION SELECT 1 FROM gs_presenza;"],
+    ["ALTER TABLE gs_presenza ADD CONSTRAINT FK_32C5F7A67ABC9740 FOREIGN KEY (alunno_id) REFERENCES gs_utente (id);", "SELECT 1 FROM dual UNION SELECT 1 FROM gs_presenza;"],
   ],
   'envDelete' => [
   ]

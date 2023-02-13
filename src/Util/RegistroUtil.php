@@ -2847,4 +2847,27 @@ class RegistroUtil {
     return $dati;
   }
 
+  /**
+   * Controlla se è possibile eseguire l'azione specificata relativamente alla gestione delle presenze fuori classe.
+   *
+   * @param \DateTime $data Data della lezione
+   * @param Docente $docente Docente che esegue l'azione
+   * @param Alunno $alunno Alunno su cui si esegue l'azione
+   * @param Classe $classe Classe su cui si esegue l'azione
+   *
+   * @return bool Restituisce vero se l'azione è permessa
+   */
+  public function azionePresenze(\DateTime $data, Docente $docente, Alunno $alunno, Classe $classe): bool {
+    if ($this->bloccoScrutinio($data, $classe)) {
+      // blocco scrutinio
+      return false;
+    }
+    if ($this->classeInData($data, $alunno) == $classe) {
+      // alunno è nella classe indicata
+      return true;
+    }
+    // non consentito
+    return false;
+  }
+
 }

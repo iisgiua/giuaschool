@@ -219,6 +219,8 @@ label.ogni_materia: Tutte le materie
 label.ora_entrata: Ora ingresso
 label.ora_fine: Ora fine
 label.ora_inizio: Ora inizio
+label.fine: Fine
+label.inizio: Inizio
 label.ora_uscita: Ora uscita
 label.ora: Ora
 label.otp: Codice OTP
@@ -346,6 +348,7 @@ label.tutte_classi: Tutte le classi
 label.tutte_sedi: Tutte le sedi
 label.tutti_destinatari: Tutti i destinatari
 label.tutti_docenti: Tutti i docenti
+label.tutti_alunni: Tutti gli alunni
 label.tutti_documenti: Tutti i documenti
 label.tutti_staff: Tutto lo staff
 label.ultimo_accesso: Ultimo accesso
@@ -596,6 +599,12 @@ label.mailserver_port: Porta del server di posta
 label.mailserver_email: Indirizzo a cui spedire la mail di prova
 label.scegli_rappresentanti: Scegli i rappresentanti
 label.filtro_rappresentanti: Filtro per rappresentanti
+label.presenza_tipo_P: PCTO
+label.presenza_tipo_S: Attività a scuola
+label.presenza_tipo_E: Attività esterna
+label.presenza_ora_tipo_G: Tutto il giorno
+label.presenza_ora_tipo_F: Dall'ora indicata sino a fine lezioni
+label.presenza_ora_tipo_I: Intervallo di ore
 
 
 ##### PAGINE #####
@@ -753,6 +762,10 @@ title.ata.rappresentanti_edit: Modifica i dati del rappresentante del personale 
 page.docenti.rappresentanti: Rappresentanti Docenti
 title.docenti.rappresentanti: Configura i rappresentanti dei docenti
 title.docenti.rappresentanti_edit: Modifica i dati del rappresentante dei docenti
+page.coordinatore.presenze: Fuori Classe
+title.coordinatore.presenze: Gestione presenze fuori classe della {classe}
+title.coordinatore.presenze_edit: Modifica i dati di una presenza fuori classe
+title.coordinatore.presenze_add: Pianifica le presenze fuori classe
 
 
 page.agenda_compito: Agenda Compiti
@@ -1593,3 +1606,11 @@ exception.mailserver_svuota_cache: "Impossibile eseguire i comandi per svuotare 
 exception.mailserver_email_test: "Errore nella spedizione della mail. [{errore}]"
 exception.token_scaduto: E' scaduto il tempo massimo per effettuare l'autenticazione. Riprova.
 exception.tipi_rappresentante_vuoto: Non hai indicato il tipo di rappresentante
+exception.presenze_tipo_ora_errato: Dati errati nella definizione dell'intervallo di ore
+exception.presenze_tipo_ora_mancante: Dati mancanti nell'intervallo di ore
+exception.presenze_azione_non_permessa: La modifica dei dati non è consentita
+exception.presenze_data_non_futura: Devi indicare una data futura
+exception.presenze_alunni_mancanti: Devi indicare gli alunni con presenza fuori classe
+exception.presenze_intervallo_date: La data finale deve essere uguale o successiva a quella iniziale
+exception.presenze_periodicita: Devi indicare la periodicità dei giorni della settimana
+exception.presenze_data_mancante: Devi indicare almeno una data valida nell'intervallo

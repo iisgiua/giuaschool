@@ -1,0 +1,96 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not info.classe %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans({classe: info.classe}) }}</h1>
+    {% for type,msgs in app.flashes %}
+      {% for msg in msgs %}
+  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|trans }}</strong></div>
+      {% endfor %}
+    {% endfor %}
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
+    <div id="{{ form[0].vars.id }}">
+      <div class="form-group" title="Filtro sull'alunno">
+        <label class="sr-only control-label" for="{{ form[0].alunno.vars.id }}">{{ form[0].alunno.vars.label|trans }}</label>
+        {{ form_widget(form[0].alunno) }}
+      </div>
+      <div class="input-group date" title="Data iniziale per il filtro">
+        {{ form_widget(form[0].inizio, {'attr': {'widget': false}}) }}
+        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      </div>
+      <div class="input-group date" title="Data finale per il filtro">
+        {{ form_widget(form[0].fine, {'attr': {'widget': false}}) }}
+        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      </div>
+      <div class="form-group _col-sm-2">
+        {{ form_widget(form[0].submit) }}
+      </div>
+      {{ form_widget(form[0]._token) }}
+    </div>
+  </form>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-3">Alunno</th>
+        <th class="col-sm-3">Data</th>
+        <th class="col-sm-3">Attività</th>
+        <th class="col-sm-3">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in dati.lista %}
+      <tr>
+        <td>{{ p.alunno }}</td>
+        <td>{{ p.data|date('d/m/Y') }} {% if p.oraInizio %}dalle {{ p.oraInizio|date('H:i') }}{% if p.oraFine %} alle {{ p.oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}</td>
+        <td><small>{{ ('label.presenza_tipo_'~p.tipo)|trans }}: {{p.descrizione}}</small></td>
+        <td>
+      {% if p.data > info.oggi %}
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_presenze_edit', {id: p.id, classe: info.classe.id}) }}" role="button" title="Modifica i dati della presenza fuori classe"><strong>{{ 'label.edit'|trans }}</strong></a>
+          <a class="btn btn-danger btn-xs" href="{{ path('coordinatore_presenze_delete', {id: p.id, classe: info.classe.id}) }}" role="button" title="Rimuove la presenza fuori classe"><strong>{{ 'label.delete'|trans }}</strong></a>
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="row gs-mt-2">
+    <div class="col-sm-offset-6 col-sm-6 text-right">
+      <a class="btn btn-primary" href="{{ path('coordinatore_presenze_add', {classe: info.classe.id}) }}" role="button" title="Pianifica nuove presenze fuori classe"><strong>Aggiungi</strong></a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ info.annoInizio }}",
+    endDate: "{{ info.annoFine }}",
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+});
+</script>
+{% endblock %}

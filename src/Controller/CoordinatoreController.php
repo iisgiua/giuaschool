@@ -12,9 +12,12 @@ use App\Entity\Annotazione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
+use App\Entity\Presenza;
 use App\Entity\Preside;
 use App\Entity\Staff;
 use App\Form\AvvisoType;
+use App\Form\FiltroType;
+use App\Form\PresenzaType;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -25,6 +28,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -979,6 +983,393 @@ class CoordinatoreController extends BaseController {
       ));
     // redirezione
     return $this->redirectToRoute('coordinatore_avvisi');
+  }
+
+  /**
+   * Gestione presenze fuori classe
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $classe Identificativo della classe
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/presenze/{classe}/{pagina}", name="coordinatore_presenze",
+   *    requirements={"classe": "\d+", "pagina": "\d+"},
+   *    defaults={"classe": 0, "pagina": 0},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function presenzeAction(Request $request, int $classe, int $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // parametro classe
+    if ($classe == 0) {
+      // recupera parametri da sessione
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+    } else {
+      // memorizza su sessione
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+    }
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['alunno'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/alunno', 0);
+    $criteri['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/inizio', null);
+    $criteri['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/fine', null);
+    $alunno = ($criteri['alunno'] > 0 ?
+      $this->em->getRepository('App\Entity\Alunno')->find($criteri['alunno']) : null);
+    if ($criteri['inizio']) {
+      $inizio = \DateTime::createFromFormat('Y-m-d', $criteri['inizio']);
+    } else {
+      $inizio = new \DateTime('tomorrow');
+      $criteri['inizio'] = $inizio->format('Y-m-d');
+    }
+    if ($criteri['fine']) {
+      $fine = \DateTime::createFromFormat('Y-m-d', $criteri['fine']);
+    } else {
+      $fine = \DateTime::createFromFormat('Y-m-d',
+        $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
+      $criteri['fine'] = $inizio->format('Y-m-d');
+    }
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
+    }
+    // controllo classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // form di ricerca
+    $form = $this->createForm(FiltroType::class, null, ['formMode' => 'presenze',
+      'values' => [$alunno, $classe->getId(), $inizio, $fine]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['alunno'] = (is_object($form->get('alunno')->getData()) ?
+        $form->get('alunno')->getData()->getId() : 0);
+      $criteri['inizio'] = $form->get('inizio')->getData()->format('Y-m-d');
+      $criteri['fine'] = $form->get('fine')->getData()->format('Y-m-d');
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/alunno', $criteri['alunno']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/inizio', $criteri['inizio']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/fine', $criteri['fine']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
+    }
+    // lista fuori classe
+    $dati = $this->em->getRepository('App\Entity\Presenza')->fuoriClasse($classe, $criteri, $pagina);
+    // imposta informazioni
+    $info['classe'] = $classe;
+    $info['pagina'] = $pagina;
+    $info['oggi'] = new \DateTime('today');
+    $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
+    $info['annoInizio'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    // mostra la pagina di risposta
+    return $this->renderHtml('coordinatore', 'presenze', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Modifica una presenza fuori classe pianificata nel futuro
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Identificativo della presenza fuori classe
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/presenze/edit/{id}/{classe}", name="coordinatore_presenze_edit",
+   *    requirements={"id": "\d+", "classe": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function presenzeEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                                     LogHandler $dblogger, int $id, int $classe): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // controlla presenza
+    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    if (!$presenza) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    $vecchiaPresenza = clone $presenza;
+    // controllo classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo data futura
+    $oggi = new \DateTime('today');
+    if ($presenza->getData() <= $oggi) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // imposta informazioni
+    $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    // form
+    $form = $this->createForm(PresenzaType::class, $presenza, [
+      'returnUrl' => $this->generateUrl('coordinatore_presenze'), 'formMode' => 'edit',
+      'values' => [$classe->getId()]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controlla dati
+      if ($form->get('data')->getData() <= $oggi) {
+        // errore data non è futura
+        $form->addError(new FormError($trans->trans('exception.presenze_data_non_futura')));
+      }
+      if (($form->get('oraTipo')->getData() == 'G' && !empty($form->get('oraInizio')->getData()) &&
+          !empty($form->get('oraFine')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
+        // errore tipo con dati errati
+        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+      }
+      if (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
+        // errore tipo con dati mancanti
+        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
+      }
+      // controlla permessi
+      if (!$reg->azionePresenze($form->get('data')->getData(), $this->getUser(),
+          $form->get('alunno')->getData(), $classe)) {
+        // errore: azione non permessa
+        $form->addError(new FormError($trans->trans('exception.presenze_azione_non_permessa')));
+      }
+      if ($form->isValid()) {
+        // ok: memorizzazione e log
+        $dblogger->logModifica('PRESENZE', 'Modifica presenza', $vecchiaPresenza, $presenza);
+        // messaggio
+        $this->addFlash('success', 'message.update_ok');
+        // redirect
+        return $this->redirectToRoute('coordinatore_presenze');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('coordinatore', 'presenze_edit', $dati, $info, [$form->createView(),
+      'message.required_fields']);
+  }
+
+  /**
+   * Cancella una presenza fuori classe pianificata nel futuro
+   *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Identificativo della presenza fuori classe
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/presenze/delete/{id}/{classe}", name="coordinatore_presenze_delete",
+   *    requirements={"id": "\d+", "classe": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function presenzeDeleteAction(RegistroUtil $reg, LogHandler $dblogger, int $id,
+                                       int $classe): Response {
+    // controlla presenza
+    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    if (!$presenza) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    $vecchiaPresenza = clone $presenza;
+    // controllo classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo data futura
+    $oggi = new \DateTime('today');
+    if ($presenza->getData() <= $oggi) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controlla permessi
+    if (!$reg->azionePresenze($presenza->getData(), $this->getUser(), $presenza->getAlunno(), $classe)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // cancella presenza
+    $this->em->remove($presenza);
+    // ok: memorizzazione e log
+    $dblogger->logRimozione('PRESENZE', 'Cancella presenza', $vecchiaPresenza);
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
+    // redirect
+    return $this->redirectToRoute('coordinatore_presenze');
+  }
+
+  /**
+   * Aggiunge nuove presenze fuori classe pianificate nel futuro
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/presenze/add/{classe}", name="coordinatore_presenze_add",
+   *    requirements={"classe": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function presenzeAddAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                                    LogHandler $dblogger, int $classe): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // controllo classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // imposta informazioni
+    $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    // form
+    $form = $this->createForm(PresenzaType::class, null, [
+      'returnUrl' => $this->generateUrl('coordinatore_presenze'), 'formMode' => 'add',
+      'values' => [$classe->getId()]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controlla dati
+      $alunni = $form->get('alunni')->getData();
+      $dataInizio = $form->get('data')->getData();
+      $dataFine = $form->get('dataFine')->getData();
+      $settimana = $form->get('settimana')->getData();
+      if (count($alunni) == 0) {
+        // errore alunni non indicati
+        $form->addError(new FormError($trans->trans('exception.presenze_alunni_mancanti')));
+      }
+      $oggi = new \DateTime('today');
+      if ($dataInizio <= $oggi) {
+        // errore data non è futura
+        $form->addError(new FormError($trans->trans('exception.presenze_data_non_futura')));
+      }
+      if ($dataFine < $dataInizio) {
+        // errore intervallo date
+        $form->addError(new FormError($trans->trans('exception.presenze_intervallo_date')));
+      }
+      if (count($settimana) == 0) {
+        // errore periodicità settimanale
+        $form->addError(new FormError($trans->trans('exception.presenze_periodicita')));
+      }
+      if (($form->get('oraTipo')->getData() == 'G' && !empty($form->get('oraInizio')->getData()) &&
+          !empty($form->get('oraFine')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
+        // errore tipo con dati errati
+        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+      }
+      if (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
+          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
+        // errore tipo con dati mancanti
+        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
+      }
+      // genera date
+      $listaDate = [];
+      while ($dataInizio <= $dataFine) {
+        $giorno = $dataInizio->format('w');
+        if (in_array($giorno, $settimana, true)) {
+          // data presente in settimana
+          $listaDate[] = clone $dataInizio;
+        }
+        // data successiva
+        $dataInizio->modify('+1 day');
+      }
+      if (count($listaDate) == 0) {
+        // errore nessuna data
+        $form->addError(new FormError($trans->trans('exception.presenze_data_mancante')));
+      }
+      // controlla permessi (solo data inziale)
+      foreach ($alunni as $alunno) {
+        if (!empty($listaDate) &&
+            !$reg->azionePresenze($listaDate[0], $this->getUser(), $alunno, $classe)) {
+          // errore: azione non permessa
+          $form->addError(new FormError($trans->trans('exception.presenze_azione_non_permessa')));
+        }
+      }
+      if ($form->isValid()) {
+        // ok: memorizzazione e log
+        foreach ($alunni as $alunno) {
+          foreach ($listaDate as $data) {
+            $presenza = (new Presenza())
+              ->setData($data)
+              ->setOraInizio($form->get('oraInizio')->getData())
+              ->setOraFine($form->get('oraFine')->getData())
+              ->setTipo($form->get('tipo')->getData())
+              ->setDescrizione($form->get('descrizione')->getData())
+              ->setAlunno($alunno);
+            $this->em->persist($presenza);
+            $dblogger->logCreazione('PRESENZE', 'Aggiunge presenza', $presenza);
+          }
+        }
+        // messaggio
+        $this->addFlash('success', 'message.update_ok');
+        // redirect
+        return $this->redirectToRoute('coordinatore_presenze');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('coordinatore', 'presenze_add', $dati, $info, [$form->createView(),
+      'message.required_fields']);
   }
 
 }

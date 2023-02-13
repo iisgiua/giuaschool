@@ -1,0 +1,27 @@
+####################
+# PresenzaFixtures - dati di test
+#
+# Dati per le presenze fuori classe:
+#   data: data del giorno di presenza fuori classe
+#   oraInizio: ora di inizio della presenza fuori classe
+#   oraFine: ora della fine della presenza fuori classe
+#   tipo: tipo di presenza fuori classe [P=PCTO, S=attività a scuola, E=attività esterna]
+#   descrizione: descrizione dell'attività fuori classe
+#   alunno: alunno con presenza fuori classe
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+
+
+App\Entity\Presenza:
+
+  # ----- presenza -----
+  presenza_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    oraInizio: '<dateTimeBetween("08:30", "11:00")>'
+    oraFine: '<dateTimeBetween("11:30", "13:00")>'
+    tipo: '<randomElement(["P", "S", "E"])>'
+    descrizione: '<substr(<text()>, 0, 255)>'
+    alunno: '@alunno_*'

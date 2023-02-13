@@ -1,0 +1,121 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid gs-pt-4">
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <div class="panel-title">{{ titolo|trans }}</div>
+    </div>
+    <div class="panel-body">
+      <div class="help-block gs-big gs-pb-4"><em>{{ form[1]|trans }}</em></div>
+      {{ form_row(form[0].alunno) }}
+      {{ form_row(form[0].alunni) }}
+      <div class="form-group gs-mb-0 gs-mt-5">
+        <label class="col-sm-2 control-label">Periodicità</label>
+        <label class="col-sm-2 control-label" for="{{ form[0].data.vars.id }}">{{ form[0].data.vars.label|trans }}</label>
+        <div class="col-sm-2">{{ form_widget(form[0].data) }}</div>
+        <label class="col-sm-2 control-label" for="{{ form[0].dataFine.vars.id }}">{{ form[0].dataFine.vars.label|trans }}</label>
+        <div class="col-sm-2">{{ form_widget(form[0].dataFine) }}</div>
+      </div>
+      {{ form_row(form[0].settimana) }}
+      <div class="form-group gs-pt-4">
+        <div class="col-sm-2">{{ form_widget(form[0].oraTipo) }}</div>
+        <label class="col-sm-2 control-label" for="{{ form[0].oraInizio.vars.id }}">{{ form[0].oraInizio.vars.label|trans }}</label>
+        <div class="col-sm-2">{{ form_widget(form[0].oraInizio) }}</div>
+        <label class="col-sm-2 control-label" for="{{ form[0].oraFine.vars.id }}">{{ form[0].oraFine.vars.label|trans }}</label>
+        <div class="col-sm-2">{{ form_widget(form[0].oraFine) }}</div>
+      </div>
+      {{ form_row(form[0].tipo) }}
+      {{ form_row(form[0].descrizione) }}
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="{{ form[0].vars.full_name }}_submit" name="{{ form[0].vars.full_name }}[submit]" class="btn-primary gs-mr-3 btn">{{ 'label.submit'|trans }}</button>
+      <button type="button" id="{{ form[0].vars.full_name }}_cancel" name="{{ form[0].vars.full_name }}[cancel]" onclick="location.href='{{ path('coordinatore_presenze') }}'" class="btn-default btn">{{ 'label.cancel'|trans }}</button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date('tomorrow')|date('d/m/Y') }}",
+    endDate: "{{ info.annoFine }}",
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12, 13, 14],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+    });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
+  $('#presenza_oraTipo').change(function() {
+    if ($(this).val() == 'G') {
+      $('#presenza_oraInizio').val('').attr('disabled', true);
+      $('#presenza_oraFine').val('').attr('disabled', true);
+    } else if ($(this).val() == 'F') {
+      $('#presenza_oraInizio').attr('disabled', false);
+      $('#presenza_oraFine').val('').attr('disabled', true);
+    } else {
+      $('#presenza_oraInizio').attr('disabled', false);
+      $('#presenza_oraFine').attr('disabled', false);
+    }
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+  // init
+  if ($('#presenza_oraInizio').val() != '' && $('#presenza_oraFine').val() != '') {
+    $('#presenza_oraTipo').val('I').change();
+  } else if ($('#presenza_oraInizio').val() != '') {
+    $('#presenza_oraTipo').val('F').change();
+  } else {
+    $('#presenza_oraTipo').val('G').change();
+  }
+  $('#presenza_alunno').val({{ (form[0].alunni.vars.choices|first).value }});
+  {% if not form[0].vars.submitted %}
+  $('input[name="presenza[settimana][]"]').attr('checked', true);
+  {% endif %}
+});
+</script>
+{% endblock %}

@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -45,7 +46,7 @@ class FiltroType extends AbstractType {
         ->add('stato', ChoiceType::class, array('label' => 'label.richiesta_stato',
           'data' => $options['values'][1],
           'choices' => ['label.richiesta_stato_I' => 'I', 'label.richiesta_stato_G' => 'G',
-            'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_A' => 'A', 
+            'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_A' => 'A',
             'label.richiesta_stato_tutte' => ''],
           'attr' => ['title' => 'label.richiesta_stato'],
           'label_attr' => ['class' => 'sr-only'],
@@ -86,24 +87,59 @@ class FiltroType extends AbstractType {
     } elseif ($options['formMode'] == 'colloqui') {
       // form cerca colloqui
       $builder
-      ->add('docente', EntityType::class, array('label' => 'label.docente',
-        'data' => $options['values'][0],
-        'class' => 'App\Entity\Docente',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
-        'placeholder' => 'label.scegli_docente',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
-              ->orderBy('d.cognome,d.nome', 'ASC');
-          },
-        'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => false));
+        ->add('docente', EntityType::class, array('label' => 'label.docente',
+          'data' => $options['values'][0],
+          'class' => 'App\Entity\Docente',
+          'choice_label' => function ($obj) {
+              return $obj->getCognome().' '.$obj->getNome();
+            },
+          'placeholder' => 'label.scegli_docente',
+          'query_builder' => function (EntityRepository $er) {
+              return $er->createQueryBuilder('d')
+                ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
+                ->orderBy('d.cognome,d.nome', 'ASC');
+            },
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false));
+    } elseif ($options['formMode'] == 'presenze') {
+      // form presenze
+      $builder
+        ->add('alunno', EntityType::class, array('label' => 'label.alunno',
+          'data' => $options['values'][0],
+          'class' => 'App\Entity\Alunno',
+          'choice_label' => function ($obj) {
+              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
+            },
+          'placeholder' => 'label.tutti_alunni',
+          'query_builder' => function(EntityRepository $er) use($options) {
+              return $er->createQueryBuilder('a')
+                ->where('a.abilitato=1 AND a.classe='.$options['values'][1])
+                ->orderBy('a.cognome,a.nome', 'ASC');
+            },
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
+        ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
+          'data' => $options['values'][2],
+          'widget' => 'single_text',
+          'html5' => false,
+          'attr' => ['widget' => 'gs-picker'],
+          'format' => 'dd/MM/yyyy',
+          'required' => false))
+        ->add('fine', DateType::class, array('label' => 'label.data_fine',
+          'data' => $options['values'][3],
+          'widget' => 'single_text',
+          'html5' => false,
+          'attr' => ['widget' => 'gs-picker'],
+          'format' => 'dd/MM/yyyy',
+          'required' => false));
     }
     // pulsante filtro
     $builder
