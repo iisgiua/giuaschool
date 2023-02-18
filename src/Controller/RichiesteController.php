@@ -297,17 +297,19 @@ class RichiesteController extends BaseController {
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
    * @param int $richiesta Identificativo della richiesta di uscita anticipata da convalidare (se esiste)
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/uscita/{data}/{alunno}/{richiesta}", name="richieste_uscita",
-   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "richiesta": "\d+"},
+   * @Route("/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}", name="richieste_uscita",
+   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "richiesta": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": "0"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, $data, $alunno, $richiesta) {
+                               LogHandler $dblogger, $data, $alunno, $richiesta, $posizione) {
     // inizializza
     $info = [];
     $dati = [];
@@ -388,19 +390,29 @@ class RichiesteController extends BaseController {
     $info['classe'] = $alunno->getClasse()->getAnno()."ª ".$alunno->getClasse()->getSezione();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['delete'] = isset($uscitaOld);
+    $info['posizione'] = $posizione;
     $dati['richiesta'] = $richiesta;
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita, ['formMode' => $richiesta ? 'richiesta' : 'staff',
       'dati' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
+      $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+        'data' => $data]);
       if (!isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
         // uscita non esiste, niente da fare
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') >= $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
+      } elseif ($presenza && !$presenza->getOraFine()) {
+        // errore coerenza fc con uscita
+        $form->addError(new FormError($trans->trans('exception.presenze_giorno_uscita_incoerente')));
+      } elseif ($presenza && $presenza->getOraFine() &&
+                $presenza->getOraFine() > $form->get('ora')->getData()) {
+        // errore coerenza fc con orario uscita
+        $form->addError(new FormError($trans->trans('exception.presenze_uscita_incoerente')));
       } elseif ($form->isValid()) {
         if (isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
           // cancella uscita esistente
@@ -473,7 +485,7 @@ class RichiesteController extends BaseController {
           ));
         }
         // redirezione
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }
     }
     // pagina di risposta

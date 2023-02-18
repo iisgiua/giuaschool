@@ -391,4 +391,29 @@ class AlunnoRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
+  /**
+   * Restituisce la situazione delle entrate/uscite/assenze/fc per l'alunno e la data indicata
+   *
+   * @param Alunno $alunno Alunno per il quale controllare le assenze
+   * @param \DateTime $data Data di riferimento per le assenze
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function assenzeInData(Alunno $alunno, \DateTime $data): array {
+    // dati alunni/assenze/ritardi/uscite
+    $assenze = $this->createQueryBuilder('a')
+      ->select('a.id AS id_alunno,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine')
+      ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
+      ->where('a.id=:alunno')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    // restituisce valori
+    return $assenze;
+  }
+
 }

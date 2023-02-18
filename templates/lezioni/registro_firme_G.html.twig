@@ -230,6 +230,22 @@
       </table>
     </div>
       {% else %}
+        {% if assenti.fc is defined %}
+    <div class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
+      <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
+        <div  class="row">
+          <div  class="col-sm-2"><strong class="gs-text-normal">Fuori classe:</strong></div>
+          <div  class="col-sm-10">
+            <small class="gs-text-normal">{% for a in assenti.fc %}{{ not loop.first ? '<br>' }}{{ a.alunno }}:
+              {% if a.oraInizio %}dalle {{ a.oraInizio|date('H:i') }}{% if a.oraFine %} alle {{ a.oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}
+              ({{ ('label.presenza_tipo_'~a.tipo)|trans }}: {{a.descrizione}})
+              {% endfor %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+        {% endif %}
+
     <div class="col-sm-4">
         {% if assenti.assenze is defined %}
       <div class="panel panel-success">

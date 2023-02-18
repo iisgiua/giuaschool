@@ -600,6 +600,7 @@ label.mailserver_email: Indirizzo a cui spedire la mail di prova
 label.scegli_rappresentanti: Scegli i rappresentanti
 label.filtro_rappresentanti: Filtro per rappresentanti
 label.presenza_tipo_P: PCTO
+label.presenza_tipo_M: Mobilità europea
 label.presenza_tipo_S: Attività a scuola
 label.presenza_tipo_E: Attività esterna
 label.presenza_ora_tipo_G: Tutto il giorno
@@ -766,6 +767,8 @@ page.coordinatore.presenze: Fuori Classe
 title.coordinatore.presenze: Gestione presenze fuori classe della {classe}
 title.coordinatore.presenze_edit: Modifica i dati di una presenza fuori classe
 title.coordinatore.presenze_add: Pianifica le presenze fuori classe
+page.lezioni.assenze: Registro Assenze
+title.lezioni.assenze_fuoriclasse: Inserisci o modifica la presenza fuori classe per l'alunno indicato.
 
 
 page.agenda_compito: Agenda Compiti
@@ -1614,3 +1617,9 @@ exception.presenze_alunni_mancanti: Devi indicare gli alunni con presenza fuori 
 exception.presenze_intervallo_date: La data finale deve essere uguale o successiva a quella iniziale
 exception.presenze_periodicita: Devi indicare la periodicità dei giorni della settimana
 exception.presenze_data_mancante: Devi indicare almeno una data valida nell'intervallo
+exception.presenze_assenza_incoerente: L'alunno risulta assente nella data indicata
+exception.presenze_ritardo_incoerente: L'alunno risulta entrato dopo l'ora iniziale dell'attività fuori classe
+exception.presenze_uscita_incoerente: L'alunno risulta uscito prima dell'ora finale dell'attività fuori classe
+exception.presenze_tipo_incoerente: La durata dell'attività fuori classe non è compatibile con la presenza di un'entrata in ritardo o di un'uscita anticipata
+exception.presenze_giorno_entrata_incoerente: La durata dell'attività fuori classe non è compatibile con la presenza di un'entrata in ritardo
+exception.presenze_giorno_uscita_incoerente: La durata dell'attività fuori classe non è compatibile con la presenza di un'uscita in anticipo

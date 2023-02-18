@@ -4,6 +4,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
+  {{ form_start(form) }}
   <div class="panel panel-primary gs-mt-4" >
     <div class="panel-heading">
       <div class="panel-title">{{ form_title|trans }}</div>
@@ -19,18 +20,34 @@
         <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
       </div>
-      {{ form_start(form) }}
       <ul id="gs-form-collection" class="list-group">
       {% for app in form.lista %}
         <li class="list-group-item{{ (not app.vars.valid) ? ' has-error' }}">
           <div class="col-sm-3"><strong>{{ app.alunno.vars.value }}</strong></div>
+        {% if dati[app.vars.value.id] is defined %}
+          {{ form_widget(app, {disabled: true}) }}
+          <div class="row">
+            <div class="col-sm-offset-3 col-sm-9">
+              <div class="label label-success"><strong class="gs-big">Fuori classe</strong></div>
+              <span><strong>{% if dati[app.vars.value.id].oraInizio %}dalle {{ dati[app.vars.value.id].oraInizio|date('H:i') }}{% if dati[app.vars.value.id].oraFine %} alle {{ dati[app.vars.value.id].oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}</strong> -
+              <strong>{{ ('label.presenza_tipo_'~dati[app.vars.value.id].tipo)|trans }}</strong>
+              ({{dati[app.vars.value.id].descrizione}})
+            </div>
+          </div>
+        {% else %}
           {{ form_widget(app) }}
+        {% endif %}
         </li>
       {% endfor %}
       </ul>
-      {{ form_end(form) }}
+    </div>
+    <div class="panel-footer text-center">
+      {{ form_widget(form._token) }}
+      {{ form_widget(form.submit) }}
+      {{ form_widget(form.cancel) }}
     </div>
   </div>
+  {{ form_end(form, {'render_rest': false}) }}
 </div>
 {% endblock %}
 
@@ -98,7 +115,14 @@ $(document).ready(function() {
 
 {% block _assenze_appello_lista_entry_widget %}
   <div class="row">
+  {% if disabled %}
+    <label for="{{ form.presenza.vars.id }}_0" class="required gs-radio-inline col-sm-2 text-muted">
+      <input type="radio" id="{{ form.presenza.vars.id }}_0" name="{{ form.presenza.vars.full_name }}" required="required" value="P" disabled="disabled" checked="checked"> Presente</label>
+    <label for="{{ form.presenza.vars.id }}_1" class="required gs-radio-inline col-sm-2 text-muted">
+      <input type="radio" id="{{ form.presenza.vars.id }}_1" name="{{ form.presenza.vars.full_name }}" required="required" value="A" disabled="disabled"> Assente</label>
+  {% else %}
     {{ form_widget(form.presenza) }}
+  {% endif %}
     {#-- {{ form_widget(form.ora) }} #}
     {#-- {{ form_errors(form.ora) }} #}
     {{ form_widget(form.id) }}

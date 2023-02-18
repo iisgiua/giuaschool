@@ -78,11 +78,11 @@ class Presenza {
   private ?\DateTime $oraFine = null;
 
   /**
-   * @var string $tipo Tipo di presenza fuori classe [P=PCTO, S=attività a scuola, E=attività esterna]
+   * @var string $tipo Tipo di presenza fuori classe [P=PCTO, M=mobilità europea, S=attività a scuola, E=attività esterna]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"P","S","E"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","M","S","E"}, strict=true, message="field.choice")
    */
   private string $tipo = 'S';
 

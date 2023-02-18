@@ -10,9 +10,11 @@ namespace App\Controller;
 
 use App\Entity\Assenza;
 use App\Entity\Entrata;
+use App\Entity\Presenza;
 use App\Entity\Uscita;
 use App\Form\AppelloType;
 use App\Form\EntrataType;
+use App\Form\PresenzaType;
 use App\Form\UscitaType;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
@@ -26,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -47,18 +50,19 @@ class AssenzeController extends BaseController {
    * @param int $classe Identificativo della classe (supplenza)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
    * @param string $vista Tipo di vista del registro (giorno/settimana/mese)
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}", name="lezioni_assenze_quadro",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
+   * @Route("/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}/{posizione}", name="lezioni_assenze_quadro",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M", "posizione": "\d+"},
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G", "posizione": "0"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function quadroAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                               $cattedra, $classe, $data, $vista) {
+                               $cattedra, $classe, $data, $vista, $posizione) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -183,6 +187,7 @@ class AssenzeController extends BaseController {
       'dati' => $dati,
       'avvisi' => $num_avvisi,
       'circolari' => $lista_circolari,
+      'posizione' => $posizione,
     ));
   }
 
@@ -197,17 +202,19 @@ class AssenzeController extends BaseController {
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
    * @param int $id Identificativo dell'assenza (se nullo crea nuova assenza)
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/assenze/assenza/{cattedra}/{classe}/{data}/{alunno}/{id}", name="lezioni_assenze_assenza",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+"},
+   * @Route("/lezioni/assenze/assenza/{cattedra}/{classe}/{data}/{alunno}/{id}/{posizione}", name="lezioni_assenze_assenza",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": "0"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                $cattedra, $classe, $data, $alunno, $id) {
+                                $cattedra, $classe, $data, $alunno, $id, $posizione) {
     // controlla cattedra
     if ($cattedra > 0) {
       // cattedra definita
@@ -239,6 +246,13 @@ class AssenzeController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // controlla fc
+    $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+      'data' => $data_obj]);
+    if ($presenza) {
+      // errore: esiste un fc
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // controlla assenza
     if ($id > 0) {
       // assenza esistente
@@ -246,7 +260,7 @@ class AssenzeController extends BaseController {
         'alunno' => $alunno, 'data' => $data_obj]);
       if (!$assenza) {
         // assenza non esiste, niente da fare
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }
       $this->em->remove($assenza);
     } else {
@@ -254,7 +268,7 @@ class AssenzeController extends BaseController {
       $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
       if ($assenza) {
         // assenza esiste già, niente da fare
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }
       // inserisce nuova assenza
       $assenza = (new Assenza())
@@ -328,7 +342,7 @@ class AssenzeController extends BaseController {
        }
     }
     // redirezione
-    return $this->redirectToRoute('lezioni_assenze_quadro');
+    return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
   }
 
   /**
@@ -342,17 +356,19 @@ class AssenzeController extends BaseController {
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/assenze/entrata/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_entrata",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   * @Route("/lezioni/assenze/entrata/{cattedra}/{classe}/{data}/{alunno}/{posizione}", name="lezioni_assenze_entrata",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function entrataAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
+                                LogHandler $dblogger, $cattedra, $classe, $data, $alunno, $posizione) {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -436,13 +452,22 @@ class AssenzeController extends BaseController {
     $form = $this->createForm(EntrataType::class, $entrata, array('formMode' => 'staff'));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
+      $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+        'data' => $data_obj]);
       if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
         // ritardo non esiste, niente da fare
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
+      } elseif ($presenza && !$presenza->getOraInizio()) {
+        // errore coerenza fc con entrata
+        $form->addError(new FormError($trans->trans('exception.presenze_giorno_entrata_incoerente')));
+      } elseif ($presenza && $presenza->getOraInizio() &&
+                $presenza->getOraInizio() < $form->get('ora')->getData()) {
+        // errore coerenza fc con orario entrata
+        $form->addError(new FormError($trans->trans('exception.presenze_ritardo_incoerente')));
       } elseif ($form->isValid()) {
         if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // cancella ritardo esistente
@@ -515,7 +540,7 @@ class AssenzeController extends BaseController {
             ));
         }
         // redirezione
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }
     }
     // mostra la pagina di risposta
@@ -525,6 +550,7 @@ class AssenzeController extends BaseController {
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
       'btn_delete' => isset($entrata_old),
+      'posizione' => $posizione,
     ));
   }
 
@@ -539,17 +565,19 @@ class AssenzeController extends BaseController {
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/assenze/uscita/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_uscita",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   * @Route("/lezioni/assenze/uscita/{cattedra}/{classe}/{data}/{alunno}/{posizione}", name="lezioni_assenze_uscita",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
+                               LogHandler $dblogger, $cattedra, $classe, $data, $alunno, $posizione) {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -632,13 +660,22 @@ class AssenzeController extends BaseController {
     $form = $this->createForm(UscitaType::class, $uscita);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
+      $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+        'data' => $data_obj]);
       if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
         // uscita non esiste, niente da fare
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') >= $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
+      } elseif ($presenza && !$presenza->getOraFine()) {
+        // errore coerenza fc con uscita
+        $form->addError(new FormError($trans->trans('exception.presenze_giorno_uscita_incoerente')));
+      } elseif ($presenza && $presenza->getOraFine() &&
+                $presenza->getOraFine() > $form->get('ora')->getData()) {
+        // errore coerenza fc con orario uscita
+        $form->addError(new FormError($trans->trans('exception.presenze_uscita_incoerente')));
       } elseif ($form->isValid()) {
         if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella ritardo esistente
@@ -700,7 +737,7 @@ class AssenzeController extends BaseController {
             ));
         }
         // redirezione
-        return $this->redirectToRoute('lezioni_assenze_quadro');
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }
     }
     // mostra la pagina di risposta
@@ -710,6 +747,7 @@ class AssenzeController extends BaseController {
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
       'btn_delete' => isset($uscita_old),
+      'posizione' => $posizione,
     ));
   }
 
@@ -723,17 +761,19 @@ class AssenzeController extends BaseController {
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/assenze/giustifica/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_giustifica",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   * @Route("/lezioni/assenze/giustifica/{cattedra}/{classe}/{data}/{alunno}/{posizione}", name="lezioni_assenze_giustifica",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": "0"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function giustificaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   $cattedra, $classe, $data, $alunno) {
+                                   $cattedra, $classe, $data, $alunno, $posizione) {
     // inizializza
     $label = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -874,7 +914,8 @@ class AssenzeController extends BaseController {
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
+        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro',
+          ['posizione' => $posizione])."'"]))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -938,7 +979,7 @@ class AssenzeController extends BaseController {
           'Uscite' => implode(', ', array_map(function ($u) { return $u->getId(); }, $form->get('convalida_uscite')->getData()))));
       }
       // redirezione
-      return $this->redirectToRoute('lezioni_assenze_quadro');
+      return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
     }
     // mostra la pagina di risposta
     return $this->render('lezioni/giustifica_edit.html.twig', array(
@@ -1007,7 +1048,12 @@ class AssenzeController extends BaseController {
     // elenco di alunni per l'appello
     $religione = ($cattedra && $cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra && $cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
-    $elenco = $reg->elencoAppello($data_obj, $classe, $religione);
+    list($elenco, $listaFC, $noAppello) = $reg->elencoAppello($data_obj, $classe, $religione);
+    // controlla funzione
+    if ($noAppello) {
+      // errore: funzione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
@@ -1022,7 +1068,7 @@ class AssenzeController extends BaseController {
         'entry_options' => array('label' => false),
         ))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
+        'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary gs-mr-3']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
         'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
@@ -1071,6 +1117,13 @@ class AssenzeController extends BaseController {
               // rimuove uscita
               $log['uscita_delete'][] = array($uscita->getId(), $uscita);
               $this->em->remove($uscita);
+            }
+            // controlla fc
+            $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+              'data' => $data_obj]);
+            if ($presenza) {
+              // errore: esiste un fc
+              throw $this->createNotFoundException('exception.id_notfound');
             }
             break;
           case 'P':   // presente
@@ -1161,6 +1214,8 @@ class AssenzeController extends BaseController {
             //-- break;
         }
       }
+
+
       if ($form->isValid()) {
         // ok: memorizza dati
         $this->em->flush();
@@ -1215,7 +1270,154 @@ class AssenzeController extends BaseController {
       'form' => $form->createView(),
       'form_title' => 'title.appello',
       'label' => $label,
+      'dati' => $listaFC,
     ));
+  }
+
+  /**
+   * Inserice, modifica o cancella una presenza fuori classe
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $classe Identificativo della classe
+   * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
+   * @param int $alunno Identificativo dell'alunno
+   * @param int $id Identificativo della presenza fuori classe
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/assenze/fuoriclasse/{classe}/{data}/{alunno}/{id}/{posizione}", name="lezioni_assenze_fuoriclasse",
+   *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": "0"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function fuoriclasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                                    LogHandler $dblogger, int $classe, string $data, int $alunno,
+                                    int $id, int $posizione): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // controlla classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla data
+    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    if ($errore) {
+      // errore: festivo
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla alunno
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno,
+      'classe' => $classe]);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla presenza
+    if ($id > 0) {
+      // presenza esistente
+      $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['id' => $id,
+        'alunno' => $alunno, 'data' => $data_obj]);
+      if (!$presenza) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $vecchiaPresenza = clone $presenza;
+    } else {
+      // inserisce nuova presenza
+      $presenza = (new Presenza())
+        ->setData($data_obj)
+        ->setAlunno($alunno);
+      $this->em->persist($presenza);
+    }
+    // imposta informazioni
+    $info['classe'] = $classe;
+    $info['data'] = $data_obj;
+    $info['alunno'] = $alunno;
+    $info['delete'] = ($id > 0);
+    $info['posizione'] = $posizione;
+    // form
+    $form = $this->createForm(PresenzaType::class, $presenza, [
+      'returnUrl' => $this->generateUrl('lezioni_assenze_quadro', ['posizione' => $posizione]),
+      'formMode' => 'registro']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      if (isset($vecchiaPresenza) && isset($request->request->get('presenza')['delete'])) {
+        // cancella presenza esistente
+        $this->em->remove($presenza);
+      } else {
+        // controlla dati
+        if (($form->get('oraTipo')->getData() == 'G' && (!empty($form->get('oraInizio')->getData()) ||
+            !empty($form->get('oraFine')->getData()))) ||
+            ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
+          // errore tipo con dati errati
+          $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+        } elseif (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
+            ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
+            ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
+          // errore tipo con dati mancanti
+          $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
+        } elseif ($form->get('oraTipo')->getData() == 'I' &&
+            $form->get('oraInizio')->getData() > $form->get('oraFine')->getData()) {
+          // errore tipo con dati mancanti
+          $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+        }
+        // controlla permessi
+        if (!$reg->azionePresenze($data_obj, $this->getUser(), $alunno, $classe)) {
+          // errore: azione non permessa
+          $form->addError(new FormError($trans->trans('exception.presenze_azione_non_permessa')));
+        }
+        // controllo coerenza
+        $assenze = $this->em->getRepository('App\Entity\Alunno')->assenzeInData($alunno, $data_obj);
+        if ($assenze['id_assenza'] > 0) {
+          // errore: assenza con fuori classe
+          $form->addError(new FormError($trans->trans('exception.presenze_assenza_incoerente')));
+        }
+        if ($assenze['id_entrata'] > 0 && $presenza->getOraInizio() &&
+            $assenze['ora_entrata'] > $presenza->getOraInizio()) {
+          // errore: entrata successiva a inizio
+          $form->addError(new FormError($trans->trans('exception.presenze_ritardo_incoerente')));
+        }
+        if ($assenze['id_uscita'] > 0 && $presenza->getOraFine() &&
+            $assenze['ora_uscita'] < $presenza->getOraFine()) {
+          // errore: uscita precedente a fine
+          $form->addError(new FormError($trans->trans('exception.presenze_uscita_incoerente')));
+        }
+        if (($form->get('oraTipo')->getData() == 'G' &&
+            ($assenze['id_entrata'] > 0 || $assenze['id_uscita'])) ||
+            ($form->get('oraTipo')->getData() == 'F' && $assenze['id_uscita'])) {
+          // errore: entrata o uscita con tipo fuori classe incoerente
+          $form->addError(new FormError($trans->trans('exception.presenze_tipo_incoerente')));
+        }
+      }
+      if ($form->isValid()) {
+        // ok: memorizzazione e log
+        if (isset($vecchiaPresenza) && isset($request->request->get('presenza')['delete'])) {
+          // log cancella
+          $dblogger->logRimozione('PRESENZE', 'Cancella presenza', $vecchiaPresenza);
+        } elseif (isset($vecchiaPresenza)) {
+          // log modifica
+          $dblogger->logModifica('PRESENZE', 'Modifica presenza', $vecchiaPresenza, $presenza);
+        } else {
+          // log inserimento
+          $dblogger->logCreazione('PRESENZE', 'Aggiunge presenza', $presenza);
+        }
+        // redirect
+        return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('lezioni', 'assenze_fuoriclasse', $dati, $info, [$form->createView(),
+      'message.required_fields']);
   }
 
 }

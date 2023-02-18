@@ -762,16 +762,18 @@ class RegistroUtil {
       $genitori = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista);
       // dati alunni/assenze/ritardi/uscite
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
+        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
         ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
         ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
         ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+        ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['lista' => $lista, 'data' => $data_str])
         ->getQuery()
         ->getArrayResult();
       // dati giustificazioni
+      $noAppello = false;
       foreach ($alunni as $k=>$alu) {
         // conteggio assenze da giustificare
         $giustifica_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
@@ -835,39 +837,68 @@ class RegistroUtil {
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['uscite'] = $uscite;
+        // controlla funzione appello
+        if ($alu['id_entrata'] || $alu['id_uscita']) {
+          // appello non permesso se presenti entrate/uscite
+          $noAppello = true;
+        }
         // gestione pulsanti
         $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
         $pulsanti = $this->azioneAssenze($data_inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));
         if ($pulsanti) {
-          // pulsante assenza/presenza
-          if ($alu['id_assenza']) {
-            // pulsante presenza
-            $alunni[$k]['pulsante_presenza'] = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-              'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
+          // url pulsanti
+          if ($alu['id_assenza'] > 0) {
+            $urlPresenza = $this->router->generate('lezioni_assenze_assenza', array(
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+              'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
           } else {
-            // pulsante assenza
-            $alunni[$k]['pulsante_assenza'] = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-              'alunno' => $alu['id_alunno'], 'id' => 0));
+            $urlAssenza = $this->router->generate('lezioni_assenze_assenza', array(
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+              'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => 0));
           }
-          // pulsante ritardo
-          $alunni[$k]['pulsante_entrata'] = $this->router->generate('lezioni_assenze_entrata', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-              'alunno' => $alu['id_alunno']));
+          $urlEntrata = $this->router->generate('lezioni_assenze_entrata', array(
+            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+            'data' =>$data_str, 'alunno' => $alu['id_alunno']));
           if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
             // pulsante uscita se richiesta presente
             $richiesta = $this->em->getRepository('App\Entity\Richiesta')
               ->richiestaAlunno('U', $alu['id_alunno'], $data_inizio);
-            $alunni[$k]['pulsante_uscita'] = $this->router->generate('richieste_uscita', ['data' =>$data_str,
+            $urlUscita = $this->router->generate('richieste_uscita', ['data' =>$data_str,
               'alunno' => $alu['id_alunno'], 'richiesta' => $richiesta ? $richiesta->getId() : 0]);
           } else {
             // pulsante uscita standard
-            $alunni[$k]['pulsante_uscita'] = $this->router->generate('lezioni_assenze_uscita', array(
-                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-                'alunno' => $alu['id_alunno']));
+            $urlUscita = $this->router->generate('lezioni_assenze_uscita', array(
+                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+                'data' =>$data_str, 'alunno' => $alu['id_alunno']));
           }
-          if (($alunni[$k]['giustifica_assenze'] + $alunni[$k]['giustifica_ritardi'] + $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
+          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse', ['classe' => $classe->getId(),
+            'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_presenza'] ?? 0]);
+          // controlla fuori classe
+          if ($alu['id_presenza']) {
+            // fuori classe
+            $alunni[$k]['pulsante_assenza'] = '#';
+            $alunni[$k]['pulsante_entrata'] = empty($alu['oraInizio']) ? '#' : $urlEntrata;
+            $alunni[$k]['pulsante_uscita'] = empty($alu['oraFine']) ? '#' : $urlUscita;
+            $alunni[$k]['pulsante_fc'] = $urlFC;
+          } else {
+            // pulsante assenza/presenza
+            if ($alu['id_assenza']) {
+              // pulsante presenza
+              $alunni[$k]['pulsante_presenza'] = $urlPresenza;
+            } else {
+              // pulsante assenza
+              $alunni[$k]['pulsante_assenza'] = $urlAssenza;
+            }
+            // pulsante ritardo
+            $alunni[$k]['pulsante_entrata'] = $urlEntrata;
+            // pulsante uscita
+            $alunni[$k]['pulsante_uscita'] = $urlUscita;
+            // pulsante fc
+            $alunni[$k]['pulsante_fc'] = empty($alu['id_assenza']) ? $urlFC : '#';
+          }
+          if ($alunni[$k]['id_assenza'] == 0 &&
+              ($alunni[$k]['giustifica_assenze'] + $alunni[$k]['giustifica_ritardi'] +
+              $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
             // pulsante giustifica
             $alunni[$k]['pulsante_giustifica'] = $this->router->generate('lezioni_assenze_giustifica', array(
               'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
@@ -876,7 +907,7 @@ class RegistroUtil {
         }
       }
       $pulsanti = $this->azioneAssenze($data_inizio, $docente, null, $classe, ($cattedra ? $cattedra->getMateria() : null));
-      if ($pulsanti) {
+      if ($pulsanti && !$noAppello) {
         // pulsante appello
         $dati[$data_str]['pulsante_appello'] = $this->router->generate('lezioni_assenze_appello', array(
           'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str));
@@ -1202,16 +1233,18 @@ class RegistroUtil {
    * @param Classe $classe Classe della lezione
    * @param string $religione Tipo di cattedra di religione, nullo altrimenti
    *
-   * @return array Lista degli alunni come istanze della classe Appello
+   * @return array Lista degli alunni come istanze della classe Appello e altre informazioni
    */
   public function elencoAppello(\DateTime $data, Classe $classe, $religione) {
     // alunni della classe
     $alunni = $this->alunniInData($data, $classe);
     // legge la lista degli alunni
     $lista = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,ass.id AS assenza,e.id AS entrata,e.ora')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,ass.id AS assenza,e.id AS entrata,e.ora,u.id AS uscita,p.id AS fc,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
       ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id IN (:id)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['id' => $alunni, 'data' => $data->format('Y-m-d')])
@@ -1219,6 +1252,8 @@ class RegistroUtil {
       ->getArrayResult();
     // crea l'elenco per l'appello
     $elenco = array();
+    $listaFC = [];
+    $noAppello = false;
     $orario = $this->orarioInData($data, $classe->getSede());
     foreach ($lista as $elemento) {
       if (!$religione || $elemento['religione'] == $religione) {
@@ -1233,10 +1268,21 @@ class RegistroUtil {
           $appello->setOra(\DateTime::createFromFormat('H:i:s', $orario[0]['inizio']));
         }
         $elenco[$elemento['id']] = $appello;
+        if ($elemento['fc']) {
+          $listaFC[$elemento['id']] = [
+            'oraInizio' => $elemento['oraInizio'],
+            'oraFine' => $elemento['oraFine'],
+            'tipo' => $elemento['tipo'],
+            'descrizione' => $elemento['descrizione']];
+        }
+        if ($elemento['entrata'] || $elemento['uscita']) {
+          // impedisce la funzione appello se presenti entrate/uscite
+          $noAppello = true;
+        }
       }
     }
     // restituisce elenco
-    return $elenco;
+    return [$elenco, $listaFC, $noAppello];
   }
 
   /**
@@ -1887,10 +1933,11 @@ class RegistroUtil {
     $lista = $this->alunniInData($data, $classe);
     // dati alunni/assenze/ritardi/uscite
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
+      ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
       ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
@@ -1906,6 +1953,13 @@ class RegistroUtil {
       }
       if ($alu['id_uscita']) {
         $dati['uscite'][] = $alu['cognome'].' '.$alu['nome'].' ('.$alu['ora_uscita']->format('H:i').')';
+      }
+      if ($alu['id_presenza']) {
+        $dati['fc'][] = ['alunno' => $alu['cognome'].' '.$alu['nome'],
+          'oraInizio' => $alu['oraInizio'],
+          'oraFine' => $alu['oraFine'],
+          'tipo' => $alu['tipo'],
+          'descrizione' => $alu['descrizione']];
       }
     }
     // restituisce vettore associativo

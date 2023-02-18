@@ -116,8 +116,8 @@ class PresenzaType extends AbstractType {
           'attr' => ['widget' => 'gs-picker'],
           'required' => false))
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_S' => 'S',
-            'label.presenza_tipo_E' => 'E'),
+          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
           'expanded' => false,
           'multiple' => false,
           'attr' => ['style' => 'width: auto'],
@@ -171,8 +171,38 @@ class PresenzaType extends AbstractType {
           'attr' => ['widget' => 'gs-picker'],
           'required' => false))
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_S' => 'S',
-            'label.presenza_tipo_E' => 'E'),
+          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
+          'expanded' => false,
+          'multiple' => false,
+          'attr' => ['style' => 'width: auto'],
+          'required' => true))
+        ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
+          'required' => true));
+    } elseif ($options['formMode'] == 'registro') {
+      // form modifica da registro assenze
+      $builder
+        ->add('oraTipo', ChoiceType::class, array('label' => false,
+          'choices' => array('label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
+            'label.presenza_ora_tipo_I' => 'I'),
+          'expanded' => false,
+          'multiple' => false,
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => true,
+          'mapped' => false))
+        ->add('oraInizio', TimeType::class, array('label' => 'label.ora_inizio',
+          'widget' => 'single_text',
+          'html5' => false,
+          'attr' => ['widget' => 'gs-picker'],
+          'required' => false))
+        ->add('oraFine', TimeType::class, array('label' => 'label.ora_fine',
+          'widget' => 'single_text',
+          'html5' => false,
+          'attr' => ['widget' => 'gs-picker'],
+          'required' => false))
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
           'expanded' => false,
           'multiple' => false,
           'attr' => ['style' => 'width: auto'],
