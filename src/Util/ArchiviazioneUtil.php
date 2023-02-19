@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Twig\Environment;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Classe;
@@ -62,6 +63,11 @@ class ArchiviazioneUtil {
   private $reqstack;
 
   /**
+   * @var Environment $tpl Gestione template
+   */
+  private $tpl;
+
+  /**
    * @var PdfManager $pdf Gestore dei documenti PDF
    */
   private $pdf;
@@ -86,11 +92,6 @@ class ArchiviazioneUtil {
    */
   private $dirCircolari;
 
-  /**
-   * @var string $localpath Directory per le immagini locali
-   */
-  private $localpath;
-
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -100,25 +101,26 @@ class ArchiviazioneUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param Environment $tpl Gestione template
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle
-   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param string $root Directory principale di archiviazione
    * @param string $dirCircolari Directory delle circolari
-   * @param string $localpath Directory per le immagini locali
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                               RequestStack $reqstack, PdfManager $pdf, RegistroUtil $regUtil,
-                               PagelleUtil $pag, $root, $dirCircolari, $localpath) {
+                               RequestStack $reqstack, Environment $tpl, PdfManager $pdf,
+                               RegistroUtil $regUtil, PagelleUtil $pag, string $root,
+                               string $dirCircolari) {
     $this->em = $em;
     $this->trans = $trans;
     $this->reqstack = $reqstack;
+    $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->regUtil = $regUtil;
     $this->pag = $pag;
     $this->root = $root;
     $this->dirCircolari = $dirCircolari;
-    $this->localpath = $localpath;
   }
 
   /**
@@ -366,10 +368,12 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->AddPage('L');
     // crea copertina
     $this->pdf->getHandler()->SetFont('times', '', 14);
-    $html = '
+    $template = '
       <div style="text-align:center">
-        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="@{{ image64(\'intestazione-documenti.jpg\') }}" width="600">
       </div>';
+    $templateTwig = $this->tpl->createTemplate($template);
+    $html = $this->tpl->render($templateTwig);
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
@@ -894,10 +898,12 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->AddPage('L');
     // crea copertina
     $this->pdf->getHandler()->SetFont('times', '', 14);
-    $html = '
+    $template = '
       <div style="text-align:center">
-        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="@{{ image64(\'intestazione-documenti.jpg\') }}" width="600">
       </div>';
+    $templateTwig = $this->tpl->createTemplate($template);
+    $html = $this->tpl->render($templateTwig);
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
@@ -1212,10 +1218,12 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->AddPage('L');
     // crea copertina
     $this->pdf->getHandler()->SetFont('times', '', 14);
-    $html = '
+    $template = '
       <div style="text-align:center">
-        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="@{{ image64(\'intestazione-documenti.jpg\') }}" width="600">
       </div>';
+    $templateTwig = $this->tpl->createTemplate($template);
+    $html = $this->tpl->render($templateTwig);
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $periodo_s = $periodo['nome'];
