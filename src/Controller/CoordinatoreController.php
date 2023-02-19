@@ -1362,6 +1362,11 @@ class CoordinatoreController extends BaseController {
         // ok: memorizzazione e log
         foreach ($alunni as $alunno) {
           foreach ($listaDate as $data) {
+            if ($this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+                'data' => $data])) {
+              // salta fuori classe esistente
+              continue;
+            }
             $presenza = (new Presenza())
               ->setData($data)
               ->setOraInizio($form->get('oraInizio')->getData())
