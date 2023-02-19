@@ -1034,7 +1034,7 @@ class CoordinatoreController extends BaseController {
     } else {
       $fine = \DateTime::createFromFormat('Y-m-d',
         $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
-      $criteri['fine'] = $inizio->format('Y-m-d');
+      $criteri['fine'] = $fine->format('Y-m-d');
     }
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -1339,7 +1339,7 @@ class CoordinatoreController extends BaseController {
       $listaDate = [];
       while ($dataInizio <= $dataFine) {
         $giorno = $dataInizio->format('w');
-        if (in_array($giorno, $settimana, true)) {
+        if (in_array($giorno, $settimana, true) && !$reg->controlloData($dataInizio, $classe->getSede())) {
           // data presente in settimana
           $listaDate[] = clone $dataInizio;
         }
