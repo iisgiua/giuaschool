@@ -110,6 +110,7 @@ jobs:
         run: |
           mkdir docs
           echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
+          echo "tag: " > docs/build.yml
 
       - name: Add version tag to documentation
         if: ${{ github.event.inputs.prerelease != 'TRUE' }}
