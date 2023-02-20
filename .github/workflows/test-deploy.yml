@@ -166,6 +166,7 @@ jobs:
       - name: Generate changelog page
         run: |
           mkdir docs
+          echo "tag: ${{ github.sha }}" > docs/build.yml
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
           echo "title: Ultimo aggiornamento" >> docs/latest-build.md
@@ -198,6 +199,19 @@ jobs:
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
           commit_message: 'Add changelog page to documentation'
+
+      - name: Add build tag to documentation
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'docs/build.yml'
+          destination_repo: 'iisgiua/giuaschool-docs'
+          destination_branch: 'master'
+          destination_folder: '_data'
+          user_name: ${{ github.actor }}
+          user_email: '${{ github.actor }}@users.noreply.github.com'
+          commit_message: 'Add build tag to documentation'
 
   test-update:
     if: ${{ github.event_name == 'push' }}
