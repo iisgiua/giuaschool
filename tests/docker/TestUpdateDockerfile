@@ -2,9 +2,10 @@
 ARG VERSION
 FROM ghcr.io/iisgiua/giuaschool-test:$VERSION
 
-# parameters for actual and new version
+# parameters for actual version, new version and new build
 ARG VERSION
 ARG NEWVERSION
+ARG NEWBUILD
 
 # base directory
 WORKDIR /var/www/giuaschool
@@ -17,7 +18,7 @@ COPY --chown=www-data:www-data tests/ ./tests/
 
 # set test environment
 RUN \
-  if [ "$NEWVERSION" = "$VERSION-build" ] ; then DIR="update-v$VERSION" ; FILE="giuaschool-update-v$VERSION" ; else DIR="v$NEWVERSION" ; FILE="giuaschool-release-v$NEWVERSION" ; fi && \
+  if [ "$VERSION" = "$NEWVERSION" ] ; then DIR="update-v$NEWVERSION" ; FILE="giuaschool-update-v$NEWVERSION" ; else DIR="v$NEWVERSION" ; FILE="giuaschool-release-v$NEWVERSION" ; fi && \
   cd src/Install && \
   wget https://github.com/iisgiua/giuaschool/releases/download/$DIR/$FILE.zip && \
   cd ../../ && \
@@ -31,6 +32,7 @@ RUN \
   mysql -uroot -proot giuaschool < .gs-updating && \
   echo "token='test'" > .gs-updating && \
   echo "version='$NEWVERSION'" >> .gs-updating
+  echo "build='$NEWBUILD'" >> .gs-updating
 
 # open https port
 EXPOSE 443
