@@ -1338,8 +1338,10 @@ message.colloquio_cancella_disabilitati: Verranno cancellati i ricevimenti disab
 message.colloquio_cancella_tutti: Verranno cancellati tutti i ricevimenti che non hanno ricevuto richieste. Vuoi continuare?
 message.salta_colloqui_duplicati: Attenzione! Non sono state inserite le date di ricevimento che si sovrappongono a quelle già esistenti.
 message.aggiornamento_possibile: E' presente la nuova versione {versione}.<br>Puoi proseguire con lo scaricamento dell'aggiornamento.
+message.aggiornamento_build_possibile: "Sono presenti modifiche successive al rilascio della versione {versione}:<br>tali modifiche non sono ancora validate né definitive, per cui se ne sconsiglia l’installazione se non in ambiente di test.<br><br>Puoi proseguire con lo scaricamento dell'aggiornamento."
 message.sistema_aggiornato: L'applicazione risulta aggiornata all'ultima versione disponibile.
 message.aggiornamento_scaricato: La nuova versione {versione} è stata scaricata correttamente.<br> Prima di proseguire con l'installazione, assicurati di aver eseguito il backup del sistema e di aver attivato la modalità <em>manutenzione</em>.
+message.aggiornamento_build_scaricato: "L'aggiornamento alle modifiche successive alla versione {versione} è stato scaricato correttamente.<br>Si ricorda che tali modifiche non sono ancora validate né definitive, per cui se ne sconsiglia l’installazione se non in ambiente di test.<br><br> Prima di proseguire con l'installazione, assicurati di aver eseguito il backup del sistema e di aver attivato la modalità <em>manutenzione</em>."
 message.sistema_email: Modifica la configurazione per la posta elettronica ed invia una mail di prova all'indirizzo indicato.
 message.mailserver_help_gmail: "Utilizza un server esterno GMAIL; è necessario inserire il nome e la password di un utente esistente. Può essere necessario modificare le impostazioni di sicurezza dell'utente GMAIL per concedere il permesso di utilizzo dall'applicazione."
 message.mailserver_help_smtp: "Utilizza un server esterno tramite protocollo SMTP; è necessario inserire i parametri del server di posta forniti dal servizio di hosting."

@@ -65,29 +65,35 @@ App\Entity\Configurazione:
     gestito: true
   configurazione_SISTEMA2:
     categoria: 'SISTEMA'
+    parametro: 'versione_build'
+    descrizione: 'Numero di build dell''applicazione\<br>[testo]'
+    valore: '0'
+    gestito: true
+  configurazione_SISTEMA3:
+    categoria: 'SISTEMA'
     parametro: 'manutenzione_inizio'
     descrizione: 'Inizio della modalit&agrave; manutenzione durante la quale il registro &egrave; offline\<br>[formato: AAAA-MM-GG HH:MM]'
     valore: ''
     gestito: true
-  configurazione_SISTEMA3:
+  configurazione_SISTEMA4:
     categoria: 'SISTEMA'
     parametro: 'manutenzione_fine'
     descrizione: 'Fine della modalit&agrave; manutenzione durante la quale il registro &egrave; offline\<br>[formato: AAAA-MM-GG HH:MM]'
     valore: ''
     gestito: true
-  configurazione_SISTEMA4:
+  configurazione_SISTEMA5:
     categoria: 'SISTEMA'
     parametro: 'banner_login'
     descrizione: 'Messaggio da visualizzare nella pagina pubblica di login\<br>[testo HTML]'
     valore: ''
     gestito: true
-  configurazione_SISTEMA5:
+  configurazione_SISTEMA6:
     categoria: 'SISTEMA'
     parametro: 'banner_home'
     descrizione: 'Messaggio da visualizzare nella pagina home degli utenti autenticati\<br>[testo HTML]'
     valore: ''
     gestito: true
-  configurazione_SISTEMA6:
+  configurazione_SISTEMA7:
     categoria: 'SISTEMA'
     parametro: 'dominio_default'
     descrizione: 'Indica il dominio di posta predefinito per le email degli utenti (usato nell''importazione)\<br>[testo]'

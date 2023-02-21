@@ -1318,6 +1318,7 @@ class SistemaController extends BaseController {
     // esegue passi
     switch($step) {
       case 0:   // controlli iniziali
+        // legge ultima versione
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
         $pagina = file_get_contents($url);
         preg_match('/^tag:\s*([0-9\.]+)$/m', $pagina, $trovati);
@@ -1327,17 +1328,36 @@ class SistemaController extends BaseController {
           $info['messaggio'] = 'exception.aggiornamento_no_versione';
           break;
         }
-        // controlla versione
         $nuovaVersione = $trovati[1];
-        $versione = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione');
-        if (version_compare($nuovaVersione, $versione, '<=')) {
+        // legge ultima build
+        $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/build.yml';
+        $pagina = file_get_contents($url);
+        preg_match('/^tag:\s*(.*)$/m', $pagina, $trovati);
+        $nuovaBuild = $trovati[1] ?? '0';
+        // controlla versione
+        $versione = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione', '0');
+        $build = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione_build', '0');
+        if (version_compare($nuovaVersione, $versione, '<')) {
           // sistema già aggiornato
           $info['tipo'] = 'info';
           $info['messaggio'] = 'message.sistema_aggiornato';
           break;
+        } elseif (version_compare($nuovaVersione, $versione, '=')) {
+          // controlla build
+          if ($nuovaBuild == '0' || $nuovaBuild == $build) {
+            $info['tipo'] = 'info';
+            $info['messaggio'] = 'message.sistema_aggiornato';
+            break;
+          }
+          // aggiornamento di build
+          $dati['versione'] = $nuovaVersione;
+          $dati['build'] = $nuovaBuild;
+        } else {
+          // aggiornamento di versione
+          $dati['versione'] = $nuovaVersione;
+          $dati['build'] = '0';
         }
-        // nuova versione presente
-        $dati['versione'] = $nuovaVersione;
+        // aggiornamento presente
         if (!extension_loaded('zip')) {
           // zip non supportato
           $info['tipo'] = 'danger';
@@ -1345,25 +1365,50 @@ class SistemaController extends BaseController {
           break;
         }
         // controlla esistenza file
-        $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.ok';
+        $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.($dati['build'] == '0' ? '' : '-build').'.ok';
         if (file_exists($file)) {
           // file già scaricato: salta il passo successivo
-          $info['tipo'] = 'success';
-          $info['messaggio'] = 'message.aggiornamento_scaricato';
+          if ($dati['build'] == '0') {
+            $info['tipo'] = 'success';
+            $info['messaggio'] = 'message.aggiornamento_scaricato';
+          } else {
+            $info['tipo'] = 'warning';
+            $info['messaggio'] = 'message.aggiornamento_build_scaricato';
+          }
           $info['prossimo'] = 2;
         } else {
           // file da scaricare
-          $info['tipo'] = 'success';
-          $info['messaggio'] = 'message.aggiornamento_possibile';
+          if ($dati['build'] == '0') {
+            $info['tipo'] = 'success';
+            $info['messaggio'] = 'message.aggiornamento_possibile';
+          } else {
+            $info['tipo'] = 'warning';
+            $info['messaggio'] = 'message.aggiornamento_build_possibile';
+          }
           $info['prossimo'] = 1;
         }
-        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_aggiorna/versione', $nuovaVersione);
+        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_aggiorna/versione', $dati['versione']);
+        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_aggiorna/build', $dati['build']);
         break;
       case 1:   // scarica file
         $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
         $dati['versione'] = $nuovaVersione;
-        $url = 'https://github.com/iisgiua/giuaschool/releases/download/v'.$nuovaVersione.
-          '/giuaschool-release-v'.$nuovaVersione.'.zip';
+        $nuovaBuild = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/build');
+        $dati['build'] = $nuovaBuild;
+        if ($dati['build'] == '0') {
+          // aggiornamento di versione
+          $url = 'https://github.com/iisgiua/giuaschool/releases/download/v'.$nuovaVersione.
+            '/giuaschool-release-v'.$nuovaVersione.'.zip';
+          $info['tipo'] = 'success';
+          $info['messaggio'] = 'message.aggiornamento_scaricato';
+        } else {
+          // aggiornamento di build
+          $url = 'https://github.com/iisgiua/giuaschool/releases/download/update-v'.$nuovaVersione.
+            '/giuaschool-update-v'.$nuovaVersione.'.zip';
+          $info['tipo'] = 'warning';
+          $info['messaggio'] = 'message.aggiornamento_build_scaricato';
+          $nuovaVersione .= '-build';
+        }
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip';
         // scarica file
         $bytes = file_put_contents($file, file_get_contents($url));
@@ -1375,16 +1420,16 @@ class SistemaController extends BaseController {
         // conferma scaricamento
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.ok';
         file_put_contents($file, '');
-        $info['tipo'] = 'success';
-        $info['messaggio'] = 'message.aggiornamento_scaricato';
         $info['prossimo'] = 2;
         break;
       case 2:   // installazione
         // salva dati per l'installazione
         $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
+        $nuovaBuild = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/build');
         $token = bin2hex(random_bytes(16));
         $contenuto = 'token="'.$token.'"'."\n".
-          'version="'.$nuovaVersione.'"'."\n";
+          'version="'.$nuovaVersione.'"'."\n".
+          'build="'.$nuovaBuild.'"'."\n";
         file_put_contents(dirname(dirname(__DIR__)).'/.gs-updating', $contenuto);
         // reindirizza a pagina di installazione
         $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').

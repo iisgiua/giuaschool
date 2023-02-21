@@ -222,16 +222,16 @@ class Updater {
       throw new \Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
     // controlla versione
-    $version = $this->getParameter('versione');
+    $version = $this->getParameter('versione', '0');
+    $build = $this->getParameter('versione_build', '0');
     if (empty($version) || version_compare($version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
       throw new \Exception('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
-    } elseif (substr($this->sys['version'], -6) != '-build' &&
-              version_compare($version, $this->sys['version'], '>=')) {
+    } elseif (version_compare($version, $this->sys['version'], '>')) {
       // sistema già aggiornato
       throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
-    } elseif (substr($this->sys['version'], -6) == '-build' &&
-              version_compare($version, substr($this->sys['version'], 0, -6), '>')) {
+    } elseif (version_compare($version, $this->sys['version'], '=') &&
+              ($this->sys['build'] == '0' || $this->sys['build'] == $build)) {
       // sistema già aggiornato
       throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
     }
@@ -261,10 +261,11 @@ class Updater {
    * Restituisce il valore del parametro dell'applicazione
    *
    * @param string $parameter Nome del parametro
+   * @param null|string $default Valore di default nel caso il parametro non sia stato trovato
    *
    * @return null|string Valore del parametro
    */
-  private function getParameter(string $parameter): ?string {
+  private function getParameter(string $parameter, ?string $default=null): ?string {
     // inizializza
     $valore = null;
     if (empty($this->pdo)) {
@@ -280,7 +281,7 @@ class Updater {
       $valore = $data[0]['valore'];
     }
     // restituisce valore
-    return $valore;
+    return $valore ?? $default;
   }
 
   /**
@@ -336,16 +337,10 @@ class Updater {
    */
   private function readUpdates(): array {
     // versione attuale
-    $oldVersion = $this->getParameter('versione');
+    $oldVersion = $this->getParameter('versione', '0');
     // lista delle versioni presenti
     $updates = [];
-    if ($this->sys['version'] == $oldVersion.'-build') {
-      // aggiornamento a nuova build della versione attuale
-      $file = $this->projectPath.'/src/Install/update-v'.$this->sys['version'];
-      if (file_exists($file)) {
-        $updates[] = [$file, $this->sys['version']];
-      }
-    } elseif (substr($this->sys['version'], -6) != '-build') {
+    if ($this->sys['build'] == '0') {
       // aggiornamento di versione
       foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
         preg_match('|/update-v([^/]+$)|', $file, $matches);
@@ -358,6 +353,12 @@ class Updater {
       }
       // ordina versioni presenti
       uasort($updates, fn($a, $b) => version_compare($a[1], $b[1]));
+    } else {
+      // aggiornamento di build
+      $file = $this->projectPath.'/src/Install/update-v'.$this->sys['version'].'-build';
+      if (file_exists($file)) {
+        $updates[] = [$file, $this->sys['version']];
+      }
     }
     // legge informazioni sugli aggiornamenti
     $updateInfo = [
@@ -420,7 +421,8 @@ class Updater {
    */
   private function unzip(int $step) {
     // apre file ZIP
-    $zipPath = $this->projectPath.'/src/Install/v'.$this->sys['version'].'.zip';
+    $zipPath = $this->projectPath.'/src/Install/v'.$this->sys['version'].
+      ($this->sys['build'] == '0' ? '' : '-build').'.zip';
     $zip = new \ZipArchive();
     if ($zip->open($zipPath) !== true) {
       // errore
@@ -605,11 +607,9 @@ class Updater {
     // cancella contenuto delle sessioni
     $this->removeFiles($this->projectPath.'/var/sessions');
     // cancella vecchi file di installazione
-    $newVersion = (substr($this->sys['version'], -6) == '-build') ? substr($this->sys['version'], 0, -6) :
-      $this->sys['version'];
     foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
       preg_match('|/update-v([\d\.]+)(-build)?$|', $file, $matches);
-      if (version_compare($matches[1], $newVersion, '<')) {
+      if (version_compare($matches[1], $this->sys['version'], '<')) {
         unlink($file);
       }
     }
@@ -617,6 +617,10 @@ class Updater {
       unlink($file);
     }
     foreach (glob($this->projectPath.'/src/Install/v*.ok') as $file) {
+      unlink($file);
+    }
+    $file = $this->projectPath.'/src/Install/init_db.sql';
+    if (file_exists($file)) {
       unlink($file);
     }
     // visualizza pagina
@@ -635,9 +639,8 @@ class Updater {
    */
   private function end(int $step) {
     // imposta la nuova versione
-    if (substr($this->sys['version'], -6) != '-build') {
-      $this->setParameter('versione', $this->sys['version']);
-    }
+    $this->setParameter('versione', $this->sys['version']);
+    $this->setParameter('versione_build', $this->sys['build']);
     // toglie la modalità manutenzione (se presente)
     $this->setParameter('manutenzione_inizio', '');
     $this->setParameter('manutenzione_fine', '');
