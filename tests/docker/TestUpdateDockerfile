@@ -31,7 +31,7 @@ RUN \
   service mariadb start && \
   mysql -uroot -proot giuaschool < .gs-updating && \
   echo "token='test'" > .gs-updating && \
-  echo "version='$NEWVERSION'" >> .gs-updating
+  echo "version='$NEWVERSION'" >> .gs-updating && \
   echo "build='$NEWBUILD'" >> .gs-updating
 
 # open https port

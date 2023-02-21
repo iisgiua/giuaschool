@@ -108,7 +108,7 @@ class Updater {
       $this->{$this->steps[$step]}($step);
     } catch (\Exception $e) {
       // visualizza pagina di errore
-      $page['version'] = $this->sys['version'];
+      $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
       $page['step'] = $step.' - Errore';
       $page['title'] = 'Si è verificato un errore';
       $page['danger'] = $e->getMessage();
@@ -453,7 +453,7 @@ class Updater {
     // fine estrazione file
     $zip->close();
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Estrazione file';
     $page['title'] = 'Estrazione dei file';
     $page['success'] = 'I file sono stati estratti correttamente.';
@@ -515,7 +515,7 @@ class Updater {
       }
     }
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Aggiornamento file';
     $page['title'] = 'Aggiornamento dei file e delle directory';
     $page['success'] = 'I file e le directory sono stati aggiornati correttamente.';
@@ -569,7 +569,7 @@ class Updater {
     }
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Aggiornamento database';
     $page['title'] = 'Aggiornamento del database';
     $page['success'] = 'Il database è stato correttamente aggiornato alla nuova versione.';
@@ -588,7 +588,7 @@ class Updater {
     // elimina le variabili indicate
     $this->writeEnv($updates['envDelete']);
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Aggiornamento .env';
     $page['title'] = 'Aggiornamento del contenuto del file ".env"';
     $page['success'] = 'Il file ".env" è stato correttamente aggiornato alla nuova versione.';
@@ -624,7 +624,7 @@ class Updater {
       unlink($file);
     }
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Pulizia';
     $page['title'] = 'Pulizia finale della cache e dei file di installazione';
     $page['success'] = 'I file sono stati correttamente rimossi.';
@@ -647,7 +647,7 @@ class Updater {
     // elimina il file di sistema
     unlink($this->projectPath.'/.gs-updating');
     // visualizza pagina
-    $page['version'] = $this->sys['version'];
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Fine';
     $page['title'] = 'Procedura di installazione terminata';
     $page['success'] = 'La procedura di installazione è terminata con successo.';
