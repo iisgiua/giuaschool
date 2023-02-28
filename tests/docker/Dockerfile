@@ -81,6 +81,8 @@ RUN \
   service mariadb start && mysqladmin -u root password 'root' && \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
+  php bin/console doctrine:schema:create -q --dump-sql > src/Install/create-db.sql && \
+  php bin/console doctrine:schema:drop -q --dump-sql > src/Install/drop-db.sql && \
 # init database
   php bin/console app:alice:load Giuaschool --dump src/Install/init-db && \
 # install SPID library

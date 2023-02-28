@@ -12,4 +12,4 @@ $step = $_GET['step'] ?? '0';
 $path = dirname(__DIR__);
 // esegue passo di installazione
 $installer = new Updater($path);
-$installer->run($token, $step);
+$installer->update($token, $step);

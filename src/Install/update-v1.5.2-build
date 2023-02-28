@@ -8,6 +8,21 @@ return [
     'src/Entity/NotificaInvio.php',
     'src/Repository/NotificaRepository.php',
     'src/Repository/NotificaInvioRepository.php',
+    'src/Install/Installer.php',
+    'public/install/index.php',
+    'public/install/page_admin.php',
+    'public/install/page_authenticate.php',
+    'public/install/page_database.php',
+    'public/install/page_error.php',
+    'public/install/page_footer.php',
+    'public/install/page_header.php',
+    'public/install/page_install.php',
+    'public/install/page_message.php',
+    'public/install/page_requirements.php',
+    'public/install/page_spid_config.php',
+    'public/install/page_spid_data.php',
+    'public/install/page_spid.php',
+    'public/install/page_update.php',
   ],
   'sqlCommand' => [
     ["UPDATE gs_utente SET rappresentante='' WHERE rappresentante IS NULL OR rappresentante='a:0:{}';", ""],
@@ -19,5 +34,6 @@ return [
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'versione_build', 'Numero di build dell\'applicazione<br>[testo]', '0', 1);", "SELECT * FROM gs_configurazione WHERE parametro='versione_build';"]
   ],
   'envDelete' => [
+    "INSTALLATION_PSW",
   ]
 ];
