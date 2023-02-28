@@ -12,7 +12,7 @@
 
 - [Scarica l'ultima versione](https://iisgiua.github.io/giuaschool-docs/latest-release.html)
 
-- [Scarica l'ultimo aggiornamento](https://iisgiua.github.io/giuaschool-docs/latest-build.html)
+- [Visualizza le modifiche successive al rilascio della versione](https://iisgiua.github.io/giuaschool-docs/latest-build.html)
 
 - [Visualizza gli annunci](https://github.com/iisgiua/giuaschool/discussions/categories/annunci)
 

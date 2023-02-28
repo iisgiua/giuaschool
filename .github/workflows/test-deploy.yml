@@ -179,9 +179,6 @@ jobs:
           echo "_Le modifiche seguenti non sono ancora validate né definitive:<br>se ne sconsiglia l'installazione se non in ambiente di test_" >> docs/latest-build.md
           echo "{: .text-center .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
-          echo "[**Scarica l'ultimo aggiornamento**](https://github.com/iisgiua/giuaschool/releases/download/update-${{ steps.latest-release.outputs.tag_name }}/giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip)" >> docs/latest-build.md
-          echo "{: .text-center .pb-5}" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
           echo "Data e ora dell'ultimo aggiornamento: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Lista delle modifiche effettuate dopo il rilascio della Versione {{ site.data.version.tag }}:"  >> docs/latest-build.md

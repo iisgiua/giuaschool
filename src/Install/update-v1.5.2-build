@@ -23,6 +23,7 @@ return [
     'public/install/page_spid_data.php',
     'public/install/page_spid.php',
     'public/install/page_update.php',
+    'public/install/app.php',
   ],
   'sqlCommand' => [
     ["UPDATE gs_utente SET rappresentante='' WHERE rappresentante IS NULL OR rappresentante='a:0:{}';", ""],

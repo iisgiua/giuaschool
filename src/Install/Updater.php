@@ -670,6 +670,8 @@ class Updater {
    * @param int $step Passo della procedura
    */
   private function cleanUpdate(int $step) {
+    // cancella procedura di installazione iniziale (per sicurezza)
+    unlink($this->projectPath.'/public/install/app.php');
     // cancella contenuto cache
     $this->removeFiles($this->projectPath.'/var/cache');
     // cancella contenuto delle sessioni
@@ -1531,7 +1533,7 @@ class Updater {
   private function end(int $step) {
     // elimina il file di sistema
     unlink($this->projectPath.'/.gs-updating');
-    // elimina la pagina di installazione
+    // elimina la procedura di installazione
     unlink($this->projectPath.'/public/install/app.php');
     // visualizza pagina
     $page['version'] = 'INSTALL';
