@@ -33,7 +33,7 @@ return [
     ["CREATE TABLE gs_presenza (id INT AUTO_INCREMENT NOT NULL, alunno_id INT NOT NULL, creato DATETIME NOT NULL, modificato DATETIME NOT NULL, data DATE NOT NULL, ora_inizio TIME DEFAULT NULL, ora_fine TIME DEFAULT NULL, tipo VARCHAR(1) NOT NULL, descrizione VARCHAR(255) NOT NULL, INDEX IDX_32C5F7A67ABC9740 (alunno_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB;", "SELECT 1 FROM dual UNION SELECT 1 FROM gs_presenza;"],
     ["ALTER TABLE gs_presenza ADD CONSTRAINT FK_32C5F7A67ABC9740 FOREIGN KEY (alunno_id) REFERENCES gs_utente (id);", "SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE TABLE_NAME = 'gs_presenza' AND REFERENCED_TABLE_NAME = 'gs_utente';"],
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'versione_build', 'Numero di build dell\'applicazione<br>[testo]', '0', 1);", "SELECT * FROM gs_configurazione WHERE parametro='versione_build';"],
-    ["ALTER TABLE gs_messenger_messages CHANGE id id BIGINT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id);", "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'PRIMARY KEY' AND TABLE_NAME = 'gs_messenger_messages');"],
+    ["ALTER TABLE gs_messenger_messages CHANGE id id BIGINT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id);", "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'PRIMARY KEY' AND TABLE_NAME = 'gs_messenger_messages';"],
   ],
   'envDelete' => [
     "INSTALLATION_PSW",
