@@ -48,23 +48,22 @@ jobs:
       - name: Create archive for update code
         run: |
           docker build -t gs:prod --target application_prod -f tests/docker/Dockerfile .
-          docker run --name gs_update gs:prod tests/docker/update.sh '${{ env.LATEST_RELEASE }}'
-          docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ env.LATEST_RELEASE }}.zip
+          docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.tag_name }}'
+          docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
 
       - name: Upload update code
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: update-${{ env.LATEST_RELEASE }}
-          name: "Aggiornamento della versione ${{ env.LATEST_RELEASE }}"
-          body: "- [Visualizza le modifiche successive al rilascio della versione](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
+          tag: update-${{ steps.latest-release.outputs.tag_name }}
+          name: "Aggiornamento della versione ${{ steps.latest-release.outputs.tag_name }}"
+          body: "- [Visualizza le modifiche successive al rilascio della versione ${{ steps.latest-release.outputs.tag_name }}](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
           draft: false
           prerelease: true
-          artifacts: giuaschool-update-${{ env.LATEST_RELEASE }}.zip
+          artifacts: giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
           allowUpdates: true
           artifactErrorsFailBuild: true
           replacesArtifacts: true
-
 
   test-phpunit:
     name: PhpUnit tests
