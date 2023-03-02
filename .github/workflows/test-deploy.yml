@@ -84,7 +84,7 @@ jobs:
       - name: Set matrix of features
         id: set-matrix
         #run: echo "::set-output name=matrix::$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')"
-        run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')"
+        run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
   test-behat:
     name: Behat tests
