@@ -10,6 +10,7 @@ return [
     'src/Repository/NotificaInvioRepository.php',
     'src/Install/Installer.php',
     'public/install/index.php',
+    'public/install/index.txt',
     'public/install/page_admin.php',
     'public/install/page_authenticate.php',
     'public/install/page_database.php',
