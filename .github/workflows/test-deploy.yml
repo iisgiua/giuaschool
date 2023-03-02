@@ -23,9 +23,11 @@ jobs:
 
       - name: Get latest release tag
         id: latest-release
-        uses: jossef/action-latest-release-info@v1.2.2
+        uses: rez0n/actions-github-release@main
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          token: ${{ github.token }}
+          repository: "iisgiua/giuaschool"
+          type: "stable"
 
       - name: Create cache registry
         uses: actions/cache@v3
