@@ -23,7 +23,7 @@ jobs:
 
       - name: Get latest release tag
         id: latest-release
-        uses: jossef/action-latest-release-info@v1
+        uses: jossef/action-latest-release-info@v1.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
