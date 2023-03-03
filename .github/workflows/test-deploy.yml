@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
+    outputs:
+      latest-release: ${{ steps.latest-release.outputs.tag_name }}
     steps:
 
       - name: Check out the repo
@@ -43,24 +45,25 @@ jobs:
           docker build -t gs:test -f tests/docker/Dockerfile .
           mkdir -p ${{ env.IMAGE_CACHE_DIR }}
           docker save --output ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar gs:test
-          echo "LATEST_RELEASE=${{ steps.latest-release.outputs.tag_name }}" >> $GITHUB_ENV
 
       - name: Create archive for update code
+        if: ${{ github.event_name == 'push' }}
         run: |
           docker build -t gs:prod --target application_prod -f tests/docker/Dockerfile .
-          docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.tag_name }}'
-          docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
+          docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
+          docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
 
       - name: Upload update code
+        if: ${{ github.event_name == 'push' }}
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: update-${{ steps.latest-release.outputs.tag_name }}
-          name: "Aggiornamento della versione ${{ steps.latest-release.outputs.tag_name }}"
-          body: "- [Visualizza le modifiche successive al rilascio della versione ${{ steps.latest-release.outputs.tag_name }}](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
+          tag: update-${{ steps.latest-release.outputs.release }}
+          name: "Aggiornamento della versione ${{ steps.latest-release.outputs.release }}"
+          body: "- [Visualizza le modifiche successive al rilascio della versione ${{ steps.latest-release.outputs.release }}](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
           draft: false
           prerelease: true
-          artifacts: giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
+          artifacts: giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
           allowUpdates: true
           artifactErrorsFailBuild: true
           replacesArtifacts: true
