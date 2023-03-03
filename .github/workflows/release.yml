@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: true
     outputs:
-      tag: ${{ steps.previous-release.outputs.tag_name }}
+      tag: ${{ steps.previous-release.outputs.release }}
     steps:
 
       - name: Check out the repo
@@ -30,19 +30,21 @@ jobs:
 
       - name: Get latest release tag
         id: previous-release
-        uses: jossef/action-latest-release-info@v1.2.0
+        uses: rez0n/actions-github-release@main
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          token: ${{ github.token }}
+          repository: "iisgiua/giuaschool"
+          type: "stable"
 
       - name: Generate changelog from latest release
         id: changelog
         if: ${{ github.event.inputs.prerelease != 'TRUE' }}
-        uses: metcalfc/changelog-generator@v3.0.0
+        uses: metcalfc/changelog-generator@v4.0.1
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
-        uses: actions/create-release@latest
+        uses: actions/create-release@v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -60,7 +62,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish PROD image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -71,7 +73,7 @@ jobs:
             ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }}
 
       - name: Build and publish DEV image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -82,7 +84,7 @@ jobs:
             ghcr.io/iisgiua/giuaschool-dev:${{ github.event.inputs.version }}
 
       - name: Build and publish TEST image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -93,7 +95,7 @@ jobs:
 
       - name: Create archive for release code
         run: |
-          docker run --name "gs_release" ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
+          docker run --name gs_release ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
           docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v${{ github.event.inputs.version }}.zip
           docker cp gs_release:/var/www/giuaschool-release.md5.zip giuaschool-release-v${{ github.event.inputs.version }}.md5.zip
 
