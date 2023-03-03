@@ -148,9 +148,27 @@ jobs:
         run: |
           docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
+  test-update:
+    if: ${{ github.event_name == 'push' }}
+    needs: build
+    name: Test update procedure
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Test update procedure
+        run: |
+          TAG="${{ needs.build.outputs.latest-release }}"
+          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test -f tests/docker/TestUpdateDockerfile .
+          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test
+
   deploy:
     if: ${{ github.event_name == 'push' }}
-    needs: [test-phpunit, test-behat]
+    needs: [test-phpunit, test-behat, test-update]
     name: Deploy release
     runs-on: ubuntu-latest
     strategy:
@@ -162,7 +180,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
-        uses: metcalfc/changelog-generator@v3.0.0
+        uses: metcalfc/changelog-generator@v4.0.1
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -212,21 +230,3 @@ jobs:
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
           commit_message: 'Add build tag to documentation'
-
-  test-update:
-    if: ${{ github.event_name == 'push' }}
-    needs: build
-    name: Test update procedure
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-    steps:
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Test update procedure
-        run: |
-          TAG="${{ needs.build.outputs.latest-release }}"
-          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test -f tests/docker/TestUpdateDockerfile .
-          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test
