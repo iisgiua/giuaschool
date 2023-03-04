@@ -40,6 +40,7 @@ class SpidController extends BaseController {
     // inizializza
     $this->idp = [
       'IdAruba' => 'ArubaPEC S.p.A.',
+      'IdEtna' => 'EtnaHitech S.C.p.A.',
       'IdInfocert' => 'InfoCert S.p.A.',
       'IdIntesa' => 'IN.TE.S.A. S.p.A.',
       'IdLepida' => 'Lepida S.p.A.',
@@ -47,6 +48,7 @@ class SpidController extends BaseController {
       'IdPoste' => 'Poste Italiane SpA',
       'IdSielte' => 'Sielte S.p.A.',
       'IdRegister' => 'Register.it S.p.A.',
+      'IdTeamsystem' => 'TeamSystem s.p.a.',
       'IdTim' => 'TI Trust Technologies srl'];
   }
 
