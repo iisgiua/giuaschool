@@ -2,16 +2,20 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% if msg %}
-  <div class="alert alert-{{ msg.tipo }} gs-mt-5" role="alert">
-    <strong class="gs-big">{{ msg.messaggio|trans }}</strong>
-  </div>
-  {% else %}
   <div class="panel panel-primary gs-mt-5">
     <div class="panel-heading">
       <div class="panel-title">{{ 'title.procedura_otp'|trans }}</div>
     </div>
     <div class="panel-body">
+  {% if reset %}
+      <div class="gs-big gs-pt-3">
+        <div class="gs-pb-5">
+          <strong>L'OTP è stato già associato all'applicazione.
+            Per disattivarlo clicca sul pulsante di CONFERMA.</strong>
+        </div>
+        {% include('include/form-inline.html.twig') %}
+      </div>
+  {% else %}
       <div class="pull-left gs-pl-3 gs-pr-5 gs-pt-3 gs-pb-3">
         <img src="{{ qrcode }}" alt="QRcode">
       </div>
@@ -27,8 +31,8 @@
           </li>
         </ol>
       </div>
+  {% endif %}
     </div>
   </div>
-  {% endif %}
 </div>
 {% endblock %}

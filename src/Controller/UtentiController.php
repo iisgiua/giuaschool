@@ -57,7 +57,6 @@ class UtentiController extends BaseController {
    * Modifica l'email del profilo dell'utente connesso
    *
    * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -68,16 +67,22 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, TranslatorInterface $trans, ValidatorInterface $validator,
-                              LogHandler $dblogger) {
+  public function emailAction(Request $request, ValidatorInterface $validator, LogHandler $dblogger) {
     $success = null;
+    // controlli
+    $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+    $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo');
+    if ($idProvider && $this->getUser()->controllaRuolo($idProviderTipo)) {
+      // errore: cambio email non permesso per utenti Google
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
       ->add('email', TextType::class, array('label' => 'label.email',
         'data' => substr($this->getUser()->getEmail(), -6) == '.local' ? '' : $this->getUser()->getEmail(),
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
+        'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
         'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
@@ -85,24 +90,21 @@ class UtentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $vecchia_email = $this->getUser()->getEmail();
-      // legge configurazione: id_provider
-      $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
       // validazione
       $this->getUser()->setEmail($form->get('email')->getData());
       $errors = $validator->validate($this->getUser());
       if (count($errors) > 0) {
         $form->addError(new FormError($errors[0]->getMessage()));
-      } elseif ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
-        // errore: docente/staff/preside/alunno
-        $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
       } else {
         // memorizza modifica
         $this->em->flush();
-        $success = 'message.update_ok';
         // log azione
         $dblogger->logAzione('SICUREZZA', 'Cambio Email', array(
-          'Precedente email' => $vecchia_email
-          ));
+          'Precedente email' => $vecchia_email));
+        // messaggio di successo
+        $this->addFlash('success', 'message.update_ok');
+        // redirezione
+        return $this->redirectToRoute('utenti_profilo');
       }
     }
     // mostra la pagina di risposta
@@ -122,7 +124,6 @@ class UtentiController extends BaseController {
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
-   * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -134,17 +135,19 @@ class UtentiController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  TranslatorInterface $trans, ValidatorInterface $validator,
-                                 OtpUtil $otp, LogHandler $dblogger) {
+                                 LogHandler $dblogger) {
     $success = null;
     $errore = null;
     $form = null;
     // controllo accesso
-    if (($this->getUser() instanceOf Docente) && !$this->getUser()->getOtp()) {
-      // docente senza OTP
-      $errore = 'exception.docente_cambio_password';
+    $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+    $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo');
+    if ($idProvider && $this->getUser()->controllaRuolo($idProviderTipo)) {
+      // cambio password su Google
+      $errore = 'exception.cambio_password_google';
     } elseif (substr($this->getUser()->getEmail(), -6) == '.local') {
-      // altro utente senza email
-      $errore = 'exception.utente_cambio_password';
+      // utente senza email
+      $errore = 'exception.cambio_password_noemail';
     } else {
       // form
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_password', FormType::class)
@@ -155,29 +158,15 @@ class UtentiController extends BaseController {
           'invalid_message' => 'password.nomatch',
           'first_options' => array('label' => 'label.new_password'),
           'second_options' => array('label' => 'label.new_password2'),
-          'required' => true));
-      if ($this->getUser() instanceOf Docente) {
-        $form = $form
-          ->add('otp', TextType::class, array('label' => 'label.otp',
-            'attr' => ['class' => 'gs-ml-2'],
-            'trim' => true,
-            'required' => true));
-      }
-      $form = $form
+          'required' => true))
         ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['widget' => 'gs-button-start']))
+          'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
           'attr' => ['widget' => 'gs-button-end',
           'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
-        // legge configurazione: id_provider
-        $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
-        if ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
-          // errore: docente/staff/preside/alunno
-          $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
-        }
         // controllo password esistente
         if (!$hasher->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
           // vecchia password errata
@@ -199,31 +188,18 @@ class UtentiController extends BaseController {
           $form->get('password')['first']->addError(
             new FormError($trans->trans('exception.formato_password')));
         }
-        // validazione OTP
-        if ($this->getUser() instanceOf Docente) {
-          $codice = $form->get('otp')->getData();
-          if (!$otp->controllaOtp($this->getUser()->getOtp(), $codice)) {
-            // errore codice OTP
-            $form->get('otp')->addError(new FormError($trans->trans('exception.otp_errato')));
-          } elseif ($this->getUser()->getUltimoOtp() == $codice) {
-            // otp riusato (replay attack)
-            $form->get('otp')->addError(new FormError($trans->trans('exception.otp_errato')));
-          }
-        }
         if ($form->isValid()) {
           // codifica password
           $password = $hasher->hashPassword($this->getUser(), $psw);
           $this->getUser()->setPassword($password);
-          if ($this->getUser() instanceOf Docente) {
-            // memorizza ultimo OTP
-            $this->getUser()->setUltimoOtp($codice);
-          }
           // memorizza password
           $this->em->flush();
-          $success = 'message.update_ok';
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array(
-            ));
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array());
+          // messaggio di successo
+          $this->addFlash('success', 'message.update_ok');
+          // redirezione
+          return $this->redirectToRoute('utenti_profilo');
         }
       }
     }
@@ -251,23 +227,46 @@ class UtentiController extends BaseController {
    * @Route("/utenti/otp/", name="utenti_otp",
    *    methods={"GET", "POST"})
    *
-   * @IsGranted("ROLE_DOCENTE")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function otpAction(Request $request, TranslatorInterface $trans, OtpUtil $otp,
                             LogHandler $dblogger) {
     // inizializza
-    $docente = $this->getUser();
-    $msg = null;
+    $reset = false;
     $qrcode = null;
     $form = null;
-    // legge configurazione: id_provider
-    $id_provider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
-    if ($id_provider) {
-      // errore: docente/staff/preside/alunno
-      $msg = array('tipo' => 'danger', 'messaggio' => 'exception.invalid_user_type_recovery');
-    } elseif ($docente->getOtp()) {
+    // controlla accesso
+    $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
+    $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo');
+    $otpTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/otp_tipo');
+    if (($idProvider && $this->getUser()->controllaRuolo($idProviderTipo)) ||
+        !$this->getUser()->controllaRuolo($otpTipo)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // impostazione OTP
+    if ($this->getUser()->getOtp()) {
       // risulta già associato
-      $msg = array('tipo' => 'warning', 'messaggio' => 'exception.otp_associato');
+      $reset = true;
+      // form reset OTP
+      $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
+        ->add('submit', SubmitType::class, array('label' => 'label.submit',
+          'attr' => ['class' => 'btn btn-primary']))
+        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
+        ->getForm();
+      $form->handleRequest($request);
+      if ($form->isSubmitted() && $form->isValid()) {
+        // reset otp
+        $this->getUser()->setOtp(null);
+        $this->em->flush();
+        // log azione
+        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP', array());
+        // messaggio di successo
+        $this->addFlash('success', 'message.otp_disabilitato');
+        // redirezione
+        return $this->redirectToRoute('utenti_profilo');
+      }
     } else {
       // prima associazione con un dispositivo
       if ($request->getMethod() == 'POST') {
@@ -275,11 +274,11 @@ class UtentiController extends BaseController {
         $token = $this->reqstack->getSession()->get('/APP/ROUTE/utenti_otp/token');
       } else {
         // crea token
-        $token = $otp->creaToken($docente->getUsername());
+        $token = $otp->creaToken($this->getUser()->getUsername());
         $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', $token);
       }
       // crea qrcode
-      $qrcode = $otp->qrcode($docente->getUsername(), 'Registro Elettronico', $token);
+      $qrcode = $otp->qrcode($this->getUser()->getUsername(), 'Registro Elettronico', $token);
       // form inserimeno OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
         ->add('otp', TextType::class, array('label' => 'label.otp',
@@ -296,16 +295,17 @@ class UtentiController extends BaseController {
         // controllo codice OTP
         if ($otp->controllaOtp($token, $form->get('otp')->getData())) {
           // ok, abilita otp
-          $docente->setOtp($token);
+          $this->getUser()->setOtp($token);
           $this->em->flush();
           // cancella sessione
           $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
-          // messaggio di successo
-          $msg = array('tipo' => 'success', 'messaggio' => 'message.otp_abilitato');
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', array(
-            ));
-        } else {
+          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', array());
+          // messaggio di successo
+          $this->addFlash('success', 'message.otp_abilitato');
+          // redirezione
+          return $this->redirectToRoute('utenti_profilo');
+      } else {
           // errore
           $form->addError(new FormError($trans->trans('exception.otp_errato')));
         }
@@ -317,7 +317,7 @@ class UtentiController extends BaseController {
       'form' => ($form ? $form->createView() : null),
       'form_help' => null,
       'form_success' => null,
-      'msg' => $msg,
+      'reset' => $reset,
       'qrcode' => $qrcode,
       ));
   }

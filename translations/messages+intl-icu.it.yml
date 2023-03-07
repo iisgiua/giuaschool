@@ -1004,7 +1004,7 @@ title.nuovo_programma: Inserisci il programma svolto
 title.ore_colloqui: Ore di ricevimento per i colloqui individuali
 title.password: Cambia la password di un utente
 title.prenota_colloqui: Prenota il colloquio con il docente
-title.procedura_otp: Procedura di attivazione del codice OTP
+title.procedura_otp: Procedura di gestione del codice OTP
 title.ricalcola: Ricalcola le ore di assenza per un dato periodo
 title.richieste_colloqui: Richieste di colloquio inoltrate
 title.risposta_colloqui: Risposta ad una richiesta di colloquio
@@ -1175,7 +1175,8 @@ non ha raggiunto gli obiettivi minimi per le discipline indicate
 e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
 message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda la sua prova presumibilmente prima dell’inizio delle lezioni, a data da definirsi.
 message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
-message.otp_abilitato: Codice OTP abilitato.
+message.otp_abilitato: Codice OTP attivato.
+message.otp_disabilitato: Codice OTP disattivato.
 message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda che è importante che sia un indirizzo valido, in caso contrario non sarà possibile utilizzare la funzione di recupero password.
 message.modifica_password: "La password ha una lunghezza minima di 8 caratteri e deve contenere: almeno una lettera maiuscola, almeno una lettera minuscola, almeno una cifra.<br>Si consiglia di utilizzare anche gli altri caratteri presenti sulla tastiera (ad esempio +-#@$&!?.,;:)."
 message.no_cattedra_piani: Non è previsto il caricamento dei piani di lavoro per questa cattedra.
@@ -1386,7 +1387,7 @@ exception.delibera_condotta: Non è stata indicata la delibera per uno o più vo
 exception.delibera_esito: Non è stata indicata la delibera per l'esito dell'alunn{sex} {alunno}.
 exception.destinatari_filtro_mancanti: Devi indicare almeno un destinatario nel filtro indicato.
 exception.destinatari_mancanti: Devi indicare almeno un destinatario.
-exception.docente_cambio_password: Il cambio password è permesso solo ai docenti che hanno abilitato l'utilizzo del codice OTP.
+exception.cambio_password_google: Per effettuare il cambio password vai alla <a href="https://myaccount.google.com/security" target="_blank">pagina Google per la gestione della sicurezza</a>.
 exception.dopo_fine_anno: La data è successiva alla fine dell'anno scolastico.
 exception.errore_attivazione: "Impossibile spedire l'email all'indirizzo indicato. Potrebbe essere un problema temporaneo del sistema di posta elettronica: riprova più tardi."
 exception.error_recovery: "Impossibile spedire l'email all'indirizzo indicato. Potrebbe essere un problema temporaneo del sistema di posta elettronica: riprova più tardi."
@@ -1487,7 +1488,7 @@ exception.upload_no_dropzone: Il programma di navigazione usato non permette di 
 exception.upload_numero: Non puoi caricare altri file!
 exception.upload_tipo: Questo tipo di file non è permesso!
 exception.user_card: Utente non abilitato all'uso di questa modalità di accesso.
-exception.utente_cambio_password: Il cambio password è permesso solo agli utenti che hanno inserito la propria email.<br>In questo modo sarà possibile utilizzare la funzione di recupero password.
+exception.cambio_password_noemail: Prima di effettuare il cambio della password devi inserire la tua email.<br>In questo modo sarà possibile utilizzare la funzione di recupero password.
 exception.verbale_argomento_vuoto: Non si può lasciare l'argomento vuoto.
 exception.verbale_argomento_mancante: "Devi inserire o confermare il {sezione} dell'ordine del giorno."
 exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn{sex} {alunno}.

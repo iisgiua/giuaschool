@@ -2,28 +2,33 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <div class="panel panel-success gs-mt-5" >
+  {% for tipo,messaggi in app.flashes %}
+    {% for msg in messaggi %}
+  <div class="alert alert-{{ tipo }} gs-mt-5" role="alert"><strong>{{ msg|trans }}<strong></div>
+    {% endfor %}
+  {% endfor %}
+  <div class="panel panel-primary gs-mt-5" >
     <div class="panel-heading">
       <div class="panel-title"><strong class="gs-big">{{ 'title.utenti_profilo'|trans }}</strong></div>
     </div>
     <div class="panel-body" >
       <dl class="dl-horizontal gs-big">
-        <dt class="text-success">Utente:</dt>
+        <dt class="text-primary">Utente:</dt>
         <dd>{% if is_granted('ROLE_GENITORE') %}{{ ('#' not in (app.user.nome~app.user.cognome)) ? (app.user.nome~' '~app.user.cognome) }} <em>genitore di</em> {{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</dd>
-        <dt class="text-success">Ruolo:</dt>
+        <dt class="text-primary">Ruolo:</dt>
         <dd><strong>{{ ('label.'~app.user.roles[0])|trans }}</strong>
         </dd>
   {% if is_granted('ROLE_ATA') %}
-        <dt class="text-success">Mansioni:</dt>
+        <dt class="text-primary">Mansioni:</dt>
         <dd>{{ ('label.ata_tipo_'~app.user.tipo)|trans }}</dd>
-        <dt class="text-success">Segreteria:</dt>
+        <dt class="text-primary">Segreteria:</dt>
         <dd>{{ app.user.segreteria ? 'ABILITATO' : 'NON ABILITATO' }}</dd>
   {% endif %}
-        <dt class="text-success">Email:</dt>
+        <dt class="text-primary">Email:</dt>
         <dd>{{ app.user.email[-6:] == '.local' ? 'NON PRESENTE' : app.user.email }}</dd>
-  {% if is_granted('ROLE_DOCENTE') %}
-        <dt class="text-success">OTP:</dt>
-        <dd>{{ app.user.otp ? 'ABILITATO' : 'NON ABILITATO' }}</dd>
+  {% if (app.session.get('/CONFIG/ACCESSO/id_provider') is empty or not app.user.controllaRuolo(app.session.get('/CONFIG/ACCESSO/id_provider_tipo'))) and app.user.controllaRuolo(app.session.get('/CONFIG/ACCESSO/otp_tipo')) %}
+        <dt class="text-primary">OTP:</dt>
+        <dd>{{ app.user.otp ? 'ATTIVATO' : 'DISATTIVATO' }}</dd>
   {% endif %}
       </dl>
     </div>
