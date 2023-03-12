@@ -12,5 +12,6 @@
   {% else %}
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_otp' ? ' class="active"' }}><a href="{{ path('utenti_otp') }}" title="Abilita/disabilita l'uso del codice OTP per l'accesso sicuro">OTP</a></li>
   {% endif %}
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_notifiche' ? ' class="active"' }}><a href="{{ path('utenti_notifiche') }}" title="Modifica le impostazioni delle notifiche">Notifiche</a></li>
   </ul>
 </nav>

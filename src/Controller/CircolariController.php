@@ -623,6 +623,10 @@ class CircolariController extends BaseController {
       // pubblicazione
       $oraNotifica = explode(':', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/notifica_circolari'));
       $tm = (new \DateTime('today'))->setTime($oraNotifica[0], $oraNotifica[1]);
+      if ($tm < new \DateTime()) {
+        // ora invio è già passata: inserisce in coda per domani
+        $tm->modify('+1 day');
+      }
       $msg->dispatch(new CircolareMessage($circolare->getId()),
         [DelayStamp::delayUntil($tm), new FlushBatchHandlersStamp(true)]);
       $dblogger->logAzione('CIRCOLARI', 'Pubblica circolare', array(

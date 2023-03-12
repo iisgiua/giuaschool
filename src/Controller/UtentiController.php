@@ -10,6 +10,7 @@ namespace App\Controller;
 
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Form\NotificaType;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -320,6 +321,90 @@ class UtentiController extends BaseController {
       'reset' => $reset,
       'qrcode' => $qrcode,
       ));
+  }
+
+  /**
+   * Gestione delle impostazioni di notifica dell'utente connesso
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/utenti/notifiche/", name="utenti_notifiche",
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function notificheAction(Request $request, LogHandler $dblogger) {
+    // init
+    $dati = [];
+    $info = [];
+    // legge dati
+    $notifica = $this->getUser()->getNotifica();
+    // form
+    $form = $this->createForm(NotificaType::class, null, [
+      'returnUrl' => $this->generateUrl('utenti_profilo'),
+      'values' => [$notifica['tipo'], $notifica['abilitato']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // modifica dati
+      $notifica['tipo'] = $form->get('tipo')->getData();
+      $notifica['abilitato'] = $form->get('abilitato')->getData();
+      $this->getUser()->setNotifica($notifica);
+      // log e memorizzazione
+      $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$notifica]);
+      // controlla configurazione
+      if (($notifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) || substr($this->getUser()->getEmail(), -6) == '.local')) ||
+          ($notifica['tipo'] == 'telegram' && empty($notifica['telegram_chat']))) {
+        // redirect alla configurazione
+        return $this->redirectToRoute('utenti_notifiche_configura');
+      }
+      // messaggio di successo
+      $this->addFlash('success', 'message.update_ok');
+      // redirezione
+      return $this->redirectToRoute('utenti_profilo');
+    }
+    // visualizza pagina
+    return $this->renderHtml('utenti', 'notifiche', $dati, $info, [$form->createView(),
+      'message.utenti.notifiche']);
+  }
+
+  /**
+   * Configura il canale usato per l'invio delle notifiche
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/utenti/notifiche/configura/", name="utenti_notifiche_configura",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function notificheConfiguraAction() {
+    // init
+    $dati = [];
+    $info = [];
+    // legge dati
+    $notifica = $this->getUser()->getNotifica();
+    if ($notifica['tipo'] == 'email' &&
+        (empty($this->getUser()->getEmail()) || substr($this->getUser()->getEmail(), -6) == '.local')) {
+      // imposta email
+      $info['messaggio'] = 'message.notifiche_configura_email';
+      $info['url'] = $this->generateUrl('utenti_email');
+    } elseif ($notifica['tipo'] == 'telegram' && empty($notifica['telegram_chat'])) {
+      // imposta informazioni
+      $this->getUser()->creaToken();
+      $this->em->flush();
+      $token = base64_encode($this->getUser()->getToken().'#'.$this->getUser()->getUsername());
+      $bot = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
+      $info['messaggio'] = 'message.notifiche_configura_telegram';
+      $info['url'] = 'https://t.me/'.$bot.'?start='.$token;
+    } else {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // visualizza pagina
+    return $this->renderHtml('utenti', 'notifiche_configura', $dati, $info, []);
   }
 
 }

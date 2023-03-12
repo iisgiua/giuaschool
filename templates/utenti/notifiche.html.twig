@@ -1,8 +1,36 @@
 {% extends 'utenti/index.html.twig' %}
 
+{% form_theme form[0] _self %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include('include/form.html.twig') %}
+  <h1 class="text-center gs-h1 gs-mt-3 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body">
+      <div id="notifica_tipo" class="gs-mt-3 gs-mr-4 gs-ml-4">
+        <legend class="gs-h3 gs-mb-0">Canale per l'invio delle notifiche:</legend>
+        <fieldset style="border:1px solid #999;border-radius:5px" class="gs-pt-3 gs-pb-3">
+          {{ form_widget(form[0].tipo) }}
+        </fieldset>
+      </div>
+      <div id="notifica_abilitato" class="gs-mt-5 gs-mr-4 gs-ml-4">
+        <legend class="gs-h3 gs-mb-0">Tipo di evento da notificare:</legend>
+        <fieldset style="border:1px solid #999;border-radius:5px" class="gs-pt-3 gs-pb-3">
+          {{ form_widget(form[0].abilitato) }}
+        </fieldset>
+      </div>
+    </div>
+    <div class="panel-footer text-center">
+      {{ form_widget(form[0].submit) }}
+      {{ form_widget(form[0].cancel) }}
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
 </div>
 {% endblock %}
 
@@ -10,15 +38,42 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('label.radio-inline input').change(function() {
-    $('label.radio-inline input').parent().removeClass('active text-success text-danger');
-    if ($('label.radio-inline input[value="1"]').is(":checked")) {
-      $('label.radio-inline input[value="1"]').parent().addClass('active text-success');
+  $('.gs-row-radio input[type="radio"]').change(function() {
+    $('.gs-row-radio input[type="radio"]').parent().removeClass('active');
+    $(this).parent().addClass('active');
+  });
+  $('.gs-row-checkbox input[type="checkbox"]').change(function() {
+    if ($(this).prop('checked')) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
     }
-    if ($('label.radio-inline input[value="0"]').is(":checked")) {
-      $('label.radio-inline input[value="0"]').parent().addClass('active text-danger');
-    }
-  }).change();
+  });
+  // init
+  $('.gs-row-radio input:checked').parent().addClass('active');
+  $('.gs-row-checkbox input:checked').parent().addClass('active');
 });
 </script>
+{% endblock %}
+
+{% block _notifica_tipo_widget %}
+  {% for item in form.children %}
+<div style="border-bottom:1px solid #ccc" class="row gs-row-radio gs-ml-4 gs-mr-4 gs-mb-4">
+  <label for="{{ item.vars.id }}" class="col-sm-6 radio-inline gs-big">
+    <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
+  </label>
+  <div class="col-sm-6 gs-big"><em>{{ ('message.tipo_notifica_'~item.vars.value)|trans }}</em></div>
+</div>
+  {% endfor %}
+{% endblock %}
+
+{% block _notifica_abilitato_widget %}
+  {% for item in form.children %}
+<div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
+  <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
+    <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
+  </label>
+  <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+</div>
+  {% endfor %}
 {% endblock %}

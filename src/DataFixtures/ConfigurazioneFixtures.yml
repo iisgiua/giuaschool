@@ -99,6 +99,24 @@ App\Entity\Configurazione:
     descrizione: 'Indica il dominio di posta predefinito per le email degli utenti (usato nell''importazione)\<br>[testo]'
     valore: 'noemail.local'
     gestito: false
+  configurazione_SISTEMA8:
+    categoria: 'SISTEMA'
+    parametro: 'telegram_bot'
+    descrizione: 'Indica il nome del bot Telegram usato per l''invio delle notifiche\<br>[testo]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA9:
+    categoria: 'SISTEMA'
+    parametro: 'telegram_token'
+    descrizione: 'Indica il token del bot Telegram usato per l''invio delle notifiche\<br>[testo]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA10:
+    categoria: 'SISTEMA'
+    parametro: 'telegram_secret'
+    descrizione: 'Indica il codice segreto usato dal bot Telegram per l''invio delle notifiche\<br>[testo]'
+    valore: ''
+    gestito: true
 
   # ----- categoria SCUOLA -----
   configurazione_SCUOLA1:

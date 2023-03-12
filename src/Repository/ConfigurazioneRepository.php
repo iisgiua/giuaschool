@@ -35,7 +35,7 @@ class ConfigurazioneRepository extends EntityRepository {
       ->getQuery()
       ->getOneOrNullResult();
     // restituisce valore
-    return ($parametro ? $parametro['valore'] : $default);
+    return ($parametro['valore'] ?? $default);
   }
 
   /**

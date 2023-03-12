@@ -35,6 +35,9 @@ return [
     ["ALTER TABLE gs_presenza ADD CONSTRAINT FK_32C5F7A67ABC9740 FOREIGN KEY (alunno_id) REFERENCES gs_utente (id);", "SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE TABLE_NAME = 'gs_presenza' AND REFERENCED_TABLE_NAME = 'gs_utente';"],
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'versione_build', 'Numero di build dell\'applicazione<br>[testo]', '0', 1);", "SELECT * FROM gs_configurazione WHERE parametro='versione_build';"],
     ["ALTER TABLE gs_messenger_messages CHANGE id id BIGINT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id);", "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'PRIMARY KEY' AND TABLE_NAME = 'gs_messenger_messages';"],
+    ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'telegram_bot', 'Indica il nome del bot Telegram usato per l\'invio delle notifiche\<br>[testo]', '', 1);", "SELECT * FROM gs_configurazione WHERE parametro='telegram_bot';"],
+    ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'telegram_token', 'Indica il token del bot Telegram usato per l\'invio delle notifiche\<br>[testo]', '', 1);", "SELECT * FROM gs_configurazione WHERE parametro='telegram_token';"],
+    ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'telegram_secret', 'Indica il codice segreto usato dal bot Telegram per l\'esecuzione della procedura di registrazione\<br>[testo]', '', 1);", "SELECT * FROM gs_configurazione WHERE parametro='telegram_secret';"],
   ],
   'envDelete' => [
     "INSTALLATION_PSW",

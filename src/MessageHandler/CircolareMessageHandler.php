@@ -55,10 +55,10 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @param LoggerInterface $logger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $msgLogger,
+  public function __construct(EntityManagerInterface $em, LoggerInterface $logger,
                               MessageBusInterface $messageBus) {
     $this->em = $em;
-    $this->logger = $msgLogger;
+    $this->logger = $logger;
     $this->messageBus = $messageBus;
   }
 
@@ -119,8 +119,8 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @return bool Restituisce vero se la lista è piena
    */
   private function shouldFlush(): bool {
-    // numero massimo di circolari da gestire nella lista
-    return \count($this->jobs) >= 10;
+    // crea sempre una sola notifica
+    return false;
   }
 
   /**
