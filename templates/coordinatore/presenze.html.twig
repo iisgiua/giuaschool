@@ -63,6 +63,7 @@
       <a class="btn btn-primary" href="{{ path('coordinatore_presenze_add', {classe: info.classe.id}) }}" role="button" title="Pianifica nuove presenze fuori classe"><strong>Aggiungi</strong></a>
     </div>
   </div>
+  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'coordinatore_presenze'} %}
   {% endif %}
 </div>
 {% endblock %}
