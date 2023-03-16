@@ -228,6 +228,15 @@ class ModuloType extends AbstractType {
             'expanded' => true,
             'multiple' => true,
             'required' => true));
+    } elseif ($options['formMode'] == 'telegram') {
+      // form configurazione tele
+      $builder
+        ->add('bot', TextType::class, array('label' => 'label.telegram_bot',
+          'data' => $options['dati']['bot'],
+          'required' => false))
+        ->add('token', TextType::class, array('label' => 'label.telegram_token',
+          'data' => $options['dati']['token'],
+          'required' => false));
     }
     // aggiunge pulsanti al form
     if ($options['returnUrl']) {

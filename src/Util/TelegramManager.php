@@ -61,6 +61,14 @@ class TelegramManager {
    * @return array Informazioni su eventuali errori e lista dei dati ricevuti
    */
   public function setWebhook(): array {
+    // crea client con parametri aggiornati
+    $token = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    if (empty($token)) {
+      // token vuoto: ignora
+      return ['result' => 'ok'];
+    }
+    $this->client = new Client(['base_uri' => 'https://api.telegram.org/bot'.$token.'/',
+      'timeout' => 60]);
     // configura
     $url = $this->url->generate('notifica_telegram', [], UrlGeneratorInterface::ABSOLUTE_URL);
     $connections = 5;
@@ -87,6 +95,14 @@ class TelegramManager {
    * @return array Informazioni su eventuali errori e lista dei dati ricevuti
    */
   public function deleteWebhook(): array {
+    // crea client con parametri aggiornati
+    $token = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    if (empty($token)) {
+      // token vuoto: ignora
+      return ['result' => 'ok'];
+    }
+    $this->client = new Client(['base_uri' => 'https://api.telegram.org/bot'.$token.'/',
+      'timeout' => 60]);
     return $this->request('deleteWebhook', ['drop_pending_updates' => true]);
   }
 

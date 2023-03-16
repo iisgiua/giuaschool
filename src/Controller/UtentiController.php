@@ -342,14 +342,24 @@ class UtentiController extends BaseController {
     $info = [];
     // legge dati
     $notifica = $this->getUser()->getNotifica();
+    // controlla configurazione telegram
+    $bot = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
+    if (empty($bot) && $notifica['tipo'] == 'telegram') {
+      // elimina notifica telegram
+      $notifica['tipo'] = 'email';
+    }
     // form
     $form = $this->createForm(NotificaType::class, null, [
       'returnUrl' => $this->generateUrl('utenti_profilo'),
-      'values' => [$notifica['tipo'], $notifica['abilitato']]]);
+      'values' => [$notifica['tipo'], empty($bot), $notifica['abilitato']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // modifica dati
       $notifica['tipo'] = $form->get('tipo')->getData();
+      if (empty($bot) && $notifica['tipo'] == 'telegram') {
+        // elimina notifica telegram
+        $notifica['tipo'] = 'email';
+      }
       $notifica['abilitato'] = $form->get('abilitato')->getData();
       $this->getUser()->setNotifica($notifica);
       // log e memorizzazione

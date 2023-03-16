@@ -309,6 +309,17 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_SISTEMA'
     sottoMenu:
+  menu_opzione_SISTEMA8:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Configura&nbsp;Telegram'
+    descrizione: 'Configura le notifiche tramite Telegram'
+    url: 'sistema_telegram'
+    ordinamento: 8
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
   menu_opzione_SISTEMA10:
     ruolo: 'M'
     funzione: ''

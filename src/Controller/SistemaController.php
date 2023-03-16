@@ -20,6 +20,7 @@ use App\Form\ModuloType;
 use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
 use App\Util\LogHandler;
+use App\Util\TelegramManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -1549,10 +1550,10 @@ class SistemaController extends BaseController {
         }
       } else {
         // spedisce mail di test
-        $text = "Questa è il testo dell'email.\n".
+        $text = "Questo è il testo dell'email.\n".
           "La mail è stata spedita dall'applicazione giua@school per verificare il corretto recapito della posta elettronica.\n\n".
           "Allegato:\n - il file di testo della licenza AGPL.\n";
-        $html = "<p><strong>Questa è il testo dell'email.</strong></p>".
+        $html = "<p><strong>Questo è il testo dell'email.</strong></p>".
           "<p><em>La mail è stata spedita dall'applicazione <strong>giua@school</strong> per verificare il corretto recapito della posta elettronica.</em></p>".
           "<p>Allegato:</p><ul><li>il file di testo della licenza AGPL.</li></ul>";
         // invia per email
@@ -1581,6 +1582,71 @@ class SistemaController extends BaseController {
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'email', $dati, $info, [$form->createView(),
       'message.sistema_email']);
+  }
+
+  /**
+   * Configura per l'invio delle notifiche via Telegram.
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param TelegramManager $telegram Gestore delle comunicazioni tramite Telegram
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/telegram", name="sistema_telegram",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function telegramAction(Request $request, TranslatorInterface $trans,
+                                 TelegramManager $telegram): Response {
+    // inizializza
+    $dati = [];
+    $info = [];
+    // legge configurazione
+    $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
+    $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    // form
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'telegram', 'dati' => $info]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // legge dati form
+      $bot = $form->get('bot')->getData() ?? '';
+      $token = empty($bot) ? '' : $form->get('token')->getData();
+      // controlli
+      if (empty($token) && !empty($bot)) {
+        // errore
+        $form->addError(new FormError($trans->trans('exception.telegram_no_token')));
+      }
+      if ($form->isValid()) {
+        // cancella webhook esistente
+        $ris = $telegram->deleteWebhook();
+        if (isset($ris['error'])) {
+          // errore
+          $form->addError(new FormError($trans->trans('exception.telegram_webhook',
+            ['errore' => $ris['error']])));
+        } else {
+          // memorizza dati
+          $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_bot', $bot);
+          $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_token', $token);
+          // nuovo webhook
+          $ris = $telegram->setWebhook();
+          if (isset($ris['error'])) {
+            // errore
+            $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_bot', '');
+            $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_token', '');
+            $form->addError(new FormError($trans->trans('exception.telegram_webhook',
+              ['errore' => $ris['error']])));
+          } else {
+            // configurazione riuscita
+            $this->addFlash('success', 'message.telegram_webhook_ok');
+          }
+        }
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('sistema', 'telegram', $dati, $info, [$form->createView(),
+      'message.sistema_telegram']);
   }
 
 }

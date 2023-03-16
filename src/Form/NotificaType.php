@@ -38,9 +38,11 @@ class NotificaType extends AbstractType {
           'label.tipo_notifica_telegram' => 'telegram'],
         'expanded' => true,
         'multiple' => false,
+        'choice_attr' => function($key, $val, $index) use ($options) {
+          return ($options['values'][1] && $key == 'telegram') ? ['disabled' => 'disabled'] : []; },
         'required' => true))
       ->add('abilitato', ChoiceType::class, array('label' => false,
-        'data' => $options['values'][1],
+        'data' => $options['values'][2],
         'choices' => ['label.abilitato_notifica_circolare' => 'circolare',
           'label.abilitato_notifica_avviso' => 'avviso', 'label.abilitato_notifica_verifica' => 'verifica',
           'label.abilitato_notifica_compito' => 'compito'],

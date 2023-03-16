@@ -60,7 +60,7 @@ $(document).ready(function() {
   {% for item in form.children %}
 <div style="border-bottom:1px solid #ccc" class="row gs-row-radio gs-ml-4 gs-mr-4 gs-mb-4">
   <label for="{{ item.vars.id }}" class="col-sm-6 radio-inline gs-big">
-    <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
+    <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}{{ item.vars.attr['disabled'] is defined ? ' disabled="disabled"'}}> {{ item.vars.label|trans }}
   </label>
   <div class="col-sm-6 gs-big"><em>{{ ('message.tipo_notifica_'~item.vars.value)|trans }}</em></div>
 </div>
