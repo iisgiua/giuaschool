@@ -1,0 +1,17 @@
+<p><strong>Data avviso: {{ dati.data }}</strong></p>
+{% if dati.alunno %}<p><strong>Alunno: {{ dati.alunno }}</strong></p>{% endif %}
+{% if dati.classi %}<p><strong>Classi: {{ dati.classi }}</strong></p>{% endif %}
+<p>{{ dati.testo }}</p>
+{% if dati.allegati > 0 %}
+<p>&nbsp;</p>
+<p><strong>Sono presenti allegati: <a href="{{ url_registro }}">Vai al registro elettronico per visualizzarli</a></strong></p>
+{% endif %}
+<p>&nbsp;</p>
+<hr>
+<p>
+  <em>
+    ATTENZIONE: questo messaggio è stato generato automaticamente.<br>
+    Si prega pertanto di non rispondere a questa e-mail perché le eventuali comunicazioni andrebbero perse.
+  </em>
+</p>
+<p>&nbsp;</p>

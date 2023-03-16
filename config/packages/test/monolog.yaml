@@ -12,7 +12,7 @@ monolog:
       max_files: 10
       path: '%kernel.logs_dir%/app_%kernel.environment%.log'
       level: error
-      channels: ['!command', '!deprecation', '!console']
+      channels: ['!command', '!deprecation', '!console', '!messenger_logger']
     command:
       type: rotating_file
       max_files: 10

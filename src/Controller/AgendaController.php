@@ -12,6 +12,8 @@ use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Form\AvvisoType;
 use App\Form\MessageType;
+use App\Message\AvvisoMessage;
+use App\MessageHandler\NotificaMessageHandler;
 use App\Util\AgendaUtil;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
@@ -22,6 +24,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -130,6 +134,7 @@ class AgendaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
@@ -145,8 +150,9 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verificaEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                     BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
+  public function verificaEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                                     RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
+                                     LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -320,6 +326,12 @@ class AgendaController extends BaseController {
           $age->creaAnnotazione($avviso);
           // ok: memorizza dati
           $this->em->flush();
+          // notifica con attesa di mezzora
+          $notifica = new AvvisoMessage($avviso->getId());
+          if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+            // inserisce avviso (nuovo o modificato) in coda notifiche
+            $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+          }
           // log azione
           if (!$id) {
             // nuovo
@@ -474,6 +486,8 @@ class AgendaController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
+    // rimuove notifica
+    NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
     $dblogger->logAzione('AGENDA', 'Cancella verifica', array(
       'Id' => $avviso_id,
@@ -495,6 +509,7 @@ class AgendaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
@@ -510,8 +525,9 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                    BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
+  public function compitoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                                    RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
+                                    LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -663,6 +679,12 @@ class AgendaController extends BaseController {
           }
           // ok: memorizza dati
           $this->em->flush();
+          // notifica con attesa di mezzora
+          $notifica = new AvvisoMessage($avviso->getId());
+          if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+            // inserisce avviso (nuovo o modificato) in coda notifiche
+            $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+          }
           // log azione
           if (!$id) {
             // nuovo
@@ -739,6 +761,8 @@ class AgendaController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
+    // rimuove notifica
+    NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
     $dblogger->logAzione('AGENDA', 'Cancella compito', array(
       'Avviso' => $avviso_id,

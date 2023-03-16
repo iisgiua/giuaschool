@@ -20,6 +20,8 @@ use App\Form\AvvisoType;
 use App\Form\EntrataType;
 use App\Form\MessageType;
 use App\Form\UscitaType;
+use App\Message\AvvisoMessage;
+use App\MessageHandler\NotificaMessageHandler;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -46,6 +48,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -182,6 +186,7 @@ class StaffController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -196,8 +201,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
-                                   RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function avvisiEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
@@ -403,6 +408,12 @@ class StaffController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        $notifica = new AvvisoMessage($avviso->getId());
+        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+          // inserisce avviso (nuovo o modificato) in coda notifiche
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo
@@ -547,6 +558,8 @@ class StaffController extends BaseController {
       $f = new File($dir.$a);
       $fs->remove($f);
     }
+    // rimuove notifica
+    NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
     $dblogger->logAzione('AVVISI', 'Cancella avviso', array(
       'Id' => $avviso_id,
@@ -688,6 +701,7 @@ class StaffController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -703,7 +717,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
+  public function avvisiOrarioEditAction(Request $request, TranslatorInterface $trans,
+                                         MessageBusInterface $msg, BachecaUtil $bac,
                                          RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
     // controlla azione
     if ($id > 0) {
@@ -747,7 +762,7 @@ class StaffController extends BaseController {
       $avviso = (new Avviso())
         ->setTipo($tipo)
         ->setDestinatariAta(['D','A'])
-        ->setDestinatari(['D','G','A'])
+        ->setDestinatari(['G','A'])
         ->setFiltroTipo('C')
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i:00', $ora_predefinita))
@@ -876,6 +891,12 @@ class StaffController extends BaseController {
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        $notifica = new AvvisoMessage($avviso->getId());
+        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+          // inserisce avviso (nuovo o modificato) in coda notifiche
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo
@@ -1023,6 +1044,7 @@ class StaffController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1036,7 +1058,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAttivitaEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
+  public function avvisiAttivitaEditAction(Request $request, TranslatorInterface $trans,
+                                           MessageBusInterface $msg, BachecaUtil $bac,
                                            RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
@@ -1185,6 +1208,12 @@ class StaffController extends BaseController {
         $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        $notifica = new AvvisoMessage($avviso->getId());
+        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+          // inserisce avviso (nuovo o modificato) in coda notifiche
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo
@@ -1304,6 +1333,7 @@ class StaffController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1318,8 +1348,8 @@ class StaffController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiIndividualiEditAction(Request $request, TranslatorInterface $trans,
-                                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
-                                              $id) {
+                                              MessageBusInterface $msg, BachecaUtil $bac,
+                                              RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1409,6 +1439,12 @@ class StaffController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        $notifica = new AvvisoMessage($avviso->getId());
+        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+          // inserisce avviso (nuovo o modificato) in coda notifiche
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo

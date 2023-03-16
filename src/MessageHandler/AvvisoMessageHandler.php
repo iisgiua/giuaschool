@@ -9,8 +9,12 @@
 namespace App\MessageHandler;
 
 use App\Message\AvvisoMessage;
+use App\Message\NotificaMessage;
 use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -21,6 +25,16 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class AvvisoMessageHandler implements MessageHandlerInterface {
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
+  /**
+   * @var EntityManagerInterface $em Gestore delle entità
+   */
+  private EntityManagerInterface $em;
+
+  /**
+   * @var TranslatorInterface $trans Gestore delle traduzioni
+   */
+  private TranslatorInterface $trans;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
@@ -38,10 +52,15 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
   /**
    * Costruttore
    *
-   * @param LoggerInterface $logger Gestore dei log su file
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LoggerInterface $msgLogger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(LoggerInterface $msgLogger, MessageBusInterface $messageBus) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
+                              LoggerInterface $msgLogger, MessageBusInterface $messageBus) {
+    $this->em = $em;
+    $this->trans = $trans;
     $this->logger = $msgLogger;
     $this->messageBus = $messageBus;
   }
@@ -51,10 +70,45 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    *
    * @param AvvisoMessage $message Dati per la notifica dell'avviso
    */
-  public function __invoke(EventoMessage $message) {
-// legge i destinatari dell'avviso
-// crea le notifiche per ogni destinatario
-// le inserisce nella coda delle notifiche
+  public function __invoke(AvvisoMessage $message) {
+    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($message->getId());
+    $destinatari = [];
+    if ($avviso) {
+      // dati avviso
+      $tipo = ($avviso->getTipo() == 'V' ? 'verifica' : ($avviso->getTipo() == 'P' ? 'compito' : 'avviso'));
+      $data = $avviso->getData()->format('d/m/Y');
+      $testo = $avviso->getTesto();
+      $ora1 = ($avviso->getOra() ? $avviso->getOra()->format('G:i') : '');
+      $ora2 = ($avviso->getOraFine() ? $avviso->getOraFine()->format('G:i') : '');
+      $testo = str_replace(['{DATA}', '{ORA}', '{INIZIO}', '{FINE}'], [$data, $ora1, $ora1, $ora2], $testo);
+      $oggetto = $avviso->getOggetto();
+      // legge classi
+      $classi = '';
+      if ($avviso->getFiltroTipo() == 'C' && !empty($avviso->getFiltro())) {
+        // entrate/uscite/attività
+        $classi = $this->em->getRepository('App\Entity\Classe')->listaClassi($avviso->getFiltro());
+      }
+      $dati = ['id' => $avviso->getId(), 'data' => $data, 'oggetto' => $oggetto,
+        'testo' => $testo, 'allegati' => count($avviso->getAllegati())];
+      // legge i destinatari
+      $destinatari = $this->em->getRepository('App\Entity\Avviso')->notifica($avviso);
+      foreach ($destinatari as $utente) {
+        // crea le notifiche per ogni destinatario
+        $dati['alunno'] = '';
+        $dati['classi'] = '';
+        if ($utente->controllaRuolo('G')) {
+          // dati alunno per notifiche al genitore
+          $dati['alunno'] = $utente->getAlunno()->getNome().' '.$utente->getAlunno()->getCognome();
+        }
+        if (!$utente->controllaRuolo('GA')) {
+          // dati classi per notifiche a docenti/ata
+          $dati['classi'] = $classi;
+        }
+        $notifica = new NotificaMessage($utente->getId(), $tipo, $message->getTag(), $dati);
+        $this->messageBus->dispatch($notifica);
+      }
+    }
+    $this->logger->notice('AvvisoMessage: crea notifica per l\'avviso', [$avviso->getId(), count($destinatari)]);
   }
 
 }

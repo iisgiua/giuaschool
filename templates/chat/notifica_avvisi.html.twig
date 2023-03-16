@@ -1,0 +1,8 @@
+{{ dati.data }}{{ dati.alunno ? (' - <i>'~dati.alunno~'</i>')|raw }}{{ dati.classi ? ' - '~dati.classi }}:
+<b>{{ dati.oggetto }}</b>
+
+{{ dati.testo }}
+
+{% if dati.allegati > 0 %}
+<b>Sono presenti allegati: <a href="{{ url_registro }}">Vai al registro</a></b>
+{% endif %}

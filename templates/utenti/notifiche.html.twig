@@ -69,11 +69,20 @@ $(document).ready(function() {
 
 {% block _notifica_abilitato_widget %}
   {% for item in form.children %}
-<div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
-  <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
-    <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
-  </label>
-  <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
-</div>
+    {% if item.vars.value in ['circolare', 'avviso'] %}
+    <div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
+      <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
+      </label>
+      <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+    </div>
+    {% elseif app.user.controllaRuolo('GA') %}
+    <div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
+      <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
+      </label>
+      <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+    </div>
+    {% endif %}
   {% endfor %}
 {% endblock %}

@@ -38,6 +38,7 @@ class AvvisoMessage {
    */
   public function __construct(int $id) {
     $this->id = $id;
+    $this->tag = '<!AVVISO!><!'.$id.'!>';
   }
 
   /**
@@ -47,7 +48,6 @@ class AvvisoMessage {
    */
   public function getId(): int {
     return $this->id;
-    $this->tag = '<!AVVISO!><!'.$id.'!>';
   }
 
   /**

@@ -42,7 +42,8 @@ class NotificaType extends AbstractType {
       ->add('abilitato', ChoiceType::class, array('label' => false,
         'data' => $options['values'][1],
         'choices' => ['label.abilitato_notifica_circolare' => 'circolare',
-          'label.abilitato_notifica_avviso' => 'avviso'],
+          'label.abilitato_notifica_avviso' => 'avviso', 'label.abilitato_notifica_verifica' => 'verifica',
+          'label.abilitato_notifica_compito' => 'compito'],
         'expanded' => true,
         'multiple' => true,
         'required' => false))

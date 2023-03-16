@@ -4,6 +4,8 @@ return [
   'fileCopy' => [
   ],
   'fileDelete' => [
+    'src/Command/NotificaInviaCommand.php',
+    'src/Command/NotificaPreparaCommand.php',
     'src/Entity/Notifica.php',
     'src/Entity/NotificaInvio.php',
     'src/Repository/NotificaRepository.php',

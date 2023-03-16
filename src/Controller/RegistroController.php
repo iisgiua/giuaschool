@@ -16,6 +16,8 @@ use App\Entity\FirmaSostegno;
 use App\Entity\Lezione;
 use App\Entity\Nota;
 use App\Form\MessageType;
+use App\Message\AvvisoMessage;
+use App\MessageHandler\NotificaMessageHandler;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
@@ -30,6 +32,8 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -847,6 +851,7 @@ class RegistroController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param LogHandler $dblogger Gestore dei log su database
@@ -863,8 +868,9 @@ class RegistroController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function annotazioneEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                        BachecaUtil $bac, LogHandler $dblogger, $classe, $data, $id) {
+  public function annotazioneEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                                        RegistroUtil $reg, BachecaUtil $bac, LogHandler $dblogger,
+                                        $classe, $data, $id) {
     // inizializza
     $label = array();
     $dest_filtro = [];
@@ -1038,6 +1044,14 @@ class RegistroController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        if ($log_avviso) {
+          NotificaMessageHandler::delete($this->em, (new AvvisoMessage($log_avviso))->getTag());
+        }
+        if ($avviso) {
+          $notifica = new AvvisoMessage($avviso->getId());
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo
@@ -1131,6 +1145,10 @@ class RegistroController extends BaseController {
     $this->em->remove($annotazione);
     // ok: memorizza dati
     $this->em->flush();
+    // rimuove notifica
+    if ($log_avviso) {
+      NotificaMessageHandler::delete($this->em, (new AvvisoMessage($log_avviso))->getTag());
+    }
     // log azione
     $dblogger->logAzione('REGISTRO', 'Cancella annotazione', array(
       'Annotazione' => $annotazione_id,

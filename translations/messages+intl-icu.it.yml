@@ -610,6 +610,8 @@ label.tipo_notifica_email: Email
 label.tipo_notifica_telegram: Telegram
 label.abilitato_notifica_circolare: Lista nuove circolari
 label.abilitato_notifica_avviso: Nuovo avviso
+label.abilitato_notifica_verifica: Nuova verifica
+label.abilitato_notifica_compito: Nuovo compito
 
 
 ##### PAGINE #####
@@ -1205,9 +1207,6 @@ message.notifica_valutazione: "Valutazione {tipo} in {materia} del {data}: {voto
 message.notifica_verifica: "Verifica di {materia} fissata il giorno {data}"
 message.notifica_compito: "Compiti di {materia} assegnati per il giorno {data}"
 message.notifica_generica: "Avviso per il giorno {data}.\n{testo}"
-message.notifica_registrazione: "Benvenuto nel servizio di notifiche via Telegram del Registro Elettronico dell' {intestazione_istituto_breve}."
-message.registrazione_telegram_ok_benvenuto: "La registrazione del servizio di notifiche via <em>Telegram</em> è avvenuta con successo.<br>Riceverai in seguito una notifica di benvenuto."
-message.registrazione_telegram_ok: "La registrazione del servizio di notifiche via <em>Telegram</em> è avvenuta con successo."
 message.cancella_circolare: Verrà cancellata la circolare indicata. Vuoi continuare?
 message.presenti_comunicazioni: Sono presenti comunicazioni da leggere alla classe
 message.num_avvisi: "{num, plural, one {Avviso} other {Avvisi}}"
@@ -1253,7 +1252,6 @@ message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima 
   </small>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
-message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."
 message.dato_memorizzato: La modifica è stata memorizzata correttamente.
 message.no_cattedra_maggio: Non è previsto il caricamento del documento del 15 maggio per questa cattedra.
 message.cancella_maggio: Verrà cancellato il documento del 15 maggio indicato. Vuoi continuare?
@@ -1359,8 +1357,10 @@ message.mailserver_email_test_ok: La mail è stata inviata senza errori. Control
 message.utenti.notifiche: Scegli il canale utilizzato per l'invio delle notifiche e il tipo di eventi da notificare.
 message.tipo_notifica_email: "Questo canale ti permette di ricevere le notifiche tramite email al tuo indirizzo di posta elettronica."
 message.tipo_notifica_telegram: "Se usi l'app Telegram nel tuo smartphone, puoi usare questo canale per ricevere le notifiche."
-message.abilitato_notifica_circolare: "Viene inviata una notifica al giorno con la lista delle nuove circolari."
+message.abilitato_notifica_circolare: "Viene inviata al massimo una notifica al giorno con la lista delle nuove circolari."
 message.abilitato_notifica_avviso: "Viene inviata una notifica per ogni nuovo avviso."
+message.abilitato_notifica_verifica: "Viene inviata una notifica per ogni nuova verifica."
+message.abilitato_notifica_compito: "Viene inviata una notifica per ogni nuovo compito per casa."
 message.notifiche_configura_email: "Devi inserire un indirizzo valido per la posta elettronica.<br><br>Puoi premere il pulsante CONTINUA per andare impostazioni dell'email."
 message.notifiche_configura_telegram: "Devi associare l'app Telegram presente nel tuo smartphone con il registro elettronico.<br><br>Se stai visualizzando questa pagina sul tuo smartphone, puoi premere il pulsante CONTINUA per predisporre la nuova chat su Telegram nel modo seguente:<br>&nbsp; 1) nella nuova pagina di presentazione della chat, premi il pulsante per l'invio di un messaggio;<br>&nbsp; 2) una volta visualizzata la chat, premi il pulsante AVVIA."
 message.telegram_chat_start: "Ciao <b>{nome}</b>, benvenuto in questa chat che sarà usata esclusivamente per inviarti le notifiche del registro elettronico.\n\nNon utilizzarla per spedire messaggi o comandi, perché saranno ignorati."

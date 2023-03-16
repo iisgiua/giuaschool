@@ -38,7 +38,7 @@ class EventoMessageHandler implements MessageHandlerInterface {
   /**
    * Costruttore
    *
-   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LoggerInterface $msgLogger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
   public function __construct(LoggerInterface $msgLogger, MessageBusInterface $messageBus) {

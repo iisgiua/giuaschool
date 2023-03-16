@@ -222,4 +222,27 @@ class AvvisoRepository extends BaseRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce la lista degli utenti a cui deve essere inviata una notifica per l'avviso indicato
+   *
+   * @param Avviso $avviso Avviso da notificare
+   *
+   * @return array Lista degli utenti
+   */
+  public function notifica(Avviso $avviso) {
+    // legge destinatari
+    $destinatari = $this->_em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+      ->join('au.utente', 'u')
+      ->where('au.avviso=:avviso AND au.letto IS NULL')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->getResult();
+    $utenti = [];
+    foreach ($destinatari as $dest) {
+      $utenti[] = $dest->getUtente();
+    }
+    // restituisce lista utenti
+    return $utenti;
+  }
+
 }

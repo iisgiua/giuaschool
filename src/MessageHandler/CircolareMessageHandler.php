@@ -52,13 +52,13 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LoggerInterface $msgLogger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $logger,
+  public function __construct(EntityManagerInterface $em, LoggerInterface $msgLogger,
                               MessageBusInterface $messageBus) {
     $this->em = $em;
-    $this->logger = $logger;
+    $this->logger = $msgLogger;
     $this->messageBus = $messageBus;
   }
 
@@ -84,7 +84,6 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @param array $jobs Lista delle circolari da notificare
    */
   private function process(array $jobs): void {
-    $this->logger->notice('CircolareMessage: predispone destinatari per la notifica delle circolari', [count($jobs)]);
     // crea le notifiche per le circolari
     $num = 0;
     $circolari = [];
@@ -110,7 +109,8 @@ class CircolareMessageHandler implements BatchHandlerInterface {
       $notifica = new NotificaMessage($utente, 'circolare', $tag, $dati);
       $this->messageBus->dispatch($notifica);
     }
-    $this->logger->notice('CircolareMessage: crea notifica delle circolari', [$num, count($destinatari)]);
+    $this->logger->notice('CircolareMessage: crea notifica delle circolari', [array_keys($circolari),
+      count($destinatari)]);
   }
 
   /**

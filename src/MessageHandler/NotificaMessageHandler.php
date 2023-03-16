@@ -71,17 +71,17 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * @param Environment $tpl Gestione template
    * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param TelegramManager $telegram Gestore delle comunicazioni tramite Telegram
-   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LoggerInterface $msgLogger Gestore dei log su file
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
                               Environment $tpl, MailerInterface $mailer, TelegramManager $telegram,
-                              LoggerInterface $logger) {
+                              LoggerInterface $msgLogger) {
     $this->em = $em;
     $this->trans = $trans;
     $this->tpl = $tpl;
     $this->mailer = $mailer;
     $this->telegram = $telegram;
-    $this->logger = $logger;
+    $this->logger = $msgLogger;
   }
 
   /**
@@ -95,7 +95,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       'abilitato' => 1]);
     if (!$utente) {
       // nessuna notifica: utente non abilitato
-      $this->logger->notice('NotificaMessage: scarta notifica, utente non abilitato', [$message]);
+      $this->logger->notice('NotificaMessage: scarta notifica, utente non abilitato', [$message->getUtenteId()]);
       return;
     }
     // legge dati di notifica dell'utente
@@ -103,7 +103,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     if (empty($datiNotifica['abilitato']) ||
         !in_array($message->getTipo(), $datiNotifica['abilitato'], true)) {
       // nessuna notifica: evento notifica non abilitata
-      $this->logger->notice('NotificaMessage: scarta notifica, tipo notifica non abilitato', [$message]);
+      $this->logger->notice('NotificaMessage: scarta notifica, evento notifica non abilitato', [$message->getUtenteId()]);
       return;
     }
     // invia notifica
@@ -137,6 +137,33 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     $connection->prepare($sql)->execute(['tag' => '%'.$tag.'%']);
   }
 
+  /**
+   * Aggiorna la notifica non ancora inviata modificando solo l'attesa.
+   * Se la notifica è ancora nella coda indicata è sufficiente aggiornarla; altrimenti
+   * è necessario reinserirla e quindi è bene cancellarla se presente nella coda di invio.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tag Testo usato per identificare la notifica
+   * @param string $queue Nome della coda della notifica
+   * @param int $delay Nuovo tempo di attesa (in secondi)
+   *
+   * @return bool Restituisce vero se la notifica è stata aggiornata
+   */
+  public static function update(EntityManagerInterface $em, string $tag, string $queue, int $delay): bool {
+    $ora = (new \DateTime())->modify('+'.$delay.' seconds');
+    $connection = $em->getConnection();
+    $sql = "UPDATE gs_messenger_messages SET available_at=:ora WHERE queue_name=:queue AND body LIKE :tag AND delivered_at IS NULL";
+    $res = $connection->prepare($sql)->execute(['ora' => $ora->format('Y-m-d H:i:s'),
+      'queue' => $queue, 'tag' => '%'.$tag.'%']);
+    if ($res->rowCount() == 0) {
+      // elimina notifica da ogni coda
+      $sql = "DELETE FROM gs_messenger_messages WHERE body LIKE :tag";
+      $connection->prepare($sql)->execute(['tag' => '%'.$tag.'%']);
+    }
+    // restituisce vero se notifica aggiornata
+    return ($res->rowCount() != 0);
+  }
+
 
   //==================== METODI PRIVATI  ====================
 
@@ -160,6 +187,19 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           'intestazione_istituto_breve' => $istituto->getIntestazioneBreve(),
           'url_registro' => $istituto->getUrlRegistro()));
         break;
+      case 'avviso':
+      case 'verifica':
+      case 'compito':
+        // dati avviso
+        $oggetto = $istituto->getIntestazioneBreve().' - '.$message->getDati()['oggetto'];
+        $testo = $this->tpl->render('email/notifica_avvisi.html.twig', array(
+          'dati' => $message->getDati(),
+          'url_registro' => $istituto->getUrlRegistro()));
+        break;
+      default:
+        // errore
+        $this->logger->warning('NotificaMessage: evento non previsto per le notifiche via email', [$message->getTipo()]);
+        return;
     }
     // crea il messaggio
     $msg = (new Email())
@@ -188,6 +228,28 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           'circolari' => $message->getDati(),
           'url_registro' => $istituto->getUrlRegistro()));
         break;
+      case 'avviso':
+        // dati avviso
+        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
+          'dati' => $message->getDati(),
+          'url_registro' => $istituto->getUrlRegistro()));
+        break;
+      case 'verifica':
+        // dati avviso
+        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
+          'dati' => $message->getDati(),
+          'url_registro' => $istituto->getUrlRegistro()));
+        break;
+      case 'compito':
+        // dati avviso
+        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
+          'dati' => $message->getDati(),
+          'url_registro' => $istituto->getUrlRegistro()));
+        break;
+      default:
+        // errore
+        $this->logger->warning('NotificaMessage: evento non previsto per le notifiche via Telegram', [$message->getTipo()]);
+        return;
     }
     // invia messaggio
     $ris = $this->telegram->sendMessage($utente, $html);

@@ -18,6 +18,8 @@ use App\Entity\Staff;
 use App\Form\AvvisoType;
 use App\Form\FiltroType;
 use App\Form\PresenzaType;
+use App\Message\AvvisoMessage;
+use App\MessageHandler\NotificaMessageHandler;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -29,6 +31,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -632,6 +636,7 @@ class CoordinatoreController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -647,8 +652,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoEditAction(Request $request, TranslatorInterface $trans, BachecaUtil $bac,
-                                   RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
+  public function avvisoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -804,6 +809,12 @@ class CoordinatoreController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
+        // notifica con attesa di mezzora
+        $notifica = new AvvisoMessage($avviso->getId());
+        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+          // inserisce avviso (nuovo o modificato) in coda notifiche
+          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+        }
         // log azione
         if (!$id) {
           // nuovo
@@ -969,6 +980,8 @@ class CoordinatoreController extends BaseController {
     $this->em->remove($avviso);
     // ok: memorizza dati
     $this->em->flush();
+    // rimuove notifica
+    NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
     $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
       'Id' => $avviso_id,
