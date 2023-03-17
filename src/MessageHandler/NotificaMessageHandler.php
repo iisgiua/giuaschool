@@ -95,7 +95,6 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       'abilitato' => 1]);
     if (!$utente) {
       // nessuna notifica: utente non abilitato
-      $this->logger->notice('NotificaMessage: scarta notifica, utente non abilitato', [$message->getUtenteId()]);
       return;
     }
     // legge dati di notifica dell'utente
@@ -103,7 +102,6 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     if (empty($datiNotifica['abilitato']) ||
         !in_array($message->getTipo(), $datiNotifica['abilitato'], true)) {
       // nessuna notifica: evento notifica non abilitata
-      $this->logger->notice('NotificaMessage: scarta notifica, evento notifica non abilitato', [$message->getUtenteId()]);
       return;
     }
     // invia notifica
@@ -111,11 +109,18 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       switch ($datiNotifica['tipo']) {
         case 'email':
           // invio per email
-          $this->notificaEmail($message, $utente->getEmail());
+          $address = $utente->getEmail();
+          if (!empty($address) && substr($address, -6) != '.local') {
+            // invia
+            $this->notificaEmail($message, $address);
+          }
           break;
         case 'telegram':
           // invio tramite Telegram
-          $this->notificaTelegram($message, $utente);
+          if (!empty($datiNotifica['telegram_chat'])) {
+            // invia
+            $this->notificaTelegram($message, $utente);
+          }
           break;
       }
     } catch (\Throwable $e) {
@@ -209,6 +214,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       ->html($testo);
     // invia email
     $this->mailer->send($msg);
+    $this->logger->debug('NotificaMessage: evento notificato via email', [$message, $email]);
   }
 
   /**
@@ -257,6 +263,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       // errore invio
       throw new \Exception($ris['error']);
     }
+    $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message, $utente->getUsername()]);
   }
 
 }

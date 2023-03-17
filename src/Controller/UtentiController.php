@@ -355,18 +355,24 @@ class UtentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // modifica dati
-      $notifica['tipo'] = $form->get('tipo')->getData();
-      if (empty($bot) && $notifica['tipo'] == 'telegram') {
+      $nuovaNotifica = $notifica;
+      $nuovaNotifica['tipo'] = $form->get('tipo')->getData();
+      if (empty($bot) && $nuovaNotifica['tipo'] == 'telegram') {
         // elimina notifica telegram
-        $notifica['tipo'] = 'email';
+        $nuovaNotifica['tipo'] = 'email';
+        unset($nuovaNotifica['telegram_chat']);
+      } elseif ($notifica['tipo'] == 'telegram' && $nuovaNotifica['tipo'] != 'telegram') {
+        // resetta chat Telegram
+        unset($nuovaNotifica['telegram_chat']);
       }
-      $notifica['abilitato'] = $form->get('abilitato')->getData();
-      $this->getUser()->setNotifica($notifica);
+      $nuovaNotifica['abilitato'] = $form->get('abilitato')->getData();
+      $this->getUser()->setNotifica($nuovaNotifica);
       // log e memorizzazione
-      $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$notifica]);
+      $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$nuovaNotifica]);
       // controlla configurazione
-      if (($notifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) || substr($this->getUser()->getEmail(), -6) == '.local')) ||
-          ($notifica['tipo'] == 'telegram' && empty($notifica['telegram_chat']))) {
+      if (($nuovaNotifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
+           substr($this->getUser()->getEmail(), -6) == '.local')) ||
+          ($nuovaNotifica['tipo'] == 'telegram' && empty($nuovaNotifica['telegram_chat']))) {
         // redirect alla configurazione
         return $this->redirectToRoute('utenti_notifiche_configura');
       }

@@ -117,6 +117,12 @@ App\Entity\Configurazione:
     descrizione: 'Indica il codice segreto usato dal bot Telegram per l''invio delle notifiche\<br>[testo]'
     valore: ''
     gestito: true
+  configurazione_SISTEMA11:
+    categoria: 'SISTEMA'
+    parametro: 'comando_token'
+    descrizione: 'Indica il codice segreto usato per l''esecuzione di un comando tramite URL\<br>[testo]'
+    valore: ''
+    gestito: true
 
   # ----- categoria SCUOLA -----
   configurazione_SCUOLA1:

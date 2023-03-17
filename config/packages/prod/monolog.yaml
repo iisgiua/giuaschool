@@ -16,11 +16,11 @@ monolog:
       type: rotating_file
       max_files: 30
       path: '%kernel.logs_dir%/command_%kernel.environment%.log'
-      level: debug
+      level: '%env(LOG_LEVEL)%'
       channels: ['command', 'console']
     messenger:
       type: rotating_file
       max_files: 30
       path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
-      level: debug
+      level: '%env(LOG_LEVEL)%'
       channels: ['messenger_logger']
