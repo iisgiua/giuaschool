@@ -44,6 +44,7 @@ class CommandController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // assicura che lo script non sia interrotto
+    ignore_user_abort(true);
     ini_set('max_execution_time', 0);
     // comando per l'invio delle notifiche
     $command = new ArrayInput(['command' => 'messenger:consume',

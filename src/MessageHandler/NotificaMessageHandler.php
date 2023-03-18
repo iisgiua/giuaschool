@@ -101,7 +101,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     $datiNotifica = $utente->getNotifica();
     if (empty($datiNotifica['abilitato']) ||
         !in_array($message->getTipo(), $datiNotifica['abilitato'], true)) {
-      // nessuna notifica: evento notifica non abilitata
+      // nessuna notifica: evento notifica non abilitato
       return;
     }
     // invia notifica
@@ -119,7 +119,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           // invio tramite Telegram
           if (!empty($datiNotifica['telegram_chat'])) {
             // invia
-            $this->notificaTelegram($message, $utente);
+            $this->notificaTelegram($message, $datiNotifica['telegram_chat']);
           }
           break;
       }
@@ -221,9 +221,9 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * Utilizza l'email per inviare la notifica
    *
    * @param NotificaMessage $message Dati per l'invio della notifica
-   * @param string $email Indirizzo email del destinatario
+   * @param string $chat Identificativo della chat Telegram
    */
-  private function notificaTelegram(NotificaMessage $message, Utente $utente): void {
+  private function notificaTelegram(NotificaMessage $message, string $chat): void {
     // legge dati
     $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
     // imposta messaggio
@@ -258,12 +258,12 @@ class NotificaMessageHandler implements MessageHandlerInterface {
         return;
     }
     // invia messaggio
-    $ris = $this->telegram->sendMessage($utente, $html);
+    $ris = $this->telegram->sendMessage($chat, $html);
     if (isset($ris['error'])) {
       // errore invio
       throw new \Exception($ris['error']);
     }
-    $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message, $utente->getUsername()]);
+    $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message]);
   }
 
 }

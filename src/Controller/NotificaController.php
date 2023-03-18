@@ -40,6 +40,9 @@ class NotificaController extends BaseController {
                                  LoggerInterface $logger): JsonResponse {
     // init
     $risposta = [];
+    // assicura che lo script non sia interrotto
+    ignore_user_abort(true);
+    ini_set('max_execution_time', 0);
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
     $inizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio', '9999-99-99 99:99');
@@ -102,15 +105,28 @@ class NotificaController extends BaseController {
       $risposta['parse_mode'] = 'HTML';
     } elseif (isset($richiesta['my_chat_member']) &&
               $richiesta['my_chat_member']['new_chat_member']['status'] == 'kicked') {
-      // elimina utente
+      // elimina chat utente
       $chat = $richiesta['my_chat_member']['chat']['id'];
-      // inserisce nella coda eliminati
-      $connection = $this->em->getConnection();
-      $sql = "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at) VALUES (:chat, '[]', 'TelegramDeleted', NOW(), NOW())";
-      $connection->prepare($sql)->execute(['chat' => $chat]);
+      $utente = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
+        ->where('u.notifica LIKE :chat')
+        ->setParameters(['chat' => '%s:13:"telegram\_chat";s:'.strlen($chat).':"'.$chat.'";%'])
+        ->getQuery()
+        ->setMaxResults(1)
+        ->getOneOrNullResult();
+      if (!$utente) {
+        // errore
+        $logger->error('Telegram webhook: errore cancellazione chat utente.', [$richiesta]);
+        return new JsonResponse($risposta);
+      }
+      // rimuove chat
+      $notifica = $utente->getNotifica();
+      unset($notifica['telegram_chat']);
+      $utente->setNotifica($notifica);
+      $this->em->flush();
       // log
-      $logger->warning('Telegram webhook: cancellazione chat utente.', [$richiesta]);
-  }
+      $logger->warning('Telegram webhook: cancellazione chat utente.', [$utente->getUsername(),
+        $richiesta]);
+    }
     // restituisce risposta
     return new JsonResponse($risposta);
   }

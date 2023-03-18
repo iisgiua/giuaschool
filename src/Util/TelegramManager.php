@@ -109,32 +109,12 @@ class TelegramManager {
   /**
    * Invia un messaggio alla chat Telegram
    *
-   * @param Utente $utente Utente a cui inviare il messaggio
+   * @param string $chat Identificativo della chat Telegram
    * @param string $html Testo del messaggio da inviare alla chat
    *
    * @return array Informazioni su eventuali errori e lista dei dati ricevuti
    */
-  public function sendMessage(Utente $utente, string $html): array {
-    // legge dati
-    $notifica = $utente->getNotifica();
-    $chat = $notifica['telegram_chat'];
-    // controlla chat
-    $connection = $this->em->getConnection();
-    $sql = "SELECT * FROM gs_messenger_messages WHERE body=:chat AND queue_name='TelegramDeleted'";
-    $stmt = $connection->prepare($sql);
-    $result = $stmt->execute(['chat' => $chat]);
-    $deleted = $result->fetch();
-    if (!empty($deleted)) {
-      // la chat è stata rimossa
-      unset($notifica['telegram_chat']);
-      $utente->setNotifica($notifica);
-      $this->em->flush();
-      // rimuove dalla coda eliminati
-      $sql = "DELETE FROM gs_messenger_messages WHERE body=:chat AND queue_name='TelegramDeleted'";
-      $connection->prepare($sql)->execute(['chat' => $chat]);
-      // scarta messaggio
-      return ['result' => 'ok'];
-    }
+  public function sendMessage(string $chat, string $html): array {
     // invia messaggio
     $params = [
       'chat_id' => $chat,
