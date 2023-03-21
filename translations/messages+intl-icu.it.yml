@@ -181,7 +181,7 @@ label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
 label.invio_notifiche: Invio delle notifiche
 label.leggere_in_classe: Leggere agli alunni
-label.login_otp: Codice OTP<br>(solo per i docenti abilitati)
+label.login_otp: Codice OTP<br>(solo per gli utenti abilitati)
 label.login: Accedi
 label.logout: Esci
 label.lunedi: Lunedì
@@ -612,7 +612,7 @@ label.abilitato_notifica_circolare: Lista nuove circolari
 label.abilitato_notifica_avviso: Nuovo avviso
 label.abilitato_notifica_verifica: Nuova verifica
 label.abilitato_notifica_compito: Nuovo compito
-label.telegram_bot: Nome del bot Telegram
+label.telegram_bot: Username del bot Telegram
 label.telegram_token: Token del bot Telegram
 
 

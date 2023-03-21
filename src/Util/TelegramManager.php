@@ -71,6 +71,10 @@ class TelegramManager {
       'timeout' => 60]);
     // configura
     $url = $this->url->generate('notifica_telegram', [], UrlGeneratorInterface::ABSOLUTE_URL);
+    if (substr($url, 0, 5) == 'http:') {
+      // deve essere https
+      $url = 'https:'.substr($url, 5);
+    }
     $connections = 5;
     $allowed = ['message', 'my_chat_member'];
     $secret = 'BOT-'.bin2hex(openssl_random_pseudo_bytes(8)).'-'.bin2hex(openssl_random_pseudo_bytes(8));
