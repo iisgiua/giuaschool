@@ -11,7 +11,6 @@ namespace App\Tests;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
-use Faker\Factory;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
@@ -22,21 +21,19 @@ use PhpMyAdmin\SqlParser\Statements\InsertStatement;
 use PhpMyAdmin\SqlParser\Statements\SelectStatement;
 use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\ValidatorBuilder;
 use Symfony\Component\VarDumper\Cloner\Data;
 
 
 /**
- * Gestione dei test con interazione con il database
+ * Gestione dei test delle entità con interazione con il database
  *
  * @author Antonello Dessì
  */
-class DatabaseTestCase extends KernelTestCase {
+class EntityTestCase extends KernelTestCase {
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
