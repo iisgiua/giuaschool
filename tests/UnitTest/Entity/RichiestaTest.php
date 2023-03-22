@@ -12,14 +12,14 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Tests\DatabaseTestCase;
+use App\Tests\EntityTestCase;
 
 
 /**
 * Unit test dell'entità Richiesta
 *
 */
-class RichiestaTest extends DatabaseTestCase {
+class RichiestaTest extends EntityTestCase {
 
   /**
    * Costruttore

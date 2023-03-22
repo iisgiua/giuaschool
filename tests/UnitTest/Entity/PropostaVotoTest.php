@@ -8,7 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Tests\DatabaseTestCase;
+use App\Tests\EntityTestCase;
 
 
 /**
@@ -16,7 +16,7 @@ use App\Tests\DatabaseTestCase;
  *
  * @author Antonello Dessì
  */
-class PropostaVotoTest extends DatabaseTestCase {
+class PropostaVotoTest extends EntityTestCase {
 
   /**
    * Costruttore

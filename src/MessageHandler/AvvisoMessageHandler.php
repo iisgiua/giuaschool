@@ -10,11 +10,10 @@ namespace App\MessageHandler;
 
 use App\Message\AvvisoMessage;
 use App\Message\NotificaMessage;
-use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -30,11 +29,6 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    * @var EntityManagerInterface $em Gestore delle entità
    */
   private EntityManagerInterface $em;
-
-  /**
-   * @var TranslatorInterface $trans Gestore delle traduzioni
-   */
-  private TranslatorInterface $trans;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
@@ -53,14 +47,12 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LoggerInterface $msgLogger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                              LoggerInterface $msgLogger, MessageBusInterface $messageBus) {
+  public function __construct(EntityManagerInterface $em, LoggerInterface $msgLogger,
+                              MessageBusInterface $messageBus) {
     $this->em = $em;
-    $this->trans = $trans;
     $this->logger = $msgLogger;
     $this->messageBus = $messageBus;
   }

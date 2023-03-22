@@ -8,14 +8,14 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Tests\DatabaseTestCase;
+use App\Tests\EntityTestCase;
 
 
 /**
 * Unit test dell'entità Presenza
 *
 */
-class PresenzaTest extends DatabaseTestCase {
+class PresenzaTest extends EntityTestCase {
 
   /**
    * Costruttore
