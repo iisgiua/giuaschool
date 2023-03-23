@@ -99,8 +99,8 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
         $notifica = new NotificaMessage($utente->getId(), $tipo, $message->getTag(), $dati);
         $this->messageBus->dispatch($notifica);
       }
+      $this->logger->notice('AvvisoMessage: crea notifica per l\'avviso', [$avviso->getId(), count($destinatari)]);
     }
-    $this->logger->notice('AvvisoMessage: crea notifica per l\'avviso', [$avviso->getId(), count($destinatari)]);
   }
 
 }
