@@ -29,6 +29,7 @@ return [
     'public/install/app.php',
   ],
   'sqlCommand' => [
+    ["UPDATE gs_utente SET notifica='a:2:{s:4:\"tipo\";s:5:\"email\";s:9:\"abilitato\";a:2:{i:0;s:6:\"avviso\";i:1;s:9:\"circolare\";}}' WHERE notifica IS NULL OR notifica='a:0:{}';", ""],
     ["UPDATE gs_utente SET rappresentante='' WHERE rappresentante IS NULL OR rappresentante='a:0:{}';", ""],
     ["DROP TABLE IF EXISTS gs_notifica;", ""],
     ["DROP TABLE IF EXISTS gs_notifica_invio;", ""],
