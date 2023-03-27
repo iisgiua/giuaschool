@@ -382,8 +382,13 @@ class UtentiController extends BaseController {
       return $this->redirectToRoute('utenti_profilo');
     }
     // visualizza pagina
-    return $this->renderHtml('utenti', 'notifiche', $dati, $info, [$form->createView(),
-      'message.utenti.notifiche']);
+    //-- return $this->renderHtml('utenti', 'notifiche', $dati, $info, );
+    return $this->render('utenti/notifiche.html.twig', [
+      'pagina_titolo' => 'page.utenti.notifiche',
+      'titolo' => 'title.utenti.notifiche',
+      'dati' => $dati,
+      'info' => $info,
+      'form' => [$form->createView(), 'message.utenti.notifiche']]);
   }
 
   /**
@@ -420,7 +425,13 @@ class UtentiController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // visualizza pagina
-    return $this->renderHtml('utenti', 'notifiche_configura', $dati, $info, []);
+    //-- return $this->renderHtml('utenti', 'notifiche_configura', $dati, $info, []);
+    return $this->render('utenti/notifiche_configura.html.twig', [
+      'pagina_titolo' => 'page.utenti.notifiche',
+      'titolo' => 'title.utenti.notifiche_configura',
+      'dati' => $dati,
+      'info' => $info,
+      'form' => []]);
   }
 
 }
