@@ -245,7 +245,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $notifica = array();
+  private ?array $notifica = array('tipo' => 'email', 'abilitato' => ['circolare']);
 
   /**
    * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]

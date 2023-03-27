@@ -122,10 +122,15 @@ class NotificaMessageHandler implements MessageHandlerInterface {
             $this->notificaTelegram($message, $datiNotifica['telegram_chat']);
           }
           break;
+        default:
+          // errore
+          $this->logger->warning('NotificaMessage: canale non previsto', [$datiNotifica['tipo']]);
+          return;
       }
     } catch (\Throwable $e) {
       // errore
-      $this->logger->error('NotificaMessage: ERRORE '.$e->getMessage(), [$e]);
+      $this->logger->error('NotificaMessage: ERRORE '.$e->getMessage(), [
+        $datiNotifica['tipo'] == 'email' ? $utente->getEmail() : $datiNotifica['telegram_chat']]);
     }
   }
 
