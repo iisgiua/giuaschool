@@ -18,7 +18,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 
 /**
- * Unit test per il gestore delle notifiche per gli avvisi
+ * Unit test per il gestore delle notifiche per le circolari
  *
  * @author Antonello Dessì
  */

@@ -1,0 +1,10 @@
+####################
+# NotificaFixtures - dati di test
+#   Dati necessari per l'invio delle notifiche
+####################
+
+
+include:
+  - AvvisoFixtures.yml
+  - CircolareFixtures.yml
+  - IstitutoFixtures.yml

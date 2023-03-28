@@ -112,7 +112,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           $address = $utente->getEmail();
           if (!empty($address) && substr($address, -6) != '.local') {
             // invia
-            $this->notificaEmail($message, $address);
+            $this->notificaEmail($message, $utente);
           }
           break;
         case 'telegram':
@@ -181,9 +181,9 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * Utilizza l'email per inviare la notifica
    *
    * @param NotificaMessage $message Dati per l'invio della notifica
-   * @param string $email Indirizzo email del destinatario
+   * @param Utente $utente Utente destinatario dell'email
    */
-  private function notificaEmail(NotificaMessage $message, string $email): void {
+  private function notificaEmail(NotificaMessage $message, Utente $utente): void {
     // legge dati per il mittente
     $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
     // imposta messaggio
@@ -214,12 +214,12 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     // crea il messaggio
     $msg = (new Email())
       ->from(new Address($istituto->getEmailNotifiche(), $istituto->getIntestazioneBreve()))
-      ->to($email)
+      ->to(new Address($utente->getEmail(), $utente->getNome().' '.$utente->getCognome()))
       ->subject($oggetto)
       ->html($testo);
     // invia email
     $this->mailer->send($msg);
-    $this->logger->debug('NotificaMessage: evento notificato via email', [$message, $email]);
+    $this->logger->debug('NotificaMessage: evento notificato via email', [$message, $utente->getEmail()]);
   }
 
   /**
@@ -240,19 +240,9 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           'url_registro' => $istituto->getUrlRegistro()));
         break;
       case 'avviso':
-        // dati avviso
-        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
-          'dati' => $message->getDati(),
-          'url_registro' => $istituto->getUrlRegistro()));
-        break;
       case 'verifica':
-        // dati avviso
-        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
-          'dati' => $message->getDati(),
-          'url_registro' => $istituto->getUrlRegistro()));
-        break;
       case 'compito':
-        // dati avviso
+        // dati avviso/verifica/compito
         $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
           'dati' => $message->getDati(),
           'url_registro' => $istituto->getUrlRegistro()));
@@ -268,7 +258,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
       // errore invio
       throw new \Exception($ris['error']);
     }
-    $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message]);
+    $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message, $chat]);
   }
 
 }
