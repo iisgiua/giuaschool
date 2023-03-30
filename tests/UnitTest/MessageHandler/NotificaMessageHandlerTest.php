@@ -242,7 +242,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertCount(0, $this->email);
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$conf['tipo']], $this->logs['warning'][0][1]);
+    $this->assertSame([$conf['tipo']], $this->logs['warning'][0][1]);
   }
 
   /**
@@ -336,18 +336,18 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('email/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(3, count($this->tpl[0][1]));
+    $this->assertSame('email/notifica_circolari.html.twig', $this->tpl[0][0]);
+    $this->assertSame(3, count($this->tpl[0][1]));
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('intestazione_istituto_breve', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertEquals('message.notifica_circolare_oggetto', $this->email[0]->getSubject());
-    $this->assertEquals('email/notifica_circolari.html.twig', $this->email[0]->getHtmlBody());
-    $this->assertEquals($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
+    $this->assertSame('message.notifica_circolare_oggetto', $this->email[0]->getSubject());
+    $this->assertSame('email/notifica_circolari.html.twig', $this->email[0]->getHtmlBody());
+    $this->assertSame($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $docente->getEmail()], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $docente->getEmail()], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -378,17 +378,17 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertEquals($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
-    $this->assertEquals($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
+    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
+    $this->assertSame($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $docente->getEmail()], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $docente->getEmail()], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -419,17 +419,17 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertEquals($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
-    $this->assertEquals($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
+    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
+    $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $utente->getEmail()], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $utente->getEmail()], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -460,17 +460,17 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertEquals($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
-    $this->assertEquals('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
-    $this->assertEquals($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
+    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
+    $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $utente->getEmail()], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $utente->getEmail()], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -501,7 +501,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertCount(0, $this->email);
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$tipo], $this->logs['warning'][0][1]);
+    $this->assertSame([$tipo], $this->logs['warning'][0][1]);
   }
 
   /**
@@ -595,16 +595,16 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('chat/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('chat/notifica_circolari.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
     $this->assertCount(1, $this->telegram);
-    $this->assertEquals($conf['telegram_chat'], $this->telegram[0][0]);
-    $this->assertEquals('chat/notifica_circolari.html.twig', $this->telegram[0][1]);
+    $this->assertSame($conf['telegram_chat'], $this->telegram[0][0]);
+    $this->assertSame('chat/notifica_circolari.html.twig', $this->telegram[0][1]);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -635,16 +635,16 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
     $this->assertCount(1, $this->telegram);
-    $this->assertEquals($conf['telegram_chat'], $this->telegram[0][0]);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
+    $this->assertSame($conf['telegram_chat'], $this->telegram[0][0]);
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -675,16 +675,16 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
     $this->assertCount(1, $this->telegram);
-    $this->assertEquals($conf['telegram_chat'], $this->telegram[0][0]);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
+    $this->assertSame($conf['telegram_chat'], $this->telegram[0][0]);
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -715,16 +715,16 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
     $this->assertCount(1, $this->telegram);
-    $this->assertEquals($conf['telegram_chat'], $this->telegram[0][0]);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
+    $this->assertSame($conf['telegram_chat'], $this->telegram[0][0]);
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
+    $this->assertSame([$msg, $conf['telegram_chat']], $this->logs['debug'][0][1]);
   }
 
   /**
@@ -755,7 +755,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertCount(0, $this->email);
     $this->assertCount(0, $this->telegram);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$tipo], $this->logs['warning'][0][1]);
+    $this->assertSame([$tipo], $this->logs['warning'][0][1]);
   }
 
   /**
@@ -786,15 +786,15 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertEquals(2, count($this->tpl[0][1]));
+    $this->assertSame(2, count($this->tpl[0][1]));
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
     $this->assertCount(1, $this->telegram);
-    $this->assertEquals($conf['telegram_chat'], $this->telegram[0][0]);
-    $this->assertEquals('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
+    $this->assertSame($conf['telegram_chat'], $this->telegram[0][0]);
+    $this->assertSame('chat/notifica_avvisi.html.twig', $this->telegram[0][1]);
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$conf['telegram_chat']], $this->logs['error'][0][1]);
+    $this->assertSame([$conf['telegram_chat']], $this->logs['error'][0][1]);
   }
 
   /**
@@ -817,7 +817,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $result = $stmt->execute();
     $rset = $result->fetchAll();
     $this->assertCount(1, $rset);
-    $this->assertEquals('[3]', $rset[0]['headers']);
+    $this->assertSame('[3]', $rset[0]['headers']);
   }
 
   /**
@@ -842,9 +842,9 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $rset = $result->fetchAll();
     $this->assertTrue($aggiornato);
     $this->assertCount(3, $rset);
-    $this->assertEquals(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr($rset[0]['available_at'], 0, 16)]);
-    $this->assertEquals(['[2]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
-    $this->assertEquals(['[3]', '2023-01-01 00:00:00'], [$rset[2]['headers'], $rset[2]['available_at']]);
+    $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr($rset[0]['available_at'], 0, 16)]);
+    $this->assertSame(['[2]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
+    $this->assertSame(['[3]', '2023-01-01 00:00:00'], [$rset[2]['headers'], $rset[2]['available_at']]);
   }
 
   /**
@@ -869,8 +869,8 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $rset = $result->fetchAll();
     $this->assertFalse($aggiornato);
     $this->assertCount(2, $rset);
-    $this->assertEquals(['[1]', '2023-01-01 00:00:00'], [$rset[0]['headers'], $rset[0]['available_at']]);
-    $this->assertEquals(['[3]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
+    $this->assertSame(['[1]', '2023-01-01 00:00:00'], [$rset[0]['headers'], $rset[0]['available_at']]);
+    $this->assertSame(['[3]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
   }
 
 }

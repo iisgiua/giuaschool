@@ -120,7 +120,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $amh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), 0], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), 0], $this->logs['notice'][0][1]);
     $this->assertCount(0, $this->bus);
   }
 
@@ -147,16 +147,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -182,16 +182,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -217,16 +217,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -252,16 +252,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -287,16 +287,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -322,16 +322,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -357,16 +357,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('verifica', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('verifica', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -392,16 +392,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('compito', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(0, $notifica->getDati()['allegati']);
+      $this->assertSame('compito', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(0, $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -427,16 +427,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(count($avviso->getAllegati()), $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(count($avviso->getAllegati()), $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -462,16 +462,16 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('avviso', $notifica->getTipo());
-      $this->assertEquals('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
-      $this->assertEquals($avviso->getId(), $notifica->getDati()['id']);
-      $this->assertEquals($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertEquals($avviso->getOggetto(), $notifica->getDati()['oggetto']);
-      $this->assertEquals($avviso->getTesto(), $notifica->getDati()['testo']);
-      $this->assertEquals(count($avviso->getAllegati()), $notifica->getDati()['allegati']);
+      $this->assertSame('avviso', $notifica->getTipo());
+      $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
+      $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
+      $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
+      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
+      $this->assertSame(count($avviso->getAllegati()), $notifica->getDati()['allegati']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /*
@@ -504,10 +504,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $avviso->getOra()->format('G:i').'. Questo è un orario di inizio: '.$avviso->getOra()->format('G:i').
       '. Questo è un orario di fine: '.$avviso->getOraFine()->format('G:i').'.';
     foreach ($this->bus as $notifica) {
-      $this->assertEquals($testo, $notifica->getDati()['testo']);
+      $this->assertSame($testo, $notifica->getDati()['testo']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -536,19 +536,19 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $utente = $this->em->getRepository('App\Entity\Utente')->find($notifica->getUtenteId());
       if ($utente instanceOf \App\Entity\Genitore) {
         $alunno = $utente->getAlunno()->getNome().' '.$utente->getAlunno()->getCognome();
-        $this->assertEquals($alunno, $notifica->getDati()['alunno']);
-        $this->assertEquals('', $notifica->getDati()['classi']);
+        $this->assertSame($alunno, $notifica->getDati()['alunno']);
+        $this->assertSame('', $notifica->getDati()['classi']);
       } elseif ($utente instanceOf \App\Entity\Alunno) {
-        $this->assertEquals('', $notifica->getDati()['alunno']);
-        $this->assertEquals('', $notifica->getDati()['classi']);
+        $this->assertSame('', $notifica->getDati()['alunno']);
+        $this->assertSame('', $notifica->getDati()['classi']);
       } else {
         $classe = $this->em->getRepository('App\Entity\Classe')->find($avviso->getFiltro()[0]);
-        $this->assertEquals('', $notifica->getDati()['alunno']);
-        $this->assertEquals($classe->getAnno().'ª '.$classe->getSezione(), $notifica->getDati()['classi']);
+        $this->assertSame('', $notifica->getDati()['alunno']);
+        $this->assertSame($classe->getAnno().'ª '.$classe->getSezione(), $notifica->getDati()['classi']);
       }
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([$avviso->getId(), count($this->bus)], $this->logs['notice'][0][1]);
   }
 
 }

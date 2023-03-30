@@ -103,7 +103,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $cmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[], 0], $this->logs['notice'][0][1]);
+    $this->assertSame([[], 0], $this->logs['notice'][0][1]);
     $this->assertCount(0, $this->bus);
   }
 
@@ -122,7 +122,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $cmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[], 0], $this->logs['notice'][0][1]);
+    $this->assertSame([[], 0], $this->logs['notice'][0][1]);
     $this->assertCount(0, $this->bus);
   }
 
@@ -149,7 +149,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $cmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[$circolare->getId()], 0], $this->logs['notice'][0][1]);
+    $this->assertSame([[$circolare->getId()], 0], $this->logs['notice'][0][1]);
     $this->assertCount(0, $this->bus);
   }
 
@@ -177,16 +177,16 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('circolare', $notifica->getTipo());
-      $this->assertEquals('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
-      $this->assertEquals(1, count($notifica->getDati()));
-      $this->assertEquals($circolare->getId(), $notifica->getDati()[0]['id']);
-      $this->assertEquals($circolare->getNumero(), $notifica->getDati()[0]['numero']);
-      $this->assertEquals($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);
-      $this->assertEquals($circolare->getOggetto(), $notifica->getDati()[0]['oggetto']);
+      $this->assertSame('circolare', $notifica->getTipo());
+      $this->assertSame('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
+      $this->assertSame(1, count($notifica->getDati()));
+      $this->assertSame($circolare->getId(), $notifica->getDati()[0]['id']);
+      $this->assertSame($circolare->getNumero(), $notifica->getDati()[0]['numero']);
+      $this->assertSame($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);
+      $this->assertSame($circolare->getOggetto(), $notifica->getDati()[0]['oggetto']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[$circolare->getId()], count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([[$circolare->getId()], count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -258,21 +258,21 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     foreach ($risultato as $dato) {
       $destinatari[$dato['utente']][] = $dato['circolare'];
     }
-    $this->assertEquals(count($destinatari), count($this->bus));
+    $this->assertSame(count($destinatari), count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('circolare', $notifica->getTipo());
+      $this->assertSame('circolare', $notifica->getTipo());
       $utente = $notifica->getUtenteId();
-      $this->assertEquals(count($destinatari[$utente]), count($notifica->getDati()));
-      $this->assertEquals('<!CIRCOLARE!><!'.implode(',', $destinatari[$utente]).'!>', $notifica->getTag());
+      $this->assertSame(count($destinatari[$utente]), count($notifica->getDati()));
+      $this->assertSame('<!CIRCOLARE!><!'.implode(',', $destinatari[$utente]).'!>', $notifica->getTag());
       foreach ($notifica->getDati() as $dati) {
         $this->assertTrue(in_array($dati['id'], $destinatari[$utente]));
-        $this->assertEquals($listaCircolari[$dati['id']]->getNumero(), $dati['numero']);
-        $this->assertEquals($listaCircolari[$dati['id']]->getData()->format('d/m/Y'), $dati['data']);
-        $this->assertEquals($listaCircolari[$dati['id']]->getOggetto(), $dati['oggetto']);
+        $this->assertSame($listaCircolari[$dati['id']]->getNumero(), $dati['numero']);
+        $this->assertSame($listaCircolari[$dati['id']]->getData()->format('d/m/Y'), $dati['data']);
+        $this->assertSame($listaCircolari[$dati['id']]->getOggetto(), $dati['oggetto']);
       }
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[$circolare1->getId(), $circolare2->getId(), $circolare3->getId()], count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([[$circolare1->getId(), $circolare2->getId(), $circolare3->getId()], count($this->bus)], $this->logs['notice'][0][1]);
   }
 
   /**
@@ -307,16 +307,16 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     foreach ($this->bus as $notifica) {
-      $this->assertEquals('circolare', $notifica->getTipo());
-      $this->assertEquals('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
-      $this->assertEquals(1, count($notifica->getDati()));
-      $this->assertEquals($circolare->getId(), $notifica->getDati()[0]['id']);
-      $this->assertEquals($circolare->getNumero(), $notifica->getDati()[0]['numero']);
-      $this->assertEquals($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);
-      $this->assertEquals($circolare->getOggetto(), $notifica->getDati()[0]['oggetto']);
+      $this->assertSame('circolare', $notifica->getTipo());
+      $this->assertSame('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
+      $this->assertSame(1, count($notifica->getDati()));
+      $this->assertSame($circolare->getId(), $notifica->getDati()[0]['id']);
+      $this->assertSame($circolare->getNumero(), $notifica->getDati()[0]['numero']);
+      $this->assertSame($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);
+      $this->assertSame($circolare->getOggetto(), $notifica->getDati()[0]['oggetto']);
     }
     $this->assertCount(1, $this->logs);
-    $this->assertEquals([[$circolare->getId()], count($this->bus)], $this->logs['notice'][0][1]);
+    $this->assertSame([[$circolare->getId()], count($this->bus)], $this->logs['notice'][0][1]);
   }
 
 }

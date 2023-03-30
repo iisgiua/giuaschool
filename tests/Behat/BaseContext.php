@@ -524,6 +524,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param string $file Percorso completo del file della feature corrente
    */
   protected function initDatabase(string $file): void {
+    // init
     $connection = $this->em->getConnection();
     $dbParams = $connection->getParams();
     $fixture = substr(basename($file), 0, -8);
@@ -535,13 +536,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
     }
     $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.sql';
     $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.map';
+    // svuota il database
+    $connection->exec('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
+    $purger = new ORMPurger($this->em);
+    $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
+    $purger->purge();
+    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     if (file_exists($sqlPath)) {
-      // svuota il database
-      $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-      $purger = new ORMPurger($this->em);
-      $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
-      $purger->purge();
-      $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
       // carica file SQL
       $process = Process::fromShellCommandline('mysql -u'.$dbParams['user'].' -p'.$dbParams['password'].
         ' '.$dbParams['dbname'].' < '.$sqlPath);
@@ -558,7 +559,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
     } elseif (file_exists($fixturePath)) {
       // carica fixtures per l'ambiente di test
-      $this->vars['obj'] = $this->alice->load([$fixturePath], [], [], PurgeMode::createTruncateMode());
+      $this->vars['obj'] = $this->alice->load([$fixturePath], [], [], PurgeMode::createNoPurgeMode());
       // esegue modifiche dopo l'inserimento nel db e le rende permanenti
       $this->customProvider->postPersistArrayId();
       $this->em->flush();
@@ -580,13 +581,6 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));
-    } else {
-      // svuota il database
-      $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-      $purger = new ORMPurger($this->em);
-      $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
-      $purger->purge();
-      $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     }
   }
 

@@ -73,9 +73,16 @@ trait AuthenticatorTrait {
             $contaProfili = count($profili);
           }
         }
-        $profilo->setListaProfili($contaProfili > 1 ? $nuoviProfili : []);
+        if ($contaProfili == 1) {
+          // un solo profilo valido: restituisce quello connesso
+          $user->setListaProfili([]);
+          return $user;
+        } else {
+          // più profili: prosegue controlli
+          $profilo->setListaProfili($nuoviProfili);
+        }
       }
-      // controlla che il profilo sia lo stesso richiesto con username
+      // controlla che il profilo sia lo stesso di quello connesso
       if ($profilo->getId() == $user->getId()) {
         // ok restituisce profilo
         return $user;
@@ -94,7 +101,7 @@ trait AuthenticatorTrait {
     }
     // errore: utente disabilitato
     $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-      'username' => $username));
+      'username' => $user->getUsername()));
     throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 

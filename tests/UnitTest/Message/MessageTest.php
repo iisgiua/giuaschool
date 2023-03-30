@@ -136,7 +136,7 @@ class MessageTest extends KernelTestCase {
       $reflect = new \ReflectionClass($obj);
       $props = $reflect->getProperties();
       $propArray = array_map(fn($o) => $o->name, $props);
-      $this->assertEquals(count($props), count($info['constructor']) + count($info['derived']), 'Il numero degli attributi è errato.');
+      $this->assertSame(count($props), count($info['constructor']) + count($info['derived']), 'Il numero degli attributi è errato.');
       foreach (array_merge(array_keys($info['constructor']), array_keys($info['derived'])) as $item) {
         $this->assertContains($item, $propArray, 'L\'attributo "'.$classe.'::'.$item.'" non esiste.');
       }
