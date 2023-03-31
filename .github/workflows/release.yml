@@ -44,15 +44,13 @@ jobs:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
-        uses: actions/create-release@v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: "v${{ github.event.inputs.version }}"
-          release_name: "Versione ${{ github.event.inputs.version }}"
           body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'TRUE' }}
+          tag: "v${{ github.event.inputs.version }}"
+          name: "Versione ${{ github.event.inputs.version }}"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -120,7 +118,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'docs/version.yml'
+          source_file: 'docs/.'
           destination_repo: 'iisgiua/giuaschool-docs'
           destination_branch: 'master'
           destination_folder: '_data'
