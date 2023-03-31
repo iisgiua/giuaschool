@@ -89,7 +89,7 @@ class StoricoVotoTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['voto'] = $this->faker->randomNumber(4, false);
+      $data[$i]['voto']++;
       $o[$i]->setVoto($data[$i]['voto']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
