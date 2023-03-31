@@ -261,6 +261,9 @@ class Updater {
     // carica variabili di ambiente e di sistema
     $this->readEnv();
     $this->readSys();
+    if (!isset($this->sys['build'])) {
+      $this->sys['build'] = '0';
+    }
     // controlla token
     if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
       // errore di sicurezza
