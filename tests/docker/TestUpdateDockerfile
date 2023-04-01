@@ -21,17 +21,18 @@ RUN \
   if [ "$VERSION" = "$NEWVERSION" ] ; then DIR="update-v$NEWVERSION" ; FILE="giuaschool-update-v$NEWVERSION" ; else DIR="v$NEWVERSION" ; FILE="giuaschool-release-v$NEWVERSION" ; fi && \
   cd src/Install && \
   wget https://github.com/iisgiua/giuaschool/releases/download/$DIR/$FILE.zip && \
+  mv "$FILE.zip" "v${NEWVERSION%-*}.zip"
   cd ../../ && \
   cp tests/docker/*.feature tests/features/ && \
   cp tests/docker/*.yml tests/features/ && \
   rm -r var/cache/* && \
   rm -r tests/temp/* && \
-  chown -R www-data:www-data src/* tests/* && \
+  chown -R www-data:www-data src/* public/* tests/* && \
   echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
   service mariadb start && \
   mysql -uroot -proot giuaschool < .gs-updating && \
   echo "token='test'" > .gs-updating && \
-  echo "version='$NEWVERSION'" >> .gs-updating && \
+  echo "version='${NEWVERSION%-*}'" >> .gs-updating && \
   echo "build='$NEWBUILD'" >> .gs-updating
 
 # open https port
