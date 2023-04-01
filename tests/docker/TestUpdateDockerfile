@@ -21,7 +21,7 @@ RUN \
   if [ "$VERSION" = "$NEWVERSION" ] ; then DIR="update-v$NEWVERSION" ; FILE="giuaschool-update-v$NEWVERSION" ; else DIR="v$NEWVERSION" ; FILE="giuaschool-release-v$NEWVERSION" ; fi && \
   cd src/Install && \
   wget https://github.com/iisgiua/giuaschool/releases/download/$DIR/$FILE.zip && \
-  mv "$FILE.zip" "v${NEWVERSION%-*}.zip"
+  mv "$FILE.zip" "v${NEWVERSION%-*}.zip" && \
   cd ../../ && \
   cp tests/docker/*.feature tests/features/ && \
   cp tests/docker/*.yml tests/features/ && \
