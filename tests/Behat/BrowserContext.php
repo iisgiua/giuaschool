@@ -302,7 +302,8 @@ class BrowserContext extends BaseContext {
   public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
     $this->logDebug('laSezioneContiene -> '.$ricerca.' | '. $sezione->getText());
-    $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()));
+    $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()),
+      '+++ laSezioneContiene -> '.$ricerca.' | '. $sezione->getText());
   }
 
   /**
