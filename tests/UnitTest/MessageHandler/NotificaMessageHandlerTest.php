@@ -92,7 +92,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
  	 *
  	 */
 	protected function mockServices(): void {
-    // translator: restituisce tag originale
+    // translator: restituisce tag richiesta
     $this->mockedTranslator = $this->createMock(TranslatorInterface::class);
     $this->mockedTranslator->method('trans')->willReturnCallback(
       function($tag) { return $tag; });

@@ -40,7 +40,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  *    - utente di tipo previsto (otp_tipo): possibilità di uso dell'OTP se l'utente è abilitato
  * Con identity provider esterno (id_provider):
  *    - utente di tipo previsto (id_provider_tipo): autentificazione tramite Google
- *    - altro tipo di utente: autenticazione tramite form
+ *    - altro tipo di utente: autenticazione tramite form/otp
  *
  * @author Antonello Dessì
  */

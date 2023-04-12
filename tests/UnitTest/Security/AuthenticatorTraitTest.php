@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationExc
 
 
 /**
- * Unit test per la gestione dell'invio delle notifiche
+ * Unit test per le funzioni di uso generale per l'autenticazione
  *
  * @author Antonello Dessì
  */
@@ -89,13 +89,13 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     try {
-      $exception = false;
+      $exception = null;
       $this->testedTrait->controllaManutenzione($utente);
     } catch (CustomUserMessageAuthenticationException $e) {
-      $exception = true;
+      $exception = $e->getMessage();
     }
     // controlla
-    $this->assertTrue($exception);
+    $this->assertSame('exception.blocked_login', $exception);
     $this->assertCount(1, $this->logs);
     $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo()], $this->logs['error'][0][1]);
   }
@@ -179,13 +179,13 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->em->flush();
     // esegue
     try {
-      $exception = false;
+      $exception = null;
       $u = $this->testedTrait->controllaProfili($ata);
     } catch (CustomUserMessageAuthenticationException $e) {
-      $exception = true;
+      $exception = $e->getMessage();
     }
     // controlla
-    $this->assertTrue($exception);
+    $this->assertSame('exception.invalid_user', $exception);
     $this->assertCount(1, $this->logs);
     $this->assertSame(['username' => $ata->getUsername()], $this->logs['error'][0][1]);
   }
