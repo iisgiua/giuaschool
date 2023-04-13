@@ -455,7 +455,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
-    $ultimoAccesso = clone $utente->getUltimoAccesso();
+    $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
     $adesso = new \DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
@@ -481,7 +481,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otpALTRO');
     $this->em->flush();
-    $ultimoAccesso = clone $utente->getUltimoAccesso();
+    $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
     $adesso = new \DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
@@ -508,7 +508,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $utente->setOtp('');
     $utente->setListaProfili(['GENITORE' => [1], 'DOCENTE' => [2]]);
     $this->em->flush();
-    $ultimoAccesso = clone $utente->getUltimoAccesso();
+    $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
