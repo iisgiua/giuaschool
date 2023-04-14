@@ -155,33 +155,30 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // richiesta corretta
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
     $req->setMethod('POST');
-    // esegue
     $res = $fa->supports($req);
-    // controlla
     $this->assertTrue($res);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
     // richiesta con route errata
     $req = new Request([], [], ['_route' => 'altro'], [], [], [], []);
     $req->setMethod('POST');
-    // esegue
     $res = $fa->supports($req);
-    // controlla
     $this->assertFalse($res);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
     // richiesta con metodo errato
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
     $req->setMethod('GET');
-    // esegue
     $res = $fa->supports($req);
-    // controlla
     $this->assertFalse($res);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
   }
 
   /**
