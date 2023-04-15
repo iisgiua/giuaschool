@@ -27,6 +27,8 @@
 !/PERSONAL/img/.gitkeep
 /PERSONAL/templates/*
 !/PERSONAL/templates/.gitkeep
+/PERSONAL/translations/*
+!/PERSONAL/translations/.gitkeep
 /public/app/*
 !/public/app/.gitkeep
 /public/bundles/
