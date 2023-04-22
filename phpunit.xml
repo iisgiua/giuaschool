@@ -20,6 +20,10 @@
     <testsuite name="entity">
       <directory>tests/UnitTest/Entity</directory>
     </testsuite>
+    <testsuite name="extension">
+      <directory>tests/UnitTest/Twig</directory>
+      <directory>tests/UnitTest/DQL</directory>
+    </testsuite>
     <testsuite name="message">
       <directory>tests/UnitTest/Message</directory>
       <directory>tests/UnitTest/MessageHandler</directory>
@@ -34,6 +38,8 @@
     </include>
     <exclude>
       <directory>src/Controller</directory>
+      <directory>src/DataFixtures</directory>
+      <directory>src/Install</directory>
       <file>src/Kernel.php</file>
     </exclude>
   </coverage>
