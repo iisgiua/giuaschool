@@ -762,7 +762,7 @@ class StaffController extends BaseController {
       $avviso = (new Avviso())
         ->setTipo($tipo)
         ->setDestinatariAta(['D','A'])
-        ->setDestinatari(['G','A'])
+        ->setDestinatari(['G','A','D'])
         ->setFiltroTipo('C')
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i:00', $ora_predefinita))
