@@ -1370,6 +1370,7 @@ message.notifiche_configura_telegram: "Devi associare l'app Telegram presente ne
 message.telegram_chat_start: "Ciao <b>{nome}</b>, benvenuto in questa chat che sarà usata esclusivamente per inviarti le notifiche del registro elettronico.\n\nNon utilizzarla per spedire messaggi o comandi, perché saranno ignorati."
 message.sistema_telegram: Modifica la configurazione per l'invio delle notifiche via Telegram. Lascia in bianco per disabilitare l'uso di Telegram.
 message.telegram_webhook_ok: La configurazione Telegram è stata eseguita con successo.
+message.recupero_debito_NC: Tutto il programma svolto.
 
 
 ##### ERRORI #####

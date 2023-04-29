@@ -578,8 +578,8 @@ App\Entity\PropostaVoto:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     alunno: '@alunno_<current()>'
     classe: '@classe_1'
-    materia: '@materia_1'
-    docente: '@docente_1'
+    materia: '@materia_*'
+    docente: '@docente_*'
 
 App\Entity\Provisioning:
   provisioning_{1..5}:

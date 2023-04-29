@@ -28,6 +28,9 @@
       <directory>tests/UnitTest/Message</directory>
       <directory>tests/UnitTest/MessageHandler</directory>
     </testsuite>
+    <testsuite name="repository">
+      <directory>tests/UnitTest/Repository</directory>
+    </testsuite>
     <testsuite name="security">
       <directory>tests/UnitTest/Security</directory>
     </testsuite>

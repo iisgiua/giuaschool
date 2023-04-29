@@ -39,7 +39,7 @@ class BaseRepository extends EntityRepository {
    *
    * @return array Array associativo con i risultati della ricerca
    */
-  public function paginazione(Query $dql, $pagina=1) {
+  public function paginazione(Query $dql, int $pagina = 1): array {
     $paginator = new Paginator($dql);
     $paginator->getQuery()
       ->setFirstResult(self::LIMITE_PER_PAGINA * ($pagina - 1))

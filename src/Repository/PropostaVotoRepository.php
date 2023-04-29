@@ -8,9 +8,10 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
 use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\Scrutinio;
+use Doctrine\ORM\EntityRepository;
 
 
 /**
@@ -68,6 +69,70 @@ class PropostaVotoRepository extends EntityRepository {
       $dati[$id_alunno]['media'] = $dati[$id_alunno]['media'] / count($prop['proposte']);
     }
     // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce i voti dello scrutinio indicato, con eventuali filtri
+   *
+   * @param Classe $classe Classe dello scrutinio da considerare
+   * @param string $periodo Periodo dello scrutinio da considerare
+   * @param array $alunni Filtro sugli alunni (lista ID)
+   * @param array $materie Filtro sulla materie (lista di ID)
+   * @param Docente|null $docente Filtro sul docente che ha inserito la proposta
+   *
+   * @return array Array associativo con i dati richiesti
+   */
+  public function proposte(Classe $classe, string $periodo, array $alunni = [], array $materie = [],
+                           ?Docente $docente = null): array {
+    // query di base
+    $query = $this->createQueryBuilder('pv')
+      ->where('pv.classe=:classe AND pv.periodo=:periodo')
+      ->setParameters(['classe' => $classe, 'periodo' => $periodo]);
+    // filtro alunno
+    if (!empty($alunni)) {
+      $query->andWhere('pv.alunno IN (:alunni)')->setParameter('alunni', $alunni);
+    }
+    // filtro materia
+    if (!empty($materie)) {
+      $query->andWhere('pv.materia IN (:materie)')->setParameter('materie', $materie);
+    }
+    // filtro docente
+    if (!empty($docente)) {
+      $query->andWhere('pv.docente=:docente')->setParameter('docente', $docente);
+    }
+    // legge dati
+    $proposte = $query->getQuery()->getResult();
+    $dati = [];
+    foreach ($proposte as $prop) {
+      $dati[$prop->getAlunno()->getId()][$prop->getMateria()->getId()][$prop->getDocente()->getId()] = $prop;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Utilizzata per verificare l'univocità dell'entità
+   *
+   * @param array $fields Array associativo dei valori univoci
+   *
+   * @return array|null Lista degli oggetti trovati
+   */
+  public function uniqueEntity(array $fields) {
+    if ($fields['materia']->getTipo() == 'E') {
+      // Ed.Civica: univoco su periodo-alunno-materia-docente
+      $filtroDocente = ' AND pv.docente=:docente';
+    } else {
+      // non Ed.Civica: univoco su periodo-alunno-materia
+      $filtroDocente = '';
+      unset($fields['docente']);
+    }
+    // legge dati
+    $dati = $this->createQueryBuilder('pv')
+      ->where('pv.periodo=:periodo AND pv.alunno=:alunno AND pv.materia=:materia'.$filtroDocente)
+      ->setParameters($fields)
+      ->getQuery()
+      ->getResult();
     return $dati;
   }
 

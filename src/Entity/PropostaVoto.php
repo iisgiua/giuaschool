@@ -9,6 +9,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -16,8 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * PropostaVoto - dati per le proposte di voto dei docenti agli scrutini
  *
  * @ORM\Entity(repositoryClass="App\Repository\PropostaVotoRepository")
- * @ORM\Table(name="gs_proposta_voto")
+ * @ORM\Table(name="gs_proposta_voto", uniqueConstraints={@ORM\UniqueConstraint(columns={"periodo","alunno_id","materia_id","docente_id"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"periodo","alunno","materia","docente"}, repositoryMethod="uniqueEntity", message="field.unique")
  *
  * @author Antonello Dessì
  */

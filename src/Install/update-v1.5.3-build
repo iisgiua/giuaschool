@@ -7,6 +7,7 @@ return [
     'public/install/app.php',
   ],
   'sqlCommand' => [
+    ["CREATE UNIQUE INDEX UNIQ_52156E2D7316C4ED7ABC9740B54DBBCB94E27525 ON gs_proposta_voto (periodo, alunno_id, materia_id, docente_id);", "SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_NAME = 'gs_proposta_voto' AND CONSTRAINT_NAME = 'UNIQ_52156E2D7316C4ED7ABC9740B54DBBCB94E27525';"],
   ],
   'envDelete' => [
   ]

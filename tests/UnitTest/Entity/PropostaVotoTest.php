@@ -193,6 +193,41 @@ class PropostaVotoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
+    // legge dati esistenti
+    $this->em->flush();
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique periodo-alunno-materia-docente
+    $periodoSaved = $objects[1]->getPeriodo();
+    $objects[1]->setPeriodo($objects[0]->getPeriodo());
+    $alunnoSaved = $objects[1]->getAlunno();
+    $objects[1]->setAlunno($objects[0]->getAlunno());
+    $materiaSaved = $objects[1]->getMateria();
+    $objects[1]->setMateria($objects[0]->getMateria());
+    $docenteSaved = $objects[1]->getDocente();
+    $objects[1]->setDocente($objects[0]->getDocente());
+    $err = $this->val->validate($objects[1]);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::periodo-alunno-materia-docente - UNIQUE');
+    // unique periodo-alunno-materia per non Ed.civica
+    $objects[1]->setDocente($docenteSaved);
+    $objects[1]->getMateria()->setTipo('N');
+    $err = $this->val->validate($objects[1]);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::periodo-alunno-materia - UNIQUE');
+    $objects[1]->getMateria()->setTipo('E');
+    $this->assertCount(0, $this->val->validate($objects[1]), $this->entity.'::periodo-alunno-materia - VALID NOT UNIQUE');
+    $objects[1]->setPeriodo($periodoSaved);
+    $objects[1]->setAlunno($alunnoSaved);
+    $objects[1]->setMateria($materiaSaved);
+    // unique
+    $newObject = new \App\Entity\PropostaVoto();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }
