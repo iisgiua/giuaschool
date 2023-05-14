@@ -17,12 +17,9 @@
     <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['creditoPrec'] }}" /><tcpdf method="StopTransform" /></strong></td>
     <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['creditoTot'] }}" /><tcpdf method="StopTransform" /></strong></td>
   {% endif %}
-  {% if dati.classe.anno == 5 %}
-    <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['creditoConv'] }}" /><tcpdf method="StopTransform" /></strong></td>
-  {% endif %}
 {% endif %}
     <td align="center" style="width:12mm">&nbsp;<br style="line-height:20mm"><strong>Media</strong></td>
-{% set dimEsito = 190 - (6 + 50 + 12 + 6 * ((dati.materie|length) - 1) + 6 * (dati.classe.anno == 3 ? 1 : (dati.classe.anno == 4 ? 3 : (dati.classe.anno == 5 ? 4 : 0))) + 12) %}
+{% set dimEsito = 190 - (6 + 50 + 12 + 6 * ((dati.materie|length) - 1) + 6 * (dati.classe.anno == 3 ? 1 : (dati.classe.anno >= 4 ? 3 : 0)) + 12) %}
     <td align="center" style="width:{{ dimEsito }}mm">&nbsp;<br style="line-height:20mm"><strong>Esito</strong></td>
   </tr>
 {% for id,alu in dati.alunni %}
@@ -46,9 +43,6 @@
       {% if dati.classe.anno >= 4 %}
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].creditoPrecedente }}</span></td>
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? (dati.esiti[id].credito + dati.esiti[id].creditoPrecedente) }}</span></td>
-      {% endif %}
-      {% if dati.classe.anno == 5 %}
-    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].dati.creditoConvertito }}</span></td>
       {% endif %}
     {% endif %}
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].media|number_format(2, ',') }}</span></td>
@@ -76,9 +70,6 @@
     <td align="center">&nbsp;</td>
     <td align="center">&nbsp;</td>
       {% endif %}
-      {% if dati.classe.anno == 5 %}
-    <td align="center">&nbsp;</td>
-      {% endif %}
     {% endif %}
     <td align="center">&nbsp;</td>
     <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:12pt;">NON<br>AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</span></td>
@@ -91,9 +82,6 @@
   <td align="center">&nbsp;</td>
       {% if dati.classe.anno >= 4 %}
   <td align="center">&nbsp;</td>
-  <td align="center">&nbsp;</td>
-      {% endif %}
-      {% if dati.classe.anno == 5 %}
   <td align="center">&nbsp;</td>
       {% endif %}
     {% endif %}

@@ -59,7 +59,7 @@ class Esito {
    *
    * @Assert\Choice(choices={"A","N","S","R","L","E","X"}, strict=true, message="field.choice")
    */
-  private ?string $esito = 'A';
+  private ?string $esito = null;
 
   /**
    * @var float|null $media Media dei voti

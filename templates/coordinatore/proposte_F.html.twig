@@ -27,10 +27,10 @@
     </ul>
   </div>
   <div class="modal-footer">
+    {{ form_widget(form._token) }}
     {{ form_widget(form.submit) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
-  {{ form_widget(form._token) }}
 {{ form_end(form, {'render_rest': false}) }}
 
 <script>

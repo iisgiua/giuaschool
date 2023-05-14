@@ -25,6 +25,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -1888,7 +1889,7 @@ class ScrutinioController extends BaseController {
     // legge proposte di voto
     $dati['proposte'] = $this->em->getRepository('App\Entity\PropostaVoto')->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
     foreach ($dati['proposte'] as $alu=>$prop) {
-      if (isset($prop['debito']) && $dati['voti'][$alu]->getUnico() == null) {
+      if (isset($prop['debito']) && $dati['voti'][$alu]->getUnico() === null) {
         $dati['voti'][$alu]->setDebito($prop['debito']);
       }
     }
@@ -1947,6 +1948,65 @@ class ScrutinioController extends BaseController {
       'dati' => $dati,
       'form' => $form->createView(),
     ));
+  }
+
+  /**
+   * Aggiorna alcuni dati dello scrutinio.
+   *
+   * @param Request $request Pagina richiesta
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param int $scrutinio Identificativo dello scrutinio
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/coordinatore/scrutinio/aggiorna/{scrutinio}", name="coordinatore_scrutinio_aggiorna",
+   *    requirements={"scrutinio": "\d+"},
+   *    methods={"POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function scrutinioAggiornaAction(Request $request, ScrutinioUtil $scr, $scrutinio) {
+    $risposta = ['status' => 'ok'];
+    // controllo scrutinio
+    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->find($scrutinio);
+    if (!$scrutinio) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    $scrutinioAttivo = $scr->scrutinioAttivo($scrutinio->getClasse());
+    if (!$scrutinioAttivo || $scrutinio->getPeriodo() != $scrutinioAttivo['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore', []));
+      if (!in_array($scrutinio->getClasse()->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // modifica dati
+    foreach ($request->request->all() as $key => $value) {
+      // modifica solo i campi previsti
+      switch ($key) {
+        case 'numeroVerbale':
+          if ($value > 0) {
+            $datiScrutinio = $scrutinio->getDati();
+            $datiScrutinio['numeroVerbale'] = (int) $value;
+            $scrutinio->setDati($datiScrutinio);
+          }
+          break;
+        case 'fine':
+          $ora = new \DateTime($value);
+          $scrutinio->setFine($ora);
+          break;
+      }
+    }
+    $this->em->flush();
+    // restituisce dati
+    return new JsonResponse($risposta);
   }
 
 }

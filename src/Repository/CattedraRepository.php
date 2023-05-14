@@ -107,7 +107,7 @@ class CattedraRepository extends BaseRepository {
    * @return array Dati formattati come un array associativo
    */
   public function docentiScrutinio(Classe $classe) {
-    // docenti del CdC (esclusi potenziamento e ed.civica)
+    // docenti del CdC (escluso potenziamento)
     $docenti = $this->createQueryBuilder('c')
       ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
       ->join('c.materia', 'm')

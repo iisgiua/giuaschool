@@ -230,7 +230,7 @@ class PagelleUtil {
       }
       // alunni all'estero
       $dati['estero'] = $dati['scrutinio']->getDato('estero');
-      // dati degli alunni (scrutinati/cessata frequenza/non scrutinabili/all'estero, sono esclusi i ritirati)
+      // dati degli alunni (scrutinati/non scrutinabili/all'estero, sono esclusi i ritirati)
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.frequenzaEstero,a.codiceFiscale')
         ->where('a.id IN (:lista)')
@@ -295,7 +295,6 @@ class PagelleUtil {
         ->setParameter('lista', array_keys($docenti))
         ->getQuery()
         ->getArrayResult();
-      // dati per materia
       foreach ($dati_docenti as $doc) {
         if ($docenti_presenti[$doc['id']]->getPresenza()) {
           // dati docente
@@ -307,6 +306,11 @@ class PagelleUtil {
             ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
+      // ordina docenti
+      uasort($dati['docenti'], function($a, $b) {
+        $pa = explode(' ', $a);
+        $pb = explode(' ', $b);
+        return strcmp($pa[1].' '.$pa[2], $pb[1].' '.$pb[2]); });
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
@@ -605,8 +609,6 @@ class PagelleUtil {
         $dati['tcpdf_params']['creditoPrec'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
         $params = [30, 0, 'Credito Totale', 0, 'L', false, 0];
         $dati['tcpdf_params']['creditoTot'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
-        $params = [30, 0, 'Credito Convertito', 0, 'L', false, 0];
-        $dati['tcpdf_params']['creditoConv'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_riepilogo_'.$periodo.'.html.twig',
           array('dati' => $dati));
@@ -834,8 +836,6 @@ class PagelleUtil {
       $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
-  //-- dd($dati['scrutinio']->getDato('docenti'));
-
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
       // dati per materia
       foreach ($materie as $mat) {
@@ -1971,17 +1971,10 @@ class PagelleUtil {
         return $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
       // controlla se alunno all'estero
-      $estero = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
-        ->where('a.id IN (:lista) AND a.id=:alunno AND cc.classe=:classe AND a.frequenzaEstero=:estero')
-        ->setParameters(['lista' => ($scrutinio->getDato('ritirati') == null ? [] : $scrutinio->getDato('ritirati')),
-          'alunno' => $alunno, 'classe' => $classe, 'estero' => 1])
-        ->setMaxResults(1)
-        ->getQuery()
-        ->getOneOrNullResult();
-      if ($estero) {
+      $estero = $scrutinio->getDato('estero');
+      if (in_array($alunno, $estero)) {
         // alunno all'estero
-        return $estero;
+        return $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
       // controlla se non scrutinabile per assenze
       $no_scrut = ($scrutinio->getDato('no_scrutinabili') == null ? [] : $scrutinio->getDato('no_scrutinabili'));
@@ -2006,52 +1999,6 @@ class PagelleUtil {
     }
     // restituisce alunno
     return $trovato;
-  }
-
-
-  //==================== FUNZIONI PRIVATE  ====================
-
-  // scrive cella
-  private function cella($pdf, $width, $height, $relx, $rely, $text, $border, $align, $valign) {
-    $pdf->MultiCell($width, $height, $text, $border, $align, false, 0, $pdf->GetX()+$relx, $pdf->GetY()+$rely, true, 0, false, true, $height, $valign, 1);
-  }
-
-  // controlla se c'è spazio per la prossima cella/riga dell'altezza data
-  // altrimenti crea nuova pagina
-  private function acapo($pdf, $height, $nextheight=0, $etichette=array(), $dim=array(6, 35, 12, true)) {
-    $pdf->Ln($height);
-    if ($nextheight > 0) {
-      $margin = $pdf->getMargins();
-      $space = $pdf->getPageHeight() - $pdf->GetY() - $margin['bottom'];
-      if ($nextheight > $space) {
-        $pdf->AddPage('P');
-        $pdf->Ln(5);
-        // intestazione tabella
-        if (count($etichette) > 0) {
-          $fn_name = $pdf->getFontFamily();
-          $fn_style = $pdf->getFontStyle();
-          $fn_size = $pdf->getFontSizePt();
-          $pdf->SetFont('helvetica', 'B', 8);
-          $this->cella($pdf, $dim[0], 30, 0, 0, 'Pr.', 1, 'C', 'B');
-          $this->cella($pdf, $dim[1], 30, 0, 0, 'Alunno', 1, 'C', 'B');
-          $pdf->SetX($pdf->GetX() - 6);
-          $pdf->StartTransform();
-          $pdf->Rotate(90);
-          $last_width = 6;
-          foreach ($etichette as $et) {
-            $this->cella($pdf, 30, $et['dim'], -30, $last_width, $et['nome'], 1, 'L', 'M');
-            $last_width = $et['dim'];
-          }
-          $pdf->StopTransform();
-          $this->cella($pdf, $dim[2], 30, (count($etichette)+2)*6, -(count($etichette)+1)*6, 'Media', 1, 'C', 'B');
-          if ($dim[3]) {
-            $this->cella($pdf, 0, 30, 0, 0, 'Esito', 1, 'C', 'B');
-          }
-          $pdf->Ln(30);
-          $pdf->SetFont($fn_name, $fn_style, $fn_size);
-        }
-      }
-    }
   }
 
   /**

@@ -11,6 +11,14 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 8: verbale e chiusura</h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
+  <div class="gs-mb-5">
+    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Numero del verbale</label>
+    <div class="form-group">
+      <div class="col-sm-3 gs-ml-5">
+        {{ form_widget(form.numeroVerbale) }}
+      </div>
+    </div>
+  </div>
     {% for step,args in dati.verbale.struttura %}
       {% if args.tipo == 'Argomento' %}
   <div class="gs-mb-5">
@@ -31,14 +39,6 @@
       {% endif %}
     {% endfor %}
   <div class="gs-mb-5">
-    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Svolgimento dello scrutinio</label>
-    <div class="form-group">
-      <div class="col-sm-3 gs-ml-5">
-        {{ form_widget(form.in_presenza) }}
-      </div>
-    </div>
-  </div>
-  <div class="gs-mb-5">
     <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Ora di chiusura</label>
     <div class="form-group">
       <div class="col-sm-3 gs-ml-5">
@@ -58,7 +58,8 @@
       <button class="btn btn-primary" title="Termina la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Chiudi lo scrutinio</strong></button>
     </div>
   </div>
-    {{ form_end(form) }}
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
     {% include 'include/modal-waiting.html.twig' %}
     {% include 'include/modal-remote.html.twig' %}
   {% endif %}
@@ -98,6 +99,8 @@ $(document).ready(function() {
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+    var dati = {numeroVerbale: $('#scrutinio_numeroVerbale').val(), fine: $('#scrutinio_fine').val()};
+    $.post("{{ path('coordinatore_scrutinio_aggiorna', {scrutinio: dati.scrutinio.id}) }}", dati);
   });
   $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
     $('form[name="scrutinio"]').submit();

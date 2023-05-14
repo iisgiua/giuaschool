@@ -80,15 +80,6 @@
     </div>
   </div>
       {% else %}
-        {% if cattedra.materia.tipo == 'E' %}
-          {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
-            null, null, null, null, null, null, null, null, null,
-            'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-        {% else %}
-          {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            null, null, null, null, null, null, null, null, null,
-            'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-        {% endif %}
   <div class="panel panel-info gs-mt-2" >
     <div class="panel-heading">
       <div class="panel-title"><strong>{{ form_title|trans }}</strong></div>
@@ -116,7 +107,7 @@
             <div class="col-sm-9">
               <div class="row">
             {% if proposte.proposte[k].unico is not empty %}
-                <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ proposte.proposte[k].unico < 5 ? 'label-danger' : (proposte.proposte[k].unico < 6 ? 'label-warning' : (proposte.proposte[k].unico <= 10 ? 'label-success' : (proposte.proposte[k].unico < 22 ? 'label-danger' : 'label-success'))) }} gs-ml-4 gs-big">{{ valutazioni[proposte.proposte[k].unico] }}</span>
+                <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ proposte.proposte[k].unico < info.valutazioni.med ? 'label-danger' : (proposte.proposte[k].unico < info.valutazioni.suff ? 'label-warning' : 'label-success') }} gs-ml-4 gs-big">{{ info.valutazioni.lista[proposte.proposte[k].unico] }}</span>
             {% else %}
                 <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-ml-4 gs-big">--</span>
             {% endif %}
@@ -203,8 +194,7 @@ $(document).ready(function() {
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
     var d = [{{ info.valutazioni.votiAbbr|raw }}];
-    var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
-      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
+    var c = (e.value.newValue < {{ info.valutazioni.med }} ? 'label-danger' : (e.value.newValue < {{ info.valutazioni.suff }} ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ info.valutazioni.min }}]);
     var id = this.id.slice(15,-6);
   {% if form.lista.vars.attr.no_recupero is not defined %}
@@ -253,21 +243,12 @@ window.setInterval(function(){
 {% endblock %}
 
 {% block _proposte_lista_entry_widget %}
-  {% if form.vars.data.materia.tipo == 'E' %}
-    {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-  {% else %}
-    {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-  {% endif %}
   <div class="col-sm-9">
     <div class="row">
       <label class="control-label col-sm-2" for="{{ form.unico.vars.id }}">Voto</label>
       <div class="col-sm-10">
-  {% if (form.vars.data.materia.tipo != 'E' and form.unico.vars.value is not empty) or (form.vars.data.materia.tipo == 'E' and form.unico.vars.value > 0) %}
-        <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < 5 ? 'label-danger' : (form.unico.vars.value < 6 ? 'label-warning' : (form.unico.vars.value <= 10 ? 'label-success' : (form.unico.vars.value < 22 ? 'label-danger' : 'label-success'))) }} gs-mr-4 gs-big">{{ valutazioni[form.unico.vars.value] }}</span>
+  {% if form.unico.vars.value is not empty %}
+        <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').med ? 'label-danger' : (form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? 'label-warning' : 'label-success') }} gs-mr-4 gs-big">{{ app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').lista[form.unico.vars.value] }}</span>
         <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
         <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>

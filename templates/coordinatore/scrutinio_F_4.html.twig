@@ -19,11 +19,11 @@
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
       {% if m.tipo == 'C' %}
-            <br>
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci le valutazioni per la condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <br>
       {% endif %}
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
     {% endfor %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
@@ -43,7 +43,7 @@
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'C' %}
-          {% if dati.voti[alunno][materia].unico is not defined %}
+          {% if dati.voti[alunno][materia].unico is null %}
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
           {% else %}
             <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>

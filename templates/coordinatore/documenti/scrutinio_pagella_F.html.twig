@@ -53,16 +53,9 @@
       <td><strong>Media: {{ dati.esito.media|number_format(2, ',') }}</strong></td>
       <td><strong>Credito: {{ dati.esito.credito }}</strong></td>
   {% if dati.classe.anno > 3 %}
-      <td><strong>Credito precedente: {{ dati.esito.creditoPrecedente }}</strong></td>
+      <td><strong>Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong></td>
   {% endif %}
     </tr>
-  {% if dati.classe.anno == 5 %}
-    <tr>
-      <td>&nbsp;</td>
-      <td><strong>Credito totale: {{ dati.esito.credito + dati.esito.creditoPrecedente }}</strong></td>
-      <td><strong>Credito convertito: {{ dati.esito.dati.creditoConvertito }}</strong></td>
-    </tr>
-  {% endif %}
   </table>
 {% endif %}
 {{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}

@@ -8,7 +8,7 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\Classe;
 use App\Entity\Scrutinio;
 
 
@@ -17,7 +17,7 @@ use App\Entity\Scrutinio;
  *
  * @author Antonello Dessì
  */
-class VotoScrutinioRepository extends EntityRepository {
+class VotoScrutinioRepository extends BaseRepository {
 
   /**
    * Restituisce la lista degli alunni che hanno già un voto nello scrutinio indicato
@@ -39,6 +39,48 @@ class VotoScrutinioRepository extends EntityRepository {
       $alunni[$l['alunno']][] = $l['materia'];
     }
     return $alunni;
+  }
+
+  /**
+   * Restituisce i voti dello scrutinio indicato, con eventuali filtri
+   *
+   * @param Classe $classe Classe dello scrutinio da considerare
+   * @param string $periodo Periodo dello scrutinio da considerare
+   * @param array $alunni Filtro sugli alunni (lista ID)
+   * @param array $materie Filtro sulla materie (lista di ID)
+   * @param string $stato Filtro sullo stato dello scrutinio
+   *
+   * @return array Array associativo con i dati richiesti
+   */
+  public function voti(Classe $classe, string $periodo, array $alunni = [], array $materie = [],
+                       string $stato = ''): array {
+    // query di base
+    $query = $this->createQueryBuilder('vs')
+      ->select('s.periodo,(vs.materia) AS materia,(vs.alunno) AS alunno,vs AS voto')
+      ->join('vs.scrutinio', 's')
+      ->where('s.classe=:classe AND s.periodo=:periodo')
+      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+      ->orderBy('s.data');
+    // filtro alunno
+    if (!empty($alunni)) {
+      $query->andWhere('vs.alunno IN (:alunni)')->setParameter('alunni', $alunni);
+    }
+    // filtro materia
+    if (!empty($materie)) {
+      $query->andWhere('vs.materia IN (:materie)')->setParameter('materie', $materie);
+    }
+    // filtro stato
+    if (!empty($stato)) {
+      $query->andWhere('s.stato=:stato')->setParameter('stato', $stato);
+    }
+    // legge dati
+    $voti = $query->getQuery()->getResult();
+    $dati = [];
+    foreach ($voti as $voto) {
+      $dati[$voto['alunno']][$voto['materia']] = $voto['voto'];
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

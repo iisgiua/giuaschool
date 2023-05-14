@@ -53,6 +53,15 @@ class SchedaController extends BaseController {
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
+    // valutazioni
+    $materiaTipo = $cattedra->getMateria()->getTipo();
+    $valutazioni[$materiaTipo] = unserialize(
+      $this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_'.$materiaTipo));
+    $listaValori = explode(',', $valutazioni[$materiaTipo]['valori']);
+    $listaVoti = explode(',', $valutazioni[$materiaTipo]['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['lista'][$val] = trim($listaVoti[$key], '"');
+    }
     // controllo alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
@@ -75,45 +84,42 @@ class SchedaController extends BaseController {
       $periodoNome = $periodi[2]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $dati['scrutini'][0]['voto'] = null;
-      $voto = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'periodo' => 'P', 'stato' => 'C'])
-        ->getQuery()
-        ->getOneOrNullResult();
-      if ($voto) {
-        // retrocompatibilità per A.S 21/22
-        $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
-        $dati['scrutini'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' :
-          ($voto->getUnico() >= 20 ? $giudizi[$voto->getUnico()] :
-          ($voto->getUnico() == 3 && $cattedra->getMateria()->getTipo() == 'E' ? 'NC' : $voto->getUnico())));
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'P',
+        [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
+      if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
+        // valutazione non presente
+        $dati['scrutini'][0]['voto'] = null;
+      } else {
+        // imposta valutazione
+        $dati['scrutini'][0]['voto'] =
+          $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
       }
     } elseif ($periodo == 'F') {
       // scrutinio finale con trimestri
       $periodoNome = $periodi[3]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $dati['scrutini'][0]['voto'] = null;
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'P',
+        [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
+      if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
+        // valutazione non presente
+        $dati['scrutini'][0]['voto'] = null;
+      } else {
+        // imposta valutazione
+        $dati['scrutini'][0]['voto'] =
+          $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
+      }
+      // voto secondo periodo
       $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
-      $dati['scrutini'][1]['voto'] = null;
-      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo IN (:periodi) AND s.stato=:stato')
-        ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'periodi' => ['P', 'S'], 'stato' => 'C'])
-        ->orderBy('s.periodo')
-        ->getQuery()
-        ->getResult();
-      foreach ($voti as $p=>$v) {
-        // retrocompatibilità per A.S 21/22
-        $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
-        if ($v !== null) {
-          $dati['scrutini'][$p]['voto'] = ($v->getUnico() == 0 ? 'NC' :
-            ($v->getUnico() >= 20 ? $giudizi[$v->getUnico()] :
-            ($v->getUnico() == 3 && $cattedra->getMateria()->getTipo() == 'E' ? 'NC' : $v->getUnico())));
-        }
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'S',
+        [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
+      if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
+        // valutazione non presente
+        $dati['scrutini'][1]['voto'] = null;
+      } else {
+        // imposta valutazione
+        $dati['scrutini'][1]['voto'] =
+          $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
       }
     }
     // cancella dati inutili

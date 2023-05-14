@@ -1650,3 +1650,4 @@ exception.presenze_giorno_entrata_incoerente: La durata dell'attività fuori cla
 exception.presenze_giorno_uscita_incoerente: La durata dell'attività fuori classe non è compatibile con la presenza di un'uscita in anticipo
 exception.telegram_no_token: Non hai inserito il token del bot Telegram
 exception.telegram_webhook: "Errore nella configurazione Telegram. [{errore}]"
+exception.numero_proposte_invalido: "<strong>{materia}</strong>: numero di proposte invalido."
