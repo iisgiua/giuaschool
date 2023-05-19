@@ -1229,6 +1229,16 @@ class ScrutinioController extends BaseController {
       $m = ceil($dati['esito']->getMedia());
     }
     $dati['credito'] = $credito[$classe->getAnno()][$m];
+    // credito per quinta con insufficienze
+    $creditoQuinta = true;
+    if ($periodo == 'F' && $classe->getAnno() == 5) {
+      foreach ($dati['voti'] as $voto) {
+        if ($voto->getUnico() < 6) {
+          $creditoQuinta = false;
+          break;
+        }
+      }
+    }
     // credito per sospensione giudizio
     $creditoSospeso = false;
     if ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
@@ -1258,6 +1268,9 @@ class ScrutinioController extends BaseController {
       ->add('creditoSospeso', HiddenType::class, array('label' => null,
         'data' => $creditoSospeso,
         'required' => false))
+      ->add('creditoQuinta', HiddenType::class, array('label' => null,
+        'data' => $creditoQuinta,
+        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -1274,7 +1287,7 @@ class ScrutinioController extends BaseController {
           $criteri_cont++;
         }
       }
-      if ($criteri_cont >= 2 && ($periodo == 'F' || $creditoSospeso)) {
+      if ($criteri_cont >= 2 && (($periodo == 'F' && $creditoQuinta) || $creditoSospeso)) {
         $dati['esito']->setCredito($dati['credito'] + 1);
       } else {
         $dati['esito']->setCredito($dati['credito']);

@@ -20,6 +20,9 @@
 {% else %}
     <li><strong>Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></li>
 {% endif %}
+{% if dati.classe.anno == 2 %}
+    <li><strong>Certificazione delle Competenze.</strong></li>
+{% endif %}
   </ol>
   <p>Presiede la riunione {{ dati.presidente }}; funge da segretario verbalizzante {{ dati.segretario }}.
     Sono presenti i professori:
@@ -234,13 +237,6 @@
   </table>
 {% endif %}
   <p>Tutte le deliberazioni sopra indicate sono state assunte individualmente per ciascun alunno.</p>
-{% if dati.classe.anno == 2 %}
-  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139 e D.M. 27 gennaio 2010 n. 9)
-    in esito all’assolvimento all’obbligo di istruzione, il Consiglio di Classe predispone, per ogni alunno
-    ammesso alla classe successiva, la certificazione delle competenze acquisite, negli assi dei linguaggi,
-    matematico, scientifico e storico sociale, in relazione al percorso formativo effettuato.
-  </p>
-{% endif %}
 {% if dati.classe.anno >= 3 %}
   <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico
     che risultano sintetizzate nella seguente tabella:
@@ -268,7 +264,13 @@
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
       <td align="center">{{ dati.esiti[idalunno].media|number_format(2,',','') }}</td>
-      <td style="font-size:9pt">{% for cr in dati.esiti[idalunno].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}</td>
+      <td style="font-size:9pt">
+      {%- if idalunno in dati.insuff5 -%}
+        <em>{{ 'label.criterio_credito_quinta_no'|trans }}.</em>
+      {% else %}
+        {%- for cr in dati.esiti[idalunno].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}{% if dati.esiti[idalunno].dati['creditoScolastico']|length %}.{% endif %}
+      {% endif %}
+      </td>
       <td align="center">{{ dati.esiti[idalunno].credito }}</td>
       {% if dati.classe.anno >= 4 %}
       <td align="center">{{ dati.esiti[idalunno].creditoPrecedente }}</td>
@@ -340,9 +342,7 @@
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
       <td align="center" style="font-size:9pt">{% if dati.esiti[idalunno].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}</td>
-      <td style="font-size:9pt">
-        {{ dati.esiti[idalunno].dati.giudizio }}
-      </td>
+      <td style="font-size:9pt">{{ dati.esiti[idalunno].dati.giudizio }}</td>
     </tr>
     {% endif %}
   {% endfor %}
@@ -350,8 +350,8 @@
 {% endif %}
   <p>Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati,
     deve dare comunicazione dell’esito di non ammissione alle famiglie degli alunni minorenni, mediante
-    fonogramma registrato.
-    Le famiglie potranno visualizzare gli esiti dello scrutinio sul
+    fonogramma registrato. Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell'esito dello scrutinio.
+    Le famiglie potranno visualizzare queste comunicazioni direttamente sul
     registro elettronico, nel rispetto della normativa sulla privacy.
   </p>
   <p>I risultati complessivi dello scrutinio della classe vengono così riassunti:</p>
@@ -399,6 +399,15 @@
   </p>
 {% else %}
   <p>Non risulta nessuna situazione particolare da segnalare.</p>
+{% endif %}
+{% if dati.classe.anno == 2 %}
+  <p>&nbsp;</p>
+  <p><strong>Punto terzo. Certificazione delle Competenze.</strong></p>
+  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139 e D.M. 27 gennaio 2010 n. 9)
+    in esito all’assolvimento all’obbligo di istruzione, il Consiglio di Classe predispone, per ogni alunno
+    ammesso alla classe successiva, la certificazione delle competenze acquisite, negli assi dei linguaggi,
+    matematico, scientifico e storico sociale, in relazione al percorso formativo effettuato.
+  </p>
 {% endif %}
   <p>&nbsp;</p>
   <p>Esaurito l'ordine del giorno, il Presidente rammenta ai presenti l'obbligo della stretta osservanza

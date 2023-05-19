@@ -1254,7 +1254,6 @@ class PagelleUtil {
             'ammesso' => 'A'])
           ->getQuery()
           ->getArrayResult();
-        $dati['insuff5'] = array();
         foreach ($insuff as $ins) {
           $dati['insuff5'][] = $ins['alunno'];
         }
