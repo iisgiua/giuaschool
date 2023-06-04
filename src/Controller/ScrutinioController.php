@@ -346,8 +346,9 @@ class ScrutinioController extends BaseController {
           $scrutinio['stato'] = $scr->passaggioStato($this->getUser(), $request, $form,
             $classe, $scrutinio['periodo'], $stato);
           if ($scrutinio['stato'] === null) {
-            // errore
-            throw $this->createNotFoundException('exception.invalid_params');
+            // forza ricarica pagina
+            return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 
+              'stato' => $scrutinio['stato']]);
           } elseif ($scrutinio['stato'] == $stato) {
             // passaggio avvenuto con successo, carico nuovi dati
             $dati = $scr->datiScrutinio($this->getUser(), $classe, $scrutinio['periodo'], $scrutinio['stato']);

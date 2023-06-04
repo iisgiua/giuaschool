@@ -2,7 +2,7 @@
 
 framework:
   secret: '%env(APP_SECRET)%'
-  ide: 'atom'
+  ide: 'vscode'
   form:
     enabled: true
   csrf_protection:

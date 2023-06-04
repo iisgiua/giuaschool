@@ -10,9 +10,51 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 2: controllo del limite di assenze degli alunni</h2>
     {% include 'include/modal-error.html.twig' %}
-    {{ form_start(form) }}
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+    {% if dati.assenze_extra|length > 0 %}
+    <div class="gs-mt-5">
+      <strong class="text-info gs-big">* Inserimento delle assenze fatte in altre scuole per gli alunni trasferiti in corso d'anno:</strong>
+    </div>
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th>Alunno</th>
+          <th>Note</th>
+          <th>Ore di assenza</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alu,da in dati.assenze_extra %}
+        <tr>
+          <td>
+        {% if dati.alunni[alu] is defined %}
+            {{ dati.alunni[alu].cognome }} {{ dati.alunni[alu].nome }} ({{ dati.alunni[alu].dataNascita|date("d/m/Y") }})
+        {% else %}
+            {{ dati.no_scrutinabili.alunni[alu].cognome }} {{ dati.no_scrutinabili.alunni[alu].nome }} ({{ dati.no_scrutinabili.alunni[alu].dataNascita|date("d/m/Y") }})
+        {% endif %}
+          </td>
+          <td><small>{{ da[1] }}</small></td>
+          <td>
+            <input type="number" id="scrutinio_assenze_{{ alu }}" name="scrutinio[assenze][{{ alu }}]" required="required" min="0" class="form-control" value="{{ da[0] }}">
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">
+            <button id="gs-aggiorna" type="submit" name="aggiorna" class="center-block btn btn-default" title="Modifica le ore di assenza e aggiorna i dati della pagina" disabled="disabled"><span class="glyphicon glyphicon-refresh gs-mr-2"></span><strong>Aggiorna dati</strong></button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}  
+    <div class="gs-mt-5">
+      <strong class="text-info gs-big">* Nessun alunno risulta trasferito in corso d'anno da altra scuola.</strong>
+    </div>
+    {% endif %}
   <div class="gs-mt-5">
-    <strong class="text-info gs-big">Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong>
+    <strong class="text-info gs-big">* Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong>
   </div>
     {% for alunno,a in form.lista %}
   <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
@@ -34,7 +76,7 @@
     {% endfor %}
     {% if dati.estero is not empty %}
   <div class="gs-mt-5">
-    <strong class="text-info gs-big">Alunni che frequentano l'anno all'estero:</strong>
+    <strong class="text-info gs-big">* Alunni che frequentano l'anno all'estero:</strong>
   </div>
   <div class="alert alert-success gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
     {% for alunno,a in dati.estero %}
@@ -49,7 +91,7 @@
       <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '1'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button type="button" class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
+      <button id="gs-avanti" type="button" class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
     {{ form_widget(form._token) }}
@@ -104,6 +146,10 @@ $(document).ready(function() {
       txt.val(m[$(this).val()]+sex);
     }
   });
+  $('input[type=number]').on('input', function() {
+    $('#gs-aggiorna').prop('disabled', false).removeClass('btn-default').addClass('btn-success');
+    $('#gs-avanti').prop('disabled', true).removeClass('btn-primary').addClass('btn-default');
+  }); 
   // init
   {% for messaggio in app.flashes('errore') %}
     {% if loop.first %}

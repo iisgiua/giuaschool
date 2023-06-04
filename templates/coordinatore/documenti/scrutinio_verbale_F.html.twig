@@ -7,8 +7,8 @@
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }},
     alle ore {{ dati.scrutinio.inizio|date('G:i') }},
-    nei locali dell'<em>{{ app.session.get('/CONFIG/SCUOLA/intestazione') }}</em>
-    di {{ app.session.get('/CONFIG/SCUOLA/sede_0_citta') }}, si riunisce in presenza,
+    nei locali dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</em>
+    di {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, si riunisce in presenza,
     a seguito di regolare convocazione (circolare n. X del Y),
     il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente
     ordine del giorno:

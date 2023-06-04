@@ -8,49 +8,38 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\FormBuilder;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Alunno;
 use App\Entity\Classe;
-use App\Entity\Materia;
+use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
+use App\Entity\Esito;
+use App\Entity\Materia;
 use App\Entity\PropostaVoto;
 use App\Entity\Scrutinio;
-use App\Entity\VotoScrutinio;
 use App\Entity\Staff;
-use App\Entity\Preside;
-use App\Entity\Esito;
-use App\Entity\DefinizioneScrutinio;
-use App\Entity\Assenza;
-use App\Entity\AssenzaLezione;
-use App\Entity\Cattedra;
-use App\Entity\Configurazione;
-use App\Entity\Entrata;
-use App\Entity\Festivita;
-use App\Entity\Nota;
-use App\Entity\StoricoVoto;
-use App\Entity\Uscita;
-use App\Util\LogHandler;
-use App\Form\ScrutinioPresenza;
-use App\Form\ScrutinioPresenzaType;
+use App\Entity\VotoScrutinio;
+use App\Form\MessageType;
 use App\Form\ScrutinioAssenza;
 use App\Form\ScrutinioAssenzaType;
-use App\Form\MessageType;
+use App\Form\ScrutinioPresenza;
+use App\Form\ScrutinioPresenzaType;
+use App\Util\LogHandler;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -578,9 +567,12 @@ class ScrutinioUtil {
     // esegue funzione di passaggio stato (se esiste)
     $func = 'passaggioStato_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).
       '_'.$scrutinio->getStato().'_'.$stato;
-    if (method_exists($this, $func) && $this->$func($docente, $request, $form, $classe, $scrutinio)) {
+    if (method_exists($this, $func) && ($res = $this->$func($docente, $request, $form, $classe, $scrutinio))) {
       // ok
       return $stato;
+    } elseif ($res === null) {
+      // situazione anomala: forza ricarica pagina
+      return null;
     }
     // restituisce stato attuale (nessuna modifica)
     return $scrutinio->getStato();
@@ -2403,7 +2395,7 @@ class ScrutinioUtil {
    * @param Classe $classe Classe relativa alle proposte di voto
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function controlloAssenze(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
@@ -2411,6 +2403,7 @@ class ScrutinioUtil {
     $dati['no_scrutinabili']['alunni'] = array();
     $dati['no_scrutinabili']['form'] = array();
     $dati['estero'] = array();
+    $dati['assenze_extra'] = [];
     // legge scrutinio finale e intermedi
     $scrutinio_F = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
     $scrutinio_S = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe]);
@@ -2420,6 +2413,18 @@ class ScrutinioUtil {
       return null;
     }
     $listaScrutini = $scrutinio_S ? [$scrutinio_P, $scrutinio_S, $scrutinio_F] : [$scrutinio_P, $scrutinio_F];
+    // legge dati alunni trasferiti da altra scuola
+    $alunniTrasferiti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id,cc.note')
+      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->where('a.id IN (:alunni) AND cc.classe IS NULL')
+      ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni']])
+      ->getQuery()
+      ->getArrayResult();
+    $datiExtra = $scrutinio_F->getDati()['assenze_extra'] ?? [];
+    foreach ($alunniTrasferiti as $alu) {
+      $dati['assenze_extra'][$alu['id']] = [$datiExtra[$alu['id']] ?? 0, $alu['note']];
+    }
     // calcola limite assenze
     $dati['monteore'] = $classe->getOreSettimanali() * 33;
     $dati['maxassenze'] = (int) ($dati['monteore'] / 4);
@@ -2439,6 +2444,38 @@ class ScrutinioUtil {
     // legge dati scrutinio
     $scrutinio_dati = $scrutinio_F->getDati();
     foreach ($alunni as $a) {
+      // non scrutinato in primo periodo
+      if (!in_array($a['id'], $scrutinio_P->getDati()['alunni'])) {
+        $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+        ->select('SUM(al.ore)')
+        ->join('al.lezione', 'l')
+        ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
+        ->setParameters(['alunno' => $a['id'], 
+          'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
+          'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
+        ->getQuery()
+        ->getSingleScalarResult();
+        $ore = ($ore ? ((int) $ore) : 0);
+        $a['ore'] += $ore;
+      }
+      // non scrutinato in secondo periodo
+      if ($scrutinio_S && !in_array($a['id'], $scrutinio_S->getDati()['alunni'])) {
+        $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+        ->select('SUM(al.ore)')
+        ->join('al.lezione', 'l')
+        ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
+        ->setParameters(['alunno' => $a['id'], 
+          'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
+          'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
+        ->getQuery()
+        ->getSingleScalarResult();
+        $ore = ($ore ? ((int) $ore) : 0);
+        $a['ore'] += $ore;
+      }
+      // aggiunta ore fatte in altre scuole
+      if (in_array($a['id'], array_keys($dati['assenze_extra']))) {
+        $a['ore'] += $dati['assenze_extra'][$a['id']][0];
+      }
       // percentuale assenze
       $perc = $a['ore'] / $dati['monteore'] * 100;
       if ($a['ore'] <= $dati['maxassenze']) {
@@ -2490,9 +2527,9 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati passati al form
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
    */
-  public function controlloAssenzeForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
+  public function controlloAssenzeForm(Classe $classe, $periodo, FormBuilder $form, $dati): ?FormBuilder {
     // crea form
     $form
       ->setAction($this->router->generate('coordinatore_scrutinio',
@@ -2501,7 +2538,16 @@ class ScrutinioUtil {
         'data' => $dati['no_scrutinabili']['form'],
         'entry_type' => ScrutinioAssenzaType::class,
         'entry_options' => array('label' => false),
-        ));
+         ));
+    if (count($dati['assenze_extra']) > 0) {
+      $assenze = array_map(fn($v) => $v[0], $dati['assenze_extra']);
+      $form
+        ->add('assenze', CollectionType::class, ['label' => false,
+          'data' => $assenze,
+          'entry_type' => IntegerType::class,
+          'entry_options' => array('label' => false,  'attr' => ['min' => 0]),
+          ]);
+    }
     // restituisce form
     return $form;
   }
@@ -2622,17 +2668,47 @@ class ScrutinioUtil {
    * @param Classe $classe Classe di cui leggere i dati dello scrutinio
    * @param Scrutinio $scrutinio Scrutinio da modificare
    *
-   * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
+   * @return boolean|null Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
   public function passaggioStato_F_2_3(Docente $docente, Request $request, Form $form,
-                                        Classe $classe, Scrutinio $scrutinio) {
+                                       Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $this->reqstack->getSession()->getFlashBag()->clear();
     // legge dati assenze
     $dati = $this->controlloAssenze($docente, $classe, 'F');
     // legge dati form
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted() && $request->request->get('aggiorna') !== null) {
+      // aggiorna valori
+      $datiScrutinio = $scrutinio->getDati();
+      $scrutinio->setDati(array());   // necessario per bug di aggiornamento
+      $this->em->flush();             // necessario per bug di aggiornamento
+      // modifica assenze
+      $datiScrutinio['assenze_extra'] = [];
+      foreach ($form->get('assenze')->getData() as $alu => $ass) {
+        $datiScrutinio['assenze_extra'][$alu] = $ass;
+      }
+      // modifica no scrutinabili
+      $datiScrutinio['no_scrutinabili'] = [];
+      foreach ($form->get('lista')->getData() as $val) {
+        $alu = $val->getAlunno();
+        if ($val->getScrutinabile() == 'D') {
+          // scrutinabili in deroga
+          $datiScrutinio['no_scrutinabili'][$alu]['ore'] = $dati['no_scrutinabili']['alunni'][$alu]['ore'];
+          $datiScrutinio['no_scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
+          $datiScrutinio['no_scrutinabili'][$alu]['deroga'] = $val->getMotivazione();
+        } elseif ($val->getScrutinabile() == 'A') {
+          // non scrutinabile
+          $datiScrutinio['no_scrutinabili'][$alu]['ore'] = $dati['no_scrutinabili']['alunni'][$alu]['ore'];
+          $datiScrutinio['no_scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
+        }
+      }
+      // memorizza dati
+      $scrutinio->setDati($datiScrutinio);
+      $this->em->flush();
+      // ricarica stessa pagina
+      return null;
+    } elseif ($form->isSubmitted() && $form->isValid()) {
       // controlli
       $errore_scrutinabile = false;
       $errore_motivazione = false;
