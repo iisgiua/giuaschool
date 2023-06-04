@@ -4739,27 +4739,35 @@ class ScrutinioUtil {
         // ora non presente
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
-      if ($form->get('in_presenza')->getData() === null) {
-        // svolgimento non presente
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_svolgimento'));
+      $numeroVerbale = (int) $form->get('numeroVerbale')->getData();
+      if ($numeroVerbale <= 0) {
+        // numero verbale errato
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_numero_verbale'));
       }
       // controlla validazione argomenti
       $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($scrutinio->getPeriodo());
-      foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
-        // solo elementi da validare
-        if (isset($args['validato']) && !$args['validato']) {
-          // errore di validazione
-          $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
-            ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
+      if (!isset($scrutinio->getDati()['verbale'])) {
+        // errore di validazione
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
+          ['sezione' => '']));
+      } else {
+        foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
+          // solo elementi da validare
+          if (isset($args['validato']) && !$args['validato']) {
+            // errore di validazione
+            $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
+              ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
+          }
         }
       }
       // se niente errori cambia stato
       if (!$this->reqstack->getSession()->getFlashBag()->has('errore')) {
         // imposta dati
-        $scrutinio->setFine($form->get('fine')->getData());
         $datiScrutinio = $scrutinio->getDati();
-        $datiScrutinio['in_presenza'] = $form->get('in_presenza')->getData();
+        $datiScrutinio['numeroVerbale'] = $numeroVerbale;
         $scrutinio->setDati($datiScrutinio);
+        // imposta ora fine
+        $scrutinio->setFine($form->get('fine')->getData());
         // aggiorna stato
         $scrutinio->setStato('C');
         $this->em->flush();

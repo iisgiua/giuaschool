@@ -1905,6 +1905,7 @@ class ScrutinioController extends BaseController {
     foreach ($dati['proposte'] as $alu=>$prop) {
       if (isset($prop['debito']) && $dati['voti'][$alu]->getUnico() === null) {
         $dati['voti'][$alu]->setDebito($prop['debito']);
+        $dati['voti'][$alu]->setRecupero('A');
       }
     }
     // legge dati valutazioni

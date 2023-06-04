@@ -1,7 +1,8 @@
 {{ include('coordinatore/documenti/intestazione.html.twig') }}
 <p style="text-align:center;">
-  <strong>VERBALE DELLO SCRUTINIO FINALE</strong> <br>
-  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
+  <strong>Verbale n. {{ dati.scrutinio.dati.numeroVerbale }}</strong><br>
+  <strong>SCRUTINIO FINALE</strong><br>
+  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
@@ -35,7 +36,7 @@
 {% set assenti=0 %}
 {% for kdoc,doc in dati.scrutinio.dati.presenze %}
   {% if doc.presenza %}
-    <tr>
+    <tr nobr="true">
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td>
     {% for kv,v in dati.docenti[doc.docente].materie %}
@@ -77,7 +78,7 @@
   <p><strong>Punto primo. Scrutini finali.</strong></p>
   <p>Il Consiglio di Classe verifica, per ciascun alunno, la frequenza delle lezioni.</p>
 {% if (dati.no_scrutinabili|length + dati.deroga|length) > 0 %}
-  <p>Si esaminano ora gli alunni che presentano un numero di assenze superiore al 25%
+  <p>Si esaminano poi gli alunni che presentano un numero di assenze superiore al 25%
     dell’orario annuale personalizzato, individuati nella seguente tabella:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">

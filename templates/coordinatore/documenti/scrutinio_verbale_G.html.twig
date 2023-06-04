@@ -4,7 +4,8 @@
   <br><br>
 </div>
 <p style="text-align:center;">
-  <strong>VERBALE DELLO SCRUTINIO PER GLI ESAMI<br>DEGLI STUDENTI CON SOSPENSIONE DEL GIUDIZIO</strong><br>
+  <strong>Verbale n. {{ dati.scrutinio.dati.numeroVerbale }}</strong><br>
+  <strong>SCRUTINIO PER GLI ESAMI DEGLI STUDENTI CON SOSPENSIONE DEL GIUDIZIO</strong><br>
   {% if dati.scrutinio.periodo != 'G' %}SESSIONE SUPPLETTIVA<br>{% endif %}
   <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
@@ -12,13 +13,9 @@
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }},
     alle ore {{ dati.scrutinio.inizio|date('G:i') }},
-{% if dati.scrutinio.dati.in_presenza %}
-    nei locali dell'<em>Istituto di Istruzione Superiore "Michele Giua"</em>
-    di Cagliari, si riunisce in presenza,
-{% else %}
-    si riunisce in seduta telematica,
-{% endif %}
-    a seguito di regolare convocazione (circolare n. 442 del 17/05/2022),
+    nei locali dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</em>
+    di {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, si riunisce in presenza,
+    a seguito di regolare convocazione (circolare n. X del Y),
     il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente
     ordine del giorno:
   </p>
@@ -71,26 +68,10 @@
 {% else %}
   <p>Nessun docente risulta assente.</p>
 {% endif %}
-{% if dati.scrutinio.dati.in_presenza %}
   <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
     (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
     dichiarando aperta la seduta.
   </p>
-{% else %}
-  <p>Preliminarmente si fa presente che:</p>
-  <ul>
-    <li>la piattaforma individuata è Google Classroom-Meet;</li>
-    <li>a tutti i docenti del Consiglio è stata comunicata la modalità di accesso a tale piattaforma.</li>
-  </ul>
-  <p>Successivamente, constatate:</p>
-  <ul>
-    <li>la presenza di tutti i componenti del Consiglio di Classe, presenza attestata dalla loro visibilità sulla piattaforma, a cui sono collegati in modalità audio e video;</li>
-    <li>la disponibilità di strumenti telematici idonei allo svolgimento della seduta;</li>
-  </ul>
-  <div>il Presidente richiama le norme in vigore sullo scrutinio (D.P.R. 122/09 e L. 169/08) e in particolare i
-    criteri di valutazione deliberati dal Collegio dei Docenti, dichiarando aperta la seduta.
-  </div>
-{% endif %}
   <p>&nbsp;</p>
   <p><strong>Punto primo. Scrutinio per gli esami degli studenti con sospensione del giudizio{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %}.</strong></p>
   <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto
