@@ -733,19 +733,19 @@ class StaffController extends BaseController {
     } else {
       // legge ora predefinita
       if ($tipo == 'E') {
-        // inizio seconda ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
+        // inizio seconda ora di lunedì su orario di oggi 
         $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno AND so.ora=:ora')
           ->orderBy('s.ordinamento', 'ASC')
-          ->setParameters(['data' => new \DateTime('tomorrow + 1day'), 'giorno' => 1, 'ora' => 2])
+          ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'giorno' => 1, 'ora' => 2])
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
       } else {
-        // inizio ultima ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
+        // inizio ultima ora di lunedì su orario di oggi 
         $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
@@ -753,7 +753,7 @@ class StaffController extends BaseController {
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno ')
           ->orderBy('s.ordinamento', 'ASC')
           ->addOrderBy('so.ora', 'DESC')
-          ->setParameters(['data' => new \DateTime('tomorrow + 1day'), 'giorno' => 1])
+          ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'giorno' => 1])
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
