@@ -7,6 +7,7 @@ return [
     'public/install/app.php',
   ],
   'sqlCommand' => [
+    ["INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SISTEMA', 'scrutinio_genitori_competenze', 'Indica se la certificazione delle competenze, compilata nello scrutinio finale, deve essere scaricabile direttamente da alunni e genitori.<br>[formato: S=si, N=no]', 'N', 0);", "SELECT * FROM gs_configurazione WHERE parametro='scrutinio_genitori_competenze';"],
   ],
   'envDelete' => [
   ]
