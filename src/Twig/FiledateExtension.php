@@ -35,7 +35,7 @@ class FiledateExtension extends AbstractExtension {
    *
    * @param string $nomefile File di cui restituire la data di modifica
    *
-   * @return null|DateTime Data dell'ultima modifica del file indicato
+   * @return \DateTime|null Data dell'ultima modifica del file indicato
    */
   public function getFileDate($nomefile) {
     if (file_exists($nomefile)) {

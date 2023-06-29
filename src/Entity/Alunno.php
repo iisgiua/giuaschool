@@ -397,7 +397,7 @@ class Alunno extends Utente {
   /**
    * Modifica la fotografia dell'alunno
    *
-   * @param String $foto Fotografia dell'alunno
+   * @param string $foto Fotografia dell'alunno
    *
    * @return self Oggetto modificato
    */

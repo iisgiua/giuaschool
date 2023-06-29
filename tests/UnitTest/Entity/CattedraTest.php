@@ -36,8 +36,7 @@ class CattedraTest extends EntityTestCase {
     // SQL read
     $this->canRead = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id'],
       'gs_materia' => '*',
-      'gs_classe' => '*',
-      'gs_cattedra' => '*'];
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id']];
     // SQL exec

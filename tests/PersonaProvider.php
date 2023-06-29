@@ -324,7 +324,7 @@ class PersonaProvider extends Person {
    * @param string $genere Indica il sesso dell'utente (M=maschile, F=femminile)
    * @param string $suffisso Testo aggiunto in coda alla username
    *
-   * @return stringa La username generata
+   * @return string La username generata
    */
   public function generaUtente(string $genere, string $suffisso=''): string {
     // genera nuovi dati utente univoci
@@ -346,7 +346,7 @@ class PersonaProvider extends Person {
    *
    * @param string $dato Indica il dato da restituire tra quelli generati [nome, cognome, username, password]
    *
-   * @return stringa Il dato indicato
+   * @return string Il dato indicato
    */
   public function datoUtente(string $dato): string {
     return static::$datiUtente[$dato];

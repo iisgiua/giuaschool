@@ -153,7 +153,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
     // richiesta corretta
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $res = $fa->supports($req);
     $this->assertTrue($res);
@@ -162,7 +162,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con route errata
-    $req = new Request([], [], ['_route' => 'altro'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'altro'], [], [], [], null);
     $req->setMethod('POST');
     $res = $fa->supports($req);
     $this->assertFalse($res);
@@ -171,7 +171,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con metodo errato
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('GET');
     $res = $fa->supports($req);
     $this->assertFalse($res);
@@ -194,7 +194,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
     $req = new Request([], ['_username' => 'user', '_password' => 'pass', '_otp' => 'otp', '_csrf_token' => 'TOKEN'],
-      ['_route' => 'login_form'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], []);
+      ['_route' => 'login_form'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     // esegue
@@ -444,7 +444,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
     // login form, no profili
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_seconda_1');
@@ -469,7 +469,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->dbLogs = [];
     $this->conf = false;
     $this->session = [];
-    $req = new Request([], ['_otp' => 'otp1234'], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], ['_otp' => 'otp1234'], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_seconda_1');
@@ -496,7 +496,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->dbLogs = [];
     $this->conf = false;
     $this->session = [];
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_seconda_1');
@@ -530,7 +530,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     $exc = new CustomUserMessageAuthenticationException('Test');
@@ -555,7 +555,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
     $res = $fa->start($req);

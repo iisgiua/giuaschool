@@ -170,7 +170,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
     // richiesta corretta
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $res = $ga->supports($req);
     $this->assertTrue($res);
     $this->assertCount(0, $this->logs);
@@ -178,7 +178,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con route errata
-    $req = new Request([], [], ['_route' => 'altro'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'altro'], [], [], [], null);
     $res = $ga->supports($req);
     $this->assertFalse($res);
     $this->assertCount(0, $this->logs);
@@ -186,7 +186,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con metodo errato
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setMethod('POST');
     $res = $ga->supports($req);
     $this->assertFalse($res);
@@ -208,7 +208,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
     $req->setSession($this->mockedSession);
     // esegue
     $res = $ga->authenticate($req);
@@ -352,7 +352,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
     // no profili
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('docente_curricolare_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
@@ -373,7 +373,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->dbLogs = [];
     $this->conf = false;
     $this->session = [];
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('staff_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
@@ -405,7 +405,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $exc = new CustomUserMessageAuthenticationException('Test');
     $res = $ga->onAuthenticationFailure($req, $exc);
@@ -429,7 +429,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $res = $ga->start($req);
     $this->assertCount(0, $this->logs);

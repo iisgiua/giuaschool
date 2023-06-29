@@ -142,7 +142,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $sa = new SpidAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig);
     // richiesta corretta
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $res = $sa->supports($req);
     $this->assertTrue($res);
     $this->assertCount(0, $this->logs);
@@ -150,7 +150,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con route errata
-    $req = new Request([], [], ['_route' => 'altro'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'altro'], [], [], [], null);
     $res = $sa->supports($req);
     $this->assertFalse($res);
     $this->assertCount(0, $this->logs);
@@ -158,7 +158,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // richiesta con metodo errato
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $req->setMethod('POST');
     $res = $sa->supports($req);
     $this->assertFalse($res);
@@ -180,7 +180,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $sa = new SpidAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'spid_acs', 'responseId' => '1234'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], []);
+    $req = new Request([], [], ['_route' => 'spid_acs', 'responseId' => '1234'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
     $req->setSession($this->mockedSession);
     // esegue
     $res = $sa->authenticate($req);
@@ -362,7 +362,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $sa = new SpidAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig);
     // no profili
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('docente_curricolare_1');
     $utente->setInfoLogin(['logoutUrl' => 'https://nome.dominio.it/logout/url']);
@@ -386,7 +386,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->dbLogs = [];
     $this->conf = false;
     $this->session = [];
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('staff_1');
     $utente->setInfoLogin(['logoutUrl' => 'https://nome.dominio.it/logout/url']);
@@ -420,7 +420,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $sa = new SpidAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $exc = new CustomUserMessageAuthenticationException('Test');
     $res = $sa->onAuthenticationFailure($req, $exc);
@@ -444,7 +444,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $sa = new SpidAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], []);
+    $req = new Request([], [], ['_route' => 'spid_acs'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $res = $sa->start($req);
     $this->assertCount(0, $this->logs);

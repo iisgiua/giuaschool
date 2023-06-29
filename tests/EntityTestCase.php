@@ -37,7 +37,7 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @var array $canRead Lista delle tabelle e campi che possono essere letti
    */
-  protected array $canRead;
+  protected array $canRead = [];
 
   /**
    * Tabelle e campi che possono essere modificati nel database (INSERT, UPDATE, DELETE)
@@ -49,7 +49,7 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @var array $canWrite Lista delle tabelle e campi che possono essere modificati
    */
-  protected array $canWrite;
+  protected array $canWrite = [];
 
   /**
    * Altri comandi che possono essere eseguiti nel database
@@ -60,21 +60,35 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @var array $canExecute Lista di altri comandi che possono essere eseguiti
    */
-  protected array $canExecute;
+  protected array $canExecute = [];
 
   /**
    * Nome dell'entità da testare
    *
    * @var string $entity Nome dell'entità
    */
-  protected string $entity;
+  protected string $entity = '';
 
   /**
    * Lista degli attributi dell'entità da testare
    *
    * @var array $fields Lista degli attributi dell'entità
    */
-  protected array $fields;
+  protected array $fields = [];
+
+  /**
+   * Lista degli attributi che non sono memorizzati nel database
+   *
+   * @var array $noStoredFields Lista degli attributi che non sono memorizzati nel database
+   */
+  protected array $noStoredFields = [];
+
+  /**
+   * Lista degli attributi che hanno un valore generato automaticamente
+   *
+   * @var array $generatedFields Lista degli attributi che hanno un valore generato automaticamente
+   */
+  protected array $generatedFields = [];
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -98,9 +112,6 @@ class EntityTestCase extends DatabaseTestCase {
     parent::setUp();
     // inizializza le variabili
     $this->sqlTrace = null;
-    // inizializza i servizi
-    //-- $kernel = self::bootKernel();
-    //-- $this->val = $kernel->getContainer()->get('validator');
     // inizia tracciamento SQL
     $this->startSqlTrace();
   }
