@@ -38,9 +38,6 @@
     <td align="center">&nbsp;</td>
     <td align="center">&nbsp;</td>
         {% endif %}
-        {% if dati.classe.anno == 5 %}
-    <td align="center">&nbsp;</td>
-        {% endif %}
       {% endif %}
     <td align="center">&nbsp;</td>
     <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:24pt;">RINVIATO</span></td>
@@ -60,9 +57,6 @@
       {% if dati.classe.anno >= 4 %}
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].creditoPrecedente }}</span></td>
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? (dati.esiti[id].credito + dati.esiti[id].creditoPrecedente) }}</span></td>
-      {% endif %}
-      {% if dati.classe.anno == 5 %}
-    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].dati.creditoConvertito }}</span></td>
       {% endif %}
     {% endif %}
     <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].media|number_format(2, ',') }}</span></td>

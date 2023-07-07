@@ -34,7 +34,7 @@
 {% set assenti=0 %}
 {% for kdoc,doc in dati.scrutinio.dati.presenze %}
   {% if doc.presenza %}
-    <tr>
+    <tr nobr="true">
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td>
     {% for kv,v in dati.docenti[doc.docente].materie %}
@@ -119,7 +119,7 @@
     che risultano sintetizzate nella seguente tabella:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
-  {% if dati.classe.anno != 4 %}
+  {% if dati.classe.anno == 3 %}
     <tr nobr="true">
       <td width="30%" align="center"><strong>ALUNNO</strong></td>
       <td width="10%" align="center"><strong>Media voti</strong></td>

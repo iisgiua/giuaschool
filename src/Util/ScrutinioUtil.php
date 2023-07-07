@@ -4643,7 +4643,7 @@ class ScrutinioUtil {
       $crediti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita')
         ->join('e.alunno', 'a')
-        ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND e.credito IS NULL')
+        ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND (e.credito=0 OR e.credito IS NULL)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['scrutinio' => $scrutinio, 'lista' => $lista_id, 'ammesso' => 'A'])
         ->getQuery()

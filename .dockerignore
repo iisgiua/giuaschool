@@ -1,5 +1,6 @@
 /.git/
 /.github/
+/.vscode/
 /config/metadata/*
 !/config/metadata/.gitkeep
 /config/secrets/*

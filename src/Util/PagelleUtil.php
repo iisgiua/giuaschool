@@ -501,7 +501,8 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = '2021/2022';
+      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
     }
     // restituisce dati
     return $dati;
@@ -863,7 +864,8 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = '2021/2022';
+      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
     }
     // restituisce dati
     return $dati;
@@ -1473,7 +1475,8 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = '2021/2022';
+      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
     }
     // restituisce dati
     return $dati;
@@ -1599,7 +1602,8 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // anno scolastico
-      $dati['annoScolastico'] = '2021/2022';
+      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
     }
     // restituisce dati
     return $dati;
@@ -2250,7 +2254,11 @@ class PagelleUtil {
         $dati['ammessi'][$alu['id']] = $alu;
       }
       // anno scolastico
-      $dati['annoScolastico'] = ($periodo == 'X' ? '2021/2022' : $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'));
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
+      if ($periodo == 'X') {
+        $anno = (int) substr($dati['annoScolastico'], 0, 4);
+        $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
+      }
     }
     // restituisce dati
     return $dati;
@@ -2531,7 +2539,8 @@ class PagelleUtil {
           'unico' => $v->getUnico(),
           'assenze' => $v->getAssenze());
       }
-      $dati['annoScolastico'] = '2021/2022';
+      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $dati['annoScolastico'] = ($anno - 1).'/'.$anno;
     }
     // restituisce dati
     return $dati;
