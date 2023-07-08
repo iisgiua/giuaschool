@@ -59,7 +59,7 @@ class ModuloType extends AbstractType {
         ->add('docente', ChoiceType::class, array('label' => 'label.registro_docente',
           'choices' => array_merge([-1], $options['dati'][0]),
           'choice_label' => function ($obj, $val) use ($options) {
-              return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
+              return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')' :
                 $options['dati'][3]); },
           'choice_value' => function ($obj) {
               return (is_object($obj) ? $obj->getId() : $obj); },

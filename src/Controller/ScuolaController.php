@@ -79,21 +79,7 @@ class ScuolaController extends BaseController {
     $info['periodo'] = $periodo;
     // legge dati
     $definizione = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
-    if ($definizione) {
-      // controlla dati mancanti
-      $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
-        ['periodo' => ($periodo == 'P' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
-        ($periodo == 'S' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
-      $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
-      $struttura[1] = ['ScrutinioInizio', false, []];
-      $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
-      $struttura[3] = ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2,
-        'obbligatorio' => false, 'inizio' => '', 'seVuoto' => '', 'default' => '', 'fine' => '']];
-      $struttura[4] = ['ScrutinioFine', false, []];
-      $definizione
-        ->setArgomenti($argomenti)
-        ->setStruttura($struttura);
-    } else {
+    if (!$definizione) {
       // nuova definizione
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
         ['periodo' => ($periodo == 'P' ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :

@@ -236,6 +236,7 @@ label.periodo_F: Scrutinio Finale
 label.periodo_G: Scrutinio esami giudizio sospeso
 label.periodo_P: Primo Quadrimestre
 label.periodo_S: Secondo Quadrimestre
+label.periodo_R: Sessione supplettiva
 label.periodo_X: Scrutinio Rinviato
 label.scrutini_periodo_G: Esami giudizio sospeso
 label.scrutini_periodo_R: Sessione supplettiva
@@ -1187,7 +1188,7 @@ considerata anche la scarsa partecipazione a tali attività di recupero,\\n
 accertato che persistono le gravi carenze segnalate,\\n
 non ha raggiunto gli obiettivi minimi per le discipline indicate
 e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
-message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda la sua prova presumibilmente prima dell’inizio delle lezioni, a data da definirsi.
+message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi, presumibilmente prima dell’inizio delle lezioni.
 message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
 message.otp_abilitato: Codice OTP attivato.
 message.otp_disabilitato: Codice OTP disattivato.

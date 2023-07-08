@@ -8,33 +8,15 @@
 
 namespace App\Util;
 
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
-use App\Entity\Genitore;
-use App\Entity\Docente;
-use App\Entity\Classe;
-use App\Entity\Cattedra;
-use App\Entity\Alunno;
-use App\Entity\Annotazione;
-use App\Entity\AssenzaLezione;
-use App\Entity\AvvisoUtente;
-use App\Entity\Circolare;
-use App\Entity\Configurazione;
-use App\Entity\Esito;
-use App\Entity\Festivita;
-use App\Entity\Firma;
-use App\Entity\Lezione;
-use App\Entity\Nota;
-use App\Entity\OsservazioneAlunno;
-use App\Entity\OsservazioneClasse;
-use App\Entity\PropostaVoto;
-use App\Entity\Scrutinio;
-use App\Entity\Valutazione;
 
 
 /**
@@ -420,27 +402,6 @@ class ArchiviazioneUtil {
     $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-    // retrocompatibilità per A.S 21/22
-    if ($periodo['scrutinio'] == 'P' || $periodo['scrutinio'] == 'S') {
-      $valutazioni['R'] = [
-        'min' => 20,
-        'max' => 26,
-        'suff' => 22,
-        'med' => 22,
-        'valori' => '20,21,22,23,24,25,26',
-        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-      $valutazioni['E'] = [
-        'min' => 3,
-        'max' => 10,
-        'suff' => 6,
-        'med' => 5,
-        'valori' => '3,4,5,6,7,8,9,10',
-        'etichette' => '"NC",4,5,6,7,8,9,10',
-        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-    }
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -1278,6 +1239,7 @@ class ArchiviazioneUtil {
       $dati['assenze'] = array();
       $dati['ritardi'] = array();
       $dati['uscite'] = array();
+      $dati['fc'] = '';
       $dati['giustificazioni'] = array();
       // controlla festivo
       if ($data->format('w') == 0 || in_array($data->format('Y-m-d'), $giorni_festivi)) {
@@ -1347,6 +1309,33 @@ class ArchiviazioneUtil {
       $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       // legge alunni
       $lista = $this->regUtil->alunniInData($data, $classe);
+      // legge FC
+      $fc = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.cognome,a.nome,a.dataNascita,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
+        ->join('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($fc as $idx => $ffcc) {
+        $dati['fc'] .= $ffcc['cognome'].' '.$ffcc['nome'].' ('.$ffcc['dataNascita']->format('d/m/Y').'): '.
+          ($ffcc['oraInizio'] ?
+            ('dalle '.$ffcc['oraInizio']->format('H:i').($ffcc['oraFine'] ? (' alle '.$ffcc['oraFine']->format('H:i')) : '')) :
+            'tutto il giorno').
+          ' ('.$this->trans->trans('label.presenza_tipo_'.$ffcc['tipo']).': '.$ffcc['descrizione'].')'.
+          ($idx < (count($fc) - 1) ? '<br>' : '');
+      }
+      // scrive FC
+      if (!empty($dati['fc'])) {
+        $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
+            <tr>
+              <td style="width:30%"><b>Fuori classe:</b></td>
+              <td style="width:70%" align="left">'.$dati['fc'].'</td>
+            </tr>
+          </table>';
+        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+      }
       // legge giustificazioni assenze
       $giustificaAssenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.cognome,a.nome,a.dataNascita,ass.data')
@@ -1374,6 +1363,19 @@ class ArchiviazioneUtil {
           $rit['cognome'].' '.$rit['nome'].' ('.$rit['dataNascita']->format('d/m/Y').')';
         $dati['giustificazioni'][$rit['id']]['ritardo'][] = $rit['data']->format('d/m/Y');
       }
+      $giustificaUscite = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.cognome,a.nome,a.dataNascita,u.data')
+        ->join('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.giustificato=:data AND u.utenteGiustifica IS NOT NULL')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita,u.data', 'ASC')
+        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($giustificaUscite as $usc) {
+        $dati['giustificazioni'][$usc['id']]['alunno'] =
+          $usc['cognome'].' '.$usc['nome'].' ('.$usc['dataNascita']->format('d/m/Y').')';
+        $dati['giustificazioni'][$usc['id']]['uscita'][] = $usc['data']->format('d/m/Y');
+      }
       // gestione assenze a seconda della modalità impostata
       if ($this->em->getRepository('App\Entity\Configurazione')->getParametro('assenze_ore')) {
         // assenze in modalità oraria
@@ -1392,7 +1394,7 @@ class ArchiviazioneUtil {
           $dati['assenze'][$ass['id']]['ore'][] = $ass['ora'].'ª';
         }
         // scrive assenze/giustificazioni
-        $html = '<br><table border="1" cellspacing="0" cellpadding="4" nobr="true">
+        $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
           <tr>
             <td style="width:50%"><b>Ore di assenza</b></td>
             <td style="width:50%"><b>Giustificazioni</b></td>
@@ -1448,7 +1450,7 @@ class ArchiviazioneUtil {
           }
         }
         // scrive assenze/giustificazioni
-        $html = '<br><table border="1" cellspacing="0" cellpadding="4" nobr="true">
+        $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
           <tr>
             <td style="width:25%"><b>Assenze</b></td>
             <td style="width:25%"><b>Ritardi</b></td>
@@ -1480,7 +1482,7 @@ class ArchiviazioneUtil {
         $html .= '</td><td align="left" style="font-size:9pt">';
         $primo = true;
         foreach ($dati['giustificazioni'] as $alu=>$giu) {
-          $html .= (!$primo ? '<br>- ' : '- ').$giu['alunno'].': ';
+          $html .= (!$primo ? '<br> - ' : ' - ').$giu['alunno'].': ';
           $primo = false;
           if (!empty($giu['assenza'])) {
             $html .= 'Assenz'.(count($giu['assenza']) > 1 ? 'e' : 'a').' del '.
@@ -1490,6 +1492,11 @@ class ArchiviazioneUtil {
             $html .= (!empty($giu['assenza']) ? '<br>' : '').
               'Ritard'.(count($giu['ritardo']) > 1 ? 'i' : 'o').' del '.
               implode(', ', $giu['ritardo']).'.';
+          }
+          if (!empty($giu['uscita'])) {
+            $html .= ((!empty($giu['assenza']) || !empty($giu['ritardo'])) ? '<br>' : '').
+              'Uscit'.(count($giu['uscita']) > 1 ? 'e' : 'a').' del '.
+              implode(', ', $giu['uscita']).'.';
           }
         }
         // chiude tabella assenze
@@ -1614,35 +1621,36 @@ class ArchiviazioneUtil {
    */
   public function scrutinioClasse(Classe $classe) {
     $msg = array();
+    $adesso = (new \DateTime())->format('Y-m-d H:i');
     // legge gli scrutini della classe
     $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->findBy(['classe' => $classe, 'stato' => 'C'],
       ['data' => 'ASC']);
     foreach ($scrutini as $scrut) {
-      $adesso = (new \DateTime())->format('Y-m-d H:i');
       $periodo = $scrut->getPeriodo();
+      $nomePeriodo = $this->trans->trans('label.periodo_'.$periodo);
       switch ($periodo) {
         case 'P': // scrutinio primo periodo
         case 'S': // scrutinio secondo periodo (se trimestri)
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
           if (!($file = $this->pag->verbale($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // debiti
@@ -1661,7 +1669,7 @@ class ArchiviazioneUtil {
             // comunicazione debiti
             if (!($file = $this->pag->debiti($classe, $alu, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Debiti '.
+              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti '.
                 $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                 'non creato per mancanza di dati.';
             } else {
@@ -1673,42 +1681,42 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Debiti: '.
+          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti: '.
             $debiti_num.' ('.$debiti_nuovi.' NUOVI)';
           break;
         case 'F': // scrutinio finale
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
           if (!($file = $this->pag->verbale($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // certificazioni
           if ($classe->getAnno() == 2) {
             if (!($file = $this->pag->certificazioni($classe, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Certificazioni: '.
+              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
                 'non creato per mancanza di dati.';
             } else {
               $data_file = (new \DateTime('@'.filemtime($file)))
                 ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Certificazioni'.
+              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni'.
                 ($data_file >= $adesso ? ' (NUOVO)': '');
             }
           }
@@ -1726,7 +1734,7 @@ class ArchiviazioneUtil {
             // comunicazione debiti
             if (!($file = $this->pag->debiti($classe, $alu, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Debiti '.
+              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti '.
                 $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                 'non creato per mancanza di dati.';
             } else {
@@ -1738,7 +1746,7 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Debiti: '.
+          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti: '.
             $debiti_num.' ('.$debiti_nuovi.' NUOVI)';
           // carenze
           $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
@@ -1756,7 +1764,7 @@ class ArchiviazioneUtil {
                 $e->getDati()['carenze'] && count($e->getDati()['carenze_materie']) > 0) {
               if (!($file = $this->pag->carenze($classe, $e->getAlunno(), $periodo))) {
                 // errore
-                $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Carenze '.
+                $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Carenze '.
                   $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                   'non creato per mancanza di dati.';
               } else {
@@ -1769,7 +1777,7 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Carenze: '.
+          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Carenze: '.
             $carenze_num.' ('.$carenze_nuovi.' NUOVI)';
           break;
         case 'G': // esame sospesi
@@ -1778,35 +1786,35 @@ class ArchiviazioneUtil {
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
           if (!($file = $this->pag->verbale($classe, $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale: '.
+            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale'.
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // certificazioni
           if ($classe->getAnno() == 2) {
             if (!($file = $this->pag->certificazioni($classe, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Certificazioni: '.
+              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
                 'non creato per mancanza di dati.';
             } else {
               $data_file = (new \DateTime('@'.filemtime($file)))
                 ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Certificazioni'.
+              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni'.
                 ($data_file >= $adesso ? ' (NUOVO)': '');
             }
           }
