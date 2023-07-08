@@ -121,7 +121,7 @@ class ArchiviazioneUtil {
     }
     // nome documento
     $nomefile = 'registro-docente-'.mb_strtoupper($docente->getCognome(), 'UTF-8').'-'.
-      mb_strtoupper($docente->getNome(), 'UTF-8').'.pdf';
+      mb_strtoupper($docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
     $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                             ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
     // lista cattedre (escluso sostegno)
@@ -210,7 +210,7 @@ class ArchiviazioneUtil {
     }
     // nome documento
     $nomefile = 'registro-sostegno-'.mb_strtoupper($docente->getCognome(), 'UTF-8').'-'.
-      mb_strtoupper($docente->getNome(), 'UTF-8').'.pdf';
+      mb_strtoupper($docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
     $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                             ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
     // lista cattedre
