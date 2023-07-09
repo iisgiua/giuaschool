@@ -1036,7 +1036,7 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
-    $lista_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+    $listaDocenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
@@ -1044,7 +1044,7 @@ class SistemaController extends BaseController {
       ->setParameters(['tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
-    $lista_sostegno = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+    $listaSostegno = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
@@ -1052,61 +1052,142 @@ class SistemaController extends BaseController {
       ->setParameters(['tipo' => 'S'])
       ->getQuery()
       ->getResult();
-    $lista_classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $listaClassi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->orderBy('c.anno,c.sezione', 'ASC')
       ->getQuery()
       ->getResult();
-    $label_docenti = $trans->trans('label.tutti_docenti');
-    $label_classi = $trans->trans('label.tutte_classi');
+    $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+      ->where('c.pubblicata=:si AND c.anno=:anno')
+      ->orderBy('c.numero', 'ASC')
+      ->setParameters(['si' => 1,
+        'anno' => (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4)])
+      ->getQuery()
+      ->getResult();
     // form
     $form = $this->createForm(ModuloType::class, null, ['formMode' => 'archivia',
-      'dati' => [$lista_docenti, $lista_sostegno, $lista_classi, $label_docenti, $label_classi]]);
+      'dati' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // assicura che lo script non sia interrotto
+      ini_set('max_execution_time', 0);
       // form inviato
+      $tipo = $form->get('tipo')->getData();
+      $selezione = $form->get('selezione')->getData();
       $docente = $form->get('docente')->getData();
       $sostegno = $form->get('sostegno')->getData();
       $classe = $form->get('classe')->getData();
-      $scrutinio = $form->get('scrutinio')->getData();
-      $circolare = ($form->get('circolare')->getData() === true);
-      // assicura che lo script non sia interrotto
-      ini_set('max_execution_time', 0);
-      // registro docenti
-      if (is_object($docente)) {
-        // crea registro
-        $arch->registroDocente($docente);
-      } elseif ($docente === -1) {
-        // crea tutti i registri
-        $arch->tuttiRegistriDocente($lista_docenti);
+      $circolare = $form->get('circolare')->getData();
+      // controllo errori
+      if ($selezione != 'T') {
+        if ($tipo == 'D' && !$docente) {
+          // docente non definito
+          $form->addError(new FormError($trans->trans('exception.no_docente')));
+        }
+        if ($tipo == 'S' && !$sostegno) {
+          // docente di sostegno non definito
+          $form->addError(new FormError($trans->trans('exception.no_sostegno')));
+        }
+        if ($tipo == 'C' && !$classe) {
+          // classe non definita
+          $form->addError(new FormError($trans->trans('exception.no_classe')));
+        }
+        if ($tipo == 'U' && !$classe) {
+          // classe non definita
+          $form->addError(new FormError($trans->trans('exception.no_classe')));
+        }
+        if ($tipo == 'R' && !$circolare) {
+          // circolare non definita
+          $form->addError(new FormError($trans->trans('exception.no_circolare')));
+        }
       }
-      // registro sostegno
-      if (is_object($sostegno)) {
-        // crea registro
-        $arch->registroSostegno($sostegno);
-      } elseif ($sostegno === -1) {
-        // crea tutti i registri
-        $arch->tuttiRegistriSostegno($lista_sostegno);
-      }
-      // registro classe
-      if (is_object($classe)) {
-        // crea registro
-        $arch->registroClasse($classe);
-      } elseif ($classe === -1) {
-        // crea tutti i registri
-        $arch->tuttiRegistriClasse($lista_classi);
-      }
-      // documenti scrutinio
-      if (is_object($scrutinio)) {
-        // crea documenti per la classe
-        $arch->scrutinioClasse($scrutinio);
-      } elseif ($scrutinio === -1) {
-        // crea documenti per tutte le classi
-        $arch->tuttiScrutiniClasse($lista_classi);
-      }
-      // archivio circolari
-      if ($circolare) {
-        // crea archivio delle circolari
-        $arch->archivioCircolari();
+      if ($form->isValid()) {
+        // no errori
+        switch ($tipo) {
+          case 'D':   // registro docenti
+            if ($selezione == 'S') {
+              // crea registro
+              $arch->registroDocente($docente);
+            } elseif ($selezione == 'T') {
+              // crea tutti i registri
+              $arch->tuttiRegistriDocente($listaDocenti);
+            } else {
+              $id = $docente->getId();
+              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaDocenti), true);
+              $lista = array_slice($listaDocenti, $pos);
+              // crea sottoinsieme dei registri
+              $arch->tuttiRegistriDocente($lista);
+            }
+            break;
+          case 'S':   // registro sostegno
+            if ($selezione == 'S') {
+              // crea registro
+              $arch->registroSostegno($sostegno);
+            } elseif ($selezione == 'T') {
+              // crea tutti i registri
+              $arch->tuttiRegistriSostegno($listaSostegno);
+            } else {
+              $id = $sostegno->getId();
+              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaSostegno), true);
+              $lista = array_slice($listaSostegno, $pos);
+              // crea sottoinsieme dei registri
+              $arch->tuttiRegistriSostegno($lista);
+            }
+            break;
+          case 'C':   // registro classe
+            if ($selezione == 'S') {
+              // crea registro
+              $arch->registroClasse($classe);
+            } elseif ($selezione == 'T') {
+              // crea tutti i registri
+              $arch->tuttiRegistriClasse($listaClassi);
+            } else {
+              $id = $classe->getId();
+              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaClassi), true);
+              $lista = array_slice($listaClassi, $pos);
+              // crea sottoinsieme dei registri
+              $arch->tuttiRegistriClasse($lista);
+            }
+            break;
+          case 'U':   // documenti scrutinio
+            if ($selezione == 'S') {
+              // crea registro
+              $arch->scrutinioClasse($classe);
+            } elseif ($selezione == 'T') {
+              // crea tutti i documenti
+              $arch->tuttiScrutiniClasse($listaClassi);
+            } else {
+              $id = $classe->getId();
+              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaClassi), true);
+              $lista = array_slice($listaClassi, $pos);
+              // crea sottoinsieme dei documenti
+              $arch->tuttiScrutiniClasse($lista);
+            }
+            break;
+          case 'R':   // archivio circolari
+            if ($selezione == 'S') {
+              // crea registro
+              $numCircolari = $arch->documentoCircolare($circolare);
+            } elseif ($selezione == 'T') {
+              // crea tutti i documenti
+              $numCircolari = $arch->tuttiDocumentiCircolari($listaCircolari);
+            } else {
+              $id = $circolare->getId();
+              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaCircolari), true);
+              $lista = array_slice($listaCircolari, $pos);
+              // crea sottoinsieme dei documenti
+              $numCircolari = $arch->tuttiDocumentiCircolari($lista);
+            }
+            if ($numCircolari > 0) {
+              // circolari create
+              $this->reqstack->getSession()->getFlashBag()->add('success', 
+                'Sono state archiviate '.$numCircolari.' circolari.');
+            } else {
+              // nessuna circolare archiviata
+              $this->reqstack->getSession()->getFlashBag()->add('warning', 
+                'Non è stata archiviata nessuna circolare.');
+            }
+            break;
+        }
       }
     }
     // mostra la pagina di risposta

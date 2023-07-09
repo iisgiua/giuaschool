@@ -56,57 +56,63 @@ class ModuloType extends AbstractType {
     } elseif ($options['formMode'] == 'archivia') {
       // form archivia
       $builder
-        ->add('docente', ChoiceType::class, array('label' => 'label.registro_docente',
-          'choices' => array_merge([-1], $options['dati'][0]),
-          'choice_label' => function ($obj, $val) use ($options) {
-              return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')' :
-                $options['dati'][3]); },
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_archivio',
+          'choices' => ['label.registro_docente' => 'D', 'label.registro_sostegno' => 'S',
+            'label.registro_classe' => 'C', 'label.documenti_scrutinio' => 'U', 
+            'label.archivio_circolari' => 'R'], 
+          'required' => true))
+        ->add('selezione', ChoiceType::class, array('label' => 'label.selezione_archivio',
+          'choices' => ['label.tutti' => 'T', 'label.selezionato' => 'S', 'label.da_selezionato' => 'D'],
+          'expanded' => true,
+          'multiple' => false,
+          'label_attr' => ['class' => 'radio-inline'],
+          'required' => true))
+        ->add('docente', ChoiceType::class, array('label' => 'label.docente_curricolare',
+          'choices' => $options['dati'][0],
+          'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'choice_value' => function ($obj) {
-              return (is_object($obj) ? $obj->getId() : $obj); },
-          'placeholder' => 'label.nessuno',
+            return $obj ? $obj->getId() : $obj; },
+          'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
+          'row_attr' => ['id' => 'row_modulo_docente'],
           'required' => false))
-        ->add('sostegno', ChoiceType::class, array('label' => 'label.registro_sostegno',
-          'choices' => array_merge([-1], $options['dati'][1]),
-          'choice_label' => function ($obj, $val) use ($options) {
-              return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
-                $options['dati'][3]); },
+        ->add('sostegno', ChoiceType::class, array('label' => 'label.docente_sostegno',
+          'choices' => $options['dati'][1],
+          'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'choice_value' => function ($obj) {
-              return (is_object($obj) ? $obj->getId() : $obj); },
-          'placeholder' => 'label.nessuno',
+            return $obj ? $obj->getId() : $obj; },
+          'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
+          'row_attr' => ['id' => 'row_modulo_sostegno'],
           'required' => false))
-        ->add('classe', ChoiceType::class, array('label' => 'label.registro_classe',
-          'choices' => array_merge([-1], $options['dati'][2]),
-          'choice_label' => function ($obj, $val) use ($options) {
-              return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
-                $options['dati'][4]); },
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'choices' => $options['dati'][2],
+          'choice_label' => function ($obj) {
+            return $obj->getAnno().'ª '.$obj->getSezione(); },
           'choice_value' => function ($obj) {
-              return (is_object($obj) ? $obj->getId() : $obj); },
+            return $obj ? $obj->getId() : $obj; },
           'group_by' => function ($obj) {
-              return (is_object($obj) ? $obj->getSede()->getCitta() : null); },
-          'placeholder' => 'label.nessuno',
+            return $obj ? $obj->getSede()->getCitta() : $obj; },
+          'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false))
-        ->add('scrutinio', ChoiceType::class, array('label' => 'label.documenti_scrutinio',
-          'choices' => array_merge([-1], $options['dati'][2]),
-          'choice_label' => function ($obj, $val) use ($options) {
-              return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
-                $options['dati'][4]); },
-          'choice_value' => function ($obj) {
-              return (is_object($obj) ? $obj->getId() : $obj); },
-          'group_by' => function ($obj) {
-              return (is_object($obj) ? $obj->getSede()->getCitta() : null); },
-          'placeholder' => 'label.nessuno',
-          'choice_translation_domain' => false,
-          'attr' => ['widget' => 'search'],
+          'row_attr' => ['id' => 'row_modulo_classe'],
           'required' => false))
         ->add('circolare', ChoiceType::class, array('label' => 'label.archivio_circolari',
-          'choices' => ['label.no' => false, 'label.si' => true],
-          'required' => true));
+          'choices' => $options['dati'][3],
+          'choice_label' => function ($obj) {
+            return $obj->getNumero().' - '.$obj->getOggetto(); },
+          'choice_value' => function ($obj) {
+            return $obj ? $obj->getId() : $obj; },
+          'placeholder' => 'label.choose_option',
+          'choice_translation_domain' => false,
+          'attr' => ['widget' => 'search'],
+          'row_attr' => ['id' => 'row_modulo_circolare'],
+          'required' => false));
     } elseif ($options['formMode'] == 'staff') {
       $builder
         ->add('docente', EntityType::class, array('label' => 'label.docente',

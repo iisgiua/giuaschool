@@ -465,6 +465,8 @@ label.documenti_tutti: Tutti i documenti
 label.programmi: Programmi svolti
 label.relazioni: Relazioni finali
 label.tutti: Tutti
+label.selezionato: Solo selezionato
+label.da_selezionato: Dall'elemento selezionato in poi
 label.tutti_tipi_documento: Tutti i tipi
 label.tipo_documenti: Tipo di documenti
 label.documenti_bes_H: P.E.I.
@@ -616,6 +618,10 @@ label.abilitato_notifica_verifica: Nuova verifica
 label.abilitato_notifica_compito: Nuovo compito
 label.telegram_bot: Username del bot Telegram
 label.telegram_token: Token del bot Telegram
+label.tipo_archivio: Tipo di documenti da archiviare
+label.selezione_archivio: Elementi da archiviare
+label.docente_curricolare: Docente curricolare
+label.docente_sostegno: Docente di sostegno
 
 
 ##### PAGINE #####
@@ -1594,8 +1600,8 @@ exception.data_invalida: "Errore: data non valida. Devi inserire una data nel fo
 exception.colloquio_ora_invalida: Non hai inserito l'orario dell'appuntamento.
 exception.colloquio_data_invalida: La data inserita non è valida.
 exception.numero_file_allegati: Hai caricato un numero eccessivo di documenti.
-exception.documento_tipo_mancante: Non hai indicato il tipo di documento.
 exception.documento_alunno_mancante: Non hai indicato l'alunno a cui è riferito il documento.
+exception.documento_tipo_mancante: Non hai indicato il tipo di documento.
 exception.documento_esistente: Il documento inserito esiste già per l'alunno selezionato.
 exception.info_studente_no_app: Il servizio richiesto non è attivo.
 exception.info_studente_no_ip: L'indirizzo IP non è valido.
@@ -1653,3 +1659,7 @@ exception.presenze_giorno_uscita_incoerente: La durata dell'attività fuori clas
 exception.telegram_no_token: Non hai inserito il token del bot Telegram
 exception.telegram_webhook: "Errore nella configurazione Telegram. [{errore}]"
 exception.numero_proposte_invalido: "<strong>{materia}</strong>: numero di proposte invalido."
+exception.no_docente: Non ha selezionato il docente.
+exception.no_sostegno: Non ha selezionato il docente di sostegno.
+exception.no_classe: Non ha selezionato la classe.
+exception.no_circolare: Non ha selezionato la circolare.

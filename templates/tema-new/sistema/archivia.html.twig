@@ -6,3 +6,41 @@
   {{ include('tema-new/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
 </div>
 {% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $('#modulo_tipo').change(function() {
+    $('#modulo_selezione_0').prop('checked', true);
+    $('#row_modulo_docente').hide();
+    $('#row_modulo_sostegno').hide();
+    $('#row_modulo_classe').hide();
+    $('#row_modulo_circolare').hide();
+    $('#modulo_docente').val('').change();
+    $('#modulo_sostegno').val('').change();
+    $('#modulo_classe').val('').change();
+    $('#modulo_circolare').val('').change();
+  }).change();
+  $('#modulo_selezione').change(function(e) {
+    var t = $('#modulo_tipo').val();
+    var tId = '#row_modulo_';
+    if (t == 'D') {
+      tId += 'docente';
+    } else if (t == 'S') {
+      tId += 'sostegno';
+    } else if (t == 'C') {
+      tId += 'classe';
+    } else if (t == 'U') {
+      tId += 'classe';
+    } else if (t == 'R') {
+      tId += 'circolare';
+    }
+    if ($('input[name="modulo[selezione]"]:checked').val() == 'T') {
+      $(tId).hide();
+    } else {
+      $(tId).show();
+    }
+  }).change();
+});
+</script>
+{% endblock %}

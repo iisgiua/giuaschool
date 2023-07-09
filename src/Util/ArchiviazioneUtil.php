@@ -9,6 +9,7 @@
 namespace App\Util;
 
 use App\Entity\Cattedra;
+use App\Entity\Circolare;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use Doctrine\ORM\EntityManagerInterface;
@@ -1871,71 +1872,70 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Crea l'archivio delle circolari
+   * Crea tutti i registri di classe
    *
+   * @param array $circolari Lista delle circolari da archiviare
+   * 
+   * @return int Numero di circolari correttamente archiviate (0 o 1)
    */
-  public function archivioCircolari() {
+  public function tuttiDocumentiCircolari(array $circolari): int {
+    $num = 0;
+    foreach ($circolari as $cir) {
+      $num += $this->documentoCircolare($cir);
+    }
+    // restituisce numero circolari archiviate
+    return $num;
+  }
+
+  /**
+   * Archivia la circolare
+   *
+   * @param Circolare $circolare Circolare da archiviare
+   * 
+   * @return int Numero di circolari correttamente archiviate (0 o 1)
+   */
+  public function documentoCircolare(Circolare $circolare): int {
     // inizializza
     $msg = array();
     $fs = new Filesystem();
+    $num = 1;
     // percorso destinazione
     $percorso = $this->root.'/circolari';
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
     }
-    // legge circolari dell'A.S.
-    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
-    $circolari = $this->em->getRepository('App\Entity\Circolare')->findBy(['pubblicata' => true, 'anno' => $anno],
-      ['numero' => 'ASC']);
-    $numCircolari = 0;
-    foreach ($circolari as $circolare) {
-      $errore = false;
-      // copia circolare
-      $file = new File($this->dirCircolari.'/'.$circolare->getDocumento());
+    // copia circolare
+    $file = new File($this->dirCircolari.'/'.$circolare->getDocumento());
+    $nuovofile = $percorso.'/circolare-'.str_pad($circolare->getNumero(), 3, '0', STR_PAD_LEFT).
+      '-del-'.$circolare->getData()->format('d-m-Y').'.'.$file->getExtension();
+    $fs->copy($file->getPathname(), $nuovofile, true);
+    // controllo esistenza del file
+    if (!$fs->exists($file)) {
+      // segnala errore
+      $this->reqstack->getSession()->getFlashBag()->add('warning', 
+        'Circolare n. '.$circolare->getNumero().' del '.$circolare->getData()->format('d-m-Y').
+        ' non creata.');
+      $num = 0;
+    }
+    // copia allegati
+    foreach ($circolare->getAllegati() as $k=>$allegato) {
+      $file = new File($this->dirCircolari.'/'.$allegato);
       $nuovofile = $percorso.'/circolare-'.str_pad($circolare->getNumero(), 3, '0', STR_PAD_LEFT).
-        '-del-'.$circolare->getData()->format('d-m-Y').'.'.$file->getExtension();
+        '-del-'.$circolare->getData()->format('d-m-Y').
+        '-allegato-'.($k + 1).'.'.$file->getExtension();
       $fs->copy($file->getPathname(), $nuovofile, true);
-      //controllo esistenza del file
+      // controllo esistenza del file
       if (!$fs->exists($file)) {
         // segnala errore
-        $msg['warning'][] = 'Circolare n. '.$circolare->getNumero().' del '.$circolare->getData()->format('d-m-Y').
-          ' non creata.';
-        $errore = true;
-      }
-      // copia allegati
-      foreach ($circolare->getAllegati() as $k=>$allegato) {
-        $file = new File($this->dirCircolari.'/'.$allegato);
-        $nuovofile = $percorso.'/circolare-'.str_pad($circolare->getNumero(), 3, '0', STR_PAD_LEFT).
-          '-del-'.$circolare->getData()->format('d-m-Y').
-          '-allegato-'.($k + 1).'.'.$file->getExtension();
-        $fs->copy($file->getPathname(), $nuovofile, true);
-        //controllo esistenza del file
-        if (!$fs->exists($file)) {
-          // segnala errore
-          $msg['warning'][] = 'Allegato n. '.($k + 1).' della circolare n. '.$circolare->getNumero().
-            ' non creato.';
-          $errore = true;
-        }
-      }
-      if (!$errore) {
-        // circolare ok
-        $numCircolari++;
+        $this->reqstack->getSession()->getFlashBag()->add('warning', 
+          'Allegato n. '.($k + 1).' della circolare n. '.$circolare->getNumero().
+          ' non creato.');
+        $num = 0;
       }
     }
-    if ($numCircolari > 0) {
-      // circolari create
-      $msg['success'][] = 'Sono state archiviate '.$numCircolari.' circolari.';
-    } else {
-      // nessuna circolare archiviata
-      $msg['warning'][] = 'Non è stata archiviata nessuna circolare.';
-    }
-    // crea messaggi
-    foreach ($msg as $c=>$m1) {
-      foreach ($m1 as $m) {
-        $this->reqstack->getSession()->getFlashBag()->add($c, $m);
-      }
-    }
+    // restituisce numero circolari archiviate
+    return $num;
   }
 
 }
