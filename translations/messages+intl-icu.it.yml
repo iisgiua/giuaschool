@@ -1278,25 +1278,36 @@ message.password: "Inserisci la username e la password (due volte).<br>
 message.alias: "Inserisci la username dell'utente che vuoi impersonare.<br>
   I campi contrassegnati con l'asterisco (*) sono obbligatori."
 message.nuovo_anno_0: "<strong>Prima di procedere, assicurati di avere effettuato le seguenti operazioni:<br>
-  1) archiviazione dei documenti;<br>
+  1) archiviazione di tutti i documenti, perché saranno cancellati;<br>
   2) backup completo (file e database), per poter effettuare il ripristino in caso di problemi;<br>
   3) posto il sito in modalità manutenzione e disconnesso tutti gli altri utenti collegati.</strong><br><br>
-  <em>Cliccando sul pulsante INIZIA saranno rimossi tutti i documenti non necessari.</em>"
-message.nuovo_anno_1: "<strong>Verrà ora effettuato lo svuotamento delle tabelle dai dati del precedente anno scolastico.</strong><br><br>
-  <em>Cliccando sul pulsante CONTINUA saranno rimossi i dati non necessari.</em>"
+  <em>Cliccando sul pulsante INIZIA sarà effettuata la pulizia iniziale dei dati presenti sul database.</em>"
+message.nuovo_anno_1: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  * recupero degli esiti degli scrutini;<br>
+  * passaggio di classe degli alunni promossi.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
 message.nuovo_anno_2: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
-  1) recupero delle circolari dello scorso anno scolastico;<br>
-  2) rimozione degli utenti disabilitati.</strong><br><br>
+  * recupero delle circolari.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
 message.nuovo_anno_3: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
-  1) recupero degli esiti scolastici dello scorso anno;<br>
-  2) passaggio di classe degli alunni promossi;<br>
-  3) rimozione degli alunni in uscita;<br>
-  4) impostazione nella configurazione del nuovo anno scolastico.</strong><br><br>
+  * pulizia degli avvisi.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_4: "<strong>Verrà ora effettuato lo svuotamento della cache di sistema.</strong><br><br>
-  <em>Cliccando sul pulsante CONTINUA sarà svuotata la cache.</em>"
-message.nuovo_anno_5: "<strong>Le operazioni per il passaggio al nuovo anno sono state completate.</strong><br><br>
+message.nuovo_anno_4: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  * pulizia dei documenti e recupero di quelli relativi ai BES.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_5: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  * recupero dei documenti degli scrutini.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_6: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  * rimozione degli utenti disabilitati;<br>
+  * rimozione degli alunni in uscita.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_7: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  * pulizia finale;<br>
+  * impostazione nella configurazione del nuovo anno scolastico;<br>
+  * svuotamento della cache di sistema.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_8: "<strong>Le operazioni per il passaggio al nuovo anno sono state completate.</strong><br><br>
   <em>Si può ora continuare con la configurazione dei parametri per il nuovo anno scolastico.</em>"
 message.archivia: "Seleziona i documenti da archiviare."
 message.modifica_alunno: "Inserisci i dati dell'alunno e del genitore. Se si modifica la classe, verrà inserito il nuovo valore senza gestire il cambio classe.<br>

@@ -21,6 +21,7 @@ use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
 use App\Util\LogHandler;
 use App\Util\TelegramManager;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -28,6 +29,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -359,91 +361,36 @@ class SistemaController extends BaseController {
       $fs = new Filesystem();
       $finder = new Finder();
       $path = $this->getParameter('kernel.project_dir').'/FILES';
+      $connection = $this->em->getConnection();
       // assicura che lo script non sia interrotto
       ini_set('max_execution_time', 0);
       switch($step) {
-        case 1: // pulizia file
-          // directory da svuotare
-          $finder->files()->in($path.'/tmp')->in($path.'/upload/documenti')->depth('== 0')->notName('.gitkeep');;
-          $fs->remove($finder);
-          $finder = new Finder();
-          $finder->files()->in($path.'/upload/avvisi')->depth('== 0')->notName('.gitkeep')
-            ->date('< '.$info['nuovoAnno'].'-09-01');
-          // sposta circolari in directory dell'anno
-          $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
-          $finder = new Finder();
-          $finder->files()->in($path.'/upload/circolari')->depth('== 0')->notName('.gitkeep');
-          foreach ($finder as $file) {
-            $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$file->getFilename());
-          }
-          // sposta documenti BES
-          $fs->mkdir($path.'/upload/documenti/riservati', 0770);
-          $finder = new Finder();
-          $finder->directories()->in($path.'/archivio/classi')->name('riservato');
-          foreach ($finder as $dir) {
-            $finder2 = new Finder();
-            $finder2->files()->in($dir->getPathname());
-            foreach ($finder2 as $file) {
-              $fs->rename($file, $path.'/upload/documenti/riservati/'.$file->getFilename());
-            }
-          }
-          // sposta documenti scrutini
-          $fs->remove([$path.'/archivio/scrutini/storico']);
-          $fs->mkdir($path.'/archivio/scrutini/storico', 0770);
-          $finder = new Finder();
-          $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')
-            ->name(['finale', 'giudizio-sospeso', 'rinviato']);
-          foreach ($finder as $dir) {
-            $finder2 = new Finder();
-            $finder2->files()->in($dir->getPathname())->depth('== 1')
-              ->name(['*-riepilogo-voti.pdf', '*-verbale.pdf']);
-            foreach ($finder2 as $file) {
-              $classe = $file->getPathInfo()->getFilename();
-              $fs->mkdir($path.'/archivio/scrutini/storico/'.$classe, 0770);
-              $fs->rename($file, $path.'/archivio/scrutini/storico/'.$classe.'/'.$file->getFilename());
-            }
-          }
-          // elimina directory di archiviazione
-          $fs->remove([$path.'/archivio/circolari', $path.'/archivio/classi', $path.'/archivio/registri']);
-          $fs->appendToFile($path.'/archivio/circolari/.gitkeep', '');
-          $fs->appendToFile($path.'/archivio/classi/.gitkeep', '');
-          $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
-          $finder = new Finder();
-          $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')->exclude('storico');
-          foreach ($finder as $dir) {
-            $fs->remove([$dir->getPathname()]);
-          }
-          $this->addFlash('success', 'message.tutte_operazioni_ok');
-          break;
-        case 2: // pulizia tabelle
+        case 1: // pulizia iniziale db
           // cancella tabelle
-          $connection = $this->em->getConnection();
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
             "TRUNCATE gs_annotazione;",
             "TRUNCATE gs_assenza;",
             "TRUNCATE gs_assenza_lezione;",
-            "TRUNCATE gs_avviso_classe;",
-            "TRUNCATE gs_avviso_sede;",
             "TRUNCATE gs_cambio_classe;",
-            "TRUNCATE gs_circolare_classe;",
-            "TRUNCATE gs_circolare_sede;",
             "TRUNCATE gs_colloquio;",
             "TRUNCATE gs_definizione_consiglio;",
             "TRUNCATE gs_deroga_assenza;",
             "TRUNCATE gs_entrata;",
             "TRUNCATE gs_festivita;",
             "TRUNCATE gs_firma;",
-            "TRUNCATE gs_firma_circolare;",
             "TRUNCATE gs_lezione;",
             "TRUNCATE gs_log;",
+            "TRUNCATE gs_messenger_messages;",
             "TRUNCATE gs_nota;",
             "TRUNCATE gs_nota_alunno;",
             "TRUNCATE gs_orario;",
             "TRUNCATE gs_orario_docente;",
             "TRUNCATE gs_osservazione;",
+            "TRUNCATE gs_presenza;",
             "TRUNCATE gs_proposta_voto;",
             "TRUNCATE gs_provisioning;",
+            "TRUNCATE gs_richiesta;",
             "TRUNCATE gs_richiesta_colloquio;",
             "TRUNCATE gs_scansione_oraria;",
             "TRUNCATE gs_spid;",
@@ -451,59 +398,10 @@ class SistemaController extends BaseController {
             "TRUNCATE gs_storico_voto;",
             "TRUNCATE gs_uscita;",
             "TRUNCATE gs_valutazione;",
-            "SET FOREIGN_KEY_CHECKS = 1;"
-          ];
+            "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
-            $connection->prepare($sql)->execute();
+            $connection->executeStatement($sql);
           }
-          // elimina destinatari per vecchie circolari
-          $sql = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
-            ->select('c.id')
-            ->where('c.anno=:anno')
-            ->getDql();
-          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
-            ->delete()
-            ->where('cu.circolare NOT IN ('.$sql.')')
-            ->setParameters(['anno' => $info['nuovoAnno']])
-            ->getQuery()
-            ->getResult();
-          $sql = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
-            ->select('u.id')
-            ->where('u.abilitato=:no')
-            ->getDql();
-          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
-            ->delete()
-            ->where('cu.utente IN ('.$sql.')')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          // conserva avvisi dal 01/09
-          $sql = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
-            ->select('a.id')
-            ->where('a.data>=:data')
-            ->getDql();
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
-            ->delete()
-            ->where('au.avviso NOT IN ('.$sql.')')
-            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
-            ->getQuery()
-            ->getResult();
-          $sql = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
-            ->select('u.id')
-            ->where('u.abilitato=:no')
-            ->getDql();
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
-            ->delete()
-            ->where('au.utente IN ('.$sql.')')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
-            ->delete()
-            ->where('a.data<:data')
-            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
-            ->getQuery()
-            ->getResult();
           // pulisce classi da coordinatori e segretari
           $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
             ->update()
@@ -511,136 +409,21 @@ class SistemaController extends BaseController {
             ->set('c.segretario', ':nessuno')
             ->setParameters(['nessuno' => null])
             ->getQuery()
-            ->getResult();
-          $this->addFlash('success', 'message.tutte_operazioni_ok');
-          break;
-        case 3: // gestione tabelle particolari
-          // gestione circolari
-          $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
-            ->update()
-            ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
-            ->where('c.anno=:anno and c.pubblicata=:si')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1])
-            ->getQuery()
-            ->getResult();
-          $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
-            ->where('c.anno=:anno and c.pubblicata=:si')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1])
-            ->getQuery()
-            ->getResult();
-          foreach ($circolari as $circolare) {
-            $allegati = $circolare->getAllegati();
-            if (!empty($allegati)) {
-              $nuoviAllegati = [];
-              foreach ($allegati as $allegato) {
-                $nuoviAllegati[] = $info['vecchioAnno'].'/'.$allegato;
-              }
-              $circolare->setAllegati($nuoviAllegati);
-            }
-          }
-          $this->em->flush();
-          $this->em->clear();
-          // gestione documenti BES
-          $documenti = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
-            ->where('d.tipo IN (:tipi)')
-            ->setParameters(['tipi' => ['B', 'D', 'H']])
-            ->getQuery()
-            ->getResult();
-          // crea report temporaneo per reinstallazione documenti BES
-          $fh = fopen($path.'/upload/documenti/riservati.csv', 'w');
-          $header = ['alunno', 'tipo', 'cifrato', 'titolo', 'nome', 'estensione', 'dimensione', 'file'];
-          fputcsv($fh, $header);
-          foreach ($documenti as $documento) {
-            $allegato = $documento->getAllegati()[0];
-            $record = [
-              $documento->getAlunno()->getId(),
-              $documento->getTipo(),
-              $documento->getCifrato(),
-              $allegato->getTitolo(),
-              $allegato->getNome(),
-              $allegato->getEstensione(),
-              $allegato->getDimensione(),
-              $allegato->getFile()];
-            fputcsv($fh, $record);
-          }
-          fclose($fh);
-          $connection = $this->em->getConnection();
-          $sqlCommands = [
-            "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_documento;",
-            "TRUNCATE gs_documento_file;",
-            "TRUNCATE gs_file;",
-            "TRUNCATE gs_lista_destinatari;",
-            "TRUNCATE gs_lista_destinatari_classe;",
-            "TRUNCATE gs_lista_destinatari_sede;",
-            "TRUNCATE gs_lista_destinatari_utente;",
-            "SET FOREIGN_KEY_CHECKS = 1;"];
-          foreach ($sqlCommands as $sql) {
-            $connection->prepare($sql)->execute();
-          }
-          // rimozione utenti disabilitati
-          $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-            ->update()
-            ->set('c.alunno', ':nullo')
-            ->setParameters(['nullo' => NULL])
-            ->getQuery()
-            ->getResult();
-          $subquery = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
-              ->select('d.id')
-              ->where('d.abilitato=:no')
-              ->getDql();
-          $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-            ->delete()
-            ->where('c.docente IN ('.$subquery.')')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
-            ->delete()
-            ->where('d.abilitato=:no')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Ata')->createQueryBuilder('a')
-            ->delete()
-            ->where('a.abilitato=:no')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
-            ->delete()
-            ->where('g.abilitato=:no')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $subquery = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-              ->select('a.id')
-              ->where('a.abilitato=:no')
-              ->getDql();
-          $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
-            ->delete()
-            ->where('e.alunno IN ('.$subquery.')')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
-            ->delete()
-            ->where('vs.alunno IN ('.$subquery.')')
-            ->setParameters(['no' => 0])
-            ->getQuery()
-            ->getResult();
+            ->execute();
+          // cancella dati annuali alunni 
           $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->delete()
-            ->where('a.abilitato=:no')
-            ->setParameters(['no' => 0])
+            ->update()
+            ->set('a.autorizzaEntrata', ':no')
+            ->set('a.autorizzaUscita', ':no')
+            ->set('a.frequenzaEstero', ':falso')
+            ->setParameters(['no' => null, 'falso' => 0])
             ->getQuery()
             ->getResult();
+          // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 4: // gestione esiti
+        case 2: // gestione esiti
           // scrutini finali
-          $alunniSospesi = [];
-          $alunniAmmessi = [];
           $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
             ->where('s.periodo=:finale')
             ->setParameters(['finale' => 'F'])
@@ -652,174 +435,118 @@ class SistemaController extends BaseController {
               function($v) {
                 return empty($v['deroga']);
               }));
-            foreach ($noScrutinabili as $alu) {
-              $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu);
-              $esito = (new StoricoEsito())
-                ->setClasse($scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione())
-                ->setEsito('L')
-                ->setPeriodo('F')
-                ->setAlunno($alunno);
-              $this->em->persist($esito);
+            if (!empty($noScrutinabili)) {
+              $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
+                "SELECT NOW(), NOW(), a.id, :classe, 'L', 'F', 0, 0, 0, 'a:0:{}' ".
+                "FROM gs_utente a ".
+                "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
+              $connection->executeStatement($sql, [
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'lista' => $noScrutinabili], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // anno all'estero
             $estero = $scrutinio->getDato('estero') ?? [];
-            foreach ($estero as $alu) {
-              $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu);
-              $esito = (new StoricoEsito())
-                ->setClasse($scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione())
-                ->setEsito('E')
-                ->setPeriodo('F')
-                ->setAlunno($alunno);
-              $this->em->persist($esito);
+            if (!empty($estero)) {
+              $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
+                "SELECT NOW(), NOW(), a.id, :classe, 'E', 'F', 0, 0, 0, 'a:0:{}' ".
+                "FROM gs_utente a ".
+                "WHERE a.id IN (:lista) AND a.ruolo = 'ALU';";
+              $connection->executeStatement($sql, [
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'lista' => $estero], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // alunni scrutinati
             $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
-            foreach ($scrutinabili as $alu) {
-              $esitoScrutinio = $this->em->getRepository('App\Entity\Esito')->findOneBy(['alunno' => $alu,
-                'scrutinio' => $scrutinio]);
-              if ($esitoScrutinio && $esitoScrutinio->getEsito() == 'S') {
-                // sospesi
-                $alunniSospesi[$alu]['carenze'] = $esitoScrutinio->getDati()['carenze_materie'] ?? [];
-                $votiScrutinio = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
-                  ->where('vs.alunno=:alunno AND vs.scrutinio=:scrutinio AND vs.unico < 6')
-                  ->setParameters(['alunno' => $alu, 'scrutinio' => $scrutinio])
-                  ->getQuery()
-                  ->getResult();
-                foreach ($votiScrutinio as $vs) {
-                  $alunniSospesi[$alu]['debiti'][] = $vs->getMateria()->getNomeBreve();
-                }
-              } elseif ($esitoScrutinio &&
-                        ($scrutinio->getClasse()->getAnno() != 5 || $esitoScrutinio->getEsito() == 'N')) {
-                // ammessi e non ammessi
-                if ($esitoScrutinio->getEsito() == 'A') {
-                  $alunniAmmessi[] = $alu;
-                }
-                $esito = (new StoricoEsito())
-                  ->setClasse($scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione())
-                  ->setEsito($esitoScrutinio->getEsito())
-                  ->setPeriodo('F')
-                  ->setAlunno($esitoScrutinio->getAlunno())
-                  ->setMedia($esitoScrutinio->getMedia())
-                  ->setCredito($esitoScrutinio->getCredito())
-                  ->setCreditoPrecedente($esitoScrutinio->getCreditoPrecedente())
-                  ->setDati($esitoScrutinio->getDati());
-                $this->em->persist($esito);
-                // legge voti
-                $carenzeMaterie = $esitoScrutinio->getDati()['carenze_materie'] ?? [];
-                $votiScrutinio = $this->em->getRepository('App\Entity\VotoScrutinio')->findBy(['alunno' => $alu,
-                  'scrutinio' => $scrutinio]);
-                foreach($votiScrutinio as $vs) {
-                  $carenze = '';
-                  $datiVoto = [];
-                  if ($esitoScrutinio->getEsito() == 'A' && !empty($carenzeMaterie) &&
-                      in_array($vs->getMateria()->getNomeBreve(), $carenzeMaterie, true)) {
-                    $carenze = $vs->getDebito();
-                    $datiVoto['carenza'] = 'C';
-                  }
-                  $voto = (new StoricoVoto())
-                    ->setStoricoEsito($esito)
-                    ->setMateria($vs->getMateria())
-                    ->setVoto($vs->getUnico())
-                    ->setCarenze($carenze)
-                    ->setDati($datiVoto);
-                  $this->em->persist($voto);
-                }
-              }
-            }
+            $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
+              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
+              "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
+              "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
+              "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
+              "AND s.id = :scrutinio ".
+              "AND e.esito IN ('A', 'N') ".
+              "AND (c.anno != 5 OR e.esito = 'N');";
+            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
+              'scrutinio' => $scrutinio->getId()], 
+              ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
+            $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
+              "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
+              "  vs.materia_id, vs.unico, '', 'a:0:{}' ".
+              "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_voto_scrutinio vs ".
+              "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
+              "AND vs.scrutinio_id = s.id AND vs.alunno_id = a.id ".
+              "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
+              "AND s.id = :scrutinio ".
+              "AND e.esito IN ('A', 'N') ".
+              "AND (c.anno != 5 OR e.esito = 'N');";
+            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
+              'scrutinio' => $scrutinio->getId()], 
+              ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
           }
-          $this->em->flush();
-          $this->em->clear();
           // scrutini sospesi
-          $esitiScrutini = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
-            ->join('e.scrutinio', 's')
-            ->where('e.alunno IN (:alunni) AND e.esito IN (:esiti) AND s.periodo IN (:periodi)')
-            ->setParameters(['alunni' => array_keys($alunniSospesi), 'esiti' => ['A', 'N'],
-              'periodi' => ['G', 'R']])
-            ->getQuery()
-            ->getResult();
-          foreach ($esitiScrutini as $es) {
-            // ammessi e non ammessi
-            if ($es->getEsito() == 'A') {
-              $alunniAmmessi[] = $es->getAlunno()->getId();
-            }
-            $esito = (new StoricoEsito())
-              ->setClasse($es->getScrutinio()->getClasse()->getAnno().$es->getScrutinio()->getClasse()->getSezione())
-              ->setEsito($es->getEsito())
-              ->setPeriodo('G')
-              ->setAlunno($es->getAlunno())
-              ->setMedia($es->getMedia())
-              ->setCredito($es->getCredito())
-              ->setCreditoPrecedente($es->getCreditoPrecedente())
-              ->setDati($es->getDati());
-            $this->em->persist($esito);
-            // legge voti
-            $votiScrutinio = $this->em->getRepository('App\Entity\VotoScrutinio')->findBy([
-              'alunno' => $es->getAlunno(), 'scrutinio' => $es->getScrutinio()]);
-            foreach($votiScrutinio as $vs) {
-              $carenze = '';
-              $datiVoto = [];
-              if ($esitoScrutinio->getEsito() == 'A') {
-                if (in_array($vs->getMateria()->getNomeBreve(),
-                    $alunniSospesi[$es->getAlunno()->getId()]['debiti'], true)) {
-                  $carenze = $vs->getDebito();
-                  $datiVoto['carenza'] = 'D';
-                } elseif (in_array($vs->getMateria()->getNomeBreve(),
-                          $alunniSospesi[$es->getAlunno()->getId()]['carenze'], true)) {
-                  $carenze = $vs->getDebito();
-                  $datiVoto['carenza'] = 'C';
-                }
-              }
-              $voto = (new StoricoVoto())
-                ->setStoricoEsito($esito)
-                ->setMateria($vs->getMateria())
-                ->setVoto($vs->getUnico())
-                ->setCarenze($carenze)
-                ->setDati($datiVoto);
-              $this->em->persist($voto);
-            }
-            unset($alunniSospesi[$es->getAlunno()->getId()]);
-          }
-          $this->em->flush();
-          $this->em->clear();
-          // esiti scrutini rinviati
-          $esitiScrutini = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
-            ->join('e.scrutinio', 's')
-            ->where('e.alunno IN (:alunni) AND s.periodo=:periodo')
-            ->setParameters(['alunni' => array_keys($alunniSospesi), 'periodo' => 'F'])
-            ->getQuery()
-            ->getResult();
-          foreach ($esitiScrutini as $es) {
-            $esito = (new StoricoEsito())
-              ->setClasse($es->getScrutinio()->getClasse()->getAnno().$es->getScrutinio()->getClasse()->getSezione())
-              ->setEsito($es->getEsito())
-              ->setPeriodo('X')
-              ->setAlunno($es->getAlunno())
-              ->setMedia($es->getMedia())
-              ->setCredito($es->getCredito())
-              ->setCreditoPrecedente($es->getCreditoPrecedente())
-              ->setDati($es->getDati());
-            $this->em->persist($esito);
-            // legge voti
-            $votiScrutinio = $this->em->getRepository('App\Entity\VotoScrutinio')->findBy([
-              'alunno' => $es->getAlunno(), 'scrutinio' => $es->getScrutinio()]);
-            foreach($votiScrutinio as $vs) {
-              $voto = (new StoricoVoto())
-                ->setStoricoEsito($esito)
-                ->setMateria($vs->getMateria())
-                ->setVoto($vs->getUnico())
-                ->setCarenze('')
-                ->setDati([]);
-              $this->em->persist($voto);
-            }
-          }
-          $this->em->flush();
-          $this->em->clear();
-          // scrutini rinviati al successivo A.S.
-          $datiScrutinio = [] ;
+          $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
+            "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
+            "AND e.esito IN ('A', 'N') AND s.periodo IN ('G', 'R');";
+          $connection->executeStatement($sql);
+          $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
+            "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
+            "  vs.materia_id, vs.unico, '', 'a:0:{}' ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_voto_scrutinio vs ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
+            "AND vs.scrutinio_id = s.id AND vs.alunno_id = a.id ".
+            "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
+            "AND e.esito IN ('A', 'N') AND s.periodo IN ('G', 'R');";
+          $connection->executeStatement($sql);
+          // esiti scrutini rinviati al nuovo A.S.
+          $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'X', e.media, e.credito, ".
+            "  e.credito_precedente, e.dati ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2 ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
+            "AND a.ruolo = 'ALU' ".
+            "AND e.esito = 'S' AND e2.esito = 'X' AND s.periodo = 'F' ".
+            "AND NOT EXISTS (SELECT id FROM gs_esito WHERE alunno_id = e.alunno_id AND esito IN ('A', 'N'));";
+          $connection->executeStatement($sql);
+          $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
+            "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
+            "  vs.materia_id, vs.unico, '', 'a:0:{}' ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_voto_scrutinio vs ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
+            "AND vs.scrutinio_id = s.id AND vs.alunno_id = a.id ".
+            "AND a.ruolo = 'ALU' ".
+            "AND e.esito = 'S' AND e2.esito = 'X' AND s.periodo = 'F' ".
+            "AND NOT EXISTS (SELECT id FROM gs_esito WHERE alunno_id = e.alunno_id AND esito IN ('A', 'N'));";
+          $connection->executeStatement($sql);
+          // aggiunge dati carenze/debiti per ammessi
+          $sql = "UPDATE gs_storico_voto sv ".
+            "INNER JOIN gs_storico_esito se ON sv.storico_esito_id = se.id ".
+            "INNER JOIN gs_esito e ON e.alunno_id = se.alunno_id ".
+            "INNER JOIN gs_scrutinio s ON s.id = e.scrutinio_id ".
+            "INNER JOIN gs_voto_scrutinio vs ON vs.scrutinio_id = s.id AND vs.alunno_id = se.alunno_id ".
+            "INNER JOIN gs_materia m ON m.id = vs.materia_id AND m.id = sv.materia_id ".
+            "SET sv.carenze = vs.debito, sv.dati= 'a:1:{s:7:\"carenza\";s:1:\"C\";}' ".
+            "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S')".
+            "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
+          $connection->executeStatement($sql);
+          $sql = "UPDATE gs_storico_voto sv ".
+            "INNER JOIN gs_storico_esito se ON sv.storico_esito_id = se.id ".
+            "INNER JOIN gs_esito e ON e.alunno_id = se.alunno_id ".
+            "INNER JOIN gs_scrutinio s ON s.id = e.scrutinio_id ".
+            "INNER JOIN gs_voto_scrutinio vs ON vs.scrutinio_id = s.id AND vs.alunno_id = se.alunno_id ".
+            "INNER JOIN gs_materia m ON m.id = vs.materia_id AND m.id = sv.materia_id ".
+            "SET sv.carenze = vs.debito, sv.dati= 'a:1:{s:7:\"carenza\";s:1:\"D\";}' ".
+            "WHERE s.periodo = 'F' AND e.esito = 'S' AND se.esito IN ('A', 'S') ".
+            "AND vs.unico < 6;";
+          $connection->executeStatement($sql);
+          // dati scrutini rinviati al nuovo A.S.
+          $datiScrutinio = [];
           $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
             ->join('App\Entity\Esito', 'e', 'WITH', 'e.scrutinio=s.id')
-            ->where('s.periodo=:periodo AND e.esito=:esito')
-            ->setParameters(['periodo' => 'G', 'esito' => 'X'])
+            ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=e.alunno')
+            ->where('s.periodo=:periodo AND se.periodo=:rinviato')
+            ->setParameters(['periodo' => 'F', 'rinviato' => 'X'])
             ->getQuery()
             ->getResult();
           foreach ($scrutini as $scrutinio) {
@@ -838,9 +565,9 @@ class SistemaController extends BaseController {
             $dati['materie'][] = $condotta->getId();
             // dati alunni
             $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-              ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id')
-              ->where('e.scrutinio=:scrutinio AND e.esito=:esito')
-              ->setParameters(['scrutinio' => $scrutinio, 'esito' => 'X'])
+              ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+              ->where('se.periodo=:rinviato AND a.classe=:classe')
+              ->setParameters(['rinviato' => 'X', 'classe' => $scrutinio->getClasse()])
               ->getQuery()
               ->getResult();
             foreach ($alunni as $alunno) {
@@ -880,40 +607,7 @@ class SistemaController extends BaseController {
             // memorizza dati scrutinio
             $datiScrutinio[] = ['classe' => $scrutinio->getClasse()->getId(), 'dati' => $dati];
           }
-          // gestione alunni promossi
-          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->join('a.classe', 'c')
-            ->where('a.id IN (:alunni)')
-            ->setParameters(['alunni' => $alunniAmmessi])
-            ->getQuery()
-            ->getResult();
-          foreach ($alunni as $alunno) {
-            // imposta nuova classe (o null se non esiste)
-            $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy([
-              'anno' => 1 + $alunno->getClasse()->getAnno(), 'sezione' => $alunno->getClasse()->getSezione()]);
-            $alunno->setClasse($classe);
-          }
-          $this->em->flush();
-          $this->em->clear();
-          // gestione alunni in uscita
-          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->join('a.classe', 'c')
-            ->join('App\Entity\Scrutinio', 's', 'WITH', 's.classe=c.id AND s.periodo=:periodo')
-            ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
-            ->leftJoin('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
-            ->where('c.anno=:quinta AND e.esito=:ammesso AND se.id IS NULL')
-            ->setParameters(['periodo' => 'F', 'quinta' => 5, 'ammesso' => 'A'])
-            ->getQuery()
-            ->getResult();
-          $alunniEliminati = array_map(function($o) { return $o->getId(); }, $alunni);
-          $genitori = $this->em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
-            ->join('g.alunno', 'a')
-            ->where('a.id IN (:lista)')
-            ->setParameters(['lista' => $alunniEliminati])
-            ->getQuery()
-            ->getResult();
-          $genitoriEliminati = array_map(function($o) { return $o->getId(); }, $genitori);
-          // svuota tabelle non più necessarie (ed evita conflitti con comandi successivi)
+          // svuota tabelle non più necessarie
           $connection = $this->em->getConnection();
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
@@ -923,33 +617,8 @@ class SistemaController extends BaseController {
             "TRUNCATE gs_voto_scrutinio;",
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
-            $connection->prepare($sql)->execute();
-          }
-          // elimina utenti
-          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
-            ->delete()
-            ->where('cu.utente IN (:lista)')
-            ->setParameters(['lista' => array_merge($genitoriEliminati, $alunniEliminati)])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
-            ->delete()
-            ->where('au.utente IN (:lista)')
-            ->setParameters(['lista' => array_merge($genitoriEliminati, $alunniEliminati)])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
-            ->delete()
-            ->where('g.id IN (:lista)')
-            ->setParameters(['lista' => $genitoriEliminati])
-            ->getQuery()
-            ->getResult();
-          $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->delete()
-            ->where('a.id IN (:lista)')
-            ->setParameters(['lista' => $alunniEliminati])
-            ->getQuery()
-            ->getResult();
+            $connection->executeStatement($sql);
+          }        
           // aggiunge scrutini rinviati
           foreach ($datiScrutinio as $dati) {
             $classe = $this->em->getRepository('App\Entity\Classe')->find($dati['classe']);
@@ -977,36 +646,363 @@ class SistemaController extends BaseController {
               ->setStruttura($struttura);
             $this->em->persist($defScrutinio);
           }
-          // memorizza dati
           $this->em->flush();
-          $this->em->clear();
-          // cancella deroghe alunni anno precedente
-          $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->update()
-            ->set('a.autorizzaEntrata', ':no')
-            ->set('a.autorizzaUscita', ':no')
-            ->setParameters(['no' => null])
+          // gestione alunni promossi
+          $sql = "UPDATE gs_utente a ".
+            "INNER JOIN gs_storico_esito se ON se.alunno_id = a.id ".
+            "INNER JOIN gs_classe c ON c.id = a.classe_id ".            
+            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione) ".
+            "WHERE a.ruolo = 'ALU' AND se.esito IN ('A', 'E');";
+          $connection->executeStatement($sql);
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 3: // gestione circolari          
+          // crea nuova directory
+          $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
+          // legge circolari pubblicate prima del 1/9 e non già modificate
+          $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+            ->where('c.anno=:anno AND c.pubblicata=:si AND c.data<:inizio AND c.documento NOT LIKE :modificato')
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+            'inizio' => $info['nuovoAnno'].'-09-01', 'modificato' => $info['vecchioAnno'].'/%'])
             ->getQuery()
             ->getResult();
+          // modifica path e sposta file 
+          foreach ($circolari as $circolare) {
+            // sposta file documento
+            $file = $path.'/upload/circolari/'.$circolare->getDocumento();
+            $fs->rename($file, 
+              $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$circolare->getDocumento());
+            // modifica path allegati
+            $allegati = $circolare->getAllegati();
+            $nuoviAllegati = [];
+            foreach ($allegati as $allegato) {
+              $file = $path.'/upload/circolari/'.$allegato;
+              $nuoviAllegati[] = $info['vecchioAnno'].'/'.$allegato;
+              $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$allegato);
+            }
+            // modifica path su db 
+            $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+            ->update()
+            ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
+            ->set('c.allegati', ':allegati')
+            ->where('c.id=:id')
+            ->setParameters(['anno' => $info['vecchioAnno'], 'allegati' => serialize($nuoviAllegati),
+              'id' => $circolare->getId()])
+            ->getQuery()
+            ->execute();
+          }            
+          // controlla presenza di circolari dal 1/9 in poi
+          $nuoveCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+            ->where('c.anno=:anno AND c.pubblicata=:si AND c.data>=:inizio')
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+              'inizio' => $info['nuovoAnno'].'-09-01'])
+            ->orderBy('c.numero', 'ASC')
+            ->getQuery()
+            ->getResult();
+          // circolari per il nuovo A.S.
+          $num = 1;
+          $dati['sede'] = [];
+          $dati['utente'] = [];
+          foreach ($nuoveCircolari as $circolare) {
+            // nuova numerazione
+            $circolare->setNumero($num)->setAnno($info['nuovoAnno']);
+            $num++;
+            // conserva dati sedi per nuove circolari
+            foreach ($circolare->getSedi() as $sede) {
+              $dati['sede'][] = ['circolare' => $circolare->getId(), 'sede' => $sede->getId()];
+            }
+            // conserva dati utenti per nuove circolari
+            $utenti = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+              ->select('(cu.circolare) AS circolare,(cu.utente) AS utente,cu.letta,cu.confermata')
+              ->where('cu.circolare=:circolare')
+              ->setParameters(['circolare' => $circolare->getId()])
+              ->getQuery()
+              ->getScalarResult();
+            $dati['utente'] = array_merge($dati['utente'], $utenti);
+          }
+          $this->em->flush();
+          // svuota tabelle dati destinatari
+          $sqlCommands = [
+            "TRUNCATE gs_circolare_classe;",
+            "TRUNCATE gs_circolare_sede;",
+            "TRUNCATE gs_circolare_utente;",
+            "TRUNCATE gs_firma_circolare;"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
+          // riscrive dati sede per nuove circolari
+          $sql = "INSERT INTO gs_circolare_sede (circolare_id, sede_id) ".
+            "VALUES (:circolare, :sede);";
+          foreach ($dati['sede'] as $sede) {
+            $connection->executeStatement($sql, $sede);
+          }
+          // riscrive dati utenti per nuove circolari
+          $sql = "INSERT INTO gs_circolare_utente (creato, modificato, circolare_id, utente_id, letta, confermata) ".
+            "VALUES (NOW(), NOW(), :circolare, :utente, :letta, :confermata);";
+          foreach ($dati['utente'] as $utente) {
+            $connection->executeStatement($sql, $utente);
+          }
+          // svuota directory di archiviazione circolari
+          $fs->remove($path.'/archivio/circolari');
+          $fs->appendToFile($path.'/archivio/circolari/.gitkeep', '');
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 4: // gestione avvisi 
+          // controlla presenza di avvisi dal 1/9 in poi
+          $nuoviAvvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            ->where('a.data>=:inizio AND a.cattedra IS NULL')
+            ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
+            ->getQuery()
+            ->getResult();
+          // avvisi per il nuovo A.S.
+          $nuoviFile = [];
+          $dati['sede'] = [];
+          $dati['utente'] = [];
+          foreach ($nuoviAvvisi as $avviso) {
+            // conserva allegati
+            $nuoviFile = array_merge($nuoviFile, $avviso->getAllegati());
+            // conserva dati sedi per nuovi avvisi
+            foreach ($avviso->getSedi() as $sede) {
+              $dati['sede'][] = ['avviso' => $avviso->getId(), 'sede' => $sede->getId()];
+            }
+            // conserva dati utenti per nuovi avvisi
+            $utenti = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+              ->select('(au.avviso) AS avviso,(au.utente) AS utente,au.letto')
+              ->where('au.avviso=:avviso')
+              ->setParameters(['avviso' => $avviso->getId()])
+              ->getQuery()
+              ->getScalarResult();
+            $dati['utente'] = array_merge($dati['utente'], $utenti);
+          }
+          // svuota tabelle dati destinatari
+          $sqlCommands = [
+            "TRUNCATE gs_avviso_classe;",
+            "TRUNCATE gs_avviso_sede;",
+            "TRUNCATE gs_avviso_utente;"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
+          // cancella vecchi avvisi
+          $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            ->delete()
+            ->where('a.data<:data OR a.cattedra IS NOT NULL')
+            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
+            ->getQuery()
+            ->execute();
+          // riscrive dati sede per nuovi avvisi
+          $sql = "INSERT INTO gs_avviso_sede (avviso_id, sede_id) ".
+            "VALUES (:avviso, :sede);";
+          foreach ($dati['sede'] as $sede) {
+            $connection->executeStatement($sql, $sede);
+          }
+          // riscrive dati utenti per nuovi avvisi
+          $sql = "INSERT INTO gs_avviso_utente (creato, modificato, avviso_id, utente_id, letto) ".
+            "VALUES (NOW(), NOW(), :avviso, :utente, :letto);";
+          foreach ($dati['utente'] as $utente) {
+            $connection->executeStatement($sql, $utente);
+          }
+          // cancella vecchi allegati
+          $finder->files()->in($path.'/upload/avvisi')->depth('== 0')->notName($nuoviFile);
+          $fs->remove($finder);
+          // sostituisce docente disabilitato
+          $preside = $this->em->getRepository('App\Entity\Preside')->findOneBy([]);
+          $sql = "UPDATE gs_avviso a ".
+            "INNER JOIN gs_utente d ON d.id = a.docente_id ".
+            "SET a.docente_id = :preside ".
+            "WHERE d.abilitato = 0;";
+          $connection->executeStatement($sql, ['preside' => $preside->getId()]);
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 5: // gestione documenti 
+          // directory da svuotare
+          $finder->in($path.'/upload/documenti')->notName('.gitkeep');
+          $fs->remove($finder);
+          // gestione documenti BES (alunni abilitati e con classe definita)
+          $documenti = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
+            ->join('d.alunno', 'a')
+            ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno = a.id')
+            ->where('d.tipo IN (:tipi) AND a.classe IS NOT NULL')
+            ->setParameters(['tipi' => ['B', 'D', 'H']])
+            ->getQuery()
+            ->getResult();
+          foreach ($documenti as $documento) {
+            // vecchio percorso
+            $file = $documento->getAllegati()[0]->getFile().'.'.
+              $documento->getAllegati()[0]->getEstensione();
+            $percorso1 = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().
+              '/riservato/';
+            // nuova classe e nuovo percorso
+            $documento->setClasse($documento->getAlunno()->getClasse());
+            $documento->getListaDestinatari()->setFiltroDocenti([$documento->getClasse()->getId()]);
+            $documento->getListaDestinatari()->setSedi(
+              new ArrayCollection([$documento->getClasse()->getSede()]));
+            $percorso2 = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().
+              '/riservato/';
+            if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
+              // sposta documento
+              $fs->mkdir($path.'/upload/documenti/'.$percorso2, 0770);
+              $fs->rename($path.'/archivio/classi/'.$percorso1.$file, 
+                $path.'/upload/documenti/'.$percorso2.$file);
+            } else {
+              // segna per la cancellazione
+              $documento->setAlunno(null);
+            }     
+          }
+          $this->em->flush();
+          // cancella dati documenti
+          $sqlCommands = [
+            "SET FOREIGN_KEY_CHECKS = 0;",
+            "TRUNCATE gs_lista_destinatari_classe;",
+            "TRUNCATE gs_lista_destinatari_utente;",
+            "SET FOREIGN_KEY_CHECKS = 1;",
+            "DELETE df FROM gs_documento_file df ".
+            "  INNER JOIN gs_documento d ON d.id = df.documento_id ".
+            "  LEFT JOIN gs_utente a ON a.id = d.alunno_id ".
+            "  WHERE d.tipo NOT IN ('B', 'D', 'H') OR a.classe_id IS NULL ".
+            "  OR NOT EXISTS (SELECT id FROM gs_storico_esito WHERE d.alunno_id = alunno_id);",
+            "DELETE d FROM gs_documento d ".
+            "  WHERE NOT EXISTS (SELECT file_id FROM gs_documento_file WHERE documento_id = d.id);",
+            "DELETE f FROM gs_file f ".
+            "  WHERE NOT EXISTS (SELECT documento_id FROM gs_documento_file WHERE file_id = f.id);",
+            "DELETE lds FROM gs_lista_destinatari_sede lds ".
+            "  WHERE NOT EXISTS (SELECT id FROM gs_documento WHERE lista_destinatari_id = lds.lista_destinatari_id);",
+            "DELETE ld FROM gs_lista_destinatari ld ".
+            "  WHERE NOT EXISTS (SELECT id FROM gs_documento WHERE lista_destinatari_id = ld.id);"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
+          // sostituisce docente disabilitato
+          $preside = $this->em->getRepository('App\Entity\Preside')->findOneBy([]);
+          $sql = "UPDATE gs_documento doc ".
+            "INNER JOIN gs_utente d ON d.id = doc.docente_id ".
+            "SET doc.docente_id = :preside ".
+            "WHERE d.abilitato = 0;";
+          $connection->executeStatement($sql, ['preside' => $preside->getId()]);
+          // svuota archivio documenti
+          $finder = new Finder();
+          $finder->in($path.'/archivio/classi')->notName('.gitkeep');
+          $fs->remove($finder);
+          // ripristina documenti 
+          $finder = new Finder();
+          $finder->files()->in($path.'/upload/documenti')->notName('.gitkeep');
+          foreach ($finder as $file) {
+            $percorso = substr($file->getPathname(), strpos($file->getPathname(), '/upload/documenti/') + 18);
+            $dir = substr($percorso, 0, - strlen($file->getBasename()) - 1);
+            $fs->mkdir($path.'/archivio/classi/'.$dir, 0770);
+            $fs->rename($file, $path.'/archivio/classi/'.$percorso);
+          }
+          $finder = new Finder();
+          $finder->in($path.'/upload/documenti')->notName('.gitkeep');
+          $fs->remove($finder);
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 6: // gestione documenti scrutini
+          // svuota storico
+          $fs->remove($path.'/archivio/scrutini/storico');
+          $fs->mkdir($path.'/archivio/scrutini/storico', 0770);
+          // sposta documenti in storico
+          $finder = new Finder();
+          $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')
+            ->name(['finale', 'giudizio-sospeso', 'rinviato']);
+          foreach ($finder as $dir) {
+            $finder2 = new Finder();
+            $finder2->files()->in($dir->getPathname())->depth('== 1')
+              ->name(['*-certificazioni.pdf', '*-riepilogo-voti.pdf', '*-verbale.pdf']);
+            foreach ($finder2 as $file) {
+              $classe = $file->getPathInfo()->getFilename();
+              $fs->mkdir($path.'/archivio/scrutini/storico/'.$classe, 0770);
+              $fs->rename($file, $path.'/archivio/scrutini/storico/'.$classe.'/'.$file->getFilename());
+            }
+          }
+          // svuota archivio scrutinio
+          $finder = new Finder();
+          $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')->exclude('storico');
+          foreach ($finder as $dir) {
+            $fs->remove($dir->getPathname());
+          }
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 7: // rimozione utenti
+          // svuota directory temp
+          $finder->files()->in($path.'/tmp')->depth('== 0')->notName('.gitkeep');
+          $fs->remove($finder);
+          // elenco alunni in uscita
+          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->leftJoin('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+            ->where('a.abilitato=:si AND se.id IS NULL')
+            ->setParameters(['si' => 1])
+            ->getQuery()
+            ->getResult();
+          // crea file CSV per info alunni disabilitati
+          $fh = fopen($path.'/tmp/alunni_disabilitati.csv', 'w');
+          $dati = ['email', 'classe'];
+          fputcsv($fh, $dati, ';');
+          foreach($alunni as $alunno) {
+            $dati = [$alunno->getEmail(), $alunno->getClasse() ?? '--'];
+            fputcsv($fh, $dati, ';');
+          }
+          fclose($fh);
+          // disabilita alunni/genitori e rimuove utenti disabilitati
+          $sqlCommands = [
+            "UPDATE gs_utente a ".
+            "  SET a.abilitato = 0 ".
+            "  WHERE a.ruolo = 'ALU' AND a.abilitato = 1 ".
+            "  AND NOT EXISTS (SELECT id FROM gs_storico_esito WHERE alunno_id = a.id);",
+            "UPDATE gs_utente g ".
+            "  INNER JOIN gs_utente a ON a.id = g.alunno_id ".
+            "  SET g.abilitato = 0 ".
+            "  WHERE g.ruolo = 'GEN' AND g.abilitato = 1 AND a.ruolo = 'ALU' AND a.abilitato = 0;",
+            "DELETE cu FROM gs_circolare_utente cu ".
+            "  INNER JOIN gs_utente u ON u.id = cu.utente_id ".
+            "  WHERE u.abilitato = 0;",
+            "DELETE au FROM gs_avviso_utente au ".
+            "  INNER JOIN gs_utente u ON u.id = au.utente_id ".
+            "  WHERE u.abilitato = 0;",
+            "UPDATE gs_utente u ".
+            "  SET alunno_id = null ".
+            "  WHERE u.abilitato = 0;",
+            "DELETE u FROM gs_utente u ".
+            "  WHERE u.abilitato = 0 ".
+            "  AND NOT EXISTS (SELECT id FROM gs_storico_esito WHERE alunno_id = u.id);"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
+          // messaggio finale
+          $this->addFlash('success', 'message.tutte_operazioni_ok');
+          break;
+        case 8: // pulizia finale 
+          // svuota archivio registri
+          $fs->remove($path.'/archivio/registri');
+          $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
           // parametro nuovo anno
           $this->em->getRepository('App\Entity\Configurazione')->setParametro('anno_scolastico',
             $info['nuovoAnno'].'/'.(1 + $info['nuovoAnno']));
-          $this->addFlash('success', 'message.tutte_operazioni_ok');
-          break;
-        case 5:
           // cancella cache
-          $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
-          // esegue comando
+          $commands = [
+            new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),
+            new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => true, '-n' => true, '-q' => true]),
+            new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => true, '-n' => true, '-q' => true]),
+          ];
+          // esegue comandi
           $application = new Application($kernel);
           $application->setAutoExit(false);
           $output = new BufferedOutput();
-          $status = $application->run($command, $output);
-          if ($status != 0) {
-            // errore nell'esecuzione del comando
-            $content = $output->fetch();
-            $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
-          } else {
-            // messaggio ok
+          foreach ($commands as $com) {
+            $status = $application->run($com, $output);
+            if ($status != 0) {
+              // errore nell'esecuzione del comando
+              $content = $output->fetch();
+              $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
+              break;
+            }
+          }
+          if ($status == 0) {
+            // messaggio finale
             $this->addFlash('success', 'message.tutte_operazioni_ok');
           }
           break;
@@ -1570,7 +1566,7 @@ class SistemaController extends BaseController {
       $password = $form->get('password')->getData();
       $host = $form->get('host')->getData();
       $port = $form->get('port')->getData();
-      $this->email = $form->get('email')->getData();
+      $email = $form->get('email')->getData();
       if (empty($this->reqstack->getSession()->get('/APP/ROUTE/sistema_email/invio'))) {
         // controlla errori
         if (!$server || !in_array($server, ['smtp', 'sendmail', 'gmail+smtp', 'php'], true)) {
@@ -1588,7 +1584,7 @@ class SistemaController extends BaseController {
         if ($server == 'smtp' && !$port) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_port')));
         }
-        if (!$this->email) {
+        if (!$email) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_email')));
         }
         if ($form->isValid()) {
@@ -1625,8 +1621,8 @@ class SistemaController extends BaseController {
               ['errore' => $output->fetch()])));
           } else {
             // ok: imposta sessione
-            $info['email'] = $this->email;
-            $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', $this->email);
+            $info['email'] = $email;
+            $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', $email);
           }
         }
       } else {
@@ -1640,7 +1636,7 @@ class SistemaController extends BaseController {
         // invia per email
         $message = (new Email())
           ->from($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'))
-          ->to($this->email)
+          ->to($email)
           ->subject('[TEST] giua@school - Invio email di prova')
           ->text($text)
           ->html($html)

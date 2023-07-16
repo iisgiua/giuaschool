@@ -45,7 +45,7 @@ class ModuloType extends AbstractType {
       // form nuovo anno
       $builder
         ->setAction($options['actionUrl']);
-      if ($options['step'] <= 4) {
+      if ($options['step'] <= 7) {
         $builder
           ->add('submit', SubmitType::class, array('label' => $options['step'] == 0 ? 'label.start' : 'label.next'));
       } else {
