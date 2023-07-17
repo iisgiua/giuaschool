@@ -1040,7 +1040,7 @@ class GenitoriUtil {
       ->join('s.classe', 'cl')
       ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
       ->setParameters(['alunno' => $alunno, 'anno' => $dati['esito']->getClasse()[0],
-        'sezione' => $dati['esito']->getClasse()[1], 'stato' => 'C', 'rinviato' => 'X',
+        'sezione' => substr($dati['esito']->getClasse(), 1), 'stato' => 'C', 'rinviato' => 'X',
         'data' => new \DateTime()])
       ->setMaxResults(1)
       ->getQuery()

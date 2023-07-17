@@ -887,15 +887,18 @@ class ScrutinioController extends BaseController {
       $lista_periodi = $scr->periodi($classe);
       // aggiunde periodo per A.S. precedente
       $lista_periodi['A'] = 'C';
+      // elimina rinviati A.S. precedente (incluso in precedente)
+      unset($lista_periodi['X']);
       if ($periodo == '0') {
         // cerca scrutinio chiuso
         $scrutinio = $scr->scrutinioChiuso($classe);
-        $periodo = (isset($scrutinio['periodo']) ? $scrutinio['periodo'] : null);
+        $periodo = (isset($scrutinio['periodo']) && in_array($scrutinio['periodo'], $lista_periodi)) ? 
+          $scrutinio['periodo'] : null;
       } elseif (!isset($lista_periodi[$periodo]) || $lista_periodi[$periodo] != 'C') {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
+      if ($periodo == 'G' || $periodo == 'R') {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, 'G');
         if (isset($lista_periodi['R']) && $lista_periodi['R'] == 'C') {

@@ -4963,12 +4963,8 @@ class ScrutinioUtil {
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['classe' => $classe->getId()])
       ->getQuery()
-      ->getResult();
+      ->getArrayResult();
     foreach ($alunni as $alu) {
-      if ($alu['esito'] == 'R' && !in_array($alu['id'], $alu['dati']['cessata_frequenza'])) {
-        // non ammesso per limite assenze
-        $alu['esito'] = 'L';
-      }
       $dati['alunni'][$alu['id']] = $alu;
     }
     // legge i voti
@@ -4981,9 +4977,41 @@ class ScrutinioUtil {
       ->where('a.classe=:classe')
       ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId()])
       ->getQuery()
-      ->getResult();
+      ->getArrayResult();
     foreach ($voti as $v) {
       $dati['voti'][$v['alunno_id']][$v['materia_id']] = $v;
+    }
+    // controllo se scrutinio rinviato dall'A.S. precedente
+    foreach ($alunni as $alu) {
+      if ($alu['periodo'] == 'X') {
+        $esitoRinviato = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
+          ->join('e.scrutinio', 's')
+          ->join('s.classe', 'cl')
+          ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
+          ->setParameters(['alunno' => $alu['id'], 'anno' => $alu['classe'][0],
+            'sezione' => substr($alu['classe'], 1), 'stato' => 'C', 'rinviato' => 'X'])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getOneOrNullResult();
+        if ($esitoRinviato) {
+          $dati['alunni'][$alu['id']]['esito'] = $esitoRinviato->getEsito();
+          $dati['alunni'][$alu['id']]['media'] = $esitoRinviato->getMedia();
+          $dati['alunni'][$alu['id']]['periodo'] = 'G';
+          $dati['alunni'][$alu['id']]['dati'] = $esitoRinviato->getDati();
+          $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+            ->select('vs.unico,m.id AS materia_id')
+            ->join('vs.materia', 'm')
+            ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=vs.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe')
+            ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
+            ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId(),
+              'scrutinio' => $esitoRinviato->getScrutinio(), 'alunno' => $alu['id']])
+            ->getQuery()
+            ->getArrayResult();
+          foreach ($voti as $voto) {
+            $dati['voti'][$alu['id']][$voto['materia_id']]['voto'] = $voto['unico'];
+          }
+        }
+      }
     }
     // restituisce dati
     return $dati;
