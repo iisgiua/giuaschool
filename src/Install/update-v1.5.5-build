@@ -1,0 +1,13 @@
+<?php
+
+return [
+  'fileCopy' => [
+  ],
+  'fileDelete' => [
+    'public/install/app.php',
+  ],
+  'sqlCommand' => [
+  ],
+  'envDelete' => [
+  ]
+];
