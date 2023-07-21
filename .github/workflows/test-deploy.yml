@@ -2,7 +2,6 @@ name: Test and deploy
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -54,7 +53,7 @@ jobs:
           docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
 
       - name: Upload update code
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -167,7 +166,7 @@ jobs:
           docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test
 
   deploy:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
     needs: [test-phpunit, test-behat, test-update]
     name: Deploy release
     runs-on: ubuntu-latest
