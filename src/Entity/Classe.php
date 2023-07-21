@@ -9,18 +9,21 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * Classe - dati delle classi
  *
  * @ORM\Entity(repositoryClass="App\Repository\ClasseRepository")
- * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione"})})
+ * @ORM\Table(name="gs_classe")
  * @ORM\HasLifecycleCallbacks
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="tipo", type="string", length=1)
+ * @ORM\DiscriminatorMap({"C"="Classe","G"="GruppoClasse"})
  *
- * @UniqueEntity(fields={"anno","sezione"}, message="field.unique")
+ * @UniqueEntity(fields={"anno","sezione"}, message="field.unique", entityClass="App\Entity\Classe", repositoryMethod="uniqueEntity")
  *
  * @author Antonello Dessì
  */
@@ -319,7 +322,7 @@ class Classe {
 
 
   //==================== METODI DELLA CLASSE ====================
-
+  
   /**
    * Restituisce l'oggetto rappresentato come testo
    *

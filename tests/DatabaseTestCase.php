@@ -141,11 +141,11 @@ class DatabaseTestCase extends KernelTestCase {
     $dbParams = $connection->getParams();
     // svuota il database
     $this->objects = [];
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
     $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
     $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     // carica fixtures
     $fixtures = is_array($this->fixtures) ? $this->fixtures : [$this->fixtures];
     $fixturesName = md5(implode('-', $fixtures));

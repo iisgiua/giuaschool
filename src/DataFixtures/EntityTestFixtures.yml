@@ -230,6 +230,18 @@ App\Entity\Classe:
     coordinatore:
     segretario:
 
+App\Entity\GruppoClasse:
+  classe_{1..2}:
+    anno: '<current()>'
+    sezione: 'B'
+    oreSettimanali: 32
+    sede: '@sede_1'
+    corso: '@corso_2'
+    coordinatore:
+    segretario:
+    nome (unique): '<word(1)>'
+    classe: '@classe_3'
+
 App\Entity\Colloquio:
   colloquio_{1..5}:
     docente: '@docente_*'
@@ -355,13 +367,6 @@ App\Entity\File:
     estensione: 'pdf'
     dimensione: 61514
     file: 'documento-pdf'
-
-App\Entity\FirmaCircolare:
-  firma_circolare_{1..5}:
-    circolare: '@circolare_<current()>'
-    utente: '@docente_1'
-    letto: '50%? <dateTimeBetween("-1 month", "now")>'
-    firmato: '50%? <dateTimeBetween("-1 month", "now")>'
 
 App\Entity\Firma:
   firma_{1..5}:

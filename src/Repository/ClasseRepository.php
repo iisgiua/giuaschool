@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use App\Entity\GruppoClasse;
 use Doctrine\Common\Collections\ArrayCollection;
 
 
@@ -252,6 +253,23 @@ class ClasseRepository extends BaseRepository {
     }
     // restituisce la lista degli ID
     return $classiId;
+  }
+
+  /**
+   * Utilizzata per verificare l'univocità dell'entità
+   *
+   * @param array $fields Array associativo dei valori univoci
+   *
+   * @return array|null Lista degli oggetti trovati
+   */
+  public function uniqueEntity(array $fields): ?array {
+    $dati = $this->findBy($fields);
+    foreach ($dati as $key => $classe) {
+      if ($classe instanceof GruppoClasse) {
+        unset($dati[$key]);
+      }
+    }
+    return $dati;
   }
 
 }
