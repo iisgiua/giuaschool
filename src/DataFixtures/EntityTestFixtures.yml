@@ -231,7 +231,7 @@ App\Entity\Classe:
     segretario:
 
 App\Entity\GruppoClasse:
-  classe_{1..2}:
+  gruppo_classe_{1..2}:
     anno: '<current()>'
     sezione: 'B'
     oreSettimanali: 32
@@ -584,7 +584,7 @@ App\Entity\PropostaVoto:
     alunno: '@alunno_<current()>'
     classe: '@classe_1'
     materia: '@materia_*'
-    docente: '@docente_*'
+    docente: '@docente_<current()>'
 
 App\Entity\Provisioning:
   provisioning_{1..5}:
