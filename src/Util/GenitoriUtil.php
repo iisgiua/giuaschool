@@ -891,7 +891,7 @@ class GenitoriUtil {
   /**
    * Restituisce le materie che il docente insegna nella classe.
    *
-   * @param Doccente $docente Docente di cui si vogliono sapere le materie insegnate
+   * @param Docente $docente Docente di cui si vogliono sapere le materie insegnate
    * @param Classe $classe Classe desiderata
    * @param Alunno $alunno Alunno per la cattedra di sostegno
    *

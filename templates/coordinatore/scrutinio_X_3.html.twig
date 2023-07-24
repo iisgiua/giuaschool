@@ -7,7 +7,7 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio rinviato per la classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio rinviato per la classe {{ classe }}</h1>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
     {% if classe.anno == 1 %}

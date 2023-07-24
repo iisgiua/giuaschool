@@ -264,24 +264,21 @@ class ClasseRepository extends BaseRepository {
   public function opzioni(?int $sede = null): array {
     // inizializza
     $dati = [];
-    // // legge classi
-    // $classi = $this->createQueryBuilder('c')
-    //   ->join('c.sede', 's');
-    // if ($sede) {
-    //   $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
-    // }
-    // $classi = $classi
-    //   ->orderBy('s.ordinamento,c.anno,c.sezione')
-    //   ->getQuery()
-    //   ->getResult();
-    // // imposta opzioni
-    // foreach ($classi as $classe) {
-    //   $gruppo = '';
-    //   if ($classe instanceof GruppoClasse) {
-    //     $gruppo = '-'.$classe->getNome();
-    //   }
-    //   $dati[$classe->getSede()->getNomeBreve()][$classe->getAnno().$classe->getSezione().$gruppo] = $classe;
-    // }
+    // legge classi
+    $classi = $this->createQueryBuilder('c')
+      ->join('c.sede', 's');
+    if ($sede) {
+      $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
+    }
+    $classi = $classi
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($classi as $classe) {
+      $nome = $classe->getAnno().$classe->getSezione().($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '');
+      $dati[$classe->getSede()->getNomeBreve()][$nome] = $classe;
+    }
     // restituisce lista opzioni
     return $dati;
   }

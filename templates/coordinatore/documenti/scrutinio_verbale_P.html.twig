@@ -2,7 +2,7 @@
 <p style="text-align:center;font-family:times;font-size:12pt">
   <strong>Verbale n. {{ dati.scrutinio.dati.numeroVerbale }}</strong><br>
   <strong>SCRUTINIO DEL {{ app.session.get('/CONFIG/SCUOLA/periodo1_nome')|upper }}</strong><br>
-  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
+  <strong>CLASSE {{ dati.classe }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
 {% for num,str in dati.definizione.struttura %}
@@ -14,7 +14,7 @@
     nei locali dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</em>
     di {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, si riunisce
     a seguito di regolare convocazione (circ. n. {{ str[2]['circolareNumero'] is defined ? str[2]['circolareNumero'] }} del {{ str[2]['circolareData'] is defined ? str[2]['circolareData'] }}),
-    il Consiglio di Classe della {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente Ordine del Giorno:
+    il Consiglio di Classe della {{ dati.classe }} per discutere il seguente Ordine del Giorno:
   </p>
   <ol>
     {% for num,arg in dati.definizione.argomenti %}

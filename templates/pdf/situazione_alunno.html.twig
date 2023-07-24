@@ -4,7 +4,7 @@
 </div>
 <p style="text-align:center; font-size:13pt">
   <strong>Situazione dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }} {{ alunno.cognome }} {{ alunno.nome }} (nat{{ alunno.sesso == 'M' ? 'o' : 'a' }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
-  <strong>Classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
+  <strong>Classe {{ classe }}</strong>
 </p>
 <p>&nbsp;</p>
 {% if dati.voti is defined %}

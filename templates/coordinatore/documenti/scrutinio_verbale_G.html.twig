@@ -7,7 +7,7 @@
   <strong>Verbale n. {{ dati.scrutinio.dati.numeroVerbale }}</strong><br>
   <strong>SCRUTINIO PER GLI ESAMI DEGLI STUDENTI CON SOSPENSIONE DEL GIUDIZIO</strong><br>
   {% if dati.scrutinio.periodo != 'G' %}SESSIONE SUPPLETTIVA<br>{% endif %}
-  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
+  <strong>CLASSE {{ dati.classe }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
@@ -16,7 +16,7 @@
     nei locali dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</em>
     di {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, si riunisce in presenza,
     a seguito di regolare convocazione (circolare n. X del Y),
-    il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente
+    il Consiglio della Classe {{ dati.classe }} per discutere il seguente
     ordine del giorno:
   </p>
   <ol>

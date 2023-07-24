@@ -1,6 +1,6 @@
 <table border="0" cellpadding="0" style="font-family:helvetica;font-size:10pt">
   <tr>
-    <td width="50%" align="left"><strong>Classe: </strong>{{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</td>
+    <td width="50%" align="left"><strong>Classe: </strong>{{ dati.classe }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</td>
     <td width="50%" align="right"><strong>Anno Scolastico: </strong>{{ dati.annoScolastico }} &nbsp;-&nbsp; <strong>{% if dati.scrutinio.periodo == 'G' %}GIUDIZIO SOSPESO{% else %}SESSIONE SUPPLETTIVA{% endif %}</strong></td>
   </tr>
 </table>

@@ -8,14 +8,14 @@
 
 namespace App\Form;
 
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 
 /**
@@ -32,76 +32,58 @@ class RicercaType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'ata') {
+    if ($options['form_mode'] == 'ata') {
       // form ata
       $builder
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['dati'][0],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['dati'][1],
-          'required' => false))
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
-          'data' => $options['dati'][2],
-          'choices' => $options['dati'][3],
-          'choice_label' => function ($obj) use ($options) {
-            return (is_object($obj) ? $obj->getCitta() :
-              $options['dati'][4]); },
-          'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj); },
+          'data' => $options['values'][0],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
-          'required' => false));
-    } elseif ($options['formMode'] == 'docenti-alunni') {
-      // form docenti
-      $builder
+          'required' => false))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][1],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['dati'][1],
-          'required' => false))
+          'data' => $options['values'][2],
+          'required' => false));
+   } elseif ($options['form_mode'] == 'docenti-alunni') {
+      // form docenti/alunni
+      $builder
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-          'data' => $options['dati'][2],
-          'choices' => $options['dati'][3],
-          'choice_label' => function ($obj) use ($options) {
-            return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
-              $options['dati'][4]); },
-          'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj); },
-          'group_by' => function ($obj) {
-            return (is_object($obj) ? $obj->getSede()->getCitta() : null); },
+          'data' => $options['values'][0],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false));
-    } elseif ($options['formMode'] == 'utenti') {
-      // form docenti
-      $builder
+          'required' => false))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][1],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][2],
           'required' => false));
-    } elseif ($options['formMode'] == 'cattedre') {
+    } elseif ($options['form_mode'] == 'utenti') {
+      // form utenti
+      $builder
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['values'][0],
+          'required' => false))
+        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'data' => $options['values'][1],
+          'required' => false));
+    } elseif ($options['form_mode'] == 'cattedre') {
       // form cattedre
       $builder
-        ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'data' => $options['dati'][0],
-          'class' => 'App\Entity\Classe',
-          'choice_label' => function ($obj) {
-            return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
-          'group_by' => function ($obj) {
-            return (is_object($obj) ? $obj->getSede()->getCitta() : null); },
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC'); },
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false))
+          'required' => false])
         ->add('materia', EntityType::class, array('label' => 'label.materia',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][1],
           'class' => 'App\Entity\Materia',
           'choice_label' => 'nome',
           'query_builder' => function (EntityRepository $er) {
@@ -113,7 +95,7 @@ class RicercaType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'required' => false))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'data' => $options['dati'][2],
+          'data' => $options['values'][2],
           'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
@@ -125,11 +107,11 @@ class RicercaType extends AbstractType {
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false));
-    } elseif ($options['formMode'] == 'docenti-sedi') {
+    } elseif ($options['form_mode'] == 'docenti-sedi') {
       // form classe-docente
       $builder
         ->add('sede', EntityType::class, array('label' => 'label.sede',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) {
@@ -137,7 +119,7 @@ class RicercaType extends AbstractType {
           'placeholder' => 'label.qualsiasi_sede',
           'required' => false))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][1],
           'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
@@ -148,7 +130,7 @@ class RicercaType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'required' => false))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'data' => $options['dati'][2],
+          'data' => $options['values'][2],
           'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
@@ -159,20 +141,20 @@ class RicercaType extends AbstractType {
           'placeholder' => 'label.qualsiasi_docente',
           'attr' => ['widget' => 'search'],
           'required' => false));
-    } elseif ($options['formMode'] == 'rappresentanti') {
+    } elseif ($options['form_mode'] == 'rappresentanti') {
       // form rappresentanti
       $builder
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['dati'][0],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['dati'][1],
-          'required' => false))
-        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'data' => $options['dati'][2],
-          'choices' => $options['dati'][3],
-          'placeholder' => 'label.tutti',
-          'required' => false));
+      ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+        'data' => $options['values'][0],
+        'choices' => $options['values'][3],
+        'placeholder' => 'label.tutti',
+        'required' => false))
+      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'data' => $options['values'][1],
+        'required' => false))
+      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'data' => $options['values'][2],
+        'required' => false));
     }
     // pulsante filtro
     $builder
@@ -185,12 +167,12 @@ class RicercaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('dati');
-    $resolver->setDefaults(array(
-      'formMode' => 'ata',
-      'dati' => null,
-      'data_class' => null));
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('values');
+    $resolver->setDefaults([
+      'form_mode' => 'ata',
+      'values' => [],
+      'data_class' => null]);
   }
 
 }
