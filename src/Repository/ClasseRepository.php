@@ -9,7 +9,6 @@
 namespace App\Repository;
 
 use App\Entity\GruppoClasse;
-use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
@@ -256,19 +255,34 @@ class ClasseRepository extends BaseRepository {
   }
 
   /**
-   * Utilizzata per verificare l'univocità dell'entità
+   * Restituisce la lista delle classi/gruppi, predisposto per le opzioni dei form
    *
-   * @param array $fields Array associativo dei valori univoci
+   * @param int|null $sede Identificativo della sede per filtrare le classi sulla sede indicata, nullo per qualsiasi sede
    *
-   * @return array|null Lista degli oggetti trovati
+   * @return array Array associativo predisposto per le opzioni dei form
    */
-  public function uniqueEntity(array $fields): ?array {
-    $dati = $this->findBy($fields);
-    foreach ($dati as $key => $classe) {
-      if ($classe instanceof GruppoClasse) {
-        unset($dati[$key]);
-      }
-    }
+  public function opzioni(?int $sede = null): array {
+    // inizializza
+    $dati = [];
+    // // legge classi
+    // $classi = $this->createQueryBuilder('c')
+    //   ->join('c.sede', 's');
+    // if ($sede) {
+    //   $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
+    // }
+    // $classi = $classi
+    //   ->orderBy('s.ordinamento,c.anno,c.sezione')
+    //   ->getQuery()
+    //   ->getResult();
+    // // imposta opzioni
+    // foreach ($classi as $classe) {
+    //   $gruppo = '';
+    //   if ($classe instanceof GruppoClasse) {
+    //     $gruppo = '-'.$classe->getNome();
+    //   }
+    //   $dati[$classe->getSede()->getNomeBreve()][$classe->getAnno().$classe->getSezione().$gruppo] = $classe;
+    // }
+    // restituisce lista opzioni
     return $dati;
   }
 

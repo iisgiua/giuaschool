@@ -28,16 +28,16 @@ class ClasseTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Classe';
     // campi da testare
-    $this->fields = ['anno', 'sezione', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
+    $this->fields = ['anno', 'sezione', 'gruppo', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id', 'tipo', 'classe_id', 'nome'],
+    $this->canRead = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'gruppo', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id'],
       'gs_corso' => '*'];
     // SQL write
-    $this->canWrite = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id', 'tipo', 'classe_id', 'nome']];
+    $this->canWrite = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'gruppo', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -70,12 +70,12 @@ class ClasseTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'anno' ? $this->faker->randomNumber(4, false) :
           ($field == 'sezione' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'gruppo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'oreSettimanali' ? $this->faker->randomNumber(4, false) :
           ($field == 'sede' ? $this->getReference("sede_1") :
           ($field == 'corso' ? $this->getReference("corso_1") :
           ($field == 'coordinatore' ? $this->getReference("docente_1") :
-          ($field == 'segretario' ? $this->getReference("docente_2") :
-          null)))))));
+          $this->getReference("docente_2"))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -118,6 +118,8 @@ class ClasseTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getAnno().'ª '.$existent->getSezione(), (string) $existent, $this->entity.'::toString');
+    $gruppo = $this->getReference('classe_10');
+    $this->assertSame($gruppo->getAnno().'ª '.$gruppo->getSezione().'-'.$gruppo->getGruppo(), (string) $gruppo, $this->entity.'::toString');
   }
 
   /**
@@ -145,6 +147,15 @@ class ClasseTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Sezione - MAX LENGTH');
     $existent->setSezione(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sezione - VALID MAX LENGTH');
+    // gruppo
+    $property = $this->getPrivateProperty('App\Entity\Classe', 'gruppo');
+    $property->setValue($existent, '');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');    
+    $existent->setGruppo(str_repeat('*', 65));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::gruppo - MAX LENGTH');
+    $existent->setGruppo(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID MAX LENGTH');
     // oreSettimanali
     $existent->setOreSettimanali(-5);
     $err = $this->val->validate($existent);
@@ -177,15 +188,18 @@ class ClasseTest extends EntityTestCase {
     // legge dati esistenti
     $this->em->flush();
     $objects = $this->em->getRepository($this->entity)->findBy([]);
-    // unique anno-sezione
+    // unique anno-sezione-gruppo
     $annoSaved = $objects[1]->getAnno();
     $objects[1]->setAnno($objects[0]->getAnno());
     $sezioneSaved = $objects[1]->getSezione();
     $objects[1]->setSezione($objects[0]->getSezione());
+    $gruppoSaved = $objects[1]->getGruppo();
+    $objects[1]->setGruppo($objects[0]->getGruppo());
     $err = $this->val->validate($objects[1]);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::anno-sezione - UNIQUE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::anno-sezione-gruppo - UNIQUE');
     $objects[1]->setAnno($annoSaved);
     $objects[1]->setSezione($sezioneSaved);
+    $objects[1]->setGruppo($gruppoSaved);
     $err = $this->val->validate($objects[1]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
   }

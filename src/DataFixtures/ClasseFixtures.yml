@@ -4,6 +4,7 @@
 # dati delle classi:
 #   anno: anno della classe
 #   sezione: sezione della classe
+#   gruppo: nome gruppo di alunni
 #   oreSettimanali: numero di ore settimanali della classe
 #   sede: sede a cui appartiene la classe
 #   corso: corso a cui appartiene classe

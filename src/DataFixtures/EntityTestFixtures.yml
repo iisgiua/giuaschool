@@ -229,18 +229,16 @@ App\Entity\Classe:
     corso: '@corso_1'
     coordinatore:
     segretario:
-
-App\Entity\GruppoClasse:
-  gruppo_classe_{1..2}:
-    anno: '<current()>'
-    sezione: 'B'
+    
+  classe_{10..11}:
+    anno: '3'
+    sezione: 'A'
+    gruppo: 'Gruppo<current()>'
     oreSettimanali: 32
     sede: '@sede_1'
-    corso: '@corso_2'
+    corso: '@corso_1'
     coordinatore:
     segretario:
-    nome (unique): '<word(1)>'
-    classe: '@classe_3'
 
 App\Entity\Colloquio:
   colloquio_{1..5}:
@@ -592,6 +590,10 @@ App\Entity\Provisioning:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     funzione: '<substr(<text()>, 0, 255)>'
     stato: '<randomElement(["A", "P", "C", "E"])>'
+
+App\Entity\Raggruppamento:
+  raggruppamento{1..2}:
+    nome (unique): '<substr(<word()>, 0, 64)>'
 
 App\Entity\RichiestaColloquio:
   richiesta_colloquio_{1..5}:

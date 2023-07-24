@@ -14,16 +14,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Classe - dati delle classi
+ * Classe - dati delle classi o di gruppi interni alla classe 
  *
  * @ORM\Entity(repositoryClass="App\Repository\ClasseRepository")
- * @ORM\Table(name="gs_classe")
+ * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione","gruppo"})})
  * @ORM\HasLifecycleCallbacks
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="tipo", type="string", length=1)
- * @ORM\DiscriminatorMap({"C"="Classe","G"="GruppoClasse"})
  *
- * @UniqueEntity(fields={"anno","sezione"}, message="field.unique", entityClass="App\Entity\Classe", repositoryMethod="uniqueEntity")
+ * @UniqueEntity(fields={"anno","sezione","gruppo"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
@@ -73,6 +70,15 @@ class Classe {
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
   private ?string $sezione = 'A';
+
+   /**
+   * @var string $gruppo Nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
+   *
+   * @ORM\Column(type="string", length=64, nullable=false)
+   *
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   */
+  private string $gruppo = '';
 
   /**
    * @var int $oreSettimanali Numero di ore settimanali della classe
@@ -216,6 +222,28 @@ class Classe {
   }
 
   /**
+   * Restituisce il nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
+   *
+   * @return string Nome del gruppo classe
+   */
+  public function getGruppo(): string {
+    return $this->gruppo;
+  }
+
+  /**
+   * Modifica del nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
+   *
+   * @param string $gruppo Nome del gruppo classe
+   *
+   * @return self Oggetto modificato
+   */
+  public function setGruppo(string $gruppo): self {
+    $this->gruppo = $gruppo;
+    return $this;
+  }
+
+
+  /**
    * Restituisce le ore settimanali della classe
    *
    * @return int Ore settimanali della classe
@@ -329,7 +357,7 @@ class Classe {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->anno.'ª '.$this->sezione;
+    return $this->anno.'ª '.$this->sezione.($this->gruppo ? ('-'.$this->gruppo) : '');
   }
 
 }
