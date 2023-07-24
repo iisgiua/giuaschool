@@ -8,16 +8,16 @@
 
 namespace App\Form;
 
+use App\Entity\Cattedra;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Cattedra;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -36,16 +36,12 @@ class CattedraType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('classe', EntityType::class, array('label' => 'label.classe',
-        'class' => 'App\Entity\Classe',
-        'choice_label' => function ($obj) {
-          return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
-        'group_by' => 'sede.citta',
-        'query_builder' => function (EntityRepository $er) {
-          return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC'); },
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
+        'choices' => $options['values'][0],
         'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
-        'required' => true))
+        'required' => true])
       ->add('materia', EntityType::class, array('label' => 'label.materia',
         'class' => 'App\Entity\Materia',
         'choice_label' => 'nome',
@@ -92,7 +88,7 @@ class CattedraType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -101,9 +97,11 @@ class CattedraType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
+      'return_url' => null,
+      'values' => [],
       'data_class' => Cattedra::class));
   }
 

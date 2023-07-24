@@ -111,7 +111,7 @@ class RichiesteController extends BaseController {
     $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     // form di inserimento
-    $form = $this->createForm(RichiestaType::class, null, ['formMode' => 'add',
+    $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'dati' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -393,7 +393,7 @@ class RichiesteController extends BaseController {
     $info['posizione'] = $posizione;
     $dati['richiesta'] = $richiesta;
     // form di inserimento
-    $form = $this->createForm(UscitaType::class, $uscita, ['formMode' => $richiesta ? 'richiesta' : 'staff',
+    $form = $this->createForm(UscitaType::class, $uscita, ['form_mode' => $richiesta ? 'richiesta' : 'staff',
       'dati' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -567,7 +567,7 @@ class RichiesteController extends BaseController {
       $listaClassi[$classe->getAnno().'ª '.$classe->getSezione()] = $classe->getId();
     }
     // form filtro
-    $form = $this->createForm(FiltroType::class, null, ['formMode' => 'richieste',
+    $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'richieste',
       'values' => [$criteri['tipo'], $criteri['stato'], $criteri['sede'], $listaSedi, $criteri['classe'],
       $listaClassi, $criteri['residenza'], $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
@@ -638,7 +638,7 @@ class RichiesteController extends BaseController {
     // informazioni
     $info['richiesta'] = $richiesta;
     // form di gestione
-    $form = $this->createForm(RichiestaType::class, null, ['formMode' => 'remove',
+    $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'remove',
       'dati' => [$richiesta->getMessaggio()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -701,7 +701,7 @@ class RichiesteController extends BaseController {
     $info['richiesta'] = $richiesta;
     // form di gestione
     $form = $this->createForm(RichiestaType::class, null, [
-      'formMode' => $tipo == 'E' ? 'manageEntrata' : ($tipo == 'D' ? 'manageUscita' : 'manage'),
+      'form_mode' => $tipo == 'E' ? 'manageEntrata' : ($tipo == 'D' ? 'manageUscita' : 'manage'),
       'dati' => [$richiesta->getMessaggio(), $deroga]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {

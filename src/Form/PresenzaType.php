@@ -57,7 +57,7 @@ class PresenzaType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'add') {
+    if ($options['form_mode'] == 'add') {
       // form aggiungi
       $builder
         ->add('alunno', HiddenType::class)
@@ -132,7 +132,7 @@ class PresenzaType extends AbstractType {
         function ($id) {
           return $this->em->getRepository('App\Entity\Alunno')->find($id);
         }));
-    } elseif ($options['formMode'] == 'edit') {
+    } elseif ($options['form_mode'] == 'edit') {
       // form modifica
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -179,7 +179,7 @@ class PresenzaType extends AbstractType {
           'required' => true))
         ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
           'required' => true));
-    } elseif ($options['formMode'] == 'registro') {
+    } elseif ($options['form_mode'] == 'registro') {
       // form modifica da registro assenze
       $builder
         ->add('oraTipo', ChoiceType::class, array('label' => false,
@@ -218,11 +218,11 @@ class PresenzaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'edit',
+      'form_mode' => 'edit',
       'allow_extra_fields' => true,
       'data_class' => Presenza::class));
   }

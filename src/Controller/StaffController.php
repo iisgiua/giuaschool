@@ -259,8 +259,8 @@ class StaffController extends BaseController {
       }
     }
     // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'generico',
-      'returnUrl' => $this->generateUrl('staff_avvisi'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'generico',
+      'return_url' => $this->generateUrl('staff_avvisi'),
       'dati' => [(count($avviso->getAnnotazioni()) > 0),
         $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
@@ -778,8 +778,8 @@ class StaffController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
     // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'orario',
-      'returnUrl' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'orario',
+      'return_url' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
       'dati' => [$tipo, $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1091,8 +1091,8 @@ class StaffController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
     // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'attivita',
-      'returnUrl' => $this->generateUrl('staff_avvisi_attivita'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'attivita',
+      'return_url' => $this->generateUrl('staff_avvisi_attivita'),
       'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1378,8 +1378,8 @@ class StaffController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
     // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'individuale',
-      'returnUrl' => $this->generateUrl('staff_avvisi_individuali'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'individuale',
+      'return_url' => $this->generateUrl('staff_avvisi_individuali'),
       'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
@@ -1738,7 +1738,7 @@ class StaffController extends BaseController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->createForm(EntrataType::class, $entrata, array('formMode' => 'staff'));
+    $form = $this->createForm(EntrataType::class, $entrata, array('form_mode' => 'staff'));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
@@ -1944,7 +1944,7 @@ class StaffController extends BaseController {
     $label['richiesta'] = $richiesta;
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita, array(
-      'formMode' => $richiesta ? 'richiesta' : 'staff',
+      'form_mode' => $richiesta ? 'richiesta' : 'staff',
       'dati' => [$chiediGiustificazione]));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {

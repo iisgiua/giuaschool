@@ -35,7 +35,7 @@ class CambioClasseType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'A') {
+    if ($options['form_mode'] == 'A') {
       // form cambio generico
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -72,7 +72,7 @@ class CambioClasseType extends AbstractType {
           'required' => true))
         ->add('note', TextType::class, array('label' => 'label.note',
           'required' => false));
-    } elseif ($options['formMode'] == 'I') {
+    } elseif ($options['form_mode'] == 'I') {
       // form inserimento alunno
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -94,7 +94,7 @@ class CambioClasseType extends AbstractType {
         ->add('cancella', CheckboxType::class, array('label' => 'label.cancella_dati',
           'mapped' => false,
           'required' => false));
-    } elseif ($options['formMode'] == 'T') {
+    } elseif ($options['form_mode'] == 'T') {
       // form trasferimento alunno
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -116,7 +116,7 @@ class CambioClasseType extends AbstractType {
         ->add('cancella', CheckboxType::class, array('label' => 'label.cancella_dati',
           'mapped' => false,
           'required' => false));
-    } elseif ($options['formMode'] == 'S') {
+    } elseif ($options['form_mode'] == 'S') {
       // form cambio sezione
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -154,7 +154,7 @@ class CambioClasseType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -163,11 +163,11 @@ class CambioClasseType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
-      'formMode' => null,
-      'returnUrl' => null,
+      'form_mode' => null,
+      'return_url' => null,
       'data_class' => CambioClasse::class));
   }
 

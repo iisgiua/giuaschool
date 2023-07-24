@@ -22,8 +22,8 @@
           <td><small>{{ c.coordinatore.cognome }}</small></td>
           <td><small>{{ c.coordinatore.nome }}</small></td>
           <td><small>{{ c.coordinatore.username }}</small></td>
-          <td><small>{{ c.sede.citta }}</small></td>
-          <td><small>{{ c.anno }}ª {{ c.sezione }}</small></td>
+          <td><small>{{ c.sede.nomeBreve }}</small></td>
+          <td><small>{{ c }}</small></td>
           <td class="pb-0">
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_coordinatori_edit', {'id': c.id}) }}" role="button" title="Modifica i dati del coordinatore">{{ 'label.edit'|trans }}</a>
             <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_coordinatori_delete', {'id': c.id}) }}" role="button" title="Elimina il coordinatore">{{ 'label.delete'|trans }}</a>

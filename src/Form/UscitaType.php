@@ -46,7 +46,7 @@ class UscitaType extends AbstractType {
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true));
-    if ($options['formMode'] == 'staff') {
+    if ($options['form_mode'] == 'staff') {
       $builder
         ->add('giustificazione', ChoiceType::class, array('label' => 'label.richiedi_giustificazione',
           'data' => $options['dati'][0],
@@ -68,10 +68,10 @@ class UscitaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('dati');
     $resolver->setDefaults(array(
-      'formMode' => 'richiesta',
+      'form_mode' => 'richiesta',
       'dati' => [],
       'allow_extra_fields' => true,
       'data_class' => Uscita::class));

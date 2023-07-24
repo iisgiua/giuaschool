@@ -695,8 +695,8 @@ class CoordinatoreController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
     // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'coordinatore',
-      'returnUrl' => $this->generateUrl('coordinatore_avvisi'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'coordinatore',
+      'return_url' => $this->generateUrl('coordinatore_avvisi'),
       'dati' => [(count($avviso->getAnnotazioni()) > 0)]]);
     $form->handleRequest($request);
     // visualizzazione filtri
@@ -1073,7 +1073,7 @@ class CoordinatoreController extends BaseController {
         }
       }
       // form di ricerca
-      $form = $this->createForm(FiltroType::class, null, ['formMode' => 'presenze',
+      $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'presenze',
         'values' => [$alunno, $classe->getId(), $inizio, $fine]]);
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -1160,7 +1160,7 @@ class CoordinatoreController extends BaseController {
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
     $form = $this->createForm(PresenzaType::class, $presenza, [
-      'returnUrl' => $this->generateUrl('coordinatore_presenze'), 'formMode' => 'edit',
+      'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'edit',
       'values' => [$classe->getId()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1307,7 +1307,7 @@ class CoordinatoreController extends BaseController {
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
     $form = $this->createForm(PresenzaType::class, null, [
-      'returnUrl' => $this->generateUrl('coordinatore_presenze'), 'formMode' => 'add',
+      'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'add',
       'values' => [$classe->getId()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {

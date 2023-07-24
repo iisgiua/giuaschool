@@ -52,7 +52,7 @@ class NotificaType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary gs-mr-3 gs-strong']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['onclick' => "location.href='".$options['returnUrl']."'",
+        'attr' => ['onclick' => "location.href='".$options['return_url']."'",
           'class' => 'btn-default gs-strong']));
   }
 
@@ -62,10 +62,10 @@ class NotificaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
+      'return_url' => null,
       'values' => null,
       'data_class' => null));
   }

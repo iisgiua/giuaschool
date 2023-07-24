@@ -8,12 +8,35 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
+
 
 /**
  * Sede - repository
  *
  * @author Antonello Dessì
  */
-class SedeRepository extends \Doctrine\ORM\EntityRepository {
+class SedeRepository extends EntityRepository {
+
+  /**
+   * Restituisce la lista delle sedi, predisposta per le opzioni dei form
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $sedi = $this->createQueryBuilder('s')
+      ->orderBy('s.ordinamento')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($sedi as $sede) {
+      $dati[$sede->getNomeBreve()] = $sede;
+    }
+    // restituisce lista opzioni
+    return $dati;
+  }
 
 }

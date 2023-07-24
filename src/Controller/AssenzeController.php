@@ -449,7 +449,7 @@ class AssenzeController extends BaseController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->createForm(EntrataType::class, $entrata, array('formMode' => 'staff'));
+    $form = $this->createForm(EntrataType::class, $entrata, array('form_mode' => 'staff'));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
@@ -1347,8 +1347,8 @@ class AssenzeController extends BaseController {
     $info['posizione'] = $posizione;
     // form
     $form = $this->createForm(PresenzaType::class, $presenza, [
-      'returnUrl' => $this->generateUrl('lezioni_assenze_quadro', ['posizione' => $posizione]),
-      'formMode' => 'registro']);
+      'return_url' => $this->generateUrl('lezioni_assenze_quadro', ['posizione' => $posizione]),
+      'form_mode' => 'registro']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (isset($vecchiaPresenza) && isset($request->request->get('presenza')['delete'])) {

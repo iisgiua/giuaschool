@@ -200,8 +200,8 @@ class AgendaController extends BaseController {
     $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'verifica',
-      'returnUrl' => $this->generateUrl('agenda_eventi'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'verifica',
+      'return_url' => $this->generateUrl('agenda_eventi'),
       'dati' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri
@@ -575,8 +575,8 @@ class AgendaController extends BaseController {
     $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'compito',
-      'returnUrl' => $this->generateUrl('agenda_eventi'),
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'compito',
+      'return_url' => $this->generateUrl('agenda_eventi'),
       'dati' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri

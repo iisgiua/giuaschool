@@ -38,7 +38,7 @@ class ConfigurazioneType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'banner') {
+    if ($options['form_mode'] == 'banner') {
     // form banner
       $builder
         ->add('banner_login', MessageType::class, array('label' => 'label.banner_login',
@@ -49,7 +49,7 @@ class ConfigurazioneType extends AbstractType {
           'data' => $options['dati'][1],
           'attr' => ['rows' => '3'],
           'required' => false));
-    } elseif ($options['formMode'] == 'manutenzione') {
+    } elseif ($options['form_mode'] == 'manutenzione') {
     // form manutenzione
       $builder
         ->add('manutenzione', CheckboxType::class, array('label' => 'label.manutenzione_attiva',
@@ -98,7 +98,7 @@ class ConfigurazioneType extends AbstractType {
         ->addModelTransformer(new CallbackTransformer(
           function ($d) { return $d; },
           function ($d) { return $d->format('H:i'); }));
-    } elseif ($options['formMode'] == 'parametri') {
+    } elseif ($options['form_mode'] == 'parametri') {
       // form parametri
       $builder
         ->add('parametri', CollectionType::class, array('label' => false,
@@ -107,12 +107,12 @@ class ConfigurazioneType extends AbstractType {
           'entry_options' => []));
     }
     // aggiunge pulsanti al form
-    if ($options['returnUrl']) {
+    if ($options['return_url']) {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit',
           'attr' => ['widget' => 'gs-button-start']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
     } else {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
@@ -125,12 +125,12 @@ class ConfigurazioneType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefined('dati');
     $resolver->setDefaults(array(
-      'formMode' => 'parametri',
-      'returnUrl' => null,
+      'form_mode' => 'parametri',
+      'return_url' => null,
       'dati' => null,
       'data_class' => null));
   }

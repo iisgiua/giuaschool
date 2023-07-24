@@ -38,7 +38,7 @@ class AvvisoType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'generico') {
+    if ($options['form_mode'] == 'generico') {
       // form generico
       $builder
         ->add('data', DateType::class, array('label' => 'label.data_evento',
@@ -174,7 +174,7 @@ class AvvisoType extends AbstractType {
           'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false));
-    } elseif ($options['formMode'] == 'orario') {
+    } elseif ($options['form_mode'] == 'orario') {
       // form orario
       $builder
         ->add('data', DateType::class, array('label' => 'label.data_evento',
@@ -236,7 +236,7 @@ class AvvisoType extends AbstractType {
           'multiple' => true,
           'required' => true,
           'mapped' => false));
-    } elseif ($options['formMode'] == 'attivita') {
+    } elseif ($options['form_mode'] == 'attivita') {
       // form attività
       $builder
         ->add('data', DateType::class, array('label' => 'label.data_evento',
@@ -302,7 +302,7 @@ class AvvisoType extends AbstractType {
           'multiple' => true,
           'required' => true,
           'mapped' => false));
-    } elseif ($options['formMode'] == 'individuale') {
+    } elseif ($options['form_mode'] == 'individuale') {
       // form messaggio indivisuale
       $builder
         ->add('testo', MessageType::class, array('label' => 'label.testo',
@@ -356,7 +356,7 @@ class AvvisoType extends AbstractType {
           'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false));
-    } elseif ($options['formMode'] == 'coordinatore') {
+    } elseif ($options['form_mode'] == 'coordinatore') {
       // form coordinatore
       $builder
         ->add('testo', MessageType::class, array('label' => 'label.testo',
@@ -390,18 +390,18 @@ class AvvisoType extends AbstractType {
           'required' => false))
         ->add('filtro', HiddenType::class, array('label' => false,
           'required' => false));
-    } elseif ($options['formMode'] == 'verifica' || $options['formMode'] == 'compito') {
+    } elseif ($options['form_mode'] == 'verifica' || $options['form_mode'] == 'compito') {
       // form verifica/compito
       $builder
         ->add('data', DateType::class, array(
-          'label' => $options['formMode'] == 'verifica' ? 'label.data_verifica' : 'label.data_compito',
+          'label' => $options['form_mode'] == 'verifica' ? 'label.data_verifica' : 'label.data_compito',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
           'required' => true))
         ->add('cattedra', ChoiceType::class, array(
-          'label' => $options['formMode'] == 'verifica' ? 'label.cattedra_verifica' : 'label.cattedra_compito',
+          'label' => $options['form_mode'] == 'verifica' ? 'label.cattedra_verifica' : 'label.cattedra_compito',
           'choices' => $options['dati'][0],
           'expanded' => false,
           'multiple' => false,
@@ -413,7 +413,7 @@ class AvvisoType extends AbstractType {
           'mapped' => false,
           'required' => false))
         ->add('testo', MessageType::class, array(
-          'label' => $options['formMode'] == 'verifica' ? 'label.descrizione_verifica' : 'label.descrizione_compito',
+          'label' => $options['form_mode'] == 'verifica' ? 'label.descrizione_verifica' : 'label.descrizione_compito',
           'attr' => array('rows' => '4'),
           'required' => true))
         ->add('filtroTipo', ChoiceType::class, array('label' => 'label.filtro_tipo',
@@ -433,7 +433,7 @@ class AvvisoType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary btn gs-mr-3']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['onclick' => "location.href='".$options['return_url']."'"]));
     // aggiunge data transform
     $builder->get('filtro')->addModelTransformer(new CallbackTransformer(
       function ($filtro) {
@@ -450,12 +450,12 @@ class AvvisoType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefined('dati');
     $resolver->setDefaults(array(
-      'formMode' => 'generico',
-      'returnUrl' => null,
+      'form_mode' => 'generico',
+      'return_url' => null,
       'dati' => null,
       'data_class' => Avviso::class));
   }

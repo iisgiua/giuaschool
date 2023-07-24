@@ -86,7 +86,7 @@ class AtaType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -95,9 +95,9 @@ class AtaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
+      'return_url' => null,
       'data_class' => Ata::class));
   }
 

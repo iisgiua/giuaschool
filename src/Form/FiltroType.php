@@ -33,7 +33,7 @@ class FiltroType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'richieste') {
+    if ($options['form_mode'] == 'richieste') {
       // form gestione richieste
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.richiesta_tipo',
@@ -84,7 +84,7 @@ class FiltroType extends AbstractType {
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false));
-    } elseif ($options['formMode'] == 'colloqui') {
+    } elseif ($options['form_mode'] == 'colloqui') {
       // form cerca colloqui
       $builder
         ->add('docente', EntityType::class, array('label' => 'label.docente',
@@ -105,7 +105,7 @@ class FiltroType extends AbstractType {
             },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false));
-    } elseif ($options['formMode'] == 'presenze') {
+    } elseif ($options['form_mode'] == 'presenze') {
       // form presenze
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
@@ -152,10 +152,10 @@ class FiltroType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'richieste',
+      'form_mode' => 'richieste',
       'values' => [],
       'data_class' => null));
   }

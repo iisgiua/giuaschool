@@ -107,40 +107,6 @@ class RicercaType extends AbstractType {
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false));
-    } elseif ($options['form_mode'] == 'docenti-sedi') {
-      // form classe-docente
-      $builder
-        ->add('sede', EntityType::class, array('label' => 'label.sede',
-          'data' => $options['values'][0],
-          'class' => 'App\Entity\Sede',
-          'choice_label' => 'citta',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')->orderBy('s.ordinamento', 'ASC'); },
-          'placeholder' => 'label.qualsiasi_sede',
-          'required' => false))
-        ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'data' => $options['values'][1],
-          'class' => 'App\Entity\Classe',
-          'choice_label' => function ($obj) {
-            return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
-          'group_by' => 'sede.citta',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC'); },
-          'placeholder' => 'label.qualsiasi_classe',
-          'attr' => ['widget' => 'search'],
-          'required' => false))
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'data' => $options['values'][2],
-          'class' => 'App\Entity\Docente',
-          'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-                ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
-                ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
-          'placeholder' => 'label.qualsiasi_docente',
-          'attr' => ['widget' => 'search'],
-          'required' => false));
     } elseif ($options['form_mode'] == 'rappresentanti') {
       // form rappresentanti
       $builder

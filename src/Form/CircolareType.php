@@ -196,7 +196,7 @@ class CircolareType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary btn gs-mr-3']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['onclick' => "location.href='".$options['return_url']."'"]));
     // aggiunge data transform
     $builder->get('filtroCoordinatori')->addModelTransformer(new CallbackTransformer(
       function ($filtro) {
@@ -243,9 +243,9 @@ class CircolareType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
+      'return_url' => null,
       'setSede' => null,
       'data_class' => Circolare::class));
   }

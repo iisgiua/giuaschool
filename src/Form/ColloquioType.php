@@ -33,7 +33,7 @@ class ColloquioType extends AbstractType {
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
-    if ($options['formMode'] == 'singolo') {
+    if ($options['form_mode'] == 'singolo') {
       // ricevimento singolo
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
@@ -66,7 +66,7 @@ class ColloquioType extends AbstractType {
           'required' => true))
         ->add('luogo', TextType::class, array('label' => 'label.colloquio_luogo',
           'required' => true));
-    } elseif ($options['formMode'] == 'periodico') {
+    } elseif ($options['form_mode'] == 'periodico') {
       // ricevimento periodico
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
@@ -112,11 +112,11 @@ class ColloquioType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'allow_extra_fields' => true,
-      'formMode' => 'singolo',
+      'form_mode' => 'singolo',
       'values' => null,
       'data_class' => Colloquio::class));
   }

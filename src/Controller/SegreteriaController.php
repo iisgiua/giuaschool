@@ -497,7 +497,7 @@ class SegreteriaController extends BaseController {
     }
     // form
     $form = $this->createForm(AlunnoGenitoreType::class, null, [
-      'returnUrl' => $this->generateUrl('segreteria_genitori'), 'formMode' => 'segreteria',
+      'return_url' => $this->generateUrl('segreteria_genitori'), 'form_mode' => 'segreteria',
       'data' => [$genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {

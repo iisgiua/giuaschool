@@ -69,7 +69,7 @@ class SistemaController extends BaseController {
     $banner_login = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
     $banner_home = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'banner',
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'banner',
       'dati' => [$banner_login, $banner_home]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -117,7 +117,7 @@ class SistemaController extends BaseController {
       $manutenzione_fine = \DateTime::createFromFormat('Y-m-d H:i', $manutenzione_fine);
     }
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'manutenzione',
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'manutenzione',
       'dati' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
         $manutenzione_fine, clone $manutenzione_fine]]);
     $form->handleRequest($request);
@@ -167,7 +167,7 @@ class SistemaController extends BaseController {
     // legge parametri
     $parametri = $this->em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'parametri',
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'parametri',
       'dati' => $parametri]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -201,7 +201,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // form
-    $form = $this->createForm(UtenteType::class, null, ['formMode' => 'password']);
+    $form = $this->createForm(UtenteType::class, null, ['form_mode' => 'password']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -263,7 +263,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // form
-    $form = $this->createForm(UtenteType::class, null, ['formMode' => 'alias']);
+    $form = $this->createForm(UtenteType::class, null, ['form_mode' => 'alias']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -354,8 +354,8 @@ class SistemaController extends BaseController {
     $info['nuovoAnno'] = (int) (new \DateTime())->format('Y');
     $info['vecchioAnno'] = $info['nuovoAnno'] - 1;
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'nuovo', 'step' => $step,
-      'actionUrl' => $this->generateUrl('sistema_nuovo', ['step' => $step + 1])]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'nuovo', 'step' => $step,
+      'action_url' => $this->generateUrl('sistema_nuovo', ['step' => $step + 1])]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $fs = new Filesystem();
@@ -1060,7 +1060,7 @@ class SistemaController extends BaseController {
       ->getQuery()
       ->getResult();
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'archivia',
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'archivia',
       'dati' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1277,8 +1277,8 @@ class SistemaController extends BaseController {
     $data = new \DateTime('today');
     $ora = new \DateTime('now');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'log',
-      'returnUrl' => $this->generateUrl('sistema_manutenzione'), 'dati' => [$data, $ora]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'log',
+      'return_url' => $this->generateUrl('sistema_manutenzione'), 'dati' => [$data, $ora]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $msgs = [];
@@ -1557,7 +1557,7 @@ class SistemaController extends BaseController {
     $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
     $info['email'] = '';
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'email', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'dati' => $info]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form
@@ -1684,7 +1684,7 @@ class SistemaController extends BaseController {
     $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
     $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'telegram', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'dati' => $info]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form

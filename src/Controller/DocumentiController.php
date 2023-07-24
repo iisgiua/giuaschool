@@ -107,7 +107,7 @@ class DocumentiController extends BaseController {
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
-      'returnUrl' => $this->generateUrl('documenti_programmi'), 'formMode' => 'P']);
+      'return_url' => $this->generateUrl('documenti_programmi'), 'form_mode' => 'P']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -280,7 +280,7 @@ class DocumentiController extends BaseController {
       ' - '.$documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome() : '');
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
-      'returnUrl' => $this->generateUrl('documenti_relazioni'), 'formMode' => 'R']);
+      'return_url' => $this->generateUrl('documenti_relazioni'), 'form_mode' => 'R']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -383,7 +383,7 @@ class DocumentiController extends BaseController {
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
-      'returnUrl' => $this->generateUrl('documenti_piani'), 'formMode' => 'L']);
+      'return_url' => $this->generateUrl('documenti_piani'), 'form_mode' => 'L']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -483,7 +483,7 @@ class DocumentiController extends BaseController {
     $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
-      'returnUrl' => $this->generateUrl('documenti_maggio'), 'formMode' => 'M']);
+      'return_url' => $this->generateUrl('documenti_maggio'), 'form_mode' => 'M']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -583,7 +583,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // form filtro
-    $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'docenti',
+    $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'docenti',
       'values' => [$this->getUser()->getSede(), $criteri['filtro'], $criteri['tipo'], $criteri['classe']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -657,7 +657,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // form filtro
-    $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'alunni',
+    $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
       'values' => [$this->getUser()->getResponsabileBesSede(), $criteri['tipo'], $criteri['classe']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -760,7 +760,7 @@ class DocumentiController extends BaseController {
      }
      // form di inserimento
      $form = $this->createForm(DocumentoType::class, null, [
-       'returnUrl' => $this->generateUrl('documenti_bes'), 'formMode' => $documento->getTipo(),
+       'return_url' => $this->generateUrl('documenti_bes'), 'form_mode' => $documento->getTipo(),
        'values' => [$this->getUser()->getResponsabileBesSede(), $listaTipi, $alunno]]);
      $form->handleRequest($request);
      if ($form->isSubmitted() && $form->isValid()) {
@@ -864,7 +864,7 @@ class DocumentiController extends BaseController {
        $this->reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
      }
      // form filtro
-     $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'alunni',
+     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
        'values' => [$this->getUser()->getSede(), $criteri['tipo'], $criteri['classe']]]);
      $form->handleRequest($request);
      if ($form->isSubmitted() && $form->isValid()) {
@@ -932,7 +932,7 @@ class DocumentiController extends BaseController {
          'label.maggio' => 'M', 'label.documenti_generici' => 'G'];
      }
      // form filtro
-     $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'bacheca',
+     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'bacheca',
        'values' => [$criteri['tipo'], $opzioni, $criteri['titolo']]]);
      $form->handleRequest($request);
      if ($form->isSubmitted() && $form->isValid()) {

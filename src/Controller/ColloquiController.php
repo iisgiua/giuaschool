@@ -117,7 +117,7 @@ class ColloquiController extends BaseController {
     $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
       $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'conferma']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'conferma']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // modifica stato
@@ -168,7 +168,7 @@ class ColloquiController extends BaseController {
     $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
       $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'rifiuta']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'rifiuta']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if (empty($richiesta->getMessaggio())) {
@@ -224,7 +224,7 @@ class ColloquiController extends BaseController {
     $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
       $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'modifica']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'modifica']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if (empty($richiesta->getMessaggio())) {
@@ -320,7 +320,7 @@ class ColloquiController extends BaseController {
     // lista sedi
     $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
     // form di inserimento
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'singolo',
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'singolo',
       'values' => [$listaSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -447,7 +447,7 @@ class ColloquiController extends BaseController {
       $listaOre[$i] = $i;
     }
     // form di inserimento
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'periodico',
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'periodico',
       'values' => [$listaSedi, $listaOre]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -623,7 +623,7 @@ class ColloquiController extends BaseController {
       }
     }
     // form di inserimento
-    $form = $this->createForm(PrenotazioneType::class, null, ['formMode' => 'prenotazione',
+    $form = $this->createForm(PrenotazioneType::class, null, ['form_mode' => 'prenotazione',
       'values' => [$dati['lista']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -688,7 +688,7 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // form di ricerca
-    $form = $this->createForm(FiltroType::class, null, ['formMode' => 'colloqui',
+    $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'colloqui',
       'values' => [$docente]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {

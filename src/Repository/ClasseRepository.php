@@ -255,7 +255,7 @@ class ClasseRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista delle classi/gruppi, predisposto per le opzioni dei form
+   * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
    *
    * @param int|null $sede Identificativo della sede per filtrare le classi sulla sede indicata, nullo per qualsiasi sede
    *

@@ -35,7 +35,7 @@ class RichiestaType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'add') {
+    if ($options['form_mode'] == 'add') {
       // form inserimento richiesta
       if (!$options['dati'][1]) {
         // richiesta multipla: aggiunge data
@@ -86,14 +86,14 @@ class RichiestaType extends AbstractType {
             break;
         }
       }
-    } elseif ($options['formMode'] == 'remove') {
+    } elseif ($options['form_mode'] == 'remove') {
       // form rimozione richiesta
       $builder
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
           'data' => $options['dati'][0],
           'attr' => ['rows' => 3],
           'required' => false));
-    } elseif ($options['formMode'] == 'manageEntrata') {
+    } elseif ($options['form_mode'] == 'manageEntrata') {
       // form gestione richiesta deroga entrata
       $builder
         ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_entrata',
@@ -104,7 +104,7 @@ class RichiestaType extends AbstractType {
           'data' => $options['dati'][0],
           'attr' => ['rows' => 3],
           'required' => false));
-    } elseif ($options['formMode'] == 'manageUscita') {
+    } elseif ($options['form_mode'] == 'manageUscita') {
       // form gestione richiesta deroga uscita
       $builder
         ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_uscita',
@@ -115,7 +115,7 @@ class RichiestaType extends AbstractType {
           'data' => $options['dati'][0],
           'attr' => ['rows' => 3],
           'required' => false));
-    } elseif ($options['formMode'] == 'manage') {
+    } elseif ($options['form_mode'] == 'manage') {
       // form gestione richiesta generica
       $builder
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
@@ -131,11 +131,11 @@ class RichiestaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('dati');
     $resolver->setDefaults(array(
       'allow_extra_fields' => true,
-      'formMode' => 'add',
+      'form_mode' => 'add',
       'dati' => null,
       'data_class' => null));
   }

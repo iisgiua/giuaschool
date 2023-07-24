@@ -9,11 +9,11 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -31,7 +31,7 @@ class ImportaCsvType extends AbstractType {
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
-    if ($options['formMode'] == 'docenti') {
+    if ($options['form_mode'] == 'docenti') {
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.importazione_docenti_tipo',
           'choices' => array('label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O'),
@@ -59,9 +59,9 @@ class ImportaCsvType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
-      'formMode' => 'ata',
+      'form_mode' => 'ata',
       'data_class' => null));
   }
 

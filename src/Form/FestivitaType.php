@@ -33,7 +33,7 @@ class FestivitaType extends AbstractType {
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
-    if ($options['formMode'] == 'singolo') {
+    if ($options['form_mode'] == 'singolo') {
       // modifica di una singola festività
       $builder
         ->add('data', DateType::class, array('label' => 'label.data',
@@ -65,7 +65,7 @@ class FestivitaType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -74,11 +74,11 @@ class FestivitaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
-      'formMode' => 'singolo',
+      'return_url' => null,
+      'form_mode' => 'singolo',
       'data_class' => Festivita::class));
   }
 

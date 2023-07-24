@@ -22,8 +22,8 @@
           <td><small>{{ c.segretario.cognome }}</small></td>
           <td><small>{{ c.segretario.nome }}</small></td>
           <td><small>{{ c.segretario.username }}</small></td>
-          <td><small>{{ c.sede.citta }}</small></td>
-          <td><small>{{ c.anno }}ª {{ c.sezione }}</small></td>
+          <td><small>{{ c.sede.nomeBreve }}</small></td>
+          <td><small>{{ c }}</small></td>
           <td class="pb-0">
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_segretari_edit', {'id': c.id}) }}" role="button" title="Modifica i dati del segretario">{{ 'label.edit'|trans }}</a>
             <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_segretari_delete', {'id': c.id}) }}" role="button" title="Elimina il segretario">{{ 'label.delete'|trans }}</a>

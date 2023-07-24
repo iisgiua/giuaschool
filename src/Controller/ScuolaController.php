@@ -100,7 +100,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
-      ['returnUrl' => $this->generateUrl('scuola_scrutini'), 'dati' => $definizione->getClassiVisibili()]);
+      ['return_url' => $this->generateUrl('scuola_scrutini'), 'dati' => $definizione->getClassiVisibili()]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // classi visibili
@@ -161,7 +161,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(AmministratoreType::class, $amministratore,
-      ['returnUrl' => $this->generateUrl('scuola_amministratore')]);
+      ['return_url' => $this->generateUrl('scuola_amministratore')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -199,7 +199,7 @@ class ScuolaController extends BaseController {
     // assicura che l'utente sia abilitato
     $preside->setAbilitato(true);
     // form
-    $form = $this->createForm(PresideType::class, $preside, ['returnUrl' => $this->generateUrl('scuola_dirigente')]);
+    $form = $this->createForm(PresideType::class, $preside, ['return_url' => $this->generateUrl('scuola_dirigente')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -233,7 +233,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($istituto);
     }
     // form
-    $form = $this->createForm(IstitutoType::class, $istituto, ['returnUrl' => $this->generateUrl('scuola_istituto')]);
+    $form = $this->createForm(IstitutoType::class, $istituto, ['return_url' => $this->generateUrl('scuola_istituto')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -297,7 +297,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($sede);
     }
     // form
-    $form = $this->createForm(SedeType::class, $sede, ['returnUrl' => $this->generateUrl('scuola_sedi')]);
+    $form = $this->createForm(SedeType::class, $sede, ['return_url' => $this->generateUrl('scuola_sedi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -400,7 +400,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($corso);
     }
     // form
-    $form = $this->createForm(CorsoType::class, $corso, ['returnUrl' => $this->generateUrl('scuola_corsi')]);
+    $form = $this->createForm(CorsoType::class, $corso, ['return_url' => $this->generateUrl('scuola_corsi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -503,7 +503,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($materia);
     }
     // form
-    $form = $this->createForm(MateriaType::class, $materia, ['returnUrl' => $this->generateUrl('scuola_materie')]);
+    $form = $this->createForm(MateriaType::class, $materia, ['return_url' => $this->generateUrl('scuola_materie')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -618,7 +618,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($classe);
     }
     // form
-    $form = $this->createForm(ClasseType::class, $classe, ['returnUrl' => $this->generateUrl('scuola_classi')]);
+    $form = $this->createForm(ClasseType::class, $classe, ['return_url' => $this->generateUrl('scuola_classi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -736,7 +736,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(FestivitaType::class, $festivita, [
-      'returnUrl' => $this->generateUrl('scuola_festivita'), 'formMode' => ($id ? 'singolo' : 'multiplo')]);
+      'return_url' => $this->generateUrl('scuola_festivita'), 'form_mode' => ($id ? 'singolo' : 'multiplo')]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlli aggiuntivi
@@ -863,7 +863,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($orario);
     }
     // form
-    $form = $this->createForm(OrarioType::class, $orario, ['returnUrl' => $this->generateUrl('scuola_orario')]);
+    $form = $this->createForm(OrarioType::class, $orario, ['return_url' => $this->generateUrl('scuola_orario')]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlli aggiuntivi
@@ -951,7 +951,7 @@ class ScuolaController extends BaseController {
     $scansione = $this->em->getRepository('App\Entity\ScansioneOraria')->orario($orario);
     // form
     $form = $this->createForm(ScansioneOrariaSettimanaleType::class, null,
-      ['returnUrl' => $this->generateUrl('scuola_orario'), 'data' => $scansione]);
+      ['return_url' => $this->generateUrl('scuola_orario'), 'data' => $scansione]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati
@@ -1076,7 +1076,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneRichiestaType::class, $modulo, [
-      'returnUrl' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
+      'return_url' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla campi

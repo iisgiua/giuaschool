@@ -150,7 +150,7 @@ class CircolariController extends BaseController {
       }
     }
     // form di inserimento
-    $form = $this->createForm(CircolareType::class, $circolare, ['returnUrl' => $this->generateUrl('circolari_gestione'),
+    $form = $this->createForm(CircolareType::class, $circolare, ['return_url' => $this->generateUrl('circolari_gestione'),
       'setSede' => ($this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null)]);
     $form->handleRequest($request);
     // visualizzazione filtro coordinatori

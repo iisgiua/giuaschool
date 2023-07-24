@@ -350,7 +350,7 @@ class UtentiController extends BaseController {
     }
     // form
     $form = $this->createForm(NotificaType::class, null, [
-      'returnUrl' => $this->generateUrl('utenti_profilo'),
+      'return_url' => $this->generateUrl('utenti_profilo'),
       'values' => [$notifica['tipo'], empty($bot), $notifica['abilitato']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
