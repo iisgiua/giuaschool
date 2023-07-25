@@ -8,8 +8,6 @@
 
 namespace App\Form;
 
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -82,31 +80,18 @@ class RicercaType extends AbstractType {
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false])
-        ->add('materia', EntityType::class, array('label' => 'label.materia',
-          'data' => $options['values'][1],
-          'class' => 'App\Entity\Materia',
-          'choice_label' => 'nome',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->where("c.tipo IN ('N','R','S','E')")
-              ->orderBy('c.nome', 'ASC'); },
+        ->add('materia', ChoiceType::class, ['label' => 'label.materia',
+          'choices' => $options['values'][1],
           'placeholder' => 'label.qualsiasi_materia',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false))
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'data' => $options['values'][2],
-          'class' => 'App\Entity\Docente',
-          'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-                ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
-                ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
+          'required' => false])
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente',
+          'choices' => $options['values'][2],
           'placeholder' => 'label.qualsiasi_docente',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'rappresentanti') {
       // form rappresentanti
       $builder

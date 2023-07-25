@@ -13,10 +13,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -56,7 +56,7 @@ class DefinizioneRichiestaType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('campi', CollectionType::class, array('label' => 'label.campi_modulo',
-        'data' => $options['dati'][0],
+        'data' => $options['values'][0],
         'entry_type' => CampoType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -67,7 +67,7 @@ class DefinizioneRichiestaType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('modulo', ChoiceType::class, array('label' => 'label.template_modulo',
-        'choices' => $options['dati'][1],
+        'choices' => $options['values'][1],
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
@@ -107,10 +107,10 @@ class DefinizioneRichiestaType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
-    $resolver->setDefined('dati');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'return_url' => null,
-      'dati' => null,
+      'values' => [],
       'data_class' => DefinizioneRichiesta::class));
   }
 

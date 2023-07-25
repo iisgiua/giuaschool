@@ -8,10 +8,10 @@
 
 namespace App\Repository;
 
-use App\Entity\Sede;
-use App\Entity\Classe;
 use App\Entity\Alunno;
-use App\Entity\CambioClasse;
+use App\Entity\Classe;
+use App\Entity\Sede;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -30,7 +30,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function findAll($search=null, $page=1, $limit=10) {
+  public function findAll($search=null, $page=1, $limit=10): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
@@ -49,7 +49,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni abilitati secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni o secondo i criteri di ricerca indicati
    *
    * @param array $search Lista dei criteri di ricerca
    * @param int $page Pagina corrente
@@ -57,7 +57,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function findAllEnabled($search=null, $page=1, $limit=10) {
+  public function findAllEnabled($search=null, $page=1, $limit=10): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->where('a.abilitato=:abilitato')
@@ -78,7 +78,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni abilitati e iscritti, secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni o e iscritti, secondo i criteri di ricerca indicati
    *
    * @param array $search Lista dei criteri di ricerca
    * @param int $page Pagina corrente
@@ -86,7 +86,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function iscritti($search, $page=1, $limit=10) {
+  public function iscritti($search, $page=1, $limit=10): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
@@ -104,7 +104,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni abilitati e inseriti in classe, secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni o e inseriti in classe, secondo i criteri di ricerca indicati
    *
    * @param Sede $sede Sede delle classi
    * @param array $search Lista dei criteri di ricerca
@@ -113,7 +113,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function findClassEnabled(Sede $sede=null, $search=null, $page=1, $limit=10) {
+  public function findClassEnabled(Sede $sede=null, $search=null, $page=1, $limit=10): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
@@ -144,7 +144,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function listaVuota($pagina, $limite) {
+  public function listaVuota($pagina, $limite): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->where('a.abilitato=:abilitato')
@@ -155,7 +155,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli ID di alunni corretti (abilitati e inseriti in classe) o l'errore nell'apposito parametro
+   * Restituisce la lista degli ID di alunni corretti (o e inseriti in classe) o l'errore nell'apposito parametro
    *
    * @param array $sedi Lista di ID delle sedi
    * @param array $lista Lista di ID degli alunni
@@ -163,7 +163,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return array Lista degli ID degli alunni che risultano corretti
    */
-  public function controllaAlunni($sedi, $lista, &$errore) {
+  public function controllaAlunni($sedi, $lista, &$errore): array {
     // legge alunni validi
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id')
@@ -186,7 +186,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return string Lista degli alunni
    */
-  public function listaAlunni($lista, $attr) {
+  public function listaAlunni($lista, $attr): string {
     // legge alunni validi
     $alunni = $this->createQueryBuilder('a')
       ->select("CONCAT('<span id=',:quote,:attr,a.id,:quote,'>',a.cognome,' ',a.nome,' (',DATE_FORMAT(a.dataNascita,'%d/%m/%Y'),') ',c.anno,'ª ',c.sezione,'</span>') AS nome")
@@ -210,7 +210,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return array Lista di ID degli utenti alunni
    */
-  public function getIdAlunno($sedi, $tipo, $filtro) {
+  public function getIdAlunno($sedi, $tipo, $filtro): array {
     $alunni = $this->createQueryBuilder('a')
       ->select('DISTINCT a.id')
       ->join('a.classe', 'cl')
@@ -240,7 +240,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return array Vettore con i dati degli alunni
    */
-  public function alunniInData(\DateTime $data, Classe $classe) {
+  public function alunniInData(\DateTime $data, Classe $classe): array {
     if ($data->format('Y-m-d') >= date('Y-m-d')) {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->createQueryBuilder('a')
@@ -291,7 +291,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return array Array associativo con la lista dei dati
    */
-  public function cerca($criteri, $pagina=1) {
+  public function cerca($criteri, $pagina=1): array {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
@@ -318,7 +318,7 @@ class AlunnoRepository extends BaseRepository {
    *
    * @return array Array associativo con la lista dei dati
    */
-  public function richiestaCertificato(Sede $sede=null) {
+  public function richiestaCertificato(Sede $sede=null): array {
     // crea query base
     $alunni = $this->createQueryBuilder('a')
       ->join('a.classe', 'c')
@@ -338,13 +338,13 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni abilitati e attualmente iscritti alla classe
+   * Restituisce la lista degli alunni o e attualmente iscritti alla classe
    *
    * @param int $search Identificativo della classe
    *
    * @return array Lista degli alunni come array associativo
    */
-  public function classe($classe) {
+  public function classe($classe): array {
     // legge alunni
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita')
@@ -414,6 +414,70 @@ class AlunnoRepository extends BaseRepository {
       ->getOneOrNullResult();
     // restituisce valori
     return $assenze;
+  }
+
+   /**
+   * Restituisce la lista degli alunni, predisposta per le opzioni dei form
+   *
+   * @param bool|null $abilitato Usato per filtrare gli alunni abilitati/disabilitati; se nullo non filtra i dati
+   * @param bool|null $assegnato Usato per filtrare gli alunni assegnati/non assegnati ad una classe/gruppo; se nullo non filtra i dati
+   * @param int|null $classe Identificativo della classe, usato per filtrare gli alunni assegnati alla classe indicata (implica VERO per il parametro $assegnato); se nullo non filtra i dati
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(?bool $abilitato = true, ?bool $assegnato = true, ?int $classe = null): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $alunni = $this->createQueryBuilder('a');
+    if ($classe) {
+      $alunni = $alunni->where('a.classe = :classe')->setParameter('classe', $classe);
+    } elseif ($assegnato === true) {
+      $alunni = $alunni->join('a.classe', 'c');
+    } elseif ($assegnato === false) {
+      $alunni = $alunni->where('a.classe IS NULL');
+    }
+    if ($abilitato === true) {
+      $alunni = $alunni->andWhere('a.abilitato = 1');
+    } elseif ($abilitato === false) {
+      $alunni = $alunni->andWhere('a.abilitato = 0');
+    }
+    $alunni = $alunni 
+      ->orderBy('a.cognome,a.nome,a.dataNascita,a.username')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($alunni as $alunno) {
+      $nome = $alunno->getCognome().' '.$alunno->getNome().' ('.
+        $alunno->getDataNascita()->format('d/m/Y').')';
+      $dati[$nome] = $alunno;
+    }
+    // restituisce lista opzioni
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli alunni per il sostegno, predisposta per le opzioni dei form
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioniSostegno(): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $alunni = $this->createQueryBuilder('a')
+      ->where("a.abilitato = 1 AND a.bes = 'H'")
+      ->orderBy('a.cognome,a.nome,a.dataNascita,a.username')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($alunni as $alunno) {
+      $nome = $alunno->getCognome().' '.$alunno->getNome().' ('.
+        $alunno->getDataNascita()->format('d/m/Y').')';
+      $dati[$nome] = $alunno;
+    }
+    // restituisce lista opzioni
+    return $dati;
   }
 
 }

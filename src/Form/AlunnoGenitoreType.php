@@ -33,26 +33,27 @@ class AlunnoGenitoreType extends AbstractType {
       // form completo per l'amministratore
       $builder
         ->add('alunno', AlunnoType::class, array('label' => false,
-          'data' => $options['data'][0],
+          'data' => $options['values'][0],
           'row_attr' => ['class' => 'mb-0'],
+          'values' => $options['values'][3],
           'mapped' => false))
         ->add('genitore1', GenitoreType::class, array('label' => false,
-          'data' => $options['data'][1],
+          'data' => $options['values'][1],
           'row_attr' => ['class' => 'mb-0'],
           'mapped' => false))
         ->add('genitore2', GenitoreType::class, array('label' => false,
-          'data' => $options['data'][2],
+          'data' => $options['values'][2],
           'row_attr' => ['class' => 'mb-0'],
           'mapped' => false));
     } else {
       // form limitato per la segreteria
       $builder
         ->add('genitore1', GenitoreType::class, array('label' => false,
-          'data' => $options['data'][0],
+          'data' => $options['values'][0],
           'mapped' => false,
           'form_mode' => $options['form_mode']))
         ->add('genitore2', GenitoreType::class, array('label' => false,
-          'data' => $options['data'][1],
+          'data' => $options['values'][1],
           'mapped' => false,
           'form_mode' => $options['form_mode']));
     }
@@ -72,11 +73,11 @@ class AlunnoGenitoreType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('form_mode');
-    $resolver->setDefined('data');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'return_url' => null,
       'form_mode' => 'completo',
-      'data' => null));
+      'values' => []));
   }
 
 }

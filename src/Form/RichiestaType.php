@@ -9,12 +9,10 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -37,14 +35,14 @@ class RichiestaType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     if ($options['form_mode'] == 'add') {
       // form inserimento richiesta
-      if (!$options['dati'][1]) {
+      if (!$options['values'][0]) {
         // richiesta multipla: aggiunge data
         $builder->add('data', DateType::class, array('label' => false,
           'attr' => ['class' => 'gs-mb-2'],
           'widget' => 'single_text',
           'required' => true));
       }
-      foreach ($options['dati'][0] as $nome => $campo) {
+      foreach ($options['values'][1] as $nome => $campo) {
         switch ($campo[0]) {
           case 'string':
             $builder->add($nome, TextType::class, array('label' => false,
@@ -90,36 +88,36 @@ class RichiestaType extends AbstractType {
       // form rimozione richiesta
       $builder
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'attr' => ['rows' => 3],
           'required' => false));
     } elseif ($options['form_mode'] == 'manageEntrata') {
       // form gestione richiesta deroga entrata
       $builder
         ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_entrata',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][0],
           'attr' => ['rows' => 3],
           'required' => false))
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][1],
           'attr' => ['rows' => 3],
           'required' => false));
     } elseif ($options['form_mode'] == 'manageUscita') {
       // form gestione richiesta deroga uscita
       $builder
         ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_uscita',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][0],
           'attr' => ['rows' => 3],
           'required' => false))
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][1],
           'attr' => ['rows' => 3],
           'required' => false));
     } elseif ($options['form_mode'] == 'manage') {
       // form gestione richiesta generica
       $builder
         ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'attr' => ['rows' => 3],
           'required' => false));
     }
@@ -132,11 +130,11 @@ class RichiestaType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
-    $resolver->setDefined('dati');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'allow_extra_fields' => true,
       'form_mode' => 'add',
-      'dati' => null,
+      'values' => [],
+      'allow_extra_fields' => true,
       'data_class' => null));
   }
 

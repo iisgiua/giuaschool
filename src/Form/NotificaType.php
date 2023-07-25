@@ -66,7 +66,7 @@ class NotificaType extends AbstractType {
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'return_url' => null,
-      'values' => null,
+      'values' => [],
       'data_class' => null));
   }
 

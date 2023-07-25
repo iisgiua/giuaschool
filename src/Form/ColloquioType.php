@@ -115,9 +115,9 @@ class ColloquioType extends AbstractType {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'allow_extra_fields' => true,
       'form_mode' => 'singolo',
-      'values' => null,
+      'values' => [],
+      'allow_extra_fields' => true,
       'data_class' => Colloquio::class));
   }
 

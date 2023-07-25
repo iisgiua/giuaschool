@@ -100,7 +100,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
-      ['return_url' => $this->generateUrl('scuola_scrutini'), 'dati' => $definizione->getClassiVisibili()]);
+      ['return_url' => $this->generateUrl('scuola_scrutini'), 'values' => $definizione->getClassiVisibili()]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // classi visibili
@@ -1076,7 +1076,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneRichiestaType::class, $modulo, [
-      'return_url' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
+      'return_url' => $this->generateUrl('scuola_moduli'), 'values' => [$campi, $lista]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla campi

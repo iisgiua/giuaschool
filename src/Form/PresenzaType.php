@@ -8,11 +8,8 @@
 
 namespace App\Form;
 
-use App\Entity\Alunno;
 use App\Entity\Presenza;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -61,21 +58,14 @@ class PresenzaType extends AbstractType {
       // form aggiungi
       $builder
         ->add('alunno', HiddenType::class)
-        ->add('alunni', EntityType::class, array('label' => 'label.alunni',
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][0])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
+        ->add('alunni', ChoiceType::class, ['label' => 'label.alunni',
+          'choices' => $options['values'][0],
+          'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
           'label_attr' => ['class' => 'checkbox-split-vertical'],
           'required' => true,
-          'mapped' => false))
+          'mapped' => false])
         ->add('data', DateType::class, array('label' => 'label.data_inizio',
           'widget' => 'single_text',
           'html5' => false,
@@ -135,17 +125,10 @@ class PresenzaType extends AbstractType {
     } elseif ($options['form_mode'] == 'edit') {
       // form modifica
       $builder
-        ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][0])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
-          'required' => true))
+        ->add('alunno', ChoiceType::class, ['label' => 'label.alunno',
+          'choices' => $options['values'][0],
+          'choice_translation_domain' => false,
+          'required' => true])
         ->add('data', DateType::class, array('label' => 'label.data',
           'widget' => 'single_text',
           'html5' => false,
@@ -223,6 +206,8 @@ class PresenzaType extends AbstractType {
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'form_mode' => 'edit',
+      'return_url' => null,
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => Presenza::class));
   }

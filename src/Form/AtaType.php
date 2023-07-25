@@ -8,16 +8,14 @@
 
 namespace App\Form;
 
+use App\Entity\Ata;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Ata;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -58,16 +56,10 @@ class AtaType extends AbstractType {
         'choices' => array('label.si' => true, 'label.no' => false),
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
-      ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App\Entity\Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'choices' => $options['values'][0],
         'placeholder' => 'label.nessuna_sede',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => false))
       ->add('spid', ChoiceType::class, array('label' => 'label.spid',
@@ -96,8 +88,10 @@ class AtaType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'return_url' => null,
+      'values' => [],
       'data_class' => Ata::class));
   }
 

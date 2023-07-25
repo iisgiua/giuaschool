@@ -8,8 +8,6 @@
 
 namespace App\Form;
 
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -53,33 +51,33 @@ class FiltroType extends AbstractType {
         'required' => true))
         ->add('sede', ChoiceType::class, array('label' => 'label.richiesta_sede',
           'data' => $options['values'][2],
-          'choices' => $options['values'][3],
+          'choices' => $options['values'][7],
           'choice_translation_domain' => false,
           'attr' => ['title' => 'label.richiesta_sede'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => true))
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-          'data' => $options['values'][4],
-          'choices' => $options['values'][5],
+          'data' => $options['values'][3],
+          'choices' => $options['values'][8],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
         ->add('residenza', TextType::class, array('label' => 'label.residenza',
-          'data' => $options['values'][6],
+          'data' => $options['values'][4],
           'attr' => ['placeholder' => 'label.residenza', 'title' => 'label.residenza',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['values'][7],
+          'data' => $options['values'][5],
           'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['values'][8],
+          'data' => $options['values'][6],
           'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
@@ -87,54 +85,40 @@ class FiltroType extends AbstractType {
     } elseif ($options['form_mode'] == 'colloqui') {
       // form cerca colloqui
       $builder
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][0],
-          'class' => 'App\Entity\Docente',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome();
-            },
+          'choices' => $options['values'][1],
           'placeholder' => 'label.scegli_docente',
-          'query_builder' => function (EntityRepository $er) {
-              return $er->createQueryBuilder('d')
-                ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
-                ->orderBy('d.cognome,d.nome', 'ASC');
-            },
+          'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'presenze') {
       // form presenze
       $builder
-        ->add('alunno', EntityType::class, array('label' => 'label.alunno',
+        ->add('alunno', ChoiceType::class, ['label' => 'label.alunno',
           'data' => $options['values'][0],
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
+          'choices' => $options['values'][3],
           'placeholder' => 'label.tutti_alunni',
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][1])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
+          'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false))
+          'required' => false])
         ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
-          'data' => $options['values'][2],
+          'data' => $options['values'][1],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
           'required' => false))
         ->add('fine', DateType::class, array('label' => 'label.data_fine',
-          'data' => $options['values'][3],
+          'data' => $options['values'][2],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],

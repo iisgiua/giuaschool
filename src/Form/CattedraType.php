@@ -9,8 +9,6 @@
 namespace App\Form;
 
 use App\Entity\Cattedra;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -42,38 +40,24 @@ class CattedraType extends AbstractType {
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
         'required' => true])
-      ->add('materia', EntityType::class, array('label' => 'label.materia',
-        'class' => 'App\Entity\Materia',
-        'choice_label' => 'nome',
-        'query_builder' => function (EntityRepository $er) {
-          return $er->createQueryBuilder('c')
-            ->where("c.tipo IN ('N','R','S','E')")
-            ->orderBy('c.nome', 'ASC'); },
+      ->add('materia', ChoiceType::class, ['label' => 'label.materia',
+        'choices' => $options['values'][1],
         'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
-        'required' => true))
-      ->add('alunno', EntityType::class, array('label' => 'label.alunno_H',
-        'class' => 'App\Entity\Alunno',
-        'choice_label' => function ($obj) {
-          return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
-        'query_builder' => function (EntityRepository $er) {
-          return $er->createQueryBuilder('a')
-            ->where("a.bes='H' AND a.abilitato=1")
-            ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC'); },
+        'required' => true])
+      ->add('alunno', ChoiceType::class, ['label' => 'label.alunno_H',
+        'choices' => $options['values'][2],
         'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
-        'required' => false))
-      ->add('docente', EntityType::class, array('label' => 'label.docente',
-        'class' => 'App\Entity\Docente',
-        'choice_label' => function ($obj) {
-          return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
-        'query_builder' => function (EntityRepository $er) {
-          return $er->createQueryBuilder('d')
-            ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
-            ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
+        'required' => false])
+      ->add('docente', ChoiceType::class, ['label' => 'label.docente',
+        'choices' => $options['values'][3],
         'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
-        'required' => true))
+        'required' => true])
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
         'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P',
           'label.tipo_A' => 'A'),

@@ -86,7 +86,7 @@ class LogoutListener {
       $this->reqstack->getSession()->invalidate();
       // log azione
       $this->dblogger->logAzione('ACCESSO', 'Logout', array(
-        'Username' => $user->getUsername(),
+        'Username' => $user->getUserIdentifier(),
         'Ruolo' => $user->getRoles()[0]));
     }
     // reindirizza a nuova pagina

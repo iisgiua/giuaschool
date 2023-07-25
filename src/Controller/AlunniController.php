@@ -75,7 +75,7 @@ class AlunniController extends BaseController {
       }
     }
     // form
-    $form = $this->createForm(ImportaCsvType::class, null, ['formMode' => 'alunni']);
+    $form = $this->createForm(ImportaCsvType::class, null, ['form_mode' => 'alunni']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
@@ -113,10 +113,10 @@ class AlunniController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
-    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
     $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
     $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
@@ -125,22 +125,21 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    $lista_classi[] = -1;
-    $label_classe = $trans->trans('label.nessuna_classe');
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, $label_classe]]);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
+      'values' => [$classe, $criteri['cognome'], $criteri['nome'], $opzioniClassi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = trim($form->get('nome')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
+        $criteri['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // lista alunni
@@ -253,7 +252,8 @@ class AlunniController extends BaseController {
     }
     // form
     $form = $this->createForm(AlunnoGenitoreType::class, $alunno, [
-      'returnUrl' => $this->generateUrl('alunni_modifica'),'data' => [$alunno, $genitore1, $genitore2]]);
+      'return_url' => $this->generateUrl('alunni_modifica'),
+      'values' => [$alunno, $genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla numeri di telefono genitore1
@@ -470,8 +470,8 @@ class AlunniController extends BaseController {
     $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $lista_classi[] = -1;
     $label_classe = $trans->trans('label.nessuna_classe');
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, $label_classe]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
+      'values' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, $label_classe]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -543,8 +543,8 @@ class AlunniController extends BaseController {
       }
     }
     // form
-    $form = $this->createForm(CambioClasseType::class, $cambio, ['formMode' => $tipo,
-      'returnUrl' => $this->generateUrl('alunni_classe')]);
+    $form = $this->createForm(CambioClasseType::class, $cambio, ['form_mode' => $tipo,
+      'return_url' => $this->generateUrl('alunni_classe')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // validazione
@@ -851,8 +851,8 @@ class AlunniController extends BaseController {
     // form di ricerca
     $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
       'label.rappresentante_P' => 'P'];
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
+      'values' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -905,8 +905,8 @@ class AlunniController extends BaseController {
     }
     // form di ricerca
     $listaTipi = ['label.rappresentante_L' => 'L', 'label.rappresentante_I' => 'I'];
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
+      'values' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -974,9 +974,9 @@ class AlunniController extends BaseController {
       $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
         'label.rappresentante_P' => 'P'];
     }
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
-      'returnUrl' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
-      'dati' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rappresentanti',
+      'return_url' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
+      'values' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlla tipi

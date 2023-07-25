@@ -8,21 +8,14 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Filesystem\Filesystem;
-use App\Util\RegistroUtil;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
-use App\Entity\Assenza;
-use App\Entity\CambioClasse;
-use App\Entity\Entrata;
-use App\Entity\Esito;
-use App\Entity\Festivita;
-use App\Entity\Uscita;
-use App\Entity\VotoScrutinio;
+use App\Util\RegistroUtil;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 
 /**
@@ -201,7 +194,7 @@ class SegreteriaUtil {
    *
    * @return array Restituisce i dati come array associativo
    */
-  public function pagelleAlunni(Paginator $lista) {
+  public function pagelleAlunni(Paginator $lista): array {
     $dati = array();
     // trova pagelle di alunni
     foreach ($lista as $alu) {

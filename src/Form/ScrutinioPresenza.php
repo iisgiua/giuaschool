@@ -20,34 +20,34 @@ class ScrutinioPresenza {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $docente Identificativo univoco per il docente
+   * @var int $docente Identificativo univoco per il docente
    */
-  private $docente;
+  private int $docente = 0;
 
   /**
    * @var bool $presenza Indica se il docente è presente oppure no
    */
-  private $presenza;
+  private bool $presenza = true;
 
   /**
    * @var string $sostituto Sostituto del docente in caso di sua assenza
    */
-  private $sostituto;
+  private string $sostituto = '';
 
   /**
    * @var string $sessoSostituto Sesso del sostituto [M,F]
    */
-  private $sessoSostituto;
+  private string $sessoSostituto = '';
 
   /**
    * @var string $surrogaProtocollo Numero protocollo del provvedimento di surroga
    */
-  private $surrogaProtocollo;
+  private string $surrogaProtocollo = '';
 
   /**
-   * @var \DateTime $surrogaData Data del provvedimento di surroga
+   * @var \DateTime|null $surrogaData Data del provvedimento di surroga
    */
-  private $surrogaData;
+  private ?\DateTime $surrogaData = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -55,20 +55,20 @@ class ScrutinioPresenza {
   /**
    * Restituisce l'identificativo univoco per il docente
    *
-   * @return integer Identificativo univoco per il docente
+   * @return int Identificativo univoco per il docente
    */
-  public function getDocente() {
+  public function getDocente(): int {
     return $this->docente;
   }
 
   /**
    * Modifica l'identificativo univoco per il docente
    *
-   * @var integer $id Identificativo univoco per il docente
+   * @var int $id Identificativo univoco per il docente
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setDocente($docente) {
+  public function setDocente(int $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -78,7 +78,7 @@ class ScrutinioPresenza {
    *
    * @return bool Indica se il docente è presente oppure no
    */
-  public function getPresenza() {
+  public function getPresenza(): bool {
     return $this->presenza;
   }
 
@@ -87,9 +87,9 @@ class ScrutinioPresenza {
    *
    * @var bool $presenza Indica se il docente è presente oppure no
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setPresenza($presenza) {
+  public function setPresenza(bool $presenza): self {
     $this->presenza = $presenza;
     return $this;
   }
@@ -99,7 +99,7 @@ class ScrutinioPresenza {
    *
    * @return string Sostituto del docente in caso di sua assenza
    */
-  public function getSostituto() {
+  public function getSostituto(): string {
     return $this->sostituto;
   }
 
@@ -108,9 +108,9 @@ class ScrutinioPresenza {
    *
    * @var string $sostituto Sostituto del docente in caso di sua assenza
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setSostituto($sostituto) {
+  public function setSostituto(string $sostituto): self {
     $this->sostituto = $sostituto;
     return $this;
   }
@@ -120,7 +120,7 @@ class ScrutinioPresenza {
    *
    * @return string Sesso del sostituto
    */
-  public function getSessoSostituto() {
+  public function getSessoSostituto(): string {
     return $this->sessoSostituto;
   }
 
@@ -129,9 +129,9 @@ class ScrutinioPresenza {
    *
    * @var string $sessoSostituto Sesso del sostituto
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setSessoSostituto($sessoSostituto) {
+  public function setSessoSostituto(string $sessoSostituto): self {
     $this->sessoSostituto = $sessoSostituto;
     return $this;
   }
@@ -141,7 +141,7 @@ class ScrutinioPresenza {
    *
    * @return string Numero protocollo del provvedimento di surroga
    */
-  public function getSurrogaProtocollo() {
+  public function getSurrogaProtocollo(): string {
     return $this->surrogaProtocollo;
   }
 
@@ -150,9 +150,9 @@ class ScrutinioPresenza {
    *
    * @var string $surrogaProtocollo Numero protocollo del provvedimento di surroga
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setSurrogaProtocollo($surrogaProtocollo) {
+  public function setSurrogaProtocollo(string $surrogaProtocollo): self {
     $this->surrogaProtocollo = $surrogaProtocollo;
     return $this;
   }
@@ -160,9 +160,9 @@ class ScrutinioPresenza {
   /**
    * Restituisce la data del provvedimento di surroga
    *
-   * @return \DateTime Data del provvedimento di surroga
+   * @return \DateTime|null Data del provvedimento di surroga
    */
-  public function getSurrogaData() {
+  public function getSurrogaData(): ?\DateTime  {
     return $this->surrogaData;
   }
 
@@ -171,9 +171,9 @@ class ScrutinioPresenza {
    *
    * @var \DateTime $surrogaData Data del provvedimento di surroga
    *
-   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setSurrogaData(\DateTime $surrogaData=null) {
+  public function setSurrogaData(?\DateTime $surrogaData): self {
     $this->surrogaData = $surrogaData;
     return $this;
   }

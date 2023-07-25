@@ -70,7 +70,7 @@ class SistemaController extends BaseController {
     $banner_home = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'banner',
-      'dati' => [$banner_login, $banner_home]]);
+      'values' => [$banner_login, $banner_home]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
@@ -118,7 +118,7 @@ class SistemaController extends BaseController {
     }
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'manutenzione',
-      'dati' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
+      'values' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
         $manutenzione_fine, clone $manutenzione_fine]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -168,7 +168,7 @@ class SistemaController extends BaseController {
     $parametri = $this->em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'parametri',
-      'dati' => $parametri]);
+      'values' => $parametri]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -1061,7 +1061,7 @@ class SistemaController extends BaseController {
       ->getResult();
     // form
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'archivia',
-      'dati' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
+      'values' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // assicura che lo script non sia interrotto
@@ -1278,7 +1278,7 @@ class SistemaController extends BaseController {
     $ora = new \DateTime('now');
     // form
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'log',
-      'return_url' => $this->generateUrl('sistema_manutenzione'), 'dati' => [$data, $ora]]);
+      'return_url' => $this->generateUrl('sistema_manutenzione'), 'values' => [$data, $ora]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $msgs = [];
@@ -1557,7 +1557,7 @@ class SistemaController extends BaseController {
     $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
     $info['email'] = '';
     // form
-    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'values' => $info]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form
@@ -1684,7 +1684,7 @@ class SistemaController extends BaseController {
     $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
     $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'values' => $info]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form

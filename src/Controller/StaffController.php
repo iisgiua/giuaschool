@@ -261,7 +261,7 @@ class StaffController extends BaseController {
     // form di inserimento
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'generico',
       'return_url' => $this->generateUrl('staff_avvisi'),
-      'dati' => [(count($avviso->getAnnotazioni()) > 0),
+      'values' => [(count($avviso->getAnnotazioni()) > 0),
         $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     // visualizzazione filtri
@@ -780,7 +780,7 @@ class StaffController extends BaseController {
     // form di inserimento
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'orario',
       'return_url' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
-      'dati' => [$tipo, $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
+      'values' => [$tipo, $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // lista sedi
@@ -1093,7 +1093,7 @@ class StaffController extends BaseController {
     // form di inserimento
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'attivita',
       'return_url' => $this->generateUrl('staff_avvisi_attivita'),
-      'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
+      'values' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // lista sedi
@@ -1380,7 +1380,7 @@ class StaffController extends BaseController {
     // form di inserimento
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'individuale',
       'return_url' => $this->generateUrl('staff_avvisi_individuali'),
-      'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
+      'values' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
     $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     if ($form->isSubmitted()) {
@@ -1945,7 +1945,7 @@ class StaffController extends BaseController {
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita, array(
       'form_mode' => $richiesta ? 'richiesta' : 'staff',
-      'dati' => [$chiediGiustificazione]));
+      'values' => [$chiediGiustificazione]));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {

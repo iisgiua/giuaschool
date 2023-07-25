@@ -11,8 +11,6 @@ namespace App\Form;
 use App\Entity\Alunno;
 use App\Entity\Docente;
 use App\Entity\Genitore;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -67,41 +65,27 @@ class ModuloType extends AbstractType {
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline'],
           'required' => true))
-        ->add('docente', ChoiceType::class, array('label' => 'label.docente_curricolare',
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente_curricolare',
           'choices' => $options['values'][0],
-          'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
-          'choice_value' => function ($obj) {
-            return $obj ? $obj->getId() : $obj; },
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'row_attr' => ['id' => 'row_modulo_docente'],
-          'required' => false))
-        ->add('sostegno', ChoiceType::class, array('label' => 'label.docente_sostegno',
+          'required' => false])
+        ->add('sostegno', ChoiceType::class, ['label' => 'label.docente_sostegno',
           'choices' => $options['values'][1],
-          'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
-          'choice_value' => function ($obj) {
-            return $obj ? $obj->getId() : $obj; },
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'row_attr' => ['id' => 'row_modulo_sostegno'],
-          'required' => false))
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'required' => false])
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'choices' => $options['values'][2],
-          'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione(); },
-          'choice_value' => function ($obj) {
-            return $obj ? $obj->getId() : $obj; },
-          'group_by' => function ($obj) {
-            return $obj ? $obj->getSede()->getCitta() : $obj; },
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'row_attr' => ['id' => 'row_modulo_classe'],
-          'required' => false))
+          'required' => false])
         ->add('circolare', ChoiceType::class, array('label' => 'label.archivio_circolari',
           'choices' => $options['values'][3],
           'choice_label' => function ($obj) {
@@ -116,22 +100,17 @@ class ModuloType extends AbstractType {
     } elseif ($options['form_mode'] == 'staff') {
       // form staff
       $builder
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][0],
-          'class' => 'App\Entity\Docente',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
+          'choices' => $options['values'][1],
           'placeholder' => 'label.choose_option',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
-              ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
+          'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'disabled' => ($options['values'][0] != null),
-          'required' => true))
+          'required' => true])
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
-          'data' => $options['values'][1],
-          'choices' => $options['values'][2],
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
           'required' => false));
@@ -140,24 +119,19 @@ class ModuloType extends AbstractType {
       $builder
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'data' => $options['values'][0],
-          'choices' => $options['values'][2],
+          'choices' => $options['values'][1],
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'disabled' => ($options['values'][0] != null),
           'required' => true))
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'data' => $options['values'][1],
-          'class' => 'App\Entity\Docente',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
-              ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.choose_option',
+          'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => true));
+          'required' => true]);
     } elseif ($options['form_mode'] == 'log') {
       // form log
       $builder
@@ -178,26 +152,26 @@ class ModuloType extends AbstractType {
       // form configurazione email
       $builder
         ->add('server', ChoiceType::class, array('label' => 'label.mailserver_tipo',
-          'data' => $options['values']['server'],
+          'data' => $options['values'][0],
           'choices' => ['label.mailserver_smtp' => 'smtp', 'label.mailserver_sendmail' => 'sendmail',
             'label.mailserver_gmail' => 'gmail+smtp', 'label.mailserver_php' => 'php'],
           'help' => 'message.mailserver_help_smtp',
           'required' => true))
         ->add('user', TextType::class, array('label' => 'label.mailserver_user',
-          'data' => $options['values']['user'],
+          'data' => $options['values'][1],
           'attr' => ['widget' => 'gs-row-start'],
           'required' => false))
         ->add('password', PasswordType::class, array('label' => 'label.mailserver_password',
-          'data' => $options['values']['password'],
+          'data' => $options['values'][2],
           'always_empty' => false,
           'attr' => ['widget' => 'gs-row-end'],
           'required' => false))
         ->add('host', TextType::class, array('label' => 'label.mailserver_host',
-          'data' => $options['values']['host'],
+          'data' => $options['values'][3],
           'attr' => ['widget' => 'gs-row-start'],
           'required' => false))
         ->add('port', IntegerType::class, array('label' => 'label.mailserver_port',
-          'data' => $options['values']['port'],
+          'data' => $options['values'][4],
           'attr' => ['widget' => 'gs-row-end'],
           'required' => false))
         ->add('email', EmailType::class, array('label' => 'label.mailserver_email',
@@ -207,7 +181,7 @@ class ModuloType extends AbstractType {
         $builder
           ->add('utente', ChoiceType::class, array('label' => 'label.utente',
             'data' => $options['values'][0],
-            'choices' => $options['values'][2],
+            'choices' => $options['values'][1],
             'choice_label' => function ($obj) {
               return ($obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
                 ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
@@ -221,7 +195,7 @@ class ModuloType extends AbstractType {
             'disabled' => count($options['values'][1]) == 1,
             'required' => true))
           ->add('tipi', ChoiceType::class, array('label' => 'label.tipo',
-            'data' => $options['values'][1],
+            'data' => $options['values'][2],
             'choices' => $options['values'][3],
             'placeholder' => 'label.choose_option',
             'expanded' => true,
@@ -231,10 +205,10 @@ class ModuloType extends AbstractType {
       // form configurazione telegram
       $builder
         ->add('bot', TextType::class, array('label' => 'label.telegram_bot',
-          'data' => $options['values']['bot'],
+          'data' => $options['values'][0],
           'required' => false))
         ->add('token', TextType::class, array('label' => 'label.telegram_token',
-          'data' => $options['values']['token'],
+          'data' => $options['values'][1],
           'required' => false));
     }
     // aggiunge pulsanti al form

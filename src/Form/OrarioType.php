@@ -8,16 +8,14 @@
 
 namespace App\Form;
 
+use App\Entity\Orario;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Orario;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -50,15 +48,10 @@ class OrarioType extends AbstractType {
         'format' => 'dd/MM/yyyy',
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
-      ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App\Entity\Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getNomeBreve();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'choices' => $options['values'][0],
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
@@ -73,8 +66,10 @@ class OrarioType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'return_url' => null,
+      'values' => [],
       'data_class' => Orario::class));
   }
 

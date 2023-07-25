@@ -8,15 +8,13 @@
 
 namespace App\Form;
 
+use App\Entity\Uscita;
+use App\Form\MessageType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\Type;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Doctrine\ORM\EntityRepository;
-use App\Form\MessageType;
-use App\Entity\Uscita;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -49,7 +47,7 @@ class UscitaType extends AbstractType {
     if ($options['form_mode'] == 'staff') {
       $builder
         ->add('giustificazione', ChoiceType::class, array('label' => 'label.richiedi_giustificazione',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'choices' => ['label.si' => true, 'label.no' => false],
           'expanded' => true,
           'multiple' => false,
@@ -69,10 +67,10 @@ class UscitaType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
-    $resolver->setDefined('dati');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'form_mode' => 'richiesta',
-      'dati' => [],
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => Uscita::class));
   }

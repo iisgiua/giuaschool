@@ -257,7 +257,7 @@ class ClasseRepository extends BaseRepository {
   /**
    * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
    *
-   * @param int|null $sede Identificativo della sede per filtrare le classi sulla sede indicata, nullo per qualsiasi sede
+   * @param int|null $sede Identificativo della sede, usato per filtrare le classi della sede indicata; se nullo non filtra i dati
    *
    * @return array Array associativo predisposto per le opzioni dei form
    */
@@ -276,7 +276,9 @@ class ClasseRepository extends BaseRepository {
       ->getResult();
     // imposta opzioni
     foreach ($classi as $classe) {
-      $nome = $classe->getAnno().$classe->getSezione().($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '');
+      $nome = $classe->getAnno().$classe->getSezione().
+        ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '').' - '.
+        $classe->getCorso()->getNomeBreve();
       $dati[$classe->getSede()->getNomeBreve()][$nome] = $classe;
     }
     // restituisce lista opzioni

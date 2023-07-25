@@ -112,7 +112,7 @@ class RichiesteController extends BaseController {
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
-      'dati' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
+      'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $invio = new \DateTime();
@@ -394,7 +394,7 @@ class RichiesteController extends BaseController {
     $dati['richiesta'] = $richiesta;
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita, ['form_mode' => $richiesta ? 'richiesta' : 'staff',
-      'dati' => [$chiediGiustificazione]]);
+      'values' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
@@ -639,7 +639,7 @@ class RichiesteController extends BaseController {
     $info['richiesta'] = $richiesta;
     // form di gestione
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'remove',
-      'dati' => [$richiesta->getMessaggio()]]);
+      'values' => [$richiesta->getMessaggio()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
         // cambia stato
@@ -702,7 +702,7 @@ class RichiesteController extends BaseController {
     // form di gestione
     $form = $this->createForm(RichiestaType::class, null, [
       'form_mode' => $tipo == 'E' ? 'manageEntrata' : ($tipo == 'D' ? 'manageUscita' : 'manage'),
-      'dati' => [$richiesta->getMessaggio(), $deroga]]);
+      'values' => [$richiesta->getMessaggio(), $deroga]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // gestione deroghe

@@ -75,8 +75,8 @@ class RichiestaColloquioType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
-      'allow_extra_fields' => true,
       'form_mode' => 'conferma',
+      'allow_extra_fields' => true,
       'data_class' => RichiestaColloquio::class));
   }
 

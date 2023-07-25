@@ -20,44 +20,44 @@ class VotoClasse {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'alunno
+   * @var int $id Identificativo univoco per l'alunno
    */
-  private $id;
+  private int $id = 0;
 
   /**
    * @var string $alunno Nome da visualizzare per l'alunno
    */
-  private $alunno;
+  private string $alunno = '';
 
   /**
    * @var string $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    */
-  private $bes;
+  private string $bes = '';
 
   /**
-   * @var boolean $media Indica se il voto è utilizzato nelle medie
+   * @var bool $media Indica se il voto è utilizzato nelle medie
    */
-  private $media;
+  private bool $media = true;
 
   /**
    * @var float $voto Voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
    */
-  private $voto;
+  private float $voto = 0;
 
   /**
    * @var string $voto Voto rappresentato come testo (es: 6-,6,6+,6½)
    */
-  private $votoTesto;
+  private string $votoTesto = '';
 
   /**
    * @var string $giudizio Giudizio della valutazione
    */
-  private $giudizio;
+  private string $giudizio = '';
 
   /**
-   * @var integer $id Identificativo univoco per la valutazione (null se non presente)
+   * @var int $id Identificativo univoco per la valutazione (null se non presente)
    */
-  private $votoId;
+  private int $votoId = 0;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -65,20 +65,20 @@ class VotoClasse {
   /**
    * Restituisce l'identificativo univoco per l'alunno
    *
-   * @return integer Identificativo univoco per l'alunno
+   * @return int Identificativo univoco per l'alunno
    */
-  public function getId() {
+  public function getId(): int {
     return $this->id;
   }
 
   /**
    * Modifica l'identificativo univoco per l'alunno
    *
-   * @var integer $id Identificativo univoco per l'alunno
+   * @var int $id Identificativo univoco per l'alunno
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setId($id) {
+  public function setId(int $id): self {
     $this->id = $id;
     return $this;
   }
@@ -88,7 +88,7 @@ class VotoClasse {
    *
    * @return string Nome da visualizzare per l'alunno
    */
-  public function getAlunno() {
+  public function getAlunno(): string {
     return $this->alunno;
   }
 
@@ -97,9 +97,9 @@ class VotoClasse {
    *
    * @var string $alunno Nome da visualizzare per l'alunno
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setAlunno($alunno) {
+  public function setAlunno(string $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -109,7 +109,7 @@ class VotoClasse {
    *
    * @return string Bisogni educativi speciali dell'alunno
    */
-  public function getBes() {
+  public function getBes(): string {
     return $this->bes;
   }
 
@@ -118,9 +118,9 @@ class VotoClasse {
    *
    * @param string $bes Bisogni educativi speciali dell'alunno
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setBes($bes) {
+  public function setBes(string $bes): string {
     $this->bes = $bes;
     return $this;
   }
@@ -128,9 +128,9 @@ class VotoClasse {
   /**
    * Restituisce se il voto è utilizzato nelle medie
    *
-   * @return boolean Indica se il voto è utilizzato nelle medie
+   * @return bool Indica se il voto è utilizzato nelle medie
    */
-  public function getMedia() {
+  public function getMedia(): bool {
     return $this->media;
   }
 
@@ -139,9 +139,9 @@ class VotoClasse {
    *
    * @param boolean $media Indica se il voto è utilizzato nelle medie
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setMedia($media) {
+  public function setMedia(bool $media): self {
     $this->media = $media;
     return $this;
   }
@@ -151,7 +151,7 @@ class VotoClasse {
    *
    * @return float Voto numerico della valutazione
    */
-  public function getVoto() {
+  public function getVoto(): float {
     return $this->voto;
   }
 
@@ -160,9 +160,9 @@ class VotoClasse {
    *
    * @param float $voto Voto numerico della valutazione
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setVoto($voto) {
+  public function setVoto(float $voto): self {
     $this->voto = $voto;
     return $this;
   }
@@ -172,7 +172,7 @@ class VotoClasse {
    *
    * @return string Voto rappresentato come testo
    */
-  public function getVotoTesto() {
+  public function getVotoTesto(): string {
     return $this->votoTesto;
   }
 
@@ -181,9 +181,9 @@ class VotoClasse {
    *
    * @param string $voto Voto rappresentato come testo
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setVotoTesto($votoTesto) {
+  public function setVotoTesto(string $votoTesto): self {
     $this->votoTesto = $votoTesto;
     return $this;
   }
@@ -193,7 +193,7 @@ class VotoClasse {
    *
    * @return string Giudizio della valutazione
    */
-  public function getGiudizio() {
+  public function getGiudizio(): string {
     return $this->giudizio;
   }
 
@@ -202,9 +202,9 @@ class VotoClasse {
    *
    * @param string $giudizio Giudizio della valutazione
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setGiudizio($giudizio) {
+  public function setGiudizio(string $giudizio): self {
     $this->giudizio = $giudizio;
     return $this;
   }
@@ -212,9 +212,9 @@ class VotoClasse {
   /**
    * Restituisce l'identificativo univoco per la valutazione
    *
-   * @return integer Identificativo univoco per la valutazione
+   * @return int Identificativo univoco per la valutazione
    */
-  public function getVotoId() {
+  public function getVotoId(): int {
     return $this->votoId;
   }
 
@@ -223,9 +223,9 @@ class VotoClasse {
    *
    * @var integer $votoId Identificativo univoco per la valutazione
    *
-   * @return Valutazione Oggetto Valutazione
+   * @return VotoClasse Oggetto modificato
    */
-  public function setVotoId($votoId) {
+  public function setVotoId(int $votoId): self {
     $this->votoId = $votoId;
     return $this;
   }
@@ -238,7 +238,7 @@ class VotoClasse {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->alunno.' '.$this->voto.' '.$this->giudizio;
   }
 
