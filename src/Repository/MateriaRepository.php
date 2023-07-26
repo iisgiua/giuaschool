@@ -80,10 +80,11 @@ class MateriaRepository extends \Doctrine\ORM\EntityRepository {
    * Restituisce la lista delle materie, predisposta per le opzioni dei form
    *
    * @param bool|null $cattedra Usato per filtrare le materie utilizzabili in una cattedra; se nullo non filtra i dati
+   * @param bool $breve Usato per utilizzare il nome breve delle materie
    *
    * @return array Array associativo predisposto per le opzioni dei form
    */
-  public function opzioni(?bool $cattedra = true): array {
+  public function opzioni(?bool $cattedra = true, $breve = true): array {
     // inizializza
     $dati = [];
     // legge dati
@@ -99,7 +100,7 @@ class MateriaRepository extends \Doctrine\ORM\EntityRepository {
       ->getResult();
     // imposta opzioni
     foreach ($materie as $materia) {
-      $dati[$materia->getNomeBreve()] = $materia;
+      $dati[$breve ? $materia->getNomeBreve() : $materia->getNome()] = $materia;
     }
     // restituisce lista opzioni
     return $dati;

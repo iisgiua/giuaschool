@@ -176,31 +176,31 @@ class ModuloType extends AbstractType {
           'required' => false))
         ->add('email', EmailType::class, array('label' => 'label.mailserver_email',
           'required' => true));
-      } elseif ($options['form_mode'] == 'rappresentanti') {
-        // form rappresentanti
-        $builder
-          ->add('utente', ChoiceType::class, array('label' => 'label.utente',
-            'data' => $options['values'][0],
-            'choices' => $options['values'][1],
-            'choice_label' => function ($obj) {
-              return ($obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
-                ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
-                ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
-                $obj))); },
-            'choice_value' => function ($obj) {
-              return (is_object($obj) ? $obj->getId() : $obj); },
-            'placeholder' => 'label.choose_option',
-            'choice_translation_domain' => false,
-            'attr' => ['widget' => 'search'],
-            'disabled' => count($options['values'][1]) == 1,
-            'required' => true))
-          ->add('tipi', ChoiceType::class, array('label' => 'label.tipo',
-            'data' => $options['values'][2],
-            'choices' => $options['values'][3],
-            'placeholder' => 'label.choose_option',
-            'expanded' => true,
-            'multiple' => true,
-            'required' => true));
+    } elseif ($options['form_mode'] == 'rappresentanti') {
+      // form rappresentanti
+      $builder
+        ->add('utente', ChoiceType::class, array('label' => 'label.utente',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_label' => function ($obj) {
+            return ($obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
+              ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
+              ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
+              $obj))); },
+          'choice_value' => function ($obj) {
+            return (is_object($obj) ? $obj->getId() : $obj); },
+          'placeholder' => 'label.choose_option',
+          'choice_translation_domain' => false,
+          'attr' => ['widget' => 'search'],
+          'disabled' => count($options['values'][1]) == 1,
+          'required' => true))
+        ->add('tipi', ChoiceType::class, array('label' => 'label.tipo',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.choose_option',
+          'expanded' => true,
+          'multiple' => true,
+          'required' => true));
     } elseif ($options['form_mode'] == 'telegram') {
       // form configurazione telegram
       $builder

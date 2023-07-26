@@ -26,7 +26,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
@@ -119,7 +118,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -127,8 +126,8 @@ class DocentiController extends BaseController {
     $criteri = array();
     $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe');
     $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/pagina', 1);
@@ -140,18 +139,18 @@ class DocentiController extends BaseController {
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
     $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
-      'values' => [$classe, $criteri['cognome'], $criteri['nome'], $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
+        $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['nome'] = trim($form->get('nome')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // lista docenti
@@ -175,7 +174,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction($id, $abilita): Response {
+  public function abilitaAction(int $id, int $abilita): Response {
     // controllo docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -213,7 +212,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, $id): Response {
+  public function modificaEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -286,7 +285,8 @@ class DocentiController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, $id, $tipo): Response {
+                                 LoggerInterface $logger, LogHandler $dblogger, int $id, 
+                                 string $tipo): Response {
     // controlla docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -322,9 +322,9 @@ class DocentiController extends BaseController {
     $html = $this->renderView('pdf/credenziali_privacy.html.twig', array(
       'utente' => $docente));
     $pdf->createFromHtml($html);
-    $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia per email
+      $doc = $pdf->getHandler()->Output('', 'S');
       $message = (new Email())
         ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($docente->getEmail())
@@ -348,12 +348,9 @@ class DocentiController extends BaseController {
       // redirezione
       return $this->redirectToRoute('docenti_modifica');
     } else {
-      // crea pdf e lo scarica
+      // scarica PDF
       $nomefile = 'credenziali-registro.pdf';
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response = new Response($doc);
-      $response->headers->set('Content-Disposition', $disposition);
-      return $response;
+      return $pdf->send($nomefile);
     }
   }
 
@@ -372,7 +369,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function resetAction(Request $request, LogHandler $dblogger, $id): Response {
+  public function resetAction(Request $request, LogHandler $dblogger, int $id): Response {
     // controlla docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -408,7 +405,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffAction(Request $request, $pagina): Response {
+  public function staffAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -429,8 +426,8 @@ class DocentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = trim($form->get('nome')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
@@ -458,7 +455,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffEditAction(Request $request, $id): Response {
+  public function staffEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -474,9 +471,11 @@ class DocentiController extends BaseController {
       $sede = null;
     }
     // form
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'staff',
-      'return_url' => $this->generateUrl('docenti_staff'), 'values' => [$staff, $sede, $opzioniSedi]]);
+      'return_url' => $this->generateUrl('docenti_staff'), 'values' => [$staff, $opzioniDocenti, 
+        $sede, $opzioniSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if ($staff) {
@@ -513,7 +512,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffDeleteAction($id): Response {
+  public function staffDeleteAction(int $id): Response {
     // controlla utente staff
     $staff = $this->em->getRepository('App\Entity\Staff')->find($id);
     if (!$staff) {
@@ -545,7 +544,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriAction(Request $request, $pagina): Response {
+  public function coordinatoriAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -565,7 +564,7 @@ class DocentiController extends BaseController {
     // form di ricerca
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
-      'values' => [$classe, $criteri['cognome'], $criteri['nome'], $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -601,7 +600,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriEditAction(Request $request, $id): Response {
+  public function coordinatoriEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -620,9 +619,10 @@ class DocentiController extends BaseController {
     }
     // form
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'coordinatori',
       'return_url' => $this->generateUrl('docenti_coordinatori'), 
-      'values' => [$classe, $docente, $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $docente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $classe = $form->get('classe')->getData();
@@ -668,7 +668,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriDeleteAction($id) {
+  public function coordinatoriDeleteAction(int $id) {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -707,7 +707,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariAction(Request $request, $pagina): Response {
+  public function segretariAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -727,7 +727,7 @@ class DocentiController extends BaseController {
     // form di ricerca
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
-      'values' => [$classe, $criteri['cognome'], $criteri['nome'], $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -763,7 +763,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariEditAction(Request $request, $id): Response {
+  public function segretariEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -782,9 +782,10 @@ class DocentiController extends BaseController {
     }
     // form
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'coordinatori',
       'return_url' => $this->generateUrl('docenti_segretari'), 
-      'values' => [$classe, $docente, $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $docente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $classe = $form->get('classe')->getData();
@@ -831,7 +832,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariDeleteAction($id) {
+  public function segretariDeleteAction(int $id) {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -868,7 +869,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreAction(Request $request, $pagina): Response {
+  public function cattedreAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -889,8 +890,10 @@ class DocentiController extends BaseController {
     }
     // form di ricerca
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'cattedre',
-      'values' => [$classe, $materia, $docente, $opzioniClassi]]);
+      'values' => [$classe, $opzioniClassi, $materia, $opzioniMaterie, $docente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -924,7 +927,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEditAction(Request $request, TranslatorInterface $trans, $id): Response {
+  public function cattedreEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -943,8 +946,12 @@ class DocentiController extends BaseController {
     }
     // form
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
-    $form = $this->createForm(CattedraType::class, $cattedra, ['return_url' => $this->generateUrl('docenti_cattedre'),
-      'values' => [$opzioniClassi]]);
+    $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
+    $opzioniSostegno = $this->em->getRepository('App\Entity\Alunno')->opzioniSostegno();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $form = $this->createForm(CattedraType::class, $cattedra, [
+      'return_url' => $this->generateUrl('docenti_cattedre'),
+      'values' => [$opzioniClassi, $opzioniMaterie, $opzioniSostegno, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if ($cattedra->getMateria()->getTipo() == 'S') {
@@ -1016,7 +1023,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEnableAction($id, $abilita): Response {
+  public function cattedreEnableAction(int $id, int $abilita): Response {
     // controllo cattedra
     $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($id);
     if (!$cattedra) {
@@ -1084,11 +1091,10 @@ class DocentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/pagina', $pagina);
     }
     // form di ricerca
-    $listaSedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
     $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     $opzioniSedi[$trans->trans('label.tutte_sedi')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'ata',
-      'values' => [$sede, $criteri['cognome'], $criteri['nome'], $opzioniSedi]]);
+      'values' => [$sede, $opzioniSedi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -1124,7 +1130,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesEditAction(Request $request, $id): Response {
+  public function responsabiliBesEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1141,9 +1147,10 @@ class DocentiController extends BaseController {
     }
     // form
     $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'staff',
       'return_url' => $this->generateUrl('docenti_responsabiliBes'), 
-      'values' => [$docente, $sede, $opzioniSedi]]);
+      'values' => [$docente, $opzioniDocenti, $sede, $opzioniSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if ($docente) {
@@ -1180,7 +1187,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesDeleteAction($id): Response {
+  public function responsabiliBesDeleteAction(int $id): Response {
     // controlla utente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -1232,7 +1239,7 @@ class DocentiController extends BaseController {
     // form di ricerca
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
-      'values' => [$criteri['tipo'], $criteri['cognome'], $criteri['nome'], $listaTipi]]);
+      'values' => [$criteri['tipo'], $listaTipi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -1284,14 +1291,13 @@ class DocentiController extends BaseController {
       // azione add
       $utente = null;
       $tipi = array();
-      $listaUtenti = $this->em->getRepository('App\Entity\Docente')->findBy(['abilitato' => 1,
-        'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
+      $listaUtenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     }
     // form
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rappresentanti',
       'return_url' => $this->generateUrl('docenti_rappresentanti'),
-      'values' => [$utente, $tipi, $listaUtenti, $listaTipi]]);
+      'values' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlla tipi

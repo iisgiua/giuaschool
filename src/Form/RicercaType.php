@@ -35,31 +35,31 @@ class RicercaType extends AbstractType {
       $builder
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
           'data' => $options['values'][0],
-          'choices' => $options['values'][3],
+          'choices' => $options['values'][1],
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
           'required' => false))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['values'][1],
+          'data' => $options['values'][2],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['values'][2],
+          'data' => $options['values'][3],
           'required' => false));
    } elseif ($options['form_mode'] == 'docenti-alunni') {
       // form docenti/alunni
       $builder
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'data' => $options['values'][0],
-          'choices' => $options['values'][3],
+          'choices' => $options['values'][1],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
-          'data' => $options['values'][1],
+          'data' => $options['values'][2],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['values'][2],
+          'data' => $options['values'][3],
           'required' => false));
     } elseif ($options['form_mode'] == 'utenti') {
       // form utenti
@@ -75,19 +75,21 @@ class RicercaType extends AbstractType {
       $builder
         ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][0],
-          'choices' => $options['values'][3],
+          'choices' => $options['values'][1],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false])
         ->add('materia', ChoiceType::class, ['label' => 'label.materia',
-          'choices' => $options['values'][1],
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_materia',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => false])
         ->add('docente', ChoiceType::class, ['label' => 'label.docente',
-          'choices' => $options['values'][2],
+          'data' => $options['values'][4],
+          'choices' => $options['values'][5],
           'placeholder' => 'label.qualsiasi_docente',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -97,14 +99,14 @@ class RicercaType extends AbstractType {
       $builder
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
         'data' => $options['values'][0],
-        'choices' => $options['values'][3],
+        'choices' => $options['values'][1],
         'placeholder' => 'label.tutti',
         'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
-        'data' => $options['values'][1],
+        'data' => $options['values'][2],
         'required' => false))
       ->add('nome', TextType::class, array('label' => 'label.nome',
-        'data' => $options['values'][2],
+        'data' => $options['values'][3],
         'required' => false));
     }
     // pulsante filtro

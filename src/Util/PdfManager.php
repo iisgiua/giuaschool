@@ -10,6 +10,8 @@ namespace App\Util;
 
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use setasign\Fpdi\Tcpdf\Fpdi;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
 
 
@@ -24,14 +26,14 @@ class PdfManager {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var TCPDFController $pdfcontroller Controlla la creazione dell'oggetto TCPDF
+   * @var TCPDFController|null $pdfcontroller Controlla la creazione dell'oggetto TCPDF
    */
-  private $pdfcontroller;
+  private ?TCPDFController $pdfcontroller = null;
 
   /**
-   * @var TCPDF $pdf Gestore dei documenti in formato PDF
+   * @var \TCPDF|null $pdf Gestore dei documenti in formato PDF
    */
-  private $pdf;
+  private ?\TCPDF $pdf = null;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -53,7 +55,7 @@ class PdfManager {
    * @param string $title Titolo del documento
    * @param bool $pdfa_mode Se vero genera un documento in formato PDF/A, se falso un PDF normale
    */
-  public function configure($author, $title, $pdfa_mode=false) {
+  public function configure(string $author, string $title, bool $pdfa_mode = false) {
     $this->pdf = $this->pdfcontroller->create('P', 'mm', 'A4', true, 'UTF-8', false, $pdfa_mode);
     // informazioni sul documento
     $this->pdf->SetCreator('TCPDF');
@@ -75,7 +77,7 @@ class PdfManager {
    *
    * @param string $html Il testo in HTML da convertire
    */
-  public function createFromHtml($html) {
+  public function createFromHtml(string $html) {
     // trasforma in PDF
     $this->pdf->AddPage();
     $this->pdf->writeHTML($html);
@@ -85,10 +87,18 @@ class PdfManager {
    * Invia al browser il file PDF creato
    *
    * @param string $filename Nome del file da inviare al browser
+   * @param string $mode Modo di invio al browser: I=inline, D=download
+   * 
+   * @return Response Pagina di risposta
    */
-  public function send($filename) {
-    $this->pdf->lastPage();
-    $this->pdf->Output($filename, 'D');
+  public function send(string $filename, string $mode = 'D'): Response {
+    $doc = $this->pdf->Output('', 'S');
+    $disposition = HeaderUtils::makeDisposition($mode == 'I' ? HeaderUtils::DISPOSITION_INLINE :
+      HeaderUtils::DISPOSITION_ATTACHMENT, $filename);
+    $response = new Response($doc);
+    $response->headers->set('Content-Type', 'application/pdf');
+    $response->headers->set('Content-Disposition', $disposition);
+    return $response;
   }
 
   /**
@@ -96,7 +106,7 @@ class PdfManager {
    *
    * @param string $filename Nome del file da salvare
    */
-  public function save($filename) {
+  public function save(string $filename) {
     $this->pdf->lastPage();
     $this->pdf->Output($filename, 'F');
   }
@@ -104,9 +114,9 @@ class PdfManager {
   /**
    * Restituisce il gestore del documento PDF
    *
-   * @return TCPDF Restituisce il gestore del documento
+   * @return \TCPDF|null Restituisce il gestore del documento
    */
-  public function getHandler() {
+  public function getHandler(): ?\TCPDF {
     return $this->pdf;
   }
 
@@ -115,9 +125,9 @@ class PdfManager {
    *
    * @param string $file Percorso completo del file PDF da importare
    *
-   * @return boolean Vero se importazione è avvenuta correttamente, falso altrimenti
+   * @return bool Vero se importazione è avvenuta correttamente, falso altrimenti
    */
-  public function import($file) {
+  public function import(string $file): bool {
     if (strtolower(substr($file, -4)) != '.pdf') {
       // non è un documento PDF
       return false;
@@ -158,7 +168,7 @@ class PdfManager {
    *
    * @param string $password Password usata per la protezione del documento
    */
-  public function protect($password) {
+  public function protect(string $password) {
     $this->pdf->SetProtection(
       ['print', 'modify', 'copy', 'annot-forms', 'fill-forms', 'extract', 'assemble', 'print-high'],
       $password, null, 3);
@@ -169,9 +179,9 @@ class PdfManager {
    *
    * @param string $file Percorso completo del file PDF da convertire
    *
-   * @return boolean Vero se la conversione è avvenuta correttamente, falso altrimenti
+   * @return bool Vero se la conversione è avvenuta correttamente, falso altrimenti
    */
-  public function convertFormat($file) {
+  public function convertFormat(string $file): bool {
     try {
       $proc = new Process(['/usr/bin/unoconv', '-f', 'pdf', '-d', 'document', '-o', $file.'.pdf', $file]);
       $proc->setTimeout(0);
