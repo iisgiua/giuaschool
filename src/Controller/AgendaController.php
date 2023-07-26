@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Form\AvvisoType;
-use App\Form\MessageType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
 use App\Util\AgendaUtil;
@@ -20,10 +19,10 @@ use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
@@ -52,7 +51,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiAction(AgendaUtil $age, $mese) {
+  public function eventiAction(AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
     // parametro data
@@ -115,7 +114,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiDettagliAction(AgendaUtil $age, $data, $tipo) {
+  public function eventiDettagliAction(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
     // data
@@ -152,7 +151,7 @@ class AgendaController extends BaseController {
    */
   public function verificaEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                      RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                     LogHandler $dblogger, $id) {
+                                     LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -202,7 +201,7 @@ class AgendaController extends BaseController {
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'verifica',
       'return_url' => $this->generateUrl('agenda_eventi'),
-      'dati' => [$dati['choice'], $materia_sostegno]]);
+      'values' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
@@ -389,7 +388,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function cattedraAjaxAction($id) {
+  public function cattedraAjaxAction(int $id): JsonResponse {
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.classe=a.classe')
@@ -416,7 +415,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction($id) {
+  public function classeAjaxAction(int $id): JsonResponse {
     // solo cattedre attive e normali, no supplenza, no sostegno
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('m.id,m.nome')
@@ -449,7 +448,7 @@ class AgendaController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaDeleteAction(Request $request, LogHandler $dblogger, RegistroUtil $reg,
-                                       BachecaUtil $bac, AgendaUtil $age, $id) {
+                                       BachecaUtil $bac, AgendaUtil $age, int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
     if (!$avviso) {
@@ -527,7 +526,7 @@ class AgendaController extends BaseController {
    */
   public function compitoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                     RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                    LogHandler $dblogger, $id) {
+                                    LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -577,7 +576,7 @@ class AgendaController extends BaseController {
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'compito',
       'return_url' => $this->generateUrl('agenda_eventi'),
-      'dati' => [$dati['choice'], $materia_sostegno]]);
+      'values' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
@@ -737,7 +736,8 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age, $id) {
+  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age, 
+                                      int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
     if (!$avviso) {

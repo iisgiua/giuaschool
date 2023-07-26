@@ -13,8 +13,6 @@ use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
 use App\Entity\Provisioning;
 use App\Entity\Scrutinio;
-use App\Entity\StoricoEsito;
-use App\Entity\StoricoVoto;
 use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
@@ -29,7 +27,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,11 +63,11 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $banner_login = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
-    $banner_home = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
+    $bannerLogin = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
+    $bannerHome = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'banner',
-      'values' => [$banner_login, $banner_home]]);
+      'values' => [$bannerLogin, $bannerHome]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
@@ -119,7 +116,7 @@ class SistemaController extends BaseController {
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'manutenzione',
       'values' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
-        $manutenzione_fine, clone $manutenzione_fine]]);
+      $manutenzione_fine, clone $manutenzione_fine]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -168,7 +165,7 @@ class SistemaController extends BaseController {
     $parametri = $this->em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'parametri',
-      'values' => $parametri]);
+      'values' => [$parametri]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -258,7 +255,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, TranslatorInterface $trans, LogHandler $dblogger): Response {
+  public function aliasAction(Request $request, TranslatorInterface $trans, 
+                              LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
@@ -276,7 +274,7 @@ class SistemaController extends BaseController {
         // memorizza dati in sessione
         $this->reqstack->getSession()->set('/APP/UTENTE/tipo_accesso_reale', $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso'));
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso_reale', $this->reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso'));
-        $this->reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
+        $this->reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUserIdentifier());
         $this->reqstack->getSession()->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
         $this->reqstack->getSession()->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso',
@@ -309,7 +307,7 @@ class SistemaController extends BaseController {
   public function aliasExitAction(Request $request, LogHandler $dblogger): Response  {
     // log azione
     $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
-      'Username' => $this->getUser()->getUsername(),
+      'Username' => $this->getUser()->getUserIdentifier(),
       'Ruolo' => $this->getUser()->getRoles()[0],
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
@@ -347,14 +345,14 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function nuovoAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
-                              $step): Response {
+                              int $step): Response {
     // init
     $dati = [];
     $info = [];
     $info['nuovoAnno'] = (int) (new \DateTime())->format('Y');
     $info['vecchioAnno'] = $info['nuovoAnno'] - 1;
     // form
-    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'nuovo', 'step' => $step,
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'nuovo', 'values' => [$step],
       'action_url' => $this->generateUrl('sistema_nuovo', ['step' => $step + 1])]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1027,7 +1025,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function archiviaAction(Request $request, TranslatorInterface $trans,
+  public function archiviaAction(Request $request, TranslatorInterface $trans, 
                                  ArchiviazioneUtil $arch): Response {
     // init
     $dati = [];
@@ -1175,12 +1173,10 @@ class SistemaController extends BaseController {
             }
             if ($numCircolari > 0) {
               // circolari create
-              $this->reqstack->getSession()->getFlashBag()->add('success', 
-                'Sono state archiviate '.$numCircolari.' circolari.');
+              $this->addFlash('success', 'Sono state archiviate '.$numCircolari.' circolari.');
             } else {
               // nessuna circolare archiviata
-              $this->reqstack->getSession()->getFlashBag()->add('warning', 
-                'Non è stata archiviata nessuna circolare.');
+              $this->addFlash('warning', 'Non è stata archiviata nessuna circolare.');
             }
             break;
         }
@@ -1514,7 +1510,6 @@ class SistemaController extends BaseController {
           '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
         $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
         return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
-        break;
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
@@ -1557,7 +1552,8 @@ class SistemaController extends BaseController {
     $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
     $info['email'] = '';
     // form
-    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'values' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'values' => [
+      $info['server'], $info['user'], $info['password'], $info['host'], $info['port']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form
@@ -1684,7 +1680,8 @@ class SistemaController extends BaseController {
     $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
     $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'values' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'values' => [
+      $info['bot'], $info['token']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form

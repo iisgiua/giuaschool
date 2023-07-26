@@ -372,7 +372,7 @@ class AgendaUtil {
    *
    * @param Avviso $avviso Avviso su cui eseguire l'azione
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function controlloVerifiche(Avviso $avviso) {
     $dati = array();
@@ -405,7 +405,7 @@ class AgendaUtil {
    *
    * @param Avviso $avviso Avviso su cui eseguire l'azione
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function controlloCompiti(Avviso $avviso) {
     $dati = array();

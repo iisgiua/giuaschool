@@ -164,7 +164,7 @@ class SegreteriaUtil {
         $dati['note'] = $c->getNote();
       }
     }
-    $dati['classe'] = ($classe ? $classe->getAnno().'ª '.$classe->getSezione() : 'NON DEFINITA');
+    $dati['classe'] = ($classe ?? 'NON DEFINITA');
     // mesi da visualizzare
     for ($d = clone $inizio; $d <= $fine; $d->modify('first day of next month')) {
       $m = intval($d->format('m'));

@@ -72,13 +72,13 @@ class Classe {
   private ?string $sezione = 'A';
 
    /**
-   * @var string $gruppo Nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
+   * @var string|null $gruppo Nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
+   * @ORM\Column(type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $gruppo = '';
+  private ?string $gruppo = '';
 
   /**
    * @var int $oreSettimanali Numero di ore settimanali della classe
@@ -224,20 +224,20 @@ class Classe {
   /**
    * Restituisce il nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
    *
-   * @return string Nome del gruppo classe
+   * @return string|null Nome del gruppo classe
    */
-  public function getGruppo(): string {
+  public function getGruppo(): ?string {
     return $this->gruppo;
   }
 
   /**
    * Modifica del nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
    *
-   * @param string $gruppo Nome del gruppo classe
+   * @param string|null $gruppo Nome del gruppo classe
    *
    * @return self Oggetto modificato
    */
-  public function setGruppo(string $gruppo): self {
+  public function setGruppo(?string $gruppo): self {
     $this->gruppo = $gruppo;
     return $this;
   }

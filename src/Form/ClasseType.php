@@ -43,6 +43,13 @@ class ClasseType extends AbstractType {
         'trim' => true,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
+      ->add('gruppo', TextType::class, array('label' => 'label.classe_gruppo',
+        'trim' => true,
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => false))
+      ->add('oreSettimanali', IntegerType::class, array('label' => 'label.ore_classe',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
       ->add('corso', ChoiceType::class, array('label' => 'label.corso',
         'choices' => $options['values'][0],
         'placeholder' => 'label.choose_option',
@@ -67,8 +74,6 @@ class ClasseType extends AbstractType {
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false])
-      ->add('oreSettimanali', IntegerType::class, array('label' => 'label.ore_classe',
-        'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',

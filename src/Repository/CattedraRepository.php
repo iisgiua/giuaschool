@@ -13,6 +13,7 @@ use App\Entity\Classe;
 use App\Entity\Cattedra;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -58,9 +59,9 @@ class CattedraRepository extends BaseRepository {
    * @param Docente $docente Docente di cui recuperare le cattedre
    * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo]
    *
-   * @return Array Dati formattati in un array associativo
+   * @return array Dati formattati in un array associativo
    */
-  public function cattedreDocente(Docente $docente, $tipo='A') {
+  public function cattedreDocente(Docente $docente, $tipo='A'): array {
     $dati = array();
     // lista cattedre
     $cattedre = $this->createQueryBuilder('c')
@@ -79,7 +80,7 @@ class CattedraRepository extends BaseRepository {
     } elseif ($tipo == 'C') {
       // form ChoiceType
       foreach ($cattedre as $cat) {
-        $label = $cat->getClasse()->getAnno().'ª '.$cat->getClasse()->getSezione().' - '.$cat->getMateria()->getNomeBreve().
+        $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati[$label] = $cat;
       }
@@ -88,7 +89,7 @@ class CattedraRepository extends BaseRepository {
       $dati['choice'] = array();
       $dati['lista'] = array();
       foreach ($cattedre as $cat) {
-        $label = $cat->getClasse()->getAnno().'ª '.$cat->getClasse()->getSezione().' - '.$cat->getMateria()->getNomeBreve().
+        $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati['choice'][$label] = $cat;
         $dati['lista'][$cat->getId()]['object'] = $cat;
@@ -150,7 +151,7 @@ class CattedraRepository extends BaseRepository {
    *
    * @param Docente $docente Docente di cui recuperare le cattedre
    *
-   * @return Array Dati formattati in un array associativo
+   * @return array Dati formattati in un array associativo
    */
 
   public function cattedreOrarioDocente(Docente $docente) {

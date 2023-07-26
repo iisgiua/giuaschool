@@ -20,7 +20,7 @@
     {% for u in dati.lista %}
       <tr>
         <td>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</td>
-        <td>{{ u.classe ? u.classe.anno~'ª '~u.classe.sezione : 'Non definita' }}</td>
+        <td>{{ u.classe ? u.classe : 'Non definita' }}</td>
         <td>
       {% for periodo in dati.pagelle[u.id] %}
         {% if periodo[0] == 'G' or periodo[0] == 'R' %}

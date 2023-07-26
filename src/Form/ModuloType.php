@@ -43,9 +43,9 @@ class ModuloType extends AbstractType {
       // form nuovo anno
       $builder
         ->setAction($options['action_url']);
-      if ($options['step'] <= 7) {
+      if ($options['values'][0] <= 7) {
         $builder
-          ->add('submit', SubmitType::class, array('label' => $options['step'] == 0 ? 'label.start' : 'label.next'));
+          ->add('submit', SubmitType::class, array('label' => $options['values'][0] == 0 ? 'label.start' : 'label.next'));
       } else {
         $builder
           ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -218,7 +218,7 @@ class ModuloType extends AbstractType {
           'attr' => ['widget' => 'gs-button-start']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
           'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
-    } elseif ($options['step'] === null) {
+    } elseif ($options['form_mode'] != 'nuovo') {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
     }
@@ -233,13 +233,11 @@ class ModuloType extends AbstractType {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('return_url');
     $resolver->setDefined('action_url');
-    $resolver->setDefined('step');
     $resolver->setDefined('values');
     $resolver->setDefaults([
       'form_mode' => 'importa',
       'return_url' => null,
       'action_url' => null,
-      'step' => null,
       'values' => [],
       'data_class' => null]);
   }

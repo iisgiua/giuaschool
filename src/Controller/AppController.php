@@ -17,7 +17,6 @@ use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
@@ -57,7 +56,7 @@ class AppController extends BaseController {
    *    methods={"GET"})
    */
   public function loginAction(AuthenticationUtils $auth, ConfigLoader $config,
-                              $codice, $lusr, $lpsw, $lapp) {
+                              string $codice, int $lusr, int $lpsw, int $lapp): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
@@ -90,7 +89,7 @@ class AppController extends BaseController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher) {
+  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
@@ -149,7 +148,7 @@ class AppController extends BaseController {
    * @Route("/app/info/", name="app_info",
    *    methods={"GET"})
    */
-  public function infoAction(ConfigLoader $config) {
+  public function infoAction(ConfigLoader $config): Response {
     $applist = array();
     // carica configurazione di sistema
     $config->carica();
@@ -187,7 +186,7 @@ class AppController extends BaseController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    */
-  public function downloadAction(ConfigLoader $config, $id) {
+  public function downloadAction(ConfigLoader $config, int $id): Response {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
@@ -223,7 +222,7 @@ class AppController extends BaseController {
    * @Route("/app/presenti/{token}", name="app_presenti",
    *    methods={"GET"})
    */
-  public function presentiAction(Request $request, $token) {
+  public function presentiAction(Request $request, string $token): Response {
     // inizializza
     $dati = array();
     // controlla servizio
@@ -269,7 +268,7 @@ class AppController extends BaseController {
    * @Route("/app/versione/", name="app_versione",
    *    methods={"POST"})
    */
-  public function versioneAction(Request $request) {
+  public function versioneAction(Request $request): JsonResponse {
     $risposta = array();
     // legge dati
     $token = $request->request->get('token');
@@ -296,7 +295,7 @@ class AppController extends BaseController {
    * @Route("/app/info/studenti/", name="app_info_studenti",
    *    methods={"POST"})
    */
-  public function infoStudentiAction(Request $request, TranslatorInterface $trans) {
+  public function infoStudentiAction(Request $request, TranslatorInterface $trans): Response {
     // inizializza
     $dati = array();
     $token = $request->headers->get('X-Giuaschool-Token');
@@ -379,7 +378,7 @@ class AppController extends BaseController {
    *    methods={"GET"})
    */
   public function connectAction(Request $request, LogHandler $dblogger, LoggerInterface $logger,
-                                ConfigLoader $config, $token): Response {
+                                ConfigLoader $config, string $token): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();

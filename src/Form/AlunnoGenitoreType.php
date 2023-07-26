@@ -35,14 +35,14 @@ class AlunnoGenitoreType extends AbstractType {
         ->add('alunno', AlunnoType::class, array('label' => false,
           'data' => $options['values'][0],
           'row_attr' => ['class' => 'mb-0'],
-          'values' => $options['values'][3],
+          'values' => [$options['values'][1]],
           'mapped' => false))
         ->add('genitore1', GenitoreType::class, array('label' => false,
-          'data' => $options['values'][1],
+          'data' => $options['values'][2],
           'row_attr' => ['class' => 'mb-0'],
           'mapped' => false))
         ->add('genitore2', GenitoreType::class, array('label' => false,
-          'data' => $options['values'][2],
+          'data' => $options['values'][3],
           'row_attr' => ['class' => 'mb-0'],
           'mapped' => false));
     } else {

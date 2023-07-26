@@ -321,11 +321,11 @@ class Avviso {
   /**
    * Modifica la data dell'evento associato all'avviso
    *
-   * @param \DateTime $data Data dell'evento associato all'avviso
+   * @param \DateTime|null $data Data dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(?\DateTime $data): self {
     $this->data = $data;
     return $this;
   }

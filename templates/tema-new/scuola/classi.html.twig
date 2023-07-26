@@ -17,7 +17,7 @@
       <tbody>
   {% for c in dati.lista %}
         <tr>
-          <td>{{ c.anno }}ª {{ c.sezione }}</td>
+          <td>{{ c }}</td>
           <td><small>{{ c.corso.nomeBreve }}</small></td>
           <td><small>{{ c.sede.nomeBreve }}</small></td>
           <td class="pb-0">
@@ -30,6 +30,10 @@
                 <dd class="col-sm-4">{{ c.anno }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.classe_sezione'|trans }}</dt>
                 <dd class="col-sm-4">{{ c.sezione }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.classe_gruppo'|trans }}</dt>
+                <dd class="col-sm-4">{{ c.gruppo }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.ore_classe'|trans }}</dt>
+                <dd class="col-sm-4">{{ c.oreSettimanali }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.corso'|trans }}</dt>
                 <dd class="col-sm-4">{{ c.corso.nome }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.sede'|trans }}</dt>
@@ -38,8 +42,6 @@
                 <dd class="col-sm-4">{{ c.coordinatore ? c.coordinatore.nome~' '~c.coordinatore.cognome }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.segretario'|trans }}</dt>
                 <dd class="col-sm-4">{{ c.segretario ? c.segretario.nome~' '~c.segretario.cognome }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.ore_classe'|trans }}</dt>
-                <dd class="col-sm-10">{{ c.oreSettimanali }}</dd>
               </dl>
             </div>
           </td>

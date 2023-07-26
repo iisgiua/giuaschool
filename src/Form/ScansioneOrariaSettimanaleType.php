@@ -33,7 +33,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
     // aggiunge campi al form
     $builder
       ->add('giorno_1', CollectionType::class, array('label' => 'label.lunedi',
-        'data' => $options['values'][0],
+        'data' => $options['values'][1],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -44,7 +44,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-center text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('giorno_2', CollectionType::class, array('label' => 'label.martedi',
-        'data' => $options['values'][1],
+        'data' => $options['values'][2],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -55,7 +55,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-center text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('giorno_3', CollectionType::class, array('label' => 'label.mercoledi',
-        'data' => $options['values'][2],
+        'data' => $options['values'][3],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -66,7 +66,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-center text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('giorno_4', CollectionType::class, array('label' => 'label.giovedi',
-        'data' => $options['values'][3],
+        'data' => $options['values'][4],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -77,7 +77,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-center text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('giorno_5', CollectionType::class, array('label' => 'label.venerdi',
-        'data' => $options['values'][4],
+        'data' => $options['values'][5],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -88,7 +88,7 @@ class ScansioneOrariaSettimanaleType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-center text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('giorno_6', CollectionType::class, array('label' => 'label.sabato',
-        'data' => $options['values'][5],
+        'data' => $options['values'][6],
         'entry_type' => ScansioneOrariaType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,

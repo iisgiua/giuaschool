@@ -209,7 +209,7 @@ class ClasseRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->join('c.sede', 's')
-      ->orderBy('s.ordinamento,c.sezione,c.anno', 'ASC');
+      ->orderBy('s.ordinamento,c.sezione,c.anno,c.gruppo');
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
   }

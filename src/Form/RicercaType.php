@@ -45,7 +45,7 @@ class RicercaType extends AbstractType {
         ->add('nome', TextType::class, array('label' => 'label.nome',
           'data' => $options['values'][3],
           'required' => false));
-   } elseif ($options['form_mode'] == 'docenti-alunni') {
+    } elseif ($options['form_mode'] == 'docenti-alunni') {
       // form docenti/alunni
       $builder
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',

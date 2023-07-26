@@ -102,7 +102,7 @@ class ConfigurazioneType extends AbstractType {
       // form parametri
       $builder
         ->add('parametri', CollectionType::class, array('label' => false,
-          'data' => $options['values'],
+          'data' => $options['values'][0],
           'entry_type' => ParametroType::class,
           'entry_options' => []));
     }

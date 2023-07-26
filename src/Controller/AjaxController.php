@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Classe;
 use App\Entity\Staff;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -41,7 +40,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction($cognome, $nome, $sede, $pagina) {
+  public function docentiAjaxAction(string $cognome, string $nome, string $sede, 
+                                    string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
     $dati = array();
@@ -94,7 +94,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction($cognome, $nome, $classe, $sede, $pagina) {
+  public function alunniAjaxAction(string $cognome, string $nome, int $classe, string $sede, 
+                                   string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
       'sede' => array());
@@ -143,7 +144,7 @@ class AjaxController extends BaseController {
    *    requirements={"id": "authenticate"},
    *    methods={"GET"})
    */
-  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, $id) {
+  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
     $dati = array();
     $dati[$id] = $tokenManager->getToken($id)->getValue();
@@ -161,7 +162,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function sessioneAjaxAction() {
+  public function sessioneAjaxAction(): JsonResponse {
     // restituisce dati
     return new JsonResponse(['ok']);
   }
@@ -180,7 +181,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(Classe $classe) {
+  public function classeAjaxAction(Classe $classe): JsonResponse {
     // legge alunni
     $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
     // restituisce dati

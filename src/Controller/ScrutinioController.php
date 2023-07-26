@@ -662,7 +662,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg));
+        $this->addFlash('errore', $trans->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $this->em->flush();
@@ -671,7 +671,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -802,8 +802,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore',
-          $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
+        $this->addFlash('errore', $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
       }
       // memorizza dati (anche se errati)
       $this->em->flush();
@@ -812,7 +811,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -1127,7 +1126,7 @@ class ScrutinioController extends BaseController {
       }
       // imposta eventuali messaggi di errore
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
+        $this->addFlash('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1147,7 +1146,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(),
@@ -1518,7 +1517,7 @@ class ScrutinioController extends BaseController {
       }
       if ($err_motivazione) {
         // errore: motivazione non inserita
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
+        $this->addFlash('errore', $trans->trans('exception.no_motivazione_certificazione', [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1626,7 +1625,7 @@ class ScrutinioController extends BaseController {
       }
       // messaggi di errore
       foreach ($errore as $msg=>$val) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
+        $this->addFlash('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1945,7 +1944,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore',
+        $this->addFlash('errore',
           $trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
       }
       // ok: memorizza dati (anche errati)
@@ -1955,7 +1954,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
