@@ -130,7 +130,7 @@ class CircolariUtil {
    * @param int $limite Numero di elementi per pagina
    * @param Staff $docente Docente che visualizza le circolari
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function listaCircolari($ricerca, $pagina, $limite, Staff $docente) {
     $dati = array();
@@ -294,13 +294,10 @@ class CircolariUtil {
     if (($utente instanceOf Docente) || ($utente instanceOf Ata)) {
       // staff/docente/ata: tutte le circolari
       return true;
-    } else {
-      // altri: solo destinatari
-      $cu = $this->em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
-      return ($cu != null);
-    }
-    // non è autorizzato
-    return false;
+    } 
+    // altri: solo destinatari
+    $cu = $this->em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
+    return ($cu != null);
   }
 
 }

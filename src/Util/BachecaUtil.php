@@ -233,7 +233,7 @@ class BachecaUtil {
    * @param Docente $docente Docente che richiede i dati
    * @param string $tipo Tipo di avviso
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function listaAvvisi($ricerca, $pagina, $limite, Docente $docente, $tipo) {
     $dati = array();
@@ -301,7 +301,7 @@ class BachecaUtil {
    *
    * @param Avviso $avviso Avviso di cui recuperare i dati
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliAvviso(Avviso $avviso) {
     $dati = array();
@@ -378,7 +378,7 @@ class BachecaUtil {
    * @param int $limite Numero massimo di elementi per pagina
    * @param Utente $utente Utente a cui sono indirizzati gli avvisi
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function bachecaAvvisi($search, $pagina, $limite, Utente $utente) {
     // lista avvisi
@@ -431,7 +431,7 @@ class BachecaUtil {
    *
    * @param Classe $classe Classe a cui sono indirizzati gli avvisi
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function bachecaAvvisiAlunni(Classe $classe) {
     // lista avvisi non letti
@@ -488,7 +488,7 @@ class BachecaUtil {
    * @param Docente $docente Docente coordinatore
    * @param Classe $classe Classe a cui è rivolto l'avviso
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function listaAvvisiCoordinatore($pagina, $limite, Docente $docente, Classe $classe) {
     $dati = array();
