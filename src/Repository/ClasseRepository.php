@@ -258,10 +258,12 @@ class ClasseRepository extends BaseRepository {
    * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
    *
    * @param int|null $sede Identificativo della sede, usato per filtrare le classi della sede indicata; se nullo non filtra i dati
+   * @param bool $breve Se vero riporta solo la classe senza il corso, altrimenti riporta tutto
+   * @param bool $ordAnno Se vero le classi sono ordinate per anno-sezione, altrimenti per sezione-anno
    *
    * @return array Array associativo predisposto per le opzioni dei form
    */
-  public function opzioni(?int $sede = null): array {
+  public function opzioni(?int $sede = null, bool $breve = true, $ordAnno = true): array {
     // inizializza
     $dati = [];
     // legge classi
@@ -271,14 +273,14 @@ class ClasseRepository extends BaseRepository {
       $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
     }
     $classi = $classi
-      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo')
+      ->orderBy('s.ordinamento,'.($ordAnno ? 'c.anno,c.sezione' : 'c.sezione,c.anno').',c.gruppo')
       ->getQuery()
       ->getResult();
     // imposta opzioni
     foreach ($classi as $classe) {
       $nome = $classe->getAnno().$classe->getSezione().
-        ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '').' - '.
-        $classe->getCorso()->getNomeBreve();
+        ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '').
+        ($breve ? '' : (' - '.$classe->getCorso()->getNomeBreve()));
       $dati[$classe->getSede()->getNomeBreve()][$nome] = $classe;
     }
     // restituisce lista opzioni

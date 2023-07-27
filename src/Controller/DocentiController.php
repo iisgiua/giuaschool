@@ -136,7 +136,7 @@ class DocentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
       'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
@@ -562,7 +562,7 @@ class DocentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
       'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
@@ -618,7 +618,7 @@ class DocentiController extends BaseController {
       $docente = null;
     }
     // form
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'coordinatori',
       'return_url' => $this->generateUrl('docenti_coordinatori'), 
@@ -725,7 +725,7 @@ class DocentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
       'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
@@ -781,7 +781,7 @@ class DocentiController extends BaseController {
       $docente = null;
     }
     // form
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'coordinatori',
       'return_url' => $this->generateUrl('docenti_segretari'), 
@@ -889,7 +889,7 @@ class DocentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
     $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'cattedre',
@@ -945,7 +945,7 @@ class DocentiController extends BaseController {
       $this->em->persist($cattedra);
     }
     // form
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
     $opzioniSostegno = $this->em->getRepository('App\Entity\Alunno')->opzioniSostegno();
     $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();

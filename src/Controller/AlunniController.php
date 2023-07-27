@@ -124,7 +124,7 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
       'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
@@ -250,7 +250,7 @@ class AlunniController extends BaseController {
       $this->em->persist($genitore2);
     }
     // form
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->createForm(AlunnoGenitoreType::class, $alunno, ['form_mode' => 'completo',
       'return_url' => $this->generateUrl('alunni_modifica'),
       'values' => [$alunno, $opzioniClassi, $genitore1, $genitore2]]);
@@ -464,7 +464,7 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
       'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
@@ -517,7 +517,7 @@ class AlunniController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(null, null);
-      $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+      $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
       $values = [$opzioniAlunni, $opzioniClassi];
     } else {
       // azione add
@@ -541,7 +541,7 @@ class AlunniController extends BaseController {
           break;
         case 'S':   // cambio sezione
           $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, null);
-          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
           $values = [$opzioniAlunni, $opzioniClassi];
           $form_help = 'message.classe_alunno_sezione';
           // dati fittizi temporanei
@@ -549,7 +549,7 @@ class AlunniController extends BaseController {
           break;
         default:    // aggiungi 
           $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(null, null);
-          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
           $values = [$opzioniAlunni, $opzioniClassi];
       }
     }

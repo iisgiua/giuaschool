@@ -24,7 +24,6 @@ use App\Util\RegistroUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -32,6 +31,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
@@ -67,7 +67,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function firmeAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                              $cattedra, $classe, $data, $vista) {
+                              int $cattedra, int $classe, string $data, string $vista): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -239,7 +239,8 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function addAction(Request $request, ValidatorInterface $validator, RegistroUtil $reg,
-                            LogHandler $dblogger, $cattedra, $classe, $data, $ora) {
+                            LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                            int $ora): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -444,7 +445,8 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function editAction(Request $request, ValidatorInterface $validator, RegistroUtil $reg,
-                             LogHandler $dblogger, $cattedra, $classe, $data, $ora) {
+                             LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                             int $ora): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -706,7 +708,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function deleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                               $classe, $data, $ora) {
+                               int $classe, string $data, int $ora): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -870,7 +872,7 @@ class RegistroController extends BaseController {
    */
   public function annotazioneEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                         RegistroUtil $reg, BachecaUtil $bac, LogHandler $dblogger,
-                                        $classe, $data, $id) {
+                                        int $classe, string $data, int $id): Response {
     // inizializza
     $label = array();
     $dest_filtro = [];
@@ -1102,7 +1104,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function annotazioneDeleteAction(Request $request, RegistroUtil $reg,
-                                          BachecaUtil $bac, LogHandler $dblogger, $id) {
+                                          BachecaUtil $bac, LogHandler $dblogger, int $id): Response {
     // controlla annotazione
     $annotazione = $this->em->getRepository('App\Entity\Annotazione')->find($id);
     if (!$annotazione) {
@@ -1185,7 +1187,8 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function notaEditAction(Request $request, TranslatorInterface $trans,
-                                 RegistroUtil $reg, LogHandler $dblogger, $classe, $data, $id) {
+                                 RegistroUtil $reg, LogHandler $dblogger, int $classe, string $data, 
+                                 int $id): Response {
     // inizializza
     $label = array();
     $docente_staff = in_array('ROLE_STAFF', $this->getUser()->getRoles());
@@ -1362,7 +1365,8 @@ class RegistroController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaDeleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function notaDeleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, 
+                                   int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository('App\Entity\Nota')->find($id);
     if (!$nota) {

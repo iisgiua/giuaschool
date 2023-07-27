@@ -31,7 +31,7 @@ class LezioneRepository extends EntityRepository {
    * @param Classe $classe Classe della lezione
    * @param Materia $materia Materia della lezione
    *
-   * @return int|null Restituisce l'identificatore della lezione o null se non trovata
+   * @return Lezione|null Restituisce l'identificatore della lezione o null se non trovata
    */
   public function lezioneVoto(\DateTime $data, Docente $docente, Classe $classe, Materia $materia) {
     // query base

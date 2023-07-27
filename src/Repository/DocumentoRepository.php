@@ -137,7 +137,7 @@ class DocumentoRepository extends BaseRepository {
   public function docenti($criteri, Sede $sede=null, $pagina) {
     // query base
     $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
+      ->select('cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')

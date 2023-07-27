@@ -49,7 +49,7 @@ class PrenotazioneType extends AbstractType {
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
       'form_mode' => 'prenotazione',
-      'values' => null,
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => null));
   }

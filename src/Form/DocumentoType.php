@@ -32,19 +32,6 @@ class DocumentoType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    // // funzioni per l'elenco delle classi
-    // $fnSede = function(EntityRepository $er) {
-    //   return $er->createQueryBuilder('c')
-    //     ->orderBy('c.anno,c.sezione', 'ASC'); };
-    // if (in_array($options['form_mode'], ['B', 'H', 'D', 'docenti', 'alunni']) &&
-    //     !empty($options['values'][0])) {
-    //   // filtro su sede
-    //   $fnSede = function(EntityRepository $er) use ($options) {
-    //     return $er->createQueryBuilder('c')
-    //       ->where('c.sede=:sede')
-    //       ->setParameter('sede', $options['values'][0])
-    //       ->orderBy('c.anno,c.sezione', 'ASC'); };
-    // }
     if ($options['form_mode'] == 'docenti') {
       // form filtro documenti docenti
       $builder
@@ -103,18 +90,18 @@ class DocumentoType extends AbstractType {
       return;
     }
     if ($options['form_mode'] == 'bacheca') {
-      // form filtro documenti docenti
+      // form filtro documenti bacheca
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
           'data' => $options['values'][0],
-          'choices' => $options['values'][2],
+          'choices' => $options['values'][1],
           'placeholder' => 'label.documenti_tutti',
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val) { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
         ->add('titolo', TextType::class, array('label' => 'label.titolo_documento',
-          'data' => $options['values'][1],
+          'data' => $options['values'][2],
           'attr' => ['placeholder' => 'label.titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
@@ -124,18 +111,15 @@ class DocumentoType extends AbstractType {
     }
     if (in_array($options['form_mode'], ['B', 'H', 'D'])) {
       // form documenti BES
-      $opzioniTipo = [];
-      foreach ($options['values'][0] as $opt) {
-        $opzioniTipo['label.documenti_bes_'.$opt] = $opt;
-      }
-      if (empty($options['values'][1])) {
+      if (!empty($options['values'][0])) {
         // scelta alunno
         $builder
           ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-            'choices' => $options['values'][2],
+            'choices' => $options['values'][0],
             'placeholder' => 'label.scegli_classe',
             'choice_translation_domain' => false,
             'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
+            'choice_value' => 'id',
             'attr' => ['class' => 'gs-placeholder'],
             'required' => false))
           ->add('alunno', HiddenType::class, array('label' => false,
@@ -143,7 +127,7 @@ class DocumentoType extends AbstractType {
       }
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
-          'choices' => $opzioniTipo,
+          'choices' => $options['values'][1],
           'placeholder' => 'label.scegli_tipo_documento',
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],

@@ -153,7 +153,7 @@ class AjaxController extends BaseController {
   }
 
   /**
-   * Estende la il tempo di scadenza della sessione
+   * Estende il tempo di scadenza della sessione
    *
    * @return JsonResponse Informazioni di risposta
    *

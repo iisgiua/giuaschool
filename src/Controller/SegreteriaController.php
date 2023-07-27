@@ -65,7 +65,7 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_assenze', FormType::class)
       ->setAction($this->generateUrl('segreteria_assenze'))
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
@@ -231,7 +231,7 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_scrutini', FormType::class)
       ->setAction($this->generateUrl('segreteria_scrutini'))
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
@@ -377,7 +377,7 @@ class SegreteriaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_genitori', FormType::class)
       ->setAction($this->generateUrl('segreteria_genitori'))
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',

@@ -11,8 +11,8 @@ namespace App\Controller;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -33,7 +33,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function lezioniAction() {
+  public function lezioniAction(): Response {
     if (!$this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
       // scelta classe
       return $this->redirectToRoute('lezioni_classe');
@@ -59,7 +59,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(Request $request) {
+  public function classeAction(Request $request): Response {
     // lista cattedre
     $lista = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->join('c.classe', 'cl')
@@ -109,7 +109,8 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiAction(Request $request, RegistroUtil $reg, $cattedra, $classe) {
+  public function argomentiAction(Request $request, RegistroUtil $reg, int $cattedra, 
+                                  int $classe): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -188,7 +189,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiRiepilogoAction(RegistroUtil $reg, $cattedra, $data) {
+  public function argomentiRiepilogoAction(RegistroUtil $reg, int $cattedra, string $data): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -264,7 +265,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(Request $request, StaffUtil $staff, $cattedra, $classe) {
+  public function noteAction(Request $request, StaffUtil $staff, int $cattedra, int $classe): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -339,7 +340,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiProgrammaAction(RegistroUtil $reg, $cattedra) {
+  public function argomentiProgrammaAction(RegistroUtil $reg, int $cattedra): Response {
     // inizializza
     $info = null;
     $dati = null;

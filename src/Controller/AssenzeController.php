@@ -20,7 +20,6 @@ use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -62,7 +61,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function quadroAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                               $cattedra, $classe, $data, $vista, $posizione) {
+                               int $cattedra, int $classe, string $data, string $vista, 
+                               int $posizione): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -214,7 +214,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                $cattedra, $classe, $data, $alunno, $id, $posizione) {
+                                int $cattedra, int $classe, string $data, int $alunno, int $id, 
+                                int $posizione): Response {
     // controlla cattedra
     if ($cattedra > 0) {
       // cattedra definita
@@ -368,7 +369,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function entrataAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, $cattedra, $classe, $data, $alunno, $posizione) {
+                                LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                                int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -577,7 +579,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, $cattedra, $classe, $data, $alunno, $posizione) {
+                               LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                               int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -654,7 +657,8 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione().
+      ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '');
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita);
@@ -773,7 +777,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function giustificaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   $cattedra, $classe, $data, $alunno, $posizione) {
+                                   int $cattedra, int $classe, string $data, int $alunno, 
+                                   int $posizione): Response {
     // inizializza
     $label = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -1013,7 +1018,8 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function appelloAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, $cattedra, $classe, $data) {
+                                LogHandler $dblogger, int $cattedra, int $classe, 
+                                string $data): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -1214,8 +1220,6 @@ class AssenzeController extends BaseController {
             //-- break;
         }
       }
-
-
       if ($form->isValid()) {
         // ok: memorizza dati
         $this->em->flush();

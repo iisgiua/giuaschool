@@ -35,6 +35,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -70,7 +71,7 @@ class CircolariController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function editAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                             CircolariUtil $circ, LogHandler $dblogger, $id) {
+                             CircolariUtil $circ, LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/circolari_edit/';
@@ -150,8 +151,19 @@ class CircolariController extends BaseController {
       }
     }
     // form di inserimento
-    $form = $this->createForm(CircolareType::class, $circolare, ['return_url' => $this->generateUrl('circolari_gestione'),
-      'setSede' => ($this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null)]);
+    $setSede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null;
+    if ($setSede) {
+      $sede = $this->em->getRepository('App\Entity\Sede')->find($setSede);
+      $opzioniSedi[$sede->getNomeBreve()] = $sede;
+    } else {
+      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni($setSede, true, false);
+    $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
+    $opzioniClassi2 = $this->em->getRepository('App\Entity\Classe')->opzioni($setSede, false);
+    $form = $this->createForm(CircolareType::class, $circolare, [
+      'return_url' => $this->generateUrl('circolari_gestione'),
+      'values' => [$opzioniSedi, $opzioniClassi, $opzioniMaterie, $opzioniClassi2]]);
     $form->handleRequest($request);
     // visualizzazione filtro coordinatori
     $dati['coordinatori'] = ($form->get('coordinatori')->getData() == 'C' ?
@@ -402,7 +414,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function deleteAction(Request $request, LogHandler $dblogger, CircolariUtil $circ, $id) {
+  public function deleteAction(Request $request, LogHandler $dblogger, CircolariUtil $circ, 
+                               int $id): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     $fs = new Filesystem();
     // controllo circolare
@@ -473,7 +486,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, CircolariUtil $circ, $pagina) {
+  public function gestioneAction(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -558,7 +571,7 @@ class CircolariController extends BaseController {
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
-   * @param bool $pubblica Vero se si vuole pubblicare la circolare, falso per togliere la pubblicazione
+   * @param int $pubblica Valore 1 se si vuole pubblicare la circolare, 0 per togliere la pubblicazione
    * @param int $id Identificativo della circolare
    *
    * @return Response Pagina di risposta
@@ -570,7 +583,7 @@ class CircolariController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function publishAction(Request $request, MessageBusInterface $msg, LogHandler $dblogger,
-                                CircolariUtil $circ, $pubblica, $id) {
+                                CircolariUtil $circ, int $pubblica, int $id): Response {
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
@@ -655,7 +668,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function dettagliGestioneAction(CircolariUtil $circ, $id) {
+  public function dettagliGestioneAction(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -692,7 +705,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(CircolariUtil $circ, $id, $doc, $tipo) {
+  public function downloadAction(CircolariUtil $circ, int $id, int $doc, string $tipo): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->find($id);
@@ -753,7 +766,7 @@ class CircolariController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function genitoriAction(Request $request, $pagina) {
+  public function genitoriAction(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -849,7 +862,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function dettagliDestinatariAction(CircolariUtil $circ, $id) {
+  public function dettagliDestinatariAction(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -884,7 +897,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function dettagliStaffAction(CircolariUtil $circ, $id) {
+  public function dettagliStaffAction(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -922,7 +935,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function firmaAction(CircolariUtil $circ, $id) {
+  public function firmaAction(CircolariUtil $circ, int $id): Response {
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
@@ -960,7 +973,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAction(Request $request, CircolariUtil $circ, $pagina) {
+  public function docentiAction(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1081,7 +1094,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function ataAction(Request $request, $pagina) {
+  public function ataAction(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1192,7 +1205,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classiAction($classe) {
+  public function classiAction(int $classe): Response {
     // inizializza
     $dati = null;
     // controllo classe
@@ -1228,7 +1241,7 @@ class CircolariController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function firmaClasseAction(Request $request, TranslatorInterface $trans, LogHandler $dblogger,
-                                    $classe, $id) {
+                                    int $classe, int $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {

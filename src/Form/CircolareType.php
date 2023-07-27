@@ -9,6 +9,9 @@
 namespace App\Form;
 
 use App\Entity\Circolare;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -55,6 +58,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5  gs-pr-5'],
         'required' => true))
       ->add('dsga', CheckboxType::class, array('label' => 'label.dsga',
@@ -118,6 +122,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        // 'choice_value' => 'id',
         'required' => false,
         'mapped' => false])
       ->add('materie', ChoiceType::class, ['label' => 'label.scegli_materie',
@@ -126,6 +131,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        // 'choice_value' => 'id',
         'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
         'required' => false,
         'mapped' => false])
@@ -135,6 +141,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => false,
         'multiple' => false,
+        'choice_value' => 'id',
         'choice_attr' => function($val, $key, $index) {
             return ['class' => 'gs-no-placeholder'];
           },
@@ -183,6 +190,18 @@ class CircolareType extends AbstractType {
         $d = explode(',', $filtro);
         return (count($d) == 1 && empty($d[0])) ? array() : $d;
       }));
+    $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
+      function ($sedi) {
+        $s = [];
+        foreach ($sedi as $sede) {
+          $s[$sede->getNomeBreve()] = $sede;
+        }
+        return $s;
+        // return $sedi->toArray();
+      },
+      function ($sedi) {
+        return new ArrayCollection($sedi);
+      }));
   }
 
   /**
@@ -194,7 +213,7 @@ class CircolareType extends AbstractType {
     $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
       'return_url' => null,
-      'setSede' => null,
+      'values' => null,
       'data_class' => Circolare::class));
   }
 

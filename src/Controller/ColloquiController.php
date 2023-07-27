@@ -17,7 +17,6 @@ use App\Form\RichiestaColloquioType;
 use App\Util\ColloquiUtil;
 use App\Util\LogHandler;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -688,8 +687,9 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // form di ricerca
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'colloqui',
-      'values' => [$docente]]);
+      'values' => [$docente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -734,7 +734,7 @@ class ColloquiController extends BaseController {
       // cancella colloquio
       $this->em->remove($ricevimento);
       // memorizzazione e log
-      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio, $ricevimento);
+      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio);
     }
     // redirezione
     return $this->redirectToRoute('colloqui_gestione');

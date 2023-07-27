@@ -16,7 +16,6 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -57,7 +56,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(Request $request, RegistroUtil $reg, $cattedra, $classe, $periodo) {
+  public function votiAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe, 
+                             string $periodo): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -177,7 +177,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiClasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, $cattedra, $tipo, $data) {
+                                   LogHandler $dblogger, int $cattedra, string $tipo, 
+                                   string $data): Response {
     // inizializza
     $label = array();
     $visibile = true;
@@ -405,7 +406,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAlunnoAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
+                                   LogHandler $dblogger, int $cattedra, int $alunno, string $tipo, 
+                                   int $id): Response {
     // inizializza
     $label = array();
     if ($request->isMethod('GET')) {
@@ -630,7 +632,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiDettagliAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, $cattedra, $classe, $alunno) {
+                                     RegistroUtil $reg, int $cattedra, int $classe, 
+                                     int $alunno): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -733,7 +736,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiSostegnoAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, GenitoriUtil $gen, $cattedra, $materia) {
+                                     RegistroUtil $reg, GenitoriUtil $gen, int $cattedra, 
+                                     int $materia): Response {
     // inizializza variabili
     $materie = null;
     $info = null;
@@ -819,7 +823,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, $cattedra, $classe, $data) {
+  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, int $cattedra, int $classe, 
+                                   string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -901,7 +906,7 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiEsportaAction(RegistroUtil $reg, $cattedra, $classe, $data) {
+  public function votiEsportaAction(RegistroUtil $reg, int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -983,7 +988,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, 
+                                     int $id): Response {
     // controllo voto
     $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
