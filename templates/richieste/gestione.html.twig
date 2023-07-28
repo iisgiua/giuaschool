@@ -30,7 +30,7 @@
     {% endif %}
       </td>
       <td>
-        <strong>{{ r.utente.classe.anno }}ª {{ r.utente.classe.sezione }}</strong>
+        <strong>{{ r.utente.classe }}</strong>
       </td>
       <td>
         <strong>{{ r.utente.cognome }} {{ r.utente.nome }}</strong>
@@ -41,7 +41,7 @@
           data-invio="{{ r.inviata|date('d/m/Y H:i') }}"
           data-stato="{{ r.stato == 'A' ? 'ANNULLATA' : (r.stato == 'I' ? 'IN ATTESA' : (r.stato == 'G' ? 'GESTITA' : (r.stato == 'R' ? 'RIMOSSA' : ''))) }}"
           data-alunno="{{ r.utente.cognome }} {{ r.utente.nome }}"
-          data-classe="{{ r.utente.classe.anno }}ª {{ r.utente.classe.sezione }}"
+          data-classe="{{ r.utente.classe }}"
           data-citta="{{ r.utente.citta }}"
           data-religione="{{ r.utente.religione }}"
     {% if not r.definizioneRichiesta.unica %}
@@ -133,23 +133,11 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  {% if info.sedi|length > 0 %}
   $('#filtro_sede').change(function(e) {
-    var s = [];
-    {% for s,cl in info.sedi %}
-    s[{{ s }}] = [
-      {% for val in cl %}
-      [{{ val[0] }}, '{{ val[1] }}'],
-      {% endfor %}
-    ];
-    {% endfor %}
-    var html = '<option value="">Qualsiasi classe</option>';
-    s[$(this).val()].forEach(function(v) {
-      html += '<option value="'+v[0]+'">'+v[1]+'</option>';
-    });
-    $('#filtro_classe').html(html);
+    $('#filtro_classe optgroup').hide();
+    $('#filtro_classe optgroup[label="'+sedi[$(this).val()]+'"]').show();
+    $('#filtro_classe').val('');
   });
-  {% endif %}
   $('#gs-info-richiesta').on('show.bs.modal', function (e) {
     $(this).find('#gs-info-richiesta-titolo').text($(e.relatedTarget).data('titolo'));
     $(this).find('#gs-info-richiesta-invio').text($(e.relatedTarget).data('invio'));
@@ -192,6 +180,13 @@ $(document).ready(function() {
     }
     $(this).find('#gs-info-richiesta-footer').html(footer);
   });
+  // init
+  var sedi = [];
+  {% for s,n in info.sedi %}
+  sedi[{{ s }}] = '{{ n }}';
+  {% endfor %}
+  $('#filtro_classe optgroup').hide();
+  $('#filtro_classe optgroup[label="'+sedi[$('#filtro_sede').val()]+'"]').show();
 });
 </script>
 {% endblock %}

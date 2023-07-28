@@ -309,7 +309,8 @@ class RichiesteController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, $data, $alunno, $richiesta, $posizione) {
+                               LogHandler $dblogger, string $data, int $alunno, int $richiesta, 
+                               int $posizione): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -535,48 +536,34 @@ class RichiesteController extends BaseController {
     if ($this->getUser()->getSede()) {
       // sede definita
       $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
-      $listaSedi = [$sede->getNomeBreve() => $sede->getId()];
       $criteri['sede'] = $sede->getId();
+      $opzioniSedi[$sede->getNomeBreve()] = $sede;
     } else {
       // crea lista
-      $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' => 'ASC']);
-      $listaSedi = [];
-      foreach ($sedi as $sede) {
-        $listaSedi[$sede->getNomeBreve()] = $sede->getId();
-      }
+      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
       if (!$criteri['sede']) {
         // definisce sempre una sede
-        $criteri['sede'] = $sedi[0]->getId();
-      }
-      // cambio sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-        ->select('s.id AS sede_id,c.anno,c.sezione,c.id')
-        ->join('c.sede', 's')
-        ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($classi as $classe) {
-        $info['sedi'][$classe['sede_id']][] = [$classe['id'], $classe['anno'].'ª '.$classe['sezione']];
+        $sede = $opzioniSedi[array_key_first($opzioniSedi)];
+        $criteri['sede'] = $sede->getId();
       }
     }
-    // lista classi
-    $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $criteri['sede']],
-      ['anno' => 'ASC', 'sezione' => 'ASC']);
-    $listaClassi = [];
-    foreach ($classi as $classe) {
-      $listaClassi[$classe->getAnno().'ª '.$classe->getSezione()] = $classe->getId();
+    // cambio sede
+    foreach ($opzioniSedi as $s) {
+      $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
     // form filtro
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'richieste',
-      'values' => [$criteri['tipo'], $criteri['stato'], $criteri['sede'], $listaSedi, $criteri['classe'],
-      $listaClassi, $criteri['residenza'], $criteri['cognome'], $criteri['nome']]]);
+      'values' => [$criteri['tipo'], $criteri['stato'], $sede, $opzioniSedi, $classe,
+      $opzioniClassi, $criteri['residenza'], $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $criteri['tipo'] = $form->get('tipo')->getData();
       $criteri['stato'] = $form->get('stato')->getData();
-      $criteri['sede'] = $form->get('sede')->getData();
-      $criteri['classe'] = $form->get('classe')->getData();
+      $criteri['sede'] = $form->get('sede')->getData() ? $form->get('sede')->getData()->getId() : 0;
+      $criteri['classe'] = $form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : 0;
       $criteri['residenza'] = $form->get('residenza')->getData();
       $criteri['cognome'] = $form->get('cognome')->getData();
       $criteri['nome'] = $form->get('nome')->getData();
@@ -586,8 +573,8 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/stato', $criteri['stato']);
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/sede', $criteri['sede']);
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/classe', $criteri['classe']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/residenza', $criteri['residenza']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }

@@ -352,9 +352,9 @@ class BachecaUtil {
    * @param Avviso $avviso Avviso di cui recuperare i dati
    * @param Utente $utente Utente da controllare
    *
-   * @return boolean Restituisce True se l'utente risulta destinatario dell'avviso, False altrimenti
+   * @return bool Restituisce True se l'utente risulta destinatario dell'avviso, False altrimenti
    */
-  public function destinatario(Avviso $avviso, Utente $utente) {
+  public function destinatario(Avviso $avviso, Utente $utente): bool {
     // controlla destinatario
     $dest = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->where('au.avviso=:avviso AND au.utente=:utente')

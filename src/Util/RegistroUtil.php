@@ -1061,9 +1061,9 @@ class RegistroUtil {
    * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
    * @param Alunno $alunno Alunno di cui si desidera conoscere la classe
    *
-   * @return array Lista degli ID degli alunni
+   * @return Classe Classe dell'alunno
    */
-  public function classeInData(\DateTime $data, Alunno $alunno) {
+  public function classeInData(\DateTime $data, Alunno $alunno): Classe {
     if ($data->format('Y-m-d') == date('Y-m-d')) {
       // data è quella odierna, restituisce la classe attuale
       $classe = $alunno->getClasse();

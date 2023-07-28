@@ -57,6 +57,7 @@ class DocumentoType extends AbstractType {
           'placeholder' => 'label.tutte_classi',
           'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
+          'choice_value' => 'id',
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
@@ -81,6 +82,7 @@ class DocumentoType extends AbstractType {
           'choices' => $options['values'][2],
           'placeholder' => 'label.tutte_classi',
           'choice_translation_domain' => false,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
