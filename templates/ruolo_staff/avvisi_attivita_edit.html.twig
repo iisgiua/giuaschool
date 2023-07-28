@@ -111,7 +111,7 @@ $(document).ready(function() {
   // init
   var c = '{{ form.filtro.vars.value }}'.split(',');
   c.forEach(function(i) {
-    $('#avviso_classi_'+i).click();
+    $('input[name="avviso[classi][]"][value="'+i+'"]').click();
   });
 });
 </script>
@@ -120,22 +120,31 @@ $(document).ready(function() {
 {% block _avviso_classi_widget %}
   {% set prec = '' %}
   {% for group_label, group in choices %}
-    {% if group_label[:-2] != prec %}
+    {% if group_label != prec %}
       {% if prec != '' %}
 </div>
       {% endif %}
-      {% set prec = group_label[:-2] %}
+      {% set prec = group_label %}
 <div class="col-sm-6" data-sede="{{ prec }}">
   <div><strong><em>{{ prec }}</em></strong></div>
     {% endif %}
-  <div class="row">
+    {% set sez = '' %}
     {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+  </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+  <div class="row">
+      {% endif %}
       {{- form_widget(form[key], {
         parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
         translation_domain: choice_translation_domain,
       }) -}}
     {% endfor %}
+    {% if sez != '' %}
   </div>
+    {% endif %}
   {% endfor %}
   {% if prec != '' %}
 </div>

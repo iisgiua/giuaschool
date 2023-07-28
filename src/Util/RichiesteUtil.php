@@ -129,7 +129,7 @@ class RichiesteUtil {
       $definizioneRichiesta->getNome());
     $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
     $this->pdf->getHandler()->SetFooterMargin(10);
-    $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+    $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     $this->pdf->createFromHtml($html);

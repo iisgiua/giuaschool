@@ -150,7 +150,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', '', 10);
     $this->pdf->getHandler()->setPrintHeader(false);
     $this->pdf->getHandler()->SetFooterMargin(12);
-    $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+    $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     // scansione cattedre
@@ -187,7 +187,7 @@ class ArchiviazioneUtil {
   /**
    * Crea tutti i registri dei docenti
    *
-   * @param Array $docenti Lista dei docenti di cui creare il registro personale
+   * @param array $docenti Lista dei docenti di cui creare il registro personale
    */
   public function tuttiRegistriDocente($docenti) {
     foreach ($docenti as $doc) {
@@ -240,7 +240,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', '', 10);
     $this->pdf->getHandler()->setPrintHeader(false);
     $this->pdf->getHandler()->SetFooterMargin(12);
-    $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+    $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     // scansione cattedre
@@ -277,7 +277,7 @@ class ArchiviazioneUtil {
   /**
    * Crea tutti i registri di sostegno
    *
-   * @param Array $docenti Lista dei docenti di cui creare il registro di sostegno
+   * @param array $docenti Lista dei docenti di cui creare il registro di sostegno
    */
   public function tuttiRegistriSostegno($docenti) {
     foreach ($docenti as $doc) {
@@ -310,7 +310,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', '', 10);
     $this->pdf->getHandler()->setPrintHeader(false);
     $this->pdf->getHandler()->SetFooterMargin(12);
-    $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+    $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     // scansione periodi
@@ -332,7 +332,7 @@ class ArchiviazioneUtil {
   /**
    * Crea tutti i registri di classe
    *
-   * @param Array $classi Lista delle classi di cui creare il registro di classe
+   * @param array $classi Lista delle classi di cui creare il registro di classe
    */
   public function tuttiRegistriClasse($classi) {
     foreach ($classi as $cl) {
@@ -1607,7 +1607,7 @@ class ArchiviazioneUtil {
   /**
    * Crea i documenti degli scrutini per tutte le classe
    *
-   * @param Array $classi Lista delle classi di cui creare i documenti degli scrutini
+   * @param array $classi Lista delle classi di cui creare i documenti degli scrutini
    */
   public function tuttiScrutiniClasse($classi) {
     foreach ($classi as $cl) {

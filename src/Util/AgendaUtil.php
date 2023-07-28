@@ -21,6 +21,7 @@ use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\Festivita;
+use App\Entity\Utente;
 
 
 /**
@@ -78,7 +79,7 @@ class AgendaUtil {
    * @param Docente $docente Docente a cui sono indirizzati gli eventi
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventi(Docente $docente, $mese) {
     $dati = null;
@@ -198,7 +199,7 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEvento(Docente $docente, $data, $tipo) {
     $dati = null;
@@ -482,7 +483,7 @@ class AgendaUtil {
    * @param Alunno $alunno Alunno di riferimento
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventiGenitori(Genitore $genitore, Alunno $alunno, $mese) {
     $dati = null;
@@ -551,7 +552,7 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEventoGenitore(Genitore $genitore, Alunno $alunno, $data, $tipo) {
     $dati = null;
@@ -611,7 +612,7 @@ class AgendaUtil {
    * @param Alunno $alunno Alunno a cui sono indirizzati gli eventi
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventiAlunni(Alunno $alunno, $mese) {
     $dati = null;
@@ -666,7 +667,7 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEventoAlunno(Alunno $alunno, $data, $tipo) {
     $dati = null;

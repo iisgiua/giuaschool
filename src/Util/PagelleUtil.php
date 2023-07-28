@@ -105,7 +105,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function riepilogoVotiDati(Classe $classe, $periodo) {
     $dati = array();
@@ -514,7 +514,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function riepilogoVoti(Classe $classe, $periodo) {
     // inizializza
@@ -538,8 +538,8 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
         $this->pdf->getHandler()->SetHeaderMargin(10);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 6));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
@@ -581,8 +581,8 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
         $this->pdf->getHandler()->SetHeaderMargin(10);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 6));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
@@ -631,8 +631,8 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
         $this->pdf->getHandler()->SetHeaderMargin(10);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 6));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
@@ -680,7 +680,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function firmeRegistroDati(Classe $classe, $periodo) {
     $dati = array();
@@ -877,7 +877,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function firmeRegistro(Classe $classe, $periodo) {
     // inizializza
@@ -1004,7 +1004,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function verbaleDati(Classe $classe, $periodo) {
     $dati = array();
@@ -1489,7 +1489,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function pagellaDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
@@ -1616,7 +1616,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function pagella(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
@@ -1638,7 +1638,7 @@ class PagelleUtil {
           'Scrutinio '.$periodoNome.' - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -1672,7 +1672,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -1712,7 +1712,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -1753,7 +1753,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function debitiDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
@@ -1856,7 +1856,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function debiti(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
@@ -1878,7 +1878,7 @@ class PagelleUtil {
           'Scrutinio '.$periodoNome.' - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -1912,7 +1912,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2010,7 +2010,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function tabelloneEsiti(Classe $classe, $periodo) {
     // inizializza
@@ -2029,7 +2029,7 @@ class PagelleUtil {
           'Scrutinio Finale - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2063,7 +2063,7 @@ class PagelleUtil {
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2098,7 +2098,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function certificazioni(Classe $classe, $periodo) {
     // inizializza
@@ -2118,11 +2118,11 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
         $this->pdf->getHandler()->SetFooterMargin(15);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         $this->pdf->getHandler()->SetHeaderMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 8));
         $this->pdf->getHandler()->setHeaderTemplateAutoreset(true);
         $this->pdf->getHandler()->setListIndentWidth(3);
         // azzera margini verticali tra tag
@@ -2164,11 +2164,11 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
         $this->pdf->getHandler()->SetFooterMargin(15);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         $this->pdf->getHandler()->SetHeaderMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 8));
         $this->pdf->getHandler()->setHeaderTemplateAutoreset(true);
         $this->pdf->getHandler()->setListIndentWidth(3);
         // azzera margini verticali tra tag
@@ -2210,7 +2210,7 @@ class PagelleUtil {
    * @param Classe $classe Classe dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function certificazioniDati(Classe $classe, $periodo) {
     $dati = array();
@@ -2271,7 +2271,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function nonAmmesso(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
@@ -2291,7 +2291,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2332,7 +2332,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2374,7 +2374,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function nonAmmessoDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
@@ -2553,7 +2553,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function carenze(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
@@ -2573,7 +2573,7 @@ class PagelleUtil {
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2614,7 +2614,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function carenzeDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
@@ -2680,7 +2680,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno selezionato
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function verbale(Classe $classe, $periodo) {
     // inizializza
@@ -2703,7 +2703,7 @@ class PagelleUtil {
           'Scrutinio '.$periodoNome.' - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2737,7 +2737,7 @@ class PagelleUtil {
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2772,7 +2772,7 @@ class PagelleUtil {
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         // azzera margini verticali tra tag
@@ -2808,7 +2808,7 @@ class PagelleUtil {
    * @param Alunno $alunno Alunno dello scrutinio
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Percorso completo del file da inviare
+   * @return string Percorso completo del file da inviare
    */
   public function certificazione(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
@@ -2829,11 +2829,11 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
         $this->pdf->getHandler()->SetFooterMargin(15);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         $this->pdf->getHandler()->SetHeaderMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 8));
         $this->pdf->getHandler()->setHeaderTemplateAutoreset(true);
         $this->pdf->getHandler()->setListIndentWidth(3);
         // azzera margini verticali tra tag
@@ -2881,11 +2881,11 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
         $this->pdf->getHandler()->SetFooterMargin(15);
-        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
+        $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 8));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintFooter(true);
         $this->pdf->getHandler()->SetHeaderMargin(10);
-        $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 8));
+        $this->pdf->getHandler()->setHeaderFont(array('helvetica', 'B', 8));
         $this->pdf->getHandler()->setHeaderTemplateAutoreset(true);
         $this->pdf->getHandler()->setListIndentWidth(3);
         // azzera margini verticali tra tag

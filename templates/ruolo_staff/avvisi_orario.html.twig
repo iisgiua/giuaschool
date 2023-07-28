@@ -29,7 +29,7 @@
         <td><small>{{ a.docente.nome }} {{ a.docente.cognome }}</small></td>
         <td><small>{{ a.data|date('d/m/Y') }}</small></td>
         <td><small>{{ a.ora|date('G:i') }}</small></td>
-        <td><small>{% for c in dati[a.id].classi %}{{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
+        <td><small>{% for c in dati[a.id].classi %}{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>
           <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('staff_avvisi_dettagli', {'id': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni[k].edit is defined %}

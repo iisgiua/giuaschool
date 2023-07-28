@@ -84,16 +84,16 @@ class BachecaUtil {
     if ($avviso->getFiltroTipo() == 'C') {
       // filtro classi
       $dati['classi'] = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-        ->select('c.anno,c.sezione')
+        ->select('c.anno,c.sezione,c.gruppo')
         ->where('c.id IN (:lista)')
-        ->orderBy('c.anno,c.sezione', 'ASC')
+        ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
         ->setParameter('lista', $avviso->getFiltro())
         ->getQuery()
         ->getArrayResult();
     } elseif ($avviso->getFiltroTipo() == 'U') {
       // filtro utenti
       $dati['utenti'] = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('DISTINCT a.cognome,a.nome,a.dataNascita,c.anno,c.sezione,aa.letto,ag1.letto AS letto_genitore1,ag2.letto AS letto_genitore2')
+        ->select('DISTINCT a.cognome,a.nome,a.dataNascita,c.anno,c.sezione,c.gruppo,aa.letto,ag1.letto AS letto_genitore1,ag2.letto AS letto_genitore2')
         ->join('a.classe', 'c')
         ->join('App\Entity\Genitore', 'g1', 'WITH', 'g1.alunno=a.id')
         ->leftJoin('App\Entity\Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.id!=g1.id')

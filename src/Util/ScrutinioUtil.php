@@ -411,7 +411,7 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati dello scrutinio
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return Form Form usato nella pagina corrente dello scrutinio
    */
   public function formScrutinio(Classe $classe, $periodo, $stato, FormBuilder $form, $dati) {
     if ($periodo == 'P' || $periodo == 'S') {

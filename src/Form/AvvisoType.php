@@ -9,6 +9,7 @@
 namespace App\Form;
 
 use App\Entity\Avviso;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -63,6 +64,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => true))
         ->add('destinatariAta', ChoiceType::class, array('label' => 'label.destinatari_ATA',
@@ -100,6 +102,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'required' => false,
           'mapped' => false])
         ->add('materie', ChoiceType::class, ['label' => 'label.scegli_materie',
@@ -107,6 +110,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
           'required' => false,
           'mapped' => false])
@@ -116,6 +120,7 @@ class AvvisoType extends AbstractType {
           'placeholder' => 'label.classe',
           'expanded' => false,
           'multiple' => false,
+          'choice_value' => 'id',
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
@@ -145,6 +150,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => true))
         ->add('filtro', HiddenType::class, array('label' => false,
@@ -155,6 +161,7 @@ class AvvisoType extends AbstractType {
           'label_attr' => ['class' => 'gs-checkbox-inline col-sm-2 gs-pt-1'],
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'required' => true,
           'mapped' => false]);
     } elseif ($options['form_mode'] == 'attivita') {
@@ -184,6 +191,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => true))
         ->add('filtro', HiddenType::class, array('label' => false,
@@ -194,6 +202,7 @@ class AvvisoType extends AbstractType {
           'label_attr' => ['class' => 'gs-checkbox-inline col-sm-2 gs-pt-1'],
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'required' => true,
           'mapped' => false]);
     } elseif ($options['form_mode'] == 'individuale') {
@@ -207,6 +216,7 @@ class AvvisoType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => true))
         ->add('filtro', HiddenType::class, array('label' => false,
@@ -217,6 +227,7 @@ class AvvisoType extends AbstractType {
           'placeholder' => 'label.classe',
           'expanded' => false,
           'multiple' => false,
+          'choice_value' => 'id',
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
@@ -308,6 +319,17 @@ class AvvisoType extends AbstractType {
       },
       function ($filtro) {
         return explode(',', $filtro);
+      }));
+    $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
+      function ($sedi) {
+        $s = [];
+        foreach ($sedi as $sede) {
+          $s[$sede->getNomeBreve()] = $sede;
+        }
+        return $s;
+      },
+      function ($sedi) {
+        return new ArrayCollection($sedi);
       }));
   }
 

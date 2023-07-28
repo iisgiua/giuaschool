@@ -54,7 +54,7 @@
       {% elseif a.filtroTipo == 'C' %}
             Classi:
         {% for c in dati[a.id].classi %}
-            {{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ',' }}
+            {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}{{ not loop.last ? ',' }}
         {% endfor %}
       {% else %}
             Sedi:

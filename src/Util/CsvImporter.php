@@ -113,7 +113,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista dei docenti importati
+   * @return array|null Lista dei docenti importati
    */
   public function importaDocenti(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email');
@@ -253,7 +253,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista delle cattedtre importate
+   * @return array|null Lista delle cattedtre importate
    */
   public function importaCattedre(File $file=null, Form $form) {
     $header = array('usernameDocente','classe','materia','usernameAlunno','tipo','supplenza');
@@ -455,7 +455,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli alunni importati
+   * @return array|null Lista degli alunni importati
    */
   public function importaAlunni(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
@@ -863,7 +863,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli ATA importati
+   * @return array|null Lista degli ATA importati
    */
   public function importaAta(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email', 'tipo', 'segreteria', 'sede');
@@ -1024,7 +1024,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli orari importati
+   * @return array|null Lista degli orari importati
    */
   public function importaOrario(File $file=null, Form $form) {
     $header = array('username', 'sede', 'giorno', 'ora', 'classe', 'materia');
