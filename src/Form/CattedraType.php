@@ -36,24 +36,28 @@ class CattedraType extends AbstractType {
     $builder
       ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
         'required' => true])
       ->add('materia', ChoiceType::class, ['label' => 'label.materia',
         'choices' => $options['values'][1],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
         'required' => true])
       ->add('alunno', ChoiceType::class, ['label' => 'label.alunno_H',
         'choices' => $options['values'][2],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
         'required' => false])
       ->add('docente', ChoiceType::class, ['label' => 'label.docente',
         'choices' => $options['values'][3],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],

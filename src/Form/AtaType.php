@@ -58,6 +58,7 @@ class AtaType extends AbstractType {
         'required' => true))
       ->add('sede', ChoiceType::class, array('label' => 'label.sede',
         'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.nessuna_sede',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],

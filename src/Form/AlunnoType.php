@@ -83,6 +83,7 @@ class AlunnoType extends AbstractType {
         'required' => false))
       ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.nessuna_classe',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],

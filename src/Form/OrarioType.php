@@ -51,6 +51,7 @@ class OrarioType extends AbstractType {
         'required' => true))
       ->add('sede', ChoiceType::class, array('label' => 'label.sede',
         'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'required' => true))

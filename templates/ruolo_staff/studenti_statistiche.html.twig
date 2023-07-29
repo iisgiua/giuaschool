@@ -82,6 +82,24 @@ $(document).ready(function() {
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });
+  $('#staff_studenti_statistiche_sede').change(function(e) {
+    if ($(this).val() > 0) {
+      $('#staff_studenti_statistiche_classe optgroup').hide();
+      $('#staff_studenti_statistiche_classe optgroup[label="'+sedi[$(this).val()]+'"]').show();
+      $('#staff_studenti_statistiche_classe').val('');
+    } else {
+      $('#staff_studenti_statistiche_classe optgroup').show();
+    }
+  });
+  // init
+  var sedi = [];
+  {% for s,n in info.sedi %}
+  sedi[{{ s }}] = '{{ n }}';
+  {% endfor %}
+  if ($('#staff_studenti_statistiche_sede').val() > 0) {
+    $('#staff_studenti_statistiche_classe optgroup').hide();
+    $('#staff_studenti_statistiche_classe optgroup[label="'+sedi[$('#staff_studenti_statistiche_sede').val()]+'"]').show();
+  }
 });
 </script>
 {% endblock %}

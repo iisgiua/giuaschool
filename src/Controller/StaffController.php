@@ -31,7 +31,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -43,7 +42,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -1566,10 +1564,10 @@ class StaffController extends BaseController {
     $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/pagina', 1);
@@ -1581,15 +1579,18 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    if ($sede) {
-      // limita a classi di sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    } else {
-      // tutte le classi
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_autorizza', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_autorizza', ['data' => $data]))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -1600,34 +1601,18 @@ class StaffController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/pagina', $pagina);
     }
     // recupera periodo
@@ -2064,10 +2049,10 @@ class StaffController extends BaseController {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/pagina', 1);
@@ -2079,15 +2064,18 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    if ($sede) {
-      // limita a classi di sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    } else {
-      // tutte le classi
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_deroghe', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_deroghe'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -2098,34 +2086,18 @@ class StaffController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // lista alunni
@@ -2237,10 +2209,10 @@ class StaffController extends BaseController {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/pagina', 1);
@@ -2252,15 +2224,18 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    if ($sede) {
-      // limita a classi di sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    } else {
-      // tutte le classi
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_situazione', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_situazione'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -2271,34 +2246,18 @@ class StaffController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
@@ -2356,24 +2315,14 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
-      ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=:abilitato')
-      ->orderBy('d.cognome,d.nome', 'ASC')
-      ->setParameters(['abilitato' => 1])
-      ->getQuery()
-      ->getResult();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $opzioniDocenti[$trans->trans('label.tutti_docenti')] = -1;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_docenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_docenti_statistiche'))
       ->add('docente', ChoiceType::class, array('label' => 'label.docente',
         'data' => $docente,
-        'choices' => array_merge(['label.tutti_docenti' => -1], $docenti),
-        'choice_label' => function ($obj, $val) use ($trans) {
-            return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
-              $trans->trans('label.tutti_docenti'));
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj) ? $obj->getId() : $obj);
-          },
+        'choices' => $opzioniDocenti,
+        'choice_value' => 'id',
         'placeholder' => 'label.scegli_docente',
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => function($val, $key, $index) {
@@ -2468,10 +2417,10 @@ class StaffController extends BaseController {
   public function passwordAction(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/pagina', 1);
@@ -2483,15 +2432,18 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    if ($sede) {
-      // limita a classi di sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    } else {
-      // tutte le classi
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_password', FormType::class)
       ->setAction($this->generateUrl('staff_password'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -2502,34 +2454,18 @@ class StaffController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // lista alunni
@@ -2621,9 +2557,9 @@ class StaffController extends BaseController {
         'password' => $password));
     }
     $pdf->createFromHtml($html);
-    $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia password per email
+      $doc = $pdf->getHandler()->Output('', 'S');
       $message = (new Email())
         ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($utente->getEmail())
@@ -2649,10 +2585,7 @@ class StaffController extends BaseController {
     } else {
       // crea pdf e lo scarica
       $nomefile = 'credenziali-registro.pdf';
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response = new Response($doc);
-      $response->headers->set('Content-Disposition', $disposition);
-      return $response;
+      return $pdf->send($nomefile);
     }
   }
 
@@ -2720,32 +2653,19 @@ class StaffController extends BaseController {
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    if ($sede) {
-      // limita a classi di sede
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    } else {
-      // tutte le classi
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze', FormType::class)
       ->setMethod('GET')
       ->setAction($this->generateUrl('staff_studenti_assenze', ['data' => $data]))
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
         'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.scegli_classe',
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => true))
+        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.visualizza'))
       ->getForm();
     $form->handleRequest($request);
@@ -2945,42 +2865,30 @@ class StaffController extends BaseController {
     // legge sede
     $sede_staff = $this->getUser()->getSede();
     // form di ricerca
-    if ($sede_staff) {
-      // limita a classi di sede
-      $sedi = [$sede_staff];
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $sede_staff], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    if ($this->getUser()->getSede()) {
+      $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      // tutte le classi
-      $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
-      $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     }
+    foreach ($opzioniSedi as $s) {
+      $info['sedi'][$s->getId()] = $s->getNomeBreve();
+    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_statistiche', ['data' => $data_obj->format('Y-m-d')]))
       ->add('sede', ChoiceType::class, array('label' => 'label.sede',
         'data' => $sede,
-        'choices' => $sedi,
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
+        'choices' => $opzioniSedi,
+        'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_sede',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
         'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],

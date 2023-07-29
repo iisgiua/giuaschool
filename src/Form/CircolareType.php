@@ -131,7 +131,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
-        // 'choice_value' => 'id',
+        'choice_value' => 'id',
         'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
         'required' => false,
         'mapped' => false])

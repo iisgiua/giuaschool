@@ -55,7 +55,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function coordinatoreAction() {
+  public function coordinatoreAction(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
       $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
@@ -86,7 +86,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction() {
+  public function classeAction(): Response {
     // lista classi coordinatore
     $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
@@ -101,14 +101,14 @@ class CoordinatoreController extends BaseController {
         // solo classi della sede
         $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
           ->where('c.sede=:sede')
-          ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
+          ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
           ->setParameters(['sede' => $this->getUser()->getSede()])
           ->getQuery()
           ->getResult();
       } else {
         // tutte le classi
         $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-          ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
+          ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
           ->getQuery()
           ->getResult();
       }
@@ -140,7 +140,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(StaffUtil $staff, $classe) {
+  public function noteAction(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -193,7 +193,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeAction(StaffUtil $staff, $classe) {
+  public function assenzeAction(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -246,7 +246,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(StaffUtil $staff, $classe) {
+  public function votiAction(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -299,7 +299,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAction(StaffUtil $staff, $classe) {
+  public function situazioneAction(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -354,7 +354,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, $alunno, $tipo, $formato) {
+  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo, 
+                                         string $formato): Response {
     // inizializza variabili
     $dati = null;
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
@@ -434,7 +435,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
+  public function assenzeStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // controllo classe
@@ -482,7 +483,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
+  public function noteStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // controllo classe
@@ -530,7 +531,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(StaffUtil $staff, PdfManager $pdf, $classe) {
+  public function votiStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // controllo classe
@@ -580,7 +581,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(BachecaUtil $bac, $classe, $pagina) {
+  public function avvisiAction(BachecaUtil $bac, int $classe, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -653,7 +654,8 @@ class CoordinatoreController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
+                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, 
+                                   int $classe, int $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -697,7 +699,7 @@ class CoordinatoreController extends BaseController {
     // form di inserimento
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'coordinatore',
       'return_url' => $this->generateUrl('coordinatore_avvisi'),
-      'dati' => [(count($avviso->getAnnotazioni()) > 0)]]);
+      'values' => [(count($avviso->getAnnotazioni()) > 0)]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
@@ -867,7 +869,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDettagliAction(BachecaUtil $bac, $classe, $id) {
+  public function avvisoDettagliAction(BachecaUtil $bac, int $classe, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -922,7 +924,7 @@ class CoordinatoreController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
-                                     RegistroUtil $reg, $classe, $id) {
+                                     RegistroUtil $reg, int $classe, int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
@@ -1073,8 +1075,10 @@ class CoordinatoreController extends BaseController {
         }
       }
       // form di ricerca
+      $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+        $classe->getId());
       $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'presenze',
-        'values' => [$alunno, $classe->getId(), $inizio, $fine]]);
+        'values' => [$alunno, $opzioniAlunni, $inizio, $fine]]);
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // imposta criteri di ricerca
@@ -1159,9 +1163,11 @@ class CoordinatoreController extends BaseController {
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
+    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+      $classe->getId());
     $form = $this->createForm(PresenzaType::class, $presenza, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'edit',
-      'values' => [$classe->getId()]]);
+      'values' => [$opzioniAlunni]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla dati
@@ -1306,9 +1312,11 @@ class CoordinatoreController extends BaseController {
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
+    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+      $classe->getId());
     $form = $this->createForm(PresenzaType::class, null, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'add',
-      'values' => [$classe->getId()]]);
+      'values' => [$opzioniAlunni]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla dati

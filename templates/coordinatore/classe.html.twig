@@ -51,7 +51,7 @@
           </td>
           <td>
             {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nomeBreve }}">{{ v1.anno }}ª {{ v1.sezione }}</a>
+            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nomeBreve }}">{{ v1 }}</a>
             {% endfor %}
           </td>
         </tr>

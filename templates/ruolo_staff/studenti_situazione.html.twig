@@ -20,7 +20,7 @@
           <span>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: lista.genitori[a.id]} %}
         </td>
-        <td>{{ a.classe.anno }}ª {{ a.classe.sezione }}</td>
+        <td>{{ a.classe }}</td>
         <td>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': a.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': a.id, 'tipo': 'S', 'formato': 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>

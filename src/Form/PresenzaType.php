@@ -63,6 +63,7 @@ class PresenzaType extends AbstractType {
           'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'checkbox-split-vertical'],
           'required' => true,
           'mapped' => false])
@@ -127,6 +128,7 @@ class PresenzaType extends AbstractType {
       $builder
         ->add('alunno', ChoiceType::class, ['label' => 'label.alunno',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'choice_translation_domain' => false,
           'required' => true])
         ->add('data', DateType::class, array('label' => 'label.data',

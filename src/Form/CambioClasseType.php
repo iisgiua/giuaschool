@@ -39,12 +39,14 @@ class CambioClasseType extends AbstractType {
       $builder
         ->add('alunno', ChoiceType::class, array('label' => 'label.alunno',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => true))
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -68,6 +70,7 @@ class CambioClasseType extends AbstractType {
       $builder
         ->add('alunno', ChoiceType::class, array('label' => 'label.alunno',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -102,12 +105,14 @@ class CambioClasseType extends AbstractType {
       $builder
         ->add('alunno', ChoiceType::class, array('label' => 'label.alunno',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'required' => true))
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],

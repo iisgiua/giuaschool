@@ -36,7 +36,7 @@ class CommandController extends BaseController {
    *    requirements={"token": "[\w\-\+=]+", "time": "\d+"},
    *    methods={"GET"})
    */
-  public function notifyAction(KernelInterface $kernel, $token, $time): Response {
+  public function notifyAction(KernelInterface $kernel, string $token, int $time): Response {
     // controlla token
     $tok = $this->em->getRepository('App\Entity\Configurazione')->getParametro('comando_token');
     if (empty($tok) || $tok != $token) {

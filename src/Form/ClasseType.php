@@ -52,12 +52,14 @@ class ClasseType extends AbstractType {
         'required' => true))
       ->add('corso', ChoiceType::class, array('label' => 'label.corso',
         'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sede', ChoiceType::class, array('label' => 'label.sede',
         'choices' => $options['values'][1],
+        'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-end'],

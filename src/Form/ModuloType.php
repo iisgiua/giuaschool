@@ -67,6 +67,7 @@ class ModuloType extends AbstractType {
           'required' => true))
         ->add('docente', ChoiceType::class, ['label' => 'label.docente_curricolare',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -74,6 +75,7 @@ class ModuloType extends AbstractType {
           'required' => false])
         ->add('sostegno', ChoiceType::class, ['label' => 'label.docente_sostegno',
           'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -81,6 +83,7 @@ class ModuloType extends AbstractType {
           'required' => false])
         ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'choices' => $options['values'][2],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -103,6 +106,7 @@ class ModuloType extends AbstractType {
         ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -111,6 +115,7 @@ class ModuloType extends AbstractType {
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
+          'choice_value' => 'id',
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
           'required' => false));
@@ -120,6 +125,7 @@ class ModuloType extends AbstractType {
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
@@ -128,6 +134,7 @@ class ModuloType extends AbstractType {
         ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
+          'choice_value' => 'id',
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],

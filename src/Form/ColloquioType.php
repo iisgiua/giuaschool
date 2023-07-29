@@ -61,6 +61,7 @@ class ColloquioType extends AbstractType {
           'required' => true))
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'choice_translation_domain' => false,
           'mapped' => false,
           'required' => true))
@@ -87,6 +88,7 @@ class ColloquioType extends AbstractType {
           'required' => true))
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
           'choices' => $options['values'][0],
+          'choice_value' => 'id',
           'choice_translation_domain' => false,
           'mapped' => false,
           'required' => true))
