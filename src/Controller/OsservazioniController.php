@@ -230,7 +230,7 @@ class OsservazioniController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
+    $label['classe'] = ''.$cattedra->getClasse();
     // form di inserimento
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
@@ -521,7 +521,7 @@ class OsservazioniController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
+    $label['classe'] = ''.$cattedra->getClasse();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_personale_edit', FormType::class, $osservazione)
       ->add('testo', MessageType::class, array('label' => 'label.testo',

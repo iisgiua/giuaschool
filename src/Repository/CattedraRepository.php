@@ -170,7 +170,7 @@ class CattedraRepository extends BaseRepository {
     $dati['choice'] = array();
     $dati['lista'] = array();
     foreach ($cattedre as $cat) {
-      $label = $cat->getClasse()->getAnno().'ª '.$cat->getClasse()->getSezione().' - '.$cat->getMateria()->getNomeBreve().
+      $label = ''.$cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
         ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
       $dati['choice'][$label] = $cat;
       $dati['lista'][$cat->getId()]['object'] = $cat;

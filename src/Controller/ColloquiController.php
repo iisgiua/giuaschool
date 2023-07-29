@@ -112,9 +112,8 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
     $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'conferma']);
     $form->handleRequest($request);
@@ -163,9 +162,8 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
     $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'rifiuta']);
     $form->handleRequest($request);
@@ -219,9 +217,8 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
     $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'modifica']);
     $form->handleRequest($request);

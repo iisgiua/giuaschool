@@ -104,8 +104,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // informazioni da visualizzare
-    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione().
-      ($documento->getClasse()->getGruppo() ? ('-'.$documento->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$documento->getClasse();
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
@@ -277,8 +276,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // informazioni da visualizzare
-    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione().
-      ($documento->getClasse()->getGruppo() ? ('-'.$documento->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$documento->getClasse();
     $info['materia'] = $documento->getMateria()->getNomeBreve().($documento->getAlunno() ?
       ' - '.$documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome() : '');
     // form di inserimento
@@ -382,8 +380,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // informazioni da visualizzare
-    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione().
-      ($documento->getClasse()->getGruppo() ? ('-'.$documento->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$documento->getClasse();
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
@@ -484,8 +481,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // informazioni da visualizzare
-    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione().
-      ($documento->getClasse()->getGruppo() ? ('-'.$documento->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$documento->getClasse();
     // form di inserimento
     $form = $this->createForm(DocumentoType::class, null, [
       'return_url' => $this->generateUrl('documenti_maggio'), 'form_mode' => 'M']);
@@ -751,8 +747,7 @@ class DocumentiController extends BaseController {
     // informazioni da visualizzare
     if ($alunno) {
       $classe = $alunno->getClasse();
-      $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione().
-        ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '');
+      $info['classe'] = ''.$classe;
       $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
       $info['sesso'] = $alunno->getSesso();
     }

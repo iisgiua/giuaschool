@@ -356,9 +356,9 @@ class LezioniController extends BaseController {
     // recupera dati
     $dati = $reg->programma($cattedra);
     // info dati
-    $info['classe'] = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
+    $info['classe'] = ''.$cattedra->getClasse();
     $info['classe_corso'] = $info['classe'].' - '.$cattedra->getClasse()->getCorso().' - '.
-      $cattedra->getClasse()->getSede()->getCitta();
+      $cattedra->getClasse()->getSede()->getNomeBreve();
     $info['materia'] = $cattedra->getMateria()->getNome();
     $info['docenti'] = (count($dati['docenti']) == 1) ? 'Docente: ' : 'Docenti: ';
     foreach ($dati['docenti'] as $doc) {

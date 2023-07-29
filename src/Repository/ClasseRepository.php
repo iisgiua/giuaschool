@@ -51,13 +51,14 @@ class ClasseRepository extends BaseRepository {
   public function listaClassi($lista) {
     // legge classi valide
     $classi = $this->createQueryBuilder('c')
-      ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome")
+      ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome,c.gruppo")
       ->where('c.id IN (:lista)')
       ->setParameters(['lista' => $lista])
       ->orderBy('c.sezione,c.anno')
       ->getQuery()
       ->getArrayResult();
-    $lista_classi = array_column($classi, 'nome');
+    $lista_classi = array_map(
+      fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
     // restituisce lista
     return implode(', ', $lista_classi);
   }

@@ -112,8 +112,7 @@ class AjaxController extends BaseController {
     foreach ($alunni as $alu) {
       $dati['lista'][] = array(
         'id' => $alu->getId(),
-        'nome' => $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') '.
-          $alu->getClasse()->getAnno().'ª '.$alu->getClasse()->getSezione());
+        'nome' => ''.$alu.' '.$alu->getClasse());
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;

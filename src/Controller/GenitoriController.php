@@ -866,8 +866,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione().
-      ($alunno->getClasse()->getGruppo() ? ('-'.$alunno->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class)
@@ -1120,8 +1119,7 @@ class GenitoriController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($entrata->getData());
     $info['ora'] =  $entrata->getOra()->format('H:i');
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione().
-      ($alunno->getClasse()->getGruppo() ? ('-'.$alunno->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['ritardo'] = $entrata;
     // form
@@ -1248,8 +1246,7 @@ class GenitoriController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($uscita->getData());
     $info['ora'] =  $uscita->getOra()->format('H:i');
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione().
-      ($alunno->getClasse()->getGruppo() ? ('-'.$alunno->getClasse()->getGruppo()) : '');
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['uscita'] = $uscita;
     // form

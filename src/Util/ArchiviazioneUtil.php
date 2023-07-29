@@ -303,7 +303,7 @@ class ArchiviazioneUtil {
     $nomefile = 'registro-classe-'.$classe->getAnno().$classe->getSezione().'.pdf';
     // crea documento
     $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Registro di classe - '.$classe->getAnno().'ª '.$classe->getSezione());
+      'Registro di classe - '.$classe);
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
     $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -325,7 +325,7 @@ class ArchiviazioneUtil {
     // salva il documento
     $this->pdf->save($percorso.'/'.$nomefile);
     // registro creato
-    $this->reqstack->getSession()->getFlashBag()->add('success', 'Registro di classe '.$classe->getAnno().'ª '.$classe->getSezione().
+    $this->reqstack->getSession()->getFlashBag()->add('success', 'Registro di classe '.$classe.
       ' archiviato.');
   }
 
@@ -361,8 +361,8 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
-    $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
-    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
+    $classe_s = ''.$cattedra->getClasse();
+    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = $cattedra->getMateria()->getNome();
     $html = '<br>
            <p>A.S. '.$annoscolastico.'</p>
@@ -385,8 +385,8 @@ class ArchiviazioneUtil {
     // inizializza dati
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $docente_sesso = $docente->getSesso();
-    $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
-    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
+    $classe_s = ''.$cattedra->getClasse();
+    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = $cattedra->getMateria()->getNome();
     $periodo_s = $periodo['nome'];
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
@@ -870,8 +870,8 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
-    $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
-    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
+    $classe_s = ''.$cattedra->getClasse();
+    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = 'Sostegno per '.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
     $html = '<br>
@@ -895,8 +895,8 @@ class ArchiviazioneUtil {
     // inizializza dati
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $docente_sesso = $docente->getSesso();
-    $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
-    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
+    $classe_s = ''.$cattedra->getClasse();
+    $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = 'Sostegno';
     $alunno_s = $cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
@@ -1191,9 +1191,9 @@ class ArchiviazioneUtil {
     $periodo_s = $periodo['nome'];
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
-    $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
+    $classe_s = ''.$classe;
     $corso_s = $classe->getCorso()->getNome();
-    $sede_s = 'Sede di '.$classe->getSede()->getCitta();
+    $sede_s = $classe->getSede()->getNomeBreve();
     $html = '<br>
       <p>A.S. '.$annoscolastico.'</p>
       <p style="font-size:20pt">Registro di classe</p>
@@ -1214,8 +1214,8 @@ class ArchiviazioneUtil {
     $periodo_s = $periodo['nome'];
     $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
-    $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
-    $corso_s = $classe->getCorso()->getNome().' - Sede di '.$classe->getSede()->getCitta();
+    $classe_s = ''.$classe;
+    $corso_s = $classe->getCorso()->getNome().' - '.$classe->getSede()->getNomeBreve();
     $nomemesi = array('','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre');
     $nomesett = array('Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato');
     // festivi

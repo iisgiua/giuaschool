@@ -32,7 +32,7 @@ class RichiestaColloquioRepository extends BaseRepository {
     $oggi = new \DateTime('today');
     // legge dati richieste
     $richieste = $this->createQueryBuilder('rc')
-      ->select('c.id,c.abilitato,c.tipo,c.data,c.inizio,c.fine,c.luogo,rc.appuntamento,rc.stato,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione')
+      ->select('c.id,c.abilitato,c.tipo,c.data,c.inizio,c.fine,c.luogo,rc.appuntamento,rc.stato,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
       ->join('rc.colloquio', 'c')
       ->join('rc.alunno', 'a')
       ->leftJoin('a.classe', 'cl')
@@ -60,7 +60,8 @@ class RichiestaColloquioRepository extends BaseRepository {
         'stato' => $richiesta['stato'],
         'alunno' => $richiesta['cognome'].' '.$richiesta['nome'].' ('.
           $richiesta['dataNascita']->format('Y-m-d').')',
-        'classe' => empty($richiesta['anno']) ? '' : $richiesta['anno'].'ª '.$richiesta['sezione']];
+        'classe' => empty($richiesta['anno']) ? '' : $richiesta['anno'].'ª '.$richiesta['sezione'].
+          ($richiesta['gruppo'] ? ('-'.$richiesta['gruppo']) : '')];
     }
     // restituisce i dati
     return $dati;

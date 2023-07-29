@@ -296,7 +296,7 @@ class RegistroController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['materia'] = $materia->getNomeBreve();
     if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
@@ -512,7 +512,7 @@ class RegistroController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['materia'] = $materia->getNomeBreve();
     if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
@@ -925,7 +925,7 @@ class RegistroController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     // opzione scelta filtro
     $alunni = array();
     if (!empty($dest_filtro)) {
@@ -1242,7 +1242,7 @@ class RegistroController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('nota_edit', FormType::class, $nota)
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_nota',

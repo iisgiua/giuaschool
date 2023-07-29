@@ -954,6 +954,9 @@ class CircolariController extends BaseController {
     } elseif ($this->getUser() instanceOf Ata) {
       // ata
       return $this->redirectToRoute('circolari_ata');
+    } else {
+      // errore: non previsto
+      throw $this->createNotFoundException('exception.id_notfound');
     }
   }
 

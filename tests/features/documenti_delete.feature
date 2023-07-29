@@ -431,7 +431,7 @@ Schema dello scenario: inserisce e poi cancella documento BES
     | id  | classe |
     | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
@@ -439,7 +439,7 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E vedi pagina "documenti_bes"
   E vedi la tabella:
     | classe | alunno           | documento        | azione            |
-    | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
+    | /3A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
   E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"

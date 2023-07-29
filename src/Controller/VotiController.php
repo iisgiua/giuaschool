@@ -213,7 +213,7 @@ class VotiController extends BaseController {
     $elenco_precedente = unserialize(serialize($elenco)); // clona oggetti
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['festivi'] = $reg->listaFestivi();
     $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
@@ -455,7 +455,7 @@ class VotiController extends BaseController {
     }
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
     $label['bes'] = $alunno->getBes();
@@ -876,7 +876,7 @@ class VotiController extends BaseController {
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
+      'Voti della classe '.$classe.' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,
       'info' => $info,

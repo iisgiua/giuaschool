@@ -405,7 +405,7 @@ class AccountProvisioning {
     $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
       ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
     $docente_username = $cattedra->getDocente()->getUsername();
-    $sede = $cattedra->getClasse()->getSede()->getCitta();
+    $sede = $cattedra->getClasse()->getSede()->getNomeBreve();
     $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
     // gestione cattedra di sostegno
     if ($cattedra->getMateria()->getTipo() == 'S') {

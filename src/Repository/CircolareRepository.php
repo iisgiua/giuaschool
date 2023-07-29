@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Circolare;
 use App\Entity\Utente;
@@ -119,7 +120,7 @@ class CircolareRepository extends EntityRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function paginate($dql, $page, $limit) {
+  public function paginate(Query $dql, int $page, int $limit): Paginator {
     $paginator = new Paginator($dql);
     $paginator->getQuery()
       ->setFirstResult($limit * ($page - 1))
@@ -275,7 +276,7 @@ class CircolareRepository extends EntityRepository {
       "WHERE c.id=:id AND c.id=cu.circolare_id AND u.id=cu.utente_id ".
       "GROUP by u.ruolo,coord,segr";
     $query = $this->_em->getConnection()->prepare($sql);
-    $stat = $query->execute(['id' => $circolare->getId()]);
+    $stat = $query->executeQuery(['id' => $circolare->getId()]);
     foreach ($stat->fetchAllAssociative() as $s) {
       switch ($s['ruolo']) {
         case 'ALU':
@@ -313,8 +314,8 @@ class CircolareRepository extends EntityRepository {
       "FROM gs_circolare AS c, gs_circolare_classe AS cc, gs_classe AS cl ".
       "WHERE c.id=:id AND c.id=cc.circolare_id AND cl.id=cc.classe_id";
     $query = $this->_em->getConnection()->prepare($sql);
-    $stat = $query->execute(['id' => $circolare->getId()]);
-    $stat = $stat->fetchAll();
+    $stat = $query->executeQuery(['id' => $circolare->getId()]);
+    $stat = $stat->fetchAllAssociative();
     if ($stat[0]['tot'] == 0) {
       $dati['CLASSI'] = array(1, 1, []);
     } else {
@@ -323,7 +324,7 @@ class CircolareRepository extends EntityRepository {
     if ($stat[0]['tot'] > $stat[0]['lette']) {
       // lista classi in cui va letta
       $classi = $this->createQueryBuilder('c')
-        ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome")
+        ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome,cl.gruppo")
         ->join('App\Entity\CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id')
         ->join('cc.classe', 'cl')
         ->where('c.id=:id AND cc.letta IS NULL')
@@ -331,7 +332,8 @@ class CircolareRepository extends EntityRepository {
         ->orderBy('cl.anno,cl.sezione', 'ASC')
         ->getQuery()
         ->getScalarResult();
-      $dati['CLASSI'][2] = array_column($classi, 'nome');
+      $dati['CLASSI'][2] = array_map(
+        fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
     }
     // restituisce i dati
     return $dati;

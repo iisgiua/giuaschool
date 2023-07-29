@@ -189,15 +189,16 @@ class AlunnoRepository extends BaseRepository {
   public function listaAlunni($lista, $attr): string {
     // legge alunni validi
     $alunni = $this->createQueryBuilder('a')
-      ->select("CONCAT('<span id=',:quote,:attr,a.id,:quote,'>',a.cognome,' ',a.nome,' (',DATE_FORMAT(a.dataNascita,'%d/%m/%Y'),') ',c.anno,'ª ',c.sezione,'</span>') AS nome")
+      ->select("CONCAT('<span id=',:quote,:attr,a.id,:quote,'>',a.cognome,' ',a.nome,' (',DATE_FORMAT(a.dataNascita,'%d/%m/%Y'),') ',c.anno,'ª ',c.sezione) AS nome,c.gruppo")
       ->join('a.classe', 'c')
       ->where('a.id IN (:lista) AND a.abilitato=:abilitato')
       ->setParameters(['lista' => $lista, 'abilitato' => 1, 'attr' => $attr, 'quote' => '\\"'])
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    $lista_alunni = array_column($alunni, 'nome');
-    // restituisce lista
+    $lista_alunni = array_map(
+      fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : '').'</span>', $alunni);
+      // restituisce lista
     return implode(', ', $lista_alunni);
   }
 

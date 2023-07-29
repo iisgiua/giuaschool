@@ -448,7 +448,7 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->createForm(EntrataType::class, $entrata, array('form_mode' => 'staff'));
@@ -657,8 +657,7 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione().
-      ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '');
+    $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita);
@@ -845,7 +844,7 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
@@ -1065,7 +1064,7 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('assenze_appello', FormType::class)
       ->add('lista', CollectionType::class, array('label' => false,

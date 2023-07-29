@@ -34,7 +34,7 @@ Scenario: visualizza pagina inserimento di relazione non presente
     | classe  | materia |
     | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci la relazione finale/"
-  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Informatica/"
+  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1B\s*Materia:\s*Informatica/"
 
 Scenario: visualizza pagina inserimento di relazione non presente per sostegno
   Data ricerca istanze di tipo "Materia":
@@ -55,7 +55,7 @@ Scenario: visualizza pagina inserimento di relazione non presente per sostegno
     | classe  | materia | alunno |
     | $cl1:id | $m1:id  | $a1:id |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci la relazione finale/"
-  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Sostegno - Rossi Mario/"
+  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1B\s*Materia:\s*Sostegno - Rossi Mario/"
 
 Scenario: visualizza errore per pagina inserimento di relazione già inserita dal docente
   Data ricerca istanze di tipo "Materia":

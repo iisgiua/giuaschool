@@ -388,7 +388,7 @@ class RichiesteController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($data);
     $info['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $info['classe'] = $alunno->getClasse()->getAnno()."ª ".$alunno->getClasse()->getSezione();
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['delete'] = isset($uscitaOld);
     $info['posizione'] = $posizione;

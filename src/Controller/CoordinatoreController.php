@@ -457,7 +457,7 @@ class CoordinatoreController extends BaseController {
     $dati = $staff->assenze($classe);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Assenze della classe '.$classe->getAnno().'ª '.$classe->getSezione());
+      'Assenze della classe '.$classe);
     $html = $this->renderView('pdf/assenze_classe.html.twig', array(
       'classe' => $classe,
       'dati' => $dati,
@@ -505,7 +505,7 @@ class CoordinatoreController extends BaseController {
     $dati = $staff->note($classe);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Note disciplinari della classe '.$classe->getAnno().'ª '.$classe->getSezione());
+      'Note disciplinari della classe '.$classe);
     $html = $this->renderView('pdf/note_classe.html.twig', array(
       'classe' => $classe,
       'dati' => $dati,
@@ -553,7 +553,7 @@ class CoordinatoreController extends BaseController {
     $dati = $staff->voti($classe);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Medie dei voti della classe '.$classe->getAnno().'ª '.$classe->getSezione());
+      'Medie dei voti della classe '.$classe);
     $pdf->getHandler()->setPageOrientation('L', true, 20);
     $html = $this->renderView('pdf/voti_classe.html.twig', array(
       'classe' => $classe,
@@ -685,8 +685,7 @@ class CoordinatoreController extends BaseController {
       // azione add
       $avviso = (new Avviso())
         ->setTipo('O')
-        ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto',
-          ['classe' => $classe->getAnno().'ª '.$classe->getSezione()]))
+        ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto', ['classe' => ''.$classe]))
         ->setData(new \DateTime('today'))
         ->addSedi($classe->getSede());
       $this->em->persist($avviso);

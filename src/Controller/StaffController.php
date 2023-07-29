@@ -1730,7 +1730,7 @@ class StaffController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->createForm(EntrataType::class, $entrata, array('form_mode' => 'staff'));
@@ -1934,7 +1934,7 @@ class StaffController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $label['richiesta'] = $richiesta;
     // form di inserimento
@@ -2149,7 +2149,7 @@ class StaffController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format(new \DateTime());
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $alunno->getClasse()->getAnno()."ª ".$alunno->getClasse()->getSezione();
+    $label['classe'] = ''.$alunno->getClasse();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('deroga_edit', FormType::class, $alunno)

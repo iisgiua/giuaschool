@@ -34,7 +34,7 @@ Scenario: visualizza pagina inserimento documento 15 maggio non presente
     | classe |
     | $c1:id |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento del 15 maggio/"
-  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*5ª A/"
+  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*5A/"
 
 Scenario: visualizza errore per pagina inserimento documento 15 maggio già inserito
   Data modifica istanze di tipo "Classe":

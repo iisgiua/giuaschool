@@ -608,7 +608,7 @@ class StaffUtil {
   /**
    * Recupera le statistiche sulle presenze secondo i criteri di ricerca indicati
    *
-   * @param DateTime $data Data per la generazione delle statistiche
+   * @param \DateTime $data Data per la generazione delle statistiche
    * @param array $search Criteri di ricerca
    *
    * @return array Dati formattati come array associativo
@@ -649,8 +649,8 @@ class StaffUtil {
       $presenti = $totale - $assenti;
       // formatta i dati
       $dati[$c->getId()] = array(
-        'classe' => $c->getAnno().'ª '.$c->getSezione().' - '.$c->getCorso()->getNomeBreve(),
-        'sede' => $c->getSede()->getCitta(),
+        'classe' => ''.$c.' - '.$c->getCorso()->getNomeBreve(),
+        'sede' => $c->getSede()->getNomeBreve(),
         'totale' => $totale,
         'assenti' => $assenti,
         'presenti' => $presenti,
