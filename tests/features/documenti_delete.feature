@@ -439,7 +439,7 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E vedi pagina "documenti_bes"
   E vedi la tabella:
     | classe | alunno           | documento        | azione            |
-    | /3A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
+    | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
   E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
