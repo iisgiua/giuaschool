@@ -145,7 +145,7 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
     | id  | classe |
     | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
@@ -171,7 +171,7 @@ Scenario: errore inserimento documento BES senza selezione classe
 
 Scenario: errore inserimento documento BES senza selezione alunno
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
@@ -186,7 +186,7 @@ Scenario: errore inserimento documento BES senza selezione tipo documento
     | id  | classe |
     | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
@@ -201,7 +201,7 @@ Scenario: impedisce inserimento documento BES con più di un allegato
     | id  | classe |
     | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
@@ -216,7 +216,7 @@ Scenario: impedisce inserimento documento BES senza allegato
     | id  | classe |
     | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   Allora pulsante "Conferma" inattivo
@@ -233,7 +233,7 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
   E ricerca istanze di tipo "Alunno":
     | id  | classe |
     | $a1 | $cl1   |
-  Quando selezioni opzione "3ª A" da lista "documento_classe"
+  Quando selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone

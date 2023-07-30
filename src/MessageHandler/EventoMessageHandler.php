@@ -10,6 +10,7 @@ namespace App\MessageHandler;
 
 use App\Message\EventoMessage;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 

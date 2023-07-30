@@ -117,7 +117,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    * @param int $giorno Giorno settimnale (0=domenica, 1=lunedì, ...)
    * @param Orario $orario Orario a cui fare riferimento; se nullo si prende quello attuale della sede principale
    *
-   * @return ScansioneOraria Oggetto che rappresenta la scansione oraria
+   * @return array Array che rappresenta la scansione oraria
    */
   public function orarioGiorno($giorno, Orario $orario=null) {
     if (!$orario) {
