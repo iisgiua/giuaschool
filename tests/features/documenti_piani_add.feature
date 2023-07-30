@@ -34,7 +34,7 @@ Scenario: visualizza pagina inserimento di piano di lavoro non presente
     | classe  | materia |
     | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il piano di lavoro/"
-  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1B\s*Materia:\s*Informatica/"
+  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Informatica/"
 
 Scenario: visualizza errore per pagina inserimento di piano di lavoro già inserito dal docente
   Date istanze di tipo "Cattedra":

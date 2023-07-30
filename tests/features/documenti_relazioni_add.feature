@@ -34,7 +34,7 @@ Scenario: visualizza pagina inserimento di relazione non presente
     | classe  | materia |
     | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci la relazione finale/"
-  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1B\s*Materia:\s*Informatica/"
+  E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Informatica/"
 
 Scenario: visualizza pagina inserimento di relazione non presente per sostegno
   Data ricerca istanze di tipo "Materia":
