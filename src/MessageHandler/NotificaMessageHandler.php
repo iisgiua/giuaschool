@@ -144,7 +144,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
   public static function delete(EntityManagerInterface $em, string $tag) {
     $connection = $em->getConnection();
     $sql = "DELETE FROM gs_messenger_messages WHERE body LIKE :tag";
-    $connection->prepare($sql)->execute(['tag' => '%'.$tag.'%']);
+    $connection->prepare($sql)->executeStatement(['tag' => '%'.$tag.'%']);
   }
 
   /**
@@ -163,15 +163,15 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     $ora = (new \DateTime())->modify('+'.$delay.' seconds');
     $connection = $em->getConnection();
     $sql = "UPDATE gs_messenger_messages SET available_at=:ora WHERE queue_name=:queue AND body LIKE :tag AND delivered_at IS NULL";
-    $res = $connection->prepare($sql)->execute(['ora' => $ora->format('Y-m-d H:i:s'),
+    $res = $connection->prepare($sql)->executeStatement(['ora' => $ora->format('Y-m-d H:i:s'),
       'queue' => $queue, 'tag' => '%'.$tag.'%']);
-    if ($res->rowCount() == 0) {
+    if ($res == 0) {
       // elimina notifica da ogni coda
       $sql = "DELETE FROM gs_messenger_messages WHERE body LIKE :tag";
-      $connection->prepare($sql)->execute(['tag' => '%'.$tag.'%']);
+      $connection->prepare($sql)->executeStatement(['tag' => '%'.$tag.'%']);
     }
     // restituisce vero se notifica aggiornata
-    return ($res->rowCount() != 0);
+    return ($res != 0);
   }
 
 

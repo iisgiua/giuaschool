@@ -8,37 +8,26 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Form\Form;
 use App\Entity\Alunno;
 use App\Entity\Annotazione;
 use App\Entity\Assenza;
 use App\Entity\AssenzaLezione;
-use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Configurazione;
 use App\Entity\Docente;
-use App\Entity\Entrata;
-use App\Entity\Festivita;
-use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
-use App\Entity\Genitore;
 use App\Entity\Lezione;
 use App\Entity\Materia;
 use App\Entity\Nota;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
-use App\Entity\ScansioneOraria;
-use App\Entity\Scrutinio;
 use App\Entity\Sede;
-use App\Entity\Uscita;
-use App\Entity\Valutazione;
 use App\Form\Appello;
 use App\Form\VotoClasse;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -465,7 +454,7 @@ class RegistroUtil {
       $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
-        throw $this->createNotFoundException('exception.invalid_params');
+        throw new \Exception('exception.invalid_params');
       }
     }
     // ciclo per intervallo di date
@@ -1600,7 +1589,7 @@ class RegistroUtil {
     // elimina ore assenze esistenti
     $this->em->getConnection()
       ->prepare('DELETE FROM gs_assenza_lezione WHERE alunno_id=:alunno AND lezione_id IN (SELECT id FROM gs_lezione WHERE data=:data AND classe_id=:classe)')
-      ->execute(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'),
+      ->executeStatement(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'),
         'classe' => $alunno->getClasse()->getId()]);
     // legge assenza del giorno
     $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data]);
@@ -1609,7 +1598,7 @@ class RegistroUtil {
       foreach ($lezioni as $l) {
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-          ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
+          ->executeStatement(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
             'durata' => $l['durata']]);
       }
     } else {
@@ -1635,7 +1624,7 @@ class RegistroUtil {
             // aggiunge ore assenza
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-              ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(), 'durata' => $oreassenza]);
+              ->executeStatement(['lezione' => $l['id'], 'alunno' => $alunno->getId(), 'durata' => $oreassenza]);
           }
         }
       }
@@ -1679,7 +1668,7 @@ class RegistroUtil {
         // assente
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-          ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
+          ->executeStatement(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
             'durata' => $ora['durata']]);
       } elseif ($alu['id_entrata'] || $alu['id_uscita']) {
         // entrata o uscita o entrambi
@@ -1699,7 +1688,7 @@ class RegistroUtil {
           // aggiunge ore assenza
           $this->em->getConnection()
             ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-            ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
+            ->executeStatement(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
               'durata' => $oreassenza]);
         }
       }

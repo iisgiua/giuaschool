@@ -537,11 +537,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.sql';
     $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.map';
     // svuota il database
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
     $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
     $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     if (file_exists($sqlPath)) {
       // carica file SQL
       $process = Process::fromShellCommandline('mysql -u'.$dbParams['user'].' -p'.$dbParams['password'].

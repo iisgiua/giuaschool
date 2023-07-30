@@ -21,7 +21,7 @@
     {% for d in dati %}
       <tr>
         <td>
-          <strong>{{ d.anno }}ª {{ d.sezione }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
+          <strong>{{ d.anno }}ª {{ d.sezione }}{{ d.gruppo ? ('-'~d.gruppo) }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
           <strong>{{ d.materia }}</strong>
         </td>
         <td>

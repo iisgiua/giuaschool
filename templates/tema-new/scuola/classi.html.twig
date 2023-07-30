@@ -21,9 +21,9 @@
           <td><small>{{ c.corso.nomeBreve }}</small></td>
           <td><small>{{ c.sede.nomeBreve }}</small></td>
           <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli della classe" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ c.anno }}ª {{ c.sezione }} - {{ c.sede.nomeBreve }}" data-cont-id="info-classe-{{ c.id }}">{{ 'label.show'|trans }}</button>
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli della classe" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }} - {{ c.sede.nomeBreve }}" data-cont-id="info-classe-{{ c.id }}">{{ 'label.show'|trans }}</button>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_classi_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della classe">{{ 'label.edit'|trans }}</a>
-            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella la classe" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ c.anno }}ª {{ c.sezione }} - {{ c.sede.nomeBreve }}" data-contenuto="{{ 'message.cancella_classe'|trans }}" data-href="{{ path('scuola_classi_delete', {'id': c.id}) }}">{{ 'label.delete'|trans }}</button>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella la classe" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }} - {{ c.sede.nomeBreve }}" data-contenuto="{{ 'message.cancella_classe'|trans }}" data-href="{{ path('scuola_classi_delete', {'id': c.id}) }}">{{ 'label.delete'|trans }}</button>
             <div class="d-none" id="info-classe-{{ c.id }}">
               <dl class="row">
                 <dt class="col-sm-2 text-right">{{ 'label.classe_anno'|trans }}</dt>

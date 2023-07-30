@@ -24,7 +24,7 @@
           </td>
           <td>
     {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe.anno }}{{ v1.classe.sezione }} - {{ v1.materia.nome }}"><strong>{{ v1.classe.anno }}ª {{ v1.classe.sezione }} - {{ v1.materia.nomeBreve }}{% if v1.materia.tipo == 'S' and v1.alunno %} {{ loop.index }}{% endif %}</strong></a>
+            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe }} - {{ v1.materia.nome }}"><strong>{{ v1.classe }} - {{ v1.materia.nomeBreve }}{% if v1.materia.tipo == 'S' and v1.alunno %} {{ loop.index }}{% endif %}</strong></a>
       {% if v1.materia.tipo == 'S' and v1.alunno %}
             <button type="button" class="btn btn-xs btn-default gs-mr-5" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v1.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
@@ -57,9 +57,9 @@
           <td>
     {% for k1,v1 in v %}
       {% if v1.id in cattedre|keys %}
-            <button type="button" class="btn btn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{ v1.anno }}ª {{ v1.sezione }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come supplente in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></button>
+            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{v1}} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come supplente in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1 }}</strong></button>
       {% else %}
-            <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nome }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></a>
+            <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nome }}"><strong>{{ v1 }}</strong></a>
       {% endif %}
     {% endfor %}
           </td>

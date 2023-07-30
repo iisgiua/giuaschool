@@ -23,8 +23,8 @@
         <td>
           <span>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>
         </td>
-        <td>{{ a.classe.anno }}ª {{ a.classe.sezione }}</td>
-        <td>{{ a.classe.sede.citta }}</td>
+        <td>{{ a.classe }}</td>
+        <td>{{ a.classe.sede.nomeBreve }}</td>
         <td>
           {#-- <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_deroghe_edit', {'alunno': u.id}) }}" role="button" title="Modifica deroghe e annotazioni sull'alunno"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span>{{ 'label.edit'|trans }}</a> #}
         </td>

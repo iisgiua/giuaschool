@@ -8,28 +8,25 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Validator\ValidatorBuilder;
-use Symfony\Component\Validator\ValidatorInterface;
-use App\Entity\Cattedra;
-use App\Entity\Docente;
-use App\Entity\Ata;
-use App\Entity\Classe;
-use App\Entity\Materia;
 use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\Genitore;
+use App\Entity\Materia;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
 use App\Entity\Provisioning;
-use App\Entity\ScansioneOraria;
-use App\Entity\Sede;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\ValidatorBuilder;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**

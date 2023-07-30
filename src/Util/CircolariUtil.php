@@ -8,19 +8,14 @@
 
 namespace App\Util;
 
+use App\Entity\Ata;
+use App\Entity\Circolare;
+use App\Entity\Docente;
+use App\Entity\Staff;
+use App\Entity\Utente;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Entity\Utente;
-use App\Entity\Docente;
-use App\Entity\Staff;
-use App\Entity\Ata;
-use App\Entity\Circolare;
-use App\Entity\Alunno;
-use App\Entity\CircolareUtente;
-use App\Entity\Classe;
-use App\Entity\Genitore;
-use App\Entity\Materia;
 
 
 /**

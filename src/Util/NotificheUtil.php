@@ -180,7 +180,7 @@ class NotificheUtil {
    *
    * @param Docente $docente Docente che ha inserito le verifiche
    *
-   * @return int Numero di veriche previste
+   * @return array Lista verifiche previste
    */
   public function numeroVerifiche(Docente $docente) {
     // conta verifiche di oggi
@@ -235,7 +235,7 @@ class NotificheUtil {
    *
    * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
    *
-   * @return int Numero di veriche previste
+   * @return array Lista verifiche previste
    */
   public function numeroVerificheGenitori(Alunno $alunno) {
     // conta verifiche di oggi
@@ -271,7 +271,7 @@ class NotificheUtil {
    *
    * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
    *
-   * @return int Numero di compiti assegnati
+   * @return array Lista compiti assegnati
    */
   public function numeroCompitiGenitori(Alunno $alunno) {
     // conta compiti di oggi
@@ -304,7 +304,7 @@ class NotificheUtil {
    *
    * @param Docente $docente Docente che ha inserito i compiti
    *
-   * @return int Numero di compiti previsti
+   * @return array Lista compiti previsti
    */
   public function numeroCompiti(Docente $docente) {
     // conta verifiche di oggi

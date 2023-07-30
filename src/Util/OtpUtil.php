@@ -118,7 +118,7 @@ class OtpUtil {
     $rnd = openssl_random_pseudo_bytes(20, $crypto);
     if (!$crypto) {
        // errore: generatore casuale non sicuro
-       throw $this->createNotFoundException('exception.id_notfound');
+       throw new \Exception('exception.id_notfound');
     }
     $prefisso = substr(str_pad($utente, 20, 'X'), 0, 20);
     return $this->codificaBase32($prefisso.$rnd);

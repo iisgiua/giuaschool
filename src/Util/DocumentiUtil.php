@@ -658,8 +658,6 @@ class DocumentiUtil {
    *
    * @param Utente $utente Utente che esegue la lettura
    * @param Documento $documento Documento letto
-   *
-   * @return boolean Restituisce vero se l'utente è autorizzato alla lettura, falso altrimenti
    */
   public function leggeUtente(Utente $utente, Documento $documento) {
     // dati lettura utente
