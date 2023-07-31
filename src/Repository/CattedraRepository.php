@@ -38,7 +38,7 @@ class CattedraRepository extends BaseRepository {
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->orderBy('cl.anno,cl.sezione,m.nomeBreve,d.cognome,d.nome', 'ASC');
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,d.cognome,d.nome', 'ASC');
     if ($search['classe'] > 0) {
       $query->where('cl.id=:classe')->setParameter('classe', $search['classe']);
     }
@@ -69,7 +69,7 @@ class CattedraRepository extends BaseRepository {
       ->join('c.materia', 'm')
       ->leftJoin('c.alunno', 'a')
       ->where('c.docente=:docente AND c.attiva=:attiva')
-      ->orderBy('cl.anno,cl.sezione,m.nomeBreve,a.cognome,a.nome', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1])
       ->getQuery()
       ->getResult();
@@ -162,7 +162,7 @@ class CattedraRepository extends BaseRepository {
       ->join('c.materia', 'm')
       ->leftJoin('c.alunno', 'a')
       ->where('c.docente=:docente AND c.attiva=:attiva')
-      ->orderBy('cl.anno,cl.sezione,m.nomeBreve,a.cognome,a.nome', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1])
       ->getQuery()
       ->getResult();
@@ -229,7 +229,7 @@ class CattedraRepository extends BaseRepository {
       ->join('cl.sede', 's')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->orderBy('s.ordinamento,cl.anno,cl.sezione,m.nomeBreve,d.cognome,d.nome', 'ASC');
+      ->orderBy('s.ordinamento,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,d.cognome,d.nome', 'ASC');
     if ($criteri['classe'] > 0) {
       $query->andWhere('cl.id=:classe')->setParameter('classe', $criteri['classe']);
     }

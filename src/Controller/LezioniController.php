@@ -65,7 +65,7 @@ class LezioniController extends BaseController {
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->where('c.docente=:docente AND c.attiva=:attiva')
-      ->orderBy('cl.sede,cl.anno,cl.sezione,m.nomeBreve', 'ASC')
+      ->orderBy('cl.sede,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
       ->setParameters(['docente' => $this->getUser(), 'attiva' => 1])
       ->getQuery()
       ->getResult();
@@ -76,7 +76,7 @@ class LezioniController extends BaseController {
     }
     // lista tutte le classi
     $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
-      ->orderBy('cl.sede,cl.sezione,cl.anno', 'ASC')
+      ->orderBy('cl.sede,cl.sezione,cl.anno,cl.gruppo', 'ASC')
       ->getQuery()
       ->getResult();
     // raggruppa per sezione

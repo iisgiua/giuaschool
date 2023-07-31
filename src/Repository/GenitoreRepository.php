@@ -112,7 +112,7 @@ class GenitoreRepository extends BaseRepository {
       ->join('g.alunno', 'a')
       ->join('a.classe', 'c')
       ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND g.nome LIKE :nome AND g.cognome LIKE :cognome')
-      ->orderBy('c.anno,c.sezione,g.cognome,g.nome')
+      ->orderBy('c.anno,c.sezione,c.gruppo,g.cognome,g.nome')
       ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
         'cognome' => $criteri['cognome'].'%']);
     // controlla tipo

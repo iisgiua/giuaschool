@@ -55,7 +55,7 @@ class StoricoEsito {
   /**
    * @var string|null $classe Classe dell'alunno
    *
-   * @ORM\Column(type="string", length=66, nullable=false)
+   * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */

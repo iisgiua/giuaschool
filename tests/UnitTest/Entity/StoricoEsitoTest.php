@@ -68,7 +68,7 @@ class StoricoEsitoTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 66)) :
+          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'esito' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'periodo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :

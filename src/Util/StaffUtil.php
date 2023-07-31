@@ -631,7 +631,7 @@ class StaffUtil {
       $param['classe'] = $search['classe'];
     }
     $classi = $classi
-      ->orderBy('c.anno,c.sezione', 'ASC')
+      ->orderBy('c.anno,c.sezione,c.gruppo')
       ->setParameters($param)
       ->getQuery()
       ->getResult();

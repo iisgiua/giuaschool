@@ -131,7 +131,7 @@ class ArchiviazioneUtil {
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->where('d.id=:docente AND m.tipo IN (:tipi)')
-      ->orderBy('cl.anno,cl.sezione,m.ordinamento', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.ordinamento', 'ASC')
       ->setParameters(['docente' => $docente, 'tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
@@ -221,7 +221,7 @@ class ArchiviazioneUtil {
       ->join('c.classe', 'cl')
       ->join('c.alunno', 'a')
       ->where('d.id=:docente AND m.tipo=:tipo')
-      ->orderBy('cl.anno,cl.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['docente' => $docente, 'tipo' => 'S'])
       ->getQuery()
       ->getResult();

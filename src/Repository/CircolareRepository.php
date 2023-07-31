@@ -329,7 +329,7 @@ class CircolareRepository extends EntityRepository {
         ->join('cc.classe', 'cl')
         ->where('c.id=:id AND cc.letta IS NULL')
         ->setParameters(['id' => $circolare->getId()])
-        ->orderBy('cl.anno,cl.sezione', 'ASC')
+        ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
         ->getQuery()
         ->getScalarResult();
       $dati['CLASSI'][2] = array_map(

@@ -131,7 +131,7 @@ class RichiestaColloquioRepository extends BaseRepository {
   public function colloquiDocente(\DateTime $inizio, \DateTime $fine, Docente $docente): array {
     // legge dati colloqui
     $colloqui = $this->createQueryBuilder('rc')
-      ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,a.nome,a.cognome,a.sesso,a.dataNascita,cl.anno,cl.sezione')
+      ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,a.nome,a.cognome,a.sesso,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
       ->join('rc.alunno', 'a')
       ->join('a.classe', 'cl')
       ->join('rc.colloquio', 'c')

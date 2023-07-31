@@ -4984,12 +4984,17 @@ class ScrutinioUtil {
     // controllo se scrutinio rinviato dall'A.S. precedente
     foreach ($alunni as $alu) {
       if ($alu['periodo'] == 'X') {
+        $classeAnno = $alu['classe'][0];
+        $classeSezione = strpos($alu['classe'], '-') === false ? substr($alu['classe'], 1) :
+          substr($alu['classe'], 1, strpos($alu['classe'], '-') - 1);
+        $classeGruppo = strpos($alu['classe'], '-') === false ? '' : 
+          substr($alu['classe'], strpos($alu['classe'], '-') + 1);
         $esitoRinviato = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->join('s.classe', 'cl')
-          ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
-          ->setParameters(['alunno' => $alu['id'], 'anno' => $alu['classe'][0],
-            'sezione' => substr($alu['classe'], 1), 'stato' => 'C', 'rinviato' => 'X'])
+          ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
+          ->setParameters(['alunno' => $alu['id'], 'anno' => $classeAnno, 'sezione' => $classeSezione, 
+            'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
           ->setMaxResults(1)
           ->getQuery()
           ->getOneOrNullResult();

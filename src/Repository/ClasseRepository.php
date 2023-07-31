@@ -54,7 +54,7 @@ class ClasseRepository extends BaseRepository {
       ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome,c.gruppo")
       ->where('c.id IN (:lista)')
       ->setParameters(['lista' => $lista])
-      ->orderBy('c.sezione,c.anno')
+      ->orderBy('c.sezione,c.anno,c.gruppo')
       ->getQuery()
       ->getArrayResult();
     $lista_classi = array_map(
@@ -102,7 +102,7 @@ class ClasseRepository extends BaseRepository {
       ->join('c.coordinatore', 'd')
       ->join('c.sede', 's')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
-      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%')
       ->setParameter('abilitato', 1);
@@ -129,7 +129,7 @@ class ClasseRepository extends BaseRepository {
       ->join('c.segretario', 'd')
       ->join('c.sede', 's')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
-      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%')
       ->setParameter('abilitato', 1);
@@ -274,7 +274,7 @@ class ClasseRepository extends BaseRepository {
       $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
     }
     $classi = $classi
-      ->orderBy('s.ordinamento,'.($ordAnno ? 'c.anno,c.sezione' : 'c.sezione,c.anno').',c.gruppo')
+      ->orderBy('s.ordinamento,'.($ordAnno ? 'c.anno,c.sezione,c.gruppo' : 'c.sezione,c.gruppo,c.anno').',c.gruppo')
       ->getQuery()
       ->getResult();
     // imposta opzioni

@@ -212,53 +212,6 @@ class AppController extends BaseController {
   }
 
   /**
-   * API: restituisce la lista dei presenti per le procedure di evacuazione di emergenza
-   *
-   * @param Request $request Pagina richiesta
-   * @param string $token Token identificativo dell'app
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/app/presenti/{token}", name="app_presenti",
-   *    methods={"GET"})
-   */
-  public function presentiAction(Request $request, string $token): Response {
-    // inizializza
-    $dati = array();
-    // controlla servizio
-    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
-    if ($app) {
-      $dati_app = $app->getDati();
-      if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
-        // controlla ora
-        $adesso = new \DateTime();
-        $oggi = $adesso->format('Y-m-d');
-        $ora = $adesso->format('H:i');
-        if ($ora >= '08:00' && $ora <= '14:00') {
-          // legge presenti
-          $dql = "SELECT CONCAT(c.anno,c.sezione) AS classe,a.nome,a.cognome,DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita,DATE_FORMAT(e.ora,'%H:%i') AS entrata,DATE_FORMAT(u.ora,'%H:%i') AS uscita
-                  FROM App\Entity\Alunno a
-                  INNER JOIN a.classe c
-                  LEFT JOIN App\Entity\Entrata e WITH e.alunno=a.id AND e.data=:oggi
-                  LEFT JOIN App\Entity\Uscita u WITH u.alunno=a.id AND u.data=:oggi
-                  WHERE a.abilitato=1
-                  AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
-                  ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
-          $dati = $this->em->createQuery($dql)
-            ->setParameters(['oggi' => $oggi])
-            ->getArrayResult();
-        }
-      }
-    }
-    // mostra la pagina di risposta
-    $risposta = $this->render('app/presenti.xml.twig', array(
-      'dati' => $dati,
-      ));
-    $risposta->headers->set('Content-Type', 'application/xml; charset=utf-8');
-    return $risposta;
-  }
-
-  /**
    * Restituisce la versione corrente dell'app indicata
    *
    * @param Request $request Pagina richiesta

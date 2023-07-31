@@ -35,5 +35,6 @@ doctrine:
       string_functions:
         date_format: App\DQL\DateFormatFunction
         find_in_set: App\DQL\FindInSetFunction
+        if: App\DQL\IfFunction
         instr: App\DQL\InstrFunction
         replace: App\DQL\ReplaceFunction

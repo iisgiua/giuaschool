@@ -206,12 +206,12 @@ class AgendaUtil {
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
         ->join('rc.alunno', 'a')
         ->join('a.classe', 'cl')
         ->join('rc.colloquio', 'c')
         ->where("rc.stato=:stato AND c.data=:data AND c.docente=:docente AND c.abilitato=:abilitato")
-        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
+        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->setParameters(['stato' => 'C', 'data' => $data->format('Y-m-d'), 'docente' => $docente, 'abilitato' => 1])
         ->getQuery()
         ->getArrayResult();
@@ -384,7 +384,7 @@ class AgendaUtil {
       ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
       ->setParameters(['tipo' => 'V', 'data' => $avviso->getData()->format('Y-m-d'),
         'classe' => $avviso->getCattedra()->getClasse()])
-      ->orderBy('cl.anno,cl.sezione', 'ASC');
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $verifiche = $verifiche
@@ -417,7 +417,7 @@ class AgendaUtil {
       ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
       ->setParameters(['tipo' => 'P', 'data' => $avviso->getData()->format('Y-m-d'),
         'classe' => $avviso->getCattedra()->getClasse()])
-      ->orderBy('cl.anno,cl.sezione', 'ASC');
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $compiti = $compiti

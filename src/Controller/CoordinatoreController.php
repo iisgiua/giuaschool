@@ -90,7 +90,7 @@ class CoordinatoreController extends BaseController {
     // lista classi coordinatore
     $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
-      ->orderBy('c.sede,c.anno,c.sezione', 'ASC')
+      ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameters(['lista' => explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
       ->getQuery()
       ->getResult();

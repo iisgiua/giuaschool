@@ -456,7 +456,7 @@ class SistemaController extends BaseController {
             // alunni scrutinati
             $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
             $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
+              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
               "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
               "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
               "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -482,7 +482,7 @@ class SistemaController extends BaseController {
           }
           // scrutini sospesi
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
             "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -499,7 +499,7 @@ class SistemaController extends BaseController {
           $connection->executeStatement($sql);
           // esiti scrutini rinviati al nuovo A.S.
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'X', e.media, e.credito, ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'X', e.media, e.credito, ".
             "  e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2 ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
@@ -649,7 +649,7 @@ class SistemaController extends BaseController {
           $sql = "UPDATE gs_utente a ".
             "INNER JOIN gs_storico_esito se ON se.alunno_id = a.id ".
             "INNER JOIN gs_classe c ON c.id = a.classe_id ".            
-            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione) ".
+            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione AND gruppo = c.gruppo) ".
             "WHERE a.ruolo = 'ALU' AND se.esito IN ('A', 'E');";
           $connection->executeStatement($sql);
           // messaggio finale
@@ -1047,7 +1047,7 @@ class SistemaController extends BaseController {
       ->getQuery()
       ->getResult();
     $listaClassi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-      ->orderBy('c.anno,c.sezione', 'ASC')
+      ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
       ->getQuery()
       ->getResult();
     $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')

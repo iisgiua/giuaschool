@@ -325,7 +325,7 @@ class AlunnoRepository extends BaseRepository {
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
       ->where('a.abilitato=:vero AND a.richiestaCertificato=:vero')
-      ->orderBy('s.ordinamento,c.anno,c.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['vero' => 1]);
     if ($sede) {
       // filtra per sede
@@ -371,7 +371,7 @@ class AlunnoRepository extends BaseRepository {
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'c')
       ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
-      ->orderBy('c.anno,c.sezione,a.cognome,a.nome')
+      ->orderBy('c.anno,c.sezione,c.gruppo,,a.cognome,a.nome')
       ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
         'cognome' => $criteri['cognome'].'%']);
     // controlla tipo
