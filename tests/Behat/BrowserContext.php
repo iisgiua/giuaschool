@@ -598,7 +598,7 @@ class BrowserContext extends BaseContext {
    */
   public function pulsanteAttivo($button): void {
     $element = $this->session->getPage()->findButton($button);
-    $this->assertFalse($element->getAttribute('disabled'));
+    $this->assertTrue(empty($element->getAttribute('disabled')));
   }
 
   /**
@@ -609,7 +609,7 @@ class BrowserContext extends BaseContext {
    */
   public function pulsanteInattivo($button): void {
     $element = $this->session->getPage()->findButton($button);
-    $this->assertTrue($element->getAttribute('disabled'));
+    $this->assertTrue(!empty($element->getAttribute('disabled')));
   }
 
   /**

@@ -192,7 +192,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'Google',
-      'Username' => $token->getUser()->getUsername(),
+      'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
       'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione

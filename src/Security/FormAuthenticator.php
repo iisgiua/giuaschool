@@ -195,7 +195,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     if ($idProvider && $user->controllaRuolo($idProviderTipo)) {
       // errore: utente deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', array(
-        'username' => $user->getUsername(),
+        'username' => $user->getUserIdentifier(),
         'ruolo' => $user->getCodiceRuolo(),
         'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
@@ -227,7 +227,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
         }
         // validazione fallita
         $this->logger->error($otp_errore_log, array(
-          'username' => $user->getUsername(),
+          'username' => $user->getUserIdentifier(),
           'ruolo' => $user->getCodiceRuolo(),
           'ip' => $credentials['ip']));
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
@@ -237,7 +237,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     }
     // validazione fallita
     $this->logger->error('Password errata nella richiesta di login.', array(
-      'username' => $user->getUsername(),
+      'username' => $user->getUserIdentifier(),
       'ruolo' => $user->getCodiceRuolo(),
       'ip' => $credentials['ip']));
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
@@ -277,7 +277,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => $tipo_accesso,
-      'Username' => $token->getUser()->getUsername(),
+      'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
       'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione

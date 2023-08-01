@@ -25,7 +25,7 @@ class RichiestaRepository extends BaseRepository {
    *
    * @param string $tipo Codifica del tipo di richiesta
    * @param int $idAlunno Identificativo alunno che ha fatto richiesta
-   * @param DateTime $data Data di riferimento della richiesta
+   * @param \DateTime $data Data di riferimento della richiesta
    *
    * @return Richiesta|null Richiesta, se esiste
    */

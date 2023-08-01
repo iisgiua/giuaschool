@@ -499,7 +499,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data/ora di creazione del token, usato per la procedura di attivazione o di recupero password
    *
-   * @return DateTime|null Data/ora di creazione del token
+   * @return \DateTime|null Data/ora di creazione del token
    */
   public function getTokenCreato(): ?\DateTime {
     return $this->tokenCreato;
@@ -508,7 +508,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica la data/ora di creazione del token
    *
-   * @param DateTime|null $tokenCreato Data/ora di creazione del token
+   * @param \DateTime|null $tokenCreato Data/ora di creazione del token
    *
    * @return self Oggetto modificato
    */
@@ -550,7 +550,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica la data/ora di creazione del codice di pre-login
    *
-   * @param DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
+   * @param \DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
    *
    * @return self Oggetto modificato
    */

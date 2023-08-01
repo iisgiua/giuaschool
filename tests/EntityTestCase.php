@@ -542,8 +542,8 @@ class EntityTestCase extends DatabaseTestCase {
   private function tableFields($db, $table): array {
     $sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=:db AND TABLE_NAME=:table";
     $stmt = $this->em->getConnection()->prepare($sql);
-    $rs = $stmt->execute(['db' => $db, 'table' => $table]);
-    $cols = array_column($rs->fetchAll(), 'COLUMN_NAME');
+    $rs = $stmt->executeQuery(['db' => $db, 'table' => $table]);
+    $cols = array_column($rs->fetchAllAssociative(), 'COLUMN_NAME');
     return $cols;
   }
 

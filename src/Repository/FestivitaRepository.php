@@ -29,7 +29,7 @@ class FestivitaRepository extends BaseRepository {
    * Include come festivo anche il periodo precedente all'inizio o successivo alla fine dell'anno scolastico.
    * Sono indicati come festivi i riposi settimanali (domenica ed eventuali altri) configurati nei parametri.
    *
-   * @param DateTime $data Giorno da controllare
+   * @param \DateTime $data Giorno da controllare
    *
    * @return bool Vero il giorno è festivo, falso altrimenti
    */
