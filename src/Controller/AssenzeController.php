@@ -816,29 +816,13 @@ class AssenzeController extends BaseController {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
-    // assenze da giustificare
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // modalità assenze orarie
-      $giustifica = $reg->assenzeOreDaGiustificare($data_obj, $alunno, $classe);
-      $obj = $this->em->getRepository('App\Entity\AssenzaLezione');
-      $func_convalida = function($value, $key, $index) use($obj, $alunno) {
-        $ore = $obj->alunnoOreAssenze($alunno, $value->data_obj);
-        $ore_str = implode('ª, ', $ore).'ª';
-        return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'.
-          '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
-      $func_assenze = function($value, $key, $index) use($obj, $alunno) {
-        $ore = $obj->alunnoOreAssenze($alunno, $value->data_obj);
-        $ore_str = implode('ª, ', $ore).'ª';
-        return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'; };
-    } else {
-      // modalità assenze giornaliere
-      $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
-      $func_convalida = function ($value, $key, $index) {
-        return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
-          '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
-      $func_assenze = function ($value, $key, $index) {
-        return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : ''); };
-    }
+    // modalità assenze giornaliere
+    $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
+    $func_convalida = function ($value, $key, $index) {
+      return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
+        '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
+    $func_assenze = function ($value, $key, $index) {
+      return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : ''); };
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');

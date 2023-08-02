@@ -29,7 +29,7 @@
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-2 text-center">
-      {% if dati[data].pulsante_appello is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+      {% if dati[data].pulsante_appello is defined %}
       <a class="btn btn-success" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello"><span class="glyphicon glyphicon-hand-up gs-mr-3"></span>Appello</a>
       {% endif %}
     </div>
@@ -75,13 +75,6 @@
         <td>
               {% if v.id_assenza %}
           <span class="label label-danger">Assente</span>
-                {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-                  {% for o,ol in dati[data].ore.id %}
-                    {% if v.id_alunno in ol %}
-                      <span class="label label-default">{{ o }}ª</span>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
               {% endif %}
               {% if v.id_entrata %}
           <span class="label label-warning gs-mr-1"{% if v.note_entrata %} title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note_entrata }}"{% endif %}>Ritardo ({{ v.ora_entrata|date('H:i') }})
@@ -120,19 +113,19 @@
               {% endif %}
         </td>
         <td>
-              {% if v.pulsante_presenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_presenza is defined %}
           <button type="button" class="{{ v.pulsante_presenza == '#' ? 'disabled ' }}btn btn-success btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_presenza }}" title="Segna la presenza dell'alunno">P</button>
               {% endif %}
-              {% if v.pulsante_assenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_assenza is defined %}
           <button type="button" class="{{ v.pulsante_assenza == '#' ? 'disabled ' }}btn btn-danger btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_assenza }}" title="Segna l'assenza dell'alunno">A</button>
               {% endif %}
-              {% if v.pulsante_entrata is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_entrata is defined %}
           <button type="button" class="{{ v.pulsante_entrata == '#' ? 'disabled ' }}btn btn-warning btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_entrata }}" title="Segna il ritardo dell'alunno">R</button>
               {% endif %}
-              {% if v.pulsante_uscita is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_uscita is defined %}
           <button type="button" class="{{ v.pulsante_uscita == '#' ? 'disabled ' }}btn btn-warning btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_uscita }}" title="Segna l'uscita anticipata dell'alunno">U</button>
               {% endif %}
-              {% if v.pulsante_fc is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_fc is defined %}
           <button type="button" class="{{ v.pulsante_fc == '#' ? 'disabled ' }}btn gs-btn-secondary btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_fc }}" title="Imposta o elimina il fuori classe dell'alunno">FC</button>
               {% endif %}
               {% if v.pulsante_giustifica is defined %}

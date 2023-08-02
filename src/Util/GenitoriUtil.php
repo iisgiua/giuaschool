@@ -460,14 +460,8 @@ class GenitoriUtil {
     $dati = array('lista');
     $dati['lista'] = array();
     $dati_periodo = array();
-    // raggruppa assenze continuative
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // gestione assenze orarie, senza raggruppamento
-      $dati_assenze = $this->raggruppaAssenzeOre($alunno);
-    } else {
-      // gestione assenze giornaliere, con raggruppamento
-      $dati_assenze = $this->raggruppaAssenze($alunno);
-    }
+    // gestione assenze giornaliere, con raggruppamento
+    $dati_assenze = $this->raggruppaAssenze($alunno);
     $dati['evidenza'] = $dati_assenze['evidenza'];
     $dati['evidenza']['ritardo'] = [];
     $dati['evidenza']['uscita'] = [];

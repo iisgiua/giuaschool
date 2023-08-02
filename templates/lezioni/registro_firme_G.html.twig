@@ -2,6 +2,8 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
+
+{{dump(dati)}}  
   {% if not cattedra and not classe %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_registro'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
@@ -160,7 +162,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for k,v in dati[data].lezioni %}
+      {# {% for k,v in dati[data].lezioni %}
       <tr>
         <td><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
         <td>{{ v.materia }}</td>
@@ -206,30 +208,10 @@
           {% endif %}
         </td>
       </tr>
-      {% endfor %}
+      {% endfor %} #}
     </tbody>
   </table>
   <div class="row gs-mb-3">
-      {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-    <div class="col-sm-12">
-      <table class="table table-bordered table-condensed gs-mt-2">
-        <thead class="bg-success">
-          <tr>
-          {% for ora,ass in assenti.nomi %}
-            <th>Assenti {{ ora}}ª ora</th>
-          {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-          {% for ora,ass in assenti.nomi %}
-            <td><small class="gs-text-normal">{% for a in ass %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small></td>
-          {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-      {% else %}
         {% if assenti.fc is defined %}
     <div class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
       <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
@@ -245,7 +227,6 @@
       </div>
     </div>
         {% endif %}
-
     <div class="col-sm-4">
         {% if assenti.assenze is defined %}
       <div class="panel panel-success">
@@ -288,7 +269,6 @@
       </div>
         {% endif %}
     </div>
-      {% endif %}
   </div>
       {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
       {% include 'include/modal-info.html.twig' %}

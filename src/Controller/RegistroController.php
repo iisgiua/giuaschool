@@ -184,12 +184,7 @@ class RegistroController extends BaseController {
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
         if ($vista == 'G') {
           // dati sugli assenti
-          if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-            // legge assenze orarie
-            $assenti = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
-          } else {
-            $assenti = $reg->listaAssenti($data_inizio, $classe);
-          }
+          $assenti = $reg->listaAssenti($data_inizio, $classe);
         }
       }
     }
@@ -319,30 +314,6 @@ class RegistroController extends BaseController {
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false));
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // alunni assenti nell'ora
-      $assenti_precedenti = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiLezionePrecedente($classe, $data_obj, $ora);
-      // religione/att.alt. o altra materia
-      $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
-        ($materia->getTipo() == 'R' ? 'S' : '');
-      $form = $form
-        ->add('assenti', EntityType::class, array('label' => 'label.assenti',
-          'data' => $assenti_precedenti,
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function (EntityRepository $er) use ($classe, $religione) {
-              return $er->createQueryBuilder('a')
-                ->where('a.classe=:classe AND a.abilitato=:abilitato'.($religione ? " AND a.religione='".$religione."'" : ''))
-                ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-                ->setParameters(['classe' => $classe, 'abilitato' => 1]);
-            },
-          'expanded' => true,
-          'multiple' => true,
-          'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
-          'required' => false));
-    }
     $form = $form
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
@@ -397,13 +368,8 @@ class RegistroController extends BaseController {
         }
         // ok: memorizza dati
         $this->em->flush();
-        if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-          // gestione assenze orarie
-          $reg->inserisceAssentiLezione($this->getUser(), $lezione, $form->get('assenti')->getData());
-        } else {
-          // ricalcola ore assenza
-          $reg->ricalcolaOreLezione($data_obj, $lezione);
-        }
+        // ricalcola ore assenza
+        $reg->ricalcolaOreLezione($data_obj, $lezione);
         // log azione
         $dblogger->logAzione('REGISTRO', 'Crea lezione', array(
           'Lezione' => $lezione->getId(),
@@ -555,29 +521,6 @@ class RegistroController extends BaseController {
           'disabled' => false,
           'required' => true));
     }
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // alunni assenti nell'ora
-      $assenti_precedenti = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
-      $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
-        ($materia->getTipo() == 'R' ? 'S' : '');
-      $form = $form
-        ->add('assenti', EntityType::class, array('label' => 'label.assenti',
-          'data' => $assenti_precedenti,
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function (EntityRepository $er) use ($classe, $religione) {
-              return $er->createQueryBuilder('a')
-                ->where('a.classe=:classe AND a.abilitato=:abilitato'.($religione ? " AND a.religione='".$religione."'" : ''))
-                ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-                ->setParameters(['classe' => $classe, 'abilitato' => 1]);
-            },
-          'expanded' => true,
-          'multiple' => true,
-          'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
-          'required' => false));
-    }
     $form = $form
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
@@ -660,11 +603,6 @@ class RegistroController extends BaseController {
         } else {
           // ok: memorizza dati
           $this->em->flush();
-          if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') && $assenti_precedenti !==  $form->get('assenti')->getData()) {
-            // gestione assenze orarie
-            $reg->modificaAssentiLezione($this->getUser(), $lezione, $assenti_precedenti,
-              $form->get('assenti')->getData());
-          }
           // log azione
           $dblogger->logAzione('REGISTRO', 'Modifica lezione', array(
             'Materia' => $old_materia,
@@ -672,8 +610,6 @@ class RegistroController extends BaseController {
             'Firma' => $firma->getId(),
             'Argomento' => $argomenti_old,
             'Attivita' =>  $attivita_old,
-            'Assenti Lezione' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') ?
-              array_map(function($o) { return $o->getId(); }, $assenti_precedenti) : '***',
             ));
           // redirezione
           return $this->redirectToRoute('lezioni_registro_firme');
@@ -788,16 +724,9 @@ class RegistroController extends BaseController {
       $lezione_cancellata['argomento'] = $lezione->getArgomento();
       $lezione_cancellata['attivita'] = $lezione->getAttivita();
       // cancella assenze lezione
-      if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-        // modalità assenze orarie
-        $assenti_precedenti = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
-        $reg->cancellaAssentiLezione($lezione, $assenti_precedenti);
-      } else {
-        // modalità assenze giornaliere
-        $assenze_lezione = $this->em->getRepository('App\Entity\AssenzaLezione')->findByLezione($lezione);
-        foreach ($assenze_lezione as $asslez) {
-          $this->em->remove($asslez);
-        }
+      $assenze_lezione = $this->em->getRepository('App\Entity\AssenzaLezione')->findByLezione($lezione);
+      foreach ($assenze_lezione as $asslez) {
+        $this->em->remove($asslez);
       }
       // cancella lezione
       $this->em->remove($lezione);
@@ -832,8 +761,6 @@ class RegistroController extends BaseController {
         'Attività' =>  $lezione_cancellata['attivita'],
         'Argomento sostegno' => ($firma_cancellata ? $firma_cancellata['argomento'] : ''),
         'Attività sostegno' => ($firma_cancellata ? $firma_cancellata['attivita'] : ''),
-        'Assenti Lezione' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') ?
-          array_map(function($o) { return $o->getId(); }, $assenti_precedenti) : '***',
         ));
     } else {
       // solo firma

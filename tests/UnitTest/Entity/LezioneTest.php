@@ -28,17 +28,17 @@ class LezioneTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Lezione';
     // campi da testare
-    $this->fields = ['data', 'ora', 'classe', 'materia', 'argomento', 'attivita'];
+    $this->fields = ['data', 'ora', 'classe','gruppo', 'tipoGruppo', 'materia', 'argomento', 'attivita'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'materia_id', 'argomento', 'attivita'],
+    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita'],
       'gs_materia' => '*',
       'gs_classe' => '*'];
     // SQL write
-    $this->canWrite = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'materia_id', 'argomento', 'attivita']];
+    $this->canWrite = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -72,10 +72,12 @@ class LezioneTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->randomNumber(4, false) :
           ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'gruppo' ? $this->faker->optional($weight = 50, $default = '')->word() :
+          ($field == 'tipoGruppo' ? $this->faker->randomElement(['N', 'C', 'R']) : 
           ($field == 'materia' ? $this->getReference("materia_1") :
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          null))))));
+          null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -143,6 +145,18 @@ class LezioneTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
     $existent->setClasse($this->getReference("classe_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
+    // gruppo
+    $existent->setGruppo(str_repeat('*', 65));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Gruppo - MAX LENGTH');
+    $existent->setGruppo(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Gruppo - VALID MAX LENGTH');
+    // tipoGruppo
+    $existent->setTipoGruppo('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::TipoGruppo - CHOICE');
+    $existent->setTipoGruppo('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::TipoGruppo - VALID CHOICE');
     // materia
     $property = $this->getPrivateProperty('App\Entity\Lezione', 'materia');
     $property->setValue($existent, null);
@@ -150,6 +164,20 @@ class LezioneTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
     $existent->setMateria($this->getReference("materia_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
+    // legge dati esistenti
+    $this->em->flush();
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique
+    $newObject = new \App\Entity\Lezione();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

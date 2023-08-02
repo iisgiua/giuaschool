@@ -1377,133 +1377,86 @@ class ArchiviazioneUtil {
           $usc['cognome'].' '.$usc['nome'].' ('.$usc['dataNascita']->format('d/m/Y').')';
         $dati['giustificazioni'][$usc['id']]['uscita'][] = $usc['data']->format('d/m/Y');
       }
-      // gestione assenze a seconda della modalità impostata
-      if ($this->em->getRepository('App\Entity\Configurazione')->getParametro('assenze_ore')) {
-        // assenze in modalità oraria
-        $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
-          ->select('a.id,a.cognome,a.nome,a.dataNascita,l.ora')
-          ->join('al.alunno', 'a')
-          ->join('al.lezione', 'l')
-          ->where('a.id IN (:lista) AND l.data=:data')
-          ->orderBy('a.cognome,a.nome,a.dataNascita,l.ora', 'ASC')
-          ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
-          ->getQuery()
-          ->getArrayResult();
-        foreach ($assenze as $ass) {
-          $dati['assenze'][$ass['id']]['alunno'] =
-            $ass['cognome'].' '.$ass['nome'].' ('.$ass['dataNascita']->format('d/m/Y').')';
-          $dati['assenze'][$ass['id']]['ore'][] = $ass['ora'].'ª';
+      // assenze in modalità giornaliera
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
+        ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+        ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+        ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($alunni as $alu) {
+        if ($alu['id_assenza']) {
+          $dati['assenze'][$alu['id_alunno']]['alunno'] =
+            $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
         }
-        // scrive assenze/giustificazioni
-        $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
-          <tr>
-            <td style="width:50%"><b>Ore di assenza</b></td>
-            <td style="width:50%"><b>Giustificazioni</b></td>
-          </tr>';
-        // assenze
-        $html .= '<tr><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['assenze'] as $ass) {
-          $html .= (!$primo ? '<br>- ' : '- ').$ass['alunno'].': '.
-            implode(', ', $ass['ore']).'.';
-          $primo = false;
+        if ($alu['id_entrata']) {
+          $dati['ritardi'][$alu['id_alunno']]['alunno'] =
+            $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
+          $dati['ritardi'][$alu['id_alunno']]['ora'] = $alu['ora_entrata'];
         }
-        // giustificazioni
-        $html .= '</td><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['giustificazioni'] as $alu=>$giu) {
-          $html .= (!$primo ? '<br>- ' : '- ').$giu['alunno'].': ';
-          $primo = false;
-          if (!empty($giu['assenza'])) {
-            $html .= 'Assenz'.(count($giu['assenza']) > 1 ? 'e' : 'a').' del '.
-              implode(', ', $giu['assenza']).'.';
-          }
+        if ($alu['id_uscita']) {
+          $dati['uscite'][$alu['id_alunno']]['alunno'] =
+            $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
+          $dati['uscite'][$alu['id_alunno']]['ora'] = $alu['ora_uscita'];
         }
-        // chiude tabella assenze
-        $html .= '</td></tr></table>';
-        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
-      } else {
-        // assenze in modalità giornaliera
-        $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-          ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
-          ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-          ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-          ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
-          ->where('a.id IN (:lista)')
-          ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-          ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
-          ->getQuery()
-          ->getArrayResult();
-        foreach ($alunni as $alu) {
-          if ($alu['id_assenza']) {
-            $dati['assenze'][$alu['id_alunno']]['alunno'] =
-              $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-          }
-          if ($alu['id_entrata']) {
-            $dati['ritardi'][$alu['id_alunno']]['alunno'] =
-              $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-            $dati['ritardi'][$alu['id_alunno']]['ora'] = $alu['ora_entrata'];
-          }
-          if ($alu['id_uscita']) {
-            $dati['uscite'][$alu['id_alunno']]['alunno'] =
-              $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-            $dati['uscite'][$alu['id_alunno']]['ora'] = $alu['ora_uscita'];
-          }
-        }
-        // scrive assenze/giustificazioni
-        $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
-          <tr>
-            <td style="width:25%"><b>Assenze</b></td>
-            <td style="width:25%"><b>Ritardi</b></td>
-            <td style="width:25%"><b>Uscite anticipate</b></td>
-            <td style="width:25%"><b>Giustificazioni</b></td>
-          </tr>';
-        // assenze
-        $html .= '<tr><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['assenze'] as $ass) {
-          $html .= (!$primo ? '<br>- ' : '- ').$ass['alunno'];
-          $primo = false;
-        }
-        // ritardi
-        $html .= '</td><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['ritardi'] as $rit) {
-          $html .= (!$primo ? '<br>' : '').'- <b>'.$rit['ora']->format('H:i').'</b> - '.$rit['alunno'];
-          $primo = false;
-        }
-        // uscite
-        $html .= '</td><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['uscite'] as $usc) {
-          $html .= (!$primo ? '<br>' : '').'- <b>'.$usc['ora']->format('H:i').'</b> - '.$usc['alunno'];
-          $primo = false;
-        }
-        // giustificazioni
-        $html .= '</td><td align="left" style="font-size:9pt">';
-        $primo = true;
-        foreach ($dati['giustificazioni'] as $alu=>$giu) {
-          $html .= (!$primo ? '<br> - ' : ' - ').$giu['alunno'].': ';
-          $primo = false;
-          if (!empty($giu['assenza'])) {
-            $html .= 'Assenz'.(count($giu['assenza']) > 1 ? 'e' : 'a').' del '.
-              implode(', ', $giu['assenza']).'.';
-          }
-          if (!empty($giu['ritardo'])) {
-            $html .= (!empty($giu['assenza']) ? '<br>' : '').
-              'Ritard'.(count($giu['ritardo']) > 1 ? 'i' : 'o').' del '.
-              implode(', ', $giu['ritardo']).'.';
-          }
-          if (!empty($giu['uscita'])) {
-            $html .= ((!empty($giu['assenza']) || !empty($giu['ritardo'])) ? '<br>' : '').
-              'Uscit'.(count($giu['uscita']) > 1 ? 'e' : 'a').' del '.
-              implode(', ', $giu['uscita']).'.';
-          }
-        }
-        // chiude tabella assenze
-        $html .= '</td></tr></table>';
-        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       }
+      // scrive assenze/giustificazioni
+      $html = '<table border="1" cellspacing="0" cellpadding="4" nobr="true">
+        <tr>
+          <td style="width:25%"><b>Assenze</b></td>
+          <td style="width:25%"><b>Ritardi</b></td>
+          <td style="width:25%"><b>Uscite anticipate</b></td>
+          <td style="width:25%"><b>Giustificazioni</b></td>
+        </tr>';
+      // assenze
+      $html .= '<tr><td align="left" style="font-size:9pt">';
+      $primo = true;
+      foreach ($dati['assenze'] as $ass) {
+        $html .= (!$primo ? '<br>- ' : '- ').$ass['alunno'];
+        $primo = false;
+      }
+      // ritardi
+      $html .= '</td><td align="left" style="font-size:9pt">';
+      $primo = true;
+      foreach ($dati['ritardi'] as $rit) {
+        $html .= (!$primo ? '<br>' : '').'- <b>'.$rit['ora']->format('H:i').'</b> - '.$rit['alunno'];
+        $primo = false;
+      }
+      // uscite
+      $html .= '</td><td align="left" style="font-size:9pt">';
+      $primo = true;
+      foreach ($dati['uscite'] as $usc) {
+        $html .= (!$primo ? '<br>' : '').'- <b>'.$usc['ora']->format('H:i').'</b> - '.$usc['alunno'];
+        $primo = false;
+      }
+      // giustificazioni
+      $html .= '</td><td align="left" style="font-size:9pt">';
+      $primo = true;
+      foreach ($dati['giustificazioni'] as $alu=>$giu) {
+        $html .= (!$primo ? '<br> - ' : ' - ').$giu['alunno'].': ';
+        $primo = false;
+        if (!empty($giu['assenza'])) {
+          $html .= 'Assenz'.(count($giu['assenza']) > 1 ? 'e' : 'a').' del '.
+            implode(', ', $giu['assenza']).'.';
+        }
+        if (!empty($giu['ritardo'])) {
+          $html .= (!empty($giu['assenza']) ? '<br>' : '').
+            'Ritard'.(count($giu['ritardo']) > 1 ? 'i' : 'o').' del '.
+            implode(', ', $giu['ritardo']).'.';
+        }
+        if (!empty($giu['uscita'])) {
+          $html .= ((!empty($giu['assenza']) || !empty($giu['ritardo'])) ? '<br>' : '').
+            'Uscit'.(count($giu['uscita']) > 1 ? 'e' : 'a').' del '.
+            implode(', ', $giu['uscita']).'.';
+        }
+      }
+      // chiude tabella assenze
+      $html .= '</td></tr></table>';
+      $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       // legge note
       $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
         ->join('n.docente', 'd')

@@ -9,6 +9,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -16,9 +17,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Lezione - dati delle ore di lezione
  *
  * @ORM\Entity(repositoryClass="App\Repository\LezioneRepository")
- * @ORM\Table(name="gs_lezione")
+ * @ORM\Table(name="gs_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","ora","classe_id","gruppo"})})
  * @ORM\HasLifecycleCallbacks
  *
+ * @UniqueEntity(fields={"data","ora","classe","gruppo"}, message="field.unique")
+ * 
  * @author Antonello Dessì
  */
 class Lezione {
@@ -75,6 +78,24 @@ class Lezione {
    * @Assert\NotBlank(message="field.notblank")
    */
   private ?Classe $classe = null;
+
+  /**
+   * @var string|null $gruppo Nome dell'eventuale gruppo a cui è riferita la lezione
+   *
+   * @ORM\Column(type="string", length=64, nullable=true)
+   *
+   * @Assert\Length(max=64, maxMessage="field.maxlength")
+   */
+  private ?string $gruppo = '';
+
+  /**
+   * @var string $tipoGruppo Tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
+   *
+   * @ORM\Column(type="string", length=1, nullable=false)
+   *
+   * @Assert\Choice(choices={"N","C","R"}, strict=true, message="field.choice")
+   */
+  private string $tipoGruppo = 'N';
 
   /**
    * @var Materia|null $materia Materia della lezione
@@ -216,6 +237,48 @@ class Lezione {
     $this->classe = $classe;
     return $this;
   }
+
+	/**
+	 * Restituisce il nome dell'eventuale gruppo a cui è riferita la lezione
+   * 
+	 * @return string|null Nome dell'eventuale gruppo a cui è riferita la lezione
+	 */
+	public function getGruppo(): ?string {
+		return $this->gruppo;
+	}
+	
+	/**
+	 * Modifica il nome dell'eventuale gruppo a cui è riferita la lezione
+   * 
+	 * @param string|null $gruppo Nome dell'eventuale gruppo a cui è riferita la lezione
+   * 
+   * @return self Oggetto modificato
+	 */
+	public function setGruppo(?string $gruppo): self {
+		$this->gruppo = $gruppo;
+		return $this;
+	}
+
+	/**
+	 * Restituisce il tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
+   * 
+	 * @return string Tipo di gruppo utilizzato
+	 */
+	public function getTipoGruppo(): string {
+		return $this->tipoGruppo;
+	}
+	
+	/**
+	 * Modifica il tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
+   * 
+	 * @param string $tipoGruppo Tipo di gruppo utilizzato
+   * 
+   * @return self Oggetto modificato
+	 */
+	public function setTipoGruppo(string $tipoGruppo): self {
+		$this->tipoGruppo = $tipoGruppo;
+		return $this;
+	}
 
   /**
    * Restituisce la materia della lezione

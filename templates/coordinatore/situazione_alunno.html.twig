@@ -274,20 +274,7 @@
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
-            {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-        <td>
-          <strong>Assenza
-              {% if e.ore|length > 0 %}
-            nelle ore:
-                {% for o in e.ore %}
-                  {{ o }}ª{{ not loop.last ? ',' }}
-                {% endfor %}
-              {% endif %}
-          </strong>
-        </td>
-            {% else %}
         <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
-            {% endif %}
         <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
         <td>{% if not e.giustificato %}<span class="label label-danger">Da giustificare</span>{% endif %}</td>
           {% elseif tipo == 'ritardo' %}
