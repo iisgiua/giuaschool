@@ -48,13 +48,13 @@ class AssenzeController extends BaseController {
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
-   * @param string $vista Tipo di vista del registro (giorno/settimana/mese)
+   * @param string $vista Tipo di vista del registro (giornaliera/mensile)
    * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}/{posizione}", name="lezioni_assenze_quadro",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M", "posizione": "\d+"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|M", "posizione": "\d+"},
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G", "posizione": "0"},
    *    methods={"GET"})
    *
@@ -103,13 +103,7 @@ class AssenzeController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data inizio e fine vista
-    if ($vista == 'S') {
-      // vista settimanale
-      $data_inizio = clone $data_obj;
-      $data_inizio->modify('this week');
-      $data_fine = clone $data_inizio;
-      $data_fine->modify('+5 days');
-    } elseif ($vista == 'M') {
+    if ($vista == 'M') {
       // vista mensile
       $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
       $data_fine = clone $data_inizio;

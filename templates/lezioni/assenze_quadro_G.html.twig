@@ -36,7 +36,6 @@
     <div class="col-sm-5 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le assenze del giorno"><span class="glyphicon glyphicon-stop"></span></a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza le assenze della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza le assenze del mese"><span class="glyphicon glyphicon-th"></span></a>
     </div>
   </div>

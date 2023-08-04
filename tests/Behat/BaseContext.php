@@ -1023,7 +1023,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $attrs[$val_name] = $val;
     }
     // restituisce valori degli attributi
-    return count($attrs) > 1 ? $attrs : array_values($attrs)[0];
+    $attrsVal = array_values($attrs);
+    return count($attrsVal) > 1 ? $attrsVal : $attrsVal[0];
   }
 
   /**
@@ -1097,6 +1098,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * Converte il testo di un parametro di ricerca in una espressione regolare.
    *  I possibili valori contenuti nel testo sono:
    *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
+   *    ?$nome... -> lista di variabili (vedi getVars) separate da ? e cercate in modo non ordinato
    *    /regex/ -> espressione regolare
    *    altro -> stringa di testo
    *
@@ -1114,6 +1116,22 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($value as $val) {
         $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
         $first = false;
+      }
+      $regex = '/'.$regex.'/ui';
+    } elseif ($search && $search[0] == '?') {
+      // ricerca non ordinata di variabili
+      $var_list = explode('?', substr($search, 1));
+      $values = [];
+      foreach ($var_list as $var) {
+        $value = $this->getVars($var);
+        if (is_array($value)) {
+          $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
+        }
+        $values[] = $value;
+      }
+      $regex = '';
+      foreach ($values as $val) {
+        $regex .= '(?=.*'.$val.')';
       }
       $regex = '/'.$regex.'/ui';
     } elseif (preg_match('#^(/.+/\w*)$#', $search)) {

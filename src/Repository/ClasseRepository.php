@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Classe;
 use App\Entity\GruppoClasse;
 
 
@@ -285,6 +286,35 @@ class ClasseRepository extends BaseRepository {
       $dati[$classe->getSede()->getNomeBreve()][$nome] = $classe;
     }
     // restituisce lista opzioni
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei gruppi esistenti per la classe
+   *
+   * @param Classe $classe Classe da controllare
+   * @param bool $oggetti Se vero restituisce lista di oggetti, altrimenti lista dei nomi dei gruppi
+   *
+   * @return array Lista dei gruppi classe esistenti
+   */
+  public function gruppi(Classe $classe, bool $oggetti = true): array {
+    // legge gruppi
+    $gruppi = $this->createQueryBuilder('c')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND c.gruppo != ''")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+      ->orderBy('c.gruppo')
+      ->getQuery()
+      ->getResult();
+    // restituisce lista gruppi
+    if ($oggetti) {
+      // restituisce oggetti gruppo classe
+      return $gruppi;
+    }
+    $dati = [];
+    foreach ($gruppi as $gruppo) {
+      $dati[] = $gruppo->getGruppo();
+    }
+    // restituisce lista di nomi
     return $dati;
   }
 

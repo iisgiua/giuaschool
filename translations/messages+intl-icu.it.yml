@@ -1327,6 +1327,7 @@ message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modi
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
+message.lezione_con_voti: "Non è possibile cancellare la lezione indicata.<br>Hai inserito uno o più valutazioni per questa materia in questa data.<br>Per rimuovere la lezione, devi prima modificare la data delle valutazioni."
 message.no_documenti: Non sono presenti documenti
 message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?

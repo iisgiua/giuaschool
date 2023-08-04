@@ -55,12 +55,12 @@ class RegistroController extends BaseController {
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
-   * @param string $vista Tipo di vista del registro (giorno/settimana/mese)
+   * @param string $vista Tipo di vista del registro (giornaliera/mensile)
    *
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}", name="lezioni_registro_firme",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|M"},
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
    *    methods={"GET"})
    *
@@ -72,10 +72,8 @@ class RegistroController extends BaseController {
     $lista_festivi = null;
     $errore = null;
     $dati = null;
-    $annotazioni = null;
     $num_avvisi = 0;
     $lista_circolari = array();
-    $note = null;
     $assenti = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -111,13 +109,7 @@ class RegistroController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data inizio e fine vista
-    if ($vista == 'S') {
-      // vista settimanale
-      $data_inizio = clone $data_obj;
-      $data_inizio->modify('this week');
-      $data_fine = clone $data_inizio;
-      $data_fine->modify('+5 days');
-    } elseif ($vista == 'M') {
+    if ($vista == 'M') {
       // vista mensile
       $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
       $data_fine = clone $data_inizio;
@@ -469,7 +461,7 @@ class RegistroController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('edit', $data_obj, $ora, $this->getUser(), $classe, $materia, $lezione, $lista_firme)) {
+    if (!$reg->azioneLezione('edit', $data_obj, $ora, $this->getUser(), $classe, $materia, [$lezione], $lista_firme)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -683,7 +675,7 @@ class RegistroController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('delete', $data_obj, $ora, $this->getUser(), $classe, $lezione->getMateria(), $lezione, $lista_firme)) {
+    if (!$reg->azioneLezione('delete', $data_obj, $ora, $this->getUser(), $classe, $lezione->getMateria(), [$lezione], $lista_firme)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
