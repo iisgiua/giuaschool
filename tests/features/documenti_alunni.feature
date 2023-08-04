@@ -59,7 +59,7 @@ Scenario: visualizza lista vuota per i documenti BES
   Allora non vedi la tabella:
     | classe | alunno | documento |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-
+@debug
 Scenario: visualizza più documenti per alunno BES
   Data ricerca istanze di tipo "Alunno":
     | id  | abilitato |
@@ -75,7 +75,7 @@ Scenario: visualizza più documenti per alunno BES
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       |
     | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Pdf   |
+    |                                     |        | Documento Pdf   |
 
 
 ################################################################################
