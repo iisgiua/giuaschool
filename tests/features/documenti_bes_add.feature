@@ -83,7 +83,7 @@ Schema dello scenario: impedisce visualizzazione pagina inserimento quando docum
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       | azione       |
     | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | /^Cancella$/ |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Pdf   | /^Cancella$/ |
+    |                                     |        | Documento Pdf   | /^Cancella$/ |
   Esempi:
     | tipo1 | tipo2 |
     | B     | H     |

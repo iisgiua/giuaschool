@@ -94,30 +94,30 @@ class RegistroController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $dataObj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $dataObj = new \DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $info['data_label'] =  $formatter->format($data_obj);
+    $info['data_label'] =  $formatter->format($dataObj);
     // data inizio e fine vista
     if ($vista == 'M') {
       // vista mensile
-      $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
+      $data_inizio = \DateTime::createFromFormat('Y-m-d', $dataObj->format('Y-m-01'));
       $data_fine = clone $data_inizio;
       $data_fine->modify('last day of this month');
     } else {
       // vista giornaliera
-      $data_inizio = $data_obj;
-      $data_fine = $data_obj;
+      $data_inizio = $dataObj;
+      $data_fine = $dataObj;
       $data_succ = null;
       $data_prec = null;
     }
@@ -160,7 +160,7 @@ class RegistroController extends BaseController {
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
-      $errore = $reg->controlloData($data_obj, $classe->getSede());
+      $errore = $reg->controlloData($dataObj, $classe->getSede());
       if (!$errore) {
         // non festivo
         $oggi = new \DateTime();
@@ -188,7 +188,7 @@ class RegistroController extends BaseController {
       'pagina_titolo' => 'page.lezioni_registro',
       'cattedra' => $cattedra,
       'classe' => $classe,
-      'data' => $data_obj->format('Y-m-d'),
+      'data' => $dataObj->format('Y-m-d'),
       'data_inizio' => $data_inizio->format('d/m/Y'),
       'data_fine' => $data_fine->format('d/m/Y'),
       'data_succ' => $data_succ,
@@ -256,32 +256,46 @@ class RegistroController extends BaseController {
       }
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
+    // legge lezioni e firme esistenti
+    $docentiId = [];
+    $firme = [];
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('l.classe', 'c')
+      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(), 
+        'sezione' => $classe->getSezione()])
+      ->orderBy('l.gruppo')
+      ->getQuery()
+      ->getResult();
+    foreach ($lezioni as $lezione) {
+      // legge firme
+      $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+      $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
+        ->join('f.docente', 'd')
+        ->where('f.lezione=:lezione')
+        ->setParameters(['lezione' => $lezione])
+        ->getQuery()
+        ->getResult();
+      // docenti
+      foreach ($firme as $f) {
+        $docentiId[$gruppo][] = $f->getDocente()->getId();
+      }
+    }
     // controlla permessi
-    $perm = $reg->azioneLezione('add', $data_obj, $ora, $this->getUser(), $classe, $materia);
-    if ($perm === null) {
-      // errore: lezione esiste già (ignora)
-      return $this->redirectToRoute('lezioni_registro_firme');
-    } elseif (!$perm) {
+    if (!$reg->azioneLezione('add', $dataObj, $ora, $this->getUser(), $classe, $materia, $lezioni, $docentiId)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
-    }
-    // controlla non esistenza di lezione
-    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
-      'ora' => $ora]);
-    if ($lezione) {
-      // lezione esiste, niente da fare
-      return $this->redirectToRoute('lezioni_registro_firme');
     }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] =  $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
     $label['materia'] = $materia->getNomeBreve();
@@ -289,13 +303,13 @@ class RegistroController extends BaseController {
       // sostegno
       $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
-    $dati = $reg->lezioneOreConsecutive($data_obj, $ora, $this->getUser(), $classe, $materia);
+    $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
-    $ora_fine = $dati['fine'];
+    $oraFine = $dati['fine'];
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_add', FormType::class)
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',
-        'choices'  => $ora_fine,
+        'choices'  => $oraFine,
         'translation_domain' => false,
         'required' => true))
       ->add('argomenti', MessageType::class, array(
@@ -305,8 +319,7 @@ class RegistroController extends BaseController {
       ->add('attivita', MessageType::class, array(
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
-        'required' => false));
-    $form = $form
+        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
@@ -315,19 +328,28 @@ class RegistroController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // ciclo per ore successive
-      for ($num_ora = $ora; $num_ora <= $form->get('fine')->getData(); $num_ora++) {
-        $lezione = (new Lezione())
-          ->setData($data_obj)
-          ->setOra($num_ora)
-          ->setClasse($classe)
-          ->setMateria($materia);
-        if ($materia->getTipo() != 'S') {
-          // lezione normale
-          $lezione
-            ->setArgomento($form->get('argomenti')->getData())
-            ->setAttivita($form->get('attivita')->getData());
+      for ($numOra = $ora; $numOra <= $form->get('fine')->getData(); $numOra++) {
+        if ($numOra > $ora || empty($lezioni)) {
+          // nuova lezione
+          $lezione = (new Lezione())
+            ->setData($dataObj)
+            ->setOra($numOra)
+            ->setClasse($classe)
+            ->setGruppo($classe->getGruppo())
+            ->setTipoGruppo($classe->getGruppo() ? 'C' : 'N')
+            ->setMateria($materia);
+          if ($materia->getTipo() != 'S') {
+            // lezione curricolare
+            $lezione
+              ->setArgomento($form->get('argomenti')->getData())
+              ->setAttivita($form->get('attivita')->getData());
+          }
+          $this->em->persist($lezione);
+        } else {
+          // esistono altre lezioni
+
+          dd('altro');
         }
-        $this->em->persist($lezione);
         // validazione lezione
         $errore = $validator->validate($lezione);
         if (count($errore) > 0) {
@@ -345,7 +367,7 @@ class RegistroController extends BaseController {
             ->setArgomento($form->get('argomenti')->getData())
             ->setAttivita($form->get('attivita')->getData());
         } else {
-          // lezione normale
+          // lezione curricolare
           $firma = (new Firma())
             ->setLezione($lezione)
             ->setDocente($this->getUser());
@@ -361,7 +383,7 @@ class RegistroController extends BaseController {
         // ok: memorizza dati
         $this->em->flush();
         // ricalcola ore assenza
-        $reg->ricalcolaOreLezione($data_obj, $lezione);
+        $reg->ricalcolaOreLezione($dataObj, $lezione);
         // log azione
         $dblogger->logAzione('REGISTRO', 'Crea lezione', array(
           'Lezione' => $lezione->getId(),
@@ -433,14 +455,14 @@ class RegistroController extends BaseController {
       }
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla esistenza di lezione
-    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
+    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $dataObj,
       'ora' => $ora]);
     if (!$lezione) {
       // errore: lezione non esiste
@@ -461,14 +483,14 @@ class RegistroController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('edit', $data_obj, $ora, $this->getUser(), $classe, $materia, [$lezione], $lista_firme)) {
+    if (!$reg->azioneLezione('edit', $dataObj, $ora, $this->getUser(), $classe, $materia, [$lezione], $lista_firme)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] =  $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
     $label['materia'] = $materia->getNomeBreve();
@@ -476,9 +498,9 @@ class RegistroController extends BaseController {
       // sostegno
       $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
-    $dati = $reg->lezioneOreConsecutive($data_obj, $ora, $this->getUser(), $classe, $materia);
+    $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
-    $ora_fine =  $dati['fine'];
+    $oraFine =  $dati['fine'];
     // lista altre materie
     if ($cattedra) {
       // cattedra normale
@@ -490,7 +512,7 @@ class RegistroController extends BaseController {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class)
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',
-        'choices'  => $ora_fine,
+        'choices'  => $oraFine,
         'translation_domain' => false,
         'disabled' => true,
         'required' => true))
@@ -644,14 +666,14 @@ class RegistroController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla esistenza di lezione
-    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
+    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $dataObj,
       'ora' => $ora]);
     if (!$lezione) {
       // lezione non esiste, niente da fare
@@ -675,7 +697,7 @@ class RegistroController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('delete', $data_obj, $ora, $this->getUser(), $classe, $lezione->getMateria(), [$lezione], $lista_firme)) {
+    if (!$reg->azioneLezione('delete', $dataObj, $ora, $this->getUser(), $classe, $lezione->getMateria(), [$lezione], $lista_firme)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -802,8 +824,8 @@ class RegistroController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
@@ -811,7 +833,7 @@ class RegistroController extends BaseController {
     if ($id > 0) {
       // azione edit, controlla annotazione
       $annotazione = $this->em->getRepository('App\Entity\Annotazione')->findOneBy(['id' => $id,
-        'data' => $data_obj, 'classe' => $classe]);
+        'data' => $dataObj, 'classe' => $classe]);
       if (!$annotazione) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -823,7 +845,7 @@ class RegistroController extends BaseController {
     } else {
       // azione add
       $annotazione = (new Annotazione())
-        ->setData($data_obj)
+        ->setData($dataObj)
         ->setClasse($classe)
         ->setVisibile(false);
       $this->em->persist($annotazione);
@@ -831,7 +853,7 @@ class RegistroController extends BaseController {
     // imposta autore dell'annotazione
     $annotazione->setDocente($this->getUser());
     // controlla permessi
-    if (!$reg->azioneAnnotazione(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(), $classe, ($id > 0 ? $annotazione : null))) {
+    if (!$reg->azioneAnnotazione(($id > 0 ? 'edit' : 'add'), $dataObj, $this->getUser(), $classe, ($id > 0 ? $annotazione : null))) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -842,7 +864,7 @@ class RegistroController extends BaseController {
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] =  $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
     // opzione scelta filtro
@@ -904,13 +926,13 @@ class RegistroController extends BaseController {
       // controllo permessi
       if ($annotazione->getVisibile()) {
         // permessi avviso
-        if (!$bac->azioneAvviso('add', $data_obj, $this->getUser(), null)) {
+        if (!$bac->azioneAvviso('add', $dataObj, $this->getUser(), null)) {
           // errore: azione non permessa
           $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
       }
       if ($annotazione->getAvviso()) {
-        if (!$bac->azioneAvviso('delete', $data_obj, $this->getUser(), $annotazione->getAvviso())) {
+        if (!$bac->azioneAvviso('delete', $dataObj, $this->getUser(), $annotazione->getAvviso())) {
           // errore: cancellazione non permessa
           $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
@@ -1118,8 +1140,8 @@ class RegistroController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
+    $dataObj = \DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
@@ -1127,7 +1149,7 @@ class RegistroController extends BaseController {
     if ($id > 0) {
       // azione edit, controlla nota
       $nota = $this->em->getRepository('App\Entity\Nota')->findOneBy(['id' => $id,
-        'data' => $data_obj, 'classe' => $classe]);
+        'data' => $dataObj, 'classe' => $classe]);
       if (!$nota) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1146,20 +1168,20 @@ class RegistroController extends BaseController {
       // azione add
       $nota = (new Nota())
         ->setTipo('C')
-        ->setData($data_obj)
+        ->setData($dataObj)
         ->setClasse($classe)
         ->setDocente($this->getUser());
       $disabilitato = false;
     }
     // controlla permessi
-    if (!$reg->azioneNota(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(), $classe, ($id > 0 ? $nota : null))) {
+    if (!$reg->azioneNota(($id > 0 ? 'edit' : 'add'), $dataObj, $this->getUser(), $classe, ($id > 0 ? $nota : null))) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] =  $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
     // form di inserimento
@@ -1215,7 +1237,7 @@ class RegistroController extends BaseController {
         // nota di classe
         $nota->setAlunni(new ArrayCollection());
         // valida testo: errore se contiene nomi di alunni
-        $nome = $reg->contieneNomiAlunni($data_obj, $classe, $nota->getTesto());
+        $nome = $reg->contieneNomiAlunni($dataObj, $classe, $nota->getTesto());
         if ($nome) {
           // errore
           $form->get('testo')->addError(

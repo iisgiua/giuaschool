@@ -275,9 +275,10 @@ class RegistroUtil {
    *
    * @return array Orario di inizio e lista di ore consecutive che si possono aggiungere
    */
-  public function lezioneOreConsecutive(\DateTime $data, $ora, Docente $docente, Classe $classe, Materia $materia) {
+  public function lezioneOreConsecutive(\DateTime $data, int $ora, Docente $docente, Classe $classe, 
+                                        Materia $materia): array {
     $dati = array();
-    $ora_str = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
+    $oraStr = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
       '7' => 'Settima', '8' => 'Ottava', '9' => 'Nona', '10' => 'Decima');
     // legge ora di inzio
     $scansione_orario = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
@@ -293,19 +294,23 @@ class RegistroUtil {
       if ($k == 0) {
         // ora iniziale
         $dati['inizio'] = $s->getInizio()->format('H:i');
-        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
-        $dati['fine'][$key] = $s->getOra();
       } else {
-        // ore successive
-        $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe,
-          'data' => $data, 'ora' => $s->getOra()]);
-        if (!$this->azioneLezione('add', $data, $s->getOra(), $docente, $classe, $materia, [$lezione])) {
-          // operazione non ammessa: esce
+        // ore successive libere da qualsiasi lezione
+        $numLezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+          ->select('COUNT(l.id)')
+          ->join('l.classe', 'c')
+          ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $s->getOra(),
+            'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($numLezioni != 0) {
+          // lezioni presenti: esce
           break;
         }
-        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
-        $dati['fine'][$key] = $s->getOra();
       }
+      $key = $s->getFine()->format('H:i').' ('.$oraStr[$s->getOra()].' ora)';
+      $dati['fine'][$key] = $s->getOra();
     }
     return $dati;
   }
@@ -521,7 +526,7 @@ class RegistroUtil {
           }
         }
         // azioni
-        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra) === true) {
+        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra)) {
           // pulsante add
           $datiLezioni[$ora]['add'] = $this->router->generate('lezioni_registro_add', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
@@ -530,13 +535,13 @@ class RegistroUtil {
           // esiste ora firmata in contemporanea
           $datiLezioni[$ora]['addAltra'] = $altra;
         }
-        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId']) === true) {
+        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'])) {
           // pulsante edit
           $datiLezioni[$ora]['edit'] = $this->router->generate('lezioni_registro_edit', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
         }
-        if ($this->azioneLezione('delete', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra) === true) {
+        if ($this->azioneLezione('delete', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra)) {
           // pulsante delete
           $datiLezioni[$ora]['delete'] = $this->router->generate('lezioni_registro_delete', array(
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
@@ -988,7 +993,7 @@ class RegistroUtil {
    *
    * @return array Lista degli ID degli alunni
    */
-  public function alunniInData(\DateTime $data, Classe $classe) {
+  public function alunniInData(\DateTime $data, Classe $classe): array {
     // controlla gruppi
     $lista = [];
     if (empty($classe->getGruppo())) {
@@ -1940,7 +1945,7 @@ class RegistroUtil {
    *
    * @return array Dati restituiti come array associativo
    */
-  public function listaAssenti(\DateTime $data, Classe $classe) {
+  public function listaAssenti(\DateTime $data, Classe $classe): array {
     $dati = array();
     // legge alunni di classe
     $lista = $this->alunniInData($data, $classe);

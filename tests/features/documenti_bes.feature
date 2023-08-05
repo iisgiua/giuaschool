@@ -97,7 +97,7 @@ Scenario: visualizza più documenti per alunno BES
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       | azione   |
     | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | Cancella |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento PDf   | Cancella |
+    |                                     |        | Documento PDf   | Cancella |
 
 
 ################################################################################

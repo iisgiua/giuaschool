@@ -17,15 +17,15 @@ Scenario: Vista giornaliera area comune con lezioni comuni, religione, sostegno,
     | cattedra          | classe        | data       | vista |
     | @cattedra_1_1A:id | @classe_1A:id | 2023-02-01 | G     |
   Allora vedi la tabella:
-    | ora               | materia                     | docenti                                          | argomenti/attività            | azioni            |
-    | 1ª: 08:20 - 09:20 | Italiano                    | ?@docente_1:nome,cognome?@docente_7:nome,cognome | @lezione_1:argomento,attivita | Modifica Cancella |
-    | 2ª: 09:20 - 10:10 | Matematica                  | @docente_2:nome,cognome                          | @lezione_2:argomento,attivita |                   |
-    | 3ª: 10:10 - 11:00 | Sostegno                    | @docente_7:nome,cognome                          | @lezione_3:argomento,attivita | Aggiungi          |
-    | 4ª: 11:00 - 12:00 | Gruppo: Mat. Alt. Religione | @docente_6:nome,cognome                          | @lezione_5:argomento,attivita |                   |
-    |                   | Gruppo: N.A. Religione      | @docente_9:nome,cognome                          | @lezione_6:argomento,attivita |                   |
-    |                   | Gruppo: Religione Religione | @docente_5:nome,cognome                          | @lezione_4:argomento,attivita |                   |
-    | 5ª: 12:00 - 12:50 | Supplenza                   | @docente_8:nome,cognome                          | @lezione_7:argomento,attivita |                   |
-    | 6ª: 12:50 - 13:50 |                             |                                                  |                               | Aggiungi          |
+    | ora               | materia                     | docenti                                          | argomenti/attività            | azioni                |
+    | 1ª: 08:20 - 09:20 | Italiano                    | ?@docente_1:nome,cognome?@docente_7:nome,cognome | @lezione_1:argomento,attivita | /^Modifica Cancella$/ |
+    | 2ª: 09:20 - 10:10 | Matematica                  | @docente_2:nome,cognome                          | @lezione_2:argomento,attivita |                       |
+    | 3ª: 10:10 - 11:00 | Sostegno                    | @docente_7:nome,cognome                          | @lezione_3:argomento,attivita | /^Aggiungi$/          |
+    | 4ª: 11:00 - 12:00 | Gruppo: Mat. Alt. Religione | @docente_6:nome,cognome                          | @lezione_5:argomento,attivita |                       |
+    |                   | Gruppo: N.A. Religione      | @docente_9:nome,cognome                          | @lezione_6:argomento,attivita |                       |
+    |                   | Gruppo: Religione Religione | @docente_5:nome,cognome                          | @lezione_4:argomento,attivita |                       |
+    | 5ª: 12:00 - 12:50 | Supplenza                   | @docente_8:nome,cognome                          | @lezione_7:argomento,attivita |                       |
+    | 6ª: 12:50 - 13:50 |                             |                                                  |                               | /^Aggiungi$/          |
 
 Schema dello scenario: Vista giornaliera area gruppi con lezioni di gruppo, comuni, compresenza, sostegno 
   Dato login utente "<docente>"
@@ -33,19 +33,19 @@ Schema dello scenario: Vista giornaliera area gruppi con lezioni di gruppo, comu
     | cattedra      | classe      | data       | vista |
     | <cattedra>:id | <classe>:id | 2023-02-01 | G     |
   Allora vedi la tabella:
-    | ora               | materia                    | docenti                                          | argomenti/attività             | azioni    |
-    | 1ª: 08:20 - 09:20 | Gruppo: 3C-AMB Informatica | @docente_3:nome,cognome                          | @lezione_12:argomento,attivita | <azione1> |
-    |                   | Gruppo: 3C-CHI Matematica  | ?@docente_2:nome,cognome?@docente_7:nome,cognome | @lezione_11:argomento,attivita |           |
-    | 2ª: 09:20 - 10:10 | Italiano                   | @docente_1:nome,cognome                          | @lezione_13:argomento,attivita | <azione2> |
-    | 3ª: 10:10 - 11:00 | Gruppo: 3C-AMB Informatica | ?@docente_3:nome,cognome?@docente_4:nome,cognome | @lezione_14:argomento,attivita | <azione3> |
-    | 4ª: 11:00 - 12:00 | Sostegno                   | @docente_7:nome,cognome                          | @lezione_15:argomento,attivita | Aggiungi  |
-    | 5ª: 12:00 - 12:50 | Gruppo: 3C-CHI Supplenza   | @docente_9:nome,cognome                          | @lezione_16:argomento,attivita | <azione4> |
-    | 6ª: 12:50 - 13:50 |                            |                                                  |                                | Aggiungi  |
+    | ora               | materia                    | docenti                                          | argomenti/attività             | azioni       |
+    | 1ª: 08:20 - 09:20 | Gruppo: 3C-AMB Informatica | @docente_3:nome,cognome                          | @lezione_12:argomento,attivita | <azione1>    |
+    |                   | Gruppo: 3C-CHI Matematica  | ?@docente_2:nome,cognome?@docente_7:nome,cognome | @lezione_11:argomento,attivita |              |
+    | 2ª: 09:20 - 10:10 | Italiano                   | @docente_1:nome,cognome                          | @lezione_13:argomento,attivita | <azione2>    |
+    | 3ª: 10:10 - 11:00 | Gruppo: 3C-AMB Informatica | ?@docente_3:nome,cognome?@docente_4:nome,cognome | @lezione_14:argomento,attivita | <azione3>    |
+    | 4ª: 11:00 - 12:00 | Sostegno                   | @docente_7:nome,cognome                          | @lezione_15:argomento,attivita | /^Aggiungi$/ |
+    | 5ª: 12:00 - 12:50 | Gruppo: 3C-CHI Supplenza   | @docente_9:nome,cognome                          | @lezione_16:argomento,attivita | <azione4>    |
+    | 6ª: 12:50 - 13:50 |                            |                                                  |                                | /^Aggiungi$/ |
   Esempi:
-    | docente  | cattedra         | classe       | azione1           | azione2           | azione3           | azione4  | 
-    | docente2 | @cattedra_2_3C-1 | @classe_3C-1 | Modifica Cancella |                   | Aggiungi          |          |
-    | docente3 | @cattedra_3_3C-2 | @classe_3C-2 | Modifica Cancella |                   | Modifica Cancella | Aggiungi |
-    | docente1 | @cattedra_1_3C   | @classe_3C   |                   | Modifica Cancella |                   |          |
+    | docente  | cattedra         | classe       | azione1               | azione2               | azione3               | azione4      | 
+    | docente2 | @cattedra_2_3C-1 | @classe_3C-1 | /^Modifica Cancella$/ |                       | /^Aggiungi$/          |              |
+    | docente3 | @cattedra_3_3C-2 | @classe_3C-2 | /^Modifica Cancella$/ |                       | /^Modifica Cancella$/ | /^Aggiungi$/ |
+    | docente1 | @cattedra_1_3C   | @classe_3C   |                       | /^Modifica Cancella$/ |                       |              |
 
 
 ################################################################################
