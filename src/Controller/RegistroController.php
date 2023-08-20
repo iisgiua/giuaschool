@@ -226,7 +226,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function addAction(Request $request, ValidatorInterface $validator, RegistroUtil $reg,
-                            LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                            LogHandler $dblogger, int $cattedra, int $classe, string $data,
                             int $ora): Response {
     // inizializza
     $label = array();
@@ -264,11 +264,11 @@ class RegistroController extends BaseController {
     }
     // legge lezioni e firme esistenti
     $docentiId = [];
-    $firme = [];
+    $firmeLezioni = [];
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->join('l.classe', 'c')
       ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(), 
+      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
         'sezione' => $classe->getSezione()])
       ->orderBy('l.gruppo')
       ->getQuery()
@@ -283,14 +283,23 @@ class RegistroController extends BaseController {
         ->getQuery()
         ->getResult();
       // docenti
+      $firmeLezioni[$gruppo] = $firme;
       foreach ($firme as $f) {
         $docentiId[$gruppo][] = $f->getDocente()->getId();
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('add', $dataObj, $ora, $this->getUser(), $classe, $materia, $lezioni, $docentiId)) {
+    if (!$reg->azioneLezione('add', $dataObj, $this->getUser(), $classe, $docentiId)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controlla nuova lezione
+    $controllo = $reg->controllaNuovaLezione($cattedra, $this->getUser(), $classe, $materia, $dataObj,
+      $ora, $lezioni, $firmeLezioni);
+    if (!empty($controllo['errore'])) {
+      // mostra messaggio di errore
+      $this->addFlash('danger', $controllo['errore']);
+      return $this->redirectToRoute('lezioni_registro_firme');
     }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -311,8 +320,20 @@ class RegistroController extends BaseController {
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',
         'choices'  => $oraFine,
         'translation_domain' => false,
-        'required' => true))
-      ->add('argomenti', MessageType::class, array(
+        'required' => true));
+    if (empty($classe->getGruppo()) && !$cattedra) {
+      // area comune: supplenza su gruppi religione
+      $opzioni = $controllo['supplenza'];
+      $form = $form
+        ->add('tipoSupplenza', ChoiceType::class, ['label' => 'label.tipo_supplenza',
+          'data' => in_array('T', $opzioni, true) ? 'T' : null,
+          'choices'  => $opzioni,
+          'expanded' => true,
+          'label_attr' => ['class' => 'radio-inline col-sm-2'],
+          'required' => true]);
+    }
+    $form = $form
+      ->add('argomento', MessageType::class, array(
         'label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'trim' => true,
         'required' => false))
@@ -327,35 +348,60 @@ class RegistroController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // legge gruppo e tipo
+      if (!$cattedra && empty($classe->getGruppo())) {
+        // supplenza
+        $tipoGruppo = $form->get('tipoSupplenza')->getData() == 'T' ? 'N' : 'R';
+        $gruppo = $tipoGruppo == 'N' ? '' : $form->get('tipoSupplenza')->getData();
+      } elseif ($cattedra && $cattedra->getMateria()->getTipo() == 'R') {
+        // religione
+        $tipoGruppo = 'R';
+        $gruppo = $cattedra->getTipo() == 'N' ? 'S' : 'A';
+      } else {
+        // altro
+        $tipoGruppo = $classe->getGruppo() ? 'C' : 'N';
+        $gruppo = $classe->getGruppo();
+      }
+      // modifica lezioni esistenti
+      $trasformazione = $reg->trasformaNuovaLezione($cattedra, $materia, $tipoGruppo, $gruppo,
+        $controllo, $lezioni, $firmeLezioni);
       // ciclo per ore successive
       for ($numOra = $ora; $numOra <= $form->get('fine')->getData(); $numOra++) {
-        if ($numOra > $ora || empty($lezioni)) {
+        if ($numOra > $ora || empty($trasformazione['lezione'])) {
           // nuova lezione
           $lezione = (new Lezione())
             ->setData($dataObj)
             ->setOra($numOra)
             ->setClasse($classe)
-            ->setGruppo($classe->getGruppo())
-            ->setTipoGruppo($classe->getGruppo() ? 'C' : 'N')
+            ->setGruppo($gruppo)
+            ->setTipoGruppo($tipoGruppo)
             ->setMateria($materia);
-          if ($materia->getTipo() != 'S') {
-            // lezione curricolare
+          if ($materia->getTipo() == 'S') {
+            // nuova lezione di sostegno: sempre senza gruppi
+            $classeComune = $classe;
+            if (!empty($classe->getGruppo())) {
+              $classeComune = $this->em->getRepository('App\Entity\Classe')->findOneBy([
+                'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => '']);
+            }
             $lezione
-              ->setArgomento($form->get('argomenti')->getData())
+              ->setClasse($classeComune)
+              ->setGruppo('')
+              ->setTipoGruppo('N');
+          } else {
+            // lezione curricolare: aggiunge argomenti/attività
+            $lezione
+              ->setArgomento($form->get('argomento')->getData())
               ->setAttivita($form->get('attivita')->getData());
           }
           $this->em->persist($lezione);
-        } else {
-          // esistono altre lezioni
-
-          dd('altro');
-        }
-        // validazione lezione
-        $errore = $validator->validate($lezione);
-        if (count($errore) > 0) {
-          // errore, esce dal ciclo
-          $form->addError(new FormError($errore[0]->getMessage()));
-          break;
+          if ($numOra == $ora && !empty($trasformazione['modifica'])) {
+            foreach ($trasformazione['modifica'] as $prop => $val) {
+              $lezione->${'set'.$prop}($val);
+            }
+          }
+        } elseif ($numOra == $ora) {
+          // lezione modificata da firmare
+          $lezione = $trasformazione['lezione'];
         }
         // crea firma
         if ($materia->getTipo() == 'S') {
@@ -364,7 +410,7 @@ class RegistroController extends BaseController {
             ->setLezione($lezione)
             ->setDocente($this->getUser())
             ->setAlunno($cattedra->getAlunno())
-            ->setArgomento($form->get('argomenti')->getData())
+            ->setArgomento($form->get('argomento')->getData())
             ->setAttivita($form->get('attivita')->getData());
         } else {
           // lezione curricolare
@@ -373,13 +419,6 @@ class RegistroController extends BaseController {
             ->setDocente($this->getUser());
         }
         $this->em->persist($firma);
-        // validazione firma
-        $errore = $validator->validate($firma);
-        if (count($errore) > 0) {
-          // errore, esce dal ciclo
-          $form->addError(new FormError($errore[0]->getMessage()));
-          break;
-        }
         // ok: memorizza dati
         $this->em->flush();
         // ricalcola ore assenza
@@ -390,10 +429,8 @@ class RegistroController extends BaseController {
           'Firma' => $firma->getId(),
           ));
       }
-      if (count($errore) == 0) {
-        // ok, redirezione
-        return $this->redirectToRoute('lezioni_registro_firme');
-      }
+      // ok, redirezione
+      return $this->redirectToRoute('lezioni_registro_firme');
     }
     // mostra la pagina di risposta
     return $this->render('lezioni/registro_edit.html.twig', array(
@@ -425,7 +462,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function editAction(Request $request, ValidatorInterface $validator, RegistroUtil $reg,
-                             LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                             LogHandler $dblogger, int $cattedra, int $classe, string $data,
                              int $ora): Response {
     // inizializza
     $label = array();
@@ -461,29 +498,39 @@ class RegistroController extends BaseController {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
-    // controlla esistenza di lezione
-    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $dataObj,
-      'ora' => $ora]);
-    if (!$lezione) {
-      // errore: lezione non esiste
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    // controlla firme di lezione
-    $firme = $this->em->getRepository('App\Entity\Firma')->findByLezione($lezione);
-    if (count($firme) == 0) {
-      // errore: firme non esistono
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    $lista_firme = array();
-    $firma_docente = null;
-    foreach ($firme as $f) {
-      $lista_firme[] = $f->getDocente()->getId();
-      if ($f->getDocente()->getId() == $this->getUser()->getId()) {
-        $firma_docente = $f;
+    // legge lezioni e firme esistenti
+    $docentiId = [];
+    $firmeLezioni = [];
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('l.classe', 'c')
+      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione()])
+      ->orderBy('l.gruppo')
+      ->getQuery()
+      ->getResult();
+    foreach ($lezioni as $lezione) {
+      // legge firme
+      $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+      $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
+        ->join('f.docente', 'd')
+        ->where('f.lezione=:lezione')
+        ->setParameters(['lezione' => $lezione])
+        ->getQuery()
+        ->getResult();
+      // docenti
+      $firmeLezioni[$gruppo] = $firme;
+      foreach ($firme as $f) {
+        $docentiId[$gruppo][] = $f->getDocente()->getId();
       }
     }
+    // controlla esistenza di lezione/firma
+    if (empty($lezioni) || empty($firme)) {
+      // errore: lezione/firma non esiste
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla permessi
-    if (!$reg->azioneLezione('edit', $dataObj, $ora, $this->getUser(), $classe, $materia, [$lezione], $lista_firme)) {
+    if (!$reg->azioneLezione('edit', $dataObj, $this->getUser(), $classe, $docentiId)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -501,6 +548,8 @@ class RegistroController extends BaseController {
     $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
     $oraFine =  $dati['fine'];
+
+
     // lista altre materie
     if ($cattedra) {
       // cattedra normale
@@ -509,6 +558,8 @@ class RegistroController extends BaseController {
       // supplenza
       $altre_materie = array();
     }
+
+
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class)
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',
@@ -697,7 +748,7 @@ class RegistroController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneLezione('delete', $dataObj, $ora, $this->getUser(), $classe, $lezione->getMateria(), [$lezione], $lista_firme)) {
+    if (!$reg->azioneLezione('delete', $dataObj, $this->getUser(), $classe, $lista_firme)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -787,6 +838,51 @@ class RegistroController extends BaseController {
     }
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
+    /**
+   *
+
+    } elseif ($azione == 'delete') {
+      // azione di cancellazione
+      if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
+        // docente ha firmato
+        $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
+          ->select('COUNT(v.id)')
+          ->where('v.docente=:docente AND v.lezione IN (:lezioni)')
+          ->setParameters(['docente' => $docente, 'lezioni' => $lezioni])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($voti == 0) {
+          // ok: nessun voto associato alla lezione
+          return true;
+        } else {
+          // sono presenti voti
+          $numLezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+            ->select('COUNT(l.id)')
+            ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
+            ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
+            ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe,
+              'materia' => $materia, 'docente' => $docente]);
+          if (empty($classe->getGruppo())) {
+            $numLezioni = $numLezioni->andWhere("l.tipoGruppo IN ('N','R')");
+          } else {
+            $numLezioni = $numLezioni
+              ->andWhere("l.tipoGruppo='C' AND l.gruppo=:gruppo")
+              ->setParameter('gruppo', $classe->getGruppo());
+          }
+          $numLezioni = $numLezioni
+            ->getQuery()
+            ->getSingleScalarResult();
+          if ($numLezioni > 1) {
+            // ok: sono presenti più ore di lezione
+            return true;
+          }
+          // segnala la presenza di voti
+          $altra = $lezioni[0];
+          return false;
+        }
+      }
+
+      */
   }
 
   /**
@@ -1128,7 +1224,7 @@ class RegistroController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function notaEditAction(Request $request, TranslatorInterface $trans,
-                                 RegistroUtil $reg, LogHandler $dblogger, int $classe, string $data, 
+                                 RegistroUtil $reg, LogHandler $dblogger, int $classe, string $data,
                                  int $id): Response {
     // inizializza
     $label = array();
@@ -1306,7 +1402,7 @@ class RegistroController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaDeleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, 
+  public function notaDeleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
                                    int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository('App\Entity\Nota')->find($id);

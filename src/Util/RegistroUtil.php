@@ -153,20 +153,14 @@ class RegistroUtil {
    *
    * @param string $azione Azione da controllare
    * @param \DateTime $data Data della lezione
-   * @param int $ora Ora della lezione
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
-   * @param Materia $materia Materia della lezione
-   * @param array $lezioni Lista delle lezioni esistenti
    * @param array $firme Lista di firme di lezione, con id del docente
-   * @param Lezione|null $altra Altra lezione già inserita in altra classe
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneLezione(string $azione, \DateTime $data, int $ora, Docente $docente, 
-                                Classe $classe, Materia $materia, array $lezioni = [], 
-                                array $firme = [], ?Lezione &$altra = null): bool {
-    $altra = null;
+  public function azioneLezione(string $azione, \DateTime $data, Docente $docente,
+                                Classe $classe, array $firme): bool {
     if ($this->bloccoScrutinio($data, $classe)) {
       // blocco scrutinio
       return false;
@@ -177,40 +171,8 @@ class RegistroUtil {
       if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
         // data non nel futuro
         if (!in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
-          // docente non ha firmato
-          $altra = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-            ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-            ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
-            ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-          if (count($lezioni) == 0 || $materia->getTipo() == 'S') {
-            // ok: nessuna lezione o sostegno
-            return !$altra;
-          }
-          // esistono lezioni
-          $lezSostegno = true;
-          $lezGruppo = !empty($classe->getGruppo());
-          foreach ($lezioni as $lezione) {
-            $lezSostegno &= ($lezione->getMateria()->getTipo() == 'S'); 
-            $lezGruppo &= ($lezione->getTipoGruppo() == 'C' && $classe->getGruppo() != $lezione->getGruppo()); 
-            if ($lezione->getMateria()->getId() == $materia->getId() && empty($classe->getGruppo()) &&
-                ($lezione->getTipoGruppo() == 'N' || $lezione->getTipoGruppo() == 'R')) {
-              // ok: esiste lezione comune della stessa materia
-              return !$altra;
-            } elseif ($lezione->getMateria()->getId() == $materia->getId() && 
-                      $lezione->getTipoGruppo() == 'C' && $classe->getGruppo() == $lezione->getGruppo()) {
-              // ok: esiste lezione di gruppo della stessa materia
-              return !$altra;
-            }
-          }
-          if ($lezSostegno || $lezGruppo) {
-            // ok: esiste solo sostegno o non esiste lezione del gruppo indicato
-            return !$altra;
-          }
-          // azione non permessa
-          $altra = null;
+          // ok: docente non ha firmato
+          return true;
         }
       }
     } elseif ($azione == 'edit') {
@@ -222,42 +184,8 @@ class RegistroUtil {
     } elseif ($azione == 'delete') {
       // azione di cancellazione
       if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
-        // docente ha firmato
-        $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-          ->select('COUNT(v.id)')
-          ->where('v.docente=:docente AND v.lezione IN (:lezioni)')
-          ->setParameters(['docente' => $docente, 'lezioni' => $lezioni])
-          ->getQuery()
-          ->getSingleScalarResult();
-        if ($voti == 0) {
-          // ok: nessun voto associato alla lezione
-          return true;
-        } else {
-          // sono presenti voti
-          $numLezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-            ->select('COUNT(l.id)')
-            ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-            ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
-            ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 
-              'materia' => $materia, 'docente' => $docente]);
-          if (empty($classe->getGruppo())) {
-            $numLezioni = $numLezioni->andWhere("l.tipoGruppo IN ('N','R')");
-          } else {
-            $numLezioni = $numLezioni
-              ->andWhere("l.tipoGruppo='C' AND l.gruppo=:gruppo")
-              ->setParameter('gruppo', $classe->getGruppo());
-          }
-          $numLezioni = $numLezioni
-            ->getQuery()
-            ->getSingleScalarResult();
-          if ($numLezioni > 1) {
-            // ok: sono presenti più ore di lezione
-            return true;
-          }
-          // segnala la presenza di voti
-          $altra = $lezioni[0];
-          return false;
-        }
+        // ok: docente ha firmato
+        return true;
       }
     }
     // non consentito
@@ -275,7 +203,7 @@ class RegistroUtil {
    *
    * @return array Orario di inizio e lista di ore consecutive che si possono aggiungere
    */
-  public function lezioneOreConsecutive(\DateTime $data, int $ora, Docente $docente, Classe $classe, 
+  public function lezioneOreConsecutive(\DateTime $data, int $ora, Docente $docente, Classe $classe,
                                         Materia $materia): array {
     $dati = array();
     $oraStr = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
@@ -326,7 +254,7 @@ class RegistroUtil {
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneAnnotazione(string $azione, \DateTime $data, Docente $docente, 
+  public function azioneAnnotazione(string $azione, \DateTime $data, Docente $docente,
                                     ?Classe $classe = null, ?Annotazione $annotazione = null): bool {
     //-- if ($this->bloccoScrutinio($data, $classe)) {
       //-- // blocco scrutinio
@@ -478,7 +406,7 @@ class RegistroUtil {
         $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->join('l.classe', 'c')
           ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-          ->setParameters(['data' => $dataStr, 'ora' => $ora, 'anno' => $classe->getAnno(), 
+          ->setParameters(['data' => $dataStr, 'ora' => $ora, 'anno' => $classe->getAnno(),
             'sezione' => $classe->getSezione()])
           ->orderBy('l.gruppo')
           ->getQuery()
@@ -516,7 +444,7 @@ class RegistroUtil {
                 $separatore = (!empty($f->getArgomento()) && !empty($f->getAttivita())) ? ' - ' : '';
                 $sostegno['argomento'][] = $f->getArgomento().$separatore.$f->getAttivita();
                 $sostegno['docente'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
-                $sostegno['alunno'][] = $f->getAlunno() ? 
+                $sostegno['alunno'][] = $f->getAlunno() ?
                   $f->getAlunno()->getCognome().' '.$f->getAlunno()->getNome() : '';
               }
             }
@@ -526,28 +454,22 @@ class RegistroUtil {
           }
         }
         // azioni
-        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra)) {
+        if ($this->azioneLezione('add', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante add
           $datiLezioni[$ora]['add'] = $this->router->generate('lezioni_registro_add', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
-        } elseif ($altra) {
-          // esiste ora firmata in contemporanea
-          $datiLezioni[$ora]['addAltra'] = $altra;
         }
-        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'])) {
+        if ($this->azioneLezione('edit', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante edit
           $datiLezioni[$ora]['edit'] = $this->router->generate('lezioni_registro_edit', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
         }
-        if ($this->azioneLezione('delete', $data, $ora, $docente, $classe, $materia, $lezioni, $datiLezioni[$ora]['docentiId'], $altra)) {
+        if ($this->azioneLezione('delete', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante delete
           $datiLezioni[$ora]['delete'] = $this->router->generate('lezioni_registro_delete', array(
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
-        } elseif ($altra) {
-          // esiste lezione con voti
-          $datiLezioni[$ora]['deleteVoti'] = true;
         }
       }
       // memorizza lezioni del giorno
@@ -2941,5 +2863,426 @@ class RegistroUtil {
     // non consentito
     return false;
   }
+
+  /**
+   * Controlla l'ammissibilità della nuova lezione e segnala gli errori
+   *
+   * @param Cattedra|null $cattedra Cattedra della lezione
+   * @param Docente $docente Docente che inserisce la lezione
+   * @param Classe $classe Classe della lezione
+   * @param Materia $materia materia della lezione
+   * @param \DateTime $data Data di inserimento della lezione
+   * @param int $ora Ora della lezione
+   * @param array $lezioni Lista delle lezioni esistenti nell'ora indicata
+   * @param array $firme Lista delle firme delle lezioni esistenti
+   *
+   * @return array Vettore associativo con l'eventuale errore e altre informazioni
+   */
+  function controllaNuovaLezione(?Cattedra $cattedra, Docente $docente, Classe $classe, Materia $materia,
+                                 \DateTime $data, int $ora, array $lezioni, array $firme) : array {
+    // init
+    $stato = [];
+    $controllo['E:N'] = [
+      'E:N' => 'ok',
+      'S:N' => 'modificaSostegno',
+      '-:-' => 'ok'];
+    $controllo['E:C'] = [
+      'E:C' => 'gruppo',
+      'N:C' => 'gruppo',
+      'S:N' => 'modificaSostegno',
+      'U:C' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['N:N'] = [
+      'N:N' => 'materiaUguale',
+      'S:N' => 'modificaSostegno',
+      '-:-' => 'ok'];
+    $controllo['N:C'] = [
+      'E:C' => 'gruppo',
+      'N:C' => 'gruppo',
+      'S:N' => 'modificaSostegno',
+      'U:C' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['R:R:S'] = [
+      'R:R' => 'gruppo',
+      'S:N' => 'sostegnoNA',
+      'U:R' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['R:R:A'] = [
+      'R:R' => 'gruppo',
+      'S:N' => 'sostegnoNA',
+      'U:R' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['S:N'] = [
+      'E:N' => 'ok',
+      'E:C' => 'gruppoSostegno',
+      'N:N' => 'ok',
+      'N:C' => 'gruppoSostegno',
+      'R:R' => 'alunnoNA',
+      'S:N' => 'ok',
+      'U:N' => 'ok',
+      'U:C' => 'gruppoSostegno',
+      'U:R' => 'alunnoNA',
+      '-:-' => 'ok'];
+    $controllo['S:C'] = [
+      'E:N' => 'ok',
+      'E:C' => 'gruppoSostegno',
+      'N:N' => 'ok',
+      'N:C' => 'gruppoSostegno',
+      'R:R' => 'alunnoNA',
+      'S:N' => 'ok',
+      'U:N' => 'ok',
+      'U:C' => 'gruppoSostegno',
+      'U:R' => 'alunnoNA',
+      '-:-' => 'ok'];
+    $controllo['U:N'] = [
+      'S:N' => 'modificaSostegno',
+      'U:N' => 'ok',
+      '-:-' => 'ok'];
+    $controllo['U:C'] = [
+      'E:C' => 'gruppo',
+      'N:C' => 'gruppo',
+      'S:N' => 'modificaSostegno',
+      'U:C' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['U:R:S'] = [
+      'R:R' => 'gruppo',
+      'S:N' => 'sostegnoNA',
+      'U:R' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['U:R:A'] = [
+      'R:R' => 'gruppo',
+      'S:N' => 'sostegnoNA',
+      'U:R' => 'gruppo',
+      '-:-' => 'ok'];
+    $controllo['U:R:N'] = [
+      'R:R' => 'gruppo',
+      'S:N' => 'sostegnoNA',
+      'U:R' => 'gruppo',
+      '-:-' => 'ok'];
+    // lezione firmata in altra classe
+    $altre = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
+      ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
+      ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
+      ->getQuery()
+      ->getResult();
+    // controlla sovrapposizione
+    $supplenzaNA = true;
+    if (!$cattedra && count($altre) > 0) {
+      // controlla supplenza NA su più classi
+      foreach ($altre as $lezione) {
+        $supplenzaNA &= $lezione->getMateria()->getTipo() == 'U' && $lezione->getTipoGruppo() == 'R' &&
+          $lezione->getGruppo() == 'N';
+      }
+    }
+    if (count($altre) > 0 && ($cattedra || !$supplenzaNA)) {
+      // errore: sovrapposizione
+      $stato['errore'] = $this->trans->trans('message.lezione_esiste_altra', ['ora' => $ora,
+        'classe' => $altre[0]->getClasse()]);
+      return $stato;
+    }
+    if ($cattedra) {
+      // tipo di cattedra docente
+      $tipoCattedre = [$materia->getTipo().':'.(!empty($classe->getGruppo()) ? 'C' :
+        ($materia->getTipo() == 'R' ? 'R:'.($cattedra->getTipo() == 'N' ? 'S' : 'A') : 'N'))];
+    } else {
+      // predispone tipi suppplenza
+      if (count($altre) > 0) {
+        $stato['supplenza'] = ['label.gruppo_religione_N' => 'N'];
+      } else {
+        $stato['supplenza'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
+          'label.gruppo_religione_A' => 'A', 'label.gruppo_religione_N' => 'N'];
+      }
+      if (empty($classe->getGruppo())) {
+        // cattedre di gruppo religione
+        $cattedreReligione = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+          ->select('DISTINCT c.tipo')
+          ->join('c.materia', 'm')
+          ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
+          ->setParameters(['classe' => $classe])
+          ->getQuery()
+          ->getSingleColumnResult();
+        // supplenza gruppo religione inesistente
+        if (!in_array('N', $cattedreReligione, true)) {
+          // impedisce gruppo religione inesistente
+          unset($stato['supplenza']['label.gruppo_religione_S']);
+        }
+        if (!in_array('A', $cattedreReligione, true)) {
+          // impedisce gruppo mat.alt. inesistente
+          unset($stato['supplenza']['label.gruppo_religione_A']);
+        }
+      } else {
+        // impedisce gruppi religione se presente gruppo classe
+        unset($stato['supplenza']['label.gruppo_religione_S']);
+        unset($stato['supplenza']['label.gruppo_religione_A']);
+        unset($stato['supplenza']['label.gruppo_religione_N']);
+      }
+      // tipo di cattedra docente
+      $tipoCattedre = [];
+      foreach ($stato['supplenza'] as $supplenza) {
+        $tipoCattedre[] = 'U:'.($supplenza == 'T' ? (empty($classe->getGruppo()) ? 'N' : 'C') :
+          'R:'.$supplenza);
+      }
+    }
+    // legge tipi lezioni esistenti
+    $tipiLezioni = count($lezioni) == 0 ? ['-:-'] : [];
+    foreach ($lezioni as $lezione) {
+      $tipiLezioni[] = $lezione->getMateria()->getTipo().':'.$lezione->getTipoGruppo();
+    }
+    // controlla cattedre
+    foreach ($tipoCattedre as $tipoCattedra) {
+      $compatibili = [];
+      foreach ($tipiLezioni as $tipoLezione) {
+        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra]), true)) {
+          $compatibili[] = $tipoLezione;
+        }
+      }
+      if (empty($compatibili)) {
+        // errore: cattedra non compatibile
+        switch ($tipoCattedra) {
+          case 'U:N':
+          case 'U:C':
+            unset($stato['supplenza']['label.gruppo_religione_T']);
+            break;
+          case 'U:R:S':
+          case 'U:R:A':
+          case 'U:R:N':
+            unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+            break;
+          default:
+            // cattedra curricolare o sostegno: esce
+            $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+            return $stato;
+        }
+      }
+      // procedura di controllo (deve essere sempre unica)
+      $procedure = array_unique(array_map(fn($c) => $controllo[$tipoCattedra][$c], $compatibili));
+      if (count($procedure) > 0) {
+        switch ($procedure[0]) {
+          case 'gruppo':  // controlli su gruppo classe/religione
+            $gruppi = [];
+            $gruppoClasse = substr($tipoCattedra, 2, 1) == 'R' ? substr($tipoCattedra, 4, 1) :
+              $classe->getGruppo();
+            $compresenza = false;
+            foreach ($lezioni as $lezione) {
+              if ($lezione->getMateria()->getTipo() != 'S') {
+                $gruppi[] = $lezione->getGruppo();
+              }
+              if ($lezione->getMateria()->getId() == $materia->getId() &&
+                  $lezione->getGruppo() == $gruppoClasse) {
+                $compresenza = true;
+              }
+            }
+            if (!$compresenza && in_array($gruppoClasse, $gruppi)) {
+              // errore: materia/gruppo incompatibile
+              switch ($tipoCattedra) {
+                case 'U:C':
+                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  break;
+                case 'U:R:S':
+                case 'U:R:A':
+                case 'U:R:N':
+                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
+          case 'materiaUguale':  // controllo compresenza su area comune
+            $compresenza = false;
+            foreach ($lezioni as $lezione) {
+              if ($lezione->getMateria()->getId() == $cattedra->getMateria()->getId()) {
+                $compresenza = true;
+              }
+            }
+            if (!$compresenza) {
+              // errore: materia/gruppo incompatibile
+              $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+              return $stato;
+            }
+            break;
+          case 'alunnoNA':  // controllo se cattedra sostegno su alunno NA
+            if ($cattedra->getAlunno() &&
+                !in_array($cattedra->getAlunno()->getReligione(), ['S', 'A'], true)) {
+              // errore: sostegno di alunno NA su gruppo religione
+              $stato['errore'] = $this->trans->trans('message.lezione_sostegno_NA_con_religione',
+                ['ora' => $ora]);
+              return $stato;
+            }
+            break;
+          case 'sostegnoNA':  // controllo se presente lezione sostegno su alunno NA
+            $alunnoNA = false;
+            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+              if ($firma->getLezione()->getMateria()->getTipo() == 'S' &&
+                  ($firma instanceof FirmaSostegno) && $firma->getAlunno() &&
+                  !in_array($firma->getAlunno()->getReligione(), ['S', 'A'], true)) {
+                $alunnoNA = true;
+                break;
+              }
+            }
+            if ($alunnoNA) {
+              // errore: gruppo religione su sostegno NA
+              switch ($tipoCattedra) {
+                case 'U:R:S':
+                case 'U:R:A':
+                case 'U:R:N':
+                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_sostegno_NA_con_religione',
+                    ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
+            // nessun controllo per le procedure: ok, gruppoSostegno, modificaSostegno
+        }
+        // conserva trasformazione
+        $stato['trasforma'][$tipoCattedra] = $procedure[0];
+      }
+    }
+    if (!$cattedra && count($stato['supplenza']) == 0) {
+      // errore: supplenza impossibile
+      $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+      return $stato;
+    }
+    // ok: nessun errore
+    return $stato;
+  }
+
+  /**
+   * Modifica le lezioni esistenti per adattarla alla nuova.
+   *
+   * @param Cattedra|null $cattedra Cattedra della lezione
+   * @param Materia $materia Materia della lezione
+   * @param string $tipoGruppo Tipo del gruppo della nuova lezione
+   * @param string $gruppo Gruppo della nuova lezione
+   * @param array $controllo Informazioni di controllo
+   * @param array $lezioni Lista delle lezioni esistenti
+   * @param array $firme Lista delle firme delle lezioni esistenti
+   *
+   * @return array Vettore associativo con la lezione e informazioni per le modifiche
+   */
+  function trasformaNuovaLezione(?Cattedra $cattedra, Materia $materia, string $tipoGruppo,
+                                 string $gruppo, array $controllo, array $lezioni, array $firme): array  {
+    // init
+    $stato = [];
+    $tipoCattedra = $materia->getTipo().':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
+    $procedura = $controllo['trasforma'][$tipoCattedra];
+    if (count($lezioni) > 0) {
+      // trasformazione
+      switch ($procedura) {
+        case 'gruppo':  // trasforma lezione gruppo classe o religione
+          foreach ($lezioni as $lezione) {
+            if ($lezione->getGruppo() == $gruppo && $lezione->getMateria()->getId() == $materia->getId()) {
+              // compresenza: firma lezione esistente
+              $stato['lezione'] = $lezione;
+              break;
+            } elseif ($lezione->getGruppo() == $gruppo && $lezione->getMateria()->getTipo() == 'S') {
+              // gruppo su sostegno: modifica lezione e firma
+              $lezione->setMateria($materia);
+              $stato['lezione'] = $lezione;
+              break;
+            }
+          }
+          // gruppo non presente: crea nuova lezione su gruppo e firma
+          break;
+        case 'gruppoSostegno':
+          foreach ($lezioni as $lezione) {
+            if ($tipoGruppo == 'N' || $lezione->getGruppo() == $gruppo) {
+              // gruppo esistente: firma sostegno
+              $stato['lezione'] = $lezione;
+              break;
+            }
+          }
+          if (empty($stato)) {
+            // gruppo non presente: crea nuova lezione su gruppo e firma
+            $stato['modifica']['Classe'] = $this->em->getRepository('App\Entity\Classe')->findOneBy([
+              'anno' => $lezione[0]->getClasse()->getAnno(),
+              'sezione' => $lezione[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
+            $stato['modifica']['TipoGruppo'] = 'C';
+            $stato['modifica']['Gruppo'] = $gruppo;
+          }
+          break;
+        case 'alunnoNA':
+          foreach ($lezioni as $lezione) {
+            if (($cattedra->getAlunno() &&
+                $cattedra->getAlunno()->getReligione() == $lezione->getGruppo()) ||
+                (!$cattedra->getAlunno() && in_array($lezione->getGruppo(), ['S', 'A']))) {
+              // gruppo esistente: firma sostegno
+              $stato['lezione'] = $lezione;
+              break;
+            }
+          }
+          if (empty($stato)) {
+            // crea sostegno su gruppo di religione alunno o su Religione se non c'è alunno
+            $stato['modifica']['TipoGruppo'] = 'R';
+            $stato['modifica']['Gruppo'] = $cattedra->getAlunno() ?
+              $cattedra->getAlunno()->getReligione() : 'S';
+          }
+          break;
+        case 'sostegnoNA':
+          // errore se più firme di sostegno differenti...
+          foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+            if (($firma->getAlunno() && $firma->getAlunno()->getReligione() == $gruppo) ||
+                (!$firma->getAlunno() && $gruppo != 'N')) {
+              // sostegno senza alunno o alunno del gruppo: modifica lezione e firma
+              $stato['lezione'] = $firma->getLezione();
+              $stato['lezione']->setTipoGruppo('R')->setGruppo($gruppo);
+              break;
+            }
+          }
+          if (empty($stato)) {
+            // modifica lezione su altro gruppo, crea gruppo e firma
+            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+              if ($firma instanceof FirmaSostegno) {
+                $firma->getLezione()->setTipoGruppo('R')->setGruppo($firma->getAlunno()->getReligione());
+                break;
+              }
+            }
+          }
+          break;
+        case 'modificaSostegno':
+          // errore se più firme di sostegno differenti...
+          if ($tipoGruppo == 'N') {
+            // modifica sostegno su cattedra e firma
+            $stato['lezione'] = $lezioni[0];
+            $stato['lezione']->setMateria($materia);
+          } else {
+            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+              if (!$firma->getAlunno() ||
+                  $firma->getAlunno()->getClasse()->getGruppo() == $gruppo) {
+                // sostegno senza alunno o alunno del gruppo: modifica lezione e firma
+                $stato['lezione'] = $firma->getLezione();
+                $stato['lezione']->setTipoGruppo('C')->setGruppo($gruppo);
+                break;
+              }
+            }
+            if (empty($stato)) {
+              // modifica lezione su altro gruppo, crea gruppo e firma
+              foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+                if ($firma instanceof FirmaSostegno) {
+                  $firma->getLezione()->setTipoGruppo('R')->setGruppo($firma->getAlunno()->getClasse()->getGruppo());
+                  break;
+                }
+              }
+            }
+          }
+          break;
+        default:  // procedure: ok, materiaUguale
+          // unica lezione esistente: firma
+          $stato['lezione'] = $lezioni[0];
+          return $stato;
+      }
+    }
+    // restituisce trasformazione
+    return $stato;
+  }
+
+
 
 }

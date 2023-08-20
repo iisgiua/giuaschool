@@ -72,7 +72,7 @@
       {% endif %}
       {% for type,msgs in app.flashes %}
         {% for msg in msgs %}
-  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert">{{ msg|trans }}</div>
+  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|raw }}</strong></div>
         {% endfor %}
       {% endfor %}
   <div class="row gs-mb-2">
@@ -174,7 +174,7 @@
         </td>
         <td><small><em>{% for v1 in v.docenti|first %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
         <td style="overflow-wrap:break-word;hyphens:auto;">
-        {% if (v.sostegno|first)|length > 0 %}        
+        {% if (v.sostegno|first)|length > 0 %}
           {% for sk,sv in (v.sostegno|first).argomento %}
             {% if sv is not empty %}
           <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ (v.sostegno|first).alunno[sk] }} ({{ (v.sostegno|first).docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
@@ -195,23 +195,13 @@
         <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>
         {% if v.add is defined %}
           <a class="btn btn-primary btn-xs" href="{{ v.add }}" role="button" title="Aggiungi una lezione"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-        {% elseif v.addAltra is defined %}
-          <button class="btn btn-warning btn-xs" title="Aggiungi una lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="add-avviso-{{ v.addAltra.id }}"><span class="glyphicon glyphicon-plus gs-mr-2" aria-hidden="true"></span>Aggiungi</button>
-          <div id="add-avviso-{{ v.addAltra.id }}" style="display:none">
-            <p class="gs-big">{{ 'message.lezione_esiste_altra'|trans({classe: v.addAltra.classe})|raw }}</p>
-          </div>
         {% endif %}
-        {% if v.edit is defined %} 
+        {% if v.edit is defined %}
           <a class="btn btn-primary btn-xs" href="{{ v.edit }}" role="button" title="Modifica la lezione"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
         {% endif %}
         {% if v.delete is defined %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_lezione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
-        {% elseif v.deleteVoti is defined %}
-          <button class="btn btn-warning btn-xs" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="delete-avviso-{{ k }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
-          <div id="delete-avviso-{{ k }}" style="display:none">
-            <p class="gs-big">{{ 'message.lezione_con_voti'|trans|raw }}</p>
-          </div>
-          {% endif %}
+        {% endif %}
         </td>
       </tr>
         {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
@@ -222,7 +212,7 @@
         </td>
         <td><small><em>{% for v1 in v.docenti[g] %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
         <td style="overflow-wrap:break-word;hyphens:auto;">
-          {% if (v.sostegno[g])|length > 0 %}        
+          {% if (v.sostegno[g])|length > 0 %}
             {% for sk,sv in v.sostegno[g].argomento %}
               {% if sv is not empty %}
             <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v.sostegno[g].alunno[sk] }} ({{ v.sostegno[g].docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>

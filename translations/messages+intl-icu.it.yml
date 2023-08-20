@@ -622,7 +622,12 @@ label.tipo_archivio: Tipo di documenti da archiviare
 label.selezione_archivio: Elementi da archiviare
 label.docente_curricolare: Docente curricolare
 label.docente_sostegno: Docente di sostegno
-label.classe_gruppo: Gruppo interno
+label.classe_gruppo: Gruppo classe
+label.tipo_supplenza: Gruppo alunni
+label.gruppo_religione_T: Tutta la classe
+label.gruppo_religione_S: Gruppo Religione
+label.gruppo_religione_A: Gruppo Mat. Alt.
+label.gruppo_religione_N: Gruppo N.A.
 
 
 ##### PAGINE #####
@@ -1326,7 +1331,7 @@ message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
-message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
+message.lezione_esiste_altra: "Non è possibile firmare la lezione della {ora}ª ora.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
 message.lezione_con_voti: "Non è possibile cancellare la lezione indicata.<br>Hai inserito uno o più valutazioni per questa materia in questa data.<br>Per rimuovere la lezione, devi prima modificare la data delle valutazioni."
 message.no_documenti: Non sono presenti documenti
 message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
@@ -1392,6 +1397,8 @@ message.telegram_chat_start: "Ciao <b>{nome}</b>, benvenuto in questa chat che s
 message.sistema_telegram: Modifica la configurazione per l'invio delle notifiche via Telegram. Lascia in bianco per disabilitare l'uso di Telegram.
 message.telegram_webhook_ok: La configurazione Telegram è stata eseguita con successo.
 message.recupero_debito_NC: Tutto il programma svolto.
+message.lezione_sostegno_NA_con_religione: "Non è possibile firmare la lezione della {ora}ª ora.<br>Non è consentito utilizzare il sostegno per il gruppo N.A."
+message.lezione_incompatibile: "Non è possibile firmare la lezione della {ora}ª ora.<br>La materia o il gruppo è incompatibile con la lezione esistente."
 
 
 ##### ERRORI #####

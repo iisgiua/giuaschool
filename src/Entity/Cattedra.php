@@ -64,7 +64,7 @@ class Cattedra {
   private bool $supplenza = false;
 
   /**
-   * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
+   * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa (religione)]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *

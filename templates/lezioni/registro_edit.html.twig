@@ -43,11 +43,10 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('label.gs-checkbox-inline input').change(function() {
+  $('label.radio-inline input').change(function() {
+    $(this).parent().siblings('label.radio-inline').removeClass('active');
     if (this.checked) {
       $(this).parent().addClass('active');
-    } else {
-      $(this).parent().removeClass('active');
     }
   }).change();
 });
