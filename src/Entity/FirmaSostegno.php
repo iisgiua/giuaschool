@@ -111,4 +111,22 @@ class FirmaSostegno extends Firma {
     return $this;
   }
 
+
+  //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'lezione' => $this->getLezione() ? $this->getLezione()->getId() : null,
+      'docente' => $this->getDocente() ? $this->getDocente()->getId() : null,
+      'alunno' => $this->alunno ? $this->alunno->getId() : null,
+      'argomento' => $this->argomento,
+      'attivita' => $this->attivita];
+    return $dati;
+  }
+
 }

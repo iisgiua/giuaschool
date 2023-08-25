@@ -114,6 +114,14 @@ class FirmaSostegnoTest extends EntityTestCase {
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    // datiVersione
+    $dt = [
+      'lezione' => $existent->getLezione() ? $existent->getLezione()->getId() : null,
+      'docente' => $existent->getDocente() ? $existent->getDocente()->getId() : null,
+      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
+      'argomento' => $existent->getArgomento(),
+      'attivita' => $existent->getAttivita()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

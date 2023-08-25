@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields={"data","ora","classe","gruppo"}, message="field.unique")
- * 
+ *
  * @author Antonello Dessì
  */
 class Lezione {
@@ -240,18 +240,18 @@ class Lezione {
 
 	/**
 	 * Restituisce il nome dell'eventuale gruppo a cui è riferita la lezione
-   * 
+   *
 	 * @return string|null Nome dell'eventuale gruppo a cui è riferita la lezione
 	 */
 	public function getGruppo(): ?string {
 		return $this->gruppo;
 	}
-	
+
 	/**
 	 * Modifica il nome dell'eventuale gruppo a cui è riferita la lezione
-   * 
+   *
 	 * @param string|null $gruppo Nome dell'eventuale gruppo a cui è riferita la lezione
-   * 
+   *
    * @return self Oggetto modificato
 	 */
 	public function setGruppo(?string $gruppo): self {
@@ -261,18 +261,18 @@ class Lezione {
 
 	/**
 	 * Restituisce il tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
-   * 
+   *
 	 * @return string Tipo di gruppo utilizzato
 	 */
 	public function getTipoGruppo(): string {
 		return $this->tipoGruppo;
 	}
-	
+
 	/**
 	 * Modifica il tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
-   * 
+   *
 	 * @param string $tipoGruppo Tipo di gruppo utilizzato
-   * 
+   *
    * @return self Oggetto modificato
 	 */
 	public function setTipoGruppo(string $tipoGruppo): self {
@@ -353,6 +353,24 @@ class Lezione {
    */
   public function __toString(): string {
     return $this->data->format('d/m/Y').': '.$this->ora.' - '.$this->classe.' '.$this->materia;
+  }
+
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'data' => $this->data ? $this->data->format('d/m/Y') : null,
+      'ora' => $this->ora,
+      'classe' => $this->classe ? $this->classe->getId() : null,
+      'gruppo' => $this->gruppo ?? '',
+      'tipoGruppo' => $this->tipoGruppo,
+      'materia' => $this->materia ? $this->materia->getId() : null,
+      'argomento' => $this->argomento,
+      'attivita' => $this->attivita];
+    return $dati;
   }
 
 }

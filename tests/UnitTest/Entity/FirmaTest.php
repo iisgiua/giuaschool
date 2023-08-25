@@ -122,6 +122,11 @@ class FirmaTest extends EntityTestCase {
     }
     // toString
     $this->assertSame($existent->getLezione().' ('.$existent->getDocente().')', (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'lezione' => $existent->getLezione() ? $existent->getLezione()->getId() : null,
+      'docente' => $existent->getDocente() ? $existent->getDocente()->getId() : null];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

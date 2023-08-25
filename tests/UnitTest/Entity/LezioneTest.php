@@ -73,7 +73,7 @@ class LezioneTest extends EntityTestCase {
           ($field == 'ora' ? $this->faker->randomNumber(4, false) :
           ($field == 'classe' ? $this->getReference("classe_1") :
           ($field == 'gruppo' ? $this->faker->optional($weight = 50, $default = '')->word() :
-          ($field == 'tipoGruppo' ? $this->faker->randomElement(['N', 'C', 'R']) : 
+          ($field == 'tipoGruppo' ? $this->faker->randomElement(['N', 'C', 'R']) :
           ($field == 'materia' ? $this->getReference("materia_1") :
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
@@ -120,6 +120,17 @@ class LezioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getData()->format('d/m/Y').': '.$existent->getOra().' - '.$existent->getClasse().' '.$existent->getMateria(), (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'data' => $existent->getData() ? $existent->getData()->format('d/m/Y') : null,
+      'ora' => $existent->getOra(),
+      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
+      'gruppo' => $existent->getGruppo() ?? '',
+      'tipoGruppo' => $existent->getTipoGruppo(),
+      'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
+      'argomento' => $existent->getArgomento(),
+      'attivita' => $existent->getAttivita()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**
