@@ -157,11 +157,11 @@
   <table class="table table-bordered table-hover table-striped gs-mb-2">
     <thead class="bg-success">
       <tr>
-        <th>Ora</th>
-        <th>Materia</th>
-        <th>Docenti</th>
-        <th>Argomenti/Attività</th>
-        <th>Azioni</th>
+        <th class="col-sm-2">Ora</th>
+        <th class="col-sm-2">Materia</th>
+        <th class="col-sm-2">Docenti</th>
+        <th class="col-sm-4">Argomenti/Attività</th>
+        <th class="col-sm-2">Azioni</th>
       </tr>
     </thead>
     <tbody>
@@ -172,24 +172,22 @@
           <strong>{% if v.materia|keys|first == 'R:S' %}Gruppo: Religione<br>{% elseif v.materia|keys|first == 'R:N' %}Gruppo: N.A.<br>{% elseif v.materia|keys|first == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif v.materia|keys|first[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}<br>{% endif %}</strong>
           {{ v.materia|first }}
         </td>
-        <td><small><em>{% for v1 in v.docenti|first %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
-        <td style="overflow-wrap:break-word;hyphens:auto;">
-        {% if (v.sostegno|first)|length > 0 %}
-          {% for sk,sv in (v.sostegno|first).argomento %}
-            {% if sv is not empty %}
-          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ (v.sostegno|first).alunno[sk] }} ({{ (v.sostegno|first).docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-          <div id="sostegno-{{ k }}-{{ sk }}" style="display:none">
+        <td><small><em>{% for k1,v1 in v.docenti|first %}{{ v1 }}
+        {% if (v.sostegno|first).docente[k1]|length > 0 %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-2" title="Argomenti e attività del sostegno - {{ (v.sostegno|first).alunno[k1] }} ({{ (v.sostegno|first).docente[k1] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ (v.materia|keys|first)[2:] }}-{{ k1 }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <div id="sostegno-{{ k }}-{{ (v.materia|keys|first)[2:] }}-{{ k1 }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
-                <p><strong>Alunno: {{ (v.sostegno|first).alunno[sk] }}</strong></p>
-                <p><strong>Docente: {{ (v.sostegno|first).docente[sk] }}</strong></p>
-                {{ sv|raw }}
+                <p><strong>Alunno: {{ (v.sostegno|first).alunno[k1] }}</strong></p>
+                <p><strong>Docente: {{ (v.sostegno|first).docente[k1] }}</strong></p>
+                {{ (v.sostegno|first).argomento[k1]|raw }}
               </div>
             </div>
           </div>
-            {% endif %}
-          {% endfor %}
         {% endif %}
+          {{ not loop.last ? '<br>' }}{% endfor %}</em></small>
+        </td>
+        <td style="overflow-wrap:break-word;hyphens:auto;">
           <small>{{ (v.argomenti|first)|raw }}</small>
         </td>
         <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>
@@ -210,25 +208,23 @@
           <strong>{% if g == 'R:S' %}Gruppo: Religione<br>{% elseif g == 'R:N' %}Gruppo: N.A.<br>{% elseif g == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}<br>{% endif %}</strong>
           {{ m }}
         </td>
-        <td><small><em>{% for v1 in v.docenti[g] %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
-        <td style="overflow-wrap:break-word;hyphens:auto;">
-          {% if (v.sostegno[g])|length > 0 %}
-            {% for sk,sv in v.sostegno[g].argomento %}
-              {% if sv is not empty %}
-            <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v.sostegno[g].alunno[sk] }} ({{ v.sostegno[g].docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-            <div id="sostegno-{{ k }}-{{ sk }}" style="display:none">
+        <td><small><em>{% for k1,v1 in v.docenti[g] %}{{ v1 }}
+          {% if v.sostegno[g].docente[k1]|length > 0 %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-2" title="Argomenti e attività del sostegno - {{ v.sostegno[g].alunno[k1] }} ({{ v.sostegno[g].docente[k1] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ g[2:] }}-{{ k1 }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <div id="sostegno-{{ k }}-{{ g[2:] }}-{{ k1 }}" style="display:none">
               <div class="list-group-item">
                 <div class="list-group-item-text">
-                  <p><strong>Alunno: {{ v.sostegno[g].alunno[sk] }}</strong></p>
-                  <p><strong>Docente: {{ v.sostegno[g].docente[sk] }}</strong></p>
-                  {{ sv|raw }}
+                  <p><strong>Alunno: {{ v.sostegno[g].alunno[k1] }}</strong></p>
+                  <p><strong>Docente: {{ v.sostegno[g].docente[k1] }}</strong></p>
+                  {{ v.sostegno[g].argomento[k1]|raw }}
                 </div>
               </div>
             </div>
-              {% endif %}
-            {% endfor %}
           {% endif %}
-            <small>{{ v.argomenti[g]|raw }}</small>
+            {{ not loop.last ? '<br>' }}{% endfor %}</em></small>
+        </td>
+        <td style="overflow-wrap:break-word;hyphens:auto;">
+          <small>{{ v.argomenti[g]|raw }}</small>
         </td>
       </tr>
         {% endfor %}

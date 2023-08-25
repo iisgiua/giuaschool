@@ -24,6 +24,8 @@ use App\Entity\OsservazioneClasse;
 use App\Entity\Sede;
 use App\Form\Appello;
 use App\Form\VotoClasse;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
@@ -446,6 +448,10 @@ class RegistroUtil {
                 $sostegno['docente'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
                 $sostegno['alunno'][] = $f->getAlunno() ?
                   $f->getAlunno()->getCognome().' '.$f->getAlunno()->getNome() : '';
+              } else {
+                $sostegno['argomento'][] = null;
+                $sostegno['docente'][] = null;
+                $sostegno['alunno'][] = null;
               }
             }
             $datiLezioni[$ora]['docenti'][$gruppo] = $docenti;
@@ -1610,7 +1616,19 @@ class RegistroUtil {
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
-      ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+      ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')]);
+    if ($lezione->getTipoGruppo() == 'R') {
+      // gruppi religione
+      if ($lezione->getGruppo() == 'S' || $lezione->getGruppo() == 'A') {
+        $alunni = $alunni
+          ->andWhere('a.religione=:religione')
+          ->setParameter('religione', $lezione->getGruppo());
+      } else {
+        $alunni = $alunni
+          ->andWhere("a.religione NOT IN ('S', 'A')");
+      }
+    }
+    $alunni = $alunni
       ->getQuery()
       ->getArrayResult();
     // calcola ore assenza
@@ -2882,83 +2900,49 @@ class RegistroUtil {
                                  \DateTime $data, int $ora, array $lezioni, array $firme) : array {
     // init
     $stato = [];
-    $controllo['E:N'] = [
-      'E:N' => 'ok',
-      'S:N' => 'modificaSostegno',
-      '-:-' => 'ok'];
-    $controllo['E:C'] = [
-      'E:C' => 'gruppo',
-      'N:C' => 'gruppo',
-      'S:N' => 'modificaSostegno',
-      'U:C' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['N:N'] = [
-      'N:N' => 'materiaUguale',
-      'S:N' => 'modificaSostegno',
-      '-:-' => 'ok'];
-    $controllo['N:C'] = [
-      'E:C' => 'gruppo',
-      'N:C' => 'gruppo',
-      'S:N' => 'modificaSostegno',
-      'U:C' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['R:R:S'] = [
-      'R:R' => 'gruppo',
-      'S:N' => 'sostegnoNA',
-      'U:R' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['R:R:A'] = [
-      'R:R' => 'gruppo',
-      'S:N' => 'sostegnoNA',
-      'U:R' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['S:N'] = [
-      'E:N' => 'ok',
-      'E:C' => 'gruppoSostegno',
-      'N:N' => 'ok',
-      'N:C' => 'gruppoSostegno',
-      'R:R' => 'alunnoNA',
-      'S:N' => 'ok',
-      'U:N' => 'ok',
-      'U:C' => 'gruppoSostegno',
-      'U:R' => 'alunnoNA',
-      '-:-' => 'ok'];
-    $controllo['S:C'] = [
-      'E:N' => 'ok',
-      'E:C' => 'gruppoSostegno',
-      'N:N' => 'ok',
-      'N:C' => 'gruppoSostegno',
-      'R:R' => 'alunnoNA',
-      'S:N' => 'ok',
-      'U:N' => 'ok',
-      'U:C' => 'gruppoSostegno',
-      'U:R' => 'alunnoNA',
-      '-:-' => 'ok'];
-    $controllo['U:N'] = [
-      'S:N' => 'modificaSostegno',
-      'U:N' => 'ok',
-      '-:-' => 'ok'];
-    $controllo['U:C'] = [
-      'E:C' => 'gruppo',
-      'N:C' => 'gruppo',
-      'S:N' => 'modificaSostegno',
-      'U:C' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['U:R:S'] = [
-      'R:R' => 'gruppo',
-      'S:N' => 'sostegnoNA',
-      'U:R' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['U:R:A'] = [
-      'R:R' => 'gruppo',
-      'S:N' => 'sostegnoNA',
-      'U:R' => 'gruppo',
-      '-:-' => 'ok'];
-    $controllo['U:R:N'] = [
-      'R:R' => 'gruppo',
-      'S:N' => 'sostegnoNA',
-      'U:R' => 'gruppo',
-      '-:-' => 'ok'];
+    $controllo['E:N']['-:-'] = 'ok';
+    $controllo['E:C']['-:-'] = 'ok';
+    $controllo['N:N']['-:-'] = 'ok';
+    $controllo['N:C']['-:-'] = 'ok';
+    $controllo['R:R:S']['-:-'] = 'ok';
+    $controllo['R:R:A']['-:-'] = 'ok';
+    $controllo['S:N']['-:-'] = 'ok';
+    $controllo['S:C']['-:-'] = 'okSostegno';
+    $controllo['U:N']['-:-'] = 'ok';
+    $controllo['U:C']['-:-'] = 'ok';
+    $controllo['U:R:S']['-:-'] = 'ok';
+    $controllo['U:R:A']['-:-'] = 'ok';
+    $controllo['U:R:N']['-:-'] = 'ok';
+    $controllo['E:N']['E:N'] = 'materia';
+    $controllo['N:N']['N:N'] = 'materia';
+    $controllo['S:N']['E:N'] = $controllo['S:N']['N:N'] = $controllo['S:N']['U:N'] = 'sostegno';
+    $controllo['S:C']['E:N'] = $controllo['S:C']['N:N'] = $controllo['S:C']['U:N'] = 'sostegno';
+    $controllo['U:N']['U:N'] = 'materia';
+    $controllo['E:C']['E:C'] = $controllo['E:C']['N:C'] = $controllo['E:C']['U:C'] = 'gruppo';
+    $controllo['N:C']['E:C'] = $controllo['N:C']['N:C'] = $controllo['N:C']['U:C'] = 'gruppo';
+    $controllo['S:N']['E:C'] = $controllo['S:N']['N:C'] = $controllo['S:N']['U:C'] = 'sostegno';
+    $controllo['S:C']['E:C'] = $controllo['S:C']['N:C'] = $controllo['S:C']['U:C'] = 'gruppoSostegno';
+    $controllo['U:C']['E:C'] = $controllo['U:C']['N:C'] = $controllo['U:C']['U:C'] = 'gruppo';
+    $controllo['R:R:S']['R:R'] = $controllo['R:R:S']['U:R'] = 'gruppo';
+    $controllo['R:R:A']['R:R'] = $controllo['R:R:A']['U:R'] = 'gruppo';
+    $controllo['S:N']['R:R']   = $controllo['S:N']['U:R']   = 'alunnoNA';
+    $controllo['S:C']['R:R']   = $controllo['S:C']['U:R']   = 'alunnoNA';
+    $controllo['U:R:S']['R:R'] = $controllo['U:R:S']['U:R'] = 'gruppo';
+    $controllo['U:R:A']['R:R'] = $controllo['U:R:A']['U:R'] = 'gruppo';
+    $controllo['U:R:N']['R:R'] = $controllo['U:R:N']['U:R'] = 'gruppo';
+    $controllo['E:N']['S:N'] = 'modificaSostegno';
+    $controllo['E:C']['S:N'] = 'modificaSostegno';
+    $controllo['N:N']['S:N'] = 'modificaSostegno';
+    $controllo['N:C']['S:N'] = 'modificaSostegno';
+    $controllo['R:R:S']['S:N'] = 'sostegnoNA';
+    $controllo['R:R:A']['S:N'] = 'sostegnoNA';
+    $controllo['S:N']['S:N'] = 'sostegno';
+    $controllo['S:C']['S:N'] = 'sostegno';
+    $controllo['U:N']['S:N'] = 'modificaSostegno';
+    $controllo['U:C']['S:N'] = 'modificaSostegno';
+    $controllo['U:R:S']['S:N'] = 'sostegnoNA';
+    $controllo['U:R:A']['S:N'] = 'sostegnoNA';
+    $controllo['U:R:N']['S:N'] = 'sostegnoNA';
     // lezione firmata in altra classe
     $altre = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
@@ -3059,17 +3043,41 @@ class RegistroUtil {
       $procedure = array_unique(array_map(fn($c) => $controllo[$tipoCattedra][$c], $compatibili));
       if (count($procedure) > 0) {
         switch ($procedure[0]) {
+          case 'materia':  // controllo compresenza su area comune
+            foreach ($lezioni as $lezione) {
+              if ($lezione->getMateria()->getId() == $materia->getId()) {
+                $stato['compresenza'] = $lezione;
+              }
+            }
+            if (empty($stato['compresenza'])) {
+              // errore: materia/gruppo incompatibile
+              switch ($tipoCattedra) {
+                case 'U:N':
+                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
           case 'gruppo':  // controlli su gruppo classe/religione
             $gruppi = [];
-            $gruppoClasse = substr($tipoCattedra, 2, 1) == 'R' ? substr($tipoCattedra, 4, 1) :
-              $classe->getGruppo();
-            $compresenza = false;
+            $gruppoClasse = !empty($classe->getGruppo()) ? 'C:'.$classe->getGruppo() :
+              substr($tipoCattedra, 2);
             foreach ($lezioni as $lezione) {
-              if ($lezione->getMateria()->getTipo() != 'S') {
-                $gruppi[] = $lezione->getGruppo();
-              }
-              if ($lezione->getMateria()->getId() == $materia->getId() &&
-                  $lezione->getGruppo() == $gruppoClasse) {
+              $gruppi[] = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+              $compresenza = false;
+              if ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
+                  $lezione->getMateria()->getId() == $materia->getId()) {
+                $compresenza = true;
+                if ($materia->getTipo() != 'U' || $lezione->getTipoGruppo() != 'R') {
+                  // non considera supplenza su religione per compresenza su argomenti
+                  $stato['compresenza'] = $lezione;
+                }
+              } elseif ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
+                        $lezione->getMateria()->getTipo() == 'S') {
                 $compresenza = true;
               }
             }
@@ -3089,19 +3097,6 @@ class RegistroUtil {
                   $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
                   return $stato;
               }
-            }
-            break;
-          case 'materiaUguale':  // controllo compresenza su area comune
-            $compresenza = false;
-            foreach ($lezioni as $lezione) {
-              if ($lezione->getMateria()->getId() == $cattedra->getMateria()->getId()) {
-                $compresenza = true;
-              }
-            }
-            if (!$compresenza) {
-              // errore: materia/gruppo incompatibile
-              $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
-              return $stato;
             }
             break;
           case 'alunnoNA':  // controllo se cattedra sostegno su alunno NA
@@ -3139,7 +3134,7 @@ class RegistroUtil {
               }
             }
             break;
-            // nessun controllo per le procedure: ok, gruppoSostegno, modificaSostegno
+            // nessun controllo su procedure: ok, okSostegno, sostegno, gruppoSostegno, modificaSostegno
         }
         // conserva trasformazione
         $stato['trasforma'][$tipoCattedra] = $procedure[0];
@@ -3178,22 +3173,26 @@ class RegistroUtil {
       switch ($procedura) {
         case 'gruppo':  // trasforma lezione gruppo classe o religione
           foreach ($lezioni as $lezione) {
-            if ($lezione->getGruppo() == $gruppo && $lezione->getMateria()->getId() == $materia->getId()) {
+            if ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
+                $lezione->getMateria()->getId() == $materia->getId()) {
               // compresenza: firma lezione esistente
               $stato['lezione'] = $lezione;
               break;
-            } elseif ($lezione->getGruppo() == $gruppo && $lezione->getMateria()->getTipo() == 'S') {
+            } elseif ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
+                      $lezione->getMateria()->getTipo() == 'S') {
               // gruppo su sostegno: modifica lezione e firma
+              $vecchiaLezione = clone $lezione;
               $lezione->setMateria($materia);
               $stato['lezione'] = $lezione;
+              $stato['log']['modifica'][] = [$vecchiaLezione, $lezione];
               break;
             }
           }
-          // gruppo non presente: crea nuova lezione su gruppo e firma
+          // se gruppo non presente: crea nuova lezione su gruppo e firma
           break;
         case 'gruppoSostegno':
           foreach ($lezioni as $lezione) {
-            if ($tipoGruppo == 'N' || $lezione->getGruppo() == $gruppo) {
+            if ($lezione->getGruppo() == $gruppo) {
               // gruppo esistente: firma sostegno
               $stato['lezione'] = $lezione;
               break;
@@ -3202,8 +3201,8 @@ class RegistroUtil {
           if (empty($stato)) {
             // gruppo non presente: crea nuova lezione su gruppo e firma
             $stato['modifica']['Classe'] = $this->em->getRepository('App\Entity\Classe')->findOneBy([
-              'anno' => $lezione[0]->getClasse()->getAnno(),
-              'sezione' => $lezione[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
+              'anno' => $lezioni[0]->getClasse()->getAnno(),
+              'sezione' => $lezioni[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
             $stato['modifica']['TipoGruppo'] = 'C';
             $stato['modifica']['Gruppo'] = $gruppo;
           }
@@ -3213,7 +3212,7 @@ class RegistroUtil {
             if (($cattedra->getAlunno() &&
                 $cattedra->getAlunno()->getReligione() == $lezione->getGruppo()) ||
                 (!$cattedra->getAlunno() && in_array($lezione->getGruppo(), ['S', 'A']))) {
-              // gruppo esistente: firma sostegno
+              // gruppo esistente: firma
               $stato['lezione'] = $lezione;
               break;
             }
@@ -3225,64 +3224,117 @@ class RegistroUtil {
               $cattedra->getAlunno()->getReligione() : 'S';
           }
           break;
-        case 'sostegnoNA':
-          // errore se più firme di sostegno differenti...
-          foreach (array_reduce($firme, 'array_merge', []) as $firma) {
-            if (($firma->getAlunno() && $firma->getAlunno()->getReligione() == $gruppo) ||
-                (!$firma->getAlunno() && $gruppo != 'N')) {
-              // sostegno senza alunno o alunno del gruppo: modifica lezione e firma
-              $stato['lezione'] = $firma->getLezione();
-              $stato['lezione']->setTipoGruppo('R')->setGruppo($gruppo);
-              break;
-            }
-          }
-          if (empty($stato)) {
-            // modifica lezione su altro gruppo, crea gruppo e firma
-            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
-              if ($firma instanceof FirmaSostegno) {
-                $firma->getLezione()->setTipoGruppo('R')->setGruppo($firma->getAlunno()->getReligione());
-                break;
-              }
-            }
-          }
-          break;
         case 'modificaSostegno':
-          // errore se più firme di sostegno differenti...
           if ($tipoGruppo == 'N') {
-            // modifica sostegno su cattedra e firma
+            // modifica sostegno su materia, poi firma
+            $vecchiaLezione = clone $lezioni[0];
             $stato['lezione'] = $lezioni[0];
             $stato['lezione']->setMateria($materia);
+            $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
           } else {
+            // cancella assenze esistenti
+            $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+              ->delete()
+              ->where('al.lezione=:lezione')
+              ->setParameters(['lezione' => $lezioni[0]->getId()])
+              ->getQuery()
+              ->execute();
+            // modifica sostegno presente su altri gruppi
+            $nuoviGruppi = [];
             foreach (array_reduce($firme, 'array_merge', []) as $firma) {
-              if (!$firma->getAlunno() ||
-                  $firma->getAlunno()->getClasse()->getGruppo() == $gruppo) {
-                // sostegno senza alunno o alunno del gruppo: modifica lezione e firma
-                $stato['lezione'] = $firma->getLezione();
-                $stato['lezione']->setTipoGruppo('C')->setGruppo($gruppo);
-                break;
+              if ($firma->getAlunno() &&
+                  $firma->getAlunno()->getClasse()->getGruppo() != $gruppo) {
+                $nuoviGruppi[$firma->getAlunno()->getClasse()->getGruppo()][] = $firma;
               }
             }
-            if (empty($stato)) {
-              // modifica lezione su altro gruppo, crea gruppo e firma
-              foreach (array_reduce($firme, 'array_merge', []) as $firma) {
-                if ($firma instanceof FirmaSostegno) {
-                  $firma->getLezione()->setTipoGruppo('R')->setGruppo($firma->getAlunno()->getClasse()->getGruppo());
-                  break;
+            if (!empty($nuoviGruppi)) {
+              // crea nuovi gruppi
+              foreach ($nuoviGruppi as $nuovoGruppo => $listaFirme) {
+                $nuovaLezione = clone ($listaFirme[0]->getLezione());
+                $nuovaLezione->setTipoGruppo('C')->setGruppo($nuovoGruppo)
+                  ->setClasse($listaFirme[0]->getAlunno()->getClasse());
+                $this->em->persist($nuovaLezione);
+                foreach ($listaFirme as $firma) {
+                  $vecchiaFirma = clone $firma;
+                  $firma->setLezione($nuovaLezione);
+                  $stato['log']['modifica'][] = [$vecchiaFirma, $firma];
                 }
+                // nuove lezioni
+                $stato['assenze'][] = $nuovaLezione;
+                $stato['log']['crea'][] = $nuovaLezione;
               }
             }
+            // modifica sostegno su gruppo e materia, poi firma
+            $vecchiaLezione = clone $lezioni[0];
+            $nuovaClasse = $this->em->getRepository('App\Entity\Classe')->findOneBy([
+              'anno' => $lezioni[0]->getClasse()->getAnno(),
+              'sezione' => $lezioni[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
+            $stato['lezione'] = $lezioni[0];
+            $stato['lezione']->setMateria($materia)->setTipoGruppo('C')->setGruppo($gruppo)
+              ->setClasse($nuovaClasse);
+            $stato['assenze'][] = $stato['lezione'];
+            $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
           }
           break;
-        default:  // procedure: ok, materiaUguale
+        case 'sostegnoNA':
+          // cancella assenze esistenti
+          $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+            ->delete()
+            ->where('al.lezione=:lezione')
+            ->setParameters(['lezione' => $lezioni[0]->getId()])
+            ->getQuery()
+            ->execute();
+          // modifica sostegno presente su altri gruppi
+          $nuoviGruppi = [];
+          $noAlunno = [];
+          foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+            if ($firma->getAlunno() &&
+                $firma->getAlunno()->getReligione() != $gruppo) {
+              $nuoviGruppi[$firma->getAlunno()->getReligione()][] = $firma;
+            } elseif (!$firma->getAlunno()) {
+              $noAlunno[] = $firma;
+            }
+          }
+          if ($gruppo == 'N' && !empty($noAlunno)) {
+            if (empty($nuoviGruppi)) {
+               // associa sostegno senza alunno al gruppo religione
+               $nuoviGruppi['S'] = $noAlunno;
+            } else {
+              // associa sostegno senza alunno al primo gruppo
+              $nuoviGruppi[array_key_first($nuoviGruppi)] = array_merge(
+                $nuoviGruppi[array_key_first($nuoviGruppi)], $noAlunno);
+            }
+          }
+          if (!empty($nuoviGruppi)) {
+            // crea nuovi gruppi
+            foreach ($nuoviGruppi as $nuovoGruppo => $listaFirme) {
+              $nuovaLezione = clone ($listaFirme[0]->getLezione());
+              $nuovaLezione->setTipoGruppo('R')->setGruppo($nuovoGruppo);
+              $this->em->persist($nuovaLezione);
+              foreach ($listaFirme as $firma) {
+                $vecchiaFirma = clone $firma;
+                $firma->setLezione($nuovaLezione);
+                $stato['log']['modifica'][] = [$vecchiaFirma, $firma];
+              }
+              // nuove lezioni
+              $stato['assenze'][] = $nuovaLezione;
+              $stato['log']['crea'][] = $nuovaLezione;
+            }
+          }
+          // modifica sostegno su gruppo e materia, poi firma
+          $vecchiaLezione = clone $lezioni[0];
+          $stato['lezione'] = $lezioni[0];
+          $stato['lezione']->setMateria($materia)->setTipoGruppo('R')->setGruppo($gruppo);
+          $stato['assenze'][] = $stato['lezione'];
+          $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
+          break;
+        default:  // procedure: materia, sostegno
           // unica lezione esistente: firma
           $stato['lezione'] = $lezioni[0];
-          return $stato;
       }
     }
     // restituisce trasformazione
     return $stato;
   }
-
-
 
 }

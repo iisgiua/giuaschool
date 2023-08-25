@@ -334,10 +334,12 @@ class RegistroController extends BaseController {
     }
     $form = $form
       ->add('argomento', MessageType::class, array(
+        'data' => empty($controllo['compresenza']) ? '' : $controllo['compresenza']->getArgomento(),
         'label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'trim' => true,
         'required' => false))
       ->add('attivita', MessageType::class, array(
+        'data' => empty($controllo['compresenza']) ? '' : $controllo['compresenza']->getAttivita(),
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false))
@@ -360,7 +362,7 @@ class RegistroController extends BaseController {
       } else {
         // altro
         $tipoGruppo = $classe->getGruppo() ? 'C' : 'N';
-        $gruppo = $classe->getGruppo();
+        $gruppo = $classe->getGruppo() ?? '';
       }
       // modifica lezioni esistenti
       $trasformazione = $reg->trasformaNuovaLezione($cattedra, $materia, $tipoGruppo, $gruppo,
@@ -396,12 +398,18 @@ class RegistroController extends BaseController {
           $this->em->persist($lezione);
           if ($numOra == $ora && !empty($trasformazione['modifica'])) {
             foreach ($trasformazione['modifica'] as $prop => $val) {
-              $lezione->${'set'.$prop}($val);
+              $lezione->{'set'.$prop}($val);
             }
           }
+          $trasformazione['log']['crea'][] = $lezione;
         } elseif ($numOra == $ora) {
           // lezione modificata da firmare
           $lezione = $trasformazione['lezione'];
+          if ($materia->getTipo() != 'S') {
+            // modifica argomento/attività
+            $lezione->setArgomento($form->get('argomento')->getData());
+            $lezione->setAttivita($form->get('attivita')->getData());
+          }
         }
         // crea firma
         if ($materia->getTipo() == 'S') {
@@ -419,15 +427,28 @@ class RegistroController extends BaseController {
             ->setDocente($this->getUser());
         }
         $this->em->persist($firma);
+        $trasformazione['log']['crea'][] = $firma;
         // ok: memorizza dati
         $this->em->flush();
         // ricalcola ore assenza
-        $reg->ricalcolaOreLezione($dataObj, $lezione);
+        if ($numOra > $ora || empty($trasformazione['lezione'])) {
+          // assenze di lezione aggiunta
+          $reg->ricalcolaOreLezione($dataObj, $lezione);
+        } elseif ($numOra == $ora && !empty($trasformazione['assenze'])) {
+          // assenze di lezioni modificate
+          foreach ($trasformazione['assenze'] as $assenza) {
+            $reg->ricalcolaOreLezione($dataObj, $assenza);
+          }
+        }
         // log azione
-        $dblogger->logAzione('REGISTRO', 'Crea lezione', array(
-          'Lezione' => $lezione->getId(),
-          'Firma' => $firma->getId(),
-          ));
+        foreach ($trasformazione['log']['crea'] as $ogg) {
+          $dblogger->logCreazione('REGISTRO',
+            'Crea '.(($ogg instanceof Lezione) ? 'lezione' : 'firma'), $ogg);
+        }
+        foreach (($trasformazione['log']['modifica'] ?? []) as $ogg) {
+          $dblogger->logModifica('REGISTRO',
+            'Modifica '.(($ogg[0] instanceof Lezione) ? 'lezione' : 'firma'), $ogg[0], $ogg[1]);
+        }
       }
       // ok, redirezione
       return $this->redirectToRoute('lezioni_registro_firme');
@@ -694,6 +715,7 @@ class RegistroController extends BaseController {
    * Cancella firma e lezione dal registro
    *
    * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -708,8 +730,8 @@ class RegistroController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                               int $classe, string $data, int $ora): Response {
+  public function deleteAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                               LogHandler $dblogger, int $classe, string $data, int $ora): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -723,56 +745,73 @@ class RegistroController extends BaseController {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
-    // controlla esistenza di lezione
-    $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $dataObj,
-      'ora' => $ora]);
-    if (!$lezione) {
-      // lezione non esiste, niente da fare
-      return $this->redirectToRoute('lezioni_registro_firme');
-    }
-    // controlla firme di lezione
-    $firme = $this->em->getRepository('App\Entity\Firma')->findByLezione($lezione);
-    if (count($firme) == 0) {
-      // errore: firme non esistono
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    $lista_firme = array();
-    $firma_docente = null;
-    $num_sostegno = 0;
-    foreach ($firme as $f) {
-      $lista_firme[] = $f->getDocente()->getId();
-      if ($f->getDocente()->getId() == $this->getUser()->getId()) {
-        $firma_docente = $f;
-      } elseif ($f instanceof FirmaSostegno) {
-        $num_sostegno++;
+    // legge lezioni e firme esistenti
+    $firma = null;
+    $docentiId = [];
+    $firmeLezioni = [];
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('l.classe', 'c')
+      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione()])
+      ->orderBy('l.gruppo')
+      ->getQuery()
+      ->getResult();
+    foreach ($lezioni as $lezione) {
+      // legge firme
+      $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+      $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
+        ->join('f.docente', 'd')
+        ->where('f.lezione=:lezione')
+        ->setParameters(['lezione' => $lezione])
+        ->getQuery()
+        ->getResult();
+      // docenti
+      $firmeLezioni[$gruppo] = $firme;
+      foreach ($firme as $f) {
+        $docentiId[$gruppo][] = $f->getDocente()->getId();
+        if ($this->getUser()->getId() == $f->getDocente()->getId()) {
+          // lezione firmata dal docente
+          $firma = $f;
+        }
       }
     }
+    // controlla esistenza di lezione/firma
+    if (empty($lezioni) || empty($firme) || empty($firma)) {
+      // errore: lezione/firma non esiste
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla permessi
-    if (!$reg->azioneLezione('delete', $dataObj, $this->getUser(), $classe, $lista_firme)) {
+    if (!$reg->azioneLezione('delete', $dataObj, $this->getUser(), $classe, $docentiId)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // controlla voti
     $voti = $this->em->getRepository('App\Entity\Valutazione')->findBy(['lezione' => $lezione, 'docente' => $this->getUser()]);
     if (count($voti) > 0) {
-      // altra lezione
-      $altra_lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      // altra lezione (stessa data/classe/gruppo/materia)
+      $altraLezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-        ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
+        ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.gruppo=:gruppo AND l.tipoGruppo=:tipoGruppo AND l.materia=:materia AND f.docente=:docente')
         ->setParameters(['id' => $lezione, 'data' => $data, 'classe' => $classe,
+          'gruppo' => $lezione->getGruppo(), 'tipoGruppo' => $lezione->getTipoGruppo(),
           'materia' => $lezione->getMateria(), 'docente' => $this->getUser()])
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
-      if (!$altra_lezione) {
-        // errore: dati inconsistenti
-        throw $this->createNotFoundException('exception.invalid_params');
+      if (!$altraLezione) {
+        // errore: voti presenti
+        $this->addFlash('danger', $trans->trans('message.lezione_con_voti'));
+        return $this->redirectToRoute('lezioni_registro_firme');
       }
       foreach ($voti as $v) {
-        $v->setLezione($altra_lezione);
+        // sposta voti su altra lezione
+        $v->setLezione($altraLezione);
       }
     }
     // cancella firma
+
+
     $firma_docente_id = $firma_docente->getId();
     $firma_cancellata = null;
     if ($firma_docente instanceof FirmaSostegno) {
@@ -810,6 +849,8 @@ class RegistroController extends BaseController {
         ->setArgomento('')
         ->setAttivita('');
     }
+
+
     // ok: memorizza dati
     $this->em->flush();
     // log azione
