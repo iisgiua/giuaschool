@@ -527,8 +527,9 @@ class SistemaController extends BaseController {
             "INNER JOIN gs_voto_scrutinio vs ON vs.scrutinio_id = s.id AND vs.alunno_id = se.alunno_id ".
             "INNER JOIN gs_materia m ON m.id = vs.materia_id AND m.id = sv.materia_id ".
             "SET sv.carenze = vs.debito, sv.dati= 'a:1:{s:7:\"carenza\";s:1:\"C\";}' ".
-            "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S')".
-            "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
+            "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S') ".
+            "AND e.dati LIKE CONCAT('%s:15:\"carenze_materie\";%\"', m.nome_breve, '\"%');";
+            // "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
           $connection->executeStatement($sql);
           $sql = "UPDATE gs_storico_voto sv ".
             "INNER JOIN gs_storico_esito se ON sv.storico_esito_id = se.id ".
