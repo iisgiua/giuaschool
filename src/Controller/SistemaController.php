@@ -255,7 +255,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, TranslatorInterface $trans, 
+  public function aliasAction(Request $request, TranslatorInterface $trans,
                               LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -408,7 +408,7 @@ class SistemaController extends BaseController {
             ->setParameters(['nessuno' => null])
             ->getQuery()
             ->execute();
-          // cancella dati annuali alunni 
+          // cancella dati annuali alunni
           $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->update()
             ->set('a.autorizzaEntrata', ':no')
@@ -439,7 +439,7 @@ class SistemaController extends BaseController {
                 "FROM gs_utente a ".
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
                 'lista' => $noScrutinabili], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // anno all'estero
@@ -450,7 +450,7 @@ class SistemaController extends BaseController {
                 "FROM gs_utente a ".
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU';";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
                 'lista' => $estero], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // alunni scrutinati
@@ -463,8 +463,8 @@ class SistemaController extends BaseController {
               "AND s.id = :scrutinio ".
               "AND e.esito IN ('A', 'N') ".
               "AND (c.anno != 5 OR e.esito = 'N');";
-            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
-              'scrutinio' => $scrutinio->getId()], 
+            $connection->executeStatement($sql, ['lista' => $scrutinabili,
+              'scrutinio' => $scrutinio->getId()],
               ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
               "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
@@ -476,8 +476,8 @@ class SistemaController extends BaseController {
               "AND s.id = :scrutinio ".
               "AND e.esito IN ('A', 'N') ".
               "AND (c.anno != 5 OR e.esito = 'N');";
-            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
-              'scrutinio' => $scrutinio->getId()], 
+            $connection->executeStatement($sql, ['lista' => $scrutinabili,
+              'scrutinio' => $scrutinio->getId()],
               ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
           }
           // scrutini sospesi
@@ -525,8 +525,9 @@ class SistemaController extends BaseController {
             "INNER JOIN gs_voto_scrutinio vs ON vs.scrutinio_id = s.id AND vs.alunno_id = se.alunno_id ".
             "INNER JOIN gs_materia m ON m.id = vs.materia_id AND m.id = sv.materia_id ".
             "SET sv.carenze = vs.debito, sv.dati= 'a:1:{s:7:\"carenza\";s:1:\"C\";}' ".
-            "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S')".
-            "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
+            "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S') ".
+            "AND e.dati LIKE CONCAT('%s:15:\"carenze_materie\";%\"', m.nome_breve, '\"%');";
+            // "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
           $connection->executeStatement($sql);
           $sql = "UPDATE gs_storico_voto sv ".
             "INNER JOIN gs_storico_esito se ON sv.storico_esito_id = se.id ".
@@ -616,7 +617,7 @@ class SistemaController extends BaseController {
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
-          }        
+          }
           // aggiunge scrutini rinviati
           foreach ($datiScrutinio as $dati) {
             $classe = $this->em->getRepository('App\Entity\Classe')->find($dati['classe']);
@@ -648,28 +649,28 @@ class SistemaController extends BaseController {
           // gestione alunni promossi
           $sql = "UPDATE gs_utente a ".
             "INNER JOIN gs_storico_esito se ON se.alunno_id = a.id ".
-            "INNER JOIN gs_classe c ON c.id = a.classe_id ".            
+            "INNER JOIN gs_classe c ON c.id = a.classe_id ".
             "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione AND gruppo = c.gruppo) ".
             "WHERE a.ruolo = 'ALU' AND se.esito IN ('A', 'E');";
           $connection->executeStatement($sql);
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 3: // gestione circolari          
+        case 3: // gestione circolari
           // crea nuova directory
           $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
           // legge circolari pubblicate prima del 1/9 e non già modificate
           $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data<:inizio AND c.documento NOT LIKE :modificato')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
             'inizio' => $info['nuovoAnno'].'-09-01', 'modificato' => $info['vecchioAnno'].'/%'])
             ->getQuery()
             ->getResult();
-          // modifica path e sposta file 
+          // modifica path e sposta file
           foreach ($circolari as $circolare) {
             // sposta file documento
             $file = $path.'/upload/circolari/'.$circolare->getDocumento();
-            $fs->rename($file, 
+            $fs->rename($file,
               $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$circolare->getDocumento());
             // modifica path allegati
             $allegati = $circolare->getAllegati();
@@ -679,7 +680,7 @@ class SistemaController extends BaseController {
               $nuoviAllegati[] = $info['vecchioAnno'].'/'.$allegato;
               $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$allegato);
             }
-            // modifica path su db 
+            // modifica path su db
             $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->update()
             ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
@@ -689,11 +690,11 @@ class SistemaController extends BaseController {
               'id' => $circolare->getId()])
             ->getQuery()
             ->execute();
-          }            
+          }
           // controlla presenza di circolari dal 1/9 in poi
           $nuoveCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data>=:inizio')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
               'inizio' => $info['nuovoAnno'].'-09-01'])
             ->orderBy('c.numero', 'ASC')
             ->getQuery()
@@ -747,7 +748,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 4: // gestione avvisi 
+        case 4: // gestione avvisi
           // controlla presenza di avvisi dal 1/9 in poi
           $nuoviAvvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
             ->where('a.data>=:inizio AND a.cattedra IS NULL')
@@ -814,7 +815,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 5: // gestione documenti 
+        case 5: // gestione documenti
           // directory da svuotare
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
@@ -842,12 +843,12 @@ class SistemaController extends BaseController {
             if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
               // sposta documento
               $fs->mkdir($path.'/upload/documenti/'.$percorso2, 0770);
-              $fs->rename($path.'/archivio/classi/'.$percorso1.$file, 
+              $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
                 $path.'/upload/documenti/'.$percorso2.$file);
             } else {
               // segna per la cancellazione
               $documento->setAlunno(null);
-            }     
+            }
           }
           $this->em->flush();
           // cancella dati documenti
@@ -883,7 +884,7 @@ class SistemaController extends BaseController {
           $finder = new Finder();
           $finder->in($path.'/archivio/classi')->notName('.gitkeep');
           $fs->remove($finder);
-          // ripristina documenti 
+          // ripristina documenti
           $finder = new Finder();
           $finder->files()->in($path.'/upload/documenti')->notName('.gitkeep');
           foreach ($finder as $file) {
@@ -973,7 +974,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 8: // pulizia finale 
+        case 8: // pulizia finale
           // svuota archivio registri
           $fs->remove($path.'/archivio/registri');
           $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
@@ -1025,7 +1026,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function archiviaAction(Request $request, TranslatorInterface $trans, 
+  public function archiviaAction(Request $request, TranslatorInterface $trans,
                                  ArchiviazioneUtil $arch): Response {
     // init
     $dati = [];

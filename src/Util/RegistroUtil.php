@@ -3066,9 +3066,9 @@ class RegistroUtil {
             $gruppi = [];
             $gruppoClasse = !empty($classe->getGruppo()) ? 'C:'.$classe->getGruppo() :
               substr($tipoCattedra, 2);
+            $compresenza = false;
             foreach ($lezioni as $lezione) {
               $gruppi[] = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
-              $compresenza = false;
               if ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
                   $lezione->getMateria()->getId() == $materia->getId()) {
                 $compresenza = true;
@@ -3112,7 +3112,7 @@ class RegistroUtil {
             $alunnoNA = false;
             foreach (array_reduce($firme, 'array_merge', []) as $firma) {
               if ($firma->getLezione()->getMateria()->getTipo() == 'S' &&
-                  ($firma instanceof FirmaSostegno) && $firma->getAlunno() &&
+                  ($firma instanceOf FirmaSostegno) && $firma->getAlunno() &&
                   !in_array($firma->getAlunno()->getReligione(), ['S', 'A'], true)) {
                 $alunnoNA = true;
                 break;

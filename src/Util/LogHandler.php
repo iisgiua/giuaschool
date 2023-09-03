@@ -63,7 +63,7 @@ class LogHandler {
    * @param string $azione Azione dell'utente
    * @param array $dati Lista di dati che descrivono l'azione
    */
-  public function logAzione($categoria, $azione, $dati) {
+  public function logAzione(string $categoria, string $azione, array $dati = []) {
     // inizializza
     $req = $this->request->getCurrentRequest();
     $tok = $this->token->getToken();

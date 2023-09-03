@@ -140,7 +140,7 @@ class LoginController extends BaseController {
    */
   public function recoveryAction(Request $request, ConfigLoader $config,
                                  UserPasswordHasherInterface $hasher, OtpUtil $otp, StaffUtil $staff,
-                                 MailerInterface $mailer, LoggerInterface $logger, 
+                                 MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger): Response {
     // carica configurazione di sistema
     $config->carica();
@@ -181,35 +181,35 @@ class LoginController extends BaseController {
         $errore = 'exception.invalid_user_type_recovery';
       } else {
         // effettua il recupero password
-        if ($utente instanceof Amministratore) {
+        if ($utente instanceOf Amministratore) {
           // amministratore
           $num_pwdchars = 12;
           $template_html = 'email/credenziali_recupero_ata.html.twig';
           $template_txt = 'email/credenziali_recupero_ata.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Docente) {
+        } elseif ($utente instanceOf Docente) {
           // docenti/staff/preside
           $num_pwdchars = 10;
           $template_html = 'email/credenziali_recupero_docenti.html.twig';
           $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-        } elseif ($utente instanceof Ata) {
+        } elseif ($utente instanceOf Ata) {
           // ATA
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_recupero_ata.html.twig';
           $template_txt = 'email/credenziali_recupero_ata.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Genitore) {
+        } elseif ($utente instanceOf Genitore) {
           // genitori
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
           $template_txt = 'email/credenziali_alunni.txt.twig';
           $utente_mail = $utente->getAlunno();
           $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Alunno) {
+        } elseif ($utente instanceOf Alunno) {
           // alunni
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
