@@ -28,18 +28,18 @@ class AvvisoTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Avviso';
     // campi da testare
-    $this->fields = ['tipo', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
+    $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
     $this->noStoredFields = ['annotazioni', 'sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
+    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
       'gs_annotazione' => '*',
       'gs_classe' => '*',
       'gs_sede' => '*'];
     // SQL write
-    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
+    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -71,6 +71,7 @@ class AvvisoTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'anno' ? $this->faker->randomNumber(4, false) :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'oraFine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
@@ -84,7 +85,7 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'docente' ? $this->getReference("docente_1") :
-          null))))))))))))));
+          null)))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

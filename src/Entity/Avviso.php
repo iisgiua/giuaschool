@@ -74,6 +74,13 @@ class Avviso {
   private ?Collection $sedi = null;
 
   /**
+   * @var int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
+   *
+   * @ORM\Column(type="integer", nullable=false)
+   */
+  private int $anno = 0;
+
+  /**
    * @var \DateTime|null $data Data dell'evento associato all'avviso
    *
    * @ORM\Column(type="date", nullable=false)
@@ -306,6 +313,27 @@ class Avviso {
    */
   public function removeSedi(Sede $sede): self {
     $this->sedi->removeElement($sede);
+    return $this;
+  }
+
+  /**
+   * Restituisce l'anno iniziale dell'A.S. a cui si riferisce l'avviso
+   *
+   * @return int Anno iniziale dell'A.S. a cui si riferisce l'avviso
+   */
+  public function getAnno(): int {
+    return $this->anno;
+  }
+
+  /**
+   * Modifica l'anno iniziale dell'A.S. a cui si riferisce l'avviso
+   *
+   * @param int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function setAnno(int $anno): self {
+    $this->anno = $anno;
     return $this;
   }
 

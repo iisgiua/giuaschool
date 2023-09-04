@@ -145,6 +145,7 @@ App\Entity\Avviso:
   avviso_{1..5}:
     tipo: '<randomElement(["U", "E", "V", "P", "A", "I", "C", "D", "O"])>'
     sedi: '<collection(@sede_1)>'
+    anno: '<numberBetween(2020, 2023)>'
     data: '<dateTimeBetween("-1 month", "now")>'
     ora: '50%? <dateTimeBetween("-1 month", "now")>'
     oraFine: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -237,7 +238,7 @@ App\Entity\Classe:
     corso: '@corso_2'
     coordinatore:
     segretario:
-    
+
   classe_{10..11}:
     anno: '3'
     sezione: 'A'

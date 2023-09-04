@@ -4,6 +4,7 @@
 # Dati per la gestione di un avviso:
 #   tipo: indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
 #   sedi: sedi a cui è destinato l'avviso
+#   anno: anno iniziale dell'A.S. a cui si riferisce l'avviso
 #   data: data dell'evento associato all'avviso
 #   ora: ora associata all'evento dell'avviso
 #   oraFine: ora finale associata all'evento dell'avviso
@@ -35,6 +36,7 @@ App\Entity\Avviso:
   avviso_U:
     tipo: 'U'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("10:30", "12:00")>'
     oraFine:
@@ -51,6 +53,7 @@ App\Entity\Avviso:
   avviso_E:
     tipo: 'E'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("09:00", "10:30")>'
     oraFine:
@@ -67,6 +70,7 @@ App\Entity\Avviso:
   avviso_A:
     tipo: 'A'
     sedi: '<collection(@sede_2)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("08:30", "10:00")>'
     oraFine: '<dateTimeBetween("11:30", "12:30")>'
@@ -83,6 +87,7 @@ App\Entity\Avviso:
   avviso_I:
     tipo: 'I'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -99,6 +104,7 @@ App\Entity\Avviso:
   avviso_D:
     tipo: 'D'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -115,6 +121,7 @@ App\Entity\Avviso:
   avviso_O:
     tipo: 'O'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -131,6 +138,7 @@ App\Entity\Avviso:
   avviso_V:
     tipo: 'V'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -147,6 +155,7 @@ App\Entity\Avviso:
   avviso_P:
     tipo: 'P'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -163,6 +172,7 @@ App\Entity\Avviso:
   avviso_C:
     tipo: 'C'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -179,6 +189,7 @@ App\Entity\Avviso:
   avviso_C_allegato:
     tipo: 'C'
     sedi: '<collection(@sede_1)>'
+    anno: '2023'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
