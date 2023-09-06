@@ -14,6 +14,7 @@ use App\Entity\Cattedra;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Proxies\__CG__\App\Entity\Materia;
 
 
 /**
@@ -249,11 +250,12 @@ class CattedraRepository extends BaseRepository {
    *
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
+   * @param Materia $materia Materia della lezione
    * @param array $firme Lista di firme alla lezione del docente
    *
    * @return array Dati formattati in un array associativo
    */
-  public function altreMaterie(Docente $docente, Classe $classe, array $firme): array {
+  public function altreMaterie(Docente $docente, Classe $classe, Materia $materia, array $firme): array {
     $dati = array();
     // lista cattedre
     $cattedre = $this->createQueryBuilder('c')
@@ -265,9 +267,14 @@ class CattedraRepository extends BaseRepository {
       ->getQuery()
       ->getResult();
     // dati materie
+    $dati['cattedre'] = [];
+    $dati['selezionato'] = null;
     foreach ($cattedre as $cattedra) {
-      $materia = $cattedra->getMateria()->getNomeBreve();
-      $dati[$materia] = $cattedra->getId();
+      $nomeMateria = $cattedra->getMateria()->getNomeBreve();
+      $dati['cattedre'][$nomeMateria] = $cattedra->getId();
+      if ($cattedra->getMateria()->getId() == $materia->getId()) {
+        $dati['selezionato'] = $cattedra->getId();
+      }
       // controlla cattedre in compresenza
       foreach ($firme as $firma) {
         if (!($firma instanceOf FirmaSostegno) && $firma->getDocente()->getId() != $docente->getId()) {
@@ -276,7 +283,7 @@ class CattedraRepository extends BaseRepository {
             'classe' => $classe, 'materia' => $cattedra->getMateria(), 'attiva' => 1]);
           if (!$compresenza) {
             // non esiste compresenza sulla materia con almeno un docente: esclude dalla lista
-            unset($dati[$materia]);
+            unset($dati['cattedre'][$nomeMateria]);
           }
         }
       }

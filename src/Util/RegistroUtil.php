@@ -272,12 +272,9 @@ class RegistroUtil {
       // azione di modifica
       if ($annotazione) {
         // esiste annotazione
-        if ($docente->getId() == $annotazione->getDocente()->getId()) {
+        if ($docente->getId() == $annotazione->getDocente()->getId() &&
+            (!$classe || $classe->getId() == $annotazione->getClasse()->getId())) {
           // stesso docente: ok
-          return true;
-        }
-        if (in_array('ROLE_STAFF', $annotazione->getDocente()->getRoles()) && in_array('ROLE_STAFF', $docente->getRoles())) {
-          // docente è dello staff come anche chi ha scritto annotazione: ok
           return true;
         }
       }
@@ -285,12 +282,9 @@ class RegistroUtil {
       // azione di cancellazione
       if ($annotazione) {
         // esiste annotazione
-        if ($docente->getId() == $annotazione->getDocente()->getId()) {
+        if ($docente->getId() == $annotazione->getDocente()->getId() &&
+            (!$classe || $classe->getId() == $annotazione->getClasse()->getId())) {
           // stesso docente: ok
-          return true;
-        }
-        if (in_array('ROLE_STAFF', $annotazione->getDocente()->getRoles()) && in_array('ROLE_STAFF', $docente->getRoles())) {
-          // docente è dello staff come anche chi ha scritto annotazione: ok
           return true;
         }
       }
@@ -331,11 +325,12 @@ class RegistroUtil {
         // esiste nota
         $ora = (new \DateTime())->modify('-30 min');
         if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato()) {
+            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
           // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
           return true;
         }
-        if (in_array('ROLE_STAFF', $docente->getRoles())) {
+        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
+            $classe->getId() == $nota->getClasse()->getId()) {
           // solo staff: ok
           return true;
         }
@@ -346,11 +341,12 @@ class RegistroUtil {
         // esiste nota
         $ora = (new \DateTime())->modify('-30 min');
         if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato()) {
+            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
           // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
           return true;
         }
-        if (in_array('ROLE_STAFF', $docente->getRoles())) {
+        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
+            $classe->getId() == $nota->getClasse()->getId()) {
           // solo staff: ok
           return true;
         }

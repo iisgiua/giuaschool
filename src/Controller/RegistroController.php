@@ -642,12 +642,12 @@ class RegistroController extends BaseController
     } elseif (in_array($lezioneDocente->getMateria()->getTipo(), ['N', 'E'], true)) {
       // permette cambio materia
       $altreMaterie = $this->em->getRepository('App\Entity\Cattedra')->altreMaterie($this->getUser(),
-        $lezioneDocente->getClasse(), $firmeLezioni[$tipoLezione]);
-      if (count($altreMaterie) > 1) {
+        $lezioneDocente->getClasse(), $lezioneDocente->getMateria(), $firmeLezioni[$tipoLezione]);
+      if (count($altreMaterie['cattedre']) > 1) {
         $form = $form
           ->add('materia', ChoiceType::class, array('label' => 'label.materia',
-            'data' => $lezioneDocente->getMateria()->getId(),
-            'choices' => $altreMaterie,
+            'data' => $altreMaterie['selezionato'],
+            'choices' => $altreMaterie['cattedre'],
             'choice_translation_domain' => false,
             'disabled' => false,
             'required' => true));
@@ -686,7 +686,7 @@ class RegistroController extends BaseController
         $log['modifica'] = [$vecchiaLezione, $lezioneDocente];
       }
       // altre modifiche
-      if (count($altreMaterie) > 1) {
+      if (count($altreMaterie['cattedre']) > 1) {
         // materie diverse su cattedre curricolari (escluso religione)
         $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($form->get('materia')->getData());
         $materia = $cattedra->getMateria();
@@ -1084,6 +1084,8 @@ class RegistroController extends BaseController
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
+    // lista alunni della classe
+    $listaAlunni = $reg->alunniInData(new \DateTime(), $classe);
     // opzione scelta filtro
     $alunni = array();
     if (!empty($dest_filtro)) {
@@ -1109,11 +1111,11 @@ class RegistroController extends BaseController
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
-        'query_builder' => function (EntityRepository $er) use ($classe) {
+        'query_builder' => function (EntityRepository $er) use ($listaAlunni) {
             return $er->createQueryBuilder('a')
-              ->where('a.classe=:classe and a.abilitato=1')
+              ->where('a.id IN (:lista)')
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-              ->setParameters(['classe' => $classe]);
+              ->setParameters(['lista' => $listaAlunni]);
           },
         'expanded' => true,
         'multiple' => true,
@@ -1386,7 +1388,6 @@ class RegistroController extends BaseController
         ->setData($dataObj)
         ->setClasse($classe)
         ->setDocente($this->getUser());
-      $disabilitato = false;
     }
     // controlla permessi
     if (!$reg->azioneNota(($id > 0 ? 'edit' : 'add'), $dataObj, $this->getUser(), $classe, ($id > 0 ? $nota : null))) {
@@ -1399,6 +1400,8 @@ class RegistroController extends BaseController
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
+    // lista alunni della classe
+    $listaAlunni = $reg->alunniInData($dataObj, $classe);
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('nota_edit', FormType::class, $nota)
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_nota',
@@ -1413,11 +1416,11 @@ class RegistroController extends BaseController
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
-        'query_builder' => function (EntityRepository $er) use ($classe) {
+        'query_builder' => function (EntityRepository $er) use ($listaAlunni) {
           return $er->createQueryBuilder('a')
-            ->where('a.classe=:classe and a.abilitato=1')
+            ->where('a.id IN (:lista)')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['classe' => $classe]);
+            ->setParameters(['lista' => $listaAlunni]);
           },
         'expanded' => true,
         'multiple' => true,
