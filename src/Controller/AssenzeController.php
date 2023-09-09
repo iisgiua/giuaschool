@@ -66,7 +66,10 @@ class AssenzeController extends BaseController {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
-    $dati = null;
+    $dati = [];
+    $dati['filtro']['S'] = [];
+    $dati['filtro']['A'] = [];
+    $dati['filtro']['N'] = [];
     $num_avvisi = 0;
     $lista_circolari = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
