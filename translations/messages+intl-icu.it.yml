@@ -1684,3 +1684,4 @@ exception.no_docente: Non ha selezionato il docente.
 exception.no_sostegno: Non ha selezionato il docente di sostegno.
 exception.no_classe: Non ha selezionato la classe.
 exception.no_circolare: Non ha selezionato la circolare.
+exception.nota_classe_non_prevista: Non è possibile inserire una nota a tutta la classe.

@@ -61,7 +61,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function quadroAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                               int $cattedra, int $classe, string $data, string $vista, 
+                               int $cattedra, int $classe, string $data, string $vista,
                                int $posizione): Response {
     // inizializza variabili
     $lista_festivi = null;
@@ -208,7 +208,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                int $cattedra, int $classe, string $data, int $alunno, int $id, 
+                                int $cattedra, int $classe, string $data, int $alunno, int $id,
                                 int $posizione): Response {
     // controlla cattedra
     if ($cattedra > 0) {
@@ -363,7 +363,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function entrataAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                                LogHandler $dblogger, int $cattedra, int $classe, string $data,
                                 int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
@@ -573,7 +573,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, int $cattedra, int $classe, string $data, 
+                               LogHandler $dblogger, int $cattedra, int $classe, string $data,
                                int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
@@ -770,7 +770,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function giustificaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $cattedra, int $classe, string $data, int $alunno, 
+                                   int $cattedra, int $classe, string $data, int $alunno,
                                    int $posizione): Response {
     // inizializza
     $label = array();
@@ -812,11 +812,6 @@ class AssenzeController extends BaseController {
     }
     // modalità assenze giornaliere
     $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
-    $func_convalida = function ($value, $key, $index) {
-      return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
-        '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
-    $func_assenze = function ($value, $key, $index) {
-      return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : ''); };
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
@@ -828,7 +823,9 @@ class AssenzeController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
       ->add('convalida_assenze', ChoiceType::class, array('label' => 'label.convalida_assenze',
         'choices' => $giustifica['convalida_assenze'],
-        'choice_label' => $func_convalida,
+        'choice_label' => function ($value, $key, $index) {
+          return $value->data.($value->giorni > 1 ? (' - '.$value->fine.' ('.$value->giorni.' giorni)') : '').
+            '<br>Motivazione: <em>'.$value->motivazione.'</em>'; },
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,
@@ -861,7 +858,8 @@ class AssenzeController extends BaseController {
         'required' => false))
       ->add('assenze', ChoiceType::class, array('label' => 'label.assenze',
         'choices' => $giustifica['assenze'],
-        'choice_label' => $func_assenze,
+        'choice_label' => function ($value, $key, $index) {
+          return $value->data.($value->giorni > 1 ? (' - '.$value->fine.' ('.$value->giorni.' giorni)') : ''); },
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,
@@ -995,7 +993,7 @@ class AssenzeController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function appelloAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, int $cattedra, int $classe, 
+                                LogHandler $dblogger, int $cattedra, int $classe,
                                 string $data): Response {
     // inizializza
     $label = array();
@@ -1132,69 +1130,6 @@ class AssenzeController extends BaseController {
               $this->em->remove($uscita);
             }
             break;
-          //-- case 'R':   // ritardo
-            //-- // validazione orario
-            //-- if ($appello->getOra()->format('H:i:00') <= $orario[0]['inizio'] ||
-                //-- $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
-              //-- // errore su orario
-              //-- $form->get('lista')[$key]->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
-              //-- continue 2;
-            //-- }
-            //-- // controlla esistenza ritardo
-            //-- $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
-            //-- if ($entrata) {
-              //-- if ($entrata->getOra()->format('H:i') != $appello->getOra()->format('H:i')) {
-                //-- // modifica
-                //-- $log['entrata_edit'][] = array($entrata->getId(), $entrata->getAlunno()->getId(),
-                  //-- $entrata->getOra()->format('H:i'), $entrata->getNote(), $entrata->getGiustificato(),
-                  //-- $entrata->getDocente()->getId(), $entrata->getDocenteGiustifica());
-                //-- $entrata
-                  //-- ->setOra($appello->getOra())
-                  //-- ->setDocente($this->getUser())
-                  //-- ->setRitardoBreve(false)
-                  //-- ->setGiustificato(null)
-                  //-- ->setDocenteGiustifica(null);
-                //-- // controlla ritardo breve
-                //-- $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
-                //-- $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
-                //-- if ($appello->getOra() <= $inizio) {
-                  //-- // ritardo breve: giustificazione automatica (non imposta docente)
-                  //-- $entrata
-                    //-- ->setRitardoBreve(true)
-                    //-- ->setGiustificato($data_obj)
-                    //-- ->setDocenteGiustifica(null)
-                    //-- ->setValido(false);
-                //-- }
-              //-- }
-            //-- } else {
-              //-- // inserisce ritardo
-              //-- $entrata = (new Entrata())
-                //-- ->setData($data_obj)
-                //-- ->setAlunno($alunno)
-                //-- ->setDocente($this->getUser())
-                //-- ->setOra($appello->getOra())
-                //-- ->setValido(false);
-              //-- // controlla ritardo breve
-              //-- $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
-              //-- $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
-              //-- if ($appello->getOra() <= $inizio) {
-                //-- // ritardo breve: giustificazione automatica (non imposta docente)
-                //-- $entrata
-                  //-- ->setRitardoBreve(true)
-                  //-- ->setGiustificato($data_obj)
-                  //-- ->setDocenteGiustifica(null);
-              //-- }
-              //-- $this->em->persist($entrata);
-              //-- $log['entrata_create'][] = $entrata;
-            //-- }
-            //-- // controlla esistenza assenza
-            //-- $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
-            //-- if ($assenza) {
-              //-- // rimuove assenza
-              //-- $log['assenza_delete'][] = array($assenza->getId(), $assenza);
-              //-- $this->em->remove($assenza);
-            //-- }
-            //-- break;
         }
       }
       if ($form->isValid()) {

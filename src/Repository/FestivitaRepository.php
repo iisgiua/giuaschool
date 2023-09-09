@@ -174,8 +174,10 @@ class FestivitaRepository extends BaseRepository {
         // controllo se giorno senza lezioni
         $lezioni = $this->_em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('COUNT(l.id)')
-          ->where('l.data=:data AND l.classe=:classe')
-          ->setParameters(['data' => $prec, 'classe' => $classe])
+          ->join('l.classe', 'c')
+          ->where("l.data=:data AND c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo='N' OR (l.tipoGruppo='C' AND l.gruppo=:gruppo))")
+          ->setParameters(['data' => $prec, 'anno' => $classe->getAnno(),
+            'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
           ->getQuery()
           ->getSingleScalarResult();
         if ($lezioni) {

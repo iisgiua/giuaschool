@@ -569,7 +569,7 @@ class RegistroUtil {
         if ($this->azioneAnnotazione('add', $data, $docente, $classe)) {
           // pulsante add
           $dati[$dataStr]['annotazioni']['add'] = $this->router->generate('lezioni_registro_annotazione_edit', array(
-            'classe' => $classe->getId(), 'data' => $dataStr));
+             'classe' => $classe->getId(), 'data' => $dataStr));
         }
       }
     }
@@ -599,7 +599,8 @@ class RegistroUtil {
         if ($this->azioneNota('add', $dataNotaPrec, $docente, $classe)) {
           // pulsante add
           $dati[$dataNotaPrec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-            'classe' => $classe->getId(), 'data' =>$dataNotaPrec->format('Y-m-d')));
+            'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+            'data' =>$dataNotaPrec->format('Y-m-d')));
         }
       }
       $nt = array();
@@ -627,7 +628,8 @@ class RegistroUtil {
       if ($this->azioneNota('edit', $n->getData(), $docente, $classe, $n)) {
         // pulsante edit
         $nt['edit'] = $this->router->generate('lezioni_registro_nota_edit', array(
-          'classe' => $classe->getId(), 'data' => $n->getData()->format('Y-m-d'), 'id' => $n->getId()));
+          'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+          'data' => $n->getData()->format('Y-m-d'), 'id' => $n->getId()));
       }
       if ($this->azioneNota('delete', $n->getData(), $docente, $classe, $n)) {
         // pulsante delete
@@ -645,7 +647,8 @@ class RegistroUtil {
       if ($this->azioneNota('add', $dataNotaPrec, $docente, $classe)) {
         // pulsante add
         $dati[$dataNotaPrec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-          'classe' => $classe->getId(), 'data' =>$dataNotaPrec->format('Y-m-d')));
+          'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+          'data' =>$dataNotaPrec->format('Y-m-d')));
       }
     }
     // aggiunge info per date senza note
@@ -657,7 +660,8 @@ class RegistroUtil {
         if ($this->azioneNota('add', $data, $docente, $classe)) {
           // pulsante add
           $dati[$dataStr]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-            'classe' => $classe->getId(), 'data' => $dataStr));
+            'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+            'data' => $dataStr));
         }
       }
     }
@@ -691,7 +695,7 @@ class RegistroUtil {
       $genitori = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista);
       // dati alunni/assenze/ritardi/uscite
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
+        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS id_classe,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
         ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
         ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
         ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
@@ -703,7 +707,16 @@ class RegistroUtil {
         ->getArrayResult();
       // dati giustificazioni
       $noAppello = false;
+      $dati['filtro']['S'] = [];
+      $dati['filtro']['A'] = [];
+      $dati['filtro']['N'] = [];
       foreach ($alunni as $k=>$alu) {
+        // filtro alunni
+        if ($alu['religione'] == 'S' || $alu['religione'] == 'A') {
+          $dati['filtro'][$alu['religione']][] = $alu['id_alunno'];
+        } else {
+          $dati['filtro']['N'][] = $alu['id_alunno'];
+        }
         // conteggio assenze da giustificare
         $giustifica_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
@@ -772,21 +785,20 @@ class RegistroUtil {
           $noAppello = true;
         }
         // gestione pulsanti
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
-        $pulsanti = $this->azioneAssenze($inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));
+        $pulsanti = $this->azioneAssenze($inizio, $docente, null, null, ($cattedra ? $cattedra->getMateria() : null));
         if ($pulsanti) {
           // url pulsanti
           if ($alu['id_assenza'] > 0) {
             $urlPresenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
               'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
           } else {
             $urlAssenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
               'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => 0));
           }
           $urlEntrata = $this->router->generate('lezioni_assenze_entrata', array(
-            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
             'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
             // pulsante uscita se richiesta presente
@@ -797,10 +809,10 @@ class RegistroUtil {
           } else {
             // pulsante uscita standard
             $urlUscita = $this->router->generate('lezioni_assenze_uscita', array(
-                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
+                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
                 'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           }
-          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse', ['classe' => $classe->getId(),
+          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse', ['classe' => $alu['id_classe'],
             'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_presenza'] ?? 0]);
           // controlla fuori classe
           if ($alu['id_presenza']) {
@@ -830,7 +842,7 @@ class RegistroUtil {
               $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
             // pulsante giustifica
             $alunni[$k]['pulsante_giustifica'] = $this->router->generate('lezioni_assenze_giustifica', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$dataStr,
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'], 'data' =>$dataStr,
               'alunno' => $alu['id_alunno']));
           }
         }
@@ -1047,9 +1059,9 @@ class RegistroUtil {
     $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
       ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe AND ass.data<:data')
+      ->where('a.id=:alunno AND ass.data<:data')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'data' => $data->format('Y-m-d')])
+      ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
@@ -1113,7 +1125,7 @@ class RegistroUtil {
         $dichiarazione = array_merge($dichiarazione, $a['dichiarazione']);
         $certificati = array_merge($certificati, $a['certificati']);
         $ids .= ','.$a['id'];
-        $prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($dataObj, null, $alunno->getClasse());
+        $prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($dataObj, null, null);
       }
       if ($fine && $giustificato != 'D') {
         // termina gruppo precedente
@@ -1202,7 +1214,7 @@ class RegistroUtil {
         $appello = (new Appello())
           ->setId($elemento['id'])
           ->setAlunno($elemento['cognome'].' '.$elemento['nome'].' ('.$elemento['dataNascita']->format('d/m/Y').')')
-          ->setPresenza($elemento['assenza'] ? 'A' : ($elemento['entrata'] ? 'R' : 'P'))
+          ->setPresenza($elemento['assenza'] ? 'A' : 'P')
           ->setOra($elemento['ora'] ? $elemento['ora'] : new \DateTime());
         if ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
             $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
@@ -1532,18 +1544,34 @@ class RegistroUtil {
     // lezioni del giorno
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,s.ora,s.inizio,s.fine,s.durata')
+      ->join('l.classe', 'c')
       ->join('App\Entity\ScansioneOraria', 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
       ->join('s.orario', 'o')
-      ->where('l.data=:data AND l.classe=:classe AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-        'sede' => $alunno->getClasse()->getSede(), 'giorno' => $data->format('w')])
+      ->where("l.data=:data AND c.anno=:anno AND c.sezione=:sezione AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
+      ->setParameters(['giorno' => $data->format('w'), 'data' => $data->format('Y-m-d'),
+        'anno' => $alunno->getClasse()->getAnno(), 'sezione' => $alunno->getClasse()->getSezione(),
+        'sede' => $alunno->getClasse()->getSede()]);
+    if (empty($alunno->getClasse()->getGruppo())) {
+      // nessun gruppo
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='N' OR (l.tipoGruppo='R' AND l.gruppo=:religione)")
+        ->setParameter('religione', in_array($alunno->getReligione(), ['S', 'A'], true) ?
+          $alunno->getReligione() : 'N');
+    } else {
+      // gruppi presenti
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='N' OR (l.tipoGruppo='R' AND l.gruppo=:religione) OR (l.tipoGruppo='C' AND l.gruppo=:gruppo)")
+        ->setParameter('religione', in_array($alunno->getReligione(), ['S', 'A'], true) ?
+          $alunno->getReligione() : 'N')
+        ->setParameter('gruppo', $alunno->getClasse()->getGruppo());
+    }
+    $lezioni = $lezioni
       ->getQuery()
       ->getArrayResult();
     // elimina ore assenze esistenti
     $this->em->getConnection()
-      ->prepare('DELETE FROM gs_assenza_lezione WHERE alunno_id=:alunno AND lezione_id IN (SELECT id FROM gs_lezione WHERE data=:data AND classe_id=:classe)')
-      ->executeStatement(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'),
-        'classe' => $alunno->getClasse()->getId()]);
+      ->prepare('DELETE al FROM gs_assenza_lezione AS al, gs_lezione AS l WHERE al.lezione_id=l.id AND al.alunno_id=:alunno AND l.data=:data')
+      ->executeStatement(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')]);
     // legge assenza del giorno
     $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data]);
     if ($assenza) {
@@ -1674,48 +1702,31 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $dati = array();
     $ore = array();
-    if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+    if ($cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di sostegno
       return $this->argomentiSostegno($cattedra);
     }
-    // cattedra non di sostegno
-    if ($cattedra->getTipo() == 'A') {
-      // cattedra di materia alternativa
-      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
-        ->getDql();
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('f.docente', 'd')
-        ->join('l.materia', 'm')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))) AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->orderBy('l.data', 'DESC')
-        ->addOrderBy('l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
-          'civica' => 'E', 'sede' => $cattedra->getClasse()->getSede()])
-        ->getQuery()
-        ->getArrayResult();
-    } else {
-      // cattedra regolare
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
-        ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->leftJoin('f.docente', 'd')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->orderBy('l.data', 'DESC')
-        ->addOrderBy('l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()])
-        ->getQuery()
-        ->getArrayResult();
+    // legge lezioni
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
+      ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->leftJoin('f.docente', 'd')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('so.orario', 'o')
+      ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->orderBy('l.data', 'DESC')
+      ->addOrderBy('l.ora', 'ASC')
+      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+        'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
     }
+    $lezioni = $lezioni
+      ->getQuery()
+      ->getArrayResult();
     // imposta array associativo
     $data_prec = null;
     $num = 0;
@@ -1807,11 +1818,14 @@ class RegistroUtil {
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost,m.nomeBreve')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione')
-      ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND (fs.alunno=:alunno OR fs.alunno IS NULL)")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'alunno' => $cattedra->getAlunno()])
+      ->setParameters(['anno' => $cattedra->getClasse()->getAnno(),
+        'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo(),
+        'alunno' => $cattedra->getAlunno()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -1950,7 +1964,14 @@ class RegistroUtil {
       ->orderBy('l.data,l.ora', 'ASC')
       ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
         'docente' => $cattedra->getDocente(), 'mese' => intval($data->format('m')),
-        'sede' => $cattedra->getClasse()->getSede()])
+        'sede' => $cattedra->getClasse()->getSede()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
+    }
+    $lezioni = $lezioni
       ->getQuery()
       ->getArrayResult();
     // legge assenze/voti
@@ -2036,13 +2057,16 @@ class RegistroUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,so.durata')
+      ->join('l.classe', 'c')
       ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
       ->orderBy('l.data,l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'docente' => $cattedra->getDocente(),
-        'alunno' => $alunno, 'mese' => intval($data->format('m')), 'sede' => $cattedra->getClasse()->getSede()])
+      ->setParameters(['anno' => $cattedra->getClasse()->getAnno(),
+        'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo(),
+        'docente' => $cattedra->getDocente(), 'alunno' => $alunno, 'mese' => intval($data->format('m')),
+        'sede' => $cattedra->getClasse()->getSede()])
       ->getQuery()
       ->getArrayResult();
     // legge assenze
@@ -2565,34 +2589,21 @@ class RegistroUtil {
   public function programma(Cattedra $cattedra) {
     // inizializza
     $dati = array();
-    if ($cattedra->getTipo() == 'A') {
-      // cattedra di materia alternativa
-      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
-        ->getDql();
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('f.docente', 'd')
-        ->join('l.materia', 'm')
-        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
-        ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
-          'civica' => 'E'])
-        ->getQuery()
-        ->getArrayResult();
-    } else {
-      // cattedra normale
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento')
-        ->where('l.classe=:classe AND l.materia=:materia')
-        ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()])
-        ->getQuery()
-        ->getArrayResult();
+    // legge lezioni
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+    ->select('l.id,l.data,l.ora,l.argomento')
+    ->where('l.classe=:classe AND l.materia=:materia')
+    ->orderBy('l.data,l.ora', 'ASC')
+    ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
     }
+    $lezioni = $lezioni
+      ->getQuery()
+      ->getArrayResult();
     // imposta programma (elimina ripetizioni)
     foreach ($lezioni as $l) {
       $argomento = strip_tags($l['argomento']);

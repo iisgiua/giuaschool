@@ -23,7 +23,6 @@
       {{ form_widget(form) }}
       {{ form_end(form) }}
     </div>
-
   </div>
 </div>
 {% endblock %}
@@ -48,8 +47,13 @@ $(document).ready(function() {
     } else {
       $(this).parent().removeClass('active');
     }
-  }).change();
+  });
+  {% if label.materia.tipo == 'R' or label.materia.tipo == 'U' %}
+  // init
+  $("input[name='nota_edit[tipo]'][value='C']").prop('disabled', true).prop('checked', false);
+  $("input[name='nota_edit[tipo]'][value='I']").prop('checked', true);
+  $("input[name='nota_edit[tipo]']").val('I').change();
+  {% endif %}
 });
 </script>
 {% endblock %}
-

@@ -25,9 +25,9 @@ class Appello {
   private int $id = 0;
 
   /**
-   * @var string $alunno Nome da visualizzare per l'alunno
+   * @var string|null $alunno Nome da visualizzare per l'alunno
    */
-  private string $alunno = '';
+  private ?string $alunno = '';
 
   /**
    * @var string $presenza Indica la presenza dell'alunno [P=presente, A=assente, R=ritardo]
@@ -75,11 +75,11 @@ class Appello {
   /**
    * Modifica il nome da visualizzare per l'alunno
    *
-   * @var string $alunno Nome da visualizzare per l'alunno
+   * @var string|null $alunno Nome da visualizzare per l'alunno
    *
    * @return Appello Oggetto modificato
    */
-  public function setAlunno(string $alunno): self {
+  public function setAlunno(?string $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -139,4 +139,3 @@ class Appello {
   }
 
 }
-

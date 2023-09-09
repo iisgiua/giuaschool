@@ -33,7 +33,18 @@
       <a class="btn btn-success" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello"><span class="glyphicon glyphicon-hand-up gs-mr-3"></span>Appello</a>
       {% endif %}
     </div>
-    <div class="col-sm-5 text-right">
+    <div class="col-sm-3 text-right">
+      {% if not cattedra %}
+      <strong class="gs-big gs-mr-2">Filtro:</strong>
+      <select id="gs-filtro-alunni" class="gs-placeholder form-control" style="width:auto;display:inline;">
+        <option value="T">Tutti</option>
+        <option value="S">Gruppo: Religione</option>
+        <option value="A">Gruppo: Mat. Alt.</option>
+        <option value="N">Gruppo: N. A.</option>
+      </select>
+      {% endif %}
+    </div>
+    <div class="col-sm-2 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le assenze del giorno"><span class="glyphicon glyphicon-stop"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza le assenze del mese"><span class="glyphicon glyphicon-th"></span></a>
@@ -58,7 +69,7 @@
     <tbody>
           {% for k,v in dati[data].lista %}
             {% if (tab == 'N' and (not cattedra or cattedra.materia.tipo != 'R' or v.religione == tipo_rel)) or (tab == 'R' and v.religione != tipo_rel) %}
-      <tr>
+      <tr id="gs-alunno-{{ v.id_alunno }}" class="gs-alunno-riga">
         <td>{{ loop.index }}</td>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
@@ -210,10 +221,24 @@ $(document).ready(function() {
       window.location.href = url+'/'+Math.floor($('html').scrollTop());
     }
   });
+  $('#gs-filtro-alunni').change(function() {
+    if ($(this).val() == 'T') {
+      $('.gs-alunno-riga').show();
+    } else {
+      $('.gs-alunno-riga').hide();
+      for (i=0; i < filtro[$(this).val()].length; i++) {
+        $('#gs-alunno-'+filtro[$(this).val()][i]).show();
+      }
+    }
+  });
   // init
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}
+  var filtro = [];
+  filtro['S'] = [{% for a in dati.filtro['S'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
+  filtro['A'] = [{% for a in dati.filtro['A'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
+  filtro['N'] = [{% for a in dati.filtro['N'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
 });
 </script>
 {% endblock %}

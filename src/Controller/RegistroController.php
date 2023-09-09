@@ -594,6 +594,7 @@ class RegistroController extends BaseController
     }
     // form di modifica
     $altreMaterie = [];
+    $altreMaterie['cattedre'] = [];
     $altriGruppi = [];
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class);
     if (($firmaDocente instanceOf FirmaSostegno) && empty($firmaDocente->getAlunno())) {
@@ -1332,13 +1333,14 @@ class RegistroController extends BaseController
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $id Identificativo della nota (se nullo aggiunge)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/registro/nota/edit/{classe}/{data}/{id}", name="lezioni_registro_nota_edit",
+   * @Route("/lezioni/registro/nota/edit/{cattedra}/{classe}/{data}/{id}", name="lezioni_registro_nota_edit",
    *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
    *    defaults={"id": 0},
    *    methods={"GET","POST"})
@@ -1346,10 +1348,30 @@ class RegistroController extends BaseController
    * @IsGranted("ROLE_DOCENTE")
    */
   public function notaEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                 LogHandler $dblogger, int $classe, string $data, int $id): Response {
+                                 LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                                 int $id): Response {
     // inizializza
     $label = array();
     $docente_staff = in_array('ROLE_STAFF', $this->getUser()->getRoles());
+    // controlla cattedra
+    if ($cattedra > 0) {
+      // lezioni di una cattedra esistente
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'classe' => $classe, 'attiva' => 1]);
+      if (!$cattedra) {
+        // errore: non esiste la cattedra
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+      $materia = $cattedra->getMateria();
+    } else {
+      // supplenza
+      $cattedra = null;
+      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      if (!$materia) {
+        // errore: dati inconsistenti
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -1400,6 +1422,7 @@ class RegistroController extends BaseController
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
+    $label['materia'] = $materia;
     // lista alunni della classe
     $listaAlunni = $reg->alunniInData($dataObj, $classe);
     // form di inserimento
@@ -1451,8 +1474,12 @@ class RegistroController extends BaseController
         if (count($nota->getAlunni()) == 0) {
           $form->get('alunni')->addError(new FormError($trans->trans('field.notblank', [], 'validators')));
         }
+      } elseif ($materia->getTipo() == 'R' || $materia->getTipo() == 'U') {
+        // nota di classe per religione o supplenza: non previsto
+        $form->get('testo')->addError(
+          new FormError($trans->trans('exception.nota_classe_non_prevista')));
       } else {
-        // nota di classe
+        // nota di classe per altre materie
         $nota->setAlunni(new ArrayCollection());
         // valida testo: errore se contiene nomi di alunni
         $nome = $reg->contieneNomiAlunni($dataObj, $classe, $nota->getTesto());
@@ -1491,7 +1518,7 @@ class RegistroController extends BaseController
         }
         // messaggio
         if (!$docente_staff) {
-          $this->addFlash('danger', 'message.nota_edit_temporizzato');
+          $this->addFlash('danger', $trans->trans('message.nota_edit_temporizzato'));
         }
         // redirezione
         return $this->redirectToRoute('lezioni_registro_firme');

@@ -109,7 +109,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiAction(Request $request, RegistroUtil $reg, int $cattedra, 
+  public function argomentiAction(Request $request, RegistroUtil $reg, int $cattedra,
                                   int $classe): Response {
     // inizializza variabili
     $info = null;
@@ -370,7 +370,7 @@ class LezioniController extends BaseController {
       $m = substr($m, 0, -1);
     }
     $info['documento'] = 'PROGRAMMA-'.$cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().
-      '-'.$m.'.docx';
+      $cattedra->getClasse()->getGruppo().'-'.$m.'.docx';
     // configurazione documento
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();

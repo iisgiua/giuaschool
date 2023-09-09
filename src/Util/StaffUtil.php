@@ -147,11 +147,18 @@ class StaffUtil {
     $dati = array();
     // legge note di classe
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
-      ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
+      ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov,c.gruppo")
       ->join('n.docente', 'd')
+      ->join('n.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND n.classe=:classe')
-      ->setParameters(['tipo' => 'C', 'classe' => $classe])
+      ->where('n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['tipo' => 'C', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()]);
+    if (!empty($classe->getGruppo())) {
+      $note = $note
+        ->andWhere('c.gruppo=:gruppo')
+        ->setParameter('gruppo', $classe->getGruppo());
+    }
+    $note = $note
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -167,17 +174,25 @@ class StaffUtil {
         'nota_doc' => $n['docente'],
         'esclusi' => $alunni,
         'provvedimento' => $n['provvedimento'],
-        'provvedimento_doc' => $n['docente_prov']);
+        'provvedimento_doc' => $n['docente_prov'],
+        'gruppo' => $n['gruppo']);
     }
     // legge note individuali
     $individuali = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->join('n.alunni', 'a')
       ->join('n.docente', 'd')
+      ->join('a.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND n.classe=:classe')
-      ->setParameters(['tipo' => 'I', 'classe' => $classe])
-      ->getQuery()
-      ->getResult();
+      ->where('n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['tipo' => 'I', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()]);
+      if (!empty($classe->getGruppo())) {
+        $individuali = $individuali
+          ->andWhere('c.gruppo=:gruppo')
+          ->setParameter('gruppo', $classe->getGruppo());
+      }
+      $individuali = $individuali
+        ->getQuery()
+        ->getResult();
     // imposta array associativo per note individuali
     foreach ($individuali as $n) {
       $data = $n->getData()->format('Y-m-d');
@@ -185,7 +200,7 @@ class StaffUtil {
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
       $alunni = array();
       foreach ($n->getAlunni() as $alu) {
-        $alunni[] = $alu->getCognome().' '.$alu->getNome();
+        $alunni[] = ''.$alu;
       }
       sort($alunni);
       $dati_periodo[$numperiodo][$data]['individuale'][] = array(
