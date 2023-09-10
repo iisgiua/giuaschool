@@ -24,8 +24,6 @@ use App\Entity\OsservazioneClasse;
 use App\Entity\Sede;
 use App\Form\Appello;
 use App\Form\VotoClasse;
-use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
@@ -1251,9 +1249,10 @@ class RegistroUtil {
   public function esisteCattedra(Docente $docente, Classe $classe, Materia $materia) {
     $cattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
-      ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.attiva=:attiva AND c.tipo!=:tipo')
-      ->setParameters(['docente' => $docente, 'classe' => $classe, 'materia' => $materia, 'attiva' => 1,
-        'tipo' => 'S'])
+      ->join('c.classe', 'cl')
+      ->where("c.docente=:docente AND c.materia=:materia AND c.attiva=1 AND c.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
+      ->setParameters(['docente' => $docente, 'materia' => $materia, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getSingleScalarResult();
     return ($cattedra > 0);
@@ -1278,12 +1277,18 @@ class RegistroUtil {
     $oggi = new \DateTime();
     if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
       // data non nel futuro
-      if (!$alunno || $this->classeInData($data, $alunno) == $classe) {
-        // alunno è nella classe indicata
-        if ($materia && $this->esisteCattedra($docente, $classe, $materia)) {
-          // non è supplenza e esiste la cattedra (non di sostegno)
-          return true;
+      if ($alunno) {
+        $classeAlunno = $this->classeInData($data, $alunno);
+        if ($classeAlunno->getAnno() != $classe->getAnno() ||
+            $classeAlunno->getSezione() != $classe->getSezione() ||
+            ($classeAlunno->getGruppo() != $classe->getGruppo() && !empty($classe->getGruppo()))) {
+          // la classe è diversa: non consentito
+          return false;
         }
+      }
+      if ($materia && $this->esisteCattedra($docente, $classe, $materia)) {
+        // non è supplenza e esiste la cattedra (non di sostegno)
+        return true;
       }
     }
     // non consentito
@@ -1306,62 +1311,63 @@ class RegistroUtil {
    */
   public function elencoVoti(\DateTime $data, Docente $docente, Classe $classe, Materia $materia,
                               $tipo, $religione, &$argomento, &$visibile) {
-    $elenco = array();
+    $dati = [];
     $argomento = null;
     $visibile = null;
     // alunni della classe
-    $lista_alunni = $this->alunniInData($data, $classe);
-    // legge i voti degli degli alunni
-    $voti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
-      ->leftJoin('App\Entity\Lezione', 'l', 'WITH', 'l.classe=:classe AND l.data=:data')
-      ->leftJoin('App\Entity\Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia')
-      ->where('a.id IN (:alunni)')
-      ->setParameters(['alunni' => $lista_alunni, 'docente' => $docente, 'tipo' => $tipo,
-        'materia' => $materia, 'classe' => $classe, 'data' => $data->format('Y-m-d')])
+    $listaAlunni = $this->alunniInData($data, $classe);
+    // legge i dati degli alunni
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione')
+      ->where('a.id IN (:lista)'.($religione ? " AND a.religione='$religione'" : ''))
+      ->setParameters(['lista' => $listaAlunni])
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->addOrderBy('v.id', 'DESC')
       ->getQuery()
       ->getArrayResult();
-    $alunno_prec = 0;
-    foreach ($voti as $v) {
-      if ($materia->getTipo() != 'R' || $v['religione'] == $religione) {
-        if ($v['voto'] > 0) {
-          $voto_int = intval($v['voto'] + 0.25);
-          $voto_dec = $v['voto'] - intval($v['voto']);
-          $voto_str = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-        } else {
-          $voto_str = '--';
-        }
-        if ($v['alunno_id'] != $alunno_prec || (!empty($v['voto']) || !empty($v['giudizio']))) {
-          // aggiunge voto
-          $voto = (new VotoClasse())
-            ->setId($v['alunno_id'])
-            ->setAlunno($v['cognome'].' '.$v['nome'].' ('.$v['dataNascita']->format('d/m/Y').')')
-            ->setBes($v['bes'])
-            ->setMedia($v['media'])
-            ->setVoto($v['voto'])
-            ->setVotoTesto($voto_str)
-            ->setGiudizio($v['giudizio'])
-            ->setVotoId($v['id']);
-          $elenco[] = $voto;
-        }
-        // argomento globale
-        if (!$argomento && $v['argomento'] != '') {
-          $argomento = trim($v['argomento']);
-        }
-        // visibilità globale
-        if ($visibile === null && $v['visibile'] !== null) {
-          $visibile = $v['visibile'] ? '1' : '0';
-        }
+    foreach ($alunni as $alunno) {
+      $dati[$alunno['id']] = (new VotoClasse())
+        ->setId($alunno['id'])
+        ->setAlunno($alunno['cognome'].' '.$alunno['nome'].' ('.$alunno['dataNascita']->format('d/m/Y').')')
+        ->setBes($alunno['bes']);
+    }
+    // legge i voti
+    $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
+      ->select('(v.alunno) AS alunno_id,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
+      ->join('v.lezione', 'l')
+      ->where('v.alunno IN (:lista) AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia AND l.data=:data')
+      ->setParameters(['lista' => $listaAlunni, 'docente' => $docente, 'tipo' => $tipo,
+        'materia' => $materia, 'data' => $data->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($voti as $voto) {
+      if ($voto['voto'] > 0) {
+        $votoInt = (int) ($voto['voto'] + 0.25);
+        $votoDec = $voto['voto'] - ((int) $voto['voto']);
+        $votoStr = $votoInt.($votoDec == 0.25 ? '+' : ($votoDec == 0.75 ? '-' : ($votoDec == 0.5 ? '½' : '')));
+      } else {
+        $votoStr = '--';
       }
-      $alunno_prec = $v['alunno_id'];
+      // aggiunge voto
+      $dati[$voto['alunno_id']]
+        ->setMedia($voto['media'])
+        ->setVoto($voto['voto'])
+        ->setVotoTesto($votoStr)
+        ->setGiudizio($voto['giudizio'])
+        ->setVotoId($voto['id']);
+      // argomento globale
+      if (!$argomento && !empty($voto['argomento'])) {
+        $argomento = trim($voto['argomento']);
+      }
+      // visibilità globale
+      if ($visibile === null && $voto['visibile'] !== null) {
+        $visibile = $voto['visibile'] ? '1' : '0';
+      }
     }
     if ($visibile === null) {
       $visibile = '1';
     }
     // restituisce elenco
-    return $elenco;
+    return $dati;
   }
 
   /**
@@ -1421,19 +1427,23 @@ class RegistroUtil {
     $dati['classe']['O'] = array();
     $dati['classe']['P'] = array();
     // alunni della classe
-    $lista_alunni = $this->alunniInPeriodo($inizio, $fine, $cattedra->getClasse());
+    $listaAlunni = $this->alunniInPeriodo($inizio, $fine, $cattedra->getClasse());
+    $tutti = array_merge($listaAlunni[0], $listaAlunni[1]);
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($tutti);
     // legge i dati degli degli alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS classe_id')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni])
+      ->setParameters(['alunni' => $tutti])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
+      if (in_array($alu['id'], $listaAlunni[1])) {
+        $dati['trasferiti'][$alu['id']] = true;
+      }
       $dati['voti'][$alu['id']]['S'] = array();
       $dati['voti'][$alu['id']]['O'] = array();
       $dati['voti'][$alu['id']]['P'] = array();
@@ -1446,7 +1456,7 @@ class RegistroUtil {
       ->join('v.docente', 'd')
       ->where('a.id IN (:alunni) AND v.materia=:materia AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
       ->orderBy('l.data', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni, 'materia' => $cattedra->getMateria(),
+      ->setParameters(['alunni' => $tutti, 'materia' => $cattedra->getMateria(),
         'classe' => $cattedra->getClasse(), 'inizio' => $inizio->format('Y-m-d'),
         'fine' => $fine->format('Y-m-d')])
       ->getQuery()
@@ -2310,7 +2320,7 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge osservazioni
     $osservazioni = $this->em->getRepository('App\Entity\OsservazioneClasse')->createQueryBuilder('o')
-      ->where('o.cattedra=:cattedra AND o NOT INSTANCE OF App\Entity\OsservazioneAlunno')
+      ->where('o.cattedra=:cattedra AND (o NOT INSTANCE OF App\Entity\OsservazioneAlunno)')
       ->orderBy('o.data', 'DESC')
       ->setParameters(['cattedra' => $cattedra])
       ->getQuery()
@@ -2432,7 +2442,7 @@ class RegistroUtil {
     foreach ($voti as $v) {
       $data = $v['data']->format('Y-m-d');
       $periodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $v['dataStr'] = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $v['data_str'] = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
       if ($v['voto'] > 0) {
         $voto_int = intval($v['voto'] + 0.25);
         $voto_dec = $v['voto'] - intval($v['voto']);
@@ -2544,6 +2554,21 @@ class RegistroUtil {
    * @return bool Restituisce vero se il blocco è attivo
    */
   public function bloccoScrutinio(\DateTime $data, Classe $classe=null) {
+    // controlla gruppi
+    $lista = [];
+    if ($classe && empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $lista = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($lista)) {
+      // indicata intera classe: controlla tutti i gruppo
+      $blocco = false;
+      foreach ($lista as $gruppo) {
+        $blocco |= $this->bloccoScrutinio($data, $gruppo);
+      }
+      // restituisce lista di ID
+      return $blocco;
+    }
     // blocco scrutinio
     $oggi = (new \DateTime())->format('Y-m-d');
     $modifica = $data->format('Y-m-d');
@@ -2652,30 +2677,45 @@ class RegistroUtil {
    * @return array Lista degli ID degli alunni
    */
   public function alunniInPeriodo(\DateTime $inizio, \DateTime $fine, Classe $classe) {
-      // aggiunge alunni attuali che non hanno fatto cambiamenti di classe per tutto il periodo
-      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
-        ->where('cc.alunno=a.id AND cc.inizio<=:inizio AND cc.fine>=:fine')
-        ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
-      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
-        ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-          'classe' => $classe, 'abilitato' => 1])
-        ->getQuery()
-        ->getScalarResult();
-      // aggiunge altri alunni con cambiamento nella classe nel periodo
-      $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
-        ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-          'classe' => $classe])
-        ->getQuery()
-        ->getScalarResult();
-      $alunni = array_merge($alunni, $alunni2);
-    // restituisce lista di ID
-    $alunni_id = array_map('current', $alunni);
-    return $alunni_id;
+    // controlla gruppi
+    $lista = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $lista = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($lista)) {
+      // indicata intera classe: legge alunni di tutti i gruppi
+      $alunniId = [[], []];
+      foreach ($lista as $gruppo) {
+        $altri = $this->alunniInPeriodo($inizio, $fine, $gruppo);
+        $alunniId[0] = array_merge($alunniId[0], $altri[0]);
+        $alunniId[1] = array_merge($alunniId[1], $altri[1]);
+      }
+      // restituisce lista di ID
+      return $alunniId;
+    }
+    // aggiunge alunni attuali che non hanno fatto cambiamenti di classe per tutto il periodo
+    $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
+      ->where('cc.alunno=a.id AND cc.inizio<=:inizio AND cc.fine>=:fine')
+      ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id')
+      ->where('a.classe=:classe AND a.abilitato=1 AND NOT EXISTS ('.$cambio->getDQL().')')
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'classe' => $classe])
+      ->getQuery()
+      ->getSingleColumnResult();
+    // aggiunge altri alunni con cambiamento nella classe nel periodo
+    $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id')
+      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+      ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'classe' => $classe])
+      ->getQuery()
+      ->getSingleColumnResult();
+    // restituisce lista di ID della classe corrente e dei cambi
+    return [$alunni, $alunni2];
   }
 
   /**

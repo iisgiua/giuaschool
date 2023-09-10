@@ -202,10 +202,11 @@ class GenitoriUtil {
   public function materie(Classe $classe, $sostegno) {
     $materie = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.id,m.nomeBreve')
+      ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
-      ->where('c.classe=:classe AND c.tipo=:tipo AND c.attiva=:attiva AND m.tipo!=:sostegno')
+      ->where("c.attiva=1 AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
       ->orderBy('m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'tipo' => 'N', 'attiva' => 1, 'sostegno' => 'S'])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     if ($sostegno) {
@@ -400,11 +401,10 @@ class GenitoriUtil {
       ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
-      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=v.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('v.alunno=:alunno AND v.visibile=:visibile AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where('v.alunno=:alunno AND v.visibile=:visibile')
       ->orderBy('m.nomeBreve', 'ASC')
       ->addOrderBy('l.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'visibile' => 1, 'classe' => $classe]);
+      ->setParameters(['alunno' => $alunno, 'visibile' => 1]);
     if ($materia) {
       $voti = $voti
         ->andWhere('v.materia=:materia')
@@ -1030,16 +1030,16 @@ class GenitoriUtil {
     }
     // scrutinio rinviato svolto nel corrente A.S.
     $classeAnno = $dati['esito']->getClasse()[0];
-    $classeSezione = strpos($dati['esito']->getClasse(), '-') === false ? 
+    $classeSezione = strpos($dati['esito']->getClasse(), '-') === false ?
       substr($dati['esito']->getClasse(), 1) :
       substr($dati['esito']->getClasse(), 1, strpos($dati['esito']->getClasse(), '-') - 1);
-    $classeGruppo = strpos($dati['esito']->getClasse(), '-') === false ? '' : 
+    $classeGruppo = strpos($dati['esito']->getClasse(), '-') === false ? '' :
       substr($dati['esito']->getClasse(), strpos($dati['esito']->getClasse(), '-') + 1);
     $dati['esitoRinviato'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
       ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
-      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione, 
+      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione,
         'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X', 'data' => new \DateTime()])
       ->setMaxResults(1)
       ->getQuery()

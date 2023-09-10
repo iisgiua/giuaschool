@@ -49,7 +49,7 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe, 
+  public function osservazioniAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
                                      string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
@@ -176,7 +176,7 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioneEditAction(Request $request, RegistroUtil $reg,
-                                         LogHandler $dblogger, int $cattedra, string $data, 
+                                         LogHandler $dblogger, int $cattedra, string $data,
                                          int $id): Response {
     // inizializza
     $label = array();
@@ -231,6 +231,8 @@ class OsservazioniController extends BaseController {
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$cattedra->getClasse();
+    // lista alunni della classe
+    $listaAlunni = $reg->alunniInData($data_obj, $cattedra->getClasse());
     // form di inserimento
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
@@ -240,12 +242,12 @@ class OsservazioniController extends BaseController {
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
-        'query_builder' => function (EntityRepository $er) use ($cattedra,$religione) {
+        'query_builder' => function (EntityRepository $er) use ($listaAlunni,$religione) {
             return $er->createQueryBuilder('a')
-              ->where('a.classe=:classe and a.abilitato=:abilitato'.
+              ->where('a.id IN (:lista)'.
                 ($religione ? " and a.religione='".$religione."'" : ''))
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-              ->setParameters(['classe' => $cattedra->getClasse(), 'abilitato' => 1]);
+              ->setParameters(['lista' => $listaAlunni]);
           },
         'expanded' => true,
         'multiple' => false,
@@ -477,7 +479,7 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazionePersonaleEditAction(Request $request, RegistroUtil $reg,
-                                                  LogHandler $dblogger, int $cattedra, string $data, 
+                                                  LogHandler $dblogger, int $cattedra, string $data,
                                                   int $id): Response {
     // inizializza
     $label = array();

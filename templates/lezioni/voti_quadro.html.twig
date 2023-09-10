@@ -115,7 +115,7 @@
       <tr>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-          <strong{{ a.classe_id!=classe.id ? ' class="text-danger"' }}>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
+          <strong{{ dati.trasferiti[a.id] is defined ? ' class="text-danger"' }}>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
         </td>
         {% for tipo in ['S','O','P'] %}
@@ -208,7 +208,7 @@ $(document).ready(function() {
         $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
       }
     });
-  });  
+  });
 });
 </script>
 {% endblock %}

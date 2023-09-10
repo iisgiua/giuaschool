@@ -30,9 +30,9 @@ class VotoClasse {
   private string $alunno = '';
 
   /**
-   * @var string $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    */
-  private string $bes = '';
+  private ?string $bes = '';
 
   /**
    * @var bool $media Indica se il voto è utilizzato nelle medie
@@ -40,24 +40,24 @@ class VotoClasse {
   private bool $media = true;
 
   /**
-   * @var float $voto Voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
+   * @var float|null $voto Voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
    */
-  private float $voto = 0;
+  private ?float $voto = 0;
 
   /**
-   * @var string $voto Voto rappresentato come testo (es: 6-,6,6+,6½)
+   * @var string|null $votoTesto Voto rappresentato come testo (es: 6-,6,6+,6½)
    */
-  private string $votoTesto = '';
+  private ?string $votoTesto = '';
 
   /**
-   * @var string $giudizio Giudizio della valutazione
+   * @var string|null $giudizio Giudizio della valutazione
    */
-  private string $giudizio = '';
+  private ?string $giudizio = '';
 
   /**
-   * @var int $id Identificativo univoco per la valutazione (null se non presente)
+   * @var int|null $id Identificativo univoco per la valutazione (null se non presente)
    */
-  private int $votoId = 0;
+  private ?int $votoId = 0;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -107,20 +107,20 @@ class VotoClasse {
   /**
    * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @return string Bisogni educativi speciali dell'alunno
+   * @return string|null Bisogni educativi speciali dell'alunno
    */
-  public function getBes(): string {
+  public function getBes(): ?string {
     return $this->bes;
   }
 
   /**
    * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @param string $bes Bisogni educativi speciali dell'alunno
+   * @param string|null $bes Bisogni educativi speciali dell'alunno
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setBes(string $bes): string {
+  public function setBes(?string $bes): self {
     $this->bes = $bes;
     return $this;
   }
@@ -137,32 +137,32 @@ class VotoClasse {
   /**
    * Modifica se il voto è utilizzato nelle medie
    *
-   * @param boolean $media Indica se il voto è utilizzato nelle medie
+   * @param bool|null $media Indica se il voto è utilizzato nelle medie
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setMedia(bool $media): self {
-    $this->media = $media;
+  public function setMedia(?bool $media): self {
+    $this->media = ($media == true);
     return $this;
   }
 
   /**
    * Restituisce il voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
    *
-   * @return float Voto numerico della valutazione
+   * @return float|null Voto numerico della valutazione
    */
-  public function getVoto(): float {
+  public function getVoto(): ?float {
     return $this->voto;
   }
 
   /**
    * Modifica il voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
    *
-   * @param float $voto Voto numerico della valutazione
+   * @param float|null $voto Voto numerico della valutazione
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setVoto(float $voto): self {
+  public function setVoto(?float $voto): self {
     $this->voto = $voto;
     return $this;
   }
@@ -170,20 +170,20 @@ class VotoClasse {
   /**
    * Restituisce il voto rappresentato come testo (es: 6-,6,6+,6½)
    *
-   * @return string Voto rappresentato come testo
+   * @return string|null Voto rappresentato come testo
    */
-  public function getVotoTesto(): string {
+  public function getVotoTesto(): ?string {
     return $this->votoTesto;
   }
 
   /**
    * Modifica il voto rappresentato come testo (es: 6-,6,6+,6½)
    *
-   * @param string $voto Voto rappresentato come testo
+   * @param string|null $voto Voto rappresentato come testo
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setVotoTesto(string $votoTesto): self {
+  public function setVotoTesto(?string $votoTesto): self {
     $this->votoTesto = $votoTesto;
     return $this;
   }
@@ -191,20 +191,20 @@ class VotoClasse {
   /**
    * Restituisce il giudizio della valutazione
    *
-   * @return string Giudizio della valutazione
+   * @return string|null Giudizio della valutazione
    */
-  public function getGiudizio(): string {
+  public function getGiudizio(): ?string {
     return $this->giudizio;
   }
 
   /**
    * Modifica il giudizio della valutazione
    *
-   * @param string $giudizio Giudizio della valutazione
+   * @param string|null $giudizio Giudizio della valutazione
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setGiudizio(string $giudizio): self {
+  public function setGiudizio(?string $giudizio): self {
     $this->giudizio = $giudizio;
     return $this;
   }
@@ -212,20 +212,20 @@ class VotoClasse {
   /**
    * Restituisce l'identificativo univoco per la valutazione
    *
-   * @return int Identificativo univoco per la valutazione
+   * @return int|null Identificativo univoco per la valutazione
    */
-  public function getVotoId(): int {
+  public function getVotoId(): ?int {
     return $this->votoId;
   }
 
   /**
    * Modifica l'identificativo univoco per la valutazione
    *
-   * @var integer $votoId Identificativo univoco per la valutazione
+   * @var int $votoId|null Identificativo univoco per la valutazione
    *
    * @return VotoClasse Oggetto modificato
    */
-  public function setVotoId(int $votoId): self {
+  public function setVotoId(?int $votoId): self {
     $this->votoId = $votoId;
     return $this;
   }
