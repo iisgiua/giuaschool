@@ -98,14 +98,16 @@ class ScrutinioUtil {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               RequestStack $reqstack, LogHandler $dblogger, $root) {
+                              RequestStack $reqstack, LogHandler $dblogger, RegistroUtil $reg, $root) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
     $this->reqstack = $reqstack;
+    $this->reg = $reg;
     $this->dblogger = $dblogger;
     $this->root = $root;
     // imposta directory per gli scrutini
@@ -126,7 +128,16 @@ class ScrutinioUtil {
    * @return array Dati formattati come un array associativo
    */
   public function periodi(Classe $classe) {
-    $lista = array();
+    $lista = [];
+    $listaGruppi = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $listaGruppi = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($listaGruppi)) {
+      // indicata intera classe: legge periodo di primo gruppo
+      return $this->periodi($listaGruppi[0]);
+    }
     // legge definizione scrutini
     $periodi = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
@@ -157,29 +168,14 @@ class ScrutinioUtil {
   public function elencoProposte(Docente $docente, Classe $classe, Materia $materia, $tipo, $periodo) {
     $elenco = array();
     // alunni della classe
-    if ($materia->getTipo() == 'R') {
-      // religione/att.alt.: solo alunni che si avvalgono
-      $lista_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND a.religione IN (:religione)')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1,
-          'religione' => $tipo ? ($tipo == 'N' ? ['S'] : ['A']) : ['S', 'A']])
-        ->getQuery()
-        ->getScalarResult();
-    } else {
-      // non è religione: tutti gli alunni
-      $lista_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
-        ->getQuery()
-        ->getScalarResult();
-    }
+    $listaAlunni = $this->reg->alunniInData(new \DateTime(), $classe);
     // legge i dati degli degli alunni
+    $tipoReligione = $tipo ? ($tipo == 'N' ? "'S'" : "'A'") : "'S', 'A'";
+    $religione = $materia->getTipo() == 'R' ? (' AND a.religione IN ('.$tipoReligione.')') : '';
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->where('a.id IN (:alunni)')
+      ->where('a.id IN (:alunni)'.$religione)
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni])
+      ->setParameters(['alunni' => $listaAlunni])
       ->getQuery()
       ->getResult();
     foreach ($alunni as $alu) {
@@ -188,7 +184,7 @@ class ScrutinioUtil {
     }
     // legge le proposte di voto
     $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->proposte($classe, $periodo,
-      $lista_alunni, [$materia->getId()], $materia->getTipo() == 'E' ? $docente : null);
+      array_keys($elenco['alunni']), [$materia->getId()], $materia->getTipo() == 'E' ? $docente : null);
     foreach ($proposte as $idAlu => $proposta) {
       // inserisce proposte trovate
       $idDoc = array_keys($proposta[$materia->getId()])[0];
@@ -2450,7 +2446,7 @@ class ScrutinioUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-        ->setParameters(['alunno' => $a['id'], 
+        ->setParameters(['alunno' => $a['id'],
           'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
           'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
         ->getQuery()
@@ -2464,7 +2460,7 @@ class ScrutinioUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
-        ->setParameters(['alunno' => $a['id'], 
+        ->setParameters(['alunno' => $a['id'],
           'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
           'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
         ->getQuery()
@@ -4955,13 +4951,14 @@ class ScrutinioUtil {
   public function quadroVotiPrecedente(Docente $docente, Classe $classe) {
     $dati = array();
     $dati['alunni'] = array();
+    $lista = $this->reg->alunniInData(new \DateTime(), $classe);
     // legge alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,se.classe,se.esito,se.media,se.periodo,se.dati')
       ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
-      ->where('a.classe=:classe')
+      ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['classe' => $classe->getId()])
+      ->setParameters(['lista' => $lista])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -4987,13 +4984,13 @@ class ScrutinioUtil {
         $classeAnno = $alu['classe'][0];
         $classeSezione = strpos($alu['classe'], '-') === false ? substr($alu['classe'], 1) :
           substr($alu['classe'], 1, strpos($alu['classe'], '-') - 1);
-        $classeGruppo = strpos($alu['classe'], '-') === false ? '' : 
+        $classeGruppo = strpos($alu['classe'], '-') === false ? '' :
           substr($alu['classe'], strpos($alu['classe'], '-') + 1);
         $esitoRinviato = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->join('s.classe', 'cl')
           ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
-          ->setParameters(['alunno' => $alu['id'], 'anno' => $classeAnno, 'sezione' => $classeSezione, 
+          ->setParameters(['alunno' => $alu['id'], 'anno' => $classeAnno, 'sezione' => $classeSezione,
             'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
           ->setMaxResults(1)
           ->getQuery()
