@@ -6,11 +6,9 @@
  */
 
 
-namespace App\Tests\UnitTest\MessageHandler;
+namespace App\Tests\UnitTest\Repository;
 
-use App\Repository\BaseRepository;
 use App\Tests\DatabaseTestCase;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
 
 
