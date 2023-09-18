@@ -638,9 +638,21 @@ class CsvImporter {
           $fields['classe'] = null;
         } else {
           // classe esistente
-          $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(array(
-            'anno' => $fields['classe'][0],
-            'sezione' => trim(substr($fields['classe'], 1))));
+          $classeAnno = (int) $fields['classe'][0];
+          $classeSezione = trim(substr($fields['classe'], 1));
+          $classeGruppo = '';
+          if (($pos = strpos($classeSezione, '-')) !== false) {
+            $classeGruppo = substr($classeSezione, $pos + 1);
+            $classeSezione = substr($classeSezione, 0, $pos);
+          }
+          $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+            ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+              ($classeGruppo ? 'c.gruppo=:classe' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+            ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+              'gruppo' => $classeGruppo])
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
           if (!$classe) {
             // errore: classe
             fclose($this->fh);

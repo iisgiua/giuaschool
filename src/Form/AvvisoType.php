@@ -320,17 +320,19 @@ class AvvisoType extends AbstractType {
       function ($filtro) {
         return explode(',', $filtro);
       }));
-    $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
-      function ($sedi) {
-        $s = [];
-        foreach ($sedi as $sede) {
-          $s[$sede->getNomeBreve()] = $sede;
-        }
-        return $s;
-      },
-      function ($sedi) {
-        return new ArrayCollection($sedi);
-      }));
+    if (!in_array($options['form_mode'], ['coordinatore', 'verifica', 'compito'])) {
+      $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
+        function ($sedi) {
+          $s = [];
+          foreach ($sedi as $sede) {
+            $s[$sede->getNomeBreve()] = $sede;
+          }
+          return $s;
+        },
+        function ($sedi) {
+          return new ArrayCollection($sedi);
+        }));
+    }
   }
 
   /**

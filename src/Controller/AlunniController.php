@@ -133,7 +133,7 @@ class AlunniController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
-        $criteri['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
@@ -505,7 +505,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeEditAction(Request $request, TranslatorInterface $trans, int $id, 
+  public function classeEditAction(Request $request, TranslatorInterface $trans, int $id,
                                    string $tipo): Response {
     $form_help = 'message.required_fields';
     // controlla azione
@@ -547,7 +547,7 @@ class AlunniController extends BaseController {
           // dati fittizi temporanei
           $cambio->setInizio(new \DateTime());
           break;
-        default:    // aggiungi 
+        default:    // aggiungi
           $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(null, null);
           $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
           $values = [$opzioniAlunni, $opzioniClassi];

@@ -736,7 +736,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age, 
+  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age,
                                       int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);

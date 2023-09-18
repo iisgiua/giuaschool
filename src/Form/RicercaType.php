@@ -52,7 +52,7 @@ class RicercaType extends AbstractType {
         ->add('classe', ChoiceType::class, array('label' => 'label.classe',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
-          'choice_value' => 'id',
+          'choice_value' => (fn($c) => is_object($c) ? $c->getId() : (int) $c),
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
