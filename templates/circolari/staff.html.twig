@@ -84,25 +84,6 @@
                   {% if a.notifica %}<div class="gs-ml-5">Forza invio notifica</div>{% endif %}
                   {% if not a.firma and not a.notifica %}<div class="gs-ml-5">NESSUNA</div>{% endif %}
                 </div>
-      {% if form.anno.vars.value == dati.annoCorrente %}
-                <div class="gs-mt-2">
-                  <div><strong>Statistiche di lettura:</strong></div>
-                  {% if a.alunni != 'N' and a.alunni != 'U' %}
-                  <div class="gs-ml-5">
-                    <strong>NELLE CLASSI {{ (dati.info[a.id].lettura['CLASSI'][1] / dati.info[a.id].lettura['CLASSI'][0] * 100)|number_format(0) }}%</strong>
-                    {% if dati.info[a.id].lettura['CLASSI'][2]|length > 0 %}
-                    (non letta in: {% for c in dati.info[a.id].lettura['CLASSI'][2] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %})
-                    {% endif %}
-                  </div>
-                  {% endif %}
-                  {% if a.dsga %}<div class="gs-ml-5">DSGA {{ (dati.info[a.id].lettura['DSGA'][1] / dati.info[a.id].lettura['DSGA'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['DSGA'][1] }} su {{ dati.info[a.id].lettura['DSGA'][0] }})</div>{% endif %}
-                  {% if a.ata %}<div class="gs-ml-5">ATA {{ (dati.info[a.id].lettura['ATA'][1] / dati.info[a.id].lettura['ATA'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['ATA'][1] }} su {{ dati.info[a.id].lettura['ATA'][0] }})</div>{% endif %}
-                  {% if a.coordinatori != 'N' %}<div class="gs-ml-5">COORDINATORI {{ (dati.info[a.id].lettura['COORD'][1] / dati.info[a.id].lettura['COORD'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['COORD'][1] }} su {{ dati.info[a.id].lettura['COORD'][0] }})</div>{% endif %}
-                  {% if a.docenti != 'N' %}<div class="gs-ml-5">DOCENTI {{ (dati.info[a.id].lettura['DOC'][1] / dati.info[a.id].lettura['DOC'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['DOC'][1] }} su {{ dati.info[a.id].lettura['DOC'][0] }})</div>{% endif %}
-                  {% if a.genitori != 'N' %}<div class="gs-ml-5">GENITORI {{ (dati.info[a.id].lettura['GEN'][1] / dati.info[a.id].lettura['GEN'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['GEN'][1] }} su {{ dati.info[a.id].lettura['GEN'][0] }})</div>{% endif %}
-                  {% if a.alunni != 'N' %}<div class="gs-ml-5">ALUNNI {{ (dati.info[a.id].lettura['ALU'][1] / dati.info[a.id].lettura['ALU'][0] * 100)|number_format(0) }}% ({{ dati.info[a.id].lettura['ALU'][1] }} su {{ dati.info[a.id].lettura['ALU'][0] }})</div>{% endif %}
-                </div>
-      {% endif %}
               </div>
             </div>
             <div class="list-group-item">

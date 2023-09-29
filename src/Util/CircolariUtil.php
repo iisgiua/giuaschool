@@ -271,7 +271,7 @@ class CircolariUtil {
     }
     // statistiche di lettura
     if ($circolare->getPubblicata()) {
-      $dati['lettura'] = $this->em->getRepository('App\Entity\Circolare')->statistiche($circolare);
+      $dati['statistiche'] = $this->em->getRepository('App\Entity\Circolare')->statistiche($circolare);
     }
     // restituisce dati
     return $dati;
@@ -289,7 +289,7 @@ class CircolariUtil {
     if (($utente instanceOf Docente) || ($utente instanceOf Ata)) {
       // staff/docente/ata: tutte le circolari
       return true;
-    } 
+    }
     // altri: solo destinatari
     $cu = $this->em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
     return ($cu != null);

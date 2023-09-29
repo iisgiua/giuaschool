@@ -1300,12 +1300,15 @@ class RegistroController extends BaseController
         ->getQuery()
         ->execute();
       // cancella avviso
-      $this->em->remove($annotazione->getAvviso());
+      $vecchioAvviso = $annotazione->getAvviso();
       $annotazione->setAvviso(null);
     }
     // cancella annotazione
     $annotazione_id = $annotazione->getId();
     $this->em->remove($annotazione);
+    if (!empty($vecchioAvviso)) {
+      $this->em->remove($vecchioAvviso);
+    }
     // ok: memorizza dati
     $this->em->flush();
     // rimuove notifica

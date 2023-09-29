@@ -37,26 +37,6 @@
     <div class="col-sm-2"><strong>Stato:</strong></div>
     <div class="col-sm-10">{{ circolare.pubblicata ? 'PUBBLICATA' : 'IN BOZZA' }}</div>
   </div>
-  {% if circolare.pubblicata %}
-  <div class="row gs-mt-2">
-    <div class="col-sm-2"><strong>Lettura:</strong></div>
-    <div class="col-sm-10">
-    {% if circolare.alunni != 'N' and circolare.alunni != 'U' %}
-      <strong>NELLE CLASSI {{ (dati.lettura['CLASSI'][1] / dati.lettura['CLASSI'][0] * 100)|number_format(0) }}%</strong>
-      {% if dati.lettura['CLASSI'][2]|length > 0 %}
-      (non letta in: {% for c in dati.lettura['CLASSI'][2] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %})
-      {% endif %}
-      <br>
-    {% endif %}
-    {% if circolare.dsga %}DSGA {{ (dati.lettura['DSGA'][1] / dati.lettura['DSGA'][0] * 100)|number_format(0) }}% ({{ dati.lettura['DSGA'][1] }} su {{ dati.lettura['DSGA'][0] }})<br>{% endif %}
-    {% if circolare.ata %}ATA {{ (dati.lettura['ATA'][1] / dati.lettura['ATA'][0] * 100)|number_format(0) }}% ({{ dati.lettura['ATA'][1] }} su {{ dati.lettura['ATA'][0] }})<br>{% endif %}
-    {% if circolare.coordinatori != 'N' %}COORDINATORI {{ (dati.lettura['COORD'][1] / dati.lettura['COORD'][0] * 100)|number_format(0) }}% ({{ dati.lettura['COORD'][1] }} su {{ dati.lettura['COORD'][0] }})<br>{% endif %}
-    {% if circolare.docenti != 'N' %}DOCENTI {{ (dati.lettura['DOC'][1] / dati.lettura['DOC'][0] * 100)|number_format(0) }}% ({{ dati.lettura['DOC'][1] }} su {{ dati.lettura['DOC'][0] }})<br>{% endif %}
-    {% if circolare.genitori != 'N' %}GENITORI {{ (dati.lettura['GEN'][1] / dati.lettura['GEN'][0] * 100)|number_format(0) }}% ({{ dati.lettura['GEN'][1] }} su {{ dati.lettura['GEN'][0] }})<br>{% endif %}
-    {% if circolare.alunni != 'N' %}ALUNNI {{ (dati.lettura['ALU'][1] / dati.lettura['ALU'][0] * 100)|number_format(0) }}% ({{ dati.lettura['ALU'][1] }} su {{ dati.lettura['ALU'][0] }})<br>{% endif %}
-    </div>
-  </div>
-  {% endif %}
   <div class="row gs-mt-2">
     <div class="col-sm-2"><strong>Documento:</strong></div>
     <div class="col-sm-10">
@@ -71,6 +51,115 @@
       <a target="_blank" href="{{ path('circolari_download', {'id': circolare.id, 'doc': n+1}) }}" title="Scarica l'allegato"><strong>Allegato {{ n+1 }}</strong></a><br>
     {% endfor %}
     </div>
+  </div>
+  {% endif %}
+  {% if circolare.pubblicata %}
+  <div class="gs-mt-2">
+    <strong>Statistiche di lettura:</strong>
+    {% if dati.statistiche.dsga[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">DSGA: {{ (dati.statistiche.dsga[1] / dati.statistiche.dsga[0] * 100)|number_format(0) }}% ({{ dati.statistiche.dsga[1] }} su {{ dati.statistiche.dsga[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.dsga[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-dsga">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.dsga[1] > 0 %}
+    <div id="gs-collapse-dsga" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.dsga[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.ata[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">ATA: {{ (dati.statistiche.ata[1] / dati.statistiche.ata[0] * 100)|number_format(0) }}% ({{ dati.statistiche.ata[1] }} su {{ dati.statistiche.ata[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.ata[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-ata">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.ata[1] > 0 %}
+    <div id="gs-collapse-ata" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.ata[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.coordinatori[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Coordinatori: {{ (dati.statistiche.coordinatori[1] / dati.statistiche.coordinatori[0] * 100)|number_format(0) }}% ({{ dati.statistiche.coordinatori[1] }} su {{ dati.statistiche.coordinatori[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.coordinatori[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-coordinatori">Dettagli</button></div>
+    </div>
+        {% if dati.statistiche.coordinatori[1] > 0 %}
+    <div id="gs-collapse-coordinatori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+          {% for u in dati.statistiche.coordinatori[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+          {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.docenti[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Docenti: {{ (dati.statistiche.docenti[1] / dati.statistiche.docenti[0] * 100)|number_format(0) }}% ({{ dati.statistiche.docenti[1] }} su {{ dati.statistiche.docenti[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.docenti[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-docenti">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.docenti[1] > 0 %}
+    <div id="gs-collapse-docenti" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.docenti[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.genitori[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Genitori: {{ (dati.statistiche.genitori[1] / dati.statistiche.genitori[0] * 100)|number_format(0) }}% ({{ dati.statistiche.genitori[1] }} su {{ dati.statistiche.genitori[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.genitori[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-genitori">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.genitori[1] > 0 %}
+    <div id="gs-collapse-genitori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.genitori[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.alunni[0] > 0 %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Alunni: {{ (dati.statistiche.alunni[1] / dati.statistiche.alunni[0] * 100)|number_format(0) }}% ({{ dati.statistiche.alunni[1] }} su {{ dati.statistiche.alunni[0] }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.alunni[1] == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-alunni">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.alunni[1] > 0 %}
+    <div id="gs-collapse-alunni" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.alunni[2] %}
+      <div class="row">
+        <div class="col-sm-8">{{ u[1] }}</div>
+        <div class="col-sm-4 text-right">{{ u[0]|date('d/m/Y H:i') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.classi[0] > 0 %}
+    <div class="gs-ml-4">
+      Classi: {{ (dati.statistiche.classi[1] / dati.statistiche.classi[0] * 100)|number_format(0) }}%  ({{ dati.statistiche.classi[1] }} su {{ dati.statistiche.classi[0] }})
+      {% if dati.statistiche.classi[1] < dati.statistiche.classi[0] %}
+      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi[2] %}{{ c }}{{ not loop.last ? ', '}}{% endfor %}
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </div>
