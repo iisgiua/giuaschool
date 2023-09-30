@@ -135,7 +135,8 @@ class RichiesteUtil {
     $this->pdf->createFromHtml($html);
     // salva il documento
     $percorso = $this->dirProgetto.'/FILES/archivio/classi/'.
-      $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().'/documenti';
+      $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().$alunno->getClasse()->getGruppo().
+      '/documenti';
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -161,7 +162,8 @@ class RichiesteUtil {
     $listaAllegati = [];
     // elabora i file
     $percorso = $this->dirProgetto.'/FILES/archivio/classi/'.
-      $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().'/documenti/';
+      $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().$alunno->getClasse()->getGruppo().
+      '/documenti/';
     $percorsoTemp = $this->dirProgetto.'/FILES/tmp/';
     $num = 1;
     foreach ($allegati as $allegato) {

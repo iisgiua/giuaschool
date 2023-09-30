@@ -35,14 +35,14 @@ class RichiestaType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     if ($options['form_mode'] == 'add') {
       // form inserimento richiesta
-      if (!$options['values'][0]) {
+      if (!$options['values'][1]) {
         // richiesta multipla: aggiunge data
         $builder->add('data', DateType::class, array('label' => false,
           'attr' => ['class' => 'gs-mb-2'],
           'widget' => 'single_text',
           'required' => true));
       }
-      foreach ($options['values'][1] as $nome => $campo) {
+      foreach ($options['values'][0] as $nome => $campo) {
         switch ($campo[0]) {
           case 'string':
             $builder->add($nome, TextType::class, array('label' => false,
