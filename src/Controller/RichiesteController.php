@@ -275,7 +275,7 @@ class RichiesteController extends BaseController {
     // invia file
     $percorso = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
       $richiesta->getUtente()->getClasse()->getAnno().$richiesta->getUtente()->getClasse()->getSezione().
-      '/documenti/';
+      $richiesta->getUtente()->getClasse()->getGruppo().'/documenti/';
     if ($documento == 0) {
       // modulo di richiesta
       $nomefile = $richiesta->getDocumento();
@@ -309,7 +309,7 @@ class RichiesteController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, string $data, int $alunno, int $richiesta, 
+                               LogHandler $dblogger, string $data, int $alunno, int $richiesta,
                                int $posizione): Response {
     // inizializza
     $info = [];
