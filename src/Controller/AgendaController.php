@@ -416,12 +416,12 @@ class AgendaController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function classeAjaxAction(int $id): JsonResponse {
-    // solo cattedre attive e normali, no supplenza, no sostegno
+    // solo cattedre attive e normali, no sostegno, no ed.civ.
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('m.id,m.nome')
+      ->select('DISTINCT m.id,m.nome')
       ->join('c.materia', 'm')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND m.tipo!=:sostegno')
-      ->setParameters(['classe' => $id, 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0, 'sostegno' => 'S'])
+      ->where("c.classe=:classe AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")
+      ->setParameters(['classe' => $id])
       ->orderBy('m.nomeBreve', 'ASC')
       ->getQuery()
       ->getArrayResult();

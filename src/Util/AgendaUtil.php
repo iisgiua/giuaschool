@@ -381,15 +381,16 @@ class AgendaUtil {
     $verifiche = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->join('c.classe', 'cl')
-      ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
+      ->where('a.tipo=:tipo AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione')
       ->setParameters(['tipo' => 'V', 'data' => $avviso->getData()->format('Y-m-d'),
-        'classe' => $avviso->getCattedra()->getClasse()])
+        'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+        'sezione' => $avviso->getCattedra()->getClasse()->getSezione()])
       ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $verifiche = $verifiche
         ->andWhere('a.id!=:avviso')
-      ->setParameter('avviso', $avviso->getId());
+        ->setParameter('avviso', $avviso->getId());
     }
     $verifiche = $verifiche
       ->getQuery()
@@ -414,10 +415,11 @@ class AgendaUtil {
     $compiti = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->join('c.classe', 'cl')
-      ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
+      ->where('a.tipo=:tipo AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione')
       ->setParameters(['tipo' => 'P', 'data' => $avviso->getData()->format('Y-m-d'),
-        'classe' => $avviso->getCattedra()->getClasse()])
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
+      'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+      'sezione' => $avviso->getCattedra()->getClasse()->getSezione()])
+    ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $compiti = $compiti

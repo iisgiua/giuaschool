@@ -117,6 +117,7 @@ class ClasseTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
+    $existent->setGruppo('');
     $this->assertSame($existent->getAnno().'ª '.$existent->getSezione(), (string) $existent, $this->entity.'::toString');
     $gruppo = $this->getReference('classe_10');
     $this->assertSame($gruppo->getAnno().'ª '.$gruppo->getSezione().'-'.$gruppo->getGruppo(), (string) $gruppo, $this->entity.'::toString');
@@ -150,7 +151,7 @@ class ClasseTest extends EntityTestCase {
     // gruppo
     $property = $this->getPrivateProperty('App\Entity\Classe', 'gruppo');
     $property->setValue($existent, '');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');    
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');
     $existent->setGruppo(str_repeat('*', 65));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::gruppo - MAX LENGTH');

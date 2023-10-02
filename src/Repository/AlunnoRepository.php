@@ -90,13 +90,16 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
+      ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
       ->where('a.abilitato=:abilitato AND a.classe IS NOT NULL AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->andWhere('cl.sede IN (:sede)')
       ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
         'sede' => $search['sede']]);
     if ($search['classe'] > 0) {
-      $query->andWhere('cl.id=:classe')->setParameter('classe', $search['classe']);
+      $query
+        ->andWhere('cl.id=:classe OR cl2.id=:classe')
+        ->setParameter('classe', $search['classe']);
     }
     // crea lista con pagine
     $res = $this->paginazione($query->getQuery(), $page);
@@ -174,7 +177,7 @@ class AlunnoRepository extends BaseRepository {
       ->getArrayResult();
     $lista_alunni = array_column($alunni, 'id');
     $errore = (count($lista) != count($lista_alunni));
-    // restituisce materie valide
+    // restituisce alunni validi
     return $lista_alunni;
   }
 
@@ -443,7 +446,7 @@ class AlunnoRepository extends BaseRepository {
     } elseif ($abilitato === false) {
       $alunni = $alunni->andWhere('a.abilitato = 0');
     }
-    $alunni = $alunni 
+    $alunni = $alunni
       ->orderBy('a.cognome,a.nome,a.dataNascita,a.username')
       ->getQuery()
       ->getResult();
