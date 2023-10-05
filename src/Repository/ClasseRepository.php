@@ -318,4 +318,35 @@ class ClasseRepository extends BaseRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce la lista delle classi articolate presenti, con informazioni sui gruppi
+   *
+   * @param array $lista Lista di identificatori delle classi
+   *
+   * @return array Array associativo delle classi articolate trovate
+   */
+  public function classiArticolate(array $lista): array {
+    $dati = [];
+    // legge gruppi
+    $classi = $this->createQueryBuilder('c')
+      ->select('c.id AS classe,cl1.id as comune,cl2.id as gruppo')
+      ->leftJoin('App\Entity\Classe', 'cl1', 'WITH', 'cl1.id!=c.id AND cl1.anno=c.anno AND cl1.sezione=c.sezione AND cl1.gruppo IS NULL')
+      ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl1.id IS NULL AND cl2.id!=c.id AND cl2.anno=c.anno AND cl2.sezione=c.sezione AND cl2.gruppo IS NOT NULL')
+      ->where('c.id IN (:lista) AND (cl1.id IS NOT NULL OR cl2.id IS NOT NULL)')
+      ->setParameters(['lista' => $lista])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($classi as $classe) {
+      if ($classe['comune']) {
+        // info classe comune
+        $dati[$classe['classe']]['comune'] = $classe['comune'];
+      } else {
+        // info gruppi classe
+        $dati[$classe['classe']]['gruppi'][] = $classe['gruppo'];
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }

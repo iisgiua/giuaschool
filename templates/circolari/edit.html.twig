@@ -20,7 +20,7 @@
           {{ form_widget(form.numero) }}
         </div>
       </div>
-      {{ form_row(form.oggetto) }} 
+      {{ form_row(form.oggetto) }}
       <div class="form-group">
         <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
         <div class="col-sm-10">
@@ -614,7 +614,7 @@ $(document).ready(function() {
     var par3 = "-"+encodeURIComponent($('#circolare_lista_classi').val() ? $('#circolare_lista_classi').val() : '');
     var par4 = "-";
     $('input[name="circolare[sedi][]"]:checked').each(function() {
-      par4 +=$(this).data('id')+"-";
+      par4 +=$(this).val()+"-";
     });
     $('#gs-modal-alunni-pag').data('par1', par1).data('par2', par2).data('par3', par3).data('par4', par4);
     alunniSearch(1);

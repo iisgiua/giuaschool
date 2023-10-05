@@ -122,7 +122,7 @@ class CircolareType extends AbstractType {
         'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
-        // 'choice_value' => 'id',
+        'choice_value' => 'id',
         'required' => false,
         'mapped' => false])
       ->add('materie', ChoiceType::class, ['label' => 'label.scegli_materie',

@@ -40,7 +40,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction(string $cognome, string $nome, string $sede, 
+  public function docentiAjaxAction(string $cognome, string $nome, string $sede,
                                     string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
@@ -81,7 +81,7 @@ class AjaxController extends BaseController {
    *
    * @param string $cognome Cognome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
    * @param string $nome Nome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
-   * @param int $classe Identificatore della classe degli alunni ("-" iniziale per evitare parametro vuoto)
+   * @param string $classe Identificatore della classe degli alunni ("-" iniziale per evitare parametro vuoto)
    * @param string $sede Lista delle sedi
    * @param string $pagina Numero della pagina della lista
    *
@@ -94,7 +94,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction(string $cognome, string $nome, int $classe, string $sede, 
+  public function alunniAjaxAction(string $cognome, string $nome, string $classe, string $sede,
                                    string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),

@@ -689,7 +689,7 @@ class RichiesteController extends BaseController {
     // form di gestione
     $form = $this->createForm(RichiestaType::class, null, [
       'form_mode' => $tipo == 'E' ? 'manageEntrata' : ($tipo == 'D' ? 'manageUscita' : 'manage'),
-      'values' => [$richiesta->getMessaggio(), $deroga]]);
+      'values' => [$deroga, $richiesta->getMessaggio()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // gestione deroghe

@@ -434,7 +434,6 @@ class ColloquiController extends BaseController {
       unset($listaSedi['']);
     }
     // informazioni per la visualizzazione
-    $sedePredefinita = null;
     foreach ($listaSedi as $idSede) {
       $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
     }

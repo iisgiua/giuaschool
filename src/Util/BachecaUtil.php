@@ -538,6 +538,19 @@ class BachecaUtil {
     $utenti = array();
     $classi = array();
     $sedi = array_map(function ($s) { return $s->getId(); }, $avviso->getSedi()->toArray());
+    // controllo classi
+    $filtroClassi = [];
+    if ($avviso->getFiltroTipo() == 'C') {
+      $filtroClassi = $avviso->getFiltro();
+      $articolate = $this->em->getRepository('App\Entity\Classe')->classiArticolate($filtroClassi);
+      foreach ($articolate as $articolata) {
+        if (!empty($articolata['comune'])) {
+          $filtroClassi[] = $articolata['comune'];
+        } else {
+          $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
+        }
+      }
+    }
     // dsga
     if (in_array('D', $avviso->getDestinatariAta())) {
       // aggiunge DSGA
@@ -552,25 +565,28 @@ class BachecaUtil {
     if (in_array('C', $avviso->getDestinatari())) {
       // aggiunge coordinatori
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')
-        ->getIdCoordinatore($sedi, $avviso->getFiltroTipo() == 'C' ? $avviso->getFiltro() : null));
+        ->getIdCoordinatore($sedi, $avviso->getFiltroTipo() == 'C' ? $filtroClassi : null));
     }
     // docenti
     if (in_array('D', $avviso->getDestinatari())) {
       // aggiunge docenti
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')
-        ->getIdDocente($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
+        ->getIdDocente($sedi, $avviso->getFiltroTipo(),
+          $avviso->getFiltroTipo() == 'C' ? $filtroClassi : $avviso->getFiltro()));
     }
     // genitori
     if (in_array('G', $avviso->getDestinatari())) {
       // aggiunge genitori
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Genitore')
-        ->getIdGenitore($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
+        ->getIdGenitore($sedi, $avviso->getFiltroTipo(),
+          $avviso->getFiltroTipo() == 'C' ? $filtroClassi : $avviso->getFiltro()));
     }
     // alunni
     if (in_array('A', $avviso->getDestinatari())) {
       // aggiunge alunni
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Alunno')
-        ->getIdAlunno($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
+        ->getIdAlunno($sedi, $avviso->getFiltroTipo(),
+        $avviso->getFiltroTipo() == 'C' ? $filtroClassi : $avviso->getFiltro()));
       if ($avviso->getFiltroTipo() != 'U') {
         // aggiunge classi
         $classi = array_merge($classi, $this->em->getRepository('App\Entity\Classe')

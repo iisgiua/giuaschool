@@ -233,11 +233,18 @@ class AgendaController extends BaseController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
-          'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
+        $materia = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+          ->join('c.classe', 'cl')
+          ->where('c.materia=:materia AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)')
+          ->setParameters(['materia' => $form->get('materia_sostegno')->getData(),
+            'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+            'sezione' => $avviso->getCattedra()->getClasse()->getSezione(),
+            'gruppo' => $avviso->getCattedra()->getClasse()->getGruppo()])
+          ->getQuery()
+          ->getOneOrNullResult();
         if (!$materia ||
             ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
-          $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
+              $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
       }
       // controlla filtro
@@ -417,11 +424,14 @@ class AgendaController extends BaseController {
    */
   public function classeAjaxAction(int $id): JsonResponse {
     // solo cattedre attive e normali, no sostegno, no ed.civ.
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.id,m.nome')
       ->join('c.materia', 'm')
-      ->where("c.classe=:classe AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")
-      ->setParameters(['classe' => $id])
+      ->join('c.classe', 'cl')
+      ->where("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->orderBy('m.nomeBreve', 'ASC')
       ->getQuery()
       ->getArrayResult();

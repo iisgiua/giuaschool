@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Classe;
 use App\Tests\EntityTestCase;
 
 
@@ -117,8 +118,8 @@ class ClasseTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $existent->setGruppo('');
-    $this->assertSame($existent->getAnno().'ª '.$existent->getSezione(), (string) $existent, $this->entity.'::toString');
+    $nuovo = (new Classe())->setAnno(5)->setSezione('Z');
+    $this->assertSame('5ª Z', (string) $nuovo, $this->entity.'::toString');
     $gruppo = $this->getReference('classe_10');
     $this->assertSame($gruppo->getAnno().'ª '.$gruppo->getSezione().'-'.$gruppo->getGruppo(), (string) $gruppo, $this->entity.'::toString');
   }
