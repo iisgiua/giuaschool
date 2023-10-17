@@ -42,15 +42,16 @@ class SpidController extends BaseController {
       'IdAruba' => 'ArubaPEC S.p.A.',
       'IdEtna' => 'EtnaHitech S.C.p.A.',
       'IdInfocert' => 'InfoCert S.p.A.',
-      'IdIntesa' => 'IN.TE.S.A. S.p.A.',
       'IdLepida' => 'Lepida S.p.A.',
       'IdNamirial' => 'Namirial',
       'IdPoste' => 'Poste Italiane SpA',
       'IdSielte' => 'Sielte S.p.A.',
       'IdRegister' => 'Register.it S.p.A.',
       'IdTeamsystem' => 'TeamSystem s.p.a.',
-      'IdTim' => 'TI Trust Technologies srl'];
-  }
+      'IdTim' => 'TI Trust Technologies srl',
+      'IdInfocamere' => 'InfoCamere S.C.p.A.',
+      'IdIntesiGroup' => 'Intesi Group S.p.A.'];
+    }
 
   /**
    * Invia il file XML con i metadata per il service provider SPID
@@ -82,7 +83,7 @@ class SpidController extends BaseController {
    * Inizia la procedura di login tramite SPID
    *
    * @param string $idp Nome idendificativo dell'Identity Provider
-   * 
+   *
    * @Route("/spid/login/{idp}", name="spid_login",
    *    methods={"GET"})
    */

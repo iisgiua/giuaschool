@@ -798,18 +798,16 @@ class ScrutinioUtil {
             // inserisce nuovi dati
             if ($mat['tipo'] == 'E') {
               // ed.Civica non ha proposte
-              $dati['proposte'][$alunno][$materia]['unico'] = null;
-              $dati['proposte'][$alunno][$materia]['debito'] = null;
-              $dati['proposte'][$alunno][$materia]['recupero'] = null;
+              $dati['proposte'][$alunno][$materia] = new PropostaVoto();
             }
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:ore,:dati)')
               ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
-                'unico' => $dati['proposte'][$alunno][$materia]['unico'],
-                'debito' => $dati['proposte'][$alunno][$materia]['debito'],
-                'recupero' => $dati['proposte'][$alunno][$materia]['recupero'],
+                'unico' => $dati['proposte'][$alunno][$materia]->getUnico(),
+                'debito' => $dati['proposte'][$alunno][$materia]->getDebito(),
+                'recupero' => $dati['proposte'][$alunno][$materia]->getRecupero(),
                 'ore' => $ore,
                 'dati' => $dati_delibera]);
           }
