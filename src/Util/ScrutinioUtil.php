@@ -802,18 +802,16 @@ class ScrutinioUtil {
             // inserisce nuovi dati
             if ($mat['tipo'] == 'E') {
               // ed.Civica non ha proposte
-              $dati['proposte'][$alunno][$materia]['unico'] = null;
-              $dati['proposte'][$alunno][$materia]['debito'] = null;
-              $dati['proposte'][$alunno][$materia]['recupero'] = null;
+              $dati['proposte'][$alunno][$materia] = new PropostaVoto();
             }
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:ore,:dati)')
               ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
-                'unico' => $dati['proposte'][$alunno][$materia]['unico'],
-                'debito' => $dati['proposte'][$alunno][$materia]['debito'],
-                'recupero' => $dati['proposte'][$alunno][$materia]['recupero'],
+                'unico' => $dati['proposte'][$alunno][$materia]->getUnico(),
+                'debito' => $dati['proposte'][$alunno][$materia]->getDebito(),
+                'recupero' => $dati['proposte'][$alunno][$materia]->getRecupero(),
                 'ore' => $ore,
                 'dati' => $dati_delibera]);
           }
@@ -1521,23 +1519,23 @@ class ScrutinioUtil {
           }
         } elseif (in_array($mat['tipo'], ['N', 'E'])) {
           // altre materie (esclusa condotta, compresa ed.civica)
-          if (!isset($dati['voti'][$a][$m]['unico'])) {
+          if (empty($dati['voti'][$a][$m]->getUnico())) {
             // mancano valutazioni
             $errori[$m] = 1;
           }
         } else {
           // condotta
-          if (!isset($dati['voti'][$a][$m]['unico'])) {
+          if (empty($dati['voti'][$a][$m]->getUnico())) {
             // mancano valutazioni
             $errori[$m] = 1;
-          } elseif (!isset($errori[$m]) && empty($dati['voti'][$a][$m]['dati']['motivazione'])) {
+          } elseif (!isset($errori[$m]) && empty($dati['voti'][$a][$m]->getDati()['motivazione'])) {
             // manca motivazione
             $errori[$m] = 11;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['dati']['unanimita'] === null) {
+          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]->getDati()['unanimita'] === null) {
             // manca delibera
             $errori[$m] = 12;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['dati']['unanimita'] === false &&
-                    empty($dati['voti'][$a][$m]['dati']['contrari'])) {
+          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]->getDati()['unanimita'] === false &&
+                    empty($dati['voti'][$a][$m]->getDati()['contrari'])) {
             // mancano contrari
             $errori[$m] = 13;
           }
@@ -2450,7 +2448,7 @@ class ScrutinioUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-        ->setParameters(['alunno' => $a['id'], 
+        ->setParameters(['alunno' => $a['id'],
           'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
           'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
         ->getQuery()
@@ -2464,7 +2462,7 @@ class ScrutinioUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
-        ->setParameters(['alunno' => $a['id'], 
+        ->setParameters(['alunno' => $a['id'],
           'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
           'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
         ->getQuery()
