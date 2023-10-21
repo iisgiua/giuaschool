@@ -1513,19 +1513,19 @@ class ScrutinioUtil {
       foreach ($dati['materie'] as $m=>$mat) {
         if ($mat['tipo'] == 'R') {
           // religione
-          if (in_array($alu['religione'], ['S', 'A']) && !isset($dati['voti'][$a][$m])) {
+          if (in_array($alu['religione'], ['S', 'A']) && $dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
           }
         } elseif (in_array($mat['tipo'], ['N', 'E'])) {
           // altre materie (esclusa condotta, compresa ed.civica)
-          if (empty($dati['voti'][$a][$m]->getUnico())) {
+          if ($dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
           }
         } else {
           // condotta
-          if (empty($dati['voti'][$a][$m]->getUnico())) {
+          if ($dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
           } elseif (!isset($errori[$m]) && empty($dati['voti'][$a][$m]->getDati()['motivazione'])) {
