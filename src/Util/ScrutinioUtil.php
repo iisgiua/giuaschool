@@ -1509,29 +1509,29 @@ class ScrutinioUtil {
       foreach ($dati['materie'] as $m=>$mat) {
         if ($mat['tipo'] == 'R') {
           // religione
-          if (in_array($alu['religione'], ['S', 'A']) && !isset($dati['voti'][$a][$m])) {
+          if (in_array($alu['religione'], ['S', 'A']) && $dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
           }
         } elseif (in_array($mat['tipo'], ['N', 'E'])) {
           // altre materie (esclusa condotta, compresa ed.civica)
-          if (!isset($dati['voti'][$a][$m]['unico'])) {
+          if ($dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
           }
         } else {
           // condotta
-          if (!isset($dati['voti'][$a][$m]['unico'])) {
+          if ($dati['voti'][$a][$m]->getUnico() === null) {
             // mancano valutazioni
             $errori[$m] = 1;
-          } elseif (!isset($errori[$m]) && empty($dati['voti'][$a][$m]['dati']['motivazione'])) {
+          } elseif (!isset($errori[$m]) && empty($dati['voti'][$a][$m]->getDati()['motivazione'])) {
             // manca motivazione
             $errori[$m] = 11;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['dati']['unanimita'] === null) {
+          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]->getDati()['unanimita'] === null) {
             // manca delibera
             $errori[$m] = 12;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['dati']['unanimita'] === false &&
-                    empty($dati['voti'][$a][$m]['dati']['contrari'])) {
+          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]->getDati()['unanimita'] === false &&
+                    empty($dati['voti'][$a][$m]->getDati()['contrari'])) {
             // mancano contrari
             $errori[$m] = 13;
           }
