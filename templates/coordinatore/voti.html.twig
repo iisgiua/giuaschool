@@ -2,62 +2,72 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% if not classe %}
+  {% if info.classe is not defined %}
   <div class="alert alert-warning gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_voti'|trans }} {{ classe }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_voti'|trans }} {{ info.classe }}</h1>
   <div class="row gs-mb-1">
-    <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti_stampa', {'classe': classe.id}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+    <div class="col-sm-8">
+      <strong class="gs-big">Periodo:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ info.periodo ? info.lista[info.periodo].nome : 'Scegli' }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for p,d in info.lista %}
+      {% if d.nome %}
+          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('coordinatore_voti', {'classe': info.classe.id, 'periodo': p}) }}">{{ d.nome }}</a></li>
+      {% endif %}
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-4 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {'classe': info.classe.id, 'periodo': info.periodo, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
-  <div id="gs-fixed-header">
-    <table class="table table-bordered table-hover table-striped">
-      <caption class="text-info text-center gs-big"><strong>{{ dati.periodo }}</strong></caption>
-      <thead class="bg-success">
-        <tr>
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+    {% for materia,m in dati.materie %}
+        <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+        </th>
+    {% endfor %}
+        <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva">Media</span></small></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for alunno,a in dati.alunni %}
+      <tr>
+        <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2 gs-mt-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+        </td>
       {% for materia,m in dati.materie %}
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
-          </th>
-      {% endfor %}
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva">Media</span></small></th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for alunno,a in dati.alunni %}
-        <tr>
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2 gs-mt-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
-            {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
-          </td>
-        {% for materia,m in dati.materie %}
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-          {% if dati.medie[alunno][materia] is defined %}
-            {% set m = dati.medie[alunno][materia]|replace({',': '.'}) %}
-            <span class="label label-{{ m  < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][materia] }}</span>
-          {% else %}
-            <span>--</span>
-          {% endif %}
-          </td>
-        {% endfor %}
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-        {% if dati.medie[alunno][0] is defined %}
-            {% set m = dati.medie[alunno][0]|replace({',': '.'}) %}
-            <span class="gs-big"><span class="label label-{{ m < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][0] }}</span></span>
+        <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+        {% if dati.medie[alunno][materia] is defined %}
+          {% set m = dati.medie[alunno][materia]|replace({',': '.'}) %}
+          <span class="label label-{{ m  < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][materia] }}</span>
         {% else %}
-            <span>--</span>
+          <span>--</span>
         {% endif %}
-          </td>
-        </tr>
+        </td>
       {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+      {% if dati.medie[alunno][0] is defined %}
+          {% set m = dati.medie[alunno][0]|replace({',': '.'}) %}
+          <span class="gs-big"><span class="label label-{{ m < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][0] }}</span></span>
+      {% else %}
+          <span>--</span>
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
     {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>
@@ -91,18 +101,6 @@ $(document).ready(function() {
       }
     });
   });
-  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
-    var c=floatContainer.find('thead');
-    if(isFloated){
-      c.hide();
-      c.removeClass("bg-success").addClass("bg-info");
-      c.fadeIn();
-    } else {
-      c.removeClass("bg-info").addClass("bg-success");
-    }
-  });
-  // init
-  $('#gs-fixed-header table').floatThead({top: 60});
 });
 </script>
 {% endblock %}

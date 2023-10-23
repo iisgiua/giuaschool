@@ -27,7 +27,6 @@ use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -234,21 +233,29 @@ class CoordinatoreController extends BaseController {
   /**
    * Mostra le medie dei voti della classe.
    *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param StaffUtil $staff Funzioni di utilità per lo staff
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
+   * @param int $periodo Periodo relativo allo scrutinio
+   * @param string $tipo Tipo di risposta: visualizza HTML (V) o scarica documento PDF (P)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/voti/{classe}", name="coordinatore_voti",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
+   * @Route("/coordinatore/voti/{classe}/{periodo}/{tipo}", name="coordinatore_voti",
+   *    requirements={"classe": "\d+", "periodo": "1|2|3|0", "tipo": "V|P"},
+   *    defaults={"classe": 0, "periodo": 0, "tipo": "V"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(StaffUtil $staff, int $classe): Response {
+  public function votiAction(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
+                             int $periodo, string $tipo): Response {
     // inizializza variabili
     $dati = null;
+    $info = null;
+    $listaPeriodi = null;
+    $datiPeriodo = null;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
@@ -273,13 +280,44 @@ class CoordinatoreController extends BaseController {
           throw $this->createNotFoundException('exception.invalid_params');
         }
       }
+    }
+    if ($classe) {
+      // periodo
+      $listaPeriodi = $reg->infoPeriodi();
+      // seleziona periodo se non indicato
+      if ($periodo == 0) {
+        // seleziona periodo in base alla data
+        $datiPeriodo = $reg->periodo(new \DateTime());
+        $periodo = $datiPeriodo['periodo'];
+      } else {
+        $datiPeriodo = $listaPeriodi[$periodo];
+      }
+      // informazioni
+      $info['classe'] = $classe;
+      $info['lista'] = $listaPeriodi;
+      $info['periodo'] = $periodo;
       // legge dati
-      $dati = $staff->voti($classe);
+      $dati = $staff->voti($classe, $datiPeriodo);
+      // controlla tipo
+      if ($tipo == 'P') {
+        // crea documento PDF
+        $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+          'Medie dei voti della classe '.$classe);
+        $pdf->getHandler()->setPageOrientation('L', true, 20);
+        $html = $this->renderView('pdf/voti_classe.html.twig', array(
+          'info' => $info,
+          'dati' => $dati,
+        ));
+        $pdf->createFromHtml($html);
+        // invia il documento
+        $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'.pdf';
+        return $pdf->send($nomefile);
+      }
     }
     // visualizza pagina
     return $this->render('coordinatore/voti.html.twig', array(
       'pagina_titolo' => 'page.coordinatore_voti',
-      'classe' => $classe,
+      'info' => $info,
       'dati' => $dati,
     ));
   }
@@ -354,7 +392,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo, 
+  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
                                          string $formato): Response {
     // inizializza variabili
     $dati = null;
@@ -517,55 +555,6 @@ class CoordinatoreController extends BaseController {
   }
 
   /**
-   * Stampa le medie dei voti della classe.
-   *
-   * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param PdfManager $pdf Gestore dei documenti PDF
-   * @param int $classe Identificativo della classe
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/coordinatore/voti/stampa/{classe}", name="coordinatore_voti_stampa",
-   *    requirements={"classe": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
-   */
-  public function votiStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
-    // inizializza variabili
-    $dati = null;
-    // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    // legge dati
-    $dati = $staff->voti($classe);
-    // crea documento PDF
-    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Medie dei voti della classe '.$classe);
-    $pdf->getHandler()->setPageOrientation('L', true, 20);
-    $html = $this->renderView('pdf/voti_classe.html.twig', array(
-      'classe' => $classe,
-      'dati' => $dati,
-      ));
-    $pdf->createFromHtml($html);
-    // invia il documento
-    $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'.pdf';
-    return $pdf->send($nomefile);
-  }
-
-  /**
    * Gestione degli avvisi per la classe.
    *
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -654,7 +643,7 @@ class CoordinatoreController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, 
+                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                                    int $classe, int $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);

@@ -3,10 +3,10 @@
   <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
 </div>
 <p style="text-align:center; font-size:13pt">
-  <strong>Medie dei voti della classe {{ classe }}</strong>
+  <strong>Medie dei voti della classe {{ info.classe }}</strong>
 </p>
 <br>
-<div style="text-align:center"><strong>{{ dati.periodo }}</strong></div>
+<div style="text-align:center"><strong>{{ info.lista[info.periodo].nome }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:9pt">
   <tr nobr="true">
     <td style="text-align:center"><strong>Alunno</strong></td>

@@ -374,7 +374,7 @@ class AlunnoRepository extends BaseRepository {
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'c')
       ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
-      ->orderBy('c.anno,c.sezione,c.gruppo,,a.cognome,a.nome')
+      ->orderBy('c.anno,c.sezione,c.gruppo,a.cognome,a.nome')
       ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
         'cognome' => $criteri['cognome'].'%']);
     // controlla tipo

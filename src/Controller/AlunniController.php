@@ -112,8 +112,8 @@ class AlunniController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : $criteri['classe']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     if ($pagina == 0) {
@@ -131,8 +131,8 @@ class AlunniController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
-        intval($form->get('classe')->getData()));
+      $criteri['classe'] = is_object($form->get('classe')->getData()) ?
+        $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
@@ -452,8 +452,8 @@ class AlunniController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
+    $classe = $criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : $criteri['classe'];
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
     if ($pagina == 0) {
@@ -471,8 +471,8 @@ class AlunniController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
-        intval($form->get('classe')->getData()));
+      $criteri['classe'] = is_object($form->get('classe')->getData()) ?
+        $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
@@ -759,11 +759,15 @@ class AlunniController extends BaseController {
                                        LogHandler $dblogger, int $genitore): Response {
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
+    // controllo classe
+    if ($criteri['classe'] < 0) {
+      $this->addFlash('warning', 'message.nessun_dato');
+      return $this->redirectToRoute('alunni_modifica');
+    }
     // recupera dati
     $dati = $this->em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
     $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);

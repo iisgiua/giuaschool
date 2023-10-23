@@ -45,7 +45,7 @@ class VotiController extends BaseController {
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
-   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
    *
@@ -57,7 +57,7 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
-                             string $periodo): Response {
+                             int $periodo): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();

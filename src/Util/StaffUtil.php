@@ -362,22 +362,25 @@ class StaffUtil {
    * Restituisce i voti medi della classe indicata.
    *
    * @param Classe $classe Classe dell'alunno
+   * @param array $periodo Informazioni sul periodo da considerare
    *
    * @return array Dati restituiti come array associativo
    */
-  public function voti(Classe $classe) {
+  public function voti(Classe $classe, array $periodo) {
     $dati = array();
     $dati['materie'] = [];
     $dati['alunni'] = [];
-    $periodo = $this->regUtil->periodo(new \DateTime());
-    $dati['periodo'] = $periodo['nome'];
+    $dati['genitori'] = [];
+    $dati['medie'] = [];
     // lista materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND m.valutazione=:valutazione AND m.media=:media')
+      ->join('c.classe', 'cl')
+      ->where("m.valutazione='N' AND m.media=1 AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'valutazione' => 'N', 'media' => 1])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per le materie
@@ -385,9 +388,9 @@ class StaffUtil {
       $dati['materie'][$m['id']] = $m;
     }
     // legge alunni
-    $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
+    $listaAlunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($listaAlunni);
     // legge medie
     $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('(v.alunno) AS alunno,(v.materia) AS materia,v.tipo,AVG(v.voto) AS media')
@@ -395,7 +398,7 @@ class StaffUtil {
       ->join('v.materia', 'm')
       ->where('v.alunno IN (:lista) AND v.media=:media AND v.voto>0 AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND m.media=:media')
       ->groupBy('v.alunno,v.materia,v.tipo')
-      ->setParameters(['lista' => $lista_alunni, 'media' => 1, 'classe' => $classe,
+      ->setParameters(['lista' => $listaAlunni, 'media' => 1, 'classe' => $classe,
         'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();
@@ -427,7 +430,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista_alunni])
+      ->setParameters(['lista' => $listaAlunni])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per gli alunni

@@ -647,7 +647,7 @@ class CsvImporter {
           }
           $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.sezione=:sezione AND '.
-              ($classeGruppo ? 'c.gruppo=:classe' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+              ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
             ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
               'gruppo' => $classeGruppo])
             ->setMaxResults(1)
