@@ -204,11 +204,14 @@ class ColloquiUtil {
     $dati = [];
     // legge cattedre
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:potenziamento AND d.abilitato=:abilitato')
+      ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione")
+      ->andWhere("cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL")
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'potenziamento' => 'P', 'abilitato' => 1])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getResult();
     // imposta i dati

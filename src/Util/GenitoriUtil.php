@@ -141,8 +141,11 @@ class GenitoriUtil {
       $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
       // legge lezione
       $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->where('l.data=:data AND l.classe=:classe AND l.ora=:ora')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'ora' => $ora])
+        ->join('l.classe', 'c')
+        ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+        ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
+        ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getOneOrNullResult();
       if ($lezione) {
@@ -176,9 +179,12 @@ class GenitoriUtil {
     // legge annotazioni
     $annotazioni = $this->em->getRepository('App\Entity\Annotazione')->createQueryBuilder('a')
       ->join('a.docente', 'd')
-      ->where('a.data=:data AND a.classe=:classe AND a.visibile=:visibile')
+      ->join('a.classe', 'c')
+      ->where('a.data=:data AND a.visibile=:visibile AND c.anno=:anno AND c.sezione=:sezione')
+      ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('a.modificato', 'DESC')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'visibile' => 1])
+      ->setParameters(['data' => $data->format('Y-m-d'), 'visibile' => 1, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getResult();
     $lista = array();
@@ -236,11 +242,14 @@ class GenitoriUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-      ->where('l.classe=:classe AND l.materia=:materia')
+      ->where('l.materia=:materia AND c.anno=:anno AND c.sezione=:sezione')
+      ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('l.ora', 'ASC')
-      ->setParameters(['classe' => $classe, 'materia' => $materia, 'alunno' => $alunno])
+      ->setParameters(['materia' => $materia, 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -611,12 +620,14 @@ class GenitoriUtil {
     // legge note di classe
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
+      ->join('n.classe', 'c')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno AND n.data BETWEEN cc.inizio AND cc.fine')
-      ->where('n.tipo=:tipo AND (n.classe=:classe OR n.classe=cc.classe)')
+      ->where("n.tipo=:tipo AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
       ->andWhere('NOT EXISTS ('.$subquery.')')
-      ->setParameters(['tipo' => 'C', 'classe' => $classe, 'alunno' => $alunno])
+      ->setParameters(['tipo' => 'C', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -635,15 +646,17 @@ class GenitoriUtil {
     // legge note individuali
     $individuali = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
+      ->join('n.classe', 'c')
       ->join('n.alunni', 'a')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id AND n.data BETWEEN cc.inizio AND cc.fine')
-      ->where('n.tipo=:tipo AND a.id=:alunno AND (n.classe=:classe OR n.classe=cc.classe)')
-      ->setParameters(['tipo' => 'I', 'classe' => $classe, 'alunno' => $alunno])
+      ->where("n.tipo=:tipo AND a.id=:alunno AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
+      ->setParameters(['tipo' => 'I', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
-    // imposta array associativo per note di classe
+    // imposta array associativo per note individuali
     foreach ($individuali as $i) {
       $data = $i['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
