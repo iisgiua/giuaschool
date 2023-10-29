@@ -292,4 +292,46 @@ class CattedraRepository extends BaseRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce la lista delle cattedre delper la classe indicata
+   *
+   * @param Classe $classe Classe di cui recuperare le cattedre
+   * @param bool $potenziamento Se vero riporta anche le cattedre di potenziamento
+   *
+   * @return array Dati formattati in un array associativo
+   */
+  public function cattedreClasse(Classe $classe, bool $potenziamento=true): array {
+    $dati = [];
+    // lista cattedre
+    $cattedre = $this->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
+      ->join('c.docente', 'd')
+      ->join('c.materia', 'm')
+      ->leftJoin('c.alunno', 'a')
+      ->where('c.attiva=1 AND d.abilitato=1')
+      ->orderBy('d.cognome,d.nome,m.nome,a.cognome,a.nome', 'ASC');
+    if (empty($classe->getGruppo())) {
+      $cattedre
+        ->andWhere('cl.id=:classe')
+        ->setParameter('classe', $classe);
+    } else {
+      $cattedre
+        ->andWhere("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+          'gruppo' => $classe->getGruppo()]);
+    }
+    if (!$potenziamento) {
+      $cattedre->andWhere("c.tipo!='P'");
+    }
+    $cattedre = $cattedre
+      ->getQuery()
+      ->getResult();
+    // distingue per docente
+    foreach ($cattedre as $cattedra) {
+      $dati[$cattedra->getDocente()->getId()][] = $cattedra;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }

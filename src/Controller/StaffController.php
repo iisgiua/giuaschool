@@ -19,6 +19,7 @@ use App\Entity\Uscita;
 use App\Form\AvvisoType;
 use App\Form\EntrataType;
 use App\Form\MessageType;
+use App\Form\ModuloType;
 use App\Form\UscitaType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
@@ -192,7 +193,7 @@ class StaffController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, 
+                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                                    int $id): Response {
     // inizializza
     $dati = array();
@@ -610,7 +611,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioAction(Request $request, BachecaUtil $bac, string $tipo, 
+  public function avvisiOrarioAction(Request $request, BachecaUtil $bac, string $tipo,
                                      int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -712,7 +713,7 @@ class StaffController extends BaseController {
    */
   public function avvisiOrarioEditAction(Request $request, TranslatorInterface $trans,
                                          MessageBusInterface $msg, BachecaUtil $bac,
-                                         RegistroUtil $reg, LogHandler $dblogger, string $tipo, 
+                                         RegistroUtil $reg, LogHandler $dblogger, string $tipo,
                                          int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -727,7 +728,7 @@ class StaffController extends BaseController {
     } else {
       // legge ora predefinita
       if ($tipo == 'E') {
-        // inizio seconda ora di lunedì su orario di oggi 
+        // inizio seconda ora di lunedì su orario di oggi
         $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
@@ -739,7 +740,7 @@ class StaffController extends BaseController {
           ->getQuery()
           ->getSingleScalarResult();
       } else {
-        // inizio ultima ora di lunedì su orario di oggi 
+        // inizio ultima ora di lunedì su orario di oggi
         $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
@@ -776,7 +777,7 @@ class StaffController extends BaseController {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
       $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
-    }    
+    }
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'orario',
@@ -1089,7 +1090,7 @@ class StaffController extends BaseController {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
       $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
-    }    
+    }
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'attivita',
@@ -1383,7 +1384,7 @@ class StaffController extends BaseController {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
       $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
-    }    
+    }
     $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'individuale',
@@ -2506,7 +2507,7 @@ class StaffController extends BaseController {
    */
   public function passwordCreateAction(Request $request, UserPasswordHasherInterface $hasher,
                                        StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
-                                       PdfManager $pdf, MailerInterface $mailer, string $tipo, 
+                                       PdfManager $pdf, MailerInterface $mailer, string $tipo,
                                        string $username = null): Response {
      // controlla alunno
      $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
@@ -2819,7 +2820,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiStatisticheAction(Request $request, RegistroUtil $reg, StaffUtil $staff, 
+  public function studentiStatisticheAction(Request $request, RegistroUtil $reg, StaffUtil $staff,
                                             string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
@@ -2922,38 +2923,64 @@ class StaffController extends BaseController {
   }
 
   /**
-   * Gestione delle richieste dei certificati medici
+   * Visualizza i componenti del consiglio di classe
    *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $this->em Gestore delle entità
-   //-- * @param RequestStack $this->reqstack Gestore dello stack delle variabili globali
-   //-- * @param RegistroUtil $reg Funzioni di utilità per il registro
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   //-- * @param string $data Data per la gestione delle assenze (AAAA-MM-GG)
-   //-- * @param int $classe Identificativo della classe
+   * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/staff/studenti/certificato", name="staff_studenti_certificato",
-   *    methods={"GET","POST"})
+   * @Route("/staff/docenti/cdc", name="staff_docenti_cdc",
+   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiCertificatoAction(Request $request
-  //-- ,
-                                         //-- RegistroUtil $reg, LogHandler $dblogger, $data, $classe
-): Response {
-    // init
-    $dati = array();
-    // legge alunni con richiesta certificato
-    $dati = $this->em->getRepository('App\Entity\Alunno')->richiestaCertificato($this->getUser()->getSede());
-
-
+  public function docentiCdcAction(Request $request): Response {
+    // inizializza
+    $dati = [];
+    $info = [];
+    // criteri di ricerca
+    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_cdc/classe', 0));
+    $classeId = $classe ? $classe->getId() : 0;
+    // form di ricerca
+    $sede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : 0;
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni($sede, false);
+    foreach ($opzioniClassi as $sede => $lista) {
+      $prec = null;
+      $precKey = null;
+      foreach ($lista as $key => $val) {
+        if ($prec && empty($prec->getGruppo()) && $prec->getAnno() == $val->getAnno() &&
+            $prec->getSezione() == $val->getSezione() && !empty($val->getGruppo())) {
+          unset($opzioniClassi[$sede][$precKey]);
+        }
+        $prec = $val;
+        $precKey = $key;
+      }
+    }
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'classe',
+      'values' => [$classe, $opzioniClassi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $classe = $form->get('classe')->getData();
+      $classeId = $classe ? $classe->getId() : 0;
+      // memorizza in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_cdc/classe', $classeId);
+    }
+    if ($classe) {
+      // informazioni
+      $info['classe'] = $classe;
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreClasse($classe);
+    }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_certificato.html.twig', array(
-      'pagina_titolo' => 'page.staff_certificato',
+    return $this->render('ruolo_staff/docenti_cdc.html.twig', array(
+      'pagina_titolo' => 'page.staff.cdc',
+      'titolo' => 'title.staff.cdc',
+      'form' => [$form->createView()],
       'dati' => $dati,
+      'info' => $info,
     ));
- }
+  }
 
 }

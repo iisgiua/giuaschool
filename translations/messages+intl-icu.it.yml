@@ -796,6 +796,8 @@ title.utenti.notifiche: Imposta le modalità per l'invio delle notifiche
 title.utenti.notifiche_configura: Configura il canale per l'invio delle notifiche
 page.sistema.telegram: Configura Telegram
 title.sistema.telegram: Configurazione per le notifiche via Telegram
+page.staff.cdc: Staff CdC
+title.staff.cdc: Composizione del Consiglio di Classe
 
 
 page.agenda_compito: Agenda Compiti

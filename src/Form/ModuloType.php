@@ -56,8 +56,8 @@ class ModuloType extends AbstractType {
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_archivio',
           'choices' => ['label.registro_docente' => 'D', 'label.registro_sostegno' => 'S',
-            'label.registro_classe' => 'C', 'label.documenti_scrutinio' => 'U', 
-            'label.archivio_circolari' => 'R'], 
+            'label.registro_classe' => 'C', 'label.documenti_scrutinio' => 'U',
+            'label.archivio_circolari' => 'R'],
           'required' => true))
         ->add('selezione', ChoiceType::class, array('label' => 'label.selezione_archivio',
           'choices' => ['label.tutti' => 'T', 'label.selezionato' => 'S', 'label.da_selezionato' => 'D'],
@@ -217,6 +217,21 @@ class ModuloType extends AbstractType {
         ->add('token', TextType::class, array('label' => 'label.telegram_token',
           'data' => $options['values'][1],
           'required' => false));
+    } elseif ($options['form_mode'] == 'classe') {
+      // form cerca classe
+      $builder
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_value' => 'id',
+          'placeholder' => 'label.scegli_classe',
+          'choice_translation_domain' => false,
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false]);
     }
     // aggiunge pulsanti al form
     if ($options['return_url']) {
@@ -229,6 +244,7 @@ class ModuloType extends AbstractType {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
     }
+
   }
 
   /**
