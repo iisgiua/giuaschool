@@ -112,8 +112,13 @@ class CoordinatoreController extends BaseController {
           ->getResult();
       }
       // raggruppa per sezione
-      foreach ($lista as $c) {
-        $tutte[$c->getSezione()][] = $c;
+      foreach ($lista as $key => $classe) {
+        if (!empty($classe->getGruppo()) || !isset($lista[$key + 1]) ||
+            $classe->getAnno() != $lista[$key + 1]->getAnno() ||
+            $classe->getSezione() != $lista[$key + 1]->getSezione() ||
+            empty($lista[$key + 1]->getGruppo())) {
+          $tutte[$classe->getSezione()][] = $classe;
+        }
       }
     }
     // visualizza pagina
@@ -128,18 +133,20 @@ class CoordinatoreController extends BaseController {
    * Mostra le note della classe.
    *
    * @param StaffUtil $staff Funzioni di utilità per lo staff
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
+   * @param string $tipo Tipo di risposta: visualizza HTML (V) o scarica documento PDF (P)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/note/{classe}", name="coordinatore_note",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
+   * @Route("/coordinatore/note/{classe}/{tipo}", name="coordinatore_note",
+   *    requirements={"classe": "\d+", "tipo": "V|P"},
+   *    defaults={"classe": 0, "tipo": "V"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(StaffUtil $staff, int $classe): Response {
+  public function noteAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -168,6 +175,20 @@ class CoordinatoreController extends BaseController {
       }
       // legge dati
       $dati = $staff->note($classe);
+      // controlla tipo
+      if ($tipo == 'P') {
+        // crea documento PDF
+        $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+          'Note disciplinari della classe '.$classe);
+        $html = $this->renderView('pdf/note_classe.html.twig', array(
+          'classe' => $classe,
+          'dati' => $dati,
+          ));
+        $pdf->createFromHtml($html);
+        // invia il documento
+        $nomefile = 'note-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
+        return $pdf->send($nomefile);
+      }
     }
     // visualizza pagina
     return $this->render('coordinatore/note.html.twig', array(
@@ -181,18 +202,20 @@ class CoordinatoreController extends BaseController {
    * Mostra le assenze della classe.
    *
    * @param StaffUtil $staff Funzioni di utilità per lo staff
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $classe Identificativo della classe
+   * @param string $tipo Tipo di risposta: visualizza HTML (V) o scarica documento PDF (P)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/assenze/{classe}", name="coordinatore_assenze",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
+   * @Route("/coordinatore/assenze/{classe}/{tipo}", name="coordinatore_assenze",
+   *    requirements={"classe": "\d+", "tipo": "V|P"},
+   *    defaults={"classe": 0, "tipo": "V"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeAction(StaffUtil $staff, int $classe): Response {
+  public function assenzeAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -221,6 +244,19 @@ class CoordinatoreController extends BaseController {
       }
       // legge dati
       $dati = $staff->assenze($classe);
+      if ($tipo == 'P') {
+        // crea documento PDF
+        $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+          'Assenze della classe '.$classe);
+        $html = $this->renderView('pdf/assenze_classe.html.twig', array(
+          'classe' => $classe,
+          'dati' => $dati,
+          ));
+        $pdf->createFromHtml($html);
+        // invia il documento
+        $nomefile = 'assenze-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
+        return $pdf->send($nomefile);
+      }
     }
     // visualizza pagina
     return $this->render('coordinatore/assenze.html.twig', array(
@@ -310,7 +346,7 @@ class CoordinatoreController extends BaseController {
         ));
         $pdf->createFromHtml($html);
         // invia il documento
-        $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'.pdf';
+        $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
         return $pdf->send($nomefile);
       }
     }
@@ -396,10 +432,7 @@ class CoordinatoreController extends BaseController {
                                          string $formato): Response {
     // inizializza variabili
     $dati = null;
-    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-    $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insufficiente', 33 => 'Mediocre', 34 => 'Sufficiente', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
-    $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
-    $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
+    $info = null;
     // controllo alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
     if (!$alunno) {
@@ -445,113 +478,16 @@ class CoordinatoreController extends BaseController {
       $nomefile = 'situazione-alunno-'.
         strtoupper(str_replace(' ', '-', $alunno->getCognome().'-'.$alunno->getNome())).'.pdf';
       return $pdf->send($nomefile);
-    } else {
-      // visualizza pagina
-      return $this->render('coordinatore/situazione_alunno.html.twig', array(
-        'pagina_titolo' => 'page.coordinatore_situazione',
-        'classe' => $classe,
-        'alunno' => $alunno,
-        'tipo' => $tipo,
-        'dati' => $dati,
-        'info' => $info,
-      ));
     }
-  }
-
-  /**
-   * Stampa le assenze della classe.
-   *
-   * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param PdfManager $pdf Gestore dei documenti PDF
-   * @param int $classe Identificativo della classe
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/coordinatore/assenze/stampa/{classe}", name="coordinatore_assenze_stampa",
-   *    requirements={"classe": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
-   */
-  public function assenzeStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
-    // inizializza variabili
-    $dati = null;
-    // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    // legge dati
-    $dati = $staff->assenze($classe);
-    // crea documento PDF
-    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Assenze della classe '.$classe);
-    $html = $this->renderView('pdf/assenze_classe.html.twig', array(
+    // visualizza pagina
+    return $this->render('coordinatore/situazione_alunno.html.twig', array(
+      'pagina_titolo' => 'page.coordinatore_situazione',
       'classe' => $classe,
+      'alunno' => $alunno,
+      'tipo' => $tipo,
       'dati' => $dati,
-      ));
-    $pdf->createFromHtml($html);
-    // invia il documento
-    $nomefile = 'assenze-'.$classe->getAnno().$classe->getSezione().'.pdf';
-    return $pdf->send($nomefile);
-  }
-
-  /**
-   * Stampa le note della classe.
-   *
-   * @param StaffUtil $staff Funzioni di utilità per lo staff
-   * @param PdfManager $pdf Gestore dei documenti PDF
-   * @param int $classe Identificativo della classe
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/coordinatore/note/stampa/{classe}", name="coordinatore_note_stampa",
-   *    requirements={"classe": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
-   */
-  public function noteStampaAction(StaffUtil $staff, PdfManager $pdf, int $classe): Response {
-    // inizializza variabili
-    $dati = null;
-    // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    // legge dati
-    $dati = $staff->note($classe);
-    // crea documento PDF
-    $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Note disciplinari della classe '.$classe);
-    $html = $this->renderView('pdf/note_classe.html.twig', array(
-      'classe' => $classe,
-      'dati' => $dati,
-      ));
-    $pdf->createFromHtml($html);
-    // invia il documento
-    $nomefile = 'note-'.$classe->getAnno().$classe->getSezione().'.pdf';
-    return $pdf->send($nomefile);
+      'info' => $info,
+    ));
   }
 
   /**

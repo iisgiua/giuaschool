@@ -58,7 +58,7 @@
   {% endif %}
   {% if dati.scrutini is defined %}
     {% for periodo,v in dati.scrutini %}
-      {% if periodo == 'P' %}
+      {% if periodo == 'P' or periodo == 'S' %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0"><strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong></caption>
     <thead class="bg-success">
@@ -73,7 +73,7 @@
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
           {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' %}
+            {% if alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
         <td></td>
             {% else %}
@@ -89,42 +89,6 @@
             {% if v.debiti[materia] is defined %}
               <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
               <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
-            {% endif %}
-        </td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
-          {% endif %}
-      </tr>
-        {% endfor %}
-    </tbody>
-  </table>
-      {% elseif periodo == '1' %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">Materia</th>
-        <th class="col-sm-3">Profitto</th>
-        <th class="col-sm-2">Debito formativo</th>
-        <th class="col-sm-2">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
-        {% for materia,m in v.materie %}
-      <tr>
-        <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' and alunno.religione != 'S' %}
-        <td><strong>--</strong></td>
-        <td></td>
-        <td></td>
-          {% elseif m.tipo == 'C'  %}
-        <td><span class="label label-{{ v.voti[materia].unico < 42 ? 'danger' : (v.voti[materia].unico < 43 ? 'warning' : 'success') }} gs-big">{{ info.condotta['1'][v.voti[materia].unico] }}</span></td>
-        <td></td>
-        <td></td>
-          {% else %}
-        <td><span class="label label-{{ v.voti[materia].unico < 33 ? 'danger' : (v.voti[materia].unico < 34 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1'][v.voti[materia].unico] }}</span></td>
-        <td>
-            {% if v.debiti[materia] is defined %}
-          <span class="label label-{{ v.voti[materia].recupero == 'N' ? 'danger' : 'success' }} gs-big">{{ ('label.recupero_'~v.voti[materia].recupero)|trans }}</span>
             {% endif %}
         </td>
         <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
@@ -160,7 +124,7 @@
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
             {% if m.tipo == 'R' %}
-              {% if alunno.religione != 'S' %}
+              {% if alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
         <td><strong>--</strong></td>
         <td></td>
@@ -240,20 +204,23 @@
         <td><span class="label label-default gs-big">{{ dati.assenze.stat.assenze }}</span></td>
       </tr>
       <tr>
-        <th class="gs-big">Numero di ritardi brevi (entro {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
-        <td><span class="label label-default gs-big">{{ dati.assenze.stat.brevi }}</span></td>
-      </tr>
-      <tr>
         <th class="gs-big">Numero di ritardi (oltre {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
         <td><span class="label label-default gs-big">{{ dati.assenze.stat.ritardi }}</span> <strong>di cui <span class="label label-{{ dati.assenze.stat.ritardi_validi > 0 ? 'warning' : 'default' }}">{{ dati.assenze.stat.ritardi_validi }}</span> considerati per il conteggio del numero massimo ammesso</strong></td>
       </tr>
-        <tr>
+      <tr>
+        <th>Numero di ritardi brevi (entro {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
+        <td><span class="label label-default gs-big">{{ dati.assenze.stat.brevi }}</span></td>
+      </tr>
+      <tr>
         <th class="gs-big">Numero di uscite anticipate</th>
         <td><span class="label label-default gs-big">{{ dati.assenze.stat.uscite }}</span> <strong>di cui <span class="label label-{{ dati.assenze.stat.uscite_valide > 0 ? 'warning' : 'default' }}">{{ dati.assenze.stat.uscite_valide }}</span> considerate per il conteggio del numero massimo ammesso</strong></td>
       </tr>
       <tr>
         <th class="gs-big">Totale ore di assenza</th>
-        <td><span class="label label-{{ dati.assenze.stat.ore_perc >= 25 ? 'danger' : (dati.assenze.stat.ore_perc >= 20 ? 'warning' : 'default') }} gs-big">{{ dati.assenze.stat.ore }}</span></td>
+        <td>
+          <span class="label label-{{ dati.assenze.stat.ore_perc >= 25 ? 'danger' : (dati.assenze.stat.ore_perc >= 20 ? 'warning' : 'default') }} gs-big">{{ dati.assenze.stat.ore }}</span>
+          <span class="gs-big gs-ml-3"><em>{{ dati.assenze.stat.ore_perc|number_format(2, ',', null) }}%</em></span>
+        </td>
       </tr>
     </tbody>
   </table>

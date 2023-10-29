@@ -151,14 +151,9 @@ class StaffUtil {
       ->join('n.docente', 'd')
       ->join('n.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['tipo' => 'C', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()]);
-    if (!empty($classe->getGruppo())) {
-      $note = $note
-        ->andWhere('c.gruppo=:gruppo')
-        ->setParameter('gruppo', $classe->getGruppo());
-    }
-    $note = $note
+      ->where("n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
+      ->setParameters(['tipo' => 'C', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -183,16 +178,11 @@ class StaffUtil {
       ->join('n.docente', 'd')
       ->join('a.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['tipo' => 'I', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()]);
-      if (!empty($classe->getGruppo())) {
-        $individuali = $individuali
-          ->andWhere('c.gruppo=:gruppo')
-          ->setParameter('gruppo', $classe->getGruppo());
-      }
-      $individuali = $individuali
-        ->getQuery()
-        ->getResult();
+      ->where("n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
+      ->setParameters(['tipo' => 'I', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
+      ->getQuery()
+      ->getResult();
     // imposta array associativo per note individuali
     foreach ($individuali as $n) {
       $data = $n->getData()->format('Y-m-d');
@@ -235,6 +225,18 @@ class StaffUtil {
     $dati['alunni'] = [];
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
+    // dati alunni
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
+      ->where('a.id IN (:lista)')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['lista' => $lista_alunni])
+      ->getQuery()
+      ->getArrayResult();
+    // imposta array associativo per gli alunni
+    foreach ($alunni as $a) {
+      $dati['alunni'][$a['id']] = $a;
+    }
     // dati GENITORI
     $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
     // legge assenze
@@ -304,10 +306,12 @@ class StaffUtil {
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno IN (:lista) AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where("al.alunno IN (:lista) AND m.tipo IN ('N', 'E') AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => ['N', 'E']])
+      ->setParameters(['lista' => $lista_alunni, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // ore di assenza di religione (per chi si avvale)
@@ -316,10 +320,12 @@ class StaffUtil {
       ->join('al.lezione', 'l')
       ->join('al.alunno', 'a')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno IN (:lista) AND a.religione IN (:religione) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where("al.alunno IN (:lista) AND a.religione IN ('S', 'A') AND m.tipo='R' AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => ['S', 'A'], 'tipo' => 'R'])
+      ->setParameters(['lista' => $lista_alunni, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // ore di assenza totali
@@ -336,23 +342,16 @@ class StaffUtil {
     }
     // imposta array associativo per le ore di assenza
     $dati['monte'] = $classe->getOreSettimanali() * 33;
+    $dati['monteNA'] = $dati['monte'] - 33;
     foreach ($ore as $id=>$o) {
       $dati['statistiche'][$id]['ore'] = number_format($o, 1, ',', null);
-      $perc = $o / $dati['monte'] * 100;
+      if (in_array($dati['alunni'][$id]['religione'], ['S', 'A'])) {
+        $perc = $o / $dati['monte'] * 100;
+      } else {
+        $perc = $o / $dati['monteNA'] * 100;
+      }
       $dati['statistiche'][$id]['perc'] = number_format($perc, 2, ',', null);
       $dati['statistiche'][$id]['livello'] = ($perc < 20 ? 'default' : ($perc < 25 ? 'warning' : 'danger'));
-    }
-    // dati alunni
-    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
-      ->where('a.id IN (:lista)')
-      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista_alunni])
-      ->getQuery()
-      ->getArrayResult();
-    // imposta array associativo per gli alunni
-    foreach ($alunni as $a) {
-      $dati['alunni'][$a['id']] = $a;
     }
     // restituisce dati come array associativo
     return $dati;

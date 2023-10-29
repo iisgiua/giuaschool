@@ -479,9 +479,9 @@ class GenitoriUtil {
     $ritardi = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('e.data,e.ora,e.ritardoBreve,e.note,e.giustificato,e.valido,e.motivazione,(e.docenteGiustifica) AS docenteGiustifica,e.id')
       ->join('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('e.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per ritardi
@@ -520,9 +520,9 @@ class GenitoriUtil {
     $uscite = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('u.data,u.ora,u.note,u.giustificato,u.valido,u.motivazione,(u.docenteGiustifica) AS docenteGiustifica,u.id')
       ->join('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('u.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per uscite
@@ -561,9 +561,11 @@ class GenitoriUtil {
       ->select('SUM(al.ore)')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno=:alunno AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => ['N', 'E']])
+      ->where("al.alunno=:alunno AND m.tipo IN ('N', 'E') AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
+      ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getSingleScalarResult();
     if ($alunno->getReligione() == 'S' || $alunno->getReligione() == 'A') {
@@ -572,9 +574,11 @@ class GenitoriUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->join('l.materia', 'm')
+        ->join('l.classe', 'c')
         ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-        ->where('al.alunno=:alunno AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
-        ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'R'])
+        ->where("al.alunno=:alunno AND m.tipo='R' AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
+        ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
+         'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getSingleScalarResult();
       if ($ass_rel) {
@@ -582,7 +586,8 @@ class GenitoriUtil {
       }
     }
     // percentuale ore di assenza
-    $monte = $classe->getOreSettimanali() * 33;
+    $monte = ($classe->getOreSettimanali() * 33) -
+      (in_array($alunno->getReligione(), ['S', 'A']) ? 0 : 33);
     $perc = round($totale / $monte * 100, 2);
     // statistiche
     $data = (new \DateTime())->format('Y-m-d');
@@ -1089,16 +1094,16 @@ class GenitoriUtil {
     $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
       ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse()])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
     foreach ($assenze as $a) {
       $data = $a['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))].' '.substr($data, 0, 4);
+      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;
