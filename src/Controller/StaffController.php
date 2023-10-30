@@ -142,6 +142,7 @@ class StaffController extends BaseController {
         'choice_attr' => function($val, $key, $index) {
             return ['class' => 'gs-no-placeholder'];
           },
+        'translation_domain' => false,
         'attr' => ['class' => 'gs-placeholder'],
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))

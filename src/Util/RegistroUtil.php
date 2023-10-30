@@ -1205,7 +1205,7 @@ class RegistroUtil {
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
-      ->where('a.id IN (:id)')
+      ->where('a.id IN (:id) AND a.abilitato=1 AND a.classe IS NOT NULL')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['id' => $alunni, 'data' => $data->format('Y-m-d')])
       ->getQuery()
