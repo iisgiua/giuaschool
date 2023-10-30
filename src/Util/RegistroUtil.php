@@ -784,19 +784,19 @@ class RegistroUtil {
         }
         // gestione pulsanti
         $pulsanti = $this->azioneAssenze($inizio, $docente, null, null, ($cattedra ? $cattedra->getMateria() : null));
-        if ($pulsanti) {
+        if ($pulsanti && $alu['id_classe'] > 0) {
           // url pulsanti
           if ($alu['id_assenza'] > 0) {
             $urlPresenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
               'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
           } else {
             $urlAssenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
               'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => 0));
           }
           $urlEntrata = $this->router->generate('lezioni_assenze_entrata', array(
-            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
+            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
             'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
             // pulsante uscita se richiesta presente
@@ -807,11 +807,12 @@ class RegistroUtil {
           } else {
             // pulsante uscita standard
             $urlUscita = $this->router->generate('lezioni_assenze_uscita', array(
-                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'],
+                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
                 'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           }
-          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse', ['classe' => $alu['id_classe'],
-            'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_presenza'] ?? 0]);
+          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse',
+            ['classe' => $alu['id_classe'] ?? 0, 'data' =>$dataStr, 'alunno' => $alu['id_alunno'],
+            'id' => $alu['id_presenza'] ?? 0]);
           // controlla fuori classe
           if ($alu['id_presenza']) {
             // fuori classe
@@ -840,8 +841,15 @@ class RegistroUtil {
               $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
             // pulsante giustifica
             $alunni[$k]['pulsante_giustifica'] = $this->router->generate('lezioni_assenze_giustifica', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'], 'data' =>$dataStr,
-              'alunno' => $alu['id_alunno']));
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+              'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
+          }
+        }
+        // cambio classe
+        if (!$alu['id_classe']) {
+          $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alu['id_alunno']]);
+          if ($cambio) {
+            $dati['cambio'][$alu['id_alunno']] = $cambio->getNote();
           }
         }
       }

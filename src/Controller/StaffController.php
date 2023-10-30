@@ -2262,8 +2262,16 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->cercaClasse($search, $pagina, $limite);
     $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    // aggiunge dati cambio classe
+    $lista['cambio'] = [];
+    foreach ($lista['lista'] as $alunno) {
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alunno]);
+      if ($cambio) {
+        $lista['cambio'][$alunno->getId()] = $cambio;
+      }
+    }
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
       'pagina_titolo' => 'page.staff_situazione',

@@ -81,6 +81,9 @@
           <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
               {% endif %}
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: v, g: dati[data].genitori[v.id_alunno]} %}
+              {% if dati.cambio[v.id_alunno] is defined %}
+          <br><strong class="text-danger">{{ dati.cambio[v.id_alunno] }}</strong>
+              {% endif %}
         </td>
         <td>
               {% if v.id_assenza %}

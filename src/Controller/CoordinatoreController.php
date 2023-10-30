@@ -442,8 +442,12 @@ class CoordinatoreController extends BaseController {
     // controllo classe
     $classe = $alunno->getClasse();
     if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alunno]);
+      if (!$cambio) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $classe = $cambio->getClasse();
     }
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
@@ -461,7 +465,7 @@ class CoordinatoreController extends BaseController {
       $info['back'] = 'coordinatore_situazione';
     }
     // legge dati
-    $dati = $staff->situazione($alunno, $tipo);
+    $dati = $staff->situazione($alunno, $classe, $tipo);
     // controllo formato
     if ($formato == 'P') {
       // crea documento PDF

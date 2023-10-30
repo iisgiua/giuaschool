@@ -59,7 +59,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function lezioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, 
+  public function lezioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
                                 string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
@@ -326,7 +326,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, 
+  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
                                 int $posizione): Response {
     // inizializza variabili
     $errore = null;
@@ -427,7 +427,7 @@ class GenitoriController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen, 
+  public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen,
                                      RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
@@ -494,7 +494,7 @@ class GenitoriController extends BaseController {
     // legge la classe (può essere null)
     $classe = $alunno->getClasse();
     // legge lista periodi
-    $dati_periodi = $gen->pagelleAlunno($alunno);
+    $dati_periodi = $gen->pagelleAlunno($alunno, $classe);
     if (!empty($dati_periodi)) {
       // seleziona scrutinio indicato o ultimo
       $scrutinio = $dati_periodi[0][1];
@@ -968,7 +968,7 @@ class GenitoriController extends BaseController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function giustificaRitardoAction(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                          LogHandler $dblogger, Entrata $entrata, 
+                                          LogHandler $dblogger, Entrata $entrata,
                                           int $posizione): Response {
     // inizializza
     $info = array();

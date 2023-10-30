@@ -111,11 +111,11 @@
     <tbody>
     {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
     {% for k,a in dati.alunni %}
-      {% if cattedra.materia.tipo != 'R' or a.religione == tipo_rel %}
+      {% if (cattedra.materia.tipo != 'R' or a.religione == tipo_rel) and dati.trasferiti[a.id] is not defined %}
       <tr>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-          <strong{{ dati.trasferiti[a.id] is defined ? ' class="text-danger"' }}>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
+          <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
         </td>
         {% for tipo in ['S','O','P'] %}

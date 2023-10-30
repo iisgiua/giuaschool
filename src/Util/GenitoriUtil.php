@@ -934,10 +934,11 @@ class GenitoriUtil {
    * Restituisce la lista delle pagelle esistenti per l'alunno indicato
    *
    * @param Alunno $alunno Alunno di riferimento
+   * @param Classe $classe Classe dell'alunno selezionato
    *
    * @return array Restituisce i dati come array associativo
    */
-  public function pagelleAlunno(Alunno $alunno) {
+  public function pagelleAlunno(Alunno $alunno, Classe $classe) {
     $periodi = array();
     $adesso = (new \DateTime())->format('Y-m-d H:i:0');
     // scrutini di classe corrente o altre di cambio classe (escluso rinviato)
@@ -945,7 +946,7 @@ class GenitoriUtil {
       ->leftJoin('s.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
       ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo NOT IN (:rinviati)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(),
+      ->setParameters(['alunno' => $alunno, 'classe' => $classe,
         'stato' => 'C', 'adesso' => $adesso, 'rinviati' => ['R', 'X']])
       ->orderBy('s.data', 'DESC')
       ->getQuery()

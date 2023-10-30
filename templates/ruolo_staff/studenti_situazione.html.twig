@@ -19,8 +19,20 @@
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
           <span>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: lista.genitori[a.id]} %}
+      {% if lista.cambio[a.id] is defined %}
+        {% if a.classe %}
+          <br><em class="text-danger">{{ lista.cambio[a.id].note }}</em>
+        {% else %}
+          <br><strong class="text-danger">{{ lista.cambio[a.id].note }}</strong>
+        {% endif %}
+      {% endif %}
         </td>
-        <td>{{ a.classe }}</td>
+        <td>
+          {{ a.classe }}
+      {% if lista.cambio[a.id].classe is defined and lista.cambio[a.id].classe %}
+          <strong class="text-danger">({{ lista.cambio[a.id].classe }})</strong>
+      {% endif %}
+        </td>
         <td>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': a.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': a.id, 'tipo': 'S', 'formato': 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>

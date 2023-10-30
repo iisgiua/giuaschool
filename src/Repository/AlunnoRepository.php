@@ -49,7 +49,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni o secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
    *
    * @param array $search Lista dei criteri di ricerca
    * @param int $page Pagina corrente
@@ -78,7 +78,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni o e iscritti, secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni iscritti, secondo i criteri di ricerca indicati
    *
    * @param array $search Lista dei criteri di ricerca
    * @param int $page Pagina corrente
@@ -107,7 +107,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni o e inseriti in classe, secondo i criteri di ricerca indicati
+   * Restituisce la lista degli alunni inseriti in classe, secondo i criteri di ricerca indicati
    *
    * @param Sede $sede Sede delle classi
    * @param array $search Lista dei criteri di ricerca
@@ -136,24 +136,6 @@ class AlunnoRepository extends BaseRepository {
     }
     // crea lista con pagine
     $res = $this->paginazione($query->getQuery(), $page);
-    return $res['lista'];
-  }
-
-  /**
-   * Restituisce una lista vuota (usata come pagina iniziale)
-   *
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function listaVuota($pagina, $limite): Paginator {
-    // crea query base
-    $query = $this->createQueryBuilder('a')
-      ->where('a.abilitato=:abilitato')
-      ->setParameters(['abilitato' => -1]);
-    // crea lista con pagine
-    $res = $this->paginazione($query->getQuery(), $pagina);
     return $res['lista'];
   }
 
@@ -316,33 +298,7 @@ class AlunnoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli alunni con richiesta di certificato
-   *
-   * @param Sede $sede Sede delle classi
-   *
-   * @return array Array associativo con la lista dei dati
-   */
-  public function richiestaCertificato(Sede $sede=null): array {
-    // crea query base
-    $alunni = $this->createQueryBuilder('a')
-      ->join('a.classe', 'c')
-      ->join('c.sede', 's')
-      ->where('a.abilitato=:vero AND a.richiestaCertificato=:vero')
-      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['vero' => 1]);
-    if ($sede) {
-      // filtra per sede
-      $alunni->andwhere('s.id=:sede')->setParameter('sede', $sede);
-    }
-    $alunni = $alunni
-      ->getQuery()
-      ->getResult();
-    // restituisce i dati
-    return $alunni;
-  }
-
-  /**
-   * Restituisce la lista degli alunni o e attualmente iscritti alla classe
+   * Restituisce la lista degli alunni attualmente iscritti alla classe
    *
    * @param int $search Identificativo della classe
    *
@@ -420,7 +376,7 @@ class AlunnoRepository extends BaseRepository {
     return $assenze;
   }
 
-   /**
+  /**
    * Restituisce la lista degli alunni, predisposta per le opzioni dei form
    *
    * @param bool|null $abilitato Usato per filtrare gli alunni abilitati/disabilitati; se nullo non filtra i dati
@@ -482,6 +438,70 @@ class AlunnoRepository extends BaseRepository {
     }
     // restituisce lista opzioni
     return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli alunni della classe, compresi i trasferiti
+   *
+   * @param Classe $classe Classe scolastica
+   *
+   * @return array Array associativo con i dati degli alunni
+   */
+  public function alunniClasse(Classe $classe): array {
+    $dati = [];
+    $dati['alunni'] = [];
+    $dati['trasferiti'] = [];
+    // legge alunni attuali
+    $alunni = $this->createQueryBuilder('a')
+      ->select('a.id,cc.note')
+      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->where('a.classe=:classe')
+      ->setParameters(['classe' => $classe])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($alunni as $alunno) {
+      $dati['alunni'][$alunno['id']] = $alunno['note'];
+    }
+    // legge alunni trasferiti
+    $alunni = $this->createQueryBuilder('a')
+      ->select('a.id,cc.note')
+      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->where('cc.classe=:classe')
+      ->setParameters(['classe' => $classe])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($alunni as $alunno) {
+      $dati['trasferiti'][$alunno['id']] = $alunno['note'];
+    }
+    // restituisce lista
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli alunni inseriti in classe (anche trasferiti), secondo i criteri di ricerca indicati
+   *
+   * @param array $search Lista dei criteri di ricerca
+   * @param int $page Pagina corrente
+   * @param int $limit Numero di elementi per pagina
+   *
+   * @return Paginator Oggetto Paginator
+   */
+  public function cercaClasse($search=null, $page=1, $limit=10): Paginator {
+    // crea query base
+    $query = $this->createQueryBuilder('a')
+      ->leftJoin('a.classe', 'cl')
+      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome AND (cl.id IS NOT NULL OR cc.id IS NOT NULL)')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%']);
+    if ($search['classe'] > 0) {
+      $query
+        ->andwhere('cl.id=:classe OR cc.classe=:classe')
+        ->setParameter('classe', $search['classe']);
+    }
+    // crea lista con pagine
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
 }
