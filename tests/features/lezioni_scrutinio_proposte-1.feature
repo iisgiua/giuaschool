@@ -27,8 +27,8 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -36,8 +36,8 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato | religione |
     | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
@@ -99,8 +99,8 @@ Schema dello scenario: Inserisce e memorizza i voti con recupero per la cattedra
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -108,8 +108,8 @@ Schema dello scenario: Inserisce e memorizza i voti con recupero per la cattedra
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato |
     | $a1  | $cl1   | Mario    | Rossi   | si        |
@@ -157,8 +157,8 @@ Schema dello scenario: Modifica voti esistenti per la cattedra del docente
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -166,8 +166,8 @@ Schema dello scenario: Modifica voti esistenti per la cattedra del docente
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato | religione |
     | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
@@ -217,8 +217,8 @@ Schema dello scenario: Modifica dati recupero esistenti per la cattedra del doce
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -226,8 +226,8 @@ Schema dello scenario: Modifica dati recupero esistenti per la cattedra del doce
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato |
     | $a1  | $cl1   | Mario    | Rossi   | si        |
