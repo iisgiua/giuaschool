@@ -8,25 +8,23 @@
 
 namespace App\Util;
 
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
+use App\Entity\Materia;
+use App\Entity\Utente;
+use Doctrine\ORM\EntityManagerInterface;
 use Google_Client as GClient;
-use Google_Service_Directory as GDirectory;
-use Google_Service_Directory_User as GUser;
-use Google_Service_Directory_Member as GMember;
-use Google_Service_Directory_UserPhoto as GPhoto;
 use Google_Service_Classroom as GClassroom;
+use Google_Service_Classroom_Course as GCourse;
 use Google_Service_Classroom_Student as GStudent;
 use Google_Service_Classroom_Teacher as GTeacher;
-use Google_Service_Classroom_Course as GCourse;
+use Google_Service_Directory as GDirectory;
+use Google_Service_Directory_Member as GMember;
+use Google_Service_Directory_User as GUser;
+use Google_Service_Directory_UserPhoto as GPhoto;
 use GuzzleHttp\Client;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\Utente;
-use App\Entity\Alunno;
-use App\Entity\Staff;
-use App\Entity\Cattedra;
-use App\Entity\Docente;
-use App\Entity\Classe;
-use App\Entity\Materia;
 
 
 /**
@@ -216,30 +214,6 @@ class AccountProvisioning {
   }
 
   /**
-   * Disconnette l'utente dal sistema esterno che fa da identity provider.
-   * ATTENZIONE: disconnette da tutti i dispositivi dell'utente
-   *
-   * @param string $utente Email dell'utente da disconnettere
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function disconnetteUtente($utente) {
-    // disconnette dall'identity provider (GSuite)
-    $errore = null;
-    try {
-      $ris = $this->serviceGsuite['directory']->users->signOut($utente);
-    } catch (\Exception $e) {
-      // errore
-      $msg = json_decode($e->getMessage(), true);
-      $errore = '[disconnetteUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
-      return $errore;
-    }
-    $this->log[] = 'disconnetteUtente: '.$utente;
-    // tutto ok
-    return null;
-  }
-
-  /**
    * Sospende o riattiva un utente sui sistemi esterni
    *
    * @param Utente $utente Utente da modificare
@@ -275,7 +249,7 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function aggiungeAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // GSuite: aggiunge a gruppo classe
     $gruppo = 'studenti'.strtolower($nomeclasse).'@'.$this->conf['dominio'];
     if (($errore = $this->aggiungeUtenteGruppoGsuite($alunno->getEmail(), $gruppo))) {
@@ -286,10 +260,11 @@ class AccountProvisioning {
     // GSuite: aggiunge ai corsi della classe
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
+      ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo NOT IN (:materie)')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'materie' => ['S', 'E']])
+      ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -320,7 +295,7 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function rimuoveAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // GSuite: rimuove da gruppo classe
     $gruppo = 'studenti'.strtolower($nomeclasse).'@'.$this->conf['dominio'];
     if (($errore = $this->rimuoveUtenteGruppoGsuite($alunno->getEmail(), $gruppo))) {
@@ -331,10 +306,11 @@ class AccountProvisioning {
     // GSuite: rimuove dai corsi della classe
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
+      ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno AND m.tipo!=:civica')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S', 'civica' => 'E'])
+      ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -401,7 +377,7 @@ class AccountProvisioning {
    */
   public function aggiungeCattedra(Cattedra $cattedra) {
     $docente = $cattedra->getDocente()->getEmail();
-    $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
+    $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().$cattedra->getClasse()->getGruppo();
     $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
       ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
     $docente_username = $cattedra->getDocente()->getUsername();
@@ -414,8 +390,8 @@ class AccountProvisioning {
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
-        ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo NOT IN (:materie)')
-        ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'materie' => ['S', 'E']])
+        ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo()])
         ->getQuery()
         ->getResult();
     } elseif ($cattedra->getMateria()->getTipo() != 'E') {
@@ -449,8 +425,9 @@ class AccountProvisioning {
         // GSuite: aggiunge studenti al corso
         $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
           ->select('a.email')
-          ->where('a.abilitato=:abilitato AND a.classe=:classe')
-          ->setParameters(['abilitato' => 1, 'classe' => $cattedra->getClasse()])
+          ->join('a.classe', 'cl')
+          ->where('a.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione'.(empty($cattedra->getClasse()->getGruppo()) ? '' : (" AND cl.gruppo='".$cattedra->getClasse()->getGruppo()."'")))
+          ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()])
           ->getQuery()
           ->getArrayResult();
         foreach ($alunni as $alu) {
@@ -518,7 +495,7 @@ class AccountProvisioning {
   public function rimuoveCattedra(Docente $docente, Classe $classe, Materia $materia) {
     $docente_email = $docente->getEmail();
     $docente_username = $docente->getUsername();
-    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // controlla se ha altre materie nella classe
     $altre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
@@ -538,8 +515,8 @@ class AccountProvisioning {
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
-        ->where('cl.id=:classe AND m.tipo NOT IN (:materie)')
-        ->setParameters(['classe' => $classe, 'materie' => ['S', 'E']])
+        ->where("m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo()])
         ->getQuery()
         ->getArrayResult();
     } elseif ($materia->getTipo() == 'E') {
@@ -625,7 +602,7 @@ class AccountProvisioning {
    */
   public function aggiungeCoordinatore(Docente $docente, Classe $classe) {
     $docente_email = $docente->getEmail();
-    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // GSuite: aggiunge docente a CdC come coordinatore/segretario
     if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $this->conf['anno'], true))) {
       // errore
@@ -646,7 +623,7 @@ class AccountProvisioning {
    */
   public function rimuoveCoordinatore(Docente $docente, Classe $classe) {
     $docente_email = $docente->getEmail();
-    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // GSuite: aggiunge docente a CdC
     if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $this->conf['anno'], false))) {
       // errore
@@ -668,7 +645,7 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function modificaCoordinatore(Docente $docente, Classe $classe, Docente $docente_prec,
-                                     Classe $classe_prec) {
+                                       Classe $classe_prec) {
     // rimuove da CdC precedente
     if (($errore = $this->rimuoveCoordinatore($docente_prec, $classe_prec))) {
       // errore

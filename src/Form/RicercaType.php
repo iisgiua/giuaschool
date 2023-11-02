@@ -36,7 +36,7 @@ class RicercaType extends AbstractType {
         ->add('sede', ChoiceType::class, array('label' => 'label.sede',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
-          'choice_value' => 'id',
+          'choice_value' => (fn($c) => is_object($c) ? $c->getId() : (int) $c),
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
           'required' => false))

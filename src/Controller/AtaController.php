@@ -110,8 +110,8 @@ class AtaController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
-    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
+    $criteri['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : $criteri['sede']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
     if ($pagina == 0) {
@@ -129,8 +129,8 @@ class AtaController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
-        intval($form->get('sede')->getData()));
+      $criteri['sede'] = is_object($form->get('sede')->getData()) ?
+        $form->get('sede')->getData()->getId() : ((int) $form->get('sede')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
       $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
@@ -247,7 +247,7 @@ class AtaController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, int $id, 
+                                 LoggerInterface $logger, LogHandler $dblogger, int $id,
                                  string $tipo): Response {
     // controlla ata
     $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
