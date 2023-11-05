@@ -36,10 +36,18 @@ class ClasseRepository extends BaseRepository {
       ->setParameters(['lista' => $lista, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
-    $lista_classi = array_column($classi, 'id');
-    $errore = (count($lista) != count($lista_classi));
+    $listaClassi = array_column($classi, 'id');
+    $errore = (count($lista) != count($listaClassi));
+    // legge gruppi
+    $classi = $this->createQueryBuilder('c')
+      ->select('c.id AS classe,c2.id AS gruppo')
+      ->leftJoin('App\Entity\Classe', 'c2', 'WITH', 'c2.id!=c.id AND c2.anno=c.anno AND c2.sezione=c.sezione')
+      ->where("c.id IN (:lista) AND (c.gruppo IS NULL OR c.gruppo='') AND c2.id IS NOT NULL AND c2 NOT IN (:lista)")
+      ->setParameters(['lista' => $lista])
+      ->getQuery()
+      ->getArrayResult();
     // restituisce classi valide
-    return $lista_classi;
+    return array_merge($listaClassi, array_column($classi, 'gruppo'));;
   }
 
   /**
@@ -329,7 +337,7 @@ class ClasseRepository extends BaseRepository {
     $dati = [];
     // legge gruppi
     $classi = $this->createQueryBuilder('c')
-      ->select('c.id AS classe,cl1.id as comune,cl2.id as gruppo')
+      ->select('c.id AS classe,cl1.id as comune,cl2.id AS gruppo')
       ->leftJoin('App\Entity\Classe', 'cl1', 'WITH', 'cl1.id!=c.id AND cl1.anno=c.anno AND cl1.sezione=c.sezione AND cl1.gruppo IS NULL')
       ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl1.id IS NULL AND cl2.id!=c.id AND cl2.anno=c.anno AND cl2.sezione=c.sezione AND cl2.gruppo IS NOT NULL')
       ->where('c.id IN (:lista) AND (cl1.id IS NOT NULL OR cl2.id IS NOT NULL)')

@@ -1212,8 +1212,8 @@ message.no_cattedra_piani: Non è previsto il caricamento dei piani di lavoro pe
 message.cancella_piano: Verrà cancellato il documento del piano di lavoro. Vuoi continuare?
 message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe; il documento dovrà comprendere anche gli argomenti di Educazione Civica.<br>I docenti di laboratorio dovranno inserire il proprio piano di lavoro assieme a quello del docente di teoria, in un unico documento."
 message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
-message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
-message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}"
+message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, come da richiesta preventivamente formalizzata."
+message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}, come da richiesta preventivamente formalizzata."
 message.autorizza_uscita_richiesta: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, come da richiesta preventivamente formalizzata."
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
 message.presenti_compiti_oggi: "{num, plural, one {È presente un compito assegnato per oggi} other {Sono presenti # compiti assegnati per oggi}}"

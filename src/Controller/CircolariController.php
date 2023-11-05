@@ -414,7 +414,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function deleteAction(Request $request, LogHandler $dblogger, CircolariUtil $circ, 
+  public function deleteAction(Request $request, LogHandler $dblogger, CircolariUtil $circ,
                                int $id): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     $fs = new Filesystem();

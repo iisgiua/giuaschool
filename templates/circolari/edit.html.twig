@@ -354,7 +354,7 @@ $(document).ready(function() {
     });
     if (opt != "") {
       $.each(opt.split(","), function(idx,item){
-        $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+        $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
       });
     }
     $("#gs-modal-"+type).data('caller', 'Coordinatori').modal('show');
@@ -401,7 +401,7 @@ $(document).ready(function() {
       }
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -457,7 +457,7 @@ $(document).ready(function() {
       });
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -513,7 +513,7 @@ $(document).ready(function() {
       });
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -596,7 +596,7 @@ $(document).ready(function() {
       $("#gs-pulsante"+caller).show();
       var lista_id = id.split(',');
       var lista_nomi = nomi.split(',').map(function(item,index){
-        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item.trim()+'</span>';
       });
       $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
     }
@@ -633,7 +633,7 @@ $(document).ready(function() {
       $("#gs-pulsante"+caller).show();
       var lista_id = id.split(',');
       var lista_nomi = nomi.split(',').map(function(item,index){
-        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item.trim()+'</span>';
       });
       $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
     }
@@ -679,13 +679,13 @@ $(document).ready(function() {
 });
 function addUser(caller, element) {
   var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
-  var nome = $(element).parent().text();
+  var nome = $(element).parent().text().trim();
   var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-'+caller+'-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\''+caller+'\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+nome+'</strong></div>';
   var txt = $('#gs-modal-'+caller+'-row').data('nomi');
-  txt = (txt == null || txt == '' ? nome : txt+','+nome);
+  txt = (txt == null || txt == '') ? nome : txt+', '+nome;
   $('#gs-modal-'+caller+'-row').data('nomi', txt);
   txt = $('#gs-modal-'+caller+'-row').data('id');
-  txt = (txt == null || txt == '' ? id : txt+', '+id);
+  txt = (txt == null || txt == '') ? id : txt+','+id;
   $('#gs-modal-'+caller+'-row').data('id', txt);
   $('#gs-modal-'+caller+'-row').append(s);
   $(element).hide();

@@ -80,7 +80,7 @@ class DocenteRepository extends BaseRepository {
       ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
-      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
+      ->andWhere('cl.sede IN (:sedi) OR cl.id IS NULL')
       ->setParameters(['attiva' => 1, 'lista' => $lista, 'abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
@@ -371,7 +371,7 @@ class DocenteRepository extends BaseRepository {
     } elseif ($abilitato === false) {
       $docenti = $docenti->andWhere('d.abilitato = 0');
     }
-    $docenti = $docenti 
+    $docenti = $docenti
       ->orderBy('d.cognome,d.nome,d.username')
       ->getQuery()
       ->getResult();
