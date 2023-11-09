@@ -322,17 +322,28 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di classe
-      $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
-        'anno' => $fields['classe'][0],
-        'sezione' => trim(substr($fields['classe'], 1))));
-      if (count($lista) != 1) {
+      $classeAnno = (int) $fields['classe'][0];
+      $classeSezione = trim(substr($fields['classe'], 1));
+      $classeGruppo = '';
+      if (($pos = strpos($classeSezione, '-')) !== false) {
+        $classeGruppo = substr($classeSezione, $pos + 1);
+        $classeSezione = substr($classeSezione, 0, $pos);
+      }
+      $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+          ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+        ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+          'gruppo' => $classeGruppo])
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+      if (!$classe) {
         // errore: classe
         fclose($this->fh);
         $this->fh = null;
         $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
         return $imported;
       }
-      $classe = $lista[0];
       // controlla esistenza di materia
       $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
       if (count($lista) != 1) {
@@ -1161,17 +1172,28 @@ class CsvImporter {
       // controlla esistenza di classe
       $classe = null;
       if ($fields['classe'] != '---') {
-        $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
-          'anno' => $fields['classe'][0],
-          'sezione' => trim(substr($fields['classe'], 1))));
-        if (count($lista) != 1) {
+        $classeAnno = (int) $fields['classe'][0];
+        $classeSezione = trim(substr($fields['classe'], 1));
+        $classeGruppo = '';
+        if (($pos = strpos($classeSezione, '-')) !== false) {
+          $classeGruppo = substr($classeSezione, $pos + 1);
+          $classeSezione = substr($classeSezione, 0, $pos);
+        }
+        $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+          ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+            ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+          ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+            'gruppo' => $classeGruppo])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getOneOrNullResult();
+        if (!$classe) {
           // errore: classe
           fclose($this->fh);
           $this->fh = null;
           $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
           return $imported;
         }
-        $classe = $lista[0];
       }
       // controlla esistenza di materia
       $materia = null;

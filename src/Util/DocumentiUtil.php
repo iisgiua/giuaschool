@@ -315,7 +315,7 @@ class DocumentiUtil {
     $dir = $this->documentoDir($documento);
     // dati predefiniti
     $nomeClasse = $documento->getClasse() ?
-      $documento->getClasse()->getAnno().$documento->getClasse()->getSezione() : null;
+      $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().$documento->getClasse()->getGruppo() : null;
     $nomeMateria = $documento->getMateria() ? $documento->getMateria()->getNomeBreve() : null;
     $nomeAlunno = $documento->getAlunno() ?
       $documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome() : null;
@@ -502,9 +502,23 @@ class DocumentiUtil {
     }
     // docenti
     if ($destinatari->getDocenti() != 'N') {
+      // controllo classi
+      $filtroClassi = [];
+      if ($destinatari->getDocenti() == 'C') {
+        $filtroClassi = $destinatari->getFiltroDocenti();
+        $articolate = $this->em->getRepository('App\Entity\Classe')->classiArticolate($filtroClassi);
+        foreach ($articolate as $articolata) {
+          if (!empty($articolata['comune'])) {
+            $filtroClassi[] = $articolata['comune'];
+          } else {
+            $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
+          }
+        }
+      }
       // aggiunge docenti
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')
-        ->getIdDocente($sedi, $destinatari->getDocenti(), $destinatari->getFiltroDocenti()));
+        ->getIdDocente($sedi, $destinatari->getDocenti(),
+          $destinatari->getDocenti() == 'C' ? $filtroClassi : $destinatari->getFiltroDocenti()));
     }
     // coordinatori
     if ($destinatari->getCoordinatori() != 'N') {

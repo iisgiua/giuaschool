@@ -189,7 +189,7 @@ class GenitoriController extends BaseController {
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
-    // legge la classe (può essere null)
+    // legge la classe
     $classe = $reg->classeInData(new \DateTime(), $alunno);
     if ($classe) {
       // lista materie

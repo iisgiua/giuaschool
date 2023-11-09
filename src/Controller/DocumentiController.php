@@ -351,7 +351,7 @@ class DocumentiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function pianiAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                 LogHandler $dblogger, CLasse $classe, Materia $materia): Response {
+                                 LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_piani_add/files';
@@ -530,7 +530,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(DocumentiUtil $doc, Documento $documento, 
+  public function downloadAction(DocumentiUtil $doc, Documento $documento,
                                  File $allegato = null): Response {
     // controlla allegato
     if ($allegato && !$documento->getAllegati()->contains($allegato)) {
@@ -767,8 +767,8 @@ class DocumentiController extends BaseController {
     // form di inserimento
     $opzioniClassi = null;
     if (!$alunno) {
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(     
-      $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
+      $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+        $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
     }
     $opzioniTipi = [];
     foreach ($listaTipi as $opt) {
