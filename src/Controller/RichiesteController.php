@@ -362,9 +362,7 @@ class RichiesteController extends BaseController {
       $chiediGiustificazione = !$uscitaOld->getDocenteGiustifica();
     } else {
       // nuovo
-      $msg = $richiesta ? 'message.autorizza_uscita_richiesta' :
-        ($alunno->controllaRuoloFunzione('AM') ? 'message.autorizza_uscita_maggiorenne' : 'message.autorizza_uscita');
-      $nota = $trans->trans($msg, ['sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+      $nota = $trans->trans('message.autorizza_uscita_richiesta', ['sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
       // imposta ora
       if ($richiesta) {
