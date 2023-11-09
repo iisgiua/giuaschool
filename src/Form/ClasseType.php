@@ -37,6 +37,7 @@ class ClasseType extends AbstractType {
     $builder
       ->add('anno', ChoiceType::class, array('label' => 'label.classe_anno',
         'choices' => array('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5),
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sezione', TextType::class, array('label' => 'label.classe_sezione',

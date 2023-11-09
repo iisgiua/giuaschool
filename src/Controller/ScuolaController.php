@@ -100,7 +100,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
-      ['return_url' => $this->generateUrl('scuola_scrutini'), 
+      ['return_url' => $this->generateUrl('scuola_scrutini'),
       'values' => $definizione->getClassiVisibili()]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -630,7 +630,7 @@ class ScuolaController extends BaseController {
     $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
     $form = $this->createForm(ClasseType::class, $classe, [
-      'return_url' => $this->generateUrl('scuola_classi'), 
+      'return_url' => $this->generateUrl('scuola_classi'),
       'values' => [$opzioniCorsi, $opzioniSedi, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -751,7 +751,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(FestivitaType::class, $festivita, [
-      'return_url' => $this->generateUrl('scuola_festivita'), 
+      'return_url' => $this->generateUrl('scuola_festivita'),
       'form_mode' => ($id ? 'singolo' : 'multiplo')]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1098,8 +1098,9 @@ class ScuolaController extends BaseController {
       }
     }
     // form
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     $form = $this->createForm(DefinizioneRichiestaType::class, $modulo, [
-      'return_url' => $this->generateUrl('scuola_moduli'), 'values' => [$campi, $lista]]);
+      'return_url' => $this->generateUrl('scuola_moduli'), 'values' => [$opzioniSedi, $campi, $lista]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla campi

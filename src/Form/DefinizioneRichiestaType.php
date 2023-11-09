@@ -38,7 +38,15 @@ class DefinizioneRichiestaType extends AbstractType {
     // aggiunge campi al form
     $builder
       ->add('nome', TextType::class, array('label' => 'label.nome_modulo',
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'choices' => $options['values'][0],
+        'choice_value' => 'id',
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false))
       ->add('richiedenti', ChoiceType::class, array('label' => 'label.richiedenti_modulo',
         'choices' => array('label.ruolo_funzione_GN' => 'GN', 'label.ruolo_funzione_AM' => 'AM',
           'label.ruolo_funzione_AN' => 'AN'),
@@ -56,7 +64,7 @@ class DefinizioneRichiestaType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('campi', CollectionType::class, array('label' => 'label.campi_modulo',
-        'data' => $options['values'][0],
+        'data' => $options['values'][1],
         'entry_type' => CampoType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
         'allow_add' => true,
@@ -67,21 +75,26 @@ class DefinizioneRichiestaType extends AbstractType {
         'label_attr' => ['class' => 'position-relative text-uppercase text-primary font-weight-bold pb-3'],
         'required' => false))
       ->add('modulo', ChoiceType::class, array('label' => 'label.template_modulo',
-        'choices' => $options['values'][1],
+        'choices' => $options['values'][2],
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('allegati', IntegerType::class, array('label' => 'label.allegati_modulo',
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
-      ->add('tipo', TextType::class, array('label' => 'label.tipo_richiesta',
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
       ->add('unica', ChoiceType::class, array('label' => 'label.richiesta_unica_modulo',
+        'choices' => array('label.si' => true, 'label.no' => false),
+        'expanded' => true,
+        'attr' => ['widget' => 'gs-row-start'],
+        'label_attr' => ['class' => 'radio-inline'],
+        'required' => true))
+      ->add('gestione', ChoiceType::class, array('label' => 'label.gestione_modulo',
         'choices' => array('label.si' => true, 'label.no' => false),
         'expanded' => true,
         'attr' => ['widget' => 'gs-row-end'],
         'label_attr' => ['class' => 'radio-inline'],
+        'required' => true))
+      ->add('tipo', TextType::class, array('label' => 'label.tipo_richiesta',
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))

@@ -3,6 +3,7 @@
 #
 # Dati per la gesstione di una richiesta:
 #   nome: nome univoco della richiesta
+#   sede: sede del modulo, null per tutte le sedi
 #   richiedenti: lista dei ruoli degli utenti autorizzati a inviare la richiesta
 #   destinatari: lista dei ruoli degli utenti autorizzati a gestire la richiesta
 #   modulo: nome del file del modulo di richiesta da compilare da parte del richiedente
@@ -10,6 +11,7 @@
 #   allegati: numero di allegati da inserire nella richiesta
 #   tipo: codifica del tipo di richiesta
 #   unica: indica se è ammessa una sola richiesta per l'utente
+#   gestione: indica se il modulo richiede la gestione degli stati
 #   abilitata: indica se la definizione della richiesta è abilitata
 ####################
 
@@ -17,6 +19,7 @@
 App\Entity\DefinizioneRichiesta:
   definizione_richiesta_{1..10}:
     nome (unique): '<substr(<word()>, 0, 128)>'
+    sede: '@sede_1'
     richiedenti: '<substr(<text()>, 0, 16)>'
     destinatari: '<substr(<text()>, 0, 16)>'
     modulo: '<substr(<text()>, 0, 128)>'
@@ -24,4 +27,5 @@ App\Entity\DefinizioneRichiesta:
     allegati: '<numberBetween(0, 3)>'
     azioneGestione: '<substr(<word()>, 0, 1)>'
     unica: '<boolean()>'
+    gestione: '<boolean()>'
     abilitata: '<boolean()>'

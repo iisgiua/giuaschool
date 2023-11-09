@@ -542,6 +542,7 @@ label.richiedenti_modulo: Utenti che possono presentare il modulo
 label.destinatari_modulo: Utenti che possono gestire la richiesta
 label.allegati_modulo: Numero di allegati da inserire nella richiesta
 label.richiesta_unica_modulo: Ammessa una sola richiesta per utente
+label.gestione_modulo: Attiva la gestione degli stati della procedura
 label.campi_modulo: Lista dei campi da compilare
 label.template_modulo: Nome del file del modello
 label.ruolo_funzione_GN: Genitori

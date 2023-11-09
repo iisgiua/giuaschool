@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Richiesta;
 use App\Entity\Uscita;
@@ -80,11 +81,19 @@ class RichiesteController extends BaseController {
       // inizializza sessione per allegati
       $this->reqstack->getSession()->set($varSessione, []);
     }
-    $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
+    $utente = ($this->getUser() instanceOf Genitore) ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla modulo richiesta
     $definizioneRichiesta = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findOneBy([
       'id' => $modulo, 'abilitata' => 1]);
     if (!$definizioneRichiesta) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla sede
+    $sedi = $utente->getCodiceRuolo() == 'A' ? [$utente->getClasse()->getSede()->getId()] :
+      ($utente->getCodiceRuolo() == 'G' ? [$utente->getAlunno()->getClasse()->getSede()->getId()] : []);
+    if ($definizioneRichiesta->getSede() &&
+        !in_array($definizioneRichiesta->getSede()->getId(), $sedi, true)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }

@@ -63,6 +63,14 @@ class DefinizioneRichiesta {
   private string $nome = '';
 
   /**
+   * @var Sede|null $sede Sede del modulo, null per tutte le sedi
+   *
+   * @ORM\ManyToOne(targetEntity="Sede")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private ?Sede $sede = null;
+
+  /**
    * @var string $richiedenti Lista dei ruoli degli utenti autorizzati a inviare la richiesta
    * Si usa una lista separata da virgole: ogni elemento è una coppia di codici per ruolo e funzione dell'utente
    *
@@ -126,6 +134,13 @@ class DefinizioneRichiesta {
    * @ORM\Column(type="boolean", nullable=false)
    */
   private bool $unica = false;
+
+  /**
+   * @var bool $gestione Indica se il modulo richiede la gestione degli stati
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private bool $gestione = true;
 
   /**
    * @var bool $abilitata Indica se la definizione della richiesta è abilitata
@@ -206,6 +221,27 @@ class DefinizioneRichiesta {
    */
   public function setNome(string $nome): self {
     $this->nome = $nome;
+    return $this;
+  }
+
+  /**
+   * Restituisce la sede del modulo
+   *
+   * @return Sede|null Sede del modulo
+   */
+  public function getSede(): ?Sede {
+    return $this->sede;
+  }
+
+  /**
+   * Modifica la sede del modulo
+   *
+   * @param Sede|null $sede Sede del modulo o null per tutte le sedi
+   *
+   * @return self Oggetto modificato
+   */
+  public function setSede(?Sede $sede): self {
+    $this->sede = $sede;
     return $this;
   }
 
@@ -357,6 +393,27 @@ class DefinizioneRichiesta {
   }
 
   /**
+   * Restituisce vero se il modulo richiede la gestione degli stati
+   *
+   * @return bool Indica se il modulo richiede la gestione degli stati
+   */
+  public function getGestione(): bool {
+    return $this->gestione;
+  }
+
+  /**
+   * Modifica il valore per indicare se il modulo richiede la gestione degli stati
+   *
+   * @param bool $gestione Indica se il modulo richiede la gestione degli stati
+   *
+   * @return self Oggetto modificato
+   */
+  public function setGestione(bool $gestione): self {
+    $this->gestione = $gestione;
+    return $this;
+  }
+
+  /**
    * Restituisce vero se la definizionne della richiesta è abilitata
    *
    * @return bool Indica se la definizionne della richiesta è abilitata
@@ -397,6 +454,7 @@ class DefinizioneRichiesta {
   public function datiVersione(): array {
     $dati = [
       'nome' => $this->nome,
+      'sede' => $this->sede ? $this->sede->getId() : null,
       'richiedenti' => $this->richiedenti,
       'destinatari' => $this->destinatari,
       'modulo' => $this->modulo,
@@ -404,6 +462,7 @@ class DefinizioneRichiesta {
       'allegati' => $this->allegati,
       'tipo' => $this->tipo,
       'unica' => $this->unica,
+      'gestione' => $this->gestione,
       'abilitata' => $this->abilitata];
     return $dati;
   }
