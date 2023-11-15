@@ -76,12 +76,15 @@
         {% endfor %}
       {% endfor %}
   <div class="row gs-mb-2">
-    <div class="col-sm-6">
+    <div class="col-sm-5">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_prec|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
-    <div class="col-sm-6 text-right">
+    <div class="col-sm-2 text-center">
+      <a class="btn btn-success" href="{{ path('richieste_classe', {classe: classe.id}) }}" role="button" title="Compila il modulo per le prove di evacuazione"><span class="glyphicon glyphicon-fire gs-mr-3"></span><strong>Evacuazione</strong></a>
+    </div>
+    <div class="col-sm-5 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-stop"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza i dati del mese"><span class="glyphicon glyphicon-th"></span></a>

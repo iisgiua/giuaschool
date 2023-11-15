@@ -16,7 +16,7 @@
         <li{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' class="active"' }}><a href="{{ path('circolari_gestione') }}" title="Gestione delle circolari">Gestione circolari</a></li>
       </ul>
     </li>
-    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] in ['staff_studenti', 'richieste_gest', 'documenti_alun'] ? ' active' }}">
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] in ['staff_studenti', 'richieste_gest', 'documenti_alun', 'staff_password'] ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli studenti">Studenti<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
         <li{{ app.request.attributes.get('_route') == 'richieste_gestione' ? ' class="active"' }}><a href="{{ path('richieste_gestione') }}" title="Gestione dei moduli di richiesta">Richieste</a></li>
@@ -26,7 +26,8 @@
         <li{{ app.request.attributes.get('_route')[:25] == 'staff_studenti_situazione' ? ' class="active"' }}><a href="{{ path('staff_studenti_situazione') }}" title="Mostra la situazione degli alunni">Situazione alunni</a></li>
         <li{{ app.request.attributes.get('_route')[:26] == 'staff_studenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_studenti_statistiche') }}" title="Mostra le statische di presenza degli alunni">Statistiche presenza</a></li>
         <li{{ app.request.attributes.get('_route') == 'documenti_alunni' ? ' class="active"' }}><a href="{{ path('documenti_alunni') }}" title="Mostra i documenti degli alunni">Visualizza documenti</a></li>
-      </ul>
+        <li{{ app.request.attributes.get('_route')[:14] == 'staff_password' ? ' class="active"' }}><a href="{{ path('staff_password') }}" title="Genera le credenziali di accesso per alunni e genitori">Password</a></li>
+    </ul>
     </li>
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:13] in ['staff_docenti', 'colloqui_cerc', 'documenti_doc'] ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Informazioni sui docenti">Docenti<span class="caret gs-ml-3"></span></a>
@@ -37,13 +38,11 @@
         <li{{ app.request.attributes.get('_route') == 'documenti_docenti' ? ' class="active"' }}><a href="{{ path('documenti_docenti') }}" title="Mostra i documenti dei docenti">Visualizza documenti</a></li>
       </ul>
     </li>
-
-    {#-- <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:15] == 'staff_documenti' ? ' active' }}"> #}
-      {#-- <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i documenti delle classi caricati dai docenti">Documenti<span class="caret gs-ml-3"></span></a> #}
-      {#-- <ul class="dropdown-menu"> #}
-      {#-- </ul> #}
-    {#-- </li> #}
-
-    <li{{ app.request.attributes.get('_route')[:14] == 'staff_password' ? ' class="active"' }}><a href="{{ path('staff_password') }}" title="Generazione delle nuove credenziali di accesso per i genitori">Password</a></li>
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:16] == 'richieste_modulo' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i moduli inviati">Moduli<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route') == 'richieste_modulo_evacuazione' ? ' class="active"' }}><a href="{{ path('richieste_modulo_evacuazione') }}" title="Visualizza i moduli delle prove di evacuazione">Evacuazione</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>

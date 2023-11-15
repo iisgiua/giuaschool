@@ -516,7 +516,7 @@ class AccountProvisioning {
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where("m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo()])
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getArrayResult();
     } elseif ($materia->getTipo() == 'E') {

@@ -177,6 +177,7 @@ label.giustifica_connessione: Problemi di connessione nella modalità a distanza
 label.giustificazione: Giustificato?
 label.impostazioni: Impostazioni
 label.indietro: Indietro
+label.back: Indietro
 label.indirizzo: Indirizzo
 label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
@@ -551,6 +552,7 @@ label.ruolo_funzione_AN: Alunni
 label.ruolo_funzione_PN: Dirigente
 label.ruolo_funzione_SN: Staff
 label.ruolo_funzione_DN: Docenti
+label.ruolo_funzione_TN: ATA
 label.nome_campo: Nome del campo
 label.tipo_campo: Tipo del campo
 label.campo_obbligatorio: Campo obbligatorio
@@ -799,6 +801,11 @@ page.sistema.telegram: Configura Telegram
 title.sistema.telegram: Configurazione per le notifiche via Telegram
 page.staff.cdc: Staff CdC
 title.staff.cdc: Composizione del Consiglio di Classe
+page.richieste.classe: Moduli Classe
+title.richieste.classe: Moduli per la classe {classe}
+title.richieste.classe_add: Inserimento di un nuovo modulo
+page.richieste.modulo: Gestione Moduli
+title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
 
 
 page.agenda_compito: Agenda Compiti
@@ -1360,9 +1367,11 @@ message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalit�
 message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
-message.cancella_modulo: Veorrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
+message.no_moduli_classe: Non sono presenti moduli per la classe.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
+message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
@@ -1649,6 +1658,7 @@ exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
+exception.campo_data_non_odierna: Non puoi inserire una data diversa da quella di oggi.
 exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
 exception.colloquio_link_invalido: Il link inserito non è valido.

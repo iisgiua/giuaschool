@@ -46,7 +46,7 @@ class SegreteriaController extends BaseController {
   public function assenzeAction(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/nome', '');
@@ -100,7 +100,7 @@ class SegreteriaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/pagina', $pagina);
     }
     // lista alunni
-      $lista = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
+    $lista = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/assenze.html.twig', array(
       'pagina_titolo' => 'page.segreteria_assenze',
@@ -212,7 +212,7 @@ class SegreteriaController extends BaseController {
   public function scrutiniAction(Request $request, SegreteriaUtil $segr, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/nome', '');
@@ -297,7 +297,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function scrutiniMostraAction(SegreteriaUtil $segr, int $alunno, string $periodo, 
+  public function scrutiniMostraAction(SegreteriaUtil $segr, int $alunno, string $periodo,
                                        int $scrutinio): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
@@ -360,7 +360,7 @@ class SegreteriaController extends BaseController {
   public function genitoriAction(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/nome', '');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);

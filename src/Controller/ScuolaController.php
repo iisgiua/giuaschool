@@ -1124,6 +1124,12 @@ class ScuolaController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_campo_duplicato')));
       }
       if ($form->isValid()) {
+        // constrollo richiedenti
+        $richiedenti = explode(',', $modulo->getRichiedenti());
+        if (in_array('DN', $richiedenti, true) && !in_array('SN', $richiedenti, true)) {
+          $richiedenti[] = 'SN';
+          $modulo->setRichiedenti(implode(',', $richiedenti));
+        }
         // memorizza modifiche
         $modulo->setCampi($listaCampi);
         $this->em->flush();

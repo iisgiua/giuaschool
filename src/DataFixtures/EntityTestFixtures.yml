@@ -793,6 +793,7 @@ App\Entity\Richiesta:
     stato: '<randomElement(["I", "G", "A", "C"])>'
     messaggio: '<text()>'
     utente: '@utente_*'
+    classe: '@classe_*'
     definizioneRichiesta: '@definizione_richiesta_*'
 
 App\Entity\Presenza:

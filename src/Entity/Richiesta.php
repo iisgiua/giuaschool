@@ -121,6 +121,14 @@ class Richiesta {
   private ?Utente $utente = null;
 
   /**
+   * @var Classe $classe Classe di riferimento della richiesta
+   *
+   * @ORM\ManyToOne(targetEntity="Classe")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private ?Classe $classe = null;
+
+  /**
    * @var DefinizioneRichiesta|null $definizioneRichiesta Definizione del modulo a cui appartiene la richiesta
    *
    * @ORM\ManyToOne(targetEntity="DefinizioneRichiesta")
@@ -374,6 +382,27 @@ class Richiesta {
   }
 
   /**
+   * Restituisce la classe di riferimento della richiesta
+   *
+   * @return Classe|null Classe di riferimento della richiesta
+   */
+  public function getClasse(): ?Classe {
+    return $this->classe;
+  }
+
+  /**
+   * Modifica la classe di riferimento della richiesta
+   *
+   * @param Classe|null $classe Classe di riferimento della richiesta
+   *
+   * @return self Oggetto modificato
+   */
+  public function setClasse(?Classe $classe): self {
+    $this->classe = $classe;
+    return $this;
+  }
+
+  /**
    * Restituisce la definizione del modulo a cui appartiene la richiesta
    *
    * @return DefinizioneRichiesta|null Definizione del modulo a cui appartiene la richiesta
@@ -422,6 +451,7 @@ class Richiesta {
       'stato' => $this->stato,
       'messaggio' => $this->messaggio,
       'utente' => $this->utente->getId(),
+      'classe' => $this->classe ? $this->classe->getId() : null,
       'definizioneRichiesta' => $this->definizioneRichiesta->getId()];
     return $dati;
   }

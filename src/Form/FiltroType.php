@@ -128,6 +128,27 @@ class FiltroType extends AbstractType {
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
           'required' => false));
+    } elseif ($options['form_mode'] == 'evacuazione') {
+      // form moduli evacuazione
+      $builder
+        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'placeholder' => 'label.qualsiasi_sede',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.sede'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.classe'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false));
     }
     // pulsante filtro
     $builder

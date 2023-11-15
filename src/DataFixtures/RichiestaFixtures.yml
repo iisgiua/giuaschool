@@ -11,6 +11,7 @@
 #   stato: indica lo stato della richiesta: I=inviata, G=gestita, A=annullata dal richiedente, C=cancellata dal gestore
 #   messaggio: eventuale messaggio da mostrare al richiedente
 #   utente: utente che invia la richiesta
+#   classe: classe di riferimento della richiesta
 #   definizioneRichiesta: definizione del modulo a cui appartiene la richiesta
 ####################
 
@@ -18,6 +19,7 @@
 include:
   - UtenteFixtures.yml
   - DefinizioneRichiestaFixtures.yml
+  - ClasseFixtures.yml
 
 
 App\Entity\Richiesta:
@@ -31,4 +33,5 @@ App\Entity\Richiesta:
     stato: '<randomElement(["I", "G", "A", "C"])>'
     messaggio: '<text()>'
     utente: '@utente_*'
+    classe: '@classe_*'
     definizioneRichiesta: '@definizione_richiesta_*'

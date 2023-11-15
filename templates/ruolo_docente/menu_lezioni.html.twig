@@ -1,7 +1,7 @@
 <nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,14) == 'lezioni_classe' ? ' class="active"' }}><a href="{{ path('lezioni_classe') }}" title="{{ 'title.lezioni_classe'|trans }}">Classe/Materia</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,16) == 'lezioni_registro' ? ' class="active"' }}><a href="{{ path('lezioni_registro_firme') }}" title="Registro di classe">Registro</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,16) == 'lezioni_registro' or app.request.attributes.get('_route')|slice(0,16) == 'richieste_classe' ? ' class="active"' }}><a href="{{ path('lezioni_registro_firme') }}" title="Registro di classe">Registro</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,15) == 'lezioni_assenze' or app.request.attributes.get('_route') == 'richieste_uscita' ? ' class="active"' }}><a href="{{ path('lezioni_assenze_quadro') }}" title="Registro delle assenze">Assenze</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,12) == 'lezioni_note' ? ' class="active"' }}><a href="{{ path('lezioni_note') }}" title="Note disciplinari">Note</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,12) == 'lezioni_voti' ? ' class="active"' }}><a href="{{ path('lezioni_voti_quadro') }}" title="Quadro delle valutazioni">Voti</a></li>

@@ -1239,6 +1239,8 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function manutenzioneLogoutAction(Request $request): Response {
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
     $mySession = 'sess_'.$request->cookies->get('PHPSESSID');
     // elimina le sessioni tranne quella corrente
@@ -1332,6 +1334,8 @@ class SistemaController extends BaseController {
    */
   public function manutenzioneDebugAction(Request $request, TranslatorInterface $trans,
                                           KernelInterface $kernel): Response {
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
     // imposta nuovo livello di log
     $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
     // legge .env
@@ -1388,9 +1392,9 @@ class SistemaController extends BaseController {
     $info = [];
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
+    // esegue passi
     $info['step'] = 0;
     $info['prossimo'] = 0;
-    // esegue passi
     switch($step) {
       case 0:   // controlli iniziali
         // legge ultima versione

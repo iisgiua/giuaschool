@@ -48,7 +48,8 @@ class DefinizioneRichiestaType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false))
       ->add('richiedenti', ChoiceType::class, array('label' => 'label.richiedenti_modulo',
-        'choices' => array('label.ruolo_funzione_GN' => 'GN', 'label.ruolo_funzione_AM' => 'AM',
+        'choices' => array('label.ruolo_funzione_TN' => 'TN', 'label.ruolo_funzione_DN' => 'DN',
+          'label.ruolo_funzione_GN' => 'GN', 'label.ruolo_funzione_AM' => 'AM',
           'label.ruolo_funzione_AN' => 'AN'),
         'expanded' => true,
         'multiple' => true,
