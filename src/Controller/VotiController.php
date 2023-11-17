@@ -971,6 +971,7 @@ class VotiController extends BaseController {
         HeaderUtils::DISPOSITION_ATTACHMENT,
         $nomefile);
     $response->headers->set('Content-Disposition', $disposition);
+    $response->headers->set('Content-Type', 'text/csv');
     return $response;
   }
 

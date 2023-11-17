@@ -410,9 +410,11 @@ class StaffUtil {
       ->select('(v.alunno) AS alunno,(v.materia) AS materia,v.tipo,AVG(v.voto) AS media')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
-      ->where('v.alunno IN (:lista) AND v.media=:media AND v.voto>0 AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND m.media=:media')
+      ->join('l.classe', 'cl')
+      ->where('v.alunno IN (:lista) AND v.media=1 AND v.voto>0 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND l.data BETWEEN :inizio AND :fine AND m.media=1')
       ->groupBy('v.alunno,v.materia,v.tipo')
-      ->setParameters(['lista' => $listaAlunni, 'media' => 1, 'classe' => $classe,
+      ->setParameters(['lista' => $listaAlunni, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo(),
         'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();

@@ -18,6 +18,8 @@ return [
     ["ALTER TABLE gs_lezione ADD gruppo VARCHAR(64) DEFAULT NULL, ADD tipo_gruppo VARCHAR(1) NOT NULL; CREATE UNIQUE INDEX UNIQ_F1D7CE79ADF3F3639B761FB58F5EA509DD03102F ON gs_lezione (data, ora, classe_id, gruppo); UPDATE gs_lezione SET tipo_gruppo='N';", "SELECT 1 FROM DUAL UNION SELECT gruppo FROM gs_lezione;"],
     ["ALTER TABLE gs_avviso ADD anno INT NOT NULL; UPDATE gs_avviso SET anno=(SELECT SUBSTR(valore, 1, 4) FROM gs_configurazione WHERE parametro='anno_scolastico');", "SELECT 1 FROM DUAL UNION SELECT anno FROM gs_avviso;"],
     ["ALTER TABLE gs_definizione_richiesta ADD sede_id INT DEFAULT NULL, ADD gestione TINYINT(1) NOT NULL; ALTER TABLE gs_definizione_richiesta ADD CONSTRAINT FK_FD5221E1E19F41BF FOREIGN KEY (sede_id) REFERENCES gs_sede (id); CREATE INDEX IDX_FD5221E1E19F41BF ON gs_definizione_richiesta (sede_id); UPDATE gs_definizione_richiesta SET gestione=1;", "SELECT 1 FROM DUAL UNION SELECT gestione FROM gs_definizione_richiesta;"],
+    ["ALTER TABLE gs_richiesta ADD classe_id INT DEFAULT NULL;ALTER TABLE gs_richiesta ADD CONSTRAINT FK_F843086B8F5EA509 FOREIGN KEY (classe_id) REFERENCES gs_classe (id);CREATE INDEX IDX_F843086B8F5EA509 ON gs_richiesta (classe_id);", "SELECT 1 FROM DUAL UNION SELECT classe_id FROM gs_richiesta;"],
+    ["UPDATE gs_richiesta AS r, gs_utente AS a SET r.classe_id=a.classe_id WHERE r.utente_id=a.id AND a.ruolo='ALU' AND r.classe_id IS NULL;", "SELECT 1 FROM gs_richiesta WHERE classe_id IS NULL;"],
   ],
   'envDelete' => [
   ]

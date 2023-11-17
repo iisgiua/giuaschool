@@ -1059,6 +1059,7 @@ class RichiesteController extends BaseController {
       $response = new Response($csv);
       $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
       $response->headers->set('Content-Disposition', $disposition);
+      $response->headers->set('Content-Type', 'text/csv');
       return $response;
     }
     // visualizza pagina HTML
