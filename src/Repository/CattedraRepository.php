@@ -114,9 +114,11 @@ class CattedraRepository extends BaseRepository {
       ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo AND d.abilitato=:abilitato')
+      ->join('c.classe', 'cl')
+      ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P', 'abilitato' => 1])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo(),])
       ->getQuery()
       ->getArrayResult();
     // elimina docenti in più
@@ -293,7 +295,7 @@ class CattedraRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista delle cattedre delper la classe indicata
+   * Restituisce la lista delle cattedre per la classe indicata
    *
    * @param Classe $classe Classe di cui recuperare le cattedre
    * @param bool $potenziamento Se vero riporta anche le cattedre di potenziamento

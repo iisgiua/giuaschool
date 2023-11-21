@@ -272,8 +272,7 @@ class AgendaUtil {
         }
       }
     } elseif ($tipo == 'P') {
-      // compiti
-      // verifiche inserite dal docente
+      // compiti inseriti dal docente
       $compiti1 = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
         ->where('a.docente=:docente AND a.tipo=:tipo AND a.data=:data')
         ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d')])

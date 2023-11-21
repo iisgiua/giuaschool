@@ -492,7 +492,7 @@ class CircolareRepository extends EntityRepository {
     $dati = array();
     // A.S.
     if (isset($cerca['anno'])) {
-      // legge A.S. da crriteri di ricerca
+      // legge A.S. da criteri di ricerca
       $anno = $cerca['anno'];
     } else {
       // A.S. in corso
@@ -562,7 +562,7 @@ class CircolareRepository extends EntityRepository {
   }
 
   /**
-   * Restituisce la lista degli anni scolatici presenti nell'archivio delle circolari
+   * Restituisce la lista degli anni scolastici presenti nell'archivio delle circolari
    *
    * @return array Dati formattati come array associativo
    */
