@@ -918,9 +918,9 @@ class RichiesteController extends BaseController {
         if ($form->get('data')->getData() === null) {
           // campo data vuoto
           $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
-        } elseif (!$definizioneRichiesta->getGestione() && $form->get('data')->getData()->format('Y-m-d') !== $info['valore_data']) {
+        } elseif (!$definizioneRichiesta->getGestione() && $form->get('data')->getData()->format('Y-m-d') > $info['valore_data']) {
           // per i moduli la data è sempre quella odierna
-          $form->addError(new FormError($trans->trans('exception.campo_data_non_odierna')));
+          $form->addError(new FormError($trans->trans('exception.campo_data_successivo_oggi')));
         } else {
           // controlla se richiesta esiste già per la data
           $altra = $this->em->getRepository('App\Entity\Richiesta')->findOneBy([

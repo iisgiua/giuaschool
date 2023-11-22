@@ -1658,7 +1658,7 @@ exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
-exception.campo_data_non_odierna: Non puoi inserire una data diversa da quella di oggi.
+exception.campo_data_successivo_oggi: Non puoi inserire una data successiva a quella di oggi.
 exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
 exception.colloquio_link_invalido: Il link inserito non è valido.
