@@ -18,8 +18,8 @@ App\Entity\Preside:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: false
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    spid: true
+    ultimoAccesso: '<dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
@@ -32,3 +32,4 @@ App\Entity\Preside:
     sede:
     responsabileBes: false
     responsabileBesSede:
+    rappresentante: '<(array())>'

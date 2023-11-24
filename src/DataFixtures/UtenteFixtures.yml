@@ -31,7 +31,7 @@
 
 
 App\Entity\Utente:
-  utente_{1..10}:
+  utente_{1..5}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".u")>'
     nome: '<datoUtente("nome")>'
@@ -43,7 +43,7 @@ App\Entity\Utente:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''

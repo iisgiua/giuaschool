@@ -6,6 +6,7 @@
 #   nomeBreve: nome breve del corso scolastico
 ####################
 
+
 App\Entity\Corso:
   corso_BIN:
     nome: Istituto Tecnico Informatica e Telecomunicazioni

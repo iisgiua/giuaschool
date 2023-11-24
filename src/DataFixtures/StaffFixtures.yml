@@ -1,7 +1,7 @@
 ####################
 # StaffFixtures - dati di test
 #
-# dati dei docenti dello staff: gli stessi dei docenti più i seguentI
+# dati dei docenti dello staff: gli stessi dei docenti più i seguenti
 #   sede: la sede di riferimento per il ruolo di staff (se definita)
 #   rappresentante: indica se il dipendente ATA è eletto come rappresentante [I=di istituto]
 ####################
@@ -12,7 +12,7 @@ include:
 
 
 App\Entity\Staff:
-  staff_{1..10}:
+  staff_{1..5}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".st")>'
     nome: '<datoUtente("nome")>'
@@ -25,7 +25,7 @@ App\Entity\Staff:
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    ultimoAccesso: '<dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
@@ -35,7 +35,7 @@ App\Entity\Staff:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    sede: '70%? <ife($otp, @sede_1, @sede_2)>: <(null)>'
-    responsabileBes: '<boolean(20)>'
-    responsabileBesSede: '<($responsabileBes ? $sede : null)>'
+    sede: '70%? <ife($codiceFiscale, @sede_1, @sede_2)>: <(null)>'
+    responsabileBes: false
+    responsabileBesSede:
     rappresentante: '<(array())>'
