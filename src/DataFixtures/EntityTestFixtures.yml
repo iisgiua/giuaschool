@@ -3,6 +3,26 @@
 ####################
 
 
+include:
+  - CorsoFixtures.yml
+  - FestivitaFixtures.yml
+  - PresideFixtures.yml
+  - SedeFixtures.yml
+  - SpidFixtures.yml
+  - StaffFixtures.yml
+  - UtenteFixtures.yml
+  - AmministratoreFixtures.yml
+  - ConfigurazioneFixtures.yml
+  - MenuFixtures.yml
+  - MenuOpzioneFixtures.yml
+  - IstitutoFixtures.yml
+  - MateriaFixtures.yml
+  - OrarioFixtures.yml
+  - ScansioneOrariaFixtures.yml
+  - AtaFixtures.yml
+
+
+
 App\Entity\Alunno:
   alunno_{1..10}:
     sesso: '<randomElement(["M", "F"])>'
@@ -43,31 +63,6 @@ App\Entity\Alunno:
     genitori: '<collection(@genitore_1)>'
     rappresentante: '<(array())>'
 
-App\Entity\Amministratore:
-  amministratore:
-    sesso: 'M'
-    nome: 'Charles'
-    cognome: 'Babbage'
-    username: 'admin'
-    email: 'admin@lovelace.edu.it'
-    password: '<passwordCodificata($username)>'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: false
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale: 'BBBCRL91T26Z114G'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(3)>'
-    notifica: '<(array())>'
-
 App\Entity\Annotazione:
   annotazione_{1..5}:
     data: '<dateTimeBetween("-1 month", "now")>'
@@ -106,35 +101,6 @@ App\Entity\AssenzaLezione:
     lezione: '@lezione_1'
     ore: '<randomElement([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])>'
 
-App\Entity\Ata:
-  ata_{1..5}:
-    sesso: '<randomElement(["M", "F"])>'
-    username (unique): '<generaUtente($sesso, ".a")>'
-    nome: '<datoUtente("nome")>'
-    cognome: '<datoUtente("cognome")>'
-    password: '<datoUtente("password")>'
-    email: '$username@lovelace.edu.it'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale (unique): '<taxId()>'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(2)>'
-    notifica: '<(array())>'
-    tipo: 'D'
-    segreteria: true
-    sede:
-    rappresentante: '<(array())>'
-
 App\Entity\AvvisoClasse:
   avviso_classe_{1..5}:
     avviso: '@avviso_<current()>'
@@ -150,7 +116,7 @@ App\Entity\Avviso:
     ora: '50%? <dateTimeBetween("-1 month", "now")>'
     oraFine: '50%? <dateTimeBetween("-1 month", "now")>'
     cattedra: '@cattedra_1'
-    materia: '@materia_1'
+    materia: '@materia_*'
     oggetto: '<substr(<text()>, 0, 255)>'
     testo: '<text()>'
     allegati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
@@ -179,7 +145,7 @@ App\Entity\Cattedra:
     attiva: '<boolean(90)>'
     supplenza: '<boolean(50)>'
     tipo: '<randomElement(["N", "N", "N", "P"])>'
-    materia: '@materia_<current()>'
+    materia: '@materia_*'
     docente: '@docente_1'
     classe: '@classe_1'
     alunno:
@@ -227,7 +193,7 @@ App\Entity\Classe:
     sezione: 'A'
     oreSettimanali: 32
     sede: '@sede_1'
-    corso: '@corso_1'
+    corso: '@corso_BIN'
     coordinatore:
     segretario:
   classe_{11..15}:
@@ -235,7 +201,7 @@ App\Entity\Classe:
     sezione: 'B'
     oreSettimanali: 30
     sede: '@sede_2'
-    corso: '@corso_2'
+    corso: '@corso_LSA'
     coordinatore:
     segretario:
 
@@ -245,7 +211,7 @@ App\Entity\Classe:
     gruppo: 'Gruppo<current()>'
     oreSettimanali: 32
     sede: '@sede_1'
-    corso: '@corso_1'
+    corso: '@corso_INF'
     coordinatore:
     segretario:
 
@@ -260,19 +226,6 @@ App\Entity\Colloquio:
     durata: '<numberBetween(5, 30)>'
     numero: '<numberBetween(1, 5)>'
     abilitato: '<boolean()>'
-
-App\Entity\Configurazione:
-  configurazione_{1..5}:
-    categoria: '<word(1)>'
-    parametro (unique): '<word(1)>'
-    descrizione: '<sentence(3)>'
-    valore: '<word(1)>'
-    gestito: true
-
-App\Entity\Corso:
-  corso_{1..5}:
-    nome (unique): '<sentence(3)>'
-    nomeBreve (unique): '<word(1)>'
 
 App\Entity\DefinizioneConsiglio:
   definizione_consiglio_{1..5}:
@@ -329,7 +282,7 @@ App\Entity\Documento:
     tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "C", "G"])>'
     docente: '@docente_1'
     listaDestinatari: '@lista_destinatari_<current()>'
-    materia: '50%? @materia_1'
+    materia: '50%? @materia_*'
     classe: '50%? @classe_1'
     alunno: '50%? @alunno_1'
     cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
@@ -359,13 +312,6 @@ App\Entity\Esito:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     scrutinio: '@scrutinio_1'
     alunno: '@alunno_<current()>'
-
-App\Entity\Festivita:
-  festivita_{1..5}:
-    data: '<dateTimeBetween("-6 month", "now")>'
-    descrizione: '<sentence(4)>'
-    tipo: 'F'
-    sede: null
 
 App\Entity\File:
   file_{1..5}:
@@ -416,26 +362,12 @@ App\Entity\Genitore:
     alunno: '@alunno_<current()>'
     rappresentante: '<(array())>'
 
-App\Entity\Istituto:
-  istituto:
-    tipo: 'Istituto di Istruzione Superiore'
-    tipoSigla: 'I.I.S.'
-    nome: 'Ada Lovelace'
-    nomeBreve: 'Lovelace'
-    email: 'iis.lovelace@istruzione.it'
-    pec: 'iis.lovelace@pec.istruzione.it'
-    urlSito: 'https://www.lovelace.edu.it'
-    urlRegistro: 'https://registro.lovelace.edu.it'
-    firmaPreside: 'Ing. Alan Turing'
-    emailAmministratore: 'admin@lovelace.edu.it'
-    emailNotifiche: 'noreply@lovelace.edu.it'
-
 App\Entity\Lezione:
   lezione_{1..5}:
     data: '<dateTimeBetween("-2 month", "now")>'
     ora: '<numberBetween(1, 4)>'
     classe: '@classe_<current()>'
-    materia: '@materia_1'
+    materia: '@materia_*'
     argomento: '80%? <paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
 
@@ -481,36 +413,6 @@ App\Entity\Log:
     azione: '<substr(<sentence(4)>, 0, -1)>'
     dati: '<words(4,false)>'
 
-App\Entity\Materia:
-  materia_{1..5}:
-    Nome (unique): '<sentence(3)>'
-    NomeBreve (unique): '<word(1)>'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 20
-
-App\Entity\Menu:
-  menu_{1..5}:
-    selettore (unique): '<word(1)>'
-    nome: 'Aiuto'
-    descrizione: 'Guida e supporto per l''utente'
-    mega: false
-    opzioni: '<collection(@menu_opzione_<current()>)>'
-
-App\Entity\MenuOpzione:
-  menu_opzione_{1..5}:
-    ruolo: 'U'
-    funzione: 'N'
-    nome: '<word(1)>'
-    descrizione: '<sentence(3)>'
-    url: ''
-    ordinamento: 2
-    abilitato: '<boolean()>'
-    icona: ''
-    menu: '@menu_<current()>'
-    sottoMenu:
-
 App\Entity\Nota:
   nota_{1..5}:
     tipo: '<randomElement(["C", "I"])>'
@@ -523,18 +425,12 @@ App\Entity\Nota:
     alunni: '<collection(@alunno_1)>'
 
 App\Entity\OrarioDocente:
-  orario_docente_{1..5}:
-    orario: '@orario_1'
+  orariodocente_{1..5}:
+    orario: '@orario_*'
     giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
     ora: '<numberBetween(1, 4)>'
     cattedra: '@cattedra_<current()>'
 
-App\Entity\Orario:
-  orario_{1..5}:
-    nome: '<sentence(4)>'
-    inizio: '<date_create("2021-09-14")>'
-    fine: '<date_create("2021-10-04")>'
-    sede: '@sede_<current()>'
 
 App\Entity\OsservazioneAlunno:
   osservazione_alunno_{1..5}:
@@ -548,34 +444,6 @@ App\Entity\OsservazioneClasse:
     data: '<dateTimeBetween("-1 month", "now")>'
     testo: '<text()>'
     cattedra: '@cattedra_<current()>'
-
-App\Entity\Preside:
-  preside:
-    sesso: 'M'
-    nome: 'Alan'
-    cognome: 'Turing'
-    username: 'dirigente'
-    email: 'dirigente@lovelace.edu.it'
-    password: '<passwordCodificata($username)>'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: false
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale: 'TRNLNA12H23Z114P'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(1)>'
-    notifica: '<(array())>'
-    sede:
-    responsabileBes: false
-    responsabileBesSede:
 
 App\Entity\PropostaVoto:
   proposta_voto_{1..5}:
@@ -614,15 +482,6 @@ App\Entity\RichiestaColloquio:
     stato: '<randomElement(["R", "A", "C", "N"])>'
     messaggio: '50%? <text()>: <strval("")>'
 
-App\Entity\ScansioneOraria:
-  scansione_oraria_{1..5}:
-    giorno: '<current()>'
-    ora: 1
-    inizio: '<date_create("08:30")>'
-    fine: '<date_create("09:30")>'
-    durata: 1
-    orario: '@orario_1'
-
 App\Entity\Scrutinio:
   scrutinio_{1..5}:
     periodo: '<randomElement(["P", "S", "F", "G", "R", "X"])>'
@@ -634,55 +493,6 @@ App\Entity\Scrutinio:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     visibile: '50%? <dateTimeBetween("-1 month", "now")>'
     sincronizzazione: '50%? <randomElement(["E", "C", "V", "B"])>'
-
-App\Entity\Sede:
-  sede_{1..5}:
-    nome (unique): '<sentence(3)>'
-    nomeBreve (unique): '<word(1)>'
-    citta: '<city()>'
-    indirizzo1: '<streetAddress()>'
-    indirizzo2: '12345'
-    telefono: '099 123 321'
-    ordinamento: '<numberBetween(1, 100)>'
-
-App\Entity\Spid:
-  spid_{1..5}:
-    idp: '<words(3, true)>'
-    responseId (unique): '<uuid()>'
-    attrName: '<nome()>'
-    attrFamilyName: '<cognome()>'
-    attrFiscalNumber: '<taxId()>'
-    logoutUrl: '<url()>'
-    state: '<randomElement(["A", "L", "E"])>'
-
-App\Entity\Staff:
-  staff_{1..5}:
-    sesso: '<randomElement(["M", "F"])>'
-    username (unique): '<generaUtente($sesso, "")>'
-    nome: '<datoUtente("nome")>'
-    cognome: '<datoUtente("cognome")>'
-    password: '<datoUtente("password")>'
-    email: '$username@lovelace.edu.it'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: true
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale (unique): '<taxId()>'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(2)>'
-    notifica: '<(array())>'
-    sede: '70%? @sede_1'
-    responsabileBes: '<boolean(20)>'
-    responsabileBesSede: '<($responsabileBes ? $sede : null)>'
-    rappresentante: '<(array())>'
 
 App\Entity\StoricoEsito:
   storico_esito_{1..5}:
@@ -701,7 +511,7 @@ App\Entity\StoricoVoto:
     carenze: '50%? <text()>: <strval("")>'
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     storicoEsito: '@storico_esito_<current()>'
-    materia: '@materia_1'
+    materia: '@materia_*'
 
 App\Entity\Uscita:
   uscita_{1..5}:
@@ -715,31 +525,6 @@ App\Entity\Uscita:
     docente: '@docente_1'
     docenteGiustifica: '@docente_1'
     utenteGiustifica: <($alunno->getGenitori()[0])>
-
-App\Entity\Utente:
-  utente_{1..5}:
-    sesso: '<randomElement(["M", "F"])>'
-    username (unique): '<generaUtente($sesso, ".u")>'
-    nome: '<datoUtente("nome")>'
-    cognome: '<datoUtente("cognome")>'
-    password: '<datoUtente("password")>'
-    email: '$username@lovelace.edu.it'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: '90%? 1: 0'
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale (unique): '<taxId()>'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(3)>'
-    notifica: '<(array())>'
 
 App\Entity\Valutazione:
   valutazione_{1..5}:
@@ -766,7 +551,7 @@ App\Entity\VotoScrutinio:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     scrutinio: '@scrutinio_<current()>'
     alunno: '@alunno_<current()>'
-    materia: '@materia_1'
+    materia: '@materia_*'
 
 App\Entity\DefinizioneRichiesta:
   definizione_richiesta_{1..5}:
