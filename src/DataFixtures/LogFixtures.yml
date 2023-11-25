@@ -16,12 +16,11 @@
 
 
 include:
-  - AmministratoreFixtures.yml
   - DocenteFixtures.yml
 
 
 App\Entity\Log:
-  log_{1..20}:
+  log_{1..5}:
     utente: '@docente_*'
     username: '<($utente->getUsername())>'
     ruolo: '<($utente->getRoles()[0])>'

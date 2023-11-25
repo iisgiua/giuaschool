@@ -88,35 +88,35 @@ App\Entity\Materia:
     Ordinamento: 500
 
   # ----- materie curricolari con ITP -----
-  materia_curricolare_itp_1:
+  materia_itp_1:
     Nome: 'Informatica'
     NomeBreve: 'Informatica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 70
-  materia_curricolare_itp_2:
+  materia_itp_2:
     Nome: 'Scienze integrate: Fisica'
     NomeBreve: 'Fisica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 110
-  materia_curricolare_itp_3:
+  materia_itp_3:
     Nome: 'Scienze integrate: Chimica'
     NomeBreve: 'Chimica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 130
-  materia_curricolare_itp_4:
+  materia_itp_4:
     Nome: 'Sistemi e reti'
     NomeBreve: 'Sistemi'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 200
-  materia_curricolare_itp_5:
+  materia_itp_5:
     Nome: 'Telecomunicazioni'
     NomeBreve: 'Telecom.'
     Tipo: 'N'
