@@ -27,65 +27,28 @@ include:
   - CattedraFixtures.yml
   - AppFixtures.yml
   - LogFixtures.yml
+  - RaggruppamentoFixtures.yml
+  - ProvisioningFixtures.yml
+  - AssenzaFixtures.yml
+  - UscitaFixtures.yml
+  - EntrataFixtures.yml
+  - DerogaAssenzaFixtures.yml
+  - OrarioDocenteFixtures.yml
+  - PresenzaFixtures.yml
+  - AnnotazioneFixtures.yml
+  - AvvisoFixtures.yml
+  - AvvisoClasseFixtures.yml
+  - AvvisoUtenteFixtures.yml
+  - CircolareFixtures.yml
+  - CircolareUtenteFixtures.yml
+  - CircolareClasseFixtures.yml
+  - LezioneFixtures.yml
+  - AssenzaLezioneFixtures.yml
 
 
-App\Entity\Annotazione:
-  annotazione_{1..5}:
-    data: '<dateTimeBetween("-1 month", "now")>'
-    testo: '<text()>'
-    visibile: '<boolean()>'
-    avviso: '@avviso_<current()>'
-    classe: '@classe_*'
-    docente: '@docente_*'
 
-App\Entity\Assenza:
-  assenza_{1..5}:
-    data: '<dateTimeBetween("-2 month", "-1 day")>'
-    giustificato: '<dateTimeBetween(<($data)>, "now")>'
-    motivazione: '<sentence(3)>'
-    dichiarazione: '<(array())>'
-    certificati: '<(array())>'
-    alunno: '@alunno_*'
-    docente: '@docente_*'
-    docenteGiustifica: '@docente_*'
-    utenteGiustifica: <($alunno->getGenitori()[0])>
 
-App\Entity\AssenzaLezione:
-  assenza_lezione_{1..5}:
-    alunno: '@alunno_*'
-    lezione: '@lezione_1'
-    ore: '<randomElement([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])>'
 
-App\Entity\AvvisoClasse:
-  avviso_classe_{1..5}:
-    avviso: '@avviso_<current()>'
-    classe: '@classe_*'
-    letto: '50%? <dateTimeBetween("-1 month", "now")>'
-
-App\Entity\Avviso:
-  avviso_{1..5}:
-    tipo: '<randomElement(["U", "E", "V", "P", "A", "I", "C", "D", "O"])>'
-    sedi: '<collection(@sede_1)>'
-    anno: '<numberBetween(2020, 2023)>'
-    data: '<dateTimeBetween("-1 month", "now")>'
-    ora: '50%? <dateTimeBetween("-1 month", "now")>'
-    oraFine: '50%? <dateTimeBetween("-1 month", "now")>'
-    cattedra: '@cattedra_*'
-    materia: '@materia_*'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    testo: '<text()>'
-    allegati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    destinatariAta: '50%? <sentences(3)>: <(array())>'
-    destinatari: '50%? <sentences(3)>: <(array())>'
-    filtroTipo: '<randomElement(["N", "T", "C", "M", "U"])>'
-    filtro: '50%? <sentences(3)>: <(array())>'
-    docente: '@docente_*'
-
-App\Entity\AvvisoUtente:
-  avviso_utente_{1..5}:
-    avviso: '@avviso_<current()>'
-    utente: '@docente_*'
-    letto: '50%? <dateTimeBetween("-1 month", "now")>'
 
 App\Entity\CambioClasse:
   cambio_classe_{1..5}:
@@ -94,43 +57,6 @@ App\Entity\CambioClasse:
     fine: '<dateTimeBetween($inizio, "now")>'
     classe: '50%? @classe_*'
     note: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
-
-App\Entity\CircolareClasse:
-  circolare_classe_{1..5}:
-    circolare: '@circolare_<current()>'
-    classe: '@classe_*'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-
-App\Entity\Circolare:
-  circolare_{1..5}:
-    sedi: '<collection(@sede_1)>'
-    anno: '<numberBetween(2020, 2022)>'
-    numero: '<current()>'
-    data: '<dateTimeBetween("-1 month", "now")>'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    documento: '<fileObj()>'
-    allegati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    ata: '<boolean()>'
-    dsga: '<boolean()>'
-    genitori: '<randomElement(["N", "T", "C", "U"])>'
-    filtroGenitori: '50%? [@genitore1_1A_1->id]: <(array())>'
-    alunni: '<randomElement(["N", "T", "C", "U"])>'
-    filtroAlunni: '50%? [@alunno_1A_1->id]: <(array())>'
-    coordinatori: '<randomElement(["N", "T", "C"])>'
-    filtroCoordinatori: '50%? [@docente_curricolare_1->id]: <(array())>'
-    docenti: '<randomElement(["N", "T", "C", "M", "U"])>'
-    filtroDocenti: '50%? [@docente_curricolare_1->id]: <(array())>'
-    altri: '50%? <words(3)>: <(array())>'
-    firma: '<boolean()>'
-    notifica: '<boolean()>'
-    pubblicata: '<boolean()>'
-
-App\Entity\CircolareUtente:
-  circolare_utente_{1..5}:
-    circolare: '@circolare_<current()>'
-    utente: '@docente_*'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '50%? <dateTimeBetween("-1 month", "now")>'
 
 App\Entity\Colloquio:
   colloquio_{1..5}:
@@ -160,12 +86,6 @@ App\Entity\DefinizioneScrutinio:
     struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
     classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<date()>, <date()>, <date()>, <date()>, <date()>])>'
 
-App\Entity\DerogaAssenza:
-  deroga_assenza_{1..5}:
-    data: '<dateTimeBetween("-1 month", "now")>'
-    alunno: '@alunno_*'
-    motivazione: '<text()>'
-
 App\Entity\Documento:
   documento_{1..5}:
     tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "C", "G"])>'
@@ -178,19 +98,6 @@ App\Entity\Documento:
     firma: '<boolean()>'
     allegati: '<collection(@file_<current()>)>'
 
-App\Entity\Entrata:
-  entrata_{1..5}:
-    data: '<dateTimeBetween("-3 month", "-1 day")>'
-    ora: '<dateTimeBetween("08:30", "11:00")>'
-    ritardoBreve: '<boolean(20)>'
-    note: '50%? <paragraph(1, true)>: <strval("")>'
-    valido: '<boolean(50)>'
-    motivazione: '<sentence(3)>'
-    giustificato: '<dateTimeBetween(<($data)>, "now")>'
-    alunno: '@alunno_*'
-    docente: '@docente_curricolare_*'
-    docenteGiustifica: '@docente_curricolare_*'
-    utenteGiustifica: <($alunno->getGenitori()[0])>
 
 App\Entity\Esito:
   esito_{1..2}:
@@ -212,8 +119,8 @@ App\Entity\File:
 
 App\Entity\Firma:
   firma_{1..5}:
-    lezione: '@lezione_<current()>'
-    docente: '@docente_*'
+    lezione: '@lezione_*'
+    docente: '@docente_curricolare_<current()>'
 
 App\Entity\FirmaSostegno:
   firma_sostegno_{1..5}:
@@ -222,15 +129,6 @@ App\Entity\FirmaSostegno:
     argomento: '80%? <paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     alunno: '@alunno_sostegno_*'
-
-App\Entity\Lezione:
-  lezione_{1..5}:
-    data: '<dateTimeBetween("-2 month", "now")>'
-    ora: '<numberBetween(1, 4)>'
-    classe: '@classe_*'
-    materia: '@materia_*'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
-    attivita: '50%? <paragraph(2, false)>: <strval("")>'
 
 App\Entity\ListaDestinatariClasse:
   lista_destinatari_classe_{1..10}:
@@ -272,14 +170,6 @@ App\Entity\Nota:
     docenteProvvedimento: '50%? @docente_*'
     alunni: '<collection(@alunno_1A_1)>'
 
-App\Entity\OrarioDocente:
-  orariodocente_{1..5}:
-    orario: '@orario_*'
-    giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
-    ora: '<numberBetween(1, 4)>'
-    cattedra: '@cattedra_*'
-
-
 App\Entity\OsservazioneAlunno:
   osservazione_alunno_{1..5}:
     data: '<dateTimeBetween("-1 month", "now")>'
@@ -308,17 +198,6 @@ App\Entity\PropostaVoto:
     classe: '@classe_*'
     materia: '@materia_*'
     docente: '@docente_curricolare_<current()>'
-
-App\Entity\Provisioning:
-  provisioning_{1..5}:
-    utente: '@utente_<current()>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    funzione: '<substr(<text()>, 0, 255)>'
-    stato: '<randomElement(["A", "P", "C", "E"])>'
-
-App\Entity\Raggruppamento:
-  raggruppamento{1..2}:
-    nome (unique): '<substr(<word()>, 0, 64)>'
 
 App\Entity\RichiestaColloquio:
   richiesta_colloquio_{1..5}:
@@ -360,19 +239,6 @@ App\Entity\StoricoVoto:
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     storicoEsito: '@storico_esito_<current()>'
     materia: '@materia_*'
-
-App\Entity\Uscita:
-  uscita_{1..5}:
-    data: '<dateTimeBetween("-3 month", "now")>'
-    ora: '<dateTimeBetween("10:00", "12:00")>'
-    note: '50%? <text()>: <strval("")>'
-    valido: '<boolean()>'
-    motivazione: '<sentence(3)>'
-    giustificato: '<dateTimeBetween(<($data)>, "now")>'
-    alunno: '@alunno_*'
-    docente: '@docente_*'
-    docenteGiustifica: '@docente_*'
-    utenteGiustifica: <($alunno->getGenitori()[0])>
 
 App\Entity\Valutazione:
   valutazione_{1..5}:
@@ -428,12 +294,3 @@ App\Entity\Richiesta:
     utente: '@utente_*'
     classe: '@classe_*'
     definizioneRichiesta: '@definizione_richiesta_*'
-
-App\Entity\Presenza:
-  presenza_{1..5}:
-    data: '<dateTimeBetween("-1 month", "now")>'
-    oraInizio: '<dateTimeBetween("08:30", "11:00")>'
-    oraFine: '<dateTimeBetween("11:30", "13:00")>'
-    tipo: '<randomElement(["P", "S", "E"])>'
-    descrizione: '<substr(<text()>, 0, 255)>'
-    alunno: '@alunno_*'

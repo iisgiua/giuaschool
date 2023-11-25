@@ -13,7 +13,7 @@ include:
 
 
 App\Entity\DerogaAssenza:
-  deroga_assenza_{1..10}:
+  deroga_assenza_{1..5}:
     data: '<dateTimeBetween("-1 month", "now")>'
     alunno: '@alunno_*'
     motivazione: '<text()>'

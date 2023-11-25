@@ -36,7 +36,7 @@ App\Entity\Avviso:
   avviso_U:
     tipo: 'U'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("10:30", "12:00")>'
     oraFine:
@@ -53,7 +53,7 @@ App\Entity\Avviso:
   avviso_E:
     tipo: 'E'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("09:00", "10:30")>'
     oraFine:
@@ -65,12 +65,12 @@ App\Entity\Avviso:
     destinatariAta: '<(array("D", "A"))>'
     destinatari: '<(array("G", "A"))>'
     filtroTipo: 'C'
-    filtro: '<arrayId(avviso_E, filtro, @avviso_E, @classe_5A)>'
+    filtro: '<arrayId(avviso_E, filtro, @avviso_E, @classe_3A)>'
     docente: '@staff_*'
   avviso_A:
     tipo: 'A'
     sedi: '<collection(@sede_2)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora: '<dateTimeBetween("08:30", "10:00")>'
     oraFine: '<dateTimeBetween("11:30", "12:30")>'
@@ -82,12 +82,12 @@ App\Entity\Avviso:
     destinatariAta: '<(array("D", "A"))>'
     destinatari: '<(array("D", "G", "A"))>'
     filtroTipo: 'C'
-    filtro: '<arrayId(avviso_A, filtro, @avviso_A, @classe_3D)>'
+    filtro: '<arrayId(avviso_A, filtro, @avviso_A, @classe_3B)>'
     docente: '@staff_*'
   avviso_I:
     tipo: 'I'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -99,12 +99,12 @@ App\Entity\Avviso:
     destinatariAta: '<(array())>'
     destinatari: '<(array("G"))>'
     filtroTipo: 'U'
-    filtro: '<arrayId(avviso_I, filtro, @avviso_I, @genitore1_terza_1)>'
+    filtro: '<arrayId(avviso_I, filtro, @avviso_I, @genitore1_3A_1)>'
     docente: '@staff_*'
   avviso_D:
     tipo: 'D'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -116,12 +116,12 @@ App\Entity\Avviso:
     destinatariAta: '<(array())>'
     destinatari: '<(array("G"))>'
     filtroTipo: 'U'
-    filtro: '<arrayId(avviso_D, filtro, @avviso_D, @genitore2_prima_1)>'
+    filtro: '<arrayId(avviso_D, filtro, @avviso_D, @genitore2_1A_1)>'
     docente: '@staff_*'
   avviso_O:
     tipo: 'O'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -133,16 +133,16 @@ App\Entity\Avviso:
     destinatariAta: '<(array())>'
     destinatari: '<(array("A"))>'
     filtroTipo: 'U'
-    filtro: '<arrayId(avviso_O, filtro, @avviso_O, @alunno_prima_1)>'
+    filtro: '<arrayId(avviso_O, filtro, @avviso_O, @alunno_2A_1)>'
     docente: '@staff_*'
   avviso_V:
     tipo: 'V'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
-    cattedra: '@cattedra_curricolare_*'
+    cattedra: '@cattedra_*'
     materia:
     oggetto: '<substr(<text()>, 0, 255)>'
     testo: '<text()>'
@@ -155,11 +155,11 @@ App\Entity\Avviso:
   avviso_P:
     tipo: 'P'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
-    cattedra: '@cattedra_curricolare_*'
+    cattedra: '@cattedra_*'
     materia:
     oggetto: '<substr(<text()>, 0, 255)>'
     testo: '<text()>'
@@ -172,7 +172,7 @@ App\Entity\Avviso:
   avviso_C:
     tipo: 'C'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -189,7 +189,7 @@ App\Entity\Avviso:
   avviso_C_allegato:
     tipo: 'C'
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
     ora:
     oraFine:
@@ -201,131 +201,5 @@ App\Entity\Avviso:
     destinatariAta: '<(array())>'
     destinatari: '<(array("A"))>'
     filtroTipo: 'U'
-    filtro: '<arrayId(avviso_C_allegato, filtro, @avviso_C_allegato, @alunno_prima_1)>'
+    filtro: '<arrayId(avviso_C_allegato, filtro, @avviso_C_allegato, @alunno_4A_1)>'
     docente: '@staff_*'
-
-
-####################
-# AvvisoClasseFixtures - dati di test
-#
-# Dati per l'associazione tra avviso e classe:
-#   avviso: avviso a cui ci si riferisce
-#   classe: classe a cui è indirizzato l'avviso
-#   letto: data e ora di lettura dell'avviso in classe
-####################
-
-
-App\Entity\AvvisoClasse:
-  avviso_classe_U:
-    avviso: '@avviso_U'
-    classe: '@classe_2A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_classe_E:
-    avviso: '@avviso_E'
-    classe: '@classe_5A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_classe_A:
-    avviso: '@avviso_A'
-    classe: '@classe_3D'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_classe_C:
-    avviso: '@avviso_C'
-    classe: '@classe_3A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-
-
-####################
-# AvvisoUtenteFixtures - dati di test
-#
-# Dati per l'associazione tra avviso e utente:
-#   avviso: avviso a cui ci si riferisce
-#   utente: utente destinatario della circolare
-#   letto: data e ora di lettura dell'avviso da parte dell'utente
-####################
-
-
-App\Entity\AvvisoUtente:
-  avviso_utente_U_1:
-    avviso: '@avviso_U'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_U_2:
-    avviso: '@avviso_U'
-    utente: '@genitore1_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_U_3:
-    avviso: '@avviso_U'
-    utente: '@alunno_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_E_1:
-    avviso: '@avviso_E'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_E_2:
-    avviso: '@avviso_E'
-    utente: '@genitore1_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_E_3:
-    avviso: '@avviso_E'
-    utente: '@alunno_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_A_1:
-    avviso: '@avviso_A'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_A_2:
-    avviso: '@avviso_A'
-    utente: '@genitore1_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_A_3:
-    avviso: '@avviso_A'
-    utente: '@alunno_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_A_4:
-    avviso: '@avviso_A'
-    utente: '@docente_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_I_1:
-    avviso: '@avviso_I'
-    utente: '@genitore1_terza_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_D_1:
-    avviso: '@avviso_D'
-    utente: '@genitore2_prima_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_O_1:
-    avviso: '@avviso_O'
-    utente: '@alunno_prima_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_V_1:
-    avviso: '@avviso_V'
-    utente: '@alunno_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_V_2:
-    avviso: '@avviso_V'
-    utente: '@genitore2_prima_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_P_1:
-    avviso: '@avviso_P'
-    utente: '@alunno_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_P_2:
-    avviso: '@avviso_P'
-    utente: '@genitore2_seconda_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_C_1:
-    avviso: '@avviso_C'
-    utente: '@alunno_terza_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_C_2:
-    avviso: '@avviso_C'
-    utente: '@genitore2_terza_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_C_3:
-    avviso: '@avviso_C'
-    utente: '@docente_curricolare_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-  avviso_utente_C_allegato_1:
-    avviso: '@avviso_C_allegato'
-    utente: '@alunno_prima_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'

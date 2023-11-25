@@ -12,16 +12,15 @@
 
 
 include:
-  - AvvisoFixtures.yml
   - ClasseFixtures.yml
   - DocenteFixtures.yml
 
 
 App\Entity\Annotazione:
-  annotazione_{1..10}:
-    data: '<dateTimeBetween("-1 month", "now")>'
+  annotazione_{1..5}:
+    data: '<dateTimeBetween("-1 month", "+1 month")>'
     testo: '<text()>'
-    visibile: '<boolean()>'
-    avviso: '@avviso_<current()>'
+    visibile: true
+    avviso:
     classe: '@classe_*'
     docente: '@docente_*'
