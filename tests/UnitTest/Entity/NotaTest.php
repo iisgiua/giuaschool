@@ -32,7 +32,7 @@ class NotaTest extends EntityTestCase {
     $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id'],
       'gs_classe' => '*'];

@@ -84,7 +84,8 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
   public function __construct() {
     parent::__construct();
     // dati da caricare
-    $this->fixtures = 'NotificaFixtures';
+    $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures',
+      'CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures', 'IstitutoFixtures'];
   }
 
   /**
@@ -134,7 +135,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
     $utenteId = -1;
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -166,7 +167,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -198,7 +199,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -230,7 +231,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -263,7 +264,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -295,7 +296,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -327,7 +328,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -403,7 +404,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'verifica']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -444,7 +445,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'compito']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -485,7 +486,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'altro']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -522,7 +523,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -554,7 +555,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -586,7 +587,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -659,7 +660,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'verifica'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -699,7 +700,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'compito'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -739,7 +740,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'altro'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -770,7 +771,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'avviso'], 'telegram_chat' => '0000'];
     $utente->setNotifica($conf);
     $this->em->flush();

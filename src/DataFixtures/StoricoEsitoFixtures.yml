@@ -18,12 +18,12 @@ include:
 
 
 App\Entity\StoricoEsito:
-  storico_esito_{1..10}:
+  storico_esito_{F, G, X}:
     classe: '<substr(<text()>, 0, 16)>'
     esito: '<randomElement(["A", "N", "R", "L", "E"])>'
-    periodo: '<randomElement(["F", "G", "X"])>'
+    periodo: '<current()>'
     media: '<randomFloat()>'
     credito: '<numberBetween(0, 14)>'
     creditoPrecedente: '<numberBetween(0, 25)>'
-    alunno: '@alunno_prima_<current()>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    alunno: '@alunno_<($current == "F" ? "1A_1" : ($current == "G" ? "2A_1" : "3A_1"))>'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'

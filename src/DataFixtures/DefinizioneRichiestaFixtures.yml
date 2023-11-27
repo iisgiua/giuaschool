@@ -17,15 +17,15 @@
 
 
 App\Entity\DefinizioneRichiesta:
-  definizione_richiesta_{1..10}:
+  definizione_richiesta_{1..5}:
     nome (unique): '<substr(<word()>, 0, 128)>'
     sede: '@sede_1'
-    richiedenti: '<substr(<text()>, 0, 16)>'
-    destinatari: '<substr(<text()>, 0, 16)>'
+    richiedenti: '<randomElement(["DN", "AN", "AM", "GN"])>'
+    destinatari: '<randomElement(["DN", "SN", "DN,SN"])>'
     modulo: '<substr(<text()>, 0, 128)>'
     campi: '<array_combine(<words(3)>, <sentences(3)>)>'
     allegati: '<numberBetween(0, 3)>'
-    azioneGestione: '<substr(<word()>, 0, 1)>'
-    unica: '<boolean()>'
-    gestione: '<boolean()>'
-    abilitata: '<boolean()>'
+    tipo: '<randomElement(["D", "U", "E", "V", "*"])>'
+    unica: '<boolean(50)>'
+    gestione: '<boolean(50)>'
+    abilitata: true

@@ -32,7 +32,7 @@ class AvvisoClasseTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_avviso_classe' => ['id', 'creato', 'modificato', 'avviso_id', 'classe_id', 'letto'],
       'gs_classe' => '*',

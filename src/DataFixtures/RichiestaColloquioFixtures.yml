@@ -14,16 +14,15 @@
 
 include:
   - ColloquioFixtures.yml
-  - AlunnoFixtures.yml
   - GenitoreFixtures.yml
 
 
 App\Entity\RichiestaColloquio:
-  richiesta_colloquio_{1..10}:
+  richiesta_colloquio_{1..5}:
     appuntamento: '<dateTimeBetween("08:30", "11:00")>'
     colloquio: '@colloquio_*'
     genitore: '@genitore1_*'
     alunno: '<($genitore->getAlunno())>'
-    genitoreAnnulla: '50%? @genitore2_*'
+    genitoreAnnulla:
     stato: '<randomElement(["R", "A", "C", "N"])>'
     messaggio: '50%? <text()>: <strval("")>'

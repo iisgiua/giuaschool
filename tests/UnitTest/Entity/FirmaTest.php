@@ -32,7 +32,7 @@ class FirmaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'argomento', 'attivita', 'alunno_id', 'tipo'],
       'gs_classe' => '*',

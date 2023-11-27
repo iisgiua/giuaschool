@@ -32,7 +32,7 @@ class AnnotazioneTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_annotazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'visibile', 'avviso_id', 'classe_id', 'docente_id'],
       'gs_classe' => '*'];

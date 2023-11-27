@@ -31,7 +31,7 @@ class PresenzaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_presenza' => ['id', 'creato', 'modificato', 'data', 'ora_inizio', 'ora_fine', 'tipo', 'descrizione', 'alunno_id'],
       'gs_utente' => '*'];

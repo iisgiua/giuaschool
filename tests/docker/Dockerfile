@@ -84,7 +84,7 @@ RUN \
   php bin/console doctrine:schema:create --dump-sql > src/Install/create-db.sql && \
   php bin/console doctrine:schema:drop --dump-sql > src/Install/drop-db.sql && \
 # init database
-  php bin/console app:alice:load Giuaschool --dump src/Install/init-db && \
+  php bin/console app:alice:load _giuaschool --dump src/Install/init-db && \
 # install SPID library
   mkdir vendor/italia && \
   cd vendor/italia && \

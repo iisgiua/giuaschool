@@ -19,7 +19,7 @@ include:
 
 
 App\Entity\Colloquio:
-  colloquio_{1..10}:
+  colloquio_{1..5}:
     docente: '@docente_*'
     data: '<dateTimeBetween("-1 month", "now")>'
     inizio: '<dateTimeBetween("08:30", "13:00")>'
@@ -28,4 +28,4 @@ App\Entity\Colloquio:
     luogo: '<substr(<text()>, 0, 2048)>'
     durata: '<numberBetween(5, 30)>'
     numero: '<numberBetween(1, 5)>'
-    abilitato: '<boolean()>'
+    abilitato: '<boolean(50)>'

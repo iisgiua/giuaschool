@@ -32,7 +32,7 @@ class StoricoEsitoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati'],
       'gs_utente' => '*'];

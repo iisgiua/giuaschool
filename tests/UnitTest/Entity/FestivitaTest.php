@@ -32,7 +32,7 @@ class FestivitaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_festivita' => ['id', 'creato', 'modificato', 'data', 'descrizione', 'tipo', 'sede_id']];
     // SQL write

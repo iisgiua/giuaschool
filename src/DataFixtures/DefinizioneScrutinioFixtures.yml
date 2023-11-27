@@ -10,11 +10,11 @@
 
 
 App\Entity\DefinizioneScrutinio:
-  definizione_scrutinio_{1..10}:
+  definizione_scrutinio_{P, S, F, G, R, X}:
     data: '<dateTimeBetween("-1 month", "now")>'
-    argomenti: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    periodo: '<randomElement(["P", "S", "F", "G", "R", "X"])>'
+    argomenti: '<array_combine(<words(3)>, <sentences(3)>)>'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    periodo: '<current()>'
     dataProposte: '<dateTimeBetween("-1 month", "now")>'
     struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
     classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<date()>, <date()>, <date()>, <date()>, <date()>])>'

@@ -27,10 +27,10 @@ App\Entity\Documento:
   documento_{1..5}:
     tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "C", "G"])>'
     docente: '@docente_*'
-    listaDestinatari: '@lista_destinatari_ALUNNI_<current()>'
+    listaDestinatari: '@lista_destinatari_DOCENTI_<current()>'
     materia: '50%? @materia_*'
     classe: '50%? @classe_*'
     alunno: '50%? @alunno_*'
     cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
-    firma: '<boolean()>'
+    firma: '<boolean(50)>'
     allegati: '<collection(@file_word_<current()>)>'

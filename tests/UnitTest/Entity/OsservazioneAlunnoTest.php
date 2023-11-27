@@ -32,7 +32,7 @@ class OsservazioneAlunnoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo'],
       'gs_cattedra' => '*',

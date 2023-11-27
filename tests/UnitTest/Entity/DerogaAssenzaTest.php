@@ -32,7 +32,7 @@ class DerogaAssenzaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione'],
       'gs_utente' => '*'];

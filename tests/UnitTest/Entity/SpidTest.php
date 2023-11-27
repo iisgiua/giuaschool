@@ -32,7 +32,7 @@ class SpidTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_spid' => ['id', 'creato', 'modificato', 'idp', 'response_id', 'attr_name', 'attr_family_name', 'attr_fiscal_number', 'logout_url', 'state']];
     // SQL write

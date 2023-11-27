@@ -1,0 +1,31 @@
+####################
+# AvvisoClasseFixtures - dati di test
+#
+# Dati per l'associazione tra avviso e classe:
+#   avviso: avviso a cui ci si riferisce
+#   classe: classe a cui è indirizzato l'avviso
+#   letto: data e ora di lettura dell'avviso in classe
+####################
+
+
+include:
+  - AvvisoFixtures.yml
+
+
+App\Entity\AvvisoClasse:
+  avviso_classe_U:
+    avviso: '@avviso_U'
+    classe: '@classe_2A'
+    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+  avviso_classe_E:
+    avviso: '@avviso_E'
+    classe: '@classe_3A'
+    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+  avviso_classe_A:
+    avviso: '@avviso_A'
+    classe: '@classe_3B'
+    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+  avviso_classe_C:
+    avviso: '@avviso_C'
+    classe: '@classe_3A'
+    letto: '50%? <dateTimeBetween("-1 day", "now")>'

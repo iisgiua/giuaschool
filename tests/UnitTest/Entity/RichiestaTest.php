@@ -35,7 +35,7 @@ class RichiestaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'classe_id', 'definizione_richiesta_id', 'data']];
     // SQL write

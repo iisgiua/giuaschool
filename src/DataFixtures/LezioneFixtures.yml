@@ -46,7 +46,7 @@ App\Entity\Lezione:
   lezione_sostegno_{1..5}:
     data (unique): '<dateTimeBetween("-3 month", "now")>'
     ora: 3
-    classe: '@classe_*'
+    classe: '@classe_1A'
     materia: '@materia_SOSTEGNO'
     argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'

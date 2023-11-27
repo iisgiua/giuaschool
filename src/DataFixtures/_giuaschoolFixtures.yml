@@ -1,0 +1,35 @@
+####################
+# _giuaschoolFixtures - dati iniziali dell'applicazione
+####################
+
+
+include:
+  - ConfigurazioneFixtures.yml
+  - MateriaFixtures.yml
+  - MenuFixtures.yml
+
+
+App\Entity\Amministratore:
+  amministratore:
+    sesso: 'M'
+    nome: 'Amministratore'
+    cognome: 'Registro'
+    username: 'admin'
+    email: 'admin@noemail.local'
+    password: '<passwordCodificata($username)>'
+    tokenCreato:
+    token: ''
+    preloginCreato:
+    prelogin: ''
+    abilitato: true
+    spid: false
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dataNascita:
+    comuneNascita: ''
+    codiceFiscale: ''
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<(array())>'
+    notifica: '<(array())>'

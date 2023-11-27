@@ -32,7 +32,7 @@ class CircolareTest extends EntityTestCase {
     $this->noStoredFields = ['sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_circolare' => ['id', 'creato', 'modificato', 'anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'altri', 'firma', 'notifica', 'pubblicata'],
       'gs_sede' => '*'];

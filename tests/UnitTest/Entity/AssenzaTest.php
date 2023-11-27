@@ -32,7 +32,7 @@ class AssenzaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_assenza' => ['id', 'creato', 'modificato', 'data', 'giustificato', 'motivazione', 'dichiarazione', 'certificati', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id'],
       'gs_utente' => '*'];

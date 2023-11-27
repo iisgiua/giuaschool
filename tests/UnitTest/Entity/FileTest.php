@@ -32,7 +32,7 @@ class FileTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_file' => ['id', 'creato', 'modificato', 'titolo', 'nome', 'estensione', 'dimensione', 'file']];
     // SQL write

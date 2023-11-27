@@ -16,16 +16,17 @@
 include:
   - ClasseFixtures.yml
   - DocenteFixtures.yml
+  - StaffFixtures.yml
   - AlunnoFixtures.yml
 
 
 App\Entity\Nota:
-  nota_{1..10}:
+  nota_{1..5}:
     tipo: '<randomElement(["C", "I"])>'
     data: '<dateTimeBetween("-1 month", "now")>'
     testo: '<text()>'
     provvedimento: '50%? <text()>: <strval("")>'
     classe: '@classe_*'
     docente: '@docente_*'
-    docenteProvvedimento: '50%? @docente_*'
-    alunni: '<collection(@alunno_prima_*)>'
+    docenteProvvedimento: '50%? @staff_*'
+    alunni: '<collection(@alunno_*)>'

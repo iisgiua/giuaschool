@@ -32,7 +32,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_raggruppamento' => ['id', 'creato', 'modificato', 'nome'],
       'gs_utente' => '*'];
