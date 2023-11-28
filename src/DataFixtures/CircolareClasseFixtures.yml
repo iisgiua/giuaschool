@@ -13,7 +13,7 @@ include:
 
 
 App\Entity\CircolareClasse:
-  circolare_classe_perclasse:
+  circolare_classe_perclasse_{1..2}:
     circolare: '@circolare_perclasse'
-    classe: '@classe_2A'
+    classe: '@classe_<($current == 1 ? "1A" : "2A")>'
     letta: '50%? <dateTimeBetween("-1 month", "now")>'

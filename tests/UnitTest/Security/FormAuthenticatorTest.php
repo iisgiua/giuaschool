@@ -304,7 +304,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password errata
     $this->logs = [];
-    $utente = $this->getReference('genitore1_prima_1');
+    $utente = $this->getReference('genitore1_1A_1');
     $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     try {
       $exception = null;
@@ -320,7 +320,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta, no OTP generale
     $this->logs = [];
-    $utente = $this->getReference('genitore1_prima_1');
+    $utente = $this->getReference('genitore1_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', '');
     $utente->setOtp('otp1234');
@@ -338,7 +338,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta, no OTP attivato per l'utente
     $this->logs = [];
-    $utente = $this->getReference('genitore2_prima_1');
+    $utente = $this->getReference('genitore2_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
@@ -356,7 +356,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta e OTP corretto
     $this->logs = [];
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
@@ -374,7 +374,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta e OTP corretto: replay attack
     $this->logs = [];
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otp1234');
@@ -393,7 +393,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta e OTP vuoto
     $this->logs = [];
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => '', 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
@@ -412,7 +412,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->session);
     // utente con password corretta e OTP errato
     $this->logs = [];
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'abc', 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
@@ -447,7 +447,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
@@ -472,7 +472,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req = new Request([], ['_otp' => 'otp1234'], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
     $utente->setOtp('otp1234');
@@ -499,7 +499,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
-    $utente = $this->getReference('genitore1_seconda_1');
+    $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
     $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
     $utente->setOtp('');

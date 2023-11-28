@@ -71,10 +71,10 @@ class LezioneTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->randomNumber(4, false) :
-          ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'gruppo' ? $this->faker->optional($weight = 50, $default = '')->word() :
           ($field == 'tipoGruppo' ? $this->faker->randomElement(['N', 'C', 'R']) :
-          ($field == 'materia' ? $this->getReference("materia_1") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
           null))))))));
@@ -154,7 +154,7 @@ class LezioneTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_1"));
+    $existent->setClasse($this->getReference("classe_1A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // gruppo
     $existent->setGruppo(str_repeat('*', 65));
@@ -173,7 +173,7 @@ class LezioneTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
-    $existent->setMateria($this->getReference("materia_1"));
+    $existent->setMateria($this->getReference("materia_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

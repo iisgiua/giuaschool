@@ -69,8 +69,8 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 1)) :
-          ($field == 'utente' ? $this->getReference("docente_2") :
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_DOCENTI_".($i + 1)) :
+          ($field == 'utente' ? $this->getReference("docente_sostegno_1") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'firmato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null))));
@@ -88,7 +88,7 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_3");
+      $data[$i]['utente'] = $this->getReference("docente_sostegno_2");
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -139,7 +139,7 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_5"));
+    $existent->setUtente($this->getReference("docente_curricolare_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);

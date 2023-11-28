@@ -68,8 +68,8 @@ class CircolareUtenteTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'circolare' ? $this->getReference("circolare_".($i + 1)) :
-          ($field == 'utente' ? $this->getReference("docente_2") :
+          ($field == 'circolare' ? $this->getReference("circolare_perdocenti") :
+          ($field == 'utente' ? $this->getReference("docente_itp_".($i + 1)) :
           ($field == 'letta' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'confermata' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null))));
@@ -87,7 +87,7 @@ class CircolareUtenteTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_5");
+      $data[$i]['utente'] = $this->getReference("docente_sostegno_".($i + 1));
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -135,7 +135,7 @@ class CircolareUtenteTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_5"));
+    $existent->setUtente($this->getReference("docente_sostegno_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
     // letta
     $existent->setLetta(null);

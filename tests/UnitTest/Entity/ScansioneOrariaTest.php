@@ -72,7 +72,7 @@ class ScansioneOrariaTest extends EntityTestCase {
           ($field == 'inizio' ? $this->faker->dateTime() :
           ($field == 'fine' ? $this->faker->dateTime() :
           ($field == 'durata' ? $this->faker->randomFloat() :
-          ($field == 'orario' ? $this->getReference("orario_1") :
+          ($field == 'orario' ? $this->getReference("orario_provvisorio_1") :
           null))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -154,7 +154,7 @@ class ScansioneOrariaTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Orario - NOT BLANK');
-    $existent->setOrario($this->getReference("orario_1"));
+    $existent->setOrario($this->getReference("orario_definitivo_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Orario - VALID NOT BLANK');
   }
 

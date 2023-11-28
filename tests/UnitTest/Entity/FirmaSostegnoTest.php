@@ -70,9 +70,9 @@ class FirmaSostegnoTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_3") :
+          ($field == 'docente' ? $this->getReference("docente_sostegno_3") :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }

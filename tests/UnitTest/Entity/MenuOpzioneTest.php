@@ -75,8 +75,8 @@ class MenuOpzioneTest extends EntityTestCase {
           ($field == 'ordinamento' ? $this->faker->randomNumber(4, false) :
           ($field == 'abilitato' ? $this->faker->boolean() :
           ($field == 'icona' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
-          ($field == 'menu' ? $this->getReference("menu_1") :
-          ($field == 'sottoMenu' ? $this->getReference("menu_1") :
+          ($field == 'menu' ? $this->getReference("menu_UTENTE") :
+          ($field == 'sottoMenu' ? $this->getReference("menu_ALUNNI") :
           null))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -188,7 +188,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Menu - NOT BLANK');
-    $existent->setMenu($this->getReference("menu_1"));
+    $existent->setMenu($this->getReference("menu_ALUNNI"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Menu - VALID NOT BLANK');
     // sottoMenu
     $existent->setSottoMenu(null);

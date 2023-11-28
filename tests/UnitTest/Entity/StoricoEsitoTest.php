@@ -74,7 +74,7 @@ class StoricoEsitoTest extends EntityTestCase {
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :
           ($field == 'credito' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'creditoPrecedente' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 6)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."B_1") :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);

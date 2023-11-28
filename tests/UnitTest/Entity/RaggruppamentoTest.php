@@ -113,7 +113,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAlunni
     $items = $existent->getAlunni()->toArray();
-    $item = $this->getReference("alunno_1");
+    $item = $this->getReference("alunno_1A_1");
     $existent->addAlunni($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getAlunni()->toArray()), $this->entity.'::addAlunni');
     $existent->addAlunni($item);
@@ -153,7 +153,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunni - NOT BLANK');
-    $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("alunno_1")]));
+    $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("alunno_1A_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunni - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

@@ -67,7 +67,7 @@ class LogTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'utente' ? $this->getReference("docente_1") :
+          ($field == 'utente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'username' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'ruolo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 32)) :
           ($field == 'alias' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
@@ -92,7 +92,7 @@ class LogTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_2");
+      $data[$i]['utente'] = $this->getReference("docente_curricolare_2");
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -134,7 +134,7 @@ class LogTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_1"));
+    $existent->setUtente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
     // username
     $property = $this->getPrivateProperty('App\Entity\Log', 'username');

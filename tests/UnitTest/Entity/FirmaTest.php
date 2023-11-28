@@ -71,7 +71,7 @@ class FirmaTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_3") :
+          ($field == 'docente' ? $this->getReference("docente_itp_3") :
           null));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -87,7 +87,7 @@ class FirmaTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['docente'] = $this->getReference("docente_5");
+      $data[$i]['docente'] = $this->getReference("docente_sostegno_5");
       $o[$i]->setDocente($data[$i]['docente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');

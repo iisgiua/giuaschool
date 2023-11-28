@@ -69,8 +69,8 @@ class CircolareClasseTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'circolare' ? $this->getReference("circolare_".($i + 1)) :
-          ($field == 'classe' ? $this->getReference("classe_2") :
+          ($field == 'circolare' ? $this->getReference("circolare_perdocenti") :
+          ($field == 'classe' ? $this->getReference("classe_".($i + 1)."B") :
           ($field == 'letta' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -87,7 +87,7 @@ class CircolareClasseTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['classe'] = $this->getReference("classe_3");
+      $data[$i]['classe'] = $this->getReference("classe_".($i + 1).($i < 2? 'C' : 'A'));
       $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -135,7 +135,7 @@ class CircolareClasseTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_5"));
+    $existent->setClasse($this->getReference("classe_5A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // letta
     $existent->setLetta(null);

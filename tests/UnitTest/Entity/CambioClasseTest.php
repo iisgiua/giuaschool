@@ -69,10 +69,10 @@ class CambioClasseTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'inizio' ? $this->faker->dateTime() :
           ($field == 'fine' ? $this->faker->dateTime() :
-          ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'note' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -89,7 +89,7 @@ class CambioClasseTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['alunno'] = $this->getReference("alunno_2");
+      $data[$i]['alunno'] = $this->getReference("alunno_1A_2");
       $o[$i]->setAlunno($data[$i]['alunno']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -131,7 +131,7 @@ class CambioClasseTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // inizio
     $property = $this->getPrivateProperty('App\Entity\CambioClasse', 'inizio');

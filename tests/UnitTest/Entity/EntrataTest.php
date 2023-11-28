@@ -75,10 +75,10 @@ class EntrataTest extends EntityTestCase {
           ($field == 'valido' ? $this->faker->boolean() :
           ($field == 'motivazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1024)) :
           ($field == 'giustificato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_1") :
-          ($field == 'docenteGiustifica' ? $this->getReference("docente_1") :
-          ($field == 'utenteGiustifica' ? $this->getReference("genitore_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."B_1") :
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'docenteGiustifica' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'utenteGiustifica' ? $this->getReference("genitore1_1A_1") :
           null)))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -94,7 +94,7 @@ class EntrataTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['docente'] = $this->getReference("docente_2");
+      $data[$i]['docente'] = $this->getReference("docente_curricolare_2");
       $o[$i]->setDocente($data[$i]['docente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -165,14 +165,14 @@ class EntrataTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // docente
     $property = $this->getPrivateProperty('App\Entity\Entrata', 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // docenteGiustifica
     $existent->setDocenteGiustifica(null);

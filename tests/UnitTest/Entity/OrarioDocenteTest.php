@@ -70,10 +70,10 @@ class OrarioDocenteTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'orario' ? $this->getReference("orario_1") :
+          ($field == 'orario' ? $this->getReference("orario_provvisorio_1") :
           ($field == 'giorno' ? $this->faker->randomNumber(4, false) :
           ($field == 'ora' ? $this->faker->randomNumber(4, false) :
-          ($field == 'cattedra' ? $this->getReference("cattedra_1") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_curricolare_1") :
           null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -89,7 +89,7 @@ class OrarioDocenteTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['orario'] = $this->getReference("orario_2");
+      $data[$i]['orario'] = $this->getReference("orario_provvisorio_2");
       $o[$i]->setOrario($data[$i]['orario']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -131,7 +131,7 @@ class OrarioDocenteTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Orario - NOT BLANK');
-    $existent->setOrario($this->getReference("orario_1"));
+    $existent->setOrario($this->getReference("orario_provvisorio_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Orario - VALID NOT BLANK');
     // giorno
     $existent->setGiorno(10);
@@ -144,7 +144,7 @@ class OrarioDocenteTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cattedra - NOT BLANK');
-    $existent->setCattedra($this->getReference("cattedra_1"));
+    $existent->setCattedra($this->getReference("cattedra_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Cattedra - VALID NOT BLANK');
   }
 

@@ -166,9 +166,9 @@ class CircolareTest extends EntityTestCase {
     $this->assertSame(array_values([$fl2->getBasename()]), array_values($existent->getAllegati()), $this->entity.'::removeAllegato');
     // addFiltroGenitori
     $existent->setFiltroGenitori([]);
-    $item1 = $this->getReference('genitore_1');
+    $item1 = $this->getReference('genitore1_1A_1');
     $existent->addFiltroGenitori($item1);
-    $item2 = $this->getReference('genitore_2');
+    $item2 = $this->getReference('genitore1_1A_2');
     $existent->addFiltroGenitori($item2);
     $existent->addFiltroGenitori($item1);
     $this->assertSame([$item1->getId(), $item2->getId()], array_values($existent->getFiltroGenitori()), $this->entity.'::addFiltroGenitori');
@@ -178,9 +178,9 @@ class CircolareTest extends EntityTestCase {
     $this->assertSame([$item2->getId()], array_values($existent->getFiltroGenitori()), $this->entity.'::removeFiltroGenitori');
     // addFiltroAlunni
     $existent->setFiltroAlunni([]);
-    $item1 = $this->getReference('alunno_1');
+    $item1 = $this->getReference('alunno_1A_1');
     $existent->addFiltroAlunni($item1);
-    $item2 = $this->getReference('alunno_2');
+    $item2 = $this->getReference('alunno_1A_2');
     $existent->addFiltroAlunni($item2);
     $existent->addFiltroAlunni($item1);
     $this->assertSame([$item1->getId(), $item2->getId()], array_values($existent->getFiltroAlunni()), $this->entity.'::addFiltroAlunni');
@@ -190,9 +190,9 @@ class CircolareTest extends EntityTestCase {
     $this->assertSame([$item2->getId()], array_values($existent->getFiltroAlunni()), $this->entity.'::removeFiltroAlunni');
     // addFiltroCoordinatori
     $existent->setFiltroCoordinatori([]);
-    $item1 = $this->getReference('docente_1');
+    $item1 = $this->getReference('docente_curricolare_1');
     $existent->addFiltroCoordinatori($item1);
-    $item2 = $this->getReference('docente_2');
+    $item2 = $this->getReference('docente_curricolare_2');
     $existent->addFiltroCoordinatori($item2);
     $existent->addFiltroCoordinatori($item1);
     $this->assertSame([$item1->getId(), $item2->getId()], array_values($existent->getFiltroCoordinatori()), $this->entity.'::addFiltroCoordinatori');
@@ -202,9 +202,9 @@ class CircolareTest extends EntityTestCase {
     $this->assertSame([$item2->getId()], array_values($existent->getFiltroCoordinatori()), $this->entity.'::removeFiltroCoordinatori');
     // addFiltroDocenti
     $existent->setFiltroDocenti([]);
-    $item1 = $this->getReference('docente_1');
+    $item1 = $this->getReference('docente_curricolare_1');
     $existent->addFiltroDocenti($item1);
-    $item2 = $this->getReference('docente_2');
+    $item2 = $this->getReference('docente_curricolare_2');
     $existent->addFiltroDocenti($item2);
     $existent->addFiltroDocenti($item1);
     $this->assertSame([$item1->getId(), $item2->getId()], array_values($existent->getFiltroDocenti()), $this->entity.'::addFiltroDocenti');

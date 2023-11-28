@@ -79,7 +79,7 @@ class AlunnoTest extends EntityTestCase {
           ($field == 'giustificaOnline' ? $this->faker->boolean() :
           ($field == 'richiestaCertificato' ? $this->faker->boolean() :
           ($field == 'foto' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
-          ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'username' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
           ($field == 'password' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :

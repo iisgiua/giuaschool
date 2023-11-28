@@ -72,8 +72,8 @@ class StoricoVotoTest extends EntityTestCase {
           ($field == 'voto' ? $this->faker->randomNumber(4, false) :
           ($field == 'carenze' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'storicoEsito' ? $this->getReference("storico_esito_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_2") :
+          ($field == 'storicoEsito' ? $this->getReference("storico_esito_F") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_".($i + 1)) :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -139,7 +139,7 @@ class StoricoVotoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
-    $existent->setMateria($this->getReference("materia_5"));
+    $existent->setMateria($this->getReference("materia_curricolare_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

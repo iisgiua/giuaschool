@@ -74,9 +74,9 @@ class ClasseTest extends EntityTestCase {
           ($field == 'gruppo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'oreSettimanali' ? $this->faker->randomNumber(4, false) :
           ($field == 'sede' ? $this->getReference("sede_1") :
-          ($field == 'corso' ? $this->getReference("corso_1") :
-          ($field == 'coordinatore' ? $this->getReference("docente_1") :
-          $this->getReference("docente_2"))))))));
+          ($field == 'corso' ? $this->getReference("corso_BIN") :
+          ($field == 'coordinatore' ? $this->getReference("docente_curricolare_1") :
+          $this->getReference("docente_curricolare_2"))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -120,7 +120,7 @@ class ClasseTest extends EntityTestCase {
     // toString
     $nuovo = (new Classe())->setAnno(5)->setSezione('Z');
     $this->assertSame('5ª Z', (string) $nuovo, $this->entity.'::toString');
-    $gruppo = $this->getReference('classe_10');
+    $gruppo = $this->getReference('classe_3CAMB');
     $this->assertSame($gruppo->getAnno().'ª '.$gruppo->getSezione().'-'.$gruppo->getGruppo(), (string) $gruppo, $this->entity.'::toString');
   }
 
@@ -179,7 +179,7 @@ class ClasseTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Corso - NOT BLANK');
-    $existent->setCorso($this->getReference("corso_1"));
+    $existent->setCorso($this->getReference("corso_INF"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Corso - VALID NOT BLANK');
     // coordinatore
     $existent->setCoordinatore(null);

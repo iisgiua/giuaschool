@@ -71,7 +71,7 @@ class AssenzaLezioneTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."A_1") :
           ($field == 'lezione' ? $this->getReference("lezione_2") :
           ($field == 'ore' ? $this->faker->randomFloat() :
           null)));

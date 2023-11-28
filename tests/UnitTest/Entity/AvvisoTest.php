@@ -75,8 +75,8 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'oraFine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'cattedra' ? $this->getReference("cattedra_1") :
-          ($field == 'materia' ? $this->getReference("materia_1") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_curricolare_1") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
           ($field == 'oggetto' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'testo' ? $this->faker->text() :
           ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
@@ -84,7 +84,7 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'docente' ? $this->getReference("docente_1") :
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           null)))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -263,7 +263,7 @@ class AvvisoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
   }
 

@@ -68,7 +68,7 @@ class GenitoreTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'giustificaOnline' ? $this->faker->boolean() :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'username' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
           ($field == 'password' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :
