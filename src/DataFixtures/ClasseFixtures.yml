@@ -52,6 +52,15 @@ App\Entity\Classe:
     corso: '@corso_BCH'
     coordinatore:
     segretario:
+  classe_3C:
+    anno: '3'
+    sezione: 'C'
+    gruppo:
+    oreSettimanali: 32
+    sede: '@sede_1'
+    corso: '@corso_CHI'
+    coordinatore:
+    segretario:
   classe_3CAMB:
     anno: '3'
     sezione: 'C'

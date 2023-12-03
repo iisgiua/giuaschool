@@ -7,6 +7,7 @@ Funzionalità: Inserimento proposte di voto per lo scrutinio
   #-- Bisogna controllare filtro del periodo
   #-- Bisogna controllare visualizzazione di altri docenti con stessa cattedra
   Bisogna controllare accesso a pagina
+  Utilizzando "_testFixtures.yml"
 
 
 Contesto: login docente senza cattedre

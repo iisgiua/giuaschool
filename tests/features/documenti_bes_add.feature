@@ -7,6 +7,7 @@ Funzionalità: Inserimento dei documenti BES da parte del responsabile
   Bisogna caricare un documento da inserire come documento BES
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente responsabile BES

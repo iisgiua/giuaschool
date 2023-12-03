@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione bacheca dei documenti indirizzati all'utente
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 ################################################################################

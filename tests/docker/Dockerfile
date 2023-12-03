@@ -157,5 +157,5 @@ RUN \
 # Set TEST environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   service mariadb start && \
-  php bin/console app:alice:load tests/features/TestFixtures.yml --dump tests/temp/TestFixtures && \
+  php bin/console app:alice:load tests/features/_testFixtures.yml --dump tests/temp/_testFixtures && \
   chown -R www-data:www-data .

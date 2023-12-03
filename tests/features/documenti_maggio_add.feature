@@ -6,6 +6,7 @@ Funzionalità: Inserimento dei documenti del 15 maggio dei docenti
   Bisogna controllare prerequisiti per inserimento documenti del 15 maggio
   Bisogna caricare un documento da inserire come documento del 15 maggio
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre di coordinatore

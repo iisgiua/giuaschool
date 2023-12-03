@@ -1,5 +1,10 @@
+####################
+# _documentiFixtures - dati per i test sui documenti
+####################
+
+
 include:
-  - TestFixtures.yml
+  - _testFixtures.yml
   - ../../src/DataFixtures/FileFixtures.yml
   - ../../src/DataFixtures/ListaDestinatariFixtures.yml
 
@@ -9,7 +14,7 @@ App\Entity\Documento:
   documento_1:
     tipo: 'L'
     docente: '@docente_curricolare_*'
-    listaDestinatari: '@lista_destinatari_DOCENTI_curricolare_1'
+    listaDestinatari: '@lista_destinatari_DOCENTI_1'
     materia:
     classe:
     alunno:

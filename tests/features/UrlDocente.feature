@@ -4,6 +4,7 @@ Funzionalità: Controllo sulla visualizzazione delle pagine del registro
   Per controllare la visualizzazione delle pagine del registro
   Come utente docente
   Bisogna controllare che le pagine siano correttamente visualizzate
+  Utilizzando "_testFixtures.yml"
 
 
 ################################################################################

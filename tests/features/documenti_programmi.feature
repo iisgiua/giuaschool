@@ -5,6 +5,7 @@ Funzionalità: Visualizzazione cattedre per l'inserimento dei programmi finali
   Come utente docente
   Bisogna leggere cattedre e programmi del docente e mostrarli
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre

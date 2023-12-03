@@ -6,6 +6,7 @@ Funzionalità: Inserimento delle relazioni finali dei docenti
   Bisogna controllare prerequisiti per inserimento relazione
   Bisogna caricare un documento da inserire come relazione
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre

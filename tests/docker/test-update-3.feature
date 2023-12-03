@@ -8,6 +8,7 @@ Funzionalità: Smoke test
   Bisogna poter effettuare un download
   Bisogna poter effettuare un upload
   Bisogna poter inserire un voto
+  Utilizzando "_documentiFixtures.yml"
 
 
 ################################################################################

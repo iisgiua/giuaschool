@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione pagina per l'inserimento dei documenti BES
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente responsabile BES

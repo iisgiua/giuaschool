@@ -6,6 +6,7 @@ Funzionalità: Cancellazione di un documento inserito in precedenza
   Bisogna controllare prerequisiti per cancellazione di documento
   Bisogna poter cancellare un documento esistente e ritornare alla pagina di gestione
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre

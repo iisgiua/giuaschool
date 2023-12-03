@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione documenti degli alunni da parte dello staff
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login staff di scuola
@@ -59,7 +60,7 @@ Scenario: visualizza lista vuota per i documenti BES
   Allora non vedi la tabella:
     | classe | alunno | documento |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-@debug
+
 Scenario: visualizza più documenti per alunno BES
   Data ricerca istanze di tipo "Alunno":
     | id  | abilitato |

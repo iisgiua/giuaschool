@@ -7,6 +7,7 @@ Funzionalità: Visualizzazione documenti dei docenti da parte dello staff
   Bisogna controllare filtro di visualizzazione
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login staff di scuola senza nessuna cattedra
@@ -101,15 +102,15 @@ Scenario: visualizza lista cattedre corretta per le relazioni
     | $m5 |      | Storia      |
     | $m6 |      | Matematica  |
   E ricerca istanze di tipo "Classe":
-    | id  | anno | sezione |
+    | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 3    | B       |
     | $cl3 | 5    | B       |
   E ricerca istanze di tipo "Alunno":
-    | id   | classe | abilitato | sesso |
-    | $a1  | $cl1   | si        |       |
-    | $a2  | $cl3   | si        | M     |
-    | $a3  | $cl3   | si        | F     |
+    | id   | classe | abilitato |
+    | $a1  | $cl1   | si        |
+    | $a2  | $cl3   | si        |
+    | $a3  | $cl3   | si        |
   E istanze di tipo "Cattedra":
     | id   | attiva | classe | materia | tipo | docente | alunno |
     | $c1  | si     | $cl1   | $m1     | A    |         |        |
@@ -142,12 +143,12 @@ Scenario: visualizza lista cattedre corretta per i documenti del 15 maggio
     | 1    | B       | #other       |
     | 5    |         | null         |
     | 5    | B       | #other       |
-    | 5    | C       | #logged      |
+    | 5    | A       | #logged      |
   E ricerca istanze di tipo "Classe":
     | id  | anno | sezione |
     | $cl1 | 1    | B      |
     | $cl2 | 5    | B      |
-    | $cl3 | 5    | C      |
+    | $cl3 | 5    | A      |
   E ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
     | $m1 |      | Informatica |
@@ -247,9 +248,9 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno stesso 
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
   E ricerca istanze di tipo "Alunno":
-    | id   | classe | abilitato | sesso |
-    | $a1  | $cl1   | si        | M     |
-    | $a2  | $cl1   | si        | F     |
+    | id   | classe | abilitato |
+    | $a1  | $cl1   | si        |
+    | $a2  | $cl1   | si        |
   E istanze di tipo "Cattedra":
     | id  | attiva | classe | materia | tipo | docente | alunno |
     | $c1 | si     | $cl1   | $m1     | N    | #other  | $a1    |
@@ -334,11 +335,11 @@ Schema dello scenario: visualizza filtro documenti presenti/mancanti per documen
   Data modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |
     | 5    | B       | #other        |
-    | 5    | C       | #logged       |
+    | 5    | A       | #logged       |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 5    | B       |
-    | $cl2 | 5    | C       |
+    | $cl2 | 5    | A       |
   E ricerca istanze di tipo "Materia":
     | id  | nome        |
     | $m1 | Informatica |

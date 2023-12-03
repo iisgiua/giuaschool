@@ -6,6 +6,7 @@ Funzionalità:
   Bisogna controllare prerequisiti per lettura di documento
   Bisogna poter scaricare un documento esistente
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 ################################################################################
@@ -240,7 +241,7 @@ Schema dello scenario: scarica documento BES inserito
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/3A/riservato/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_bes"
   E click su "Documento Excel"
-  Allora file scaricato con nome "documento-excel-versione-1.xlsx" 
+  Allora file scaricato con nome "documento-excel-versione-1.xlsx"
   Esempi:
     | tipo |
     | B    |
