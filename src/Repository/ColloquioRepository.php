@@ -144,7 +144,7 @@ class ColloquioRepository extends BaseRepository {
   public function richiesteValide(Docente $docente): array {
     $dati = [];
     $oggi = new \DateTime('today');
-    $fine = (clone $oggi)->modify('last day of next month');
+    $fine = (new \DateTime('tomorrow'))->modify('last day of next month');
     // legge dati prenotazioni
     $prenotazioni = $this->createQueryBuilder('c')
       ->select('c.id,c.tipo,c.data,c.inizio,c.fine,c.luogo,c.numero,rc.id AS id_prenotazione,rc.appuntamento,rc.stato,rc.messaggio,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')

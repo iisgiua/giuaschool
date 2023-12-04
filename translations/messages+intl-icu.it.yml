@@ -565,7 +565,9 @@ label.tipo_date: Data
 label.tipo_time: Ora
 label.minus: -
 label.invia_richiesta: Nuova richiesta
+label.invia_modulo: Nuovo modulo
 label.cancella_richiesta: Cancella richiesta
+label.cancella_modulo: Cancella modulo
 label.richieste_scadute: Richieste scadute
 label.tipo_richiesta: Codifica del tipo di richiesta
 label.richiedi_giustificazione: Chiedere la giustificazione?

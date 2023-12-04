@@ -38,7 +38,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
       (($utente instanceOf Genitore) ? [$utente->getAlunno()->getClasse()->getSede()] : []);
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
-      ->select('dr.id,dr.nome,dr.unica,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
+      ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
       ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
       ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere($sql)
@@ -60,7 +60,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
       if (!$moduloPrec || $moduloPrec != $modulo) {
         // aggiunge a lista moduli
         $dati[$richiesta['unica'] ? 'uniche' : 'multiple'][$modulo] = [
-          'nome' => $richiesta['nome']];
+          'nome' => $richiesta['nome'], 'gestione' => $richiesta['gestione']];
         $moduloPrec = $modulo;
       }
       if ($richiesta['richiesta_id']) {
