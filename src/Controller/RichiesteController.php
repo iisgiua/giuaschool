@@ -121,6 +121,7 @@ class RichiesteController extends BaseController {
     // informazioni per la visualizzazione
     $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
     $info['allegati'] = $definizioneRichiesta->getAllegati();
+    $info['gestione'] = $definizioneRichiesta->getGestione();
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
@@ -196,7 +197,8 @@ class RichiesteController extends BaseController {
       }
     }
     // pagina di risposta
-    return $this->renderHtml('richieste', 'add', $dati, $info, [$form->createView(),  'message.richieste_add']);
+    return $this->renderHtml('richieste', 'add', $dati, $info, [$form->createView(),
+     $definizioneRichiesta->getGestione() ? 'message.richieste_add' : 'message.modulo_add']);
   }
 
   /**
@@ -1064,6 +1066,109 @@ class RichiesteController extends BaseController {
     }
     // visualizza pagina HTML
     return $this->renderHtml('richieste', 'modulo_evacuazione', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Visualizza i moduli presenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param string $formato Formato della visualizzazione [H=html,C=csv]
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/richieste/modulo/lista/{formato}/{pagina}", name="richieste_modulo_lista",
+   *    requirements={"formato": "H|C", "pagina": "\d+"},
+   *    defaults={"formato": "H", "pagina": "0"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function moduloListaAction(Request $request, string $formato, int $pagina): Response {
+    // inizializza
+    $info = [];
+    $info['sedi'] = [];
+    $dati = [];
+    // criteri di ricerca
+    $criteri = array();
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/tipo', '');
+    $sede = $this->em->getRepository('App\Entity\Sede')->find(
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/sede', 0));
+    $criteri['sede'] = $sede ? $sede->getId() : 0;
+    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/classe', 0));
+    $criteri['classe'] = $classe ? $classe->getId() : 0;
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/nome', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/pagina', $pagina);
+    }
+    // lista tipi
+    $opzioniTipi = $this->em->getRepository('App\Entity\DefinizioneRichiesta')
+      ->opzioniModuli($this->getUser());
+    // lista sedi
+    if ($this->getUser()->getSede()) {
+      // sede definita
+      $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
+      $criteri['sede'] = $sede->getId();
+      $opzioniSedi[$sede->getNomeBreve()] = $sede;
+    } else {
+      // crea lista
+      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    }
+    // cambio sede
+    foreach ($opzioniSedi as $s) {
+      $info['sedi'][$s->getId()] = $s->getNomeBreve();
+    }
+    // lista classi
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
+    // form filtro
+    $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'moduli',
+      'values' => [$criteri['tipo'], $opzioniTipi, $sede, $opzioniSedi, $classe, $opzioniClassi,
+      $criteri['cognome'], $criteri['nome']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['sede'] = $form->get('sede')->getData() ? $form->get('sede')->getData()->getId() : 0;
+      $criteri['classe'] = $form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : 0;
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/sede', $criteri['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $this->em->getRepository('App\Entity\Richiesta')
+      ->listaModuliAlunni($this->getUser(), $criteri, $formato == 'C' ? -1 : $pagina);
+    // informazioni di visualizzazione
+    $info['pagina'] = $pagina;
+    // pagina di risposta
+    if ($formato == 'C') {
+      // crea documento CSV
+      $csv = $this->renderView('richieste/modulo_lista.csv.twig', array(
+        'dati' => $dati,
+        'info' => $info));
+      // invia il documento
+      $nomefile = 'modulo.csv';
+      $response = new Response($csv);
+      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+      $response->headers->set('Content-Disposition', $disposition);
+      $response->headers->set('Content-Type', 'text/csv');
+      return $response;
+    }
+    // visualizza pagina HTML
+    return $this->renderHtml('richieste', 'modulo_lista', $dati, $info, [$form->createView()]);
   }
 
 }

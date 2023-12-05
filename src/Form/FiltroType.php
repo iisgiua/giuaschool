@@ -149,6 +149,47 @@ class FiltroType extends AbstractType {
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false));
+    } elseif ($options['form_mode'] == 'moduli') {
+      // form moduli evacuazione
+      $builder
+        ->add('tipo', ChoiceType::class, array('label' => 'label.modulo_tipo',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.modulo_tipo'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => true))
+        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_sede',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.sede'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][4],
+          'choices' => $options['values'][5],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.classe'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['values'][6],
+          'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
+            'style' => 'width:10em'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'data' => $options['values'][7],
+          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
+            'style' => 'width:10em'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false));
     }
     // pulsante filtro
     $builder

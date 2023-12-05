@@ -136,4 +136,35 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce la lista dei moduli, predisposta per le opzioni dei form
+   * Sono esclusi i moduli che sono gestiti separatamente (es. evacuazione)
+   *
+   * @param Utente $utente Utente destinatario dei moduli
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioniModuli(Utente $utente): array {
+    // inizializza
+    $dati = [];
+    // ruoli destinatario
+    $ruolo = $utente->getCodiceRuolo();
+    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",
+      $utente->getCodiceFunzioni());
+    $sql = implode(' OR ', $funzioni);
+    // legge dati
+    $moduli = $this->createQueryBuilder('dr')
+      ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#'")
+      ->andWhere($sql)
+      ->orderBy('dr.nome', 'ASC')
+      ->getQuery()
+      ->getResult();
+   // imposta opzioni
+   foreach ($moduli as $modulo) {
+     $dati[$modulo->getNome()] = $modulo;
+   }
+   // restituisce lista opzioni
+   return $dati;
+ }
+
 }

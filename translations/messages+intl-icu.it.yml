@@ -586,6 +586,7 @@ label.richiesta_sede: Sede di destinazione
 label.richiesta_messaggio: Messaggio in risposta
 label.richiesta_deroga_entrata: Autorizza ingresso
 label.richiesta_deroga_uscita: Autorizza uscita
+label.modulo_tipo: Tipo di modulo
 label.tipo_colloquio_P: In presenza
 label.tipo_colloquio_D: A distanza
 label.durata_colloquio_5: 5 minuti
@@ -742,7 +743,7 @@ title.scuola.moduli_edit: Modifica i dati di un modulo di richiesta
 page.richieste.lista: Lista Richieste
 title.richieste.lista: Lista delle richieste
 page.richieste.add: Modifica Richiesta
-title.richieste.add: Invia un modulo di richiesta
+title.richieste.add: Invia un modulo
 page.richieste.uscita: Gestione Uscite
 title.richieste.uscita: Gestione delle richieste di uscita anticipata
 page.richieste.gestione: Gestione Richieste
@@ -808,6 +809,7 @@ title.richieste.classe: Moduli per la classe {classe}
 title.richieste.classe_add: Inserimento di un nuovo modulo
 page.richieste.modulo: Gestione Moduli
 title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
+title.richieste.modulo_lista: Moduli inviati
 
 
 page.agenda_compito: Agenda Compiti
@@ -1373,6 +1375,7 @@ message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
+message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
 message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
