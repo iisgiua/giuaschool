@@ -202,6 +202,7 @@ class ColloquiUtil {
    */
   public function colloquiGenitori(Classe $classe, Alunno $alunno, Genitore $genitore): array {
     $dati = [];
+    $dati['docenti'] = [];
     // legge cattedre
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->join('c.classe', 'cl')
