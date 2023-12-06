@@ -21,11 +21,11 @@ include:
 
 
 App\Entity\Uscita:
-  uscita_{1..10}:
+  uscita_{1..5}:
     data (unique): '<dateTimeBetween("-3 month", "now")>'
     ora: '<dateTimeBetween("10:00", "12:00")>'
     note: '50%? <text()>: <strval("")>'
-    valido: '<boolean()>'
+    valido: '<boolean(50)>'
     motivazione: '<sentence(3)>'
     giustificato: '<dateTimeBetween(<($data)>, "now")>'
     alunno: '@alunno_*'

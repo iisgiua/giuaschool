@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\Docente;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -27,7 +28,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function findAll($search=null, $page=1, $limit=10) {
+  public function findAll($search=null, $page=1, $limit=10): Paginator {
     // crea query
     $query = $this->createQueryBuilder('d')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
@@ -49,7 +50,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function findEnabled($search=null, $page=1, $limit=10) {
+  public function findEnabled($search=null, $page=1, $limit=10): Paginator {
     // crea query
     $query = $this->createQueryBuilder('d')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
@@ -72,14 +73,14 @@ class DocenteRepository extends BaseRepository {
    *
    * @return array Lista degli ID dei docenti che risultano corretti
    */
-  public function controllaDocenti($sedi, $lista, &$errore) {
+  public function controllaDocenti($sedi, $lista, &$errore): array {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
       ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
-      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
+      ->andWhere('cl.sede IN (:sedi) OR cl.id IS NULL')
       ->setParameters(['attiva' => 1, 'lista' => $lista, 'abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
@@ -97,7 +98,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return string Lista dei docenti
    */
-  public function listaDocenti($lista, $attr) {
+  public function listaDocenti($lista, $attr): string {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
       ->select("CONCAT('<span id=',:quote,:attr,d.id,:quote,'>',d.cognome,' ',d.nome,'</span>') AS nome")
@@ -119,7 +120,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return array Lista di ID degli utenti coordinatori
    */
-  public function getIdCoordinatore($sedi, $filtro) {
+  public function getIdCoordinatore($sedi, $filtro): array {
     $coordinatori = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
       ->join('App\Entity\Classe', 'c', 'WITH', 'd.id=c.coordinatore')
@@ -145,7 +146,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return array Lista di ID degli utenti docenti
    */
-  public function getIdDocente($sedi, $tipo, $filtro) {
+  public function getIdDocente($sedi, $tipo, $filtro): array {
     // docenti con cattedra
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
@@ -204,7 +205,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return Paginator Oggetto Paginator
    */
-  public function cercaSede($cerca, $pagina, $limite) {
+  public function cercaSede($cerca, $pagina, $limite): Paginator {
     // crea query
     $query = $this->createQueryBuilder('d')
       ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
@@ -228,7 +229,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return array Array associativo con i risultati della ricerca
    */
-  public function cerca($criteri, $pagina=1) {
+  public function cerca($criteri, $pagina=1): array {
     // crea query
     $query = $this->createQueryBuilder('d')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
@@ -301,7 +302,7 @@ class DocenteRepository extends BaseRepository {
    *
    * @return array Array associativo con i risultati della ricerca
    */
-  public function responsabiliBes($criteri, $pagina=1) {
+  public function responsabiliBes($criteri, $pagina=1): array {
     // crea query
     $query = $this->createQueryBuilder('d')
       ->where('d.responsabileBes=:responsabile AND d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
@@ -350,6 +351,38 @@ class DocenteRepository extends BaseRepository {
     }
     // restituisce dati
     return $this->paginazione($query->getQuery(), $pagina);
+  }
+
+  /**
+   * Restituisce la lista dei docenti, predisposta per le opzioni dei form
+   *
+   * @param bool|null $abilitato Usato per filtrare i docenti abilitati/disabilitati; se nullo non filtra i dati
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(?bool $abilitato = true): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $docenti = $this->createQueryBuilder('d')
+      ->where('d NOT INSTANCE OF App\Entity\Preside');
+    if ($abilitato === true) {
+      $docenti = $docenti->andWhere('d.abilitato = 1');
+    } elseif ($abilitato === false) {
+      $docenti = $docenti->andWhere('d.abilitato = 0');
+    }
+    $docenti = $docenti
+      ->orderBy('d.cognome,d.nome,d.username')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($docenti as $docente) {
+      $nome = $docente->getCognome().' '.$docente->getNome().' ('.
+        $docente->getUsername().')';
+      $dati[$nome] = $docente;
+    }
+    // restituisce lista opzioni
+    return $dati;
   }
 
 }

@@ -22,7 +22,7 @@
     {% if dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2" role="alert">
-        <span class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) - {{ c.anno }}ª {{ c.sezione }}</span><br>
+        <span class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) - {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}</span><br>
         <strong>{{ c.data|format_date('full')|title }} alle {{ c.appuntamento|date('G:i') }}
         - {{ ('label.tipo_colloquio_'~c.tipo)|trans }}: {% if c.tipo == 'D' %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif %}</strong>
         {% if c.messaggio is not empty %}

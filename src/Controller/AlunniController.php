@@ -27,7 +27,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
@@ -75,7 +74,7 @@ class AlunniController extends BaseController {
       }
     }
     // form
-    $form = $this->createForm(ImportaCsvType::class, null, ['formMode' => 'alunni']);
+    $form = $this->createForm(ImportaCsvType::class, null, ['form_mode' => 'alunni']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
@@ -107,16 +106,16 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : $criteri['classe']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
@@ -125,22 +124,21 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    $lista_classi[] = -1;
-    $label_classe = $trans->trans('label.nessuna_classe');
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, $label_classe]]);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+    $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
+      'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['classe'] = is_object($form->get('classe')->getData()) ?
+        $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
-        intval($form->get('classe')->getData()));
+      $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/pagina', $pagina);
     }
     // lista alunni
@@ -166,7 +164,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction($id, $abilita): Response {
+  public function abilitaAction(int $id, int $abilita): Response {
     // controllo alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->find($id);
     if (!$alunno) {
@@ -209,7 +207,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, $id): Response {
+  public function modificaEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -252,8 +250,10 @@ class AlunniController extends BaseController {
       $this->em->persist($genitore2);
     }
     // form
-    $form = $this->createForm(AlunnoGenitoreType::class, $alunno, [
-      'returnUrl' => $this->generateUrl('alunni_modifica'),'data' => [$alunno, $genitore1, $genitore2]]);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+    $form = $this->createForm(AlunnoGenitoreType::class, $alunno, ['form_mode' => 'completo',
+      'return_url' => $this->generateUrl('alunni_modifica'),
+      'values' => [$alunno, $opzioniClassi, $genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla numeri di telefono genitore1
@@ -349,8 +349,8 @@ class AlunniController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, $tipo,
-                                 $username=null): Response {
+                                 LoggerInterface $logger, LogHandler $dblogger, string $tipo,
+                                 ?string $username): Response {
     // controlla alunno
     $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
     if (!$utente) {
@@ -400,9 +400,9 @@ class AlunniController extends BaseController {
         'password' => $password));
     }
     $pdf->createFromHtml($html);
-    $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia password per email
+      $doc = $pdf->getHandler()->Output('', 'S');
       $message = (new Email())
         ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($utente->getEmail())
@@ -426,12 +426,9 @@ class AlunniController extends BaseController {
       // redirezione
       return $this->redirectToRoute('alunni_modifica');
     } else {
-      // crea pdf e lo scarica
+      // scarica PDF
       $nomefile = 'credenziali-registro.pdf';
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response = new Response($doc);
-      $response->headers->set('Content-Disposition', $disposition);
-      return $response;
+      return $pdf->send($nomefile);
     }
   }
 
@@ -449,16 +446,16 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeAction(Request $request, TranslatorInterface $trans, $pagina): Response {
+  public function classeAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
+    $classe = $criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : $criteri['classe'];
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/cognome', '');
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_classe/pagina', 1);
@@ -467,22 +464,21 @@ class AlunniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
-    $lista_classi[] = -1;
-    $label_classe = $trans->trans('label.nessuna_classe');
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, $label_classe]]);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+    $opzioniClassi[$trans->trans('label.nessuna_classe')] = -1;
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'docenti-alunni',
+      'values' => [$classe, $opzioniClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['classe'] = is_object($form->get('classe')->getData()) ?
+        $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
-        intval($form->get('classe')->getData()));
+      $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/classe', $criteri['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/pagina', $pagina);
     }
     // lista cambi classe
@@ -509,7 +505,8 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeEditAction(Request $request, TranslatorInterface $trans, $id, $tipo): Response {
+  public function classeEditAction(Request $request, TranslatorInterface $trans, int $id,
+                                   string $tipo): Response {
     $form_help = 'message.required_fields';
     // controlla azione
     if ($id > 0) {
@@ -519,6 +516,9 @@ class AlunniController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
+      $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(null, null);
+      $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+      $values = [$opzioniAlunni, $opzioniClassi];
     } else {
       // azione add
       $cambio = new CambioClasse();
@@ -526,25 +526,36 @@ class AlunniController extends BaseController {
       // controlla tipo di cambio
       switch ($tipo) {
         case 'I':   // inserimento
+          $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, null);
+          $values = [$opzioniAlunni];
           $form_help = 'message.classe_alunno_inserito';
           // dati fittizi temporanei
           $cambio->setFine(new \DateTime());
           break;
         case 'T':   // trasferimento
+          $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, null);
+          $values = [$opzioniAlunni];
           $form_help = 'message.classe_alunno_trasferito';
           // dati fittizi temporanei
           $cambio->setInizio(new \DateTime());
           break;
         case 'S':   // cambio sezione
+          $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, null);
+          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+          $values = [$opzioniAlunni, $opzioniClassi];
           $form_help = 'message.classe_alunno_sezione';
           // dati fittizi temporanei
           $cambio->setInizio(new \DateTime());
           break;
+        default:    // aggiungi
+          $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(null, null);
+          $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
+          $values = [$opzioniAlunni, $opzioniClassi];
       }
     }
     // form
-    $form = $this->createForm(CambioClasseType::class, $cambio, ['formMode' => $tipo,
-      'returnUrl' => $this->generateUrl('alunni_classe')]);
+    $form = $this->createForm(CambioClasseType::class, $cambio, ['form_mode' => $tipo,
+      'return_url' => $this->generateUrl('alunni_classe'), 'values' => $values]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // validazione
@@ -709,7 +720,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeDeleteAction($id): Response {
+  public function classeDeleteAction(int $id): Response {
     $cambio = $this->em->getRepository('App\Entity\CambioClasse')->find($id);
     if (!$cambio) {
       // errore
@@ -733,7 +744,7 @@ class AlunniController extends BaseController {
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
+   * @param int $genitore Valore 1 se si vuole cambiare la password del genitore, 0 per la password dell'alunno
    *
    * @return Response Pagina di risposta
    *
@@ -745,18 +756,21 @@ class AlunniController extends BaseController {
    */
   public function passwordFiltroAction(Request $request, UserPasswordHasherInterface $hasher,
                                        PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
-                                       LogHandler $dblogger, $genitore): Response {
+                                       LogHandler $dblogger, int $genitore): Response {
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
+    $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
-    $classe = ($criteri['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
+    // controllo classe
+    if ($criteri['classe'] < 0) {
+      $this->addFlash('warning', 'message.nessun_dato');
+      return $this->redirectToRoute('alunni_modifica');
+    }
     // recupera dati
     $dati = $this->em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);
     $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($dati['lista']);
-
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -808,13 +822,9 @@ class AlunniController extends BaseController {
         $pdf->createFromHtml($html);
       }
     }
-    // crea pdf e lo scarica
-    $doc = $pdf->getHandler()->Output('', 'S');
+    // scarica PDF
     $nomefile = 'credenziali-registro-'.($genitore ? 'genitori' : 'alunni').'.pdf';
-    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-    $response = new Response($doc);
-    $response->headers->set('Content-Disposition', $disposition);
-    return $response;
+    return $pdf->send($nomefile);
   }
 
   /**
@@ -838,9 +848,9 @@ class AlunniController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/tipo', '');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/nome', '');
-    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/tipo', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentanti/pagina', 1);
@@ -851,18 +861,18 @@ class AlunniController extends BaseController {
     // form di ricerca
     $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
       'label.rappresentante_P' => 'P'];
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
+      'values' => [$criteri['tipo'], $listaTipi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = $form->get('nome')->getData();
-      $criteri['cognome'] = $form->get('cognome')->getData();
       $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentanti/pagina', $pagina);
     }
     // lista rappresentanti
@@ -893,9 +903,9 @@ class AlunniController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/tipo', '');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/nome', '');
-    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/tipo', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', 1);
@@ -905,18 +915,18 @@ class AlunniController extends BaseController {
     }
     // form di ricerca
     $listaTipi = ['label.rappresentante_L' => 'L', 'label.rappresentante_I' => 'I'];
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
+      'values' => [$criteri['tipo'], $listaTipi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = $form->get('nome')->getData();
-      $criteri['cognome'] = $form->get('cognome')->getData();
       $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_rappresentantiGenitori/pagina', $pagina);
     }
     // lista rappresentanti
@@ -974,9 +984,9 @@ class AlunniController extends BaseController {
       $listaTipi = ['label.rappresentante_S' => 'S', 'label.rappresentante_I' => 'I',
         'label.rappresentante_P' => 'P'];
     }
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
-      'returnUrl' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
-      'dati' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rappresentanti',
+      'return_url' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
+      'values' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlla tipi

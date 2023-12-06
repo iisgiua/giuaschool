@@ -32,7 +32,7 @@ class DefinizioneConsiglioTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_definizione_consiglio' => ['id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'periodo', 'data_proposte', 'struttura', 'classi_visibili', 'tipo']];
     // SQL write

@@ -25,40 +25,27 @@ include:
 App\Entity\Valutazione:
 
   # ----- valutazione con voto -----
-  valutazione_voto_{0..36}:
+  valutazione_voto_{1..5}:
     tipo: '<randomElement(["S", "O", "P"])>'
-    visibile: '<boolean()>'
-    media: '<boolean()>'
-    voto: '<((int) ($current / 4) + 1 + ($current % 4) * 0.25)>'
+    visibile: '<boolean(80)>'
+    media: '<boolean(70)>'
+    voto: '<($current + 1 + $current * 0.25)>'
     giudizio: '50%? <text()>: <strval("")>'
-    argomento: '50%? <text()>: <strval("")>'
-    docente: '@docente_*'
+    argomento: '<text()>'
+    docente: '@docente_curricolare_*'
     alunno: '@alunno_*'
     lezione: '@lezione_*'
     materia: '<($lezione->getMateria())>'
 
   # ----- valutazione con giudizio -----
-  valutazione_giudizio_{1..30}:
+  valutazione_giudizio_{1..5}:
     tipo: '<randomElement(["S", "O", "P"])>'
-    visibile: '<boolean()>'
-    media: '<boolean()>'
+    visibile: '<boolean(80)>'
+    media: '<boolean(70)>'
     voto: 0
     giudizio: '<text()>'
-    argomento: '50%? <text()>: <strval("")>'
-    docente: '@docente_*'
+    argomento: '<text()>'
+    docente: '@docente_curricolare_*'
     alunno: '@alunno_*'
     lezione: '@lezione_*'
     materia: '<($lezione->getMateria())>'
-
-  # ----- valutazione materia diversa da lezione -----
-  valutazione_materia_{1..10}:
-    tipo: '<randomElement(["S", "O", "P"])>'
-    visibile: '<boolean()>'
-    media: '<boolean()>'
-    voto: '<numberBetween(1, 10)>'
-    giudizio: '50%? <text()>: <strval("")>'
-    argomento: '50%? <text()>: <strval("")>'
-    docente: '@docente_*'
-    alunno: '@alunno_*'
-    lezione: '@lezione_*'
-    materia: '@materia_*'

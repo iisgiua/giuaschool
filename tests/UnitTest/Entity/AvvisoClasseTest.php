@@ -32,7 +32,7 @@ class AvvisoClasseTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_avviso_classe' => ['id', 'creato', 'modificato', 'avviso_id', 'classe_id', 'letto'],
       'gs_classe' => '*',
@@ -65,12 +65,13 @@ class AvvisoClasseTest extends EntityTestCase {
    */
   public function testProperties() {
     // crea nuovi oggetti
+    $lista = ['U', 'E', 'A', 'I', 'V'];
     for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'avviso' ? $this->getReference("avviso_".($i + 1)) :
-          ($field == 'classe' ? $this->getReference("classe_2") :
+          ($field == 'avviso' ? $this->getReference("avviso_".$lista[$i]) :
+          ($field == 'classe' ? $this->getReference("classe_1B") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -87,7 +88,7 @@ class AvvisoClasseTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['classe'] = $this->getReference("classe_3");
+      $data[$i]['classe'] = $this->getReference("classe_2B");
       $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -135,7 +136,7 @@ class AvvisoClasseTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_5"));
+    $existent->setClasse($this->getReference("classe_5A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);

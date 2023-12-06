@@ -23,7 +23,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
@@ -71,7 +70,7 @@ class AtaController extends BaseController {
       }
     }
     // form
-    $form = $this->createForm(ImportaCsvType::class, null, ['formMode' => 'ata']);
+    $form = $this->createForm(ImportaCsvType::class, null, ['form_mode' => 'ata']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
@@ -105,16 +104,16 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, $pagina): Response {
+  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
+    $criteri['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : $criteri['sede']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
-    $criteri['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
-    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/pagina', 1);
@@ -123,22 +122,21 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
-    $lista_sedi[] = -1;
-    $label_sede = $trans->trans('label.nessuna_sede');
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'ata',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $sede, $lista_sedi, $label_sede]]);
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $opzioniSedi[$trans->trans('label.nessuna_sede')] = -1;
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'ata',
+      'values' => [$sede, $opzioniSedi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['sede'] = is_object($form->get('sede')->getData()) ?
+        $form->get('sede')->getData()->getId() : ((int) $form->get('sede')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
-        intval($form->get('sede')->getData()));
+      $criteri['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
@@ -162,7 +160,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction($id, $abilita): Response {
+  public function abilitaAction(int $id, int $abilita): Response {
     // controlla ata
     $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
@@ -193,7 +191,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, $id): Response {
+  public function modificaEditAction(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -210,7 +208,9 @@ class AtaController extends BaseController {
       $this->em->persist($ata);
     }
     // form
-    $form = $this->createForm(AtaType::class, $ata, ['returnUrl' => $this->generateUrl('ata_modifica')]);
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $form = $this->createForm(AtaType::class, $ata, ['return_url' => $this->generateUrl('ata_modifica'),
+      'values' => [$opzioniSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -247,7 +247,8 @@ class AtaController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, $id, $tipo): Response {
+                                 LoggerInterface $logger, LogHandler $dblogger, int $id,
+                                 string $tipo): Response {
     // controlla ata
     $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
@@ -278,9 +279,9 @@ class AtaController extends BaseController {
     $html = $this->renderView('pdf/credenziali_privacy.html.twig', array(
       'utente' => $ata));
     $pdf->createFromHtml($html);
-    $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia per email
+      $doc = $pdf->getHandler()->Output('', 'S');
       $message = (new Email())
         ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($ata->getEmail())
@@ -304,12 +305,9 @@ class AtaController extends BaseController {
       // redirezione
       return $this->redirectToRoute('ata_modifica');
     } else {
-      // crea pdf e lo scarica
+      // scarica il PDF
       $nomefile = 'credenziali-registro.pdf';
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response = new Response($doc);
-      $response->headers->set('Content-Disposition', $disposition);
-      return $response;
+      return $pdf->send($nomefile);
     }
   }
 
@@ -334,9 +332,9 @@ class AtaController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/tipo', '');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/nome', '');
-    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/tipo', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/pagina', 1);
@@ -346,18 +344,18 @@ class AtaController extends BaseController {
     }
     // form di ricerca
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'rappresentanti',
-      'dati' => [$criteri['cognome'], $criteri['nome'], $criteri['tipo'], $listaTipi]]);
+    $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'rappresentanti',
+      'values' => [$criteri['tipo'], $listaTipi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['nome'] = $form->get('nome')->getData();
-      $criteri['cognome'] = $form->get('cognome')->getData();
       $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/nome', $criteri['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/nome', $criteri['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/pagina', $pagina);
     }
     // lista rappresentanti
@@ -404,9 +402,9 @@ class AtaController extends BaseController {
     }
     // form
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'rappresentanti',
-      'returnUrl' => $this->generateUrl('ata_rappresentanti'),
-      'dati' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rappresentanti',
+      'return_url' => $this->generateUrl('ata_rappresentanti'),
+      'values' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlla tipi

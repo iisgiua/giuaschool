@@ -17,7 +17,6 @@ use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
@@ -57,7 +56,7 @@ class AppController extends BaseController {
    *    methods={"GET"})
    */
   public function loginAction(AuthenticationUtils $auth, ConfigLoader $config,
-                              $codice, $lusr, $lpsw, $lapp) {
+                              string $codice, int $lusr, int $lpsw, int $lapp): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
@@ -90,7 +89,7 @@ class AppController extends BaseController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher) {
+  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
@@ -149,7 +148,7 @@ class AppController extends BaseController {
    * @Route("/app/info/", name="app_info",
    *    methods={"GET"})
    */
-  public function infoAction(ConfigLoader $config) {
+  public function infoAction(ConfigLoader $config): Response {
     $applist = array();
     // carica configurazione di sistema
     $config->carica();
@@ -187,7 +186,7 @@ class AppController extends BaseController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    */
-  public function downloadAction(ConfigLoader $config, $id) {
+  public function downloadAction(ConfigLoader $config, int $id): Response {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
@@ -213,53 +212,6 @@ class AppController extends BaseController {
   }
 
   /**
-   * API: restituisce la lista dei presenti per le procedure di evacuazione di emergenza
-   *
-   * @param Request $request Pagina richiesta
-   * @param string $token Token identificativo dell'app
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/app/presenti/{token}", name="app_presenti",
-   *    methods={"GET"})
-   */
-  public function presentiAction(Request $request, $token) {
-    // inizializza
-    $dati = array();
-    // controlla servizio
-    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
-    if ($app) {
-      $dati_app = $app->getDati();
-      if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
-        // controlla ora
-        $adesso = new \DateTime();
-        $oggi = $adesso->format('Y-m-d');
-        $ora = $adesso->format('H:i');
-        if ($ora >= '08:00' && $ora <= '14:00') {
-          // legge presenti
-          $dql = "SELECT CONCAT(c.anno,c.sezione) AS classe,a.nome,a.cognome,DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita,DATE_FORMAT(e.ora,'%H:%i') AS entrata,DATE_FORMAT(u.ora,'%H:%i') AS uscita
-                  FROM App\Entity\Alunno a
-                  INNER JOIN a.classe c
-                  LEFT JOIN App\Entity\Entrata e WITH e.alunno=a.id AND e.data=:oggi
-                  LEFT JOIN App\Entity\Uscita u WITH u.alunno=a.id AND u.data=:oggi
-                  WHERE a.abilitato=1
-                  AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
-                  ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
-          $dati = $this->em->createQuery($dql)
-            ->setParameters(['oggi' => $oggi])
-            ->getArrayResult();
-        }
-      }
-    }
-    // mostra la pagina di risposta
-    $risposta = $this->render('app/presenti.xml.twig', array(
-      'dati' => $dati,
-      ));
-    $risposta->headers->set('Content-Type', 'application/xml; charset=utf-8');
-    return $risposta;
-  }
-
-  /**
    * Restituisce la versione corrente dell'app indicata
    *
    * @param Request $request Pagina richiesta
@@ -269,7 +221,7 @@ class AppController extends BaseController {
    * @Route("/app/versione/", name="app_versione",
    *    methods={"POST"})
    */
-  public function versioneAction(Request $request) {
+  public function versioneAction(Request $request): JsonResponse {
     $risposta = array();
     // legge dati
     $token = $request->request->get('token');
@@ -296,7 +248,7 @@ class AppController extends BaseController {
    * @Route("/app/info/studenti/", name="app_info_studenti",
    *    methods={"POST"})
    */
-  public function infoStudentiAction(Request $request, TranslatorInterface $trans) {
+  public function infoStudentiAction(Request $request, TranslatorInterface $trans): Response {
     // inizializza
     $dati = array();
     $token = $request->headers->get('X-Giuaschool-Token');
@@ -379,7 +331,7 @@ class AppController extends BaseController {
    *    methods={"GET"})
    */
   public function connectAction(Request $request, LogHandler $dblogger, LoggerInterface $logger,
-                                ConfigLoader $config, $token): Response {
+                                ConfigLoader $config, string $token): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();

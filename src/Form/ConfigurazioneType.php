@@ -8,20 +8,20 @@
 
 namespace App\Form;
 
+use App\Entity\Configurazione;
+use App\Form\MessageType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use App\Form\MessageType;
-use App\Entity\Configurazione;
-use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -38,45 +38,45 @@ class ConfigurazioneType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'banner') {
-    // form banner
+    if ($options['form_mode'] == 'banner') {
+      // form banner
       $builder
         ->add('banner_login', MessageType::class, array('label' => 'label.banner_login',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'attr' => ['rows' => '3'],
           'required' => false))
         ->add('banner_home', MessageType::class, array('label' => 'label.banner_home',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][1],
           'attr' => ['rows' => '3'],
           'required' => false));
-    } elseif ($options['formMode'] == 'manutenzione') {
-    // form manutenzione
+    } elseif ($options['form_mode'] == 'manutenzione') {
+      // form manutenzione
       $builder
         ->add('manutenzione', CheckboxType::class, array('label' => 'label.manutenzione_attiva',
-          'data' => $options['dati'][0],
+          'data' => $options['values'][0],
           'required' => false))
         ->add('data_inizio', DateType::class, array('label' => 'label.data_inizio',
-          'data' => $options['dati'][1],
+          'data' => $options['values'][1],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-start'],
           'format' => 'dd/MM/yyyy',
           'required' => true))
         ->add('ora_inizio', TimeType::class, array('label' => 'label.ora_inizio',
-          'data' => $options['dati'][2],
+          'data' => $options['values'][2],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
           'required' => true))
         ->add('data_fine', DateType::class, array('label' => 'label.data_fine',
-          'data' => $options['dati'][3],
+          'data' => $options['values'][3],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-start'],
           'format' => 'dd/MM/yyyy',
           'required' => true))
         ->add('ora_fine', TimeType::class, array('label' => 'label.ora_fine',
-          'data' => $options['dati'][4],
+          'data' => $options['values'][4],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
@@ -98,21 +98,21 @@ class ConfigurazioneType extends AbstractType {
         ->addModelTransformer(new CallbackTransformer(
           function ($d) { return $d; },
           function ($d) { return $d->format('H:i'); }));
-    } elseif ($options['formMode'] == 'parametri') {
+    } elseif ($options['form_mode'] == 'parametri') {
       // form parametri
       $builder
         ->add('parametri', CollectionType::class, array('label' => false,
-          'data' => $options['dati'],
+          'data' => $options['values'][0],
           'entry_type' => ParametroType::class,
           'entry_options' => []));
     }
     // aggiunge pulsanti al form
-    if ($options['returnUrl']) {
+    if ($options['return_url']) {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit',
           'attr' => ['widget' => 'gs-button-start']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
     } else {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
@@ -125,13 +125,13 @@ class ConfigurazioneType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
-    $resolver->setDefined('dati');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'parametri',
-      'returnUrl' => null,
-      'dati' => null,
+      'form_mode' => 'parametri',
+      'return_url' => null,
+      'values' => [],
       'data_class' => null));
   }
 

@@ -31,15 +31,15 @@ class RichiestaTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Richiesta';
     // campi da testare
-    $this->fields = ['inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente', 'definizioneRichiesta', 'data'];
+    $this->fields = ['inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente', 'classe', 'definizioneRichiesta', 'data'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id', 'data']];
+    $this->canRead = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'classe_id', 'definizione_richiesta_id', 'data']];
     // SQL write
-    $this->canWrite = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id', 'data']];
+    $this->canWrite = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'classe_id', 'definizione_richiesta_id', 'data']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -78,9 +78,10 @@ class RichiestaTest extends EntityTestCase {
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'messaggio' ? $this->faker->text() :
           ($field == 'utente' ? $this->getReference("utente_1") :
+          ($field == 'classe' ? $this->getReference("classe_2A") :
           ($field == 'definizioneRichiesta' ? $this->getReference("definizione_richiesta_1") :
           ($field == 'data' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          null))))))))));
+          null)))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -134,6 +135,7 @@ class RichiestaTest extends EntityTestCase {
       'stato' =>  $existent->getStato(),
       'messaggio' =>  $existent->getMessaggio(),
       'utente' => $existent->getUtente()->getId(),
+      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
       'definizioneRichiesta' => $existent->getDefinizioneRichiesta()->getId()];
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }

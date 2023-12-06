@@ -32,7 +32,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto'],
       'gs_avviso' => '*',
@@ -65,12 +65,13 @@ class AvvisoUtenteTest extends EntityTestCase {
    */
   public function testProperties() {
     // crea nuovi oggetti
+    $lista = ['U', 'E', 'A', 'I', 'V'];
     for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'avviso' ? $this->getReference("avviso_".($i + 1)) :
-          ($field == 'utente' ? $this->getReference("docente_2") :
+          ($field == 'avviso' ? $this->getReference("avviso_".$lista[$i]) :
+          ($field == 'utente' ? $this->getReference("genitore1_1B_1") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -87,7 +88,7 @@ class AvvisoUtenteTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_3");
+      $data[$i]['utente'] = $this->getReference("genitore1_1B_2");
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -135,7 +136,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_5"));
+    $existent->setUtente($this->getReference("docente_curricolare_5"));
     $err = $this->val->validate($existent);
     $msgs = [];
     foreach ($err as $e) {

@@ -16,10 +16,8 @@ include:
 
 
 App\Entity\Presenza:
-
-  # ----- presenza -----
-  presenza_{1..10}:
-    data: '<dateTimeBetween("-1 month", "now")>'
+  presenza_{1..5}:
+    data (unique): '<dateTimeBetween("-1 month", "now")>'
     oraInizio: '<dateTimeBetween("08:30", "11:00")>'
     oraFine: '<dateTimeBetween("11:30", "13:00")>'
     tipo: '<randomElement(["P", "S", "E"])>'

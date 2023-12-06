@@ -136,7 +136,7 @@ class MenuRepository extends EntityRepository {
    *
    * @param int $id Identificativo del sottomenu
    * @param string $ruolo Ruolo dell'utente che visualizza il sottomenu
-   * @param array $funzione Funzione relativa al ruolo dell'utente che visualizza il sottomenu
+   * @param string $funzione Funzione relativa al ruolo dell'utente che visualizza il sottomenu
    *
    * @return array Array associativo con la struttura del sottomenu
    */

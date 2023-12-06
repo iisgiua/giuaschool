@@ -32,7 +32,7 @@ class SedeTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_sede' => ['id', 'creato', 'modificato', 'nome', 'nome_breve', 'citta', 'indirizzo1', 'indirizzo2', 'telefono', 'ordinamento']];
     // SQL write

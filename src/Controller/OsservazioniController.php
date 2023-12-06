@@ -15,12 +15,12 @@ use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Doctrine\ORM\EntityRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -49,7 +49,8 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniAction(Request $request, RegistroUtil $reg, $cattedra, $classe, $data) {
+  public function osservazioniAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
+                                     string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -175,7 +176,8 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioneEditAction(Request $request, RegistroUtil $reg,
-                                         LogHandler $dblogger, $cattedra, $data, $id) {
+                                         LogHandler $dblogger, int $cattedra, string $data,
+                                         int $id): Response {
     // inizializza
     $label = array();
     // controlla cattedra
@@ -228,7 +230,9 @@ class OsservazioniController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
+    $label['classe'] = ''.$cattedra->getClasse();
+    // lista alunni della classe
+    $listaAlunni = $reg->alunniInData($data_obj, $cattedra->getClasse());
     // form di inserimento
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
@@ -238,12 +242,12 @@ class OsservazioniController extends BaseController {
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
-        'query_builder' => function (EntityRepository $er) use ($cattedra,$religione) {
+        'query_builder' => function (EntityRepository $er) use ($listaAlunni,$religione) {
             return $er->createQueryBuilder('a')
-              ->where('a.classe=:classe and a.abilitato=:abilitato'.
+              ->where('a.id IN (:lista)'.
                 ($religione ? " and a.religione='".$religione."'" : ''))
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-              ->setParameters(['classe' => $cattedra->getClasse(), 'abilitato' => 1]);
+              ->setParameters(['lista' => $listaAlunni]);
           },
         'expanded' => true,
         'multiple' => false,
@@ -311,7 +315,7 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioneDeleteAction(Request $request, RegistroUtil $reg,
-                                           LogHandler $dblogger, $id) {
+                                           LogHandler $dblogger, int $id): Response {
     // controlla osservazione
     $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($id);
     if (!$osservazione) {
@@ -360,7 +364,7 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioniPersonaliAction(Request $request, RegistroUtil $reg,
-                                              $cattedra, $classe, $data) {
+                                              int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -475,7 +479,8 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazionePersonaleEditAction(Request $request, RegistroUtil $reg,
-                                                  LogHandler $dblogger, $cattedra, $data, $id) {
+                                                  LogHandler $dblogger, int $cattedra, string $data,
+                                                  int $id): Response {
     // inizializza
     $label = array();
     // controlla cattedra
@@ -518,7 +523,7 @@ class OsservazioniController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
-    $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
+    $label['classe'] = ''.$cattedra->getClasse();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_personale_edit', FormType::class, $osservazione)
       ->add('testo', MessageType::class, array('label' => 'label.testo',
@@ -581,7 +586,7 @@ class OsservazioniController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazionePersonaleDeleteAction(Request $request, RegistroUtil $reg,
-                                                    LogHandler $dblogger, $id) {
+                                                    LogHandler $dblogger, int $id): Response {
     // controlla osservazione
     $osservazione = $this->em->getRepository('App\Entity\OsservazioneClasse')->find($id);
     if (!$osservazione) {
@@ -589,7 +594,6 @@ class OsservazioniController extends BaseController {
       return $this->redirectToRoute('lezioni_osservazioni_personali');
     }
     // controlla permessi
-
     if (!$reg->azioneOsservazione('delete', $osservazione->getData(), $this->getUser(),
                                   $osservazione->getCattedra()->getClasse(), $osservazione)) {
       // errore: azione non permessa

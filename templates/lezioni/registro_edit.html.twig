@@ -8,8 +8,8 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
-        <div class="col-sm-4"><span class="gs-big">{{ label.data }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Lezione:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.data }} - {{ label.ora }} ª ora</span></div>
         <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
       </div>
@@ -22,16 +22,6 @@
       {% endif %}
       </div>
       {{ form_start(form) }}
-      {% if form.materia is defined %}{{ form_row(form.materia) }}{% endif %}
-      <div class="form-group">
-        <label class="col-sm-2 control-label" for="registro_add_fine">Ora</label>
-        <div class="col-sm-5">
-          <p class="form-control-static"><strong>Inizio alle {{label.inizio }}</strong></p>
-        </div>
-        <div class="col-sm-5">
-          <strong>Fine alle</strong> {{ form_widget(form.fine, {'attr': {'class': 'gs-inline', 'style': 'width: auto;'}}) }}
-        </div>
-      </div>
       {{ form_widget(form) }}
       {{ form_end(form) }}
     </div>
@@ -43,11 +33,10 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('label.gs-checkbox-inline input').change(function() {
+  $('label.radio-inline input').change(function() {
+    $(this).parent().siblings('label.radio-inline').removeClass('active');
     if (this.checked) {
       $(this).parent().addClass('active');
-    } else {
-      $(this).parent().removeClass('active');
     }
   }).change();
 });

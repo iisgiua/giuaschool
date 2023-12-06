@@ -32,7 +32,7 @@ class NotaTest extends EntityTestCase {
     $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id'],
       'gs_classe' => '*'];
@@ -72,9 +72,9 @@ class NotaTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'testo' ? $this->faker->text() :
           ($field == 'provvedimento' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'classe' ? $this->getReference("classe_1") :
-          ($field == 'docente' ? $this->getReference("docente_1") :
-          ($field == 'docenteProvvedimento' ? $this->getReference("docente_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'docenteProvvedimento' ? $this->getReference("docente_curricolare_1") :
           null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -118,9 +118,9 @@ class NotaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAlunni
     $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection());
-    $item1 = $this->getReference('alunno_1');
+    $item1 = $this->getReference('alunno_1A_1');
     $existent->addAlunni($item1);
-    $item2 = $this->getReference('alunno_2');
+    $item2 = $this->getReference('alunno_1A_2');
     $existent->addAlunni($item2);
     $this->assertSame([$item1, $item2], array_values($existent->getAlunni()->toArray()), $this->entity.'::addAlunni');
     // removeAlunni
@@ -165,14 +165,14 @@ class NotaTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_1"));
+    $existent->setClasse($this->getReference("classe_1A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // docente
     $property = $this->getPrivateProperty('App\Entity\Nota', 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // docenteProvvedimento
     $existent->setDocenteProvvedimento(null);

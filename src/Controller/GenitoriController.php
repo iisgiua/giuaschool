@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
-use App\Entity\Genitore;
 use App\Entity\Scrutinio;
 use App\Entity\Uscita;
 use App\Form\MessageType;
@@ -24,12 +23,12 @@ use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -58,7 +57,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function lezioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, $data) {
+  public function lezioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
+                                string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -158,7 +158,7 @@ class GenitoriController extends BaseController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function argomentiAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                                  RegistroUtil $reg, $idmateria) {
+                                  RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
     $template = 'ruolo_genitore/argomenti.html.twig';
     $errore = null;
@@ -187,7 +187,7 @@ class GenitoriController extends BaseController {
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
-    // legge la classe (può essere null)
+    // legge la classe
     $classe = $reg->classeInData(new \DateTime(), $alunno);
     if ($classe) {
       // lista materie
@@ -243,7 +243,7 @@ class GenitoriController extends BaseController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function votiAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                             RegistroUtil $reg, $idmateria) {
+                             RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
     $errore = null;
     $materie = null;
@@ -324,7 +324,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, $posizione) {
+  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
+                                int $posizione): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -375,7 +376,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function noteAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
+  public function noteAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -424,7 +425,8 @@ class GenitoriController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
+  public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen,
+                                     RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -469,7 +471,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen, $periodo) {
+  public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen, string $periodo): Response {
     // inizializza variabili
     $errore = null;
     $dati = array();
@@ -490,7 +492,7 @@ class GenitoriController extends BaseController {
     // legge la classe (può essere null)
     $classe = $alunno->getClasse();
     // legge lista periodi
-    $dati_periodi = $gen->pagelleAlunno($alunno);
+    $dati_periodi = $gen->pagelleAlunno($alunno, $classe);
     if (!empty($dati_periodi)) {
       // seleziona scrutinio indicato o ultimo
       $scrutinio = $dati_periodi[0][1];
@@ -585,7 +587,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiAction(Request $request, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -656,17 +658,16 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiDettagliAction(BachecaUtil $bac, $id) {
+  public function avvisiDettagliAction(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
-    $letto = null;
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
+    if (!$bac->destinatario($avviso, $this->getUser())) {
       // errore: non è destinatario dell'avviso
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -677,7 +678,6 @@ class GenitoriController extends BaseController {
     // visualizza pagina
     return $this->render('bacheca/scheda_avviso_genitori.html.twig', array(
       'dati' => $dati,
-      'letto' => $letto,
     ));
   }
 
@@ -697,7 +697,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventiAction(GenitoriUtil $gen, AgendaUtil $age, $mese) {
+  public function eventiAction(GenitoriUtil $gen, AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
     // parametro data
@@ -770,7 +770,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventiDettagliAction(AgendaUtil $age, $data, $tipo) {
+  public function eventiDettagliAction(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
     // data
@@ -783,7 +783,6 @@ class GenitoriController extends BaseController {
       // utente è genitore
       $dati = $age->dettagliEventoGenitore($this->getUser(), $this->getUser()->getAlunno(), $data, $tipo);
     }
-
     // visualizza pagina
     return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
       'dati' => $dati,
@@ -813,7 +812,7 @@ class GenitoriController extends BaseController {
    */
   public function giustificaAssenzaAction(Request $request, TranslatorInterface $trans,
                                           PdfManager $pdf, GenitoriUtil $gen, LogHandler $dblogger,
-                                          Assenza $assenza, $posizione) {
+                                          Assenza $assenza, int $posizione): Response {
     // inizializza
     $fs = new Filesystem();
     $info = array();
@@ -843,13 +842,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati assenze
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // modalità assenze orarie
-      $dati_assenze = $gen->raggruppaAssenzeOre($alunno);
-    } else {
-      // modalità assenze giornaliere
-      $dati_assenze = $gen->raggruppaAssenze($alunno);
-    }
+    $dati_assenze = $gen->raggruppaAssenze($alunno);
     $data_str = $assenza->getData()->format('Y-m-d');
     $dich = null;
     foreach ($dati_assenze['gruppi'] as $per=>$ass) {
@@ -865,7 +858,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class)
@@ -884,58 +877,7 @@ class GenitoriController extends BaseController {
         'data' => $info['assenza']['motivazione'],
         'trim' => true,
         'attr' => array('rows' => '3'),
-        'required' => true));
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
-      // dichiarazione NO-COVID
-      $form = $form
-        ->add('genitoreSesso', ChoiceType::class, array('label' => false,
-          'data' => isset($info['assenza']['dichiarazione']['genitoreSesso']) ?
-            $info['assenza']['dichiarazione']['genitoreSesso'] : (isset($dich['genitoreSesso']) ? $dich['genitoreSesso'] : null),
-          'choices' => ['label.sottoscritto_M' => 'M', 'label.sottoscritto_F' => 'F'],
-          'expanded' => false,
-          'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
-          'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
-          'required' => true))
-        ->add('genitoreNome', TextType::class, array('label' => false,
-          'data' => isset($info['assenza']['dichiarazione']['genitoreNome']) ?
-            $info['assenza']['dichiarazione']['genitoreNome'] : (isset($dich['genitoreNome']) ? $dich['genitoreNome'] : null),
-          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
-            'placeholder' => $trans->trans('label.cognome_nome'), ],
-          'required' => true))
-        ->add('genitoreNascita', TextType::class, array('label' => 'label.data_nascita',
-          'data' => (isset($info['assenza']['dichiarazione']['genitoreNascita']) && $info['assenza']['dichiarazione']['genitoreNascita']) ?
-            $info['assenza']['dichiarazione']['genitoreNascita']->format('d/m/Y') :
-            ((isset($dich['genitoreNascita']) && $dich['genitoreNascita']) ? $dich['genitoreNascita']->format('d/m/Y') : null),
-          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
-            'placeholder' => 'gg/mm/aaaa'],
-          'required' => true))
-        ->add('genitoreCitta', TextType::class, array('label' => false,
-          'data' => isset($info['assenza']['dichiarazione']['genitoreCitta']) ?
-            $info['assenza']['dichiarazione']['genitoreCitta'] : (isset($dich['genitoreCitta']) ? $dich['genitoreCitta'] : null),
-          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-0 gs-mb-2 gs-text-normal gs-strong',
-            'placeholder' => $trans->trans('label.luogo_nascita'), ],
-          'required' => true))
-        ->add('genitoreRuolo', ChoiceType::class, array('label' => false,
-          'data' => isset($info['assenza']['dichiarazione']['genitoreRuolo']) ?
-            $info['assenza']['dichiarazione']['genitoreRuolo'] : (isset($dich['genitoreRuolo']) ? $dich['genitoreRuolo'] : null),
-          'choices' => ['label.genitore_ruolo_P' => 'P', 'label.genitore_ruolo_M' => 'M',
-            'label.genitore_ruolo_T' => 'T'],
-          'expanded' => false,
-          'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
-          'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
-          'required' => true))
-        ->add('firma', CheckboxType::class, array('label' => 'label.sottoscrizione_dichiarazione_covid',
-          'data' => $assenza->getGiustificato() != null,
-          'label_attr' => ['class' => 'gs-big gs-strong'],
-          'required' => true));
-    }
-    $form = $form
+        'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary']))
       ->add('delete', SubmitType::class, array('label' => 'label.delete',
@@ -951,66 +893,6 @@ class GenitoriController extends BaseController {
         $motivazione = null;
         $dichiarazione = array();
         $certificati = array();
-      } elseif ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
-        // controlla campi
-        $genitoreSesso = $form->get('genitoreSesso')->getData();
-        $genitoreNome = strtoupper($form->get('genitoreNome')->getData());
-        $genitoreNascita = \DateTime::createFromFormat('d/m/Y', $form->get('genitoreNascita')->getData());
-        $genitoreCitta = strtoupper($form->get('genitoreCitta')->getData());
-        $genitoreRuolo = $form->get('genitoreRuolo')->getData();
-        $giustificato = null;
-        $dichiarazione = array(
-          'genitore' => ($this->getUser() instanceOf Genitore),
-          'genitoreSesso' => $genitoreSesso,
-          'genitoreNome' => $genitoreNome,
-          'genitoreNascita' => $genitoreNascita,
-          'genitoreCitta' => $genitoreCitta,
-          'genitoreRuolo' => $genitoreRuolo);
-        $certificati = array();
-        if (empty($motivazione)) {
-          // errore: motivazione assente
-          $errore = true;
-          $this->addFlash('errore', $trans->trans('exception.no_motivazione'));
-        } elseif (($this->getUser() instanceOf Genitore) &&
-            (empty($genitoreSesso) || empty($genitoreNome) || empty($genitoreCitta) || empty($genitoreRuolo))) {
-          // errore: dichiarazione non compilata
-          $errore = true;
-          $this->addFlash('errore', $trans->trans('exception.dichiarazione_incompleta'));
-        } elseif (($this->getUser() instanceOf Genitore) &&
-            (empty($genitoreNascita) || $genitoreNascita->format('d/m/Y') != $form->get('genitoreNascita')->getData())) {
-          // errore: data nascita non valida
-          $errore = true;
-          $this->addFlash('errore', $trans->trans('exception.data_invalida'));
-        } elseif (!$form->get('firma')->getData()) {
-          // errore: niente firma
-          $errore = true;
-          $this->addFlash('errore', $trans->trans('exception.no_firma_dichiarazione'));
-        } else {
-          // dati validi
-          $giustificato = new \DateTime();
-          // id documento
-          $id_documento = 'AUTODICHIARAZIONE-'.$alunno->getId().'-'.$assenza->getId();
-          // percorso PDF
-          $percorso = $this->getParameter('dir_classi').'/'.
-            $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().'/certificati';
-          if (!$fs->exists($percorso)) {
-            // crea directory
-            $fs->mkdir($percorso, 0775);
-          }
-          // crea pdf
-          $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-            'Autodichiarazione assenze no COVID');
-          // contenuto in formato HTML
-          $html = $this->renderView('pdf/autodichiarazione_nocovid.html.twig', array(
-            'alunno' => $alunno,
-            'dichiarazione' => $dichiarazione,
-            'assenza' => $info['assenza'],
-            'giustificato' => $giustificato,
-            'id' => $id_documento));
-          $pdf->createFromHtml($html);
-          // salva il documento
-          $pdf->save($percorso.'/'.$id_documento.'.pdf');
-        }
       } else {
         // no autodichiarazione
         $giustificato = new \DateTime();
@@ -1084,7 +966,8 @@ class GenitoriController extends BaseController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function giustificaRitardoAction(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                          LogHandler $dblogger, Entrata $entrata, $posizione) {
+                                          LogHandler $dblogger, Entrata $entrata,
+                                          int $posizione): Response {
     // inizializza
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
@@ -1117,7 +1000,7 @@ class GenitoriController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($entrata->getData());
     $info['ora'] =  $entrata->getOra()->format('H:i');
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['ritardo'] = $entrata;
     // form
@@ -1212,7 +1095,7 @@ class GenitoriController extends BaseController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function giustificaUscitaAction(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                         LogHandler $dblogger, Uscita $uscita, $posizione) {
+                                         LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
     // inizializza
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
@@ -1244,7 +1127,7 @@ class GenitoriController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($uscita->getData());
     $info['ora'] =  $uscita->getOra()->format('H:i');
-    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['classe'] = ''.$alunno->getClasse();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $info['uscita'] = $uscita;
     // form
@@ -1332,7 +1215,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function derogheAction(GenitoriUtil $gen, RegistroUtil $reg) {
+  public function derogheAction(GenitoriUtil $gen, RegistroUtil $reg): Response {
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno

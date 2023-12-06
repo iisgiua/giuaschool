@@ -20,7 +20,7 @@
   {% for c in dati.lista %}
         <tr>
           <td><small>{{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }})</small></td>
-          <td><small>{{ c.anno ? c.anno~'ª '~c.sezione }}</small></td>
+          <td><small>{{ c.anno ? c.anno~'ª '~c.sezione~(c.gruppo ? ('-'~c.gruppo)) }}</small></td>
           <td><small>{{ c.cambio.inizio|date('d/m/Y') }}</small></td>
           <td><small>{{ c.cambio.fine|date('d/m/Y') }}</small></td>
           <td><small>{{ c.cambio.note }}</small></td>

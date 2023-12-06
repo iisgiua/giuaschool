@@ -37,7 +37,7 @@
   <div class="gs-mt-2">
     <strong>Filtro classi:</strong>
   {% for c in dati.classi %}
-    {{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ',' }}
+    {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}{{ not loop.last ? ',' }}
   {% endfor %}
   </div>
 {% elseif dati.utenti|length > 0 %}
@@ -45,7 +45,7 @@
     <strong>Filtro utenti:</strong>
     <div class="gs-ml-4">
   {% for u in dati.utenti %}
-    {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}) {{ u.anno }}ª {{ u.sezione }}
+    {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}) {{ u.anno }}ª {{ u.sezione }}{{ u.gruppo ? ('-'~u.gruppo) }}
     {% if 'A' in dati.avviso.destinatari %}
       {{ u.letto ? '- Letto dall\'alunno in data '~(u.letto|date('d/m/Y G:i')) : '- Non letto dall\'alunno' }}
     {% endif %}

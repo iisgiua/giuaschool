@@ -57,7 +57,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
   public function __construct() {
     parent::__construct();
     // dati da caricare
-    $this->fixtures = 'AvvisoFixtures';
+    $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures'];
   }
 
   /**
@@ -134,7 +134,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_U');
-    $risultato = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')

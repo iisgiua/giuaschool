@@ -8,6 +8,8 @@
 #   materia: Materia della lezione
 #   argomento: Argomento della lezione
 #   attivita: Attività della lezione
+#   gruppo: Nome dell'eventuale gruppo a cui è riferita la lezione
+#   tipoGruppo: Tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
 ####################
 
 
@@ -19,37 +21,45 @@ include:
 App\Entity\Lezione:
 
   # ----- lezioni delle classi -----
-  lezione_{1..100}:
-    data: '<dateTimeBetween("-2 month", "now")>'
-    ora: '<numberBetween(1, 4)>'
+  lezione_{1..5}:
+    data (unique): '<dateTimeBetween("-3 month", "now")>'
+    ora: 1
     classe: '@classe_*'
-    materia: '@materia_curricolare_*'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    gruppo:
+    tipoGruppo: 'N'
 
   # ----- lezioni di religione -----
-  lezione_religione_{1..30}:
-    data: '<dateTimeBetween("-2 month", "now")>'
-    ora: '<numberBetween(1, 4)>'
+  lezione_religione_{1..5}:
+    data (unique): '<dateTimeBetween("-3 month", "now")>'
+    ora: 2
     classe: '@classe_*'
     materia: '@materia_RELIGIONE'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    gruppo:
+    tipoGruppo: 'N'
 
   # ----- lezioni di sostegno -----
-  lezione_sostegno_{1..10}:
-    data: '<dateTimeBetween("-2 month", "now")>'
-    ora: '<numberBetween(1, 4)>'
-    classe: '@classe_*'
+  lezione_sostegno_{1..5}:
+    data (unique): '<dateTimeBetween("-3 month", "now")>'
+    ora: 3
+    classe: '@classe_1A'
     materia: '@materia_SOSTEGNO'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    gruppo:
+    tipoGruppo: 'N'
 
   # ----- lezioni di sostituzione -----
-  lezione_supplenza_{1..10}:
-    data: '<dateTimeBetween("-2 month", "now")>'
-    ora: '<numberBetween(1, 4)>'
+  lezione_supplenza_{1..5}:
+    data (unique): '<dateTimeBetween("-3 month", "now")>'
+    ora: 4
     classe: '@classe_*'
     materia: '@materia_SUPPLENZA'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    gruppo:
+    tipoGruppo: 'N'

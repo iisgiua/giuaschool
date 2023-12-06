@@ -21,6 +21,7 @@ use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\Festivita;
+use App\Entity\Utente;
 
 
 /**
@@ -78,7 +79,7 @@ class AgendaUtil {
    * @param Docente $docente Docente a cui sono indirizzati gli eventi
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventi(Docente $docente, $mese) {
     $dati = null;
@@ -198,19 +199,19 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEvento(Docente $docente, $data, $tipo) {
     $dati = null;
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
         ->join('rc.alunno', 'a')
         ->join('a.classe', 'cl')
         ->join('rc.colloquio', 'c')
         ->where("rc.stato=:stato AND c.data=:data AND c.docente=:docente AND c.abilitato=:abilitato")
-        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
+        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->setParameters(['stato' => 'C', 'data' => $data->format('Y-m-d'), 'docente' => $docente, 'abilitato' => 1])
         ->getQuery()
         ->getArrayResult();
@@ -271,8 +272,7 @@ class AgendaUtil {
         }
       }
     } elseif ($tipo == 'P') {
-      // compiti
-      // verifiche inserite dal docente
+      // compiti inseriti dal docente
       $compiti1 = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
         ->where('a.docente=:docente AND a.tipo=:tipo AND a.data=:data')
         ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d')])
@@ -372,7 +372,7 @@ class AgendaUtil {
    *
    * @param Avviso $avviso Avviso su cui eseguire l'azione
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function controlloVerifiche(Avviso $avviso) {
     $dati = array();
@@ -380,15 +380,16 @@ class AgendaUtil {
     $verifiche = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->join('c.classe', 'cl')
-      ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
+      ->where('a.tipo=:tipo AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione')
       ->setParameters(['tipo' => 'V', 'data' => $avviso->getData()->format('Y-m-d'),
-        'classe' => $avviso->getCattedra()->getClasse()])
-      ->orderBy('cl.anno,cl.sezione', 'ASC');
+        'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+        'sezione' => $avviso->getCattedra()->getClasse()->getSezione()])
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $verifiche = $verifiche
         ->andWhere('a.id!=:avviso')
-      ->setParameter('avviso', $avviso->getId());
+        ->setParameter('avviso', $avviso->getId());
     }
     $verifiche = $verifiche
       ->getQuery()
@@ -405,7 +406,7 @@ class AgendaUtil {
    *
    * @param Avviso $avviso Avviso su cui eseguire l'azione
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function controlloCompiti(Avviso $avviso) {
     $dati = array();
@@ -413,10 +414,11 @@ class AgendaUtil {
     $compiti = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->join('c.classe', 'cl')
-      ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
+      ->where('a.tipo=:tipo AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione')
       ->setParameters(['tipo' => 'P', 'data' => $avviso->getData()->format('Y-m-d'),
-        'classe' => $avviso->getCattedra()->getClasse()])
-      ->orderBy('cl.anno,cl.sezione', 'ASC');
+      'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+      'sezione' => $avviso->getCattedra()->getClasse()->getSezione()])
+    ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
     if ($avviso->getId()) {
       // modifica di avviso esistente
       $compiti = $compiti
@@ -482,7 +484,7 @@ class AgendaUtil {
    * @param Alunno $alunno Alunno di riferimento
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventiGenitori(Genitore $genitore, Alunno $alunno, $mese) {
     $dati = null;
@@ -551,7 +553,7 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEventoGenitore(Genitore $genitore, Alunno $alunno, $data, $tipo) {
     $dati = null;
@@ -611,7 +613,7 @@ class AgendaUtil {
    * @param Alunno $alunno Alunno a cui sono indirizzati gli eventi
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function agendaEventiAlunni(Alunno $alunno, $mese) {
     $dati = null;
@@ -666,7 +668,7 @@ class AgendaUtil {
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function dettagliEventoAlunno(Alunno $alunno, $data, $tipo) {
     $dati = null;

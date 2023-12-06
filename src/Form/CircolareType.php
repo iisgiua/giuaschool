@@ -8,21 +8,22 @@
 
 namespace App\Form;
 
+use App\Entity\Circolare;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\CallbackTransformer;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Circolare;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -52,24 +53,12 @@ class CircolareType extends AbstractType {
       ->add('oggetto', TextType::class, array('label' => 'label.oggetto',
         'trim' => true,
         'required' => true))
-      ->add('sedi', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App\Entity\Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
-        'query_builder' => function (EntityRepository $er) use ($options){
-            if ($options['setSede']) {
-              return $er->createQueryBuilder('s')
-                ->where('s.id=:sede')
-                ->setParameter(':sede', $options['setSede'])
-                ->orderBy('s.ordinamento', 'ASC');
-            } else {
-              return $er->createQueryBuilder('s')
-                ->orderBy('s.ordinamento', 'ASC');
-            }
-          },
+      ->add('sedi', ChoiceType::class, array('label' => 'label.sede',
+        'choices' => $options['values'][0],
+        'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5  gs-pr-5'],
         'required' => true))
       ->add('dsga', CheckboxType::class, array('label' => 'label.dsga',
@@ -127,76 +116,42 @@ class CircolareType extends AbstractType {
       ->add('notifica', CheckboxType::class, array('label' => 'label.notifica_circolare',
         'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
         'required' => false))
-      ->add('classi', EntityType::class, array('label' => 'label.scegli_classi',
-        'class' => 'App\Entity\Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'query_builder' => function (EntityRepository $er) use($options) {
-            if ($options['setSede']) {
-              return $er->createQueryBuilder('c')
-                ->where('c.sede=:sede')
-                ->setParameter(':sede', $options['setSede'])
-                ->orderBy('c.sezione,c.anno', 'ASC');
-            } else {
-              return $er->createQueryBuilder('c')
-                ->orderBy('c.sezione,c.anno', 'ASC');
-            }
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta().'-'.$obj->getSezione();
-          },
+      ->add('classi', ChoiceType::class, ['label' => 'label.scegli_classi',
+        'choices' => $options['values'][1],
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        'choice_value' => 'id',
         'required' => false,
-        'mapped' => false))
-      ->add('materie', EntityType::class, array('label' => 'label.scegli_materie',
-        'class' => 'App\Entity\Materia',
-        'choice_label' => function ($obj) {
-            return $obj->getNome();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('m')
-              ->where("m.tipo IN ('N','R','S')")
-              ->orderBy('m.nome', 'ASC');
-          },
+        'mapped' => false])
+      ->add('materie', ChoiceType::class, ['label' => 'label.scegli_materie',
+        'choices' => $options['values'][2],
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
         'expanded' => true,
         'multiple' => true,
+        'choice_value' => 'id',
         'label_attr' => ['class' => 'checkbox-split-vertical gs-pt-0'],
         'required' => false,
-        'mapped' => false))
-      ->add('lista_classi', EntityType::class, array('label' => 'label.scegli_classi',
-        'class' => 'App\Entity\Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'query_builder' => function (EntityRepository $er) use ($options) {
-            if ($options['setSede']) {
-              return $er->createQueryBuilder('c')
-                ->where('c.sede=:sede')
-                ->setParameter(':sede', $options['setSede'])
-                ->orderBy('c.anno,c.sezione', 'ASC');
-            } else {
-              return $er->createQueryBuilder('c')
-                ->orderBy('c.anno,c.sezione', 'ASC');
-            }
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
+        'mapped' => false])
+      ->add('lista_classi', ChoiceType::class, ['label' => 'label.scegli_classi',
+        'choices' => $options['values'][3],
         'placeholder' => 'label.classe',
+        'choice_translation_domain' => false,
         'expanded' => false,
         'multiple' => false,
+        'choice_value' => 'id',
         'choice_attr' => function($val, $key, $index) {
             return ['class' => 'gs-no-placeholder'];
           },
         'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
         'required' => false,
-        'mapped' => false))
+        'mapped' => false])
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary btn gs-mr-3']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['onclick' => "location.href='".$options['return_url']."'"]));
     // aggiunge data transform
     $builder->get('filtroCoordinatori')->addModelTransformer(new CallbackTransformer(
       function ($filtro) {
@@ -235,6 +190,18 @@ class CircolareType extends AbstractType {
         $d = explode(',', $filtro);
         return (count($d) == 1 && empty($d[0])) ? array() : $d;
       }));
+    $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
+      function ($sedi) {
+        $s = [];
+        foreach ($sedi as $sede) {
+          $s[$sede->getNomeBreve()] = $sede;
+        }
+        return $s;
+        // return $sedi->toArray();
+      },
+      function ($sedi) {
+        return new ArrayCollection($sedi);
+      }));
   }
 
   /**
@@ -243,10 +210,10 @@ class CircolareType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
-      'setSede' => null,
+      'return_url' => null,
+      'values' => null,
       'data_class' => Circolare::class));
   }
 

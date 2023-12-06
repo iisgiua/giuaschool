@@ -25,7 +25,7 @@ class RichiestaRepository extends BaseRepository {
    *
    * @param string $tipo Codifica del tipo di richiesta
    * @param int $idAlunno Identificativo alunno che ha fatto richiesta
-   * @param DateTime $data Data di riferimento della richiesta
+   * @param \DateTime $data Data di riferimento della richiesta
    *
    * @return Richiesta|null Richiesta, se esiste
    */
@@ -45,7 +45,7 @@ class RichiestaRepository extends BaseRepository {
    * Restituisce la lista dei moduli di richiesta per la gestione da parte del destinatario
    *
    * @param Utente $utente Utente che gestisce i moduli di richiesta
-   * @param array $criteri Criteri di rricerca dei moduli di richiesta
+   * @param array $criteri Criteri di ricerca dei moduli di richiesta
    * @param int $pagina Numero di pagina da visualizzare
    *
    * @return array Lista associativa con i risultati
@@ -60,7 +60,7 @@ class RichiestaRepository extends BaseRepository {
     $richieste = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
       ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
-      ->join('a.classe', 'c')
+      ->join('r.classe', 'c')
       ->where('dr.abilitata=:abilitata AND c.sede=:sede')
       ->andWhere($sql)
       ->setParameters(['abilitata' => 1, 'sede' => $criteri['sede']])
@@ -163,6 +163,123 @@ class RichiestaRepository extends BaseRepository {
       ->getArrayResult();
     // restituisce dati
     return $richieste;
+  }
+
+  /**
+   * Restituisce la lista dei moduli della classe
+   *
+   * @param Utente $utente Utente che gestisce i moduli
+   * @param array $criteri Criteri di ricerca dei moduli
+   * @param int $pagina Numero di pagina da visualizzare; se -1 nessuna paginazione
+   *
+   * @return array Lista associativa con i risultati
+   */
+  public function listaClasse(Utente $utente, string $tipo, array $criteri, int $pagina): array {
+    // controllo destinatario
+    $ruolo = $utente->getCodiceRuolo();
+    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",
+      $utente->getCodiceFunzioni());
+    $sql = implode(' OR ', $funzioni);
+    // query base
+    $richieste = $this->createQueryBuilder('r')
+      ->join('r.definizioneRichiesta', 'dr')
+      ->join('r.classe', 'c')
+      ->join('c.sede', 's')
+      ->where("dr.abilitata=1 AND dr.tipo=:tipo AND r.stato='I'")
+      ->andWhere($sql)
+      ->setParameters(['tipo' => $tipo])
+      ->orderBy('s.ordinamento,c.anno,c.sezione,r.data', 'ASC');
+    // controllo sede
+    if ($criteri['sede']) {
+      // sede definita
+      $richieste
+        ->andWhere('s.id=:sede')
+        ->setParameter('sede', $criteri['sede']);
+    }
+    // controllo classe
+    if ($criteri['classe']) {
+      // classe definita
+      $richieste
+        ->andWhere('c.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    }
+    if ($pagina == -1) {
+      // tutti i dati senza paginazione
+      $dati['lista'] = $richieste->getQuery()->getResult();
+    } else {
+      // paginazione
+      $dati = $this->paginazione($richieste->getQuery(), $pagina);
+      // per evitare errori di paginazione
+      $dati['lista']->setUseOutputWalkers(false);
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei moduli inviati da alunni/genitori
+   *
+   * @param Utente $utente Utente che gestisce i moduli
+   * @param array $criteri Criteri di ricerca dei moduli di richiesta
+   * @param int $pagina Numero di pagina da visualizzare
+   *
+   * @return array Lista associativa con i risultati
+   */
+  public function listaModuliAlunni(Utente $utente, array $criteri, int $pagina): array {
+    // controllo destinatario
+    $ruolo = $utente->getCodiceRuolo();
+    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",
+      $utente->getCodiceFunzioni());
+    $sql = implode(' OR ', $funzioni);
+    // query base
+    $moduli = $this->createQueryBuilder('r')
+      ->join('r.definizioneRichiesta', 'dr')
+      ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
+      ->join('r.classe', 'c')
+      ->join('c.sede', 's')
+      ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")
+      ->andWhere($sql)
+      ->setParameters(['modulo' => $criteri['tipo']])
+      ->orderBy('s.ordinamento,c.anno,c.sezione,a.cognome,a.nome,r.data', 'ASC');
+    // controllo sede
+    if ($criteri['sede']) {
+      // sede definita
+      $moduli
+        ->andWhere('s.id=:sede')
+        ->setParameter('sede', $criteri['sede']);
+    }
+    // controllo classe
+    if ($criteri['classe']) {
+      // classe definita
+      $moduli
+        ->andWhere('c.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    }
+    // controllo cognome
+    if ($criteri['cognome']) {
+      // cognome definito
+      $moduli
+        ->andWhere('a.cognome LIKE :cognome')
+        ->setParameter('cognome', $criteri['cognome'].'%');
+    }
+    // controllo nome
+    if ($criteri['nome']) {
+      // nome definito
+      $moduli
+        ->andWhere('a.nome LIKE :nome')
+        ->setParameter('nome', $criteri['nome'].'%');
+    }
+    if ($pagina == -1) {
+      // tutti i dati senza paginazione
+      $dati['lista'] = $moduli->getQuery()->getResult();
+    } else {
+      // paginazione
+      $dati = $this->paginazione($moduli->getQuery(), $pagina);
+      // per evitare errori di paginazione
+      $dati['lista']->setUseOutputWalkers(false);
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

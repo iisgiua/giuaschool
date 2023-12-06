@@ -8,19 +8,15 @@
 
 namespace App\Form;
 
+use App\Entity\Alunno;
+use App\Form\MessageType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Form\MessageType;
-use App\Entity\Alunno;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -85,21 +81,13 @@ class AlunnoType extends AbstractType {
       ->add('credito4', IntegerType::class, array('label' => 'label.credito4',
         'attr' => ['min' => 0, 'widget' => 'gs-row-end'],
         'required' => false))
-      ->add('classe', EntityType::class, array('label' => 'label.classe',
-        'class' => 'App\Entity\Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
+        'choices' => $options['values'][0],
+        'choice_value' => 'id',
         'placeholder' => 'label.nessuna_classe',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => false))
+        'required' => false])
       ->add('frequenzaEstero', ChoiceType::class, array('label' => 'label.frequenza_estero',
         'choices' => array('label.si' => true, 'label.no' => false),
         'expanded' => true,
@@ -127,8 +115,10 @@ class AlunnoType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array(
-      'data_class' => Alunno::class));
+    $resolver->setDefined('values');
+    $resolver->setDefaults([
+      'values' => [],
+      'data_class' => Alunno::class]);
   }
 
 }

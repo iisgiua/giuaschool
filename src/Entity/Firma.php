@@ -183,4 +183,16 @@ class Firma {
     return $this->lezione.' ('.$this->docente.')';
   }
 
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'lezione' => $this->lezione ? $this->lezione->getId() : null,
+      'docente' => $this->docente ? $this->docente->getId() : null];
+    return $dati;
+  }
+
 }

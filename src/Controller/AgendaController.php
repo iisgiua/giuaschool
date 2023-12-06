@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Form\AvvisoType;
-use App\Form\MessageType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
 use App\Util\AgendaUtil;
@@ -20,10 +19,10 @@ use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
@@ -52,7 +51,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiAction(AgendaUtil $age, $mese) {
+  public function eventiAction(AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
     // parametro data
@@ -115,7 +114,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiDettagliAction(AgendaUtil $age, $data, $tipo) {
+  public function eventiDettagliAction(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
     // data
@@ -152,7 +151,7 @@ class AgendaController extends BaseController {
    */
   public function verificaEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                      RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                     LogHandler $dblogger, $id) {
+                                     LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -200,9 +199,9 @@ class AgendaController extends BaseController {
     $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'verifica',
-      'returnUrl' => $this->generateUrl('agenda_eventi'),
-      'dati' => [$dati['choice'], $materia_sostegno]]);
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'verifica',
+      'return_url' => $this->generateUrl('agenda_eventi'),
+      'values' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
@@ -234,11 +233,18 @@ class AgendaController extends BaseController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
-          'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
+        $materia = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+          ->join('c.classe', 'cl')
+          ->where('c.materia=:materia AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)')
+          ->setParameters(['materia' => $form->get('materia_sostegno')->getData(),
+            'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
+            'sezione' => $avviso->getCattedra()->getClasse()->getSezione(),
+            'gruppo' => $avviso->getCattedra()->getClasse()->getGruppo()])
+          ->getQuery()
+          ->getOneOrNullResult();
         if (!$materia ||
             ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
-          $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
+              $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
       }
       // controlla filtro
@@ -389,7 +395,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function cattedraAjaxAction($id) {
+  public function cattedraAjaxAction(int $id): JsonResponse {
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.classe=a.classe')
@@ -416,13 +422,16 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction($id) {
-    // solo cattedre attive e normali, no supplenza, no sostegno
+  public function classeAjaxAction(int $id): JsonResponse {
+    // solo cattedre attive e normali, no sostegno, no ed.civ.
+    $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('m.id,m.nome')
+      ->select('DISTINCT m.id,m.nome')
       ->join('c.materia', 'm')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND m.tipo!=:sostegno')
-      ->setParameters(['classe' => $id, 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0, 'sostegno' => 'S'])
+      ->join('c.classe', 'cl')
+      ->where("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->orderBy('m.nomeBreve', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -449,7 +458,7 @@ class AgendaController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaDeleteAction(Request $request, LogHandler $dblogger, RegistroUtil $reg,
-                                       BachecaUtil $bac, AgendaUtil $age, $id) {
+                                       BachecaUtil $bac, AgendaUtil $age, int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
     if (!$avviso) {
@@ -527,7 +536,7 @@ class AgendaController extends BaseController {
    */
   public function compitoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                     RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                    LogHandler $dblogger, $id) {
+                                    LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -575,9 +584,9 @@ class AgendaController extends BaseController {
     $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
-    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'compito',
-      'returnUrl' => $this->generateUrl('agenda_eventi'),
-      'dati' => [$dati['choice'], $materia_sostegno]]);
+    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'compito',
+      'return_url' => $this->generateUrl('agenda_eventi'),
+      'values' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
@@ -737,7 +746,8 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age, $id) {
+  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age,
+                                      int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
     if (!$avviso) {

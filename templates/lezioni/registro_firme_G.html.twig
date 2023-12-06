@@ -8,7 +8,7 @@
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
     {% if errore %}
   <div class="row gs-mb-5">
@@ -72,166 +72,171 @@
       {% endif %}
       {% for type,msgs in app.flashes %}
         {% for msg in msgs %}
-  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert">{{ msg|trans }}</div>
+  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|raw }}</strong></div>
         {% endfor %}
       {% endfor %}
   <div class="row gs-mb-2">
-    <div class="col-sm-6">
+    <div class="col-sm-5">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_prec|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
-    <div class="col-sm-6 text-right">
+    <div class="col-sm-2 text-center">
+      <a class="btn btn-success" href="{{ path('richieste_classe', {classe: classe.id}) }}" role="button" title="Compila il modulo per le prove di evacuazione"><span class="glyphicon glyphicon-fire gs-mr-3"></span><strong>Evacuazione</strong></a>
+    </div>
+    <div class="col-sm-5 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-stop"></span></a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza i dati della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza i dati del mese"><span class="glyphicon glyphicon-th"></span></a>
     </div>
   </div>
   <div class="row gs-row-eq gs-mb-2">
-    <div class="col-sm-6 bg-warning">
+    <div id="gs-note" class="col-sm-6 bg-warning">
       <div class="gs-mt-2 gs-mb-2">
         <h3 class="gs-h3 gs-inline">Note disciplinari</h3>
-        {% if dati[data].note.add is defined  %}
+      {% if dati[data].note.add is defined  %}
         <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].note.add }}" role="button" title="Aggiungi una nota di classe o individuale"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-        {% endif %}
+      {% endif %}
       </div>
       <div class="list-group gs-mb-2">
-        {% for k,v in dati[data].note.lista %}
+      {% for k,v in dati[data].note.lista %}
         <div class="list-group-item">
+        {% if v.gruppo  %}
+          <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v.gruppo }}</strong><br>
+        {% endif %}
           <div class="list-group-item-text">
-            {% if v.alunni is defined %}
+        {% if v.alunni is defined %}
             <small><em>Alunni: {{ v.alunni }}</em></small><br>
-            {% endif %}
+        {% endif %}
             {{ v.testo|raw|nl2br }}<br><small><em>({{ v.docente }})</em></small>
-            {% if v.provvedimento %}
+        {% if v.provvedimento %}
             <br><strong>{{ v.provvedimento|raw|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
-            {% endif %}
-            {% if v.delete is defined %}
+        {% endif %}
+        {% if v.delete is defined %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-            {% endif %}
-            {% if v.edit is defined %}
+        {% endif %}
+        {% if v.edit is defined %}
             <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
-            {% endif %}
+        {% endif %}
           </div>
         </div>
-        {% endfor %}
+      {% endfor %}
       </div>
     </div>
-    <div class="col-sm-6 bg-info">
+    <div id="gs-annotazioni" class="col-sm-6 bg-info">
       <div class="gs-mt-2 gs-mb-2">
         <h3 class="gs-h3 gs-inline">Annotazioni</h3>
-        {% if dati[data].annotazioni.add is defined  %}
+      {% if dati[data].annotazioni.add is defined  %}
         <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].annotazioni.add }}" role="button" title="Aggiungi una annotazione sul registro"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-        {% endif %}
+      {% endif %}
       </div>
       <div class="list-group gs-mb-2">
-        {% for k,v in dati[data].annotazioni.lista %}
+      {% for k,v in dati[data].annotazioni.lista %}
         <div class="list-group-item">
+        {% if v.gruppo  %}
+          <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v.gruppo }}</strong><br>
+        {% endif %}
           <div class="list-group-item-text">
-            {% if v.alunni is not empty %}
+        {% if v.alunni is not empty %}
               <strong>Destinatari ({% for d in v.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}):
-                {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
-            {% elseif v.avviso and v.avviso.filtroTipo == 'R' %}
+              {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+        {% elseif v.avviso and v.avviso.filtroTipo == 'R' %}
               <strong>Destinatari ({% for f in v.avviso.filtro %}{{ ('label.rappresentante_'~(f == 'I' ? 'istituto' : 'classe'))|trans }}{{ not loop.last ? ', ' }}{% endfor %})</strong><br>
-            {% endif %}
+        {% endif %}
             {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }})</em></small>
-            {% if v.delete is defined and (not v.avviso or v.visibile) %}
+        {% if v.delete is defined and (not v.avviso or v.visibile) %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-            {% endif %}
-            {% if v.edit is defined and (not v.avviso or v.visibile) %}
+        {% endif %}
+        {% if v.edit is defined and (not v.avviso or v.visibile) %}
             <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica l'annotazione sul registro"><span class="glyphicon glyphicon-edit"></span></a>
-            {% endif %}
+        {% endif %}
           </div>
         </div>
-        {% endfor %}
+      {% endfor %}
       </div>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped gs-mb-2">
     <thead class="bg-success">
       <tr>
-        <th>Ora</th>
-        <th>Materia</th>
-        <th>Docenti</th>
-        <th>Argomenti/Attività</th>
-        <th>Azioni</th>
+        <th class="col-sm-2">Ora</th>
+        <th class="col-sm-2">Materia</th>
+        <th class="col-sm-2">Docenti</th>
+        <th class="col-sm-4">Argomenti/Attività</th>
+        <th class="col-sm-2">Azioni</th>
       </tr>
     </thead>
     <tbody>
       {% for k,v in dati[data].lezioni %}
       <tr>
-        <td><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
-        <td>{{ v.materia }}</td>
-        <td><small><em>{% for v1 in v.docenti %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
-        <td style="word-wrap:anywhere">
-          {% if v.sostegno is defined %}
-            {% for sk,sv in v.sostegno.argomento %}
-              {% if sv is not empty %}
-          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v.sostegno.alunno[sk] }} ({{ v.sostegno.docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-          <div id="sostegno-{{ k }}-{{ sk }}" style="display:none">
+        <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
+        <td>
+          <strong>{% if v.materia|keys|first == 'R:S' %}Gruppo: Religione<br>{% elseif v.materia|keys|first == 'R:N' %}Gruppo: N.A.<br>{% elseif v.materia|keys|first == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif v.materia|keys|first[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}<br>{% endif %}</strong>
+          {{ v.materia|first }}
+        </td>
+        <td><small><em>{% for k1,v1 in v.docenti|first %}{{ v1 }}
+        {% if (v.sostegno|first).docente[k1]|length > 0 %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-2" title="Argomenti e attività del sostegno - {{ (v.sostegno|first).alunno[k1] }} ({{ (v.sostegno|first).docente[k1] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ (v.materia|keys|first)[2:] }}-{{ k1 }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <div id="sostegno-{{ k }}-{{ (v.materia|keys|first)[2:] }}-{{ k1 }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
-                <p><strong>Alunno: {{ v.sostegno.alunno[sk] }}</strong></p>
-                <p><strong>Docente: {{ v.sostegno.docente[sk] }}</strong></p>
-                {{ sv|raw }}
+                <p><strong>Alunno: {{ (v.sostegno|first).alunno[k1] }}</strong></p>
+                <p><strong>Docente: {{ (v.sostegno|first).docente[k1] }}</strong></p>
+                {{ (v.sostegno|first).argomento[k1]|raw }}
               </div>
             </div>
           </div>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-          <small>{{ v.argomenti|raw }}</small>
+        {% endif %}
+          {{ not loop.last ? '<br>' }}{% endfor %}</em></small>
         </td>
-        <td>
-          {% if v.add is defined  %}
+        <td style="overflow-wrap:break-word;hyphens:auto;">
+          <small>{{ (v.argomenti|first)|raw }}</small>
+        </td>
+        <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>
+        {% if v.add is defined %}
           <a class="btn btn-primary btn-xs" href="{{ v.add }}" role="button" title="Aggiungi una lezione"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-          {% elseif v.addAltra is defined %}
-          <button class="btn btn-warning btn-xs" title="Aggiungi una lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="add-avviso-{{ v.addAltra.id }}"><span class="glyphicon glyphicon-plus gs-mr-2" aria-hidden="true"></span>Aggiungi</button>
-          <div id="add-avviso-{{ v.addAltra.id }}" style="display:none">
-            <p class="gs-big">{{ 'message.lezione_esiste_altra'|trans({classe: v.addAltra.classe})|raw }}</p>
-          </div>
-          {% endif %}
-          {% if v.edit is defined  %}
+        {% endif %}
+        {% if v.edit is defined %}
           <a class="btn btn-primary btn-xs" href="{{ v.edit }}" role="button" title="Modifica la lezione"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
-          {% elseif v.editAltra is defined %}
-          <button class="btn btn-warning btn-xs" title="Modifica una lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="edit-avviso-{{ v.editAltra.id }}"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span>Modifica</button>
-          <div id="edit-avviso-{{ v.editAltra.id }}" style="display:none">
-            <p class="gs-big">{{ 'message.lezione_esiste_altra'|trans({classe: v.editAltra.classe})|raw }}</p>
-          </div>
-          {% endif %}
-          {% if v.delete is defined  %}
+        {% endif %}
+        {% if v.delete is defined %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_lezione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
-          {% endif %}
+        {% endif %}
         </td>
       </tr>
+        {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
+      <tr>
+        <td>
+          <strong>{% if g == 'R:S' %}Gruppo: Religione<br>{% elseif g == 'R:N' %}Gruppo: N.A.<br>{% elseif g == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}<br>{% endif %}</strong>
+          {{ m }}
+        </td>
+        <td><small><em>{% for k1,v1 in v.docenti[g] %}{{ v1 }}
+          {% if v.sostegno[g].docente[k1]|length > 0 %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-2" title="Argomenti e attività del sostegno - {{ v.sostegno[g].alunno[k1] }} ({{ v.sostegno[g].docente[k1] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ g[2:] }}-{{ k1 }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <div id="sostegno-{{ k }}-{{ g[2:] }}-{{ k1 }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <p><strong>Alunno: {{ v.sostegno[g].alunno[k1] }}</strong></p>
+                  <p><strong>Docente: {{ v.sostegno[g].docente[k1] }}</strong></p>
+                  {{ v.sostegno[g].argomento[k1]|raw }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+            {{ not loop.last ? '<br>' }}{% endfor %}</em></small>
+        </td>
+        <td style="overflow-wrap:break-word;hyphens:auto;">
+          <small>{{ v.argomenti[g]|raw }}</small>
+        </td>
+      </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>
   <div class="row gs-mb-3">
-      {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-    <div class="col-sm-12">
-      <table class="table table-bordered table-condensed gs-mt-2">
-        <thead class="bg-success">
-          <tr>
-          {% for ora,ass in assenti.nomi %}
-            <th>Assenti {{ ora}}ª ora</th>
-          {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-          {% for ora,ass in assenti.nomi %}
-            <td><small class="gs-text-normal">{% for a in ass %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small></td>
-          {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-      {% else %}
-        {% if assenti.fc is defined %}
-    <div class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
+      {% if assenti.fc is defined %}
+    <div id="gs-fuoriclasse" class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
       <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
         <div  class="row">
           <div  class="col-sm-2"><strong class="gs-text-normal">Fuori classe:</strong></div>
@@ -244,11 +249,10 @@
         </div>
       </div>
     </div>
-        {% endif %}
-
+      {% endif %}
     <div class="col-sm-4">
         {% if assenti.assenze is defined %}
-      <div class="panel panel-success">
+      <div id="gs-assenti" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Assenti:</strong>
           <small class="gs-text-normal">{% for a in assenti.assenze %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
@@ -262,7 +266,7 @@
     </div>
     <div class="col-sm-4">
         {% if assenti.entrate is defined %}
-      <div class="panel panel-success">
+      <div id="gs-ritardi" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Ritardi:</strong>
           <small class="gs-text-normal">{% for a in assenti.entrate %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
@@ -276,7 +280,7 @@
     </div>
     <div class="col-sm-4">
         {% if assenti.uscite is defined %}
-      <div class="panel panel-success">
+      <div id="gs-uscite" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Uscite:</strong>
           <small class="gs-text-normal">{% for a in assenti.uscite %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
@@ -288,7 +292,6 @@
       </div>
         {% endif %}
     </div>
-      {% endif %}
   </div>
       {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
       {% include 'include/modal-info.html.twig' %}

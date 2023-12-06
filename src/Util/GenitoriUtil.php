@@ -141,8 +141,11 @@ class GenitoriUtil {
       $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
       // legge lezione
       $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->where('l.data=:data AND l.classe=:classe AND l.ora=:ora')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'ora' => $ora])
+        ->join('l.classe', 'c')
+        ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+        ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
+        ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getOneOrNullResult();
       if ($lezione) {
@@ -176,9 +179,12 @@ class GenitoriUtil {
     // legge annotazioni
     $annotazioni = $this->em->getRepository('App\Entity\Annotazione')->createQueryBuilder('a')
       ->join('a.docente', 'd')
-      ->where('a.data=:data AND a.classe=:classe AND a.visibile=:visibile')
+      ->join('a.classe', 'c')
+      ->where('a.data=:data AND a.visibile=:visibile AND c.anno=:anno AND c.sezione=:sezione')
+      ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('a.modificato', 'DESC')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'visibile' => 1])
+      ->setParameters(['data' => $data->format('Y-m-d'), 'visibile' => 1, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getResult();
     $lista = array();
@@ -202,10 +208,11 @@ class GenitoriUtil {
   public function materie(Classe $classe, $sostegno) {
     $materie = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.id,m.nomeBreve')
+      ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
-      ->where('c.classe=:classe AND c.tipo=:tipo AND c.attiva=:attiva AND m.tipo!=:sostegno')
+      ->where("c.attiva=1 AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
       ->orderBy('m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'tipo' => 'N', 'attiva' => 1, 'sostegno' => 'S'])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     if ($sostegno) {
@@ -235,11 +242,14 @@ class GenitoriUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-      ->where('l.classe=:classe AND l.materia=:materia')
+      ->where('l.materia=:materia AND c.anno=:anno AND c.sezione=:sezione')
+      ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('l.ora', 'ASC')
-      ->setParameters(['classe' => $classe, 'materia' => $materia, 'alunno' => $alunno])
+      ->setParameters(['materia' => $materia, 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -400,11 +410,10 @@ class GenitoriUtil {
       ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
-      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=v.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('v.alunno=:alunno AND v.visibile=:visibile AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where('v.alunno=:alunno AND v.visibile=:visibile')
       ->orderBy('m.nomeBreve', 'ASC')
       ->addOrderBy('l.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'visibile' => 1, 'classe' => $classe]);
+      ->setParameters(['alunno' => $alunno, 'visibile' => 1]);
     if ($materia) {
       $voti = $voti
         ->andWhere('v.materia=:materia')
@@ -460,14 +469,8 @@ class GenitoriUtil {
     $dati = array('lista');
     $dati['lista'] = array();
     $dati_periodo = array();
-    // raggruppa assenze continuative
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-      // gestione assenze orarie, senza raggruppamento
-      $dati_assenze = $this->raggruppaAssenzeOre($alunno);
-    } else {
-      // gestione assenze giornaliere, con raggruppamento
-      $dati_assenze = $this->raggruppaAssenze($alunno);
-    }
+    // gestione assenze giornaliere, con raggruppamento
+    $dati_assenze = $this->raggruppaAssenze($alunno);
     $dati['evidenza'] = $dati_assenze['evidenza'];
     $dati['evidenza']['ritardo'] = [];
     $dati['evidenza']['uscita'] = [];
@@ -476,9 +479,9 @@ class GenitoriUtil {
     $ritardi = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('e.data,e.ora,e.ritardoBreve,e.note,e.giustificato,e.valido,e.motivazione,(e.docenteGiustifica) AS docenteGiustifica,e.id')
       ->join('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('e.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per ritardi
@@ -517,9 +520,9 @@ class GenitoriUtil {
     $uscite = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('u.data,u.ora,u.note,u.giustificato,u.valido,u.motivazione,(u.docenteGiustifica) AS docenteGiustifica,u.id')
       ->join('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('u.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per uscite
@@ -558,9 +561,11 @@ class GenitoriUtil {
       ->select('SUM(al.ore)')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno=:alunno AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => ['N', 'E']])
+      ->where("al.alunno=:alunno AND m.tipo IN ('N', 'E') AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
+      ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getSingleScalarResult();
     if ($alunno->getReligione() == 'S' || $alunno->getReligione() == 'A') {
@@ -569,9 +574,11 @@ class GenitoriUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->join('l.materia', 'm')
+        ->join('l.classe', 'c')
         ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-        ->where('al.alunno=:alunno AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
-        ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'R'])
+        ->where("al.alunno=:alunno AND m.tipo='R' AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
+        ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
+         'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getSingleScalarResult();
       if ($ass_rel) {
@@ -579,7 +586,8 @@ class GenitoriUtil {
       }
     }
     // percentuale ore di assenza
-    $monte = $classe->getOreSettimanali() * 33;
+    $monte = ($classe->getOreSettimanali() * 33) -
+      (in_array($alunno->getReligione(), ['S', 'A']) ? 0 : 33);
     $perc = round($totale / $monte * 100, 2);
     // statistiche
     $data = (new \DateTime())->format('Y-m-d');
@@ -617,12 +625,14 @@ class GenitoriUtil {
     // legge note di classe
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
+      ->join('n.classe', 'c')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno AND n.data BETWEEN cc.inizio AND cc.fine')
-      ->where('n.tipo=:tipo AND (n.classe=:classe OR n.classe=cc.classe)')
+      ->where("n.tipo=:tipo AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
       ->andWhere('NOT EXISTS ('.$subquery.')')
-      ->setParameters(['tipo' => 'C', 'classe' => $classe, 'alunno' => $alunno])
+      ->setParameters(['tipo' => 'C', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -641,15 +651,17 @@ class GenitoriUtil {
     // legge note individuali
     $individuali = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
+      ->join('n.classe', 'c')
       ->join('n.alunni', 'a')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id AND n.data BETWEEN cc.inizio AND cc.fine')
-      ->where('n.tipo=:tipo AND a.id=:alunno AND (n.classe=:classe OR n.classe=cc.classe)')
-      ->setParameters(['tipo' => 'I', 'classe' => $classe, 'alunno' => $alunno])
+      ->where("n.tipo=:tipo AND a.id=:alunno AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
+      ->setParameters(['tipo' => 'I', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
-    // imposta array associativo per note di classe
+    // imposta array associativo per note individuali
     foreach ($individuali as $i) {
       $data = $i['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
@@ -891,7 +903,7 @@ class GenitoriUtil {
   /**
    * Restituisce le materie che il docente insegna nella classe.
    *
-   * @param Doccente $docente Docente di cui si vogliono sapere le materie insegnate
+   * @param Docente $docente Docente di cui si vogliono sapere le materie insegnate
    * @param Classe $classe Classe desiderata
    * @param Alunno $alunno Alunno per la cattedra di sostegno
    *
@@ -922,10 +934,11 @@ class GenitoriUtil {
    * Restituisce la lista delle pagelle esistenti per l'alunno indicato
    *
    * @param Alunno $alunno Alunno di riferimento
+   * @param Classe $classe Classe dell'alunno selezionato
    *
    * @return array Restituisce i dati come array associativo
    */
-  public function pagelleAlunno(Alunno $alunno) {
+  public function pagelleAlunno(Alunno $alunno, Classe $classe) {
     $periodi = array();
     $adesso = (new \DateTime())->format('Y-m-d H:i:0');
     // scrutini di classe corrente o altre di cambio classe (escluso rinviato)
@@ -933,7 +946,7 @@ class GenitoriUtil {
       ->leftJoin('s.classe', 'c')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
       ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo NOT IN (:rinviati)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(),
+      ->setParameters(['alunno' => $alunno, 'classe' => $classe,
         'stato' => 'C', 'adesso' => $adesso, 'rinviati' => ['R', 'X']])
       ->orderBy('s.data', 'DESC')
       ->getQuery()
@@ -1035,13 +1048,18 @@ class GenitoriUtil {
       }
     }
     // scrutinio rinviato svolto nel corrente A.S.
+    $classeAnno = $dati['esito']->getClasse()[0];
+    $classeSezione = strpos($dati['esito']->getClasse(), '-') === false ?
+      substr($dati['esito']->getClasse(), 1) :
+      substr($dati['esito']->getClasse(), 1, strpos($dati['esito']->getClasse(), '-') - 1);
+    $classeGruppo = strpos($dati['esito']->getClasse(), '-') === false ? '' :
+      substr($dati['esito']->getClasse(), strpos($dati['esito']->getClasse(), '-') + 1);
     $dati['esitoRinviato'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
-      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
-      ->setParameters(['alunno' => $alunno, 'anno' => $dati['esito']->getClasse()[0],
-        'sezione' => substr($dati['esito']->getClasse(), 1), 'stato' => 'C', 'rinviato' => 'X',
-        'data' => new \DateTime()])
+      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
+      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione,
+        'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X', 'data' => new \DateTime()])
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -1077,16 +1095,16 @@ class GenitoriUtil {
     $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
       ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
+      ->where('a.id=:alunno')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse()])
+      ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
     foreach ($assenze as $a) {
       $data = $a['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))].' '.substr($data, 0, 4);
+      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;

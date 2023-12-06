@@ -8,37 +8,26 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Form\Form;
 use App\Entity\Alunno;
 use App\Entity\Annotazione;
 use App\Entity\Assenza;
 use App\Entity\AssenzaLezione;
-use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Configurazione;
 use App\Entity\Docente;
-use App\Entity\Entrata;
-use App\Entity\Festivita;
-use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
-use App\Entity\Genitore;
 use App\Entity\Lezione;
 use App\Entity\Materia;
 use App\Entity\Nota;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
-use App\Entity\ScansioneOraria;
-use App\Entity\Scrutinio;
 use App\Entity\Sede;
-use App\Entity\Uscita;
-use App\Entity\Valutazione;
 use App\Form\Appello;
 use App\Form\VotoClasse;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -164,19 +153,14 @@ class RegistroUtil {
    *
    * @param string $azione Azione da controllare
    * @param \DateTime $data Data della lezione
-   * @param int $ora Ora della lezione
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
-   * @param Materia $materia Materia della lezione
-   * @param Lezione $lezione Lezione esistente
    * @param array $firme Lista di firme di lezione, con id del docente
-   * @param Lezione $altra Altra lezione già inserita in altra classe
    *
-   * @return null|bool Restituisce vero se l'azione è permessa (null se sovrapposizione lezione)
+   * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneLezione($azione, \DateTime $data, $ora, Docente $docente, Classe $classe, Materia $materia,
-                                Lezione $lezione=null, $firme=null, Lezione &$altra=null) {
-    $altra = null;
+  public function azioneLezione(string $azione, \DateTime $data, Docente $docente,
+                                Classe $classe, array $firme): bool {
     if ($this->bloccoScrutinio($data, $classe)) {
       // blocco scrutinio
       return false;
@@ -186,96 +170,22 @@ class RegistroUtil {
       $oggi = new \DateTime();
       if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
         // data non nel futuro
-        if (!$lezione) {
-          // nuova lezione
-          $altra_lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-            ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-            ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
-            ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-          if (!$altra_lezione) {
-            // nessun altra lezione in sovrapposizione
-            return true;
-          } else {
-            // esiste lezione in sovrapposizione
-            $altra = $altra_lezione;
-            return null;
-          }
+        if (!in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
+          // ok: docente non ha firmato
+          return true;
         }
       }
     } elseif ($azione == 'edit') {
       // azione di modifica
-      if ($lezione && $firme && count($firme) > 0) {
-        // esiste lezione e firme
-        $altra_lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-          ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente AND l.id!=:lezione')
-          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente,
-            'lezione' => $lezione->getId()])
-          ->setMaxResults(1)
-          ->getQuery()
-          ->getOneOrNullResult();
-        if ($altra_lezione) {
-          // esiste altra lezione in sovrapposizione
-          if ($materia->getId() == $lezione->getMateria()->getId() ||
-              $materia->getTipo() == 'S' || $lezione->getMateria()->getTipo() == 'S') {
-            $altra = $altra_lezione;
-          }
-          return null;
-        } else {
-          // non esiste lezione in sovrapposizione
-          if ($materia->getId() == $lezione->getMateria()->getId()) {
-            // stessa materia di lezione esistente: ok
-            return true;
-          }
-          if ($materia->getTipo() == 'S' || $lezione->getMateria()->getTipo() == 'S') {
-            // materia di sostegno o lezione di sostegno: ok
-            return true;
-          }
-          if ($materia->getTipo() == 'R') {
-            // controlla se cattedra di materia alternativa
-            $matAlter = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['docente' => $docente,
-              'materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'A']);
-            if ($matAlter) {
-              // materia alternaativa con lezione di altra disciplina: ok
-              return true;
-            }
-          }
-        }
+      if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
+        // ok: docente ha firmato
+        return true;
       }
     } elseif ($azione == 'delete') {
       // azione di cancellazione
-      if ($lezione && $firme && count($firme) > 0) {
-        // esiste lezione e firme
-        if (in_array($docente->getId(), $firme)) {
-          // docente ha firmato lezione
-          $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-            ->select('COUNT(v.id)')
-            ->where('v.lezione=:lezione AND v.docente=:docente')
-            ->setParameters(['lezione' => $lezione, 'docente' => $docente])
-            ->getQuery()
-            ->getSingleScalarResult();
-          if ($voti == 0) {
-            // nessun voto associato alla lezione
-            return true;
-          } else {
-            // sono presenti voti
-            $num_lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-              ->select('COUNT(l.id)')
-              ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
-              ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
-              ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'materia' => $materia,
-                'docente' => $docente])
-              ->getQuery()
-              ->getSingleScalarResult();
-            if ($num_lezioni > 1) {
-              // sono presenti più ore di lezione
-              return true;
-            }
-          }
-        }
+      if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
+        // ok: docente ha firmato
+        return true;
       }
     }
     // non consentito
@@ -293,9 +203,10 @@ class RegistroUtil {
    *
    * @return array Orario di inizio e lista di ore consecutive che si possono aggiungere
    */
-  public function lezioneOreConsecutive(\DateTime $data, $ora, Docente $docente, Classe $classe, Materia $materia) {
+  public function lezioneOreConsecutive(\DateTime $data, int $ora, Docente $docente, Classe $classe,
+                                        Materia $materia): array {
     $dati = array();
-    $ora_str = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
+    $oraStr = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
       '7' => 'Settima', '8' => 'Ottava', '9' => 'Nona', '10' => 'Decima');
     // legge ora di inzio
     $scansione_orario = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
@@ -311,19 +222,23 @@ class RegistroUtil {
       if ($k == 0) {
         // ora iniziale
         $dati['inizio'] = $s->getInizio()->format('H:i');
-        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
-        $dati['fine'][$key] = $s->getOra();
       } else {
-        // ore successive
-        $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe,
-          'data' => $data, 'ora' => $s->getOra()]);
-        if (!$this->azioneLezione('add', $data, $s->getOra(), $docente, $classe, $materia, $lezione)) {
-          // operazione non ammessa: esce
+        // ore successive libere da qualsiasi lezione
+        $numLezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+          ->select('COUNT(l.id)')
+          ->join('l.classe', 'c')
+          ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $s->getOra(),
+            'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($numLezioni != 0) {
+          // lezioni presenti: esce
           break;
         }
-        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
-        $dati['fine'][$key] = $s->getOra();
       }
+      $key = $s->getFine()->format('H:i').' ('.$oraStr[$s->getOra()].' ora)';
+      $dati['fine'][$key] = $s->getOra();
     }
     return $dati;
   }
@@ -334,13 +249,13 @@ class RegistroUtil {
    * @param string $azione Azione da controllare
    * @param \DateTime $data Data della lezione
    * @param Docente $docente Docente della lezione
-   * @param Classe $classe Classe della lezione (nullo se qualsiasi)
-   * @param Annotazione $annotazione Annotazione sul registro
+   * @param Classe|null $classe Classe della lezione (nullo se qualsiasi)
+   * @param Annotazione|null $annotazione Annotazione sul registro
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneAnnotazione($azione, \DateTime $data, Docente $docente, Classe $classe=null,
-                                     Annotazione $annotazione=null) {
+  public function azioneAnnotazione(string $azione, \DateTime $data, Docente $docente,
+                                    ?Classe $classe = null, ?Annotazione $annotazione = null): bool {
     //-- if ($this->bloccoScrutinio($data, $classe)) {
       //-- // blocco scrutinio
       //-- return false;
@@ -355,12 +270,9 @@ class RegistroUtil {
       // azione di modifica
       if ($annotazione) {
         // esiste annotazione
-        if ($docente->getId() == $annotazione->getDocente()->getId()) {
+        if ($docente->getId() == $annotazione->getDocente()->getId() &&
+            (!$classe || $classe->getId() == $annotazione->getClasse()->getId())) {
           // stesso docente: ok
-          return true;
-        }
-        if (in_array('ROLE_STAFF', $annotazione->getDocente()->getRoles()) && in_array('ROLE_STAFF', $docente->getRoles())) {
-          // docente è dello staff come anche chi ha scritto annotazione: ok
           return true;
         }
       }
@@ -368,12 +280,9 @@ class RegistroUtil {
       // azione di cancellazione
       if ($annotazione) {
         // esiste annotazione
-        if ($docente->getId() == $annotazione->getDocente()->getId()) {
+        if ($docente->getId() == $annotazione->getDocente()->getId() &&
+            (!$classe || $classe->getId() == $annotazione->getClasse()->getId())) {
           // stesso docente: ok
-          return true;
-        }
-        if (in_array('ROLE_STAFF', $annotazione->getDocente()->getRoles()) && in_array('ROLE_STAFF', $docente->getRoles())) {
-          // docente è dello staff come anche chi ha scritto annotazione: ok
           return true;
         }
       }
@@ -414,11 +323,12 @@ class RegistroUtil {
         // esiste nota
         $ora = (new \DateTime())->modify('-30 min');
         if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato()) {
+            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
           // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
           return true;
         }
-        if (in_array('ROLE_STAFF', $docente->getRoles())) {
+        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
+            $classe->getId() == $nota->getClasse()->getId()) {
           // solo staff: ok
           return true;
         }
@@ -429,11 +339,12 @@ class RegistroUtil {
         // esiste nota
         $ora = (new \DateTime())->modify('-30 min');
         if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato()) {
+            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
           // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
           return true;
         }
-        if (in_array('ROLE_STAFF', $docente->getRoles())) {
+        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
+            $classe->getId() == $nota->getClasse()->getId()) {
           // solo staff: ok
           return true;
         }
@@ -446,16 +357,16 @@ class RegistroUtil {
   /**
    * Restituisce i dati del registro per la classe e l'intervallo di date indicato.
    *
-   * @param \DateTime $data_inizio Data iniziale del registro
-   * @param \DateTime $data_fine Data finale del registro
+   * @param \DateTime $inizio Data iniziale del registro
+   * @param \DateTime $fine Data finale del registro
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
    * @param Cattedra|null $cattedra Cattedra del docente (se nulla è supplenza)
    *
    * @return array Dati restituiti come array associativo
    */
-  public function tabellaFirmeVista(\DateTime $data_inizio, \DateTime $data_fine, Docente $docente, Classe $classe,
-                                     Cattedra $cattedra=null) {
+  public function tabellaFirmeVista(\DateTime $inizio, \DateTime $fine, Docente $docente, Classe $classe,
+                                    ?Cattedra $cattedra): array {
     // legge materia
     if ($cattedra) {
       // lezioni di una cattedra esistente
@@ -465,119 +376,132 @@ class RegistroUtil {
       $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
-        throw $this->createNotFoundException('exception.invalid_params');
+        throw new \Exception('exception.invalid_params');
       }
     }
     // ciclo per intervallo di date
-    $dati = array();
-    for ($data = clone $data_inizio; $data <= $data_fine; $data->modify('+1 day')) {
-      $data_str = $data->format('Y-m-d');
-      $dati[$data_str]['data'] = clone $data;
+    $dati = [];
+    for ($data = clone $inizio; $data <= $fine; $data->modify('+1 day')) {
+      $dataStr = $data->format('Y-m-d');
+      $dati[$dataStr]['data'] = clone $data;
       $errore = $this->controlloData($data, $classe->getSede());
       if ($errore) {
         // festivo
-        $dati[$data_str]['errore'] = $errore;
+        $dati[$dataStr]['errore'] = $errore;
         continue;
       }
       // non festivo, legge orario
-      $scansioneoraria = $this->orarioInData($data, $classe->getSede());
+      $scansioneOraria = $this->orarioInData($data, $classe->getSede());
       // predispone dati lezioni come array associativo
-      $dati_lezioni = array();
-      foreach ($scansioneoraria as $s) {
+      $datiLezioni = array();
+      foreach ($scansioneOraria as $s) {
         $ora = $s['ora'];
-        $dati_lezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
-        $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
+        $datiLezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
+        $datiLezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
         // legge lezione
-        $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->where('l.data=:data AND l.classe=:classe AND l.ora=:ora')
-          ->setParameters(['data' => $data_str, 'classe' => $classe, 'ora' => $ora])
+        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+          ->join('l.classe', 'c')
+          ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+          ->setParameters(['data' => $dataStr, 'ora' => $ora, 'anno' => $classe->getAnno(),
+            'sezione' => $classe->getSezione()])
+          ->orderBy('l.gruppo')
           ->getQuery()
-          ->getOneOrNullResult();
-        if ($lezione) {
-          // esiste lezione
-          $dati_lezioni[$ora]['materia'] = $lezione->getMateria()->getNomeBreve();
-          $dati_lezioni[$ora]['argomenti'] = trim($lezione->getArgomento().' '.$lezione->getAttivita());
-          // legge firme
-          $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
-            ->join('f.docente', 'd')
-            ->where('f.lezione=:lezione')
-            ->orderBy('d.cognome,d.nome', 'ASC')
-            ->setParameters(['lezione' => $lezione])
-            ->getQuery()
-            ->getResult();
-          // docenti
-          $docenti = array();
-          foreach ($firme as $f) {
-            $dati_lezioni[$ora]['docenti'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
-            $docenti[] = $f->getDocente()->getId();
-            if ($f instanceOf FirmaSostegno) {
-              $dati_lezioni[$ora]['sostegno']['argomento'][] = trim($f->getArgomento().' '.$f->getAttivita());
-              $dati_lezioni[$ora]['sostegno']['docente'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
-              $dati_lezioni[$ora]['sostegno']['alunno'][] =
-                ($f->getAlunno() ? $f->getAlunno()->getCognome().' '.$f->getAlunno()->getNome() : '');
-            }
-          }
-        } else {
+          ->getResult();
+        if (empty($lezioni)) {
           // nessuna lezione esistente
-          $dati_lezioni[$ora]['materia'] = '';
-          $dati_lezioni[$ora]['argomenti'] = '';
-          $dati_lezioni[$ora]['docenti'] = '';
-          $docenti = array();
+          $datiLezioni[$ora]['materia'] = [];
+          $datiLezioni[$ora]['argomenti'] = [];
+          $datiLezioni[$ora]['docenti'] = [];
+          $datiLezioni[$ora]['docentiId'] = [];
+          $datiLezioni[$ora]['sostegno'] = [];
+        } else {
+          // esistono lezioni
+          foreach ($lezioni as $lezione) {
+            $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+            $datiLezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve();
+            $separatore = (!empty($lezione->getArgomento()) && !empty($lezione->getAttivita())) ? ' - ' : '';
+            $datiLezioni[$ora]['argomenti'][$gruppo] = $lezione->getArgomento().$separatore.$lezione->getAttivita();
+            // legge firme
+            $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
+              ->join('f.docente', 'd')
+              ->where('f.lezione=:lezione')
+              ->orderBy('d.cognome,d.nome', 'ASC')
+              ->setParameters(['lezione' => $lezione])
+              ->getQuery()
+              ->getResult();
+            // docenti
+            $docenti = [];
+            $docentiId = [];
+            $sostegno = [];
+            foreach ($firme as $f) {
+              $docenti[] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
+              $docentiId[] = $f->getDocente()->getId();
+              if ($f instanceOf FirmaSostegno) {
+                $separatore = (!empty($f->getArgomento()) && !empty($f->getAttivita())) ? ' - ' : '';
+                $sostegno['argomento'][] = $f->getArgomento().$separatore.$f->getAttivita();
+                $sostegno['docente'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
+                $sostegno['alunno'][] = $f->getAlunno() ?
+                  $f->getAlunno()->getCognome().' '.$f->getAlunno()->getNome() : '';
+              } else {
+                $sostegno['argomento'][] = null;
+                $sostegno['docente'][] = null;
+                $sostegno['alunno'][] = null;
+              }
+            }
+            $datiLezioni[$ora]['docenti'][$gruppo] = $docenti;
+            $datiLezioni[$ora]['docentiId'][$gruppo] = $docentiId;
+            $datiLezioni[$ora]['sostegno'][$gruppo] = $sostegno;
+          }
         }
         // azioni
-        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezione, $docenti, $altra)) {
+        if ($this->azioneLezione('add', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante add
-          $dati_lezioni[$ora]['add'] = $this->router->generate('lezioni_registro_add', array(
+          $datiLezioni[$ora]['add'] = $this->router->generate('lezioni_registro_add', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
-        } elseif ($altra) {
-          // esiste ora firmata in contemporanea
-          $dati_lezioni[$ora]['addAltra'] = $altra;
         }
-        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezione, $docenti, $altra)) {
+        if ($this->azioneLezione('edit', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante edit
-          $dati_lezioni[$ora]['edit'] = $this->router->generate('lezioni_registro_edit', array(
+          $datiLezioni[$ora]['edit'] = $this->router->generate('lezioni_registro_edit', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
-        } elseif ($altra) {
-          // esiste ora firmata in contemporanea
-          $dati_lezioni[$ora]['editAltra'] = $altra;
         }
-        if ($this->azioneLezione('delete', $data, $ora, $docente, $classe, $materia, $lezione, $docenti)) {
+        if ($this->azioneLezione('delete', $data, $docente, $classe, $datiLezioni[$ora]['docentiId'])) {
           // pulsante delete
-          $dati_lezioni[$ora]['delete'] = $this->router->generate('lezioni_registro_delete', array(
+          $datiLezioni[$ora]['delete'] = $this->router->generate('lezioni_registro_delete', array(
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
         }
       }
       // memorizza lezioni del giorno
-      $dati[$data_str]['lezioni'] = $dati_lezioni;
+      $dati[$dataStr]['lezioni'] = $datiLezioni;
     }
     // legge annotazioni
     $annotazioni = $this->em->getRepository('App\Entity\Annotazione')->createQueryBuilder('a')
       ->join('a.docente', 'd')
-      ->where('a.data BETWEEN :data_inizio AND :data_fine AND a.classe=:classe')
+      ->join('a.classe', 'c')
+      ->where('a.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione')
       ->orderBy('a.data', 'ASC')
       ->addOrderBy('a.modificato', 'DESC')
-      ->setParameters(['data_inizio' => $data_inizio->format('Y-m-d'), 'data_fine' => $data_fine->format('Y-m-d'),
-        'classe' => $classe])
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
       ->getQuery()
       ->getResult();
     // predispone dati per la visualizzazione
-    $data_annotazione = null;
-    $data_annotazione_prec = null;
+    $dataAnnotazione = null;
+    $dataAnnotazionePrec = null;
     $lista = array();
     foreach ($annotazioni as $a) {
-      $data_annotazione = $a->getData();
-      if ($data_annotazione != $data_annotazione_prec && $data_annotazione_prec) {
+      $dataAnnotazione = $a->getData();
+      if ($dataAnnotazione != $dataAnnotazionePrec && $dataAnnotazionePrec) {
         // conserva in vettore associativo
-        $dati[$data_annotazione_prec->format('Y-m-d')]['annotazioni']['lista'] = $lista;
+        $dati[$dataAnnotazionePrec->format('Y-m-d')]['annotazioni']['lista'] = $lista;
         $lista = array();
         // azione add
-        if ($this->azioneAnnotazione('add', $data_annotazione_prec, $docente, $classe)) {
+        if ($this->azioneAnnotazione('add', $dataAnnotazionePrec, $docente, $classe)) {
           // pulsante add
-          $dati[$data_annotazione_prec->format('Y-m-d')]['annotazioni']['add'] =
+          $dati[$dataAnnotazionePrec->format('Y-m-d')]['annotazioni']['add'] =
             $this->router->generate('lezioni_registro_annotazione_edit', array('classe' => $classe->getId(),
-            'data' => $data_annotazione_prec->format('Y-m-d')));
+            'data' => $dataAnnotazionePrec->format('Y-m-d')));
         }
       }
       $ann = array();
@@ -586,6 +510,7 @@ class RegistroUtil {
       $ann['visibile'] = $a->getVisibile();
       $ann['docente'] = $a->getDocente()->getNome().' '.$a->getDocente()->getCognome();
       $ann['avviso'] = $a->getAvviso();
+      $ann['gruppo'] = $a->getClasse()->getGruppo();
       $ann['alunni'] = null;
       if ($a->getAvviso() && in_array('A', $a->getAvviso()->getDestinatari())) {
         // legge alunno destinatario
@@ -620,63 +545,66 @@ class RegistroUtil {
       }
       // raggruppa annotazioni per data
       $lista[] = $ann;
-      $data_annotazione_prec = $data_annotazione;
+      $dataAnnotazionePrec = $dataAnnotazione;
     }
     if (count($annotazioni) > 0) {
       // conserva in vettore associativo
-      $dati[$data_annotazione_prec->format('Y-m-d')]['annotazioni']['lista'] = $lista;
+      $dati[$dataAnnotazionePrec->format('Y-m-d')]['annotazioni']['lista'] = $lista;
       // azione add
-      if ($this->azioneAnnotazione('add', $data_annotazione_prec, $docente, $classe)) {
+      if ($this->azioneAnnotazione('add', $dataAnnotazionePrec, $docente, $classe)) {
         // pulsante add
-        $dati[$data_annotazione_prec->format('Y-m-d')]['annotazioni']['add'] =
+        $dati[$dataAnnotazionePrec->format('Y-m-d')]['annotazioni']['add'] =
           $this->router->generate('lezioni_registro_annotazione_edit', array('classe' => $classe->getId(),
-          'data' => $data_annotazione_prec->format('Y-m-d')));
+          'data' => $dataAnnotazionePrec->format('Y-m-d')));
       }
     }
     // aggiunge info per date senza annotazioni
-    for ($data = clone $data_inizio; $data <= $data_fine; $data->modify('+1 day')) {
-      $data_str = $data->format('Y-m-d');
-      if (!isset($dati[$data_str]['annotazioni'])) {
-        $dati[$data_str]['annotazioni']['lista'] = array();
+    for ($data = clone $inizio; $data <= $fine; $data->modify('+1 day')) {
+      $dataStr = $data->format('Y-m-d');
+      if (!isset($dati[$dataStr]['annotazioni'])) {
+        $dati[$dataStr]['annotazioni']['lista'] = array();
         // azione add
         if ($this->azioneAnnotazione('add', $data, $docente, $classe)) {
           // pulsante add
-          $dati[$data_str]['annotazioni']['add'] = $this->router->generate('lezioni_registro_annotazione_edit', array(
-            'classe' => $classe->getId(), 'data' => $data_str));
+          $dati[$dataStr]['annotazioni']['add'] = $this->router->generate('lezioni_registro_annotazione_edit', array(
+             'classe' => $classe->getId(), 'data' => $dataStr));
         }
       }
     }
     // legge note
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->join('n.docente', 'd')
+      ->join('n.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.data BETWEEN :data_inizio AND :data_fine AND n.classe=:classe')
+      ->where('n.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione')
       ->orderBy('n.data', 'ASC')
       ->addOrderBy('n.modificato', 'DESC')
-      ->setParameters(['data_inizio' => $data_inizio->format('Y-m-d'), 'data_fine' => $data_fine->format('Y-m-d'),
-        'classe' => $classe])
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
       ->getQuery()
       ->getResult();
     // predispone dati per la visualizzazione
-    $data_nota = null;
-    $data_nota_prec = null;
+    $dataNota = null;
+    $dataNotaPrec = null;
     $lista = array();
     foreach ($note as $n) {
-      $data_nota = $n->getData();
-      if ($data_nota != $data_nota_prec && $data_nota_prec) {
+      $dataNota = $n->getData();
+      if ($dataNota != $dataNotaPrec && $dataNotaPrec) {
         // conserva in vettore associativo
-        $dati[$data_nota_prec->format('Y-m-d')]['note']['lista'] = $lista;
+        $dati[$dataNotaPrec->format('Y-m-d')]['note']['lista'] = $lista;
         $lista = array();
         // azione add
-        if ($this->azioneNota('add', $data_nota_prec, $docente, $classe)) {
+        if ($this->azioneNota('add', $dataNotaPrec, $docente, $classe)) {
           // pulsante add
-          $dati[$data_nota_prec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-            'classe' => $classe->getId(), 'data' =>$data_nota_prec->format('Y-m-d')));
+          $dati[$dataNotaPrec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
+            'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+            'data' =>$dataNotaPrec->format('Y-m-d')));
         }
       }
       $nt = array();
       $nt['id'] = $n->getId();
       $nt['tipo'] = $n->getTipo();
+      $nt['gruppo'] = $n->getClasse()->getGruppo();
       $nt['testo'] = $n->getTesto();
       $nt['provvedimento'] = $n->getProvvedimento();
       $nt['docente'] = $n->getDocente()->getNome().' '.$n->getDocente()->getCognome();
@@ -698,7 +626,8 @@ class RegistroUtil {
       if ($this->azioneNota('edit', $n->getData(), $docente, $classe, $n)) {
         // pulsante edit
         $nt['edit'] = $this->router->generate('lezioni_registro_nota_edit', array(
-          'classe' => $classe->getId(), 'data' => $n->getData()->format('Y-m-d'), 'id' => $n->getId()));
+          'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+          'data' => $n->getData()->format('Y-m-d'), 'id' => $n->getId()));
       }
       if ($this->azioneNota('delete', $n->getData(), $docente, $classe, $n)) {
         // pulsante delete
@@ -707,28 +636,30 @@ class RegistroUtil {
       }
       // raggruppa note per data
       $lista[] = $nt;
-      $data_nota_prec = $data_nota;
+      $dataNotaPrec = $dataNota;
     }
     if (count($note) > 0) {
       // conserva in vettore associativo
-      $dati[$data_nota_prec->format('Y-m-d')]['note']['lista'] = $lista;
+      $dati[$dataNotaPrec->format('Y-m-d')]['note']['lista'] = $lista;
       // azione add
-      if ($this->azioneNota('add', $data_nota_prec, $docente, $classe)) {
+      if ($this->azioneNota('add', $dataNotaPrec, $docente, $classe)) {
         // pulsante add
-        $dati[$data_nota_prec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-          'classe' => $classe->getId(), 'data' =>$data_nota_prec->format('Y-m-d')));
+        $dati[$dataNotaPrec->format('Y-m-d')]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
+          'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+          'data' =>$dataNotaPrec->format('Y-m-d')));
       }
     }
     // aggiunge info per date senza note
-    for ($data = clone $data_inizio; $data <= $data_fine; $data->modify('+1 day')) {
-      $data_str = $data->format('Y-m-d');
-      if (!isset($dati[$data_str]['note'])) {
-        $dati[$data_str]['note']['lista'] = array();
+    for ($data = clone $inizio; $data <= $fine; $data->modify('+1 day')) {
+      $dataStr = $data->format('Y-m-d');
+      if (!isset($dati[$dataStr]['note'])) {
+        $dati[$dataStr]['note']['lista'] = array();
         // azione add
         if ($this->azioneNota('add', $data, $docente, $classe)) {
           // pulsante add
-          $dati[$data_str]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
-            'classe' => $classe->getId(), 'data' => $data_str));
+          $dati[$dataStr]['note']['add'] = $this->router->generate('lezioni_registro_nota_edit', array(
+            'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+            'data' => $dataStr));
         }
       }
     }
@@ -739,47 +670,56 @@ class RegistroUtil {
   /**
    * Restituisce i dati delle assenze per la classe e l'intervallo di date indicato.
    *
-   * @param \DateTime $data_inizio Data iniziale del registro
-   * @param \DateTime $data_fine Data finale del registro
+   * @param \DateTime $inizio Data iniziale del registro
+   * @param \DateTime $fine Data finale del registro
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
    * @param Cattedra|null $cattedra Cattedra del docente (se nulla è supplenza)
    *
    * @return array Dati restituiti come array associativo
    */
-  public function quadroAssenzeVista(\DateTime $data_inizio, \DateTime $data_fine, Docente $docente, Classe $classe,
+  public function quadroAssenzeVista(\DateTime $inizio, \DateTime $fine, Docente $docente, Classe $classe,
                                       Cattedra $cattedra=null) {
     $dati = array();
-    if ($data_inizio == $data_fine) {
+    if ($inizio == $fine) {
       // vista giornaliera
-      $data_str = $data_inizio->format('Y-m-d');
-      $dati[$data_str]['data'] = clone $data_inizio;
+      $dataStr = $inizio->format('Y-m-d');
+      $dati[$dataStr]['data'] = clone $inizio;
       // dati periodo
-      $periodo = $this->periodo($data_inizio);
+      $periodo = $this->periodo($inizio);
       // legge alunni di classe
-      $lista = $this->alunniInData($data_inizio, $classe);
+      $lista = $this->alunniInData($inizio, $classe);
       // dati GENITORI
       $genitori = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista);
       // dati alunni/assenze/ritardi/uscite
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
+        ->select('a.id AS id_alunno,a.cognome,a.nome,a.sesso,a.dataNascita,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS id_classe,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine,p.tipo,p.descrizione')
         ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
         ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
         ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
         ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data_str])
+        ->setParameters(['lista' => $lista, 'data' => $dataStr])
         ->getQuery()
         ->getArrayResult();
       // dati giustificazioni
       $noAppello = false;
+      $dati['filtro']['S'] = [];
+      $dati['filtro']['A'] = [];
+      $dati['filtro']['N'] = [];
       foreach ($alunni as $k=>$alu) {
+        // filtro alunni
+        if ($alu['religione'] == 'S' || $alu['religione'] == 'A') {
+          $dati['filtro'][$alu['religione']][] = $alu['id_alunno'];
+        } else {
+          $dati['filtro']['N'][] = $alu['id_alunno'];
+        }
         // conteggio assenze da giustificare
         $giustifica_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NULL')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_assenze'] = $giustifica_assenze;
@@ -787,7 +727,7 @@ class RegistroUtil {
         $giustifica_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_ritardi'] = $giustifica_ritardi;
@@ -795,7 +735,7 @@ class RegistroUtil {
         $giustifica_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
           ->select('COUNT(u.id)')
           ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_uscite'] = $giustifica_uscite;
@@ -803,19 +743,19 @@ class RegistroUtil {
         $convalide_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NOT NULL AND ass.docenteGiustifica IS NULL')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $convalide_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str, 'breve' => 1])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr, 'breve' => 1])
           ->getQuery()
           ->getSingleScalarResult();
         $convalide_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
           ->select('COUNT(u.id)')
           ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['convalide'] = $convalide_assenze + $convalide_ritardi  + $convalide_uscite;
@@ -824,7 +764,7 @@ class RegistroUtil {
           ->select('COUNT(e.id)')
           ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
           ->setParameters(['valido' => 1, 'alunno' => $alu['id_alunno'],
-            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $data_str])
+            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['ritardi'] = $ritardi;
@@ -833,7 +773,7 @@ class RegistroUtil {
           ->select('COUNT(u.id)')
           ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
           ->setParameters(['valido' => 1, 'alunno' => $alu['id_alunno'],
-            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $data_str])
+            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $dataStr])
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['uscite'] = $uscite;
@@ -843,36 +783,36 @@ class RegistroUtil {
           $noAppello = true;
         }
         // gestione pulsanti
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
-        $pulsanti = $this->azioneAssenze($data_inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));
-        if ($pulsanti) {
+        $pulsanti = $this->azioneAssenze($inizio, $docente, null, null, ($cattedra ? $cattedra->getMateria() : null));
+        if ($pulsanti && $alu['id_classe'] > 0) {
           // url pulsanti
           if ($alu['id_assenza'] > 0) {
             $urlPresenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
-              'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+              'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_assenza']));
           } else {
             $urlAssenza = $this->router->generate('lezioni_assenze_assenza', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
-              'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => 0));
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+              'data' =>$dataStr, 'alunno' => $alu['id_alunno'], 'id' => 0));
           }
           $urlEntrata = $this->router->generate('lezioni_assenze_entrata', array(
-            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
-            'data' =>$data_str, 'alunno' => $alu['id_alunno']));
+            'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+            'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
             // pulsante uscita se richiesta presente
             $richiesta = $this->em->getRepository('App\Entity\Richiesta')
-              ->richiestaAlunno('U', $alu['id_alunno'], $data_inizio);
-            $urlUscita = $this->router->generate('richieste_uscita', ['data' =>$data_str,
+              ->richiestaAlunno('U', $alu['id_alunno'], $inizio);
+            $urlUscita = $this->router->generate('richieste_uscita', ['data' =>$dataStr,
               'alunno' => $alu['id_alunno'], 'richiesta' => $richiesta ? $richiesta->getId() : 0]);
           } else {
             // pulsante uscita standard
             $urlUscita = $this->router->generate('lezioni_assenze_uscita', array(
-                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(),
-                'data' =>$data_str, 'alunno' => $alu['id_alunno']));
+                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+                'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
           }
-          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse', ['classe' => $classe->getId(),
-            'data' =>$data_str, 'alunno' => $alu['id_alunno'], 'id' => $alu['id_presenza'] ?? 0]);
+          $urlFC = $this->router->generate('lezioni_assenze_fuoriclasse',
+            ['classe' => $alu['id_classe'] ?? 0, 'data' =>$dataStr, 'alunno' => $alu['id_alunno'],
+            'id' => $alu['id_presenza'] ?? 0]);
           // controlla fuori classe
           if ($alu['id_presenza']) {
             // fuori classe
@@ -901,33 +841,37 @@ class RegistroUtil {
               $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
             // pulsante giustifica
             $alunni[$k]['pulsante_giustifica'] = $this->router->generate('lezioni_assenze_giustifica', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-              'alunno' => $alu['id_alunno']));
+              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $alu['id_classe'] ?? 0,
+              'data' =>$dataStr, 'alunno' => $alu['id_alunno']));
+          }
+        }
+        // cambio classe
+        if (!$alu['id_classe']) {
+          $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alu['id_alunno']]);
+          if ($cambio) {
+            $dati['cambio'][$alu['id_alunno']] = $cambio->getNote();
           }
         }
       }
-      $pulsanti = $this->azioneAssenze($data_inizio, $docente, null, $classe, ($cattedra ? $cattedra->getMateria() : null));
+      $pulsanti = $this->azioneAssenze($inizio, $docente, null, $classe, ($cattedra ? $cattedra->getMateria() : null));
       if ($pulsanti && !$noAppello) {
         // pulsante appello
-        $dati[$data_str]['pulsante_appello'] = $this->router->generate('lezioni_assenze_appello', array(
-          'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str));
+        $dati[$dataStr]['pulsante_appello'] = $this->router->generate('lezioni_assenze_appello', array(
+          'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$dataStr));
       }
       // imposta vettore associativo
-      $dati[$data_str]['lista'] = $alunni;
-      $dati[$data_str]['genitori'] = $genitori;
-      if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
-        $dati[$data_str]['ore'] = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
-      }
+      $dati[$dataStr]['lista'] = $alunni;
+      $dati[$dataStr]['genitori'] = $genitori;
     } else {
       // vista settimanale/mensile
       $lista_alunni = array();
-      for ($data = clone $data_inizio; $data <= $data_fine; $data->modify('+1 day')) {
-        $data_str = $data->format('Y-m-d');
-        $dati['lista'][$data_str]['data'] = clone $data;
+      for ($data = clone $inizio; $data <= $fine; $data->modify('+1 day')) {
+        $dataStr = $data->format('Y-m-d');
+        $dati['lista'][$dataStr]['data'] = clone $data;
         $errore = $this->controlloData($data, $classe->getSede());
         if ($errore) {
           // festivo
-          $dati['lista'][$data_str]['errore'] = $errore;
+          $dati['lista'][$dataStr]['errore'] = $errore;
           continue;
         }
         // legge alunni di classe
@@ -940,12 +884,12 @@ class RegistroUtil {
           ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
           ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
           ->where('a.id IN (:lista)')
-          ->setParameters(['lista' => $lista, 'data' => $data_str])
+          ->setParameters(['lista' => $lista, 'data' => $dataStr])
           ->getQuery()
           ->getArrayResult();
         // dati per alunno
         foreach ($alunni as $k=>$alu) {
-          $dati['lista'][$data_str][$alu['id_alunno']] = $alu;
+          $dati['lista'][$dataStr][$alu['id_alunno']] = $alu;
         }
       }
       // lista alunni (ordinata)
@@ -972,7 +916,7 @@ class RegistroUtil {
    */
   public function orarioInData(\DateTime $data, Sede $sede) {
     // legge orario
-    $scansioneoraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
+    $scansioneOraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
       ->select('s.giorno,s.ora,s.inizio,s.fine,s.durata')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno')
@@ -980,7 +924,7 @@ class RegistroUtil {
       ->setParameters(['data' => $data->format('Y-m-d'), 'sede' => $sede, 'giorno' => $data->format('w')])
       ->getQuery()
       ->getScalarResult();
-    return $scansioneoraria;
+    return $scansioneOraria;
   }
 
   /**
@@ -991,7 +935,23 @@ class RegistroUtil {
    *
    * @return array Lista degli ID degli alunni
    */
-  public function alunniInData(\DateTime $data, Classe $classe) {
+  public function alunniInData(\DateTime $data, Classe $classe): array {
+    // controlla gruppi
+    $lista = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $lista = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($lista)) {
+      // indicata intera classe: legge alunni di tutti i gruppi
+      $alunniId = [];
+      foreach ($lista as $gruppo) {
+        $alunniId = array_merge($alunniId, $this->alunniInData($data, $gruppo));
+      }
+      // restituisce lista di ID
+      return $alunniId;
+    }
+    // alunni della classe senza gruppi o del gruppo classe
     if ($data->format('Y-m-d') >= date('Y-m-d')) {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
@@ -1022,8 +982,8 @@ class RegistroUtil {
       $alunni = array_merge($alunni, $alunni2);
     }
     // restituisce lista di ID
-    $alunni_id = array_map('current', $alunni);
-    return $alunni_id;
+    $alunniId = array_map('current', $alunni);
+    return $alunniId;
   }
 
   /**
@@ -1061,9 +1021,9 @@ class RegistroUtil {
    * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
    * @param Alunno $alunno Alunno di cui si desidera conoscere la classe
    *
-   * @return array Lista degli ID degli alunni
+   * @return Classe Classe dell'alunno
    */
-  public function classeInData(\DateTime $data, Alunno $alunno) {
+  public function classeInData(\DateTime $data, Alunno $alunno): Classe {
     if ($data->format('Y-m-d') == date('Y-m-d')) {
       // data è quella odierna, restituisce la classe attuale
       $classe = $alunno->getClasse();
@@ -1105,18 +1065,18 @@ class RegistroUtil {
     $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
       ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe AND ass.data<:data')
+      ->where('a.id=:alunno AND ass.data<:data')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'data' => $data->format('Y-m-d')])
+      ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
     foreach ($assenze as $a) {
       $data_assenza = $a['data']->format('Y-m-d');
       $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
-      $dati_periodo[$numperiodo][$data_assenza]['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data_assenza]['data_fine'] = $data_str;
+      $dataStr = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
+      $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
+      $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;
       $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
       $dati_periodo[$numperiodo][$data_assenza]['giustificato'] =
         ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
@@ -1145,15 +1105,15 @@ class RegistroUtil {
           // nuovo gruppo
           if ($fine && $giustificato != 'D') {
             // termina gruppo precedente
-            $data_str = $inizio_data->format('Y-m-d');
+            $dataStr = $inizio_data->format('Y-m-d');
             $gruppo = $inizio;
             $gruppo['data'] = $fine['data'];
-            $gruppo['data_fine'] = $inizio['data'];
+            $gruppo['fine'] = $inizio['data'];
             $gruppo['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
             $gruppo['dichiarazione'] = $dichiarazione;
             $gruppo['certificati'] = $certificati;
             $gruppo['ids'] = substr($ids, 1);
-            $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$data_str] = (object) $gruppo;
+            $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$dataStr] = (object) $gruppo;
           }
           // inizia nuovo gruppo
           $inizio = $a;
@@ -1171,19 +1131,19 @@ class RegistroUtil {
         $dichiarazione = array_merge($dichiarazione, $a['dichiarazione']);
         $certificati = array_merge($certificati, $a['certificati']);
         $ids .= ','.$a['id'];
-        $prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($dataObj, null, $alunno->getClasse());
+        $prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($dataObj, null, null);
       }
       if ($fine && $giustificato != 'D') {
         // termina gruppo precedente
-        $data_str = $inizio_data->format('Y-m-d');
+        $dataStr = $inizio_data->format('Y-m-d');
         $gruppo = $inizio;
         $gruppo['data'] = $fine['data'];
-        $gruppo['data_fine'] = $inizio['data'];
+        $gruppo['fine'] = $inizio['data'];
         $gruppo['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
         $gruppo['dichiarazione'] = $dichiarazione;
         $gruppo['certificati'] = $certificati;
         $gruppo['ids'] = substr($ids, 1);
-        $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$data_str] = (object) $gruppo;
+        $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$dataStr] = (object) $gruppo;
       }
     }
     // ritardi da giustificare
@@ -1245,7 +1205,7 @@ class RegistroUtil {
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
-      ->where('a.id IN (:id)')
+      ->where('a.id IN (:id) AND a.abilitato=1 AND a.classe IS NOT NULL')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['id' => $alunni, 'data' => $data->format('Y-m-d')])
       ->getQuery()
@@ -1260,7 +1220,7 @@ class RegistroUtil {
         $appello = (new Appello())
           ->setId($elemento['id'])
           ->setAlunno($elemento['cognome'].' '.$elemento['nome'].' ('.$elemento['dataNascita']->format('d/m/Y').')')
-          ->setPresenza($elemento['assenza'] ? 'A' : ($elemento['entrata'] ? 'R' : 'P'))
+          ->setPresenza($elemento['assenza'] ? 'A' : 'P')
           ->setOra($elemento['ora'] ? $elemento['ora'] : new \DateTime());
         if ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
             $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
@@ -1297,9 +1257,10 @@ class RegistroUtil {
   public function esisteCattedra(Docente $docente, Classe $classe, Materia $materia) {
     $cattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
-      ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.attiva=:attiva AND c.tipo!=:tipo')
-      ->setParameters(['docente' => $docente, 'classe' => $classe, 'materia' => $materia, 'attiva' => 1,
-        'tipo' => 'S'])
+      ->join('c.classe', 'cl')
+      ->where("c.docente=:docente AND c.materia=:materia AND c.attiva=1 AND c.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
+      ->setParameters(['docente' => $docente, 'materia' => $materia, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getSingleScalarResult();
     return ($cattedra > 0);
@@ -1324,12 +1285,18 @@ class RegistroUtil {
     $oggi = new \DateTime();
     if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
       // data non nel futuro
-      if (!$alunno || $this->classeInData($data, $alunno) == $classe) {
-        // alunno è nella classe indicata
-        if ($materia && $this->esisteCattedra($docente, $classe, $materia)) {
-          // non è supplenza e esiste la cattedra (non di sostegno)
-          return true;
+      if ($alunno) {
+        $classeAlunno = $this->classeInData($data, $alunno);
+        if ($classeAlunno->getAnno() != $classe->getAnno() ||
+            $classeAlunno->getSezione() != $classe->getSezione() ||
+            ($classeAlunno->getGruppo() != $classe->getGruppo() && !empty($classe->getGruppo()))) {
+          // la classe è diversa: non consentito
+          return false;
         }
+      }
+      if ($materia && $this->esisteCattedra($docente, $classe, $materia)) {
+        // non è supplenza e esiste la cattedra (non di sostegno)
+        return true;
       }
     }
     // non consentito
@@ -1352,62 +1319,63 @@ class RegistroUtil {
    */
   public function elencoVoti(\DateTime $data, Docente $docente, Classe $classe, Materia $materia,
                               $tipo, $religione, &$argomento, &$visibile) {
-    $elenco = array();
+    $dati = [];
     $argomento = null;
     $visibile = null;
     // alunni della classe
-    $lista_alunni = $this->alunniInData($data, $classe);
-    // legge i voti degli degli alunni
-    $voti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
-      ->leftJoin('App\Entity\Lezione', 'l', 'WITH', 'l.classe=:classe AND l.data=:data')
-      ->leftJoin('App\Entity\Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia')
-      ->where('a.id IN (:alunni)')
-      ->setParameters(['alunni' => $lista_alunni, 'docente' => $docente, 'tipo' => $tipo,
-        'materia' => $materia, 'classe' => $classe, 'data' => $data->format('Y-m-d')])
+    $listaAlunni = $this->alunniInData($data, $classe);
+    // legge i dati degli alunni
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione')
+      ->where('a.id IN (:lista)'.($religione ? " AND a.religione='$religione'" : ''))
+      ->setParameters(['lista' => $listaAlunni])
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->addOrderBy('v.id', 'DESC')
       ->getQuery()
       ->getArrayResult();
-    $alunno_prec = 0;
-    foreach ($voti as $v) {
-      if ($materia->getTipo() != 'R' || $v['religione'] == $religione) {
-        if ($v['voto'] > 0) {
-          $voto_int = intval($v['voto'] + 0.25);
-          $voto_dec = $v['voto'] - intval($v['voto']);
-          $voto_str = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-        } else {
-          $voto_str = '--';
-        }
-        if ($v['alunno_id'] != $alunno_prec || (!empty($v['voto']) || !empty($v['giudizio']))) {
-          // aggiunge voto
-          $voto = (new VotoClasse())
-            ->setId($v['alunno_id'])
-            ->setAlunno($v['cognome'].' '.$v['nome'].' ('.$v['dataNascita']->format('d/m/Y').')')
-            ->setBes($v['bes'])
-            ->setMedia($v['media'])
-            ->setVoto($v['voto'])
-            ->setVotoTesto($voto_str)
-            ->setGiudizio($v['giudizio'])
-            ->setVotoId($v['id']);
-          $elenco[] = $voto;
-        }
-        // argomento globale
-        if (!$argomento && $v['argomento'] != '') {
-          $argomento = trim($v['argomento']);
-        }
-        // visibilità globale
-        if ($visibile === null && $v['visibile'] !== null) {
-          $visibile = $v['visibile'] ? '1' : '0';
-        }
+    foreach ($alunni as $alunno) {
+      $dati[$alunno['id']] = (new VotoClasse())
+        ->setId($alunno['id'])
+        ->setAlunno($alunno['cognome'].' '.$alunno['nome'].' ('.$alunno['dataNascita']->format('d/m/Y').')')
+        ->setBes($alunno['bes']);
+    }
+    // legge i voti
+    $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
+      ->select('(v.alunno) AS alunno_id,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
+      ->join('v.lezione', 'l')
+      ->where('v.alunno IN (:lista) AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia AND l.data=:data')
+      ->setParameters(['lista' => $listaAlunni, 'docente' => $docente, 'tipo' => $tipo,
+        'materia' => $materia, 'data' => $data->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($voti as $voto) {
+      if ($voto['voto'] > 0) {
+        $votoInt = (int) ($voto['voto'] + 0.25);
+        $votoDec = $voto['voto'] - ((int) $voto['voto']);
+        $votoStr = $votoInt.($votoDec == 0.25 ? '+' : ($votoDec == 0.75 ? '-' : ($votoDec == 0.5 ? '½' : '')));
+      } else {
+        $votoStr = '--';
       }
-      $alunno_prec = $v['alunno_id'];
+      // aggiunge voto
+      $dati[$voto['alunno_id']]
+        ->setMedia($voto['media'])
+        ->setVoto($voto['voto'])
+        ->setVotoTesto($votoStr)
+        ->setGiudizio($voto['giudizio'])
+        ->setVotoId($voto['id']);
+      // argomento globale
+      if (!$argomento && !empty($voto['argomento'])) {
+        $argomento = trim($voto['argomento']);
+      }
+      // visibilità globale
+      if ($visibile === null && $voto['visibile'] !== null) {
+        $visibile = $voto['visibile'] ? '1' : '0';
+      }
     }
     if ($visibile === null) {
       $visibile = '1';
     }
     // restituisce elenco
-    return $elenco;
+    return $dati;
   }
 
   /**
@@ -1419,15 +1387,15 @@ class RegistroUtil {
    */
   public function periodo(\DateTime $data) {
     $dati = array();
-    $data_str = $data->format('Y-m-d');
-    if ($data_str <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
+    $dataStr = $data->format('Y-m-d');
+    if ($dataStr <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
       // primo periodo
       $dati['periodo'] = 1;
       $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
       $dati['inizio'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
       $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
-    } elseif ($data_str <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine') ||
-              ($data_str > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine') && $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
+    } elseif ($dataStr <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine') ||
+              ($dataStr > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine') && $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
       // secondo periodo
       $dati['periodo'] = 2;
       $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
@@ -1454,32 +1422,36 @@ class RegistroUtil {
   /**
    * Restituisce i dati dei voti per la classe e l'intervallo di date indicato.
    *
-   * @param \DateTime $data_inizio Data iniziale del registro
-   * @param \DateTime $data_fine Data finale del registro
+   * @param \DateTime $inizio Data iniziale del registro
+   * @param \DateTime $fine Data finale del registro
    * @param Docente $docente Docente della lezione
    * @param Cattedra $cattedra Cattedra del docente
    *
    * @return array Dati restituiti come array associativo
    */
-  public function quadroVoti(\DateTime $data_inizio, \DateTime $data_fine, Docente $docente, Cattedra $cattedra) {
+  public function quadroVoti(\DateTime $inizio, \DateTime $fine, Docente $docente, Cattedra $cattedra) {
     $dati = array();
     $dati['classe']['S'] = array();
     $dati['classe']['O'] = array();
     $dati['classe']['P'] = array();
     // alunni della classe
-    $lista_alunni = $this->alunniInPeriodo($data_inizio, $data_fine, $cattedra->getClasse());
+    $listaAlunni = $this->alunniInPeriodo($inizio, $fine, $cattedra->getClasse());
+    $tutti = array_merge($listaAlunni[0], $listaAlunni[1]);
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($tutti);
     // legge i dati degli degli alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS classe_id')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni])
+      ->setParameters(['alunni' => $tutti])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
+      if (in_array($alu['id'], $listaAlunni[1])) {
+        $dati['trasferiti'][$alu['id']] = true;
+      }
       $dati['voti'][$alu['id']]['S'] = array();
       $dati['voti'][$alu['id']]['O'] = array();
       $dati['voti'][$alu['id']]['P'] = array();
@@ -1492,9 +1464,9 @@ class RegistroUtil {
       ->join('v.docente', 'd')
       ->where('a.id IN (:alunni) AND v.materia=:materia AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
       ->orderBy('l.data', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse(), 'inizio' => $data_inizio->format('Y-m-d'),
-        'fine' => $data_fine->format('Y-m-d')])
+      ->setParameters(['alunni' => $tutti, 'materia' => $cattedra->getMateria(),
+        'classe' => $cattedra->getClasse(), 'inizio' => $inizio->format('Y-m-d'),
+        'fine' => $fine->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
     foreach ($voti as $v) {
@@ -1590,18 +1562,34 @@ class RegistroUtil {
     // lezioni del giorno
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,s.ora,s.inizio,s.fine,s.durata')
+      ->join('l.classe', 'c')
       ->join('App\Entity\ScansioneOraria', 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
       ->join('s.orario', 'o')
-      ->where('l.data=:data AND l.classe=:classe AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-        'sede' => $alunno->getClasse()->getSede(), 'giorno' => $data->format('w')])
+      ->where("l.data=:data AND c.anno=:anno AND c.sezione=:sezione AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
+      ->setParameters(['giorno' => $data->format('w'), 'data' => $data->format('Y-m-d'),
+        'anno' => $alunno->getClasse()->getAnno(), 'sezione' => $alunno->getClasse()->getSezione(),
+        'sede' => $alunno->getClasse()->getSede()]);
+    if (empty($alunno->getClasse()->getGruppo())) {
+      // nessun gruppo
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='N' OR (l.tipoGruppo='R' AND l.gruppo=:religione)")
+        ->setParameter('religione', in_array($alunno->getReligione(), ['S', 'A'], true) ?
+          $alunno->getReligione() : 'N');
+    } else {
+      // gruppi presenti
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='N' OR (l.tipoGruppo='R' AND l.gruppo=:religione) OR (l.tipoGruppo='C' AND l.gruppo=:gruppo)")
+        ->setParameter('religione', in_array($alunno->getReligione(), ['S', 'A'], true) ?
+          $alunno->getReligione() : 'N')
+        ->setParameter('gruppo', $alunno->getClasse()->getGruppo());
+    }
+    $lezioni = $lezioni
       ->getQuery()
       ->getArrayResult();
     // elimina ore assenze esistenti
     $this->em->getConnection()
-      ->prepare('DELETE FROM gs_assenza_lezione WHERE alunno_id=:alunno AND lezione_id IN (SELECT id FROM gs_lezione WHERE data=:data AND classe_id=:classe)')
-      ->execute(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'),
-        'classe' => $alunno->getClasse()->getId()]);
+      ->prepare('DELETE al FROM gs_assenza_lezione AS al, gs_lezione AS l WHERE al.lezione_id=l.id AND al.alunno_id=:alunno AND l.data=:data')
+      ->executeStatement(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')]);
     // legge assenza del giorno
     $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data]);
     if ($assenza) {
@@ -1609,7 +1597,7 @@ class RegistroUtil {
       foreach ($lezioni as $l) {
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-          ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
+          ->executeStatement(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
             'durata' => $l['durata']]);
       }
     } else {
@@ -1635,7 +1623,7 @@ class RegistroUtil {
             // aggiunge ore assenza
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-              ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(), 'durata' => $oreassenza]);
+              ->executeStatement(['lezione' => $l['id'], 'alunno' => $alunno->getId(), 'durata' => $oreassenza]);
           }
         }
       }
@@ -1670,7 +1658,19 @@ class RegistroUtil {
       ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
-      ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+      ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')]);
+    if ($lezione->getTipoGruppo() == 'R') {
+      // gruppi religione
+      if ($lezione->getGruppo() == 'S' || $lezione->getGruppo() == 'A') {
+        $alunni = $alunni
+          ->andWhere('a.religione=:religione')
+          ->setParameter('religione', $lezione->getGruppo());
+      } else {
+        $alunni = $alunni
+          ->andWhere("a.religione NOT IN ('S', 'A')");
+      }
+    }
+    $alunni = $alunni
       ->getQuery()
       ->getArrayResult();
     // calcola ore assenza
@@ -1679,7 +1679,7 @@ class RegistroUtil {
         // assente
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-          ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
+          ->executeStatement(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
             'durata' => $ora['durata']]);
       } elseif ($alu['id_entrata'] || $alu['id_uscita']) {
         // entrata o uscita o entrambi
@@ -1699,7 +1699,7 @@ class RegistroUtil {
           // aggiunge ore assenza
           $this->em->getConnection()
             ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
-            ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
+            ->executeStatement(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
               'durata' => $oreassenza]);
         }
       }
@@ -1720,48 +1720,31 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $dati = array();
     $ore = array();
-    if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+    if ($cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di sostegno
       return $this->argomentiSostegno($cattedra);
     }
-    // cattedra non di sostegno
-    if ($cattedra->getTipo() == 'A') {
-      // cattedra di materia alternativa
-      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
-        ->getDql();
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('f.docente', 'd')
-        ->join('l.materia', 'm')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))) AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->orderBy('l.data', 'DESC')
-        ->addOrderBy('l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
-          'civica' => 'E', 'sede' => $cattedra->getClasse()->getSede()])
-        ->getQuery()
-        ->getArrayResult();
-    } else {
-      // cattedra regolare
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
-        ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->leftJoin('f.docente', 'd')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->orderBy('l.data', 'DESC')
-        ->addOrderBy('l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()])
-        ->getQuery()
-        ->getArrayResult();
+    // legge lezioni
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
+      ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->leftJoin('f.docente', 'd')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('so.orario', 'o')
+      ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->orderBy('l.data', 'DESC')
+      ->addOrderBy('l.ora', 'ASC')
+      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+        'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
     }
+    $lezioni = $lezioni
+      ->getQuery()
+      ->getArrayResult();
     // imposta array associativo
     $data_prec = null;
     $num = 0;
@@ -1789,8 +1772,8 @@ class RegistroUtil {
           // nessun argomento in data precedente
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
-          $dati[$periodo][$data_prec][$num]['data'] = $data_str;
+          $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $dati[$periodo][$data_prec][$num]['data'] = $dataStr;
           $dati[$periodo][$data_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$num]['attivita'] = '';
           $dati[$periodo][$data_prec][$num]['firme'] = '';
@@ -1807,8 +1790,8 @@ class RegistroUtil {
           // evita ripetizioni identiche degli argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-          $dati[$periodo][$data][$num]['data'] = $data_str;
+          $dataStr = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $dati[$periodo][$data][$num]['data'] = $dataStr;
           $dati[$periodo][$data][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$num]['attivita'] = $l['attivita'];
           $dati[$periodo][$data][$num]['firme'] = $firme;
@@ -1824,8 +1807,8 @@ class RegistroUtil {
       // nessun argomento in data precedente
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
-      $dati[$periodo][$data_prec][$num]['data'] = $data_str;
+      $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $dati[$periodo][$data_prec][$num]['data'] = $dataStr;
       $dati[$periodo][$data_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$num]['attivita'] = '';
       $dati[$periodo][$data_prec][$num]['firme'] = '';
@@ -1853,11 +1836,14 @@ class RegistroUtil {
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost,m.nomeBreve')
       ->join('l.materia', 'm')
+      ->join('l.classe', 'c')
       ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione')
-      ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND (fs.alunno=:alunno OR fs.alunno IS NULL)")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'alunno' => $cattedra->getAlunno()])
+      ->setParameters(['anno' => $cattedra->getClasse()->getAnno(),
+        'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo(),
+        'alunno' => $cattedra->getAlunno()])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -1872,8 +1858,8 @@ class RegistroUtil {
           // nessun argomento
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
-          $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $data_str;
+          $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $dataStr;
           $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
           $dati[$periodo][$data_prec][$materia_prec][$num]['argomento_sost'] = '';
@@ -1892,8 +1878,8 @@ class RegistroUtil {
           // evita ripetizioni identiche di argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-          $dati[$periodo][$data][$materia][$num]['data'] = $data_str;
+          $dataStr = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $dati[$periodo][$data][$materia][$num]['data'] = $dataStr;
           $dati[$periodo][$data][$materia][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$materia][$num]['attivita'] = $l['attivita'];
           $dati[$periodo][$data][$materia][$num]['argomento_sost'] = $l['argomento_sost'];
@@ -1908,8 +1894,8 @@ class RegistroUtil {
       // nessun argomento
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
-      $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $data_str;
+      $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $dataStr;
       $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
       $dati[$periodo][$data_prec][$materia_prec][$num]['argomento_sost'] = '';
@@ -1927,7 +1913,7 @@ class RegistroUtil {
    *
    * @return array Dati restituiti come array associativo
    */
-  public function listaAssenti(\DateTime $data, Classe $classe) {
+  public function listaAssenti(\DateTime $data, Classe $classe): array {
     $dati = array();
     // legge alunni di classe
     $lista = $this->alunniInData($data, $classe);
@@ -1996,7 +1982,14 @@ class RegistroUtil {
       ->orderBy('l.data,l.ora', 'ASC')
       ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
         'docente' => $cattedra->getDocente(), 'mese' => intval($data->format('m')),
-        'sede' => $cattedra->getClasse()->getSede()])
+        'sede' => $cattedra->getClasse()->getSede()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
+    }
+    $lezioni = $lezioni
       ->getQuery()
       ->getArrayResult();
     // legge assenze/voti
@@ -2006,18 +1999,18 @@ class RegistroUtil {
     foreach ($lezioni as $l) {
       if (!$data_prec || $l['data'] != $data_prec) {
         // cambio di data
-        $data_str = $l['data']->format('Y-m-d');
-        $dati['lista'][$data_str]['data'] = intval($l['data']->format('d'));
-        $dati['lista'][$data_str]['durata'] = 0;
+        $dataStr = $l['data']->format('Y-m-d');
+        $dati['lista'][$dataStr]['data'] = intval($l['data']->format('d'));
+        $dati['lista'][$dataStr]['durata'] = 0;
         $lista = $this->alunniInData($l['data'], $cattedra->getClasse());
         $lista_alunni = array_unique(array_merge($lista_alunni, $lista));
         // alunni in classe per data
         foreach ($lista as $id) {
-          $dati['lista'][$data_str][$id]['classe'] = 1;
+          $dati['lista'][$dataStr][$id]['classe'] = 1;
         }
       }
       // aggiorna durata lezioni
-      $dati['lista'][$data_str]['durata'] +=
+      $dati['lista'][$dataStr]['durata'] +=
         ($l['materia'] == $cattedra->getMateria()->getId() ? $l['durata'] : 0);
       // legge assenze
       $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
@@ -2028,10 +2021,10 @@ class RegistroUtil {
         ->getArrayResult();
       // somma ore di assenza per alunno
       foreach ($assenze as $a) {
-        if (isset($dati['lista'][$data_str][$a['id']]['assenze'])) {
-          $dati['lista'][$data_str][$a['id']]['assenze'] += $a['ore'];
+        if (isset($dati['lista'][$dataStr][$a['id']]['assenze'])) {
+          $dati['lista'][$dataStr][$a['id']]['assenze'] += $a['ore'];
         } else {
-          $dati['lista'][$data_str][$a['id']]['assenze'] = $a['ore'];
+          $dati['lista'][$dataStr][$a['id']]['assenze'] = $a['ore'];
         }
       }
       // legge voti
@@ -2049,7 +2042,7 @@ class RegistroUtil {
           $voto_dec = $v['voto'] - intval($v['voto']);
           $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
         }
-        $dati['lista'][$data_str][$v['id']]['voti'][] = $v;
+        $dati['lista'][$dataStr][$v['id']]['voti'][] = $v;
       }
       // memorizza data precedente
       $data_prec = $l['data'];
@@ -2082,13 +2075,16 @@ class RegistroUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,so.durata')
+      ->join('l.classe', 'c')
       ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
       ->orderBy('l.data,l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'docente' => $cattedra->getDocente(),
-        'alunno' => $alunno, 'mese' => intval($data->format('m')), 'sede' => $cattedra->getClasse()->getSede()])
+      ->setParameters(['anno' => $cattedra->getClasse()->getAnno(),
+        'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo(),
+        'docente' => $cattedra->getDocente(), 'alunno' => $alunno, 'mese' => intval($data->format('m')),
+        'sede' => $cattedra->getClasse()->getSede()])
       ->getQuery()
       ->getArrayResult();
     // legge assenze
@@ -2096,15 +2092,15 @@ class RegistroUtil {
     foreach ($lezioni as $l) {
       if (!$data_prec || $l['data'] != $data_prec) {
         // cambio di data
-        $data_str = $l['data']->format('Y-m-d');
-        $dati['lista'][$data_str]['data'] = intval($l['data']->format('d'));
-        $dati['lista'][$data_str]['durata'] = 0;
+        $dataStr = $l['data']->format('Y-m-d');
+        $dati['lista'][$dataStr]['data'] = intval($l['data']->format('d'));
+        $dati['lista'][$dataStr]['durata'] = 0;
         if ($alunno && $this->classeInData($l['data'], $cattedra->getAlunno()) == $cattedra->getClasse()) {
-          $dati['lista'][$data_str][$alunno]['classe'] = 1;
+          $dati['lista'][$dataStr][$alunno]['classe'] = 1;
         }
       }
       // aggiorna durata lezioni
-      $dati['lista'][$data_str]['durata'] += $l['durata'];
+      $dati['lista'][$dataStr]['durata'] += $l['durata'];
       // legge assenze
       $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
         ->select('al.ore')
@@ -2114,10 +2110,10 @@ class RegistroUtil {
         ->getArrayResult();
       // somma ore di assenza per l'alunno
       foreach ($assenze as $a) {
-        if (isset($dati['lista'][$data_str][$alunno]['assenze'])) {
-          $dati['lista'][$data_str][$alunno]['assenze'] += $a['ore'];
+        if (isset($dati['lista'][$dataStr][$alunno]['assenze'])) {
+          $dati['lista'][$dataStr][$alunno]['assenze'] += $a['ore'];
         } else {
-          $dati['lista'][$data_str][$alunno]['assenze'] = $a['ore'];
+          $dati['lista'][$dataStr][$alunno]['assenze'] = $a['ore'];
         }
       }
       // memorizza data precedente
@@ -2216,7 +2212,7 @@ class RegistroUtil {
       $data_oss = $o['data']->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
       $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
@@ -2233,7 +2229,7 @@ class RegistroUtil {
       }
       $dati['lista'][$periodo][$o['alunno_id']][$data_oss][] = array(
         'id' => $o['id'],
-        'data' => $data_str,
+        'data' => $dataStr,
         'testo' => $o['testo'],
         'nome' => $o['cognome'].' '.$o['nome'].' ('.$o['dataNascita']->format('d/m/Y').')',
         'bes' => $o['bes'],
@@ -2285,7 +2281,7 @@ class RegistroUtil {
       $data_oss = $o['data']->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
       $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
@@ -2303,7 +2299,7 @@ class RegistroUtil {
       // imposta dati
       $sostegno = array(
         'id' => $o['id'],
-        'data' => $data_str,
+        'data' => $dataStr,
         'testo' => $o['testo'],
         'materia' => $o['nomeBreve'].' ('.$o['nome'].' '.$o['cognome'].')',
         'edit' => $edit,
@@ -2332,7 +2328,7 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge osservazioni
     $osservazioni = $this->em->getRepository('App\Entity\OsservazioneClasse')->createQueryBuilder('o')
-      ->where('o.cattedra=:cattedra AND o NOT INSTANCE OF App\Entity\OsservazioneAlunno')
+      ->where('o.cattedra=:cattedra AND (o NOT INSTANCE OF App\Entity\OsservazioneAlunno)')
       ->orderBy('o.data', 'DESC')
       ->setParameters(['cattedra' => $cattedra])
       ->getQuery()
@@ -2342,7 +2338,7 @@ class RegistroUtil {
       $data_oss = $o->getData()->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $o)) {
         $edit = $this->router->generate('lezioni_osservazioni_personali_edit', array(
@@ -2359,7 +2355,7 @@ class RegistroUtil {
       // memorizza dati
       $dati['lista'][$periodo][$data_oss][] = array(
         'id' => $o->getId(),
-        'data' => $data_str,
+        'data' => $dataStr,
         'testo' => $o->getTesto(),
         'edit' => $edit,
         'delete' => $delete
@@ -2566,6 +2562,21 @@ class RegistroUtil {
    * @return bool Restituisce vero se il blocco è attivo
    */
   public function bloccoScrutinio(\DateTime $data, Classe $classe=null) {
+    // controlla gruppi
+    $lista = [];
+    if ($classe && empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $lista = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($lista)) {
+      // indicata intera classe: controlla tutti i gruppo
+      $blocco = false;
+      foreach ($lista as $gruppo) {
+        $blocco |= $this->bloccoScrutinio($data, $gruppo);
+      }
+      // restituisce lista di ID
+      return $blocco;
+    }
     // blocco scrutinio
     $oggi = (new \DateTime())->format('Y-m-d');
     $modifica = $data->format('Y-m-d');
@@ -2611,34 +2622,21 @@ class RegistroUtil {
   public function programma(Cattedra $cattedra) {
     // inizializza
     $dati = array();
-    if ($cattedra->getTipo() == 'A') {
-      // cattedra di materia alternativa
-      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
-        ->getDql();
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('f.docente', 'd')
-        ->join('l.materia', 'm')
-        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
-        ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
-          'civica' => 'E'])
-        ->getQuery()
-        ->getArrayResult();
-    } else {
-      // cattedra normale
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,l.argomento')
-        ->where('l.classe=:classe AND l.materia=:materia')
-        ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()])
-        ->getQuery()
-        ->getArrayResult();
+    // legge lezioni
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+    ->select('l.id,l.data,l.ora,l.argomento')
+    ->where('l.classe=:classe AND l.materia=:materia')
+    ->orderBy('l.data,l.ora', 'ASC')
+    ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()]);
+    if ($cattedra->getMateria()->getTipo() == 'R') {
+      // religione e mat.alt.
+      $lezioni = $lezioni
+        ->andWhere("l.tipoGruppo='R' AND l.gruppo=:religione")
+        ->setParameter('religione', $cattedra->getTipo() == 'A' ? 'A' : 'S');
     }
+    $lezioni = $lezioni
+      ->getQuery()
+      ->getArrayResult();
     // imposta programma (elimina ripetizioni)
     foreach ($lezioni as $l) {
       $argomento = strip_tags($l['argomento']);
@@ -2687,30 +2685,45 @@ class RegistroUtil {
    * @return array Lista degli ID degli alunni
    */
   public function alunniInPeriodo(\DateTime $inizio, \DateTime $fine, Classe $classe) {
-      // aggiunge alunni attuali che non hanno fatto cambiamenti di classe per tutto il periodo
-      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
-        ->where('cc.alunno=a.id AND cc.inizio<=:inizio AND cc.fine>=:fine')
-        ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
-      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
-        ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-          'classe' => $classe, 'abilitato' => 1])
-        ->getQuery()
-        ->getScalarResult();
-      // aggiunge altri alunni con cambiamento nella classe nel periodo
-      $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
-        ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-          'classe' => $classe])
-        ->getQuery()
-        ->getScalarResult();
-      $alunni = array_merge($alunni, $alunni2);
-    // restituisce lista di ID
-    $alunni_id = array_map('current', $alunni);
-    return $alunni_id;
+    // controlla gruppi
+    $lista = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $lista = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($lista)) {
+      // indicata intera classe: legge alunni di tutti i gruppi
+      $alunniId = [[], []];
+      foreach ($lista as $gruppo) {
+        $altri = $this->alunniInPeriodo($inizio, $fine, $gruppo);
+        $alunniId[0] = array_merge($alunniId[0], $altri[0]);
+        $alunniId[1] = array_merge($alunniId[1], $altri[1]);
+      }
+      // restituisce lista di ID
+      return $alunniId;
+    }
+    // aggiunge alunni attuali che non hanno fatto cambiamenti di classe per tutto il periodo
+    $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
+      ->where('cc.alunno=a.id AND cc.inizio<=:inizio AND cc.fine>=:fine')
+      ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id')
+      ->where('a.classe=:classe AND a.abilitato=1 AND NOT EXISTS ('.$cambio->getDQL().')')
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'classe' => $classe])
+      ->getQuery()
+      ->getSingleColumnResult();
+    // aggiunge altri alunni con cambiamento nella classe nel periodo
+    $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->select('a.id')
+      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+      ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
+      ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'classe' => $classe])
+      ->getQuery()
+      ->getSingleColumnResult();
+    // restituisce lista di ID della classe corrente e dei cambi
+    return [$alunni, $alunni2];
   }
 
   /**
@@ -2820,10 +2833,10 @@ class RegistroUtil {
     foreach ($assenze as $a) {
       $data_assenza = $a['data']->format('Y-m-d');
       $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
+      $dataStr = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
       $dati_periodo[$numperiodo][$data_assenza]['data_obj'] = $a['data'];
-      $dati_periodo[$numperiodo][$data_assenza]['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data_assenza]['data_fine'] = $data_str;
+      $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
+      $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;
       $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
       $dati_periodo[$numperiodo][$data_assenza]['giustificato'] =
         ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
@@ -2922,6 +2935,461 @@ class RegistroUtil {
     }
     // non consentito
     return false;
+  }
+
+  /**
+   * Controlla l'ammissibilità della nuova lezione e segnala gli errori
+   *
+   * @param Cattedra|null $cattedra Cattedra della lezione
+   * @param Docente $docente Docente che inserisce la lezione
+   * @param Classe $classe Classe della lezione
+   * @param Materia $materia materia della lezione
+   * @param \DateTime $data Data di inserimento della lezione
+   * @param int $ora Ora della lezione
+   * @param array $lezioni Lista delle lezioni esistenti nell'ora indicata
+   * @param array $firme Lista delle firme delle lezioni esistenti
+   *
+   * @return array Vettore associativo con l'eventuale errore e altre informazioni
+   */
+  function controllaNuovaLezione(?Cattedra $cattedra, Docente $docente, Classe $classe, Materia $materia,
+                                 \DateTime $data, int $ora, array $lezioni, array $firme) : array {
+    // init
+    $stato = [];
+    $controllo['E:N']['-:-'] = 'ok';
+    $controllo['E:C']['-:-'] = 'ok';
+    $controllo['N:N']['-:-'] = 'ok';
+    $controllo['N:C']['-:-'] = 'ok';
+    $controllo['R:R:S']['-:-'] = 'ok';
+    $controllo['R:R:A']['-:-'] = 'ok';
+    $controllo['S:N']['-:-'] = 'ok';
+    $controllo['S:C']['-:-'] = 'okSostegno';
+    $controllo['U:N']['-:-'] = 'ok';
+    $controllo['U:C']['-:-'] = 'ok';
+    $controllo['U:R:S']['-:-'] = 'ok';
+    $controllo['U:R:A']['-:-'] = 'ok';
+    $controllo['U:R:N']['-:-'] = 'ok';
+    $controllo['E:N']['E:N'] = 'materia';
+    $controllo['N:N']['N:N'] = 'materia';
+    $controllo['S:N']['E:N'] = $controllo['S:N']['N:N'] = $controllo['S:N']['U:N'] = 'sostegno';
+    $controllo['S:C']['E:N'] = $controllo['S:C']['N:N'] = $controllo['S:C']['U:N'] = 'sostegno';
+    $controllo['U:N']['U:N'] = 'materia';
+    $controllo['E:C']['E:C'] = $controllo['E:C']['N:C'] = $controllo['E:C']['U:C'] = 'gruppo';
+    $controllo['N:C']['E:C'] = $controllo['N:C']['N:C'] = $controllo['N:C']['U:C'] = 'gruppo';
+    $controllo['S:N']['E:C'] = $controllo['S:N']['N:C'] = $controllo['S:N']['U:C'] = 'sostegno';
+    $controllo['S:C']['E:C'] = $controllo['S:C']['N:C'] = $controllo['S:C']['U:C'] = 'gruppoSostegno';
+    $controllo['U:C']['E:C'] = $controllo['U:C']['N:C'] = $controllo['U:C']['U:C'] = 'gruppo';
+    $controllo['R:R:S']['R:R'] = $controllo['R:R:S']['U:R'] = 'gruppo';
+    $controllo['R:R:A']['R:R'] = $controllo['R:R:A']['U:R'] = 'gruppo';
+    $controllo['S:N']['R:R']   = $controllo['S:N']['U:R']   = 'alunnoNA';
+    $controllo['S:C']['R:R']   = $controllo['S:C']['U:R']   = 'alunnoNA';
+    $controllo['U:R:S']['R:R'] = $controllo['U:R:S']['U:R'] = 'gruppo';
+    $controllo['U:R:A']['R:R'] = $controllo['U:R:A']['U:R'] = 'gruppo';
+    $controllo['U:R:N']['R:R'] = $controllo['U:R:N']['U:R'] = 'gruppo';
+    $controllo['E:N']['S:N'] = 'modificaSostegno';
+    $controllo['E:C']['S:N'] = 'modificaSostegno';
+    $controllo['N:N']['S:N'] = 'modificaSostegno';
+    $controllo['N:C']['S:N'] = 'modificaSostegno';
+    $controllo['R:R:S']['S:N'] = 'sostegnoNA';
+    $controllo['R:R:A']['S:N'] = 'sostegnoNA';
+    $controllo['S:N']['S:N'] = 'sostegno';
+    $controllo['S:C']['S:N'] = 'sostegno';
+    $controllo['U:N']['S:N'] = 'modificaSostegno';
+    $controllo['U:C']['S:N'] = 'modificaSostegno';
+    $controllo['U:R:S']['S:N'] = 'sostegnoNA';
+    $controllo['U:R:A']['S:N'] = 'sostegnoNA';
+    $controllo['U:R:N']['S:N'] = 'sostegnoNA';
+    // lezione firmata in altra classe
+    $altre = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
+      ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
+      ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
+      ->getQuery()
+      ->getResult();
+    // controlla sovrapposizione
+    $supplenzaNA = true;
+    if (!$cattedra && count($altre) > 0) {
+      // controlla supplenza NA su più classi
+      foreach ($altre as $lezione) {
+        $supplenzaNA &= $lezione->getMateria()->getTipo() == 'U' && $lezione->getTipoGruppo() == 'R' &&
+          $lezione->getGruppo() == 'N';
+      }
+    }
+    if (count($altre) > 0 && ($cattedra || !$supplenzaNA)) {
+      // errore: sovrapposizione
+      $stato['errore'] = $this->trans->trans('message.lezione_esiste_altra', ['ora' => $ora,
+        'classe' => $altre[0]->getClasse()]);
+      return $stato;
+    }
+    if ($cattedra) {
+      // tipo di cattedra docente
+      $tipoCattedre = [$materia->getTipo().':'.(!empty($classe->getGruppo()) ? 'C' :
+        ($materia->getTipo() == 'R' ? 'R:'.($cattedra->getTipo() == 'N' ? 'S' : 'A') : 'N'))];
+    } else {
+      // predispone tipi suppplenza
+      if (count($altre) > 0) {
+        $stato['supplenza'] = ['label.gruppo_religione_N' => 'N'];
+      } else {
+        $stato['supplenza'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
+          'label.gruppo_religione_A' => 'A', 'label.gruppo_religione_N' => 'N'];
+      }
+      if (empty($classe->getGruppo())) {
+        // cattedre di gruppo religione
+        $cattedreReligione = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+          ->select('DISTINCT c.tipo')
+          ->join('c.materia', 'm')
+          ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
+          ->setParameters(['classe' => $classe])
+          ->getQuery()
+          ->getSingleColumnResult();
+        // supplenza gruppo religione inesistente
+        if (!in_array('N', $cattedreReligione, true)) {
+          // impedisce gruppo religione inesistente
+          unset($stato['supplenza']['label.gruppo_religione_S']);
+        }
+        if (!in_array('A', $cattedreReligione, true)) {
+          // impedisce gruppo mat.alt. inesistente
+          unset($stato['supplenza']['label.gruppo_religione_A']);
+        }
+      } else {
+        // impedisce gruppi religione se presente gruppo classe
+        unset($stato['supplenza']['label.gruppo_religione_S']);
+        unset($stato['supplenza']['label.gruppo_religione_A']);
+        unset($stato['supplenza']['label.gruppo_religione_N']);
+      }
+      // tipo di cattedra docente
+      $tipoCattedre = [];
+      foreach ($stato['supplenza'] as $supplenza) {
+        $tipoCattedre[] = 'U:'.($supplenza == 'T' ? (empty($classe->getGruppo()) ? 'N' : 'C') :
+          'R:'.$supplenza);
+      }
+    }
+    // legge tipi lezioni esistenti
+    $tipiLezioni = count($lezioni) == 0 ? ['-:-'] : [];
+    foreach ($lezioni as $lezione) {
+      $tipiLezioni[] = $lezione->getMateria()->getTipo().':'.$lezione->getTipoGruppo();
+    }
+    // controlla cattedre
+    foreach ($tipoCattedre as $tipoCattedra) {
+      $compatibili = [];
+      foreach ($tipiLezioni as $tipoLezione) {
+        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra]), true)) {
+          $compatibili[] = $tipoLezione;
+        }
+      }
+      if (empty($compatibili)) {
+        // errore: cattedra non compatibile
+        switch ($tipoCattedra) {
+          case 'U:N':
+          case 'U:C':
+            unset($stato['supplenza']['label.gruppo_religione_T']);
+            break;
+          case 'U:R:S':
+          case 'U:R:A':
+          case 'U:R:N':
+            unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+            break;
+          default:
+            // cattedra curricolare o sostegno: esce
+            $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+            return $stato;
+        }
+      }
+      // procedura di controllo (deve essere sempre unica)
+      $procedure = array_unique(array_map(fn($c) => $controllo[$tipoCattedra][$c], $compatibili));
+      if (count($procedure) > 0) {
+        switch ($procedure[0]) {
+          case 'materia':  // controllo compresenza su area comune
+            foreach ($lezioni as $lezione) {
+              if ($lezione->getMateria()->getId() == $materia->getId()) {
+                $stato['compresenza'] = $lezione;
+              }
+            }
+            if (empty($stato['compresenza'])) {
+              // errore: materia/gruppo incompatibile
+              switch ($tipoCattedra) {
+                case 'U:N':
+                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
+          case 'gruppo':  // controlli su gruppo classe/religione
+            $gruppi = [];
+            $gruppoClasse = !empty($classe->getGruppo()) ? 'C:'.$classe->getGruppo() :
+              substr($tipoCattedra, 2);
+            $compresenza = false;
+            foreach ($lezioni as $lezione) {
+              $gruppi[] = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+              if ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
+                  $lezione->getMateria()->getId() == $materia->getId()) {
+                $compresenza = true;
+                if ($materia->getTipo() != 'U' || $lezione->getTipoGruppo() != 'R') {
+                  // non considera supplenza su religione per compresenza su argomenti
+                  $stato['compresenza'] = $lezione;
+                }
+              } elseif ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
+                        $lezione->getMateria()->getTipo() == 'S') {
+                $compresenza = true;
+              }
+            }
+            if (!$compresenza && in_array($gruppoClasse, $gruppi)) {
+              // errore: materia/gruppo incompatibile
+              switch ($tipoCattedra) {
+                case 'U:C':
+                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  break;
+                case 'U:R:S':
+                case 'U:R:A':
+                case 'U:R:N':
+                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
+          case 'alunnoNA':  // controllo se cattedra sostegno su alunno NA
+            if ($cattedra->getAlunno() &&
+                !in_array($cattedra->getAlunno()->getReligione(), ['S', 'A'], true)) {
+              // errore: sostegno di alunno NA su gruppo religione
+              $stato['errore'] = $this->trans->trans('message.lezione_sostegno_NA_con_religione',
+                ['ora' => $ora]);
+              return $stato;
+            }
+            break;
+          case 'sostegnoNA':  // controllo se presente lezione sostegno su alunno NA
+            $alunnoNA = false;
+            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+              if ($firma->getLezione()->getMateria()->getTipo() == 'S' &&
+                  ($firma instanceOf FirmaSostegno) && $firma->getAlunno() &&
+                  !in_array($firma->getAlunno()->getReligione(), ['S', 'A'], true)) {
+                $alunnoNA = true;
+                break;
+              }
+            }
+            if ($alunnoNA) {
+              // errore: gruppo religione su sostegno NA
+              switch ($tipoCattedra) {
+                case 'U:R:S':
+                case 'U:R:A':
+                case 'U:R:N':
+                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  break;
+                default:
+                  // cattedra curricolare o sostegno: esce
+                  $stato['errore'] = $this->trans->trans('message.lezione_sostegno_NA_con_religione',
+                    ['ora' => $ora]);
+                  return $stato;
+              }
+            }
+            break;
+            // nessun controllo su procedure: ok, okSostegno, sostegno, gruppoSostegno, modificaSostegno
+        }
+        // conserva trasformazione
+        $stato['trasforma'][$tipoCattedra] = $procedure[0];
+      }
+    }
+    if (!$cattedra && count($stato['supplenza']) == 0) {
+      // errore: supplenza impossibile
+      $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+      return $stato;
+    }
+    // ok: nessun errore
+    return $stato;
+  }
+
+  /**
+   * Modifica le lezioni esistenti per adattarla alla nuova.
+   *
+   * @param Cattedra|null $cattedra Cattedra della lezione
+   * @param Materia $materia Materia della lezione
+   * @param string $tipoGruppo Tipo del gruppo della nuova lezione
+   * @param string $gruppo Gruppo della nuova lezione
+   * @param array $controllo Informazioni di controllo
+   * @param array $lezioni Lista delle lezioni esistenti
+   * @param array $firme Lista delle firme delle lezioni esistenti
+   *
+   * @return array Vettore associativo con la lezione e informazioni per le modifiche
+   */
+  function trasformaNuovaLezione(?Cattedra $cattedra, Materia $materia, string $tipoGruppo,
+                                 string $gruppo, array $controllo, array $lezioni, array $firme): array  {
+    // init
+    $stato = [];
+    $tipoCattedra = $materia->getTipo().':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
+    $procedura = $controllo['trasforma'][$tipoCattedra];
+    if (count($lezioni) > 0) {
+      // trasformazione
+      switch ($procedura) {
+        case 'gruppo':  // trasforma lezione gruppo classe o religione
+          foreach ($lezioni as $lezione) {
+            if ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
+                $lezione->getMateria()->getId() == $materia->getId()) {
+              // compresenza: firma lezione esistente
+              $stato['lezione'] = $lezione;
+              break;
+            } elseif ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
+                      $lezione->getMateria()->getTipo() == 'S') {
+              // gruppo su sostegno: modifica lezione e firma
+              $vecchiaLezione = clone $lezione;
+              $lezione->setMateria($materia);
+              $stato['lezione'] = $lezione;
+              $stato['log']['modifica'][] = [$vecchiaLezione, $lezione];
+              break;
+            }
+          }
+          // se gruppo non presente: crea nuova lezione su gruppo e firma
+          break;
+        case 'gruppoSostegno':
+          foreach ($lezioni as $lezione) {
+            if ($lezione->getGruppo() == $gruppo) {
+              // gruppo esistente: firma sostegno
+              $stato['lezione'] = $lezione;
+              break;
+            }
+          }
+          if (empty($stato)) {
+            // gruppo non presente: crea nuova lezione su gruppo e firma
+            $stato['modifica']['Classe'] = $this->em->getRepository('App\Entity\Classe')->findOneBy([
+              'anno' => $lezioni[0]->getClasse()->getAnno(),
+              'sezione' => $lezioni[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
+            $stato['modifica']['TipoGruppo'] = 'C';
+            $stato['modifica']['Gruppo'] = $gruppo;
+          }
+          break;
+        case 'alunnoNA':
+          foreach ($lezioni as $lezione) {
+            if (($cattedra->getAlunno() &&
+                $cattedra->getAlunno()->getReligione() == $lezione->getGruppo()) ||
+                (!$cattedra->getAlunno() && in_array($lezione->getGruppo(), ['S', 'A']))) {
+              // gruppo esistente: firma
+              $stato['lezione'] = $lezione;
+              break;
+            }
+          }
+          if (empty($stato)) {
+            // crea sostegno su gruppo di religione alunno o su Religione se non c'è alunno
+            $stato['modifica']['TipoGruppo'] = 'R';
+            $stato['modifica']['Gruppo'] = $cattedra->getAlunno() ?
+              $cattedra->getAlunno()->getReligione() : 'S';
+          }
+          break;
+        case 'modificaSostegno':
+          if ($tipoGruppo == 'N') {
+            // modifica sostegno su materia, poi firma
+            $vecchiaLezione = clone $lezioni[0];
+            $stato['lezione'] = $lezioni[0];
+            $stato['lezione']->setMateria($materia);
+            $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
+          } else {
+            // cancella assenze esistenti
+            $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+              ->delete()
+              ->where('al.lezione=:lezione')
+              ->setParameters(['lezione' => $lezioni[0]->getId()])
+              ->getQuery()
+              ->execute();
+            // modifica sostegno presente su altri gruppi
+            $nuoviGruppi = [];
+            foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+              if ($firma->getAlunno() &&
+                  $firma->getAlunno()->getClasse()->getGruppo() != $gruppo) {
+                $nuoviGruppi[$firma->getAlunno()->getClasse()->getGruppo()][] = $firma;
+              }
+            }
+            if (!empty($nuoviGruppi)) {
+              // crea nuovi gruppi
+              foreach ($nuoviGruppi as $nuovoGruppo => $listaFirme) {
+                $nuovaLezione = clone ($listaFirme[0]->getLezione());
+                $nuovaLezione->setTipoGruppo('C')->setGruppo($nuovoGruppo)
+                  ->setClasse($listaFirme[0]->getAlunno()->getClasse());
+                $this->em->persist($nuovaLezione);
+                foreach ($listaFirme as $firma) {
+                  $vecchiaFirma = clone $firma;
+                  $firma->setLezione($nuovaLezione);
+                  $stato['log']['modifica'][] = [$vecchiaFirma, $firma];
+                }
+                // nuove lezioni
+                $stato['assenze'][] = $nuovaLezione;
+                $stato['log']['crea'][] = $nuovaLezione;
+              }
+            }
+            // modifica sostegno su gruppo e materia, poi firma
+            $vecchiaLezione = clone $lezioni[0];
+            $nuovaClasse = $this->em->getRepository('App\Entity\Classe')->findOneBy([
+              'anno' => $lezioni[0]->getClasse()->getAnno(),
+              'sezione' => $lezioni[0]->getClasse()->getSezione(), 'gruppo' => $gruppo]);
+            $stato['lezione'] = $lezioni[0];
+            $stato['lezione']->setMateria($materia)->setTipoGruppo('C')->setGruppo($gruppo)
+              ->setClasse($nuovaClasse);
+            $stato['assenze'][] = $stato['lezione'];
+            $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
+          }
+          break;
+        case 'sostegnoNA':
+          // cancella assenze esistenti
+          $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+            ->delete()
+            ->where('al.lezione=:lezione')
+            ->setParameters(['lezione' => $lezioni[0]->getId()])
+            ->getQuery()
+            ->execute();
+          // modifica sostegno presente su altri gruppi
+          $nuoviGruppi = [];
+          $noAlunno = [];
+          foreach (array_reduce($firme, 'array_merge', []) as $firma) {
+            if ($firma->getAlunno() &&
+                $firma->getAlunno()->getReligione() != $gruppo) {
+              $nuoviGruppi[$firma->getAlunno()->getReligione()][] = $firma;
+            } elseif (!$firma->getAlunno()) {
+              $noAlunno[] = $firma;
+            }
+          }
+          if ($gruppo == 'N' && !empty($noAlunno)) {
+            if (empty($nuoviGruppi)) {
+               // associa sostegno senza alunno al gruppo religione
+               $nuoviGruppi['S'] = $noAlunno;
+            } else {
+              // associa sostegno senza alunno al primo gruppo
+              $nuoviGruppi[array_key_first($nuoviGruppi)] = array_merge(
+                $nuoviGruppi[array_key_first($nuoviGruppi)], $noAlunno);
+            }
+          }
+          if (!empty($nuoviGruppi)) {
+            // crea nuovi gruppi
+            foreach ($nuoviGruppi as $nuovoGruppo => $listaFirme) {
+              $nuovaLezione = clone ($listaFirme[0]->getLezione());
+              $nuovaLezione->setTipoGruppo('R')->setGruppo($nuovoGruppo);
+              $this->em->persist($nuovaLezione);
+              foreach ($listaFirme as $firma) {
+                $vecchiaFirma = clone $firma;
+                $firma->setLezione($nuovaLezione);
+                $stato['log']['modifica'][] = [$vecchiaFirma, $firma];
+              }
+              // nuove lezioni
+              $stato['assenze'][] = $nuovaLezione;
+              $stato['log']['crea'][] = $nuovaLezione;
+            }
+          }
+          // modifica sostegno su gruppo e materia, poi firma
+          $vecchiaLezione = clone $lezioni[0];
+          $stato['lezione'] = $lezioni[0];
+          $stato['lezione']->setMateria($materia)->setTipoGruppo('R')->setGruppo($gruppo);
+          $stato['assenze'][] = $stato['lezione'];
+          $stato['log']['modifica'][] = [$vecchiaLezione, $stato['lezione']];
+          break;
+        default:  // procedure: materia, sostegno
+          // unica lezione esistente: firma
+          $stato['lezione'] = $lezioni[0];
+      }
+    }
+    // restituisce trasformazione
+    return $stato;
   }
 
 }

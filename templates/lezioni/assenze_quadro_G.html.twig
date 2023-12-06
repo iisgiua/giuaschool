@@ -8,7 +8,7 @@
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_assenze'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_assenze'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
     {% if errore %}
   <div class="row gs-mb-5">
@@ -29,14 +29,24 @@
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-2 text-center">
-      {% if dati[data].pulsante_appello is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+      {% if dati[data].pulsante_appello is defined %}
       <a class="btn btn-success" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello"><span class="glyphicon glyphicon-hand-up gs-mr-3"></span>Appello</a>
       {% endif %}
     </div>
-    <div class="col-sm-5 text-right">
+    <div class="col-sm-3 text-right">
+      {% if not cattedra %}
+      <strong class="gs-big gs-mr-2">Filtro:</strong>
+      <select id="gs-filtro-alunni" class="gs-placeholder form-control" style="width:auto;display:inline;">
+        <option value="T">Tutti</option>
+        <option value="S">Gruppo: Religione</option>
+        <option value="A">Gruppo: Mat. Alt.</option>
+        <option value="N">Gruppo: N. A.</option>
+      </select>
+      {% endif %}
+    </div>
+    <div class="col-sm-2 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le assenze del giorno"><span class="glyphicon glyphicon-stop"></span></a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza le assenze della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza le assenze del mese"><span class="glyphicon glyphicon-th"></span></a>
     </div>
   </div>
@@ -59,7 +69,7 @@
     <tbody>
           {% for k,v in dati[data].lista %}
             {% if (tab == 'N' and (not cattedra or cattedra.materia.tipo != 'R' or v.religione == tipo_rel)) or (tab == 'R' and v.religione != tipo_rel) %}
-      <tr>
+      <tr id="gs-alunno-{{ v.id_alunno }}" class="gs-alunno-riga">
         <td>{{ loop.index }}</td>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
@@ -71,17 +81,13 @@
           <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
               {% endif %}
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: v, g: dati[data].genitori[v.id_alunno]} %}
+              {% if dati.cambio[v.id_alunno] is defined %}
+          <br><strong class="text-danger">{{ dati.cambio[v.id_alunno] }}</strong>
+              {% endif %}
         </td>
         <td>
               {% if v.id_assenza %}
           <span class="label label-danger">Assente</span>
-                {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-                  {% for o,ol in dati[data].ore.id %}
-                    {% if v.id_alunno in ol %}
-                      <span class="label label-default">{{ o }}ª</span>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
               {% endif %}
               {% if v.id_entrata %}
           <span class="label label-warning gs-mr-1"{% if v.note_entrata %} title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note_entrata }}"{% endif %}>Ritardo ({{ v.ora_entrata|date('H:i') }})
@@ -120,19 +126,19 @@
               {% endif %}
         </td>
         <td>
-              {% if v.pulsante_presenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_presenza is defined %}
           <button type="button" class="{{ v.pulsante_presenza == '#' ? 'disabled ' }}btn btn-success btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_presenza }}" title="Segna la presenza dell'alunno">P</button>
               {% endif %}
-              {% if v.pulsante_assenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_assenza is defined %}
           <button type="button" class="{{ v.pulsante_assenza == '#' ? 'disabled ' }}btn btn-danger btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_assenza }}" title="Segna l'assenza dell'alunno">A</button>
               {% endif %}
-              {% if v.pulsante_entrata is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_entrata is defined %}
           <button type="button" class="{{ v.pulsante_entrata == '#' ? 'disabled ' }}btn btn-warning btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_entrata }}" title="Segna il ritardo dell'alunno">R</button>
               {% endif %}
-              {% if v.pulsante_uscita is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_uscita is defined %}
           <button type="button" class="{{ v.pulsante_uscita == '#' ? 'disabled ' }}btn btn-warning btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_uscita }}" title="Segna l'uscita anticipata dell'alunno">U</button>
               {% endif %}
-              {% if v.pulsante_fc is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+              {% if v.pulsante_fc is defined %}
           <button type="button" class="{{ v.pulsante_fc == '#' ? 'disabled ' }}btn gs-btn-secondary btn-xs gs-button-remote gs-mb-1" data-href="{{ v.pulsante_fc }}" title="Imposta o elimina il fuori classe dell'alunno">FC</button>
               {% endif %}
               {% if v.pulsante_giustifica is defined %}
@@ -218,10 +224,24 @@ $(document).ready(function() {
       window.location.href = url+'/'+Math.floor($('html').scrollTop());
     }
   });
+  $('#gs-filtro-alunni').change(function() {
+    if ($(this).val() == 'T') {
+      $('.gs-alunno-riga').show();
+    } else {
+      $('.gs-alunno-riga').hide();
+      for (i=0; i < filtro[$(this).val()].length; i++) {
+        $('#gs-alunno-'+filtro[$(this).val()][i]).show();
+      }
+    }
+  });
   // init
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}
+  var filtro = [];
+  filtro['S'] = [{% for a in dati.filtro['S'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
+  filtro['A'] = [{% for a in dati.filtro['A'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
+  filtro['N'] = [{% for a in dati.filtro['N'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
 });
 </script>
 {% endblock %}

@@ -26,7 +26,7 @@ App\Entity\Ata:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -41,7 +41,7 @@ App\Entity\Ata:
     segreteria: true
     sede:
     rappresentante: '<(array())>'
-  ata_{A, T, C, U}1:
+  ata_{A, T, C, U}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".a")>'
     nome: '<datoUtente("nome")>'
@@ -53,7 +53,7 @@ App\Entity\Ata:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -65,33 +65,6 @@ App\Entity\Ata:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     tipo: '<current()>'
-    segreteria: '<($tipo == "A" || $tipo == "D" ? true : false)>'
-    sede: '@sede_1'
-    rappresentante: '<(array())>'
-  ata_{T, C}2:
-    sesso: '<randomElement(["M", "F"])>'
-    username (unique): '<generaUtente($sesso, ".a")>'
-    nome: '<datoUtente("nome")>'
-    cognome: '<datoUtente("cognome")>'
-    password: '<datoUtente("password")>'
-    email: '$username@lovelace.edu.it'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
-    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
-    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
-    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
-    indirizzo: '50%? <streetAddress()>: <strval("")>'
-    numeriTelefono: '<telefono(2)>'
-    notifica: '<(array())>'
-    tipo: '<current()>'
-    segreteria: false
-    sede: '@sede_2'
+    segreteria: '<($tipo == "A" ? true : false)>'
+    sede: '@sede_*'
     rappresentante: '<(array())>'

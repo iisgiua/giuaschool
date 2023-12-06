@@ -37,26 +37,6 @@
     <div class="col-sm-2"><strong>Stato:</strong></div>
     <div class="col-sm-10">{{ circolare.pubblicata ? 'PUBBLICATA' : 'IN BOZZA' }}</div>
   </div>
-  {% if circolare.pubblicata %}
-  <div class="row gs-mt-2">
-    <div class="col-sm-2"><strong>Lettura:</strong></div>
-    <div class="col-sm-10">
-    {% if circolare.alunni != 'N' and circolare.alunni != 'U' %}
-      <strong>NELLE CLASSI {{ (dati.lettura['CLASSI'][1] / dati.lettura['CLASSI'][0] * 100)|number_format(0) }}%</strong>
-      {% if dati.lettura['CLASSI'][2]|length > 0 %}
-      (non letta in: {% for c in dati.lettura['CLASSI'][2] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %})
-      {% endif %}
-      <br>
-    {% endif %}
-    {% if circolare.dsga %}DSGA {{ (dati.lettura['DSGA'][1] / dati.lettura['DSGA'][0] * 100)|number_format(0) }}% ({{ dati.lettura['DSGA'][1] }} su {{ dati.lettura['DSGA'][0] }})<br>{% endif %}
-    {% if circolare.ata %}ATA {{ (dati.lettura['ATA'][1] / dati.lettura['ATA'][0] * 100)|number_format(0) }}% ({{ dati.lettura['ATA'][1] }} su {{ dati.lettura['ATA'][0] }})<br>{% endif %}
-    {% if circolare.coordinatori != 'N' %}COORDINATORI {{ (dati.lettura['COORD'][1] / dati.lettura['COORD'][0] * 100)|number_format(0) }}% ({{ dati.lettura['COORD'][1] }} su {{ dati.lettura['COORD'][0] }})<br>{% endif %}
-    {% if circolare.docenti != 'N' %}DOCENTI {{ (dati.lettura['DOC'][1] / dati.lettura['DOC'][0] * 100)|number_format(0) }}% ({{ dati.lettura['DOC'][1] }} su {{ dati.lettura['DOC'][0] }})<br>{% endif %}
-    {% if circolare.genitori != 'N' %}GENITORI {{ (dati.lettura['GEN'][1] / dati.lettura['GEN'][0] * 100)|number_format(0) }}% ({{ dati.lettura['GEN'][1] }} su {{ dati.lettura['GEN'][0] }})<br>{% endif %}
-    {% if circolare.alunni != 'N' %}ALUNNI {{ (dati.lettura['ALU'][1] / dati.lettura['ALU'][0] * 100)|number_format(0) }}% ({{ dati.lettura['ALU'][1] }} su {{ dati.lettura['ALU'][0] }})<br>{% endif %}
-    </div>
-  </div>
-  {% endif %}
   <div class="row gs-mt-2">
     <div class="col-sm-2"><strong>Documento:</strong></div>
     <div class="col-sm-10">

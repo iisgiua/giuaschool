@@ -65,15 +65,24 @@ class AssenzaRepository extends BaseRepository {
   public function assentiInData(Classe $classe, \DateTime $data): array {
     // crea query base
     $assenti = $this->createQueryBuilder('ass')
-      ->select('a.cognome,a.nome')
+      ->select('a.cognome,a.nome,a.dataNascita')
       ->join('ass.alunno', 'a')
-      ->where('ass.data=:data AND a.abilitato=:abilitato AND a.classe=:classe')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'abilitato' => 1, 'classe' => $classe])
+      ->join('a.classe', 'c')
+      ->where('ass.data=:data AND a.abilitato=:abilitato AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameters(['data' => $data->format('Y-m-d'), 'abilitato' => 1, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione()]);
+    if (!empty($classe->getGruppo())) {
+      $assenti = $assenti
+        ->andWhere('c.gruppo=:gruppo')
+        ->setParameter('gruppo', $classe->getGruppo());
+    }
+    $assenti = $assenti
       ->getQuery()
       ->getResult();
     $dati = [];
     foreach ($assenti as $assente) {
-      $dati[] = $assente['cognome'].' '.$assente['nome'];
+      $dati[] = $assente['cognome'].' '.$assente['nome'].' ('.
+        $assente['dataNascita']->format('d/m/Y').')';
     }
     // restituisce dati
     return $dati;

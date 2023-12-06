@@ -27,7 +27,7 @@ class CambioClasseRepository extends BaseRepository {
   public function cerca($criteri, $pagina=1) {
     // crea query base
     $query = $this->createQueryBuilder('cc')
-      ->select('cc AS cambio,a.cognome,a.nome,a.dataNascita,cl.anno,cl.sezione')
+      ->select('cc AS cambio,a.cognome,a.nome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
       ->join('cc.alunno', 'a')
       ->leftJoin('cc.classe', 'cl')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')

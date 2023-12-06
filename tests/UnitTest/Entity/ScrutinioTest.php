@@ -32,7 +32,7 @@ class ScrutinioTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_scrutinio' => ['id', 'creato', 'modificato', 'periodo', 'data', 'inizio', 'fine', 'stato', 'classe_id', 'dati', 'visibile', 'sincronizzazione'],
       'gs_classe' => '*'];
@@ -73,7 +73,7 @@ class ScrutinioTest extends EntityTestCase {
           ($field == 'inizio' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'fine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'classe' ? $this->getReference("classe_".($i +1)) :
+          ($field == 'classe' ? $this->getReference("classe_".($i + 1)."A") :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'visibile' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'sincronizzazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1)) :

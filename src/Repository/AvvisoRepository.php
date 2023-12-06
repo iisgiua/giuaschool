@@ -90,19 +90,19 @@ class AvvisoRepository extends BaseRepository {
       $dati['coordinatori'] = array($utenti[0]['tot'], $utenti[0]['letti'], []);
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
-        ->select('d.cognome,d.nome,c.anno,c.sezione,au.letto')
+        ->select('d.cognome,d.nome,c.anno,c.sezione,c.gruppo,au.letto')
         ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
         ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
         ->join('App\Entity\Classe', 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
         ->setParameters(['avviso' => $avviso])
-        ->orderBy('c.anno,c.sezione', 'ASC')
+        ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
         ->getQuery()
         ->getArrayResult();
       foreach ($utenti as $utente) {
         $dati['coordinatori'][2][] = [
           $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
           $utente['cognome'].' '.$utente['nome']];
       }
     }
@@ -146,20 +146,20 @@ class AvvisoRepository extends BaseRepository {
       $dati['genitori'] = array($utenti[0]['tot'], $utenti[0]['letti']);
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
-        ->select('al.cognome,al.nome,c.anno,c.sezione,g.cognome AS cognome_gen,g.nome AS nome_gen,au.letto')
+        ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,g.cognome AS cognome_gen,g.nome AS nome_gen,au.letto')
         ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
         ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=au.utente')
         ->join('g.alunno', 'al')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
         ->setParameters(['avviso' => $avviso])
-        ->orderBy('c.anno,c.sezione,al.cognome,al.nome', 'ASC')
+        ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
       foreach ($utenti as $utente) {
         $dati['genitori'][2][] = [
           $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
           $utente['cognome'].' '.$utente['nome'].
           ' ('.$utente['cognome_gen'].' '.$utente['nome_gen'].')'];
       }
@@ -177,19 +177,19 @@ class AvvisoRepository extends BaseRepository {
       $dati['alunni'] = array($utenti[0]['tot'], $utenti[0]['letti']);
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
-        ->select('al.cognome,al.nome,c.anno,c.sezione,au.letto')
+        ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,au.letto')
         ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
         ->join('App\Entity\Alunno', 'al', 'WITH', 'al.id=au.utente')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
         ->setParameters(['avviso' => $avviso])
-        ->orderBy('c.anno,c.sezione,al.cognome,al.nome', 'ASC')
+        ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
       foreach ($utenti as $utente) {
         $dati['alunni'][2][] = [
           $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
           $utente['cognome'].' '.$utente['nome']];
       }
       // classi
@@ -206,15 +206,16 @@ class AvvisoRepository extends BaseRepository {
         if ($classi[0]['tot'] > $classi[0]['letti']) {
           // lista classi in cui va letta
           $classi = $this->createQueryBuilder('a')
-            ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome")
+            ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome,cl.gruppo")
             ->join('App\Entity\AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
             ->join('ac.classe', 'cl')
             ->where('a.id=:avviso AND ac.letto IS NULL')
             ->setParameters(['avviso' => $avviso])
-            ->orderBy('cl.anno,cl.sezione', 'ASC')
+            ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
             ->getQuery()
             ->getArrayResult();
-          $dati['classi'][2] = array_column($classi, 'nome');
+          $dati['classi'][2] = array_map(
+            fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
         }
       }
     }

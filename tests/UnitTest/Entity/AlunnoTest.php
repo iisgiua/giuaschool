@@ -32,7 +32,7 @@ class AlunnoTest extends EntityTestCase {
     $this->noStoredFields = ['genitori'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_utente' => ['bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL write
@@ -79,7 +79,7 @@ class AlunnoTest extends EntityTestCase {
           ($field == 'giustificaOnline' ? $this->faker->boolean() :
           ($field == 'richiestaCertificato' ? $this->faker->boolean() :
           ($field == 'foto' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
-          ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'username' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
           ($field == 'password' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :

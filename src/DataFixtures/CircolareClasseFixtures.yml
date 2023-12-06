@@ -1,0 +1,19 @@
+####################
+# CircolareClasseFixtures - dati di test
+#
+# Associazione tra la circolare e le classi di destinazione:
+#   circolare: circolare a cui ci si riferisce
+#   classe: classe in cui deve essere letta la circolare
+#   letta: data e ora di lettura della circolare nella classe
+####################
+
+
+include:
+  - CircolareFixtures.yml
+
+
+App\Entity\CircolareClasse:
+  circolare_classe_perclasse_{1..2}:
+    circolare: '@circolare_perclasse'
+    classe: '@classe_<($current == 1 ? "1A" : "2A")>'
+    letta: '50%? <dateTimeBetween("-1 month", "now")>'

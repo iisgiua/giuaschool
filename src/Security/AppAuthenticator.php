@@ -270,7 +270,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'App', array(
       'Login' => 'app',
-      'Username' => $token->getUser()->getUsername(),
+      'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
       'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione

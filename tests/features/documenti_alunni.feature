@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione documenti degli alunni da parte dello staff
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login staff di scuola
@@ -75,7 +76,7 @@ Scenario: visualizza più documenti per alunno BES
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       |
     | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Pdf   |
+    |                                     |        | Documento Pdf   |
 
 
 ################################################################################
@@ -199,7 +200,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id  | docente | classe | attiva | tipo |
     | $c1 | #logged | $cl1   | si     | N    |
   E pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone

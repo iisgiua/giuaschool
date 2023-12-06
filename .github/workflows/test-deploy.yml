@@ -46,7 +46,7 @@ jobs:
           docker save --output ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar gs:test
 
       - name: Create archive for update code
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
         run: |
           docker build -t gs:prod --target application_prod -f tests/docker/Dockerfile .
           docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
@@ -94,7 +94,7 @@ jobs:
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage report
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -148,7 +148,7 @@ jobs:
           docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   test-update:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
     needs: build
     name: Test update procedure
     runs-on: ubuntu-latest

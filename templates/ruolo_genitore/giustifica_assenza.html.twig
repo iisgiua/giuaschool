@@ -1,18 +1,7 @@
 {{ form_start(form) }}
   <div class="modal-header">
     <h3 class="modal-title gs-h3">{{ info.alunno }} - Classe: {{ info.classe }}</h3>
-  {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-    <h4 class="modal-title text-info gs-h4"><em>Giustificazione dell'assenza del giorno {{ info.assenza.data }}
-    {% if info.assenza.ore|length > 0 %}
-      nelle ore:
-      {% for o in info.assenza.ore %}
-        {{ o }}ª{{ not loop.last ? ',' }}
-      {% endfor %}
-    {% endif %}
-    </em></h4>
-  {% else %}
     <h4 class="modal-title text-info gs-h4"><em>Giustificazione {% if info.assenza.giorni == 1 %}dell'assenza del giorno: {{ info.assenza.data }}{% else %}del periodo di assenza: dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %}</em></h4>
-  {% endif %}
   </div>
   <div class="modal-body">
     <div class="form-group gs-pl-4 gs-pr-4">
@@ -22,52 +11,7 @@
     <div class="form-group gs-pl-4 gs-pr-4">
       {{ form_widget(form.motivazione) }}
     </div>
-  {% if app.session.get('/CONFIG/SCUOLA/assenze_dichiarazione') %}
-    <div class="form-group gs-pl-4 gs-pr-4">
-      <p class="text-center"><strong>AUTODICHIARAZIONE</strong></p>
-    {% if is_granted('ROLE_GENITORE') %}
-      <p><em>
-        {{ form_widget(form.genitoreSesso) }} {{ form_widget(form.genitoreNome) }}
-        <span id="gs-genitore-nascita">nato</span> il {{ form_widget(form.genitoreNascita) }}
-        a {{ form_widget(form.genitoreCitta) }},
-        {{ form_widget(form.genitoreRuolo) }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
-        <strong>{{ alunno.cognome }} {{ alunno.nome }}</strong>
-        (codice fiscale {{ alunno.codiceFiscale }}) frequentante la classe {{ info.classe }}
-        presso l'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }},
-        in qualità di esercente la responsabilità genitoriale,
-        consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
-        dichiara che l'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}:
-      </em></p>
-      <ul>
-        <li><em>è stato assente {% if info.assenza.giorni == 1 %}il giorno {{ info.assenza.data }}{% else %}dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %};</em></li>
-        <li><em>non ha presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</em></li>
-        <li><em>non è stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
-        <li><em>non è stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
-      </ul>
-    {% else %}
-      <p><em>
-        {{ alunno.sesso == 'M' ? 'Il sottoscritto' : 'La sottoscritta' }}
-        <strong>{{ alunno.cognome }} {{ alunno.nome }}</strong>
-        {{ alunno.sesso == 'M' ? 'nato' : 'nata' }} il {{ alunno.dataNascita|date('d/m/Y') }}
-        a {{ alunno.comuneNascita }} (codice fiscale {{ alunno.codiceFiscale }}),
-        frequentante la classe {{ info.classe }}
-        presso l'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }},
-        consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
-        dichiara:
-      </em></p>
-      <ul>
-        <li><em>di essere stato assente {% if info.assenza.giorni == 1 %}il giorno {{ info.assenza.data }}{% else %}dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %};</em></li>
-        <li><em>di non aver presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</em></li>
-        <li><em>di non essere stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
-        <li><em>di non essere stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
-      </ul>
-    {% endif %}
-      <p><em>La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</em></p>
-      <p><em>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ date()|date('d/m/Y') }}.</em></p>
-      {{ form_widget(form.firma) }}
-    </div>
   </div>
-  {% endif %}
   <div class="modal-footer">
     {{ form_widget(form.submit) }}
   {% if info.assenza.giustificato %}

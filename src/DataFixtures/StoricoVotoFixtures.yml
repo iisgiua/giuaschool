@@ -16,9 +16,9 @@ include:
 
 
 App\Entity\StoricoVoto:
-  storico_voto_{1..10}:
+  storico_voto_{1..5}:
     voto: '<numberBetween(1, 10)>'
     carenze: '50%? <text()>: <strval("")>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    storicoEsito: '@storico_esito_<current()>'
-    materia: '@materia_*'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    storicoEsito: '@storico_esito_F'
+    materia: '@materia_curricolare_<current()>'

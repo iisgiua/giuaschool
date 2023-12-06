@@ -9,16 +9,13 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Documento;
 
 
 /**
@@ -35,24 +32,11 @@ class DocumentoType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    // funzioni per l'elenco delle classi
-    $fnSede = function(EntityRepository $er) {
-      return $er->createQueryBuilder('c')
-        ->orderBy('c.anno,c.sezione', 'ASC'); };
-    if (in_array($options['formMode'], ['B', 'H', 'D', 'docenti', 'alunni']) &&
-        !empty($options['values'][0])) {
-      // filtro su sede
-      $fnSede = function(EntityRepository $er) use ($options) {
-        return $er->createQueryBuilder('c')
-          ->where('c.sede=:sede')
-          ->setParameter('sede', $options['values'][0])
-          ->orderBy('c.anno,c.sezione', 'ASC'); };
-    }
-    if ($options['formMode'] == 'docenti') {
+    if ($options['form_mode'] == 'docenti') {
       // form filtro documenti docenti
       $builder
         ->add('filtro', ChoiceType::class, array('label' => 'label.filtro_documenti',
-          'data' => $options['values'][1],
+          'data' => $options['values'][0],
           'choices' => ['label.documenti_presenti' => 'D', 'label.documenti_mancanti' => 'M',
             'label.documenti_tutti' => 'T'],
           'label_attr' => ['class' => 'sr-only'],
@@ -60,21 +44,20 @@ class DocumentoType extends AbstractType {
           'attr' => ['class' => 'gs-placeholder'],
           'required' => true))
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
-          'data' => $options['values'][2],
+          'data' => $options['values'][1],
           'choices' => ['label.piani' => 'L', 'label.programmi' => 'P', 'label.relazioni' => 'R',
             'label.maggio' => 'M'],
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val) { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => true))
-        ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'data' => $options['values'][3],
-          'class' => 'App\Entity\Classe',
-          'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
           'placeholder' => 'label.tutte_classi',
-          'query_builder' => $fnSede,
-          'group_by' => function($obj) { return $obj->getSede()->getCitta(); },
+          'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
+          'choice_value' => 'id',
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
@@ -82,11 +65,11 @@ class DocumentoType extends AbstractType {
           'attr' => ['class' => 'btn-primary']));
       return;
     }
-    if ($options['formMode'] == 'alunni') {
+    if ($options['form_mode'] == 'alunni') {
       // form filtro documenti alunni
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
-          'data' => $options['values'][1],
+          'data' => $options['values'][0],
           'choices' => ['label.documenti_bes_B' => 'B', 'label.documenti_bes_H' => 'H',
             'label.documenti_bes_D' => 'D'],
           'placeholder' => 'label.tutti_tipi_documento',
@@ -94,13 +77,12 @@ class DocumentoType extends AbstractType {
           'choice_attr' => function($val) { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
-        ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'data' => $options['values'][2],
-          'class' => 'App\Entity\Classe',
-          'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][1],
+          'choices' => $options['values'][2],
           'placeholder' => 'label.tutte_classi',
-          'query_builder' => $fnSede,
-          'group_by' => function($obj) { return $obj->getSede()->getCitta(); },
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
@@ -109,8 +91,8 @@ class DocumentoType extends AbstractType {
           'attr' => ['class' => 'btn-primary']));
       return;
     }
-    if ($options['formMode'] == 'bacheca') {
-      // form filtro documenti docenti
+    if ($options['form_mode'] == 'bacheca') {
+      // form filtro documenti bacheca
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
           'data' => $options['values'][0],
@@ -129,22 +111,17 @@ class DocumentoType extends AbstractType {
           'attr' => ['class' => 'btn-primary']));
       return;
     }
-    if (in_array($options['formMode'], ['B', 'H', 'D'])) {
+    if (in_array($options['form_mode'], ['B', 'H', 'D'])) {
       // form documenti BES
-      $opzioniTipo = [];
-      foreach ($options['values'][1] as $opt) {
-        $opzioniTipo['label.documenti_bes_'.$opt] = $opt;
-      }
-      if (empty($options['values'][2])) {
+      if (!empty($options['values'][0])) {
         // scelta alunno
         $builder
-          ->add('classe', EntityType::class, array('label' => 'label.classe',
-            'class' => 'App\Entity\Classe',
-            'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
+          ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+            'choices' => $options['values'][0],
             'placeholder' => 'label.scegli_classe',
-            'query_builder' => $fnSede,
-            'group_by' => function($obj) { return $obj->getSede()->getCitta(); },
+            'choice_translation_domain' => false,
             'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
+            'choice_value' => 'id',
             'attr' => ['class' => 'gs-placeholder'],
             'required' => false))
           ->add('alunno', HiddenType::class, array('label' => false,
@@ -152,7 +129,7 @@ class DocumentoType extends AbstractType {
       }
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
-          'choices' => $opzioniTipo,
+          'choices' => $options['values'][1],
           'placeholder' => 'label.scegli_tipo_documento',
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
@@ -161,7 +138,7 @@ class DocumentoType extends AbstractType {
           'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
           'attr' => ['widget' => 'gs-button-end',
-            'onclick' => "location.href='".$options['returnUrl']."'"]));
+            'onclick' => "location.href='".$options['return_url']."'"]));
       return;
     }
     // form vuoto per solo allegato
@@ -170,7 +147,7 @@ class DocumentoType extends AbstractType {
         'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-          'onclick' => "location.href='".$options['returnUrl']."'"]));
+          'onclick' => "location.href='".$options['return_url']."'"]));
 
   }
 
@@ -180,10 +157,13 @@ class DocumentoType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
+      'return_url' => null,
+      'form_mode' => null,
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => null));
   }

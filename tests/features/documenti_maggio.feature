@@ -5,6 +5,7 @@ Funzionalità: Visualizzazione cattedre di coordinatore per l'inserimento dei do
   Come utente docente
   Bisogna leggere cattedre di coordinatore e documenti del 15 maggio del docente e mostrarli
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre di coordinatore

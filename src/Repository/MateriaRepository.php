@@ -8,8 +8,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Classe;
-
 
 /**
  * Materia - repository
@@ -37,7 +35,7 @@ class MateriaRepository extends \Doctrine\ORM\EntityRepository {
    * Restituisce la lista degli ID di materia corretti o l'errore nell'apposito parametro.
    * Sono escluse la condotta e la supplenza.
    *
-   * @param string $lista Lista di ID delle materie, separata da virgole
+   * @param array $lista Lista di ID delle materie, separata da virgole
    * @param bool $errore Viene impostato a vero se è presente un errore
    *
    * @return array Lista degli ID delle materie che risultano corretti
@@ -76,6 +74,36 @@ class MateriaRepository extends \Doctrine\ORM\EntityRepository {
     $lista_materie = array_column($materie, 'nome');
     // restituisce lista
     return '&quot;'.implode('&quot;, &quot;', $lista_materie).'&quot;';
+  }
+
+  /**
+   * Restituisce la lista delle materie, predisposta per le opzioni dei form
+   *
+   * @param bool|null $cattedra Usato per filtrare le materie utilizzabili in una cattedra; se nullo non filtra i dati
+   * @param bool $breve Usato per utilizzare il nome breve delle materie
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(?bool $cattedra = true, $breve = true): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $materie = $this->createQueryBuilder('m');
+    if ($cattedra === true) {
+      $materie = $materie->where("m.tipo IN ('N','R','S','E')");
+    } elseif ($cattedra === false) {
+      $materie = $materie->where("m.tipo NOT IN ('N','R','S','E')");
+    }
+    $materie = $materie 
+      ->orderBy('m.nome')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($materie as $materia) {
+      $dati[$breve ? $materia->getNomeBreve() : $materia->getNome()] = $materia;
+    }
+    // restituisce lista opzioni
+    return $dati;
   }
 
 }

@@ -8,7 +8,7 @@
 
 namespace App\Repository;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Classe;
 
 
 /**
@@ -35,10 +35,18 @@ class ClasseRepository extends BaseRepository {
       ->setParameters(['lista' => $lista, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
-    $lista_classi = array_column($classi, 'id');
-    $errore = (count($lista) != count($lista_classi));
+    $listaClassi = array_column($classi, 'id');
+    $errore = (count($lista) != count($listaClassi));
+    // legge gruppi
+    $classi = $this->createQueryBuilder('c')
+      ->select('c.id AS classe,c2.id AS gruppo')
+      ->leftJoin('App\Entity\Classe', 'c2', 'WITH', 'c2.id!=c.id AND c2.anno=c.anno AND c2.sezione=c.sezione')
+      ->where("c.id IN (:lista) AND (c.gruppo IS NULL OR c.gruppo='') AND c2.id IS NOT NULL AND c2 NOT IN (:lista)")
+      ->setParameters(['lista' => $lista])
+      ->getQuery()
+      ->getArrayResult();
     // restituisce classi valide
-    return $lista_classi;
+    return array_merge($listaClassi, array_column($classi, 'gruppo'));;
   }
 
   /**
@@ -51,13 +59,14 @@ class ClasseRepository extends BaseRepository {
   public function listaClassi($lista) {
     // legge classi valide
     $classi = $this->createQueryBuilder('c')
-      ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome")
+      ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome,c.gruppo")
       ->where('c.id IN (:lista)')
       ->setParameters(['lista' => $lista])
-      ->orderBy('c.sezione,c.anno')
+      ->orderBy('c.sezione,c.anno,c.gruppo')
       ->getQuery()
       ->getArrayResult();
-    $lista_classi = array_column($classi, 'nome');
+    $lista_classi = array_map(
+      fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
     // restituisce lista
     return implode(', ', $lista_classi);
   }
@@ -101,7 +110,7 @@ class ClasseRepository extends BaseRepository {
       ->join('c.coordinatore', 'd')
       ->join('c.sede', 's')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
-      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%')
       ->setParameter('abilitato', 1);
@@ -128,7 +137,7 @@ class ClasseRepository extends BaseRepository {
       ->join('c.segretario', 'd')
       ->join('c.sede', 's')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
-      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%')
       ->setParameter('abilitato', 1);
@@ -209,7 +218,7 @@ class ClasseRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->join('c.sede', 's')
-      ->orderBy('s.ordinamento,c.sezione,c.anno', 'ASC');
+      ->orderBy('s.ordinamento,c.sezione,c.anno,c.gruppo');
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
   }
@@ -252,6 +261,99 @@ class ClasseRepository extends BaseRepository {
     }
     // restituisce la lista degli ID
     return $classiId;
+  }
+
+  /**
+   * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
+   *
+   * @param int|null $sede Identificativo della sede, usato per filtrare le classi della sede indicata; se nullo non filtra i dati
+   * @param bool $breve Se vero riporta solo la classe senza il corso, altrimenti riporta tutto
+   * @param bool $ordAnno Se vero le classi sono ordinate per anno-sezione, altrimenti per sezione-anno
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(?int $sede = null, bool $breve = true, $ordAnno = true): array {
+    // inizializza
+    $dati = [];
+    // legge classi
+    $classi = $this->createQueryBuilder('c')
+      ->join('c.sede', 's');
+    if ($sede) {
+      $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
+    }
+    $classi = $classi
+      ->orderBy('s.ordinamento,'.($ordAnno ? 'c.anno,c.sezione,c.gruppo' : 'c.sezione,c.gruppo,c.anno').',c.gruppo')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($classi as $classe) {
+      $nome = $classe->getAnno().$classe->getSezione().
+        ($classe->getGruppo() ? ('-'.$classe->getGruppo()) : '').
+        ($breve ? '' : (' - '.$classe->getCorso()->getNomeBreve()));
+      $dati[$classe->getSede()->getNomeBreve()][$nome] = $classe;
+    }
+    // restituisce lista opzioni
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei gruppi esistenti per la classe
+   *
+   * @param Classe $classe Classe da controllare
+   * @param bool $oggetti Se vero restituisce lista di oggetti, altrimenti lista dei nomi dei gruppi
+   *
+   * @return array Lista dei gruppi classe esistenti
+   */
+  public function gruppi(Classe $classe, bool $oggetti = true): array {
+    // legge gruppi
+    $gruppi = $this->createQueryBuilder('c')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND c.gruppo != ''")
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+      ->orderBy('c.gruppo')
+      ->getQuery()
+      ->getResult();
+    // restituisce lista gruppi
+    if ($oggetti) {
+      // restituisce oggetti gruppo classe
+      return $gruppi;
+    }
+    $dati = [];
+    foreach ($gruppi as $gruppo) {
+      $dati[] = $gruppo->getGruppo();
+    }
+    // restituisce lista di nomi
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle classi articolate presenti, con informazioni sui gruppi
+   *
+   * @param array $lista Lista di identificatori delle classi
+   *
+   * @return array Array associativo delle classi articolate trovate
+   */
+  public function classiArticolate(array $lista): array {
+    $dati = [];
+    // legge gruppi
+    $classi = $this->createQueryBuilder('c')
+      ->select('c.id AS classe,cl1.id as comune,cl2.id AS gruppo')
+      ->leftJoin('App\Entity\Classe', 'cl1', 'WITH', 'cl1.id!=c.id AND cl1.anno=c.anno AND cl1.sezione=c.sezione AND cl1.gruppo IS NULL')
+      ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl1.id IS NULL AND cl2.id!=c.id AND cl2.anno=c.anno AND cl2.sezione=c.sezione AND cl2.gruppo IS NOT NULL')
+      ->where('c.id IN (:lista) AND (cl1.id IS NOT NULL OR cl2.id IS NOT NULL)')
+      ->setParameters(['lista' => $lista])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($classi as $classe) {
+      if ($classe['comune']) {
+        // info classe comune
+        $dati[$classe['classe']]['comune'] = $classe['comune'];
+      } else {
+        // info gruppi classe
+        $dati[$classe['classe']]['gruppi'][] = $classe['gruppo'];
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

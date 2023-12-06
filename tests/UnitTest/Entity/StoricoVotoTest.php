@@ -32,7 +32,7 @@ class StoricoVotoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_storico_voto' => ['id', 'creato', 'modificato', 'voto', 'carenze', 'dati', 'storico_esito_id', 'materia_id'],
       'gs_materia' => '*',
@@ -72,8 +72,8 @@ class StoricoVotoTest extends EntityTestCase {
           ($field == 'voto' ? $this->faker->randomNumber(4, false) :
           ($field == 'carenze' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'storicoEsito' ? $this->getReference("storico_esito_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_2") :
+          ($field == 'storicoEsito' ? $this->getReference("storico_esito_G") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_".($i + 1)) :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -135,11 +135,12 @@ class StoricoVotoTest extends EntityTestCase {
     $existent->setStoricoEsito($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::StoricoEsito - VALID NOT BLANK');
     // materia
+    $temp = $existent->getMateria();
     $property = $this->getPrivateProperty('App\Entity\StoricoVoto', 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
-    $existent->setMateria($this->getReference("materia_5"));
+    $existent->setMateria($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

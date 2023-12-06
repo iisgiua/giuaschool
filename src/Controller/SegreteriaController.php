@@ -12,12 +12,12 @@ use App\Form\AlunnoGenitoreType;
 use App\Util\PdfManager;
 use App\Util\SegreteriaUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -43,13 +43,13 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeAction(Request $request, $pagina) {
+  public function assenzeAction(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/cognome', '');
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/pagina', 1);
@@ -65,9 +65,16 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_assenze', FormType::class)
       ->setAction($this->generateUrl('segreteria_assenze'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -78,42 +85,22 @@ class SegreteriaController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/pagina', $pagina);
     }
     // lista alunni
-    if ($this->reqstack->getSession()->has('/APP/ROUTE/segreteria_assenze/nome')) {
-      $lista = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
-    } else {
-      $lista = $this->em->getRepository('App\Entity\Alunno')->listaVuota($pagina, $limite);
-    }
+    $lista = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/assenze.html.twig', array(
       'pagina_titolo' => 'page.segreteria_assenze',
@@ -140,7 +127,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeMostraAction(SegreteriaUtil $segr, $alunno) {
+  public function assenzeMostraAction(SegreteriaUtil $segr, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -177,7 +164,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeStampaAction(SegreteriaUtil $segr, PdfManager $pdf, $alunno) {
+  public function assenzeStampaAction(SegreteriaUtil $segr, PdfManager $pdf, int $alunno) {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -222,13 +209,13 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function scrutiniAction(Request $request, SegreteriaUtil $segr, $pagina) {
+  public function scrutiniAction(Request $request, SegreteriaUtil $segr, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/nome', '');
-    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/pagina', 1);
@@ -244,9 +231,16 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_scrutini', FormType::class)
       ->setAction($this->generateUrl('segreteria_scrutini'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -257,42 +251,22 @@ class SegreteriaController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/pagina', $pagina);
     }
     // lista alunni
-    if ($this->reqstack->getSession()->has('/APP/ROUTE/segreteria_scrutini/nome')) {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
-    } else {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaVuota($pagina, $limite);
-    }
+    $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
     // legge dati pagelle
     $dati['pagelle'] = $segr->pagelleAlunni($dati['lista']);
     // mostra la pagina di risposta
@@ -323,7 +297,8 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function scrutiniMostraAction(SegreteriaUtil $segr, $alunno, $periodo, $scrutinio) {
+  public function scrutiniMostraAction(SegreteriaUtil $segr, int $alunno, string $periodo,
+                                       int $scrutinio): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -382,12 +357,12 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function genitoriAction(Request $request, $pagina) {
+  public function genitoriAction(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
-    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/nome', '');
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/cognome', '');
-    $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
+    $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/nome', '');
     $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -402,9 +377,16 @@ class SegreteriaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // form di ricerca
-    $classi = $this->em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_genitori', FormType::class)
       ->setAction($this->generateUrl('segreteria_genitori'))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
@@ -415,34 +397,18 @@ class SegreteriaController extends BaseController {
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'choices' => $classi,
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['nome'] = trim($form->get('nome')->getData());
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/nome', $search['nome']);
-      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/cognome', $search['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/cognome', $search['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/nome', $search['nome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/pagina', $pagina);
     }
     // lista alunni
@@ -474,7 +440,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function genitoriEditAction(Request $request, $alunno) {
+  public function genitoriEditAction(Request $request, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -497,8 +463,8 @@ class SegreteriaController extends BaseController {
     }
     // form
     $form = $this->createForm(AlunnoGenitoreType::class, null, [
-      'returnUrl' => $this->generateUrl('segreteria_genitori'), 'formMode' => 'segreteria',
-      'data' => [$genitore1, $genitore2]]);
+      'return_url' => $this->generateUrl('segreteria_genitori'), 'form_mode' => 'segreteria',
+      'values' => [$genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche

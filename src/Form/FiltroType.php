@@ -8,8 +8,6 @@
 
 namespace App\Form;
 
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -33,7 +31,7 @@ class FiltroType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'richieste') {
+    if ($options['form_mode'] == 'richieste') {
       // form gestione richieste
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.richiesta_tipo',
@@ -55,6 +53,7 @@ class FiltroType extends AbstractType {
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'choice_translation_domain' => false,
+          'choice_value' => 'id',
           'attr' => ['title' => 'label.richiesta_sede'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => true))
@@ -63,6 +62,7 @@ class FiltroType extends AbstractType {
           'choices' => $options['values'][5],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
+          'choice_value' => 'id',
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
@@ -84,48 +84,36 @@ class FiltroType extends AbstractType {
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false));
-    } elseif ($options['formMode'] == 'colloqui') {
+    } elseif ($options['form_mode'] == 'colloqui') {
       // form cerca colloqui
       $builder
-        ->add('docente', EntityType::class, array('label' => 'label.docente',
+        ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][0],
-          'class' => 'App\Entity\Docente',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome();
-            },
+          'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.scegli_docente',
-          'query_builder' => function (EntityRepository $er) {
-              return $er->createQueryBuilder('d')
-                ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
-                ->orderBy('d.cognome,d.nome', 'ASC');
-            },
+          'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false));
-    } elseif ($options['formMode'] == 'presenze') {
+          'required' => false]);
+    } elseif ($options['form_mode'] == 'presenze') {
       // form presenze
       $builder
-        ->add('alunno', EntityType::class, array('label' => 'label.alunno',
+        ->add('alunno', ChoiceType::class, ['label' => 'label.alunno',
           'data' => $options['values'][0],
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
+          'choices' => $options['values'][1],
+          'choice_value' => 'id',
           'placeholder' => 'label.tutti_alunni',
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][1])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
+          'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function($val, $key, $index) {
               return ['class' => 'gs-no-placeholder'];
             },
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false))
+          'required' => false])
         ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
           'data' => $options['values'][2],
           'widget' => 'single_text',
@@ -140,6 +128,68 @@ class FiltroType extends AbstractType {
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
           'required' => false));
+    } elseif ($options['form_mode'] == 'evacuazione') {
+      // form moduli evacuazione
+      $builder
+        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'placeholder' => 'label.qualsiasi_sede',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.sede'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.classe'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false));
+    } elseif ($options['form_mode'] == 'moduli') {
+      // form moduli evacuazione
+      $builder
+        ->add('tipo', ChoiceType::class, array('label' => 'label.modulo_tipo',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.modulo_tipo'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => true))
+        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_sede',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.sede'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][4],
+          'choices' => $options['values'][5],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'attr' => ['title' => 'label.classe'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['values'][6],
+          'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
+            'style' => 'width:10em'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'data' => $options['values'][7],
+          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
+            'style' => 'width:10em'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false));
     }
     // pulsante filtro
     $builder
@@ -152,10 +202,10 @@ class FiltroType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'richieste',
+      'form_mode' => 'richieste',
       'values' => [],
       'data_class' => null));
   }

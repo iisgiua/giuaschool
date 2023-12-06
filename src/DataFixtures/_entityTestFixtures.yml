@@ -1,0 +1,70 @@
+####################
+# _entityTestFixtures - dati per lo unit test delle entità
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - AmministratoreFixtures.yml
+  - AnnotazioneFixtures.yml
+  - AppFixtures.yml
+  - AssenzaFixtures.yml
+  - AssenzaLezioneFixtures.yml
+  - AtaFixtures.yml
+  - AvvisoClasseFixtures.yml
+  - AvvisoFixtures.yml
+  - AvvisoUtenteFixtures.yml
+  - CambioClasseFixtures.yml
+  - CattedraFixtures.yml
+  - CircolareClasseFixtures.yml
+  - CircolareFixtures.yml
+  - CircolareUtenteFixtures.yml
+  - ClasseFixtures.yml
+  - ColloquioFixtures.yml
+  - ConfigurazioneFixtures.yml
+  - CorsoFixtures.yml
+  - DefinizioneConsiglioFixtures.yml
+  - DefinizioneRichiestaFixtures.yml
+  - DefinizioneScrutinioFixtures.yml
+  - DerogaAssenzaFixtures.yml
+  - DocenteFixtures.yml
+  - DocumentoFixtures.yml
+  - EntrataFixtures.yml
+  - EsitoFixtures.yml
+  - FestivitaFixtures.yml
+  - FileFixtures.yml
+  - FirmaFixtures.yml
+  - FirmaSostegnoFixtures.yml
+  - GenitoreFixtures.yml
+  - IstitutoFixtures.yml
+  - LezioneFixtures.yml
+  - ListaDestinatariClasseFixtures.yml
+  - ListaDestinatariFixtures.yml
+  - ListaDestinatariUtenteFixtures.yml
+  - LogFixtures.yml
+  - MateriaFixtures.yml
+  - MenuFixtures.yml
+  - MenuOpzioneFixtures.yml
+  - NotaFixtures.yml
+  - OrarioDocenteFixtures.yml
+  - OrarioFixtures.yml
+  - OsservazioneAlunnoFixtures.yml
+  - OsservazioneClasseFixtures.yml
+  - PresenzaFixtures.yml
+  - PresideFixtures.yml
+  - PropostaVotoFixtures.yml
+  - ProvisioningFixtures.yml
+  - RaggruppamentoFixtures.yml
+  - RichiestaColloquioFixtures.yml
+  - RichiestaFixtures.yml
+  - ScansioneOrariaFixtures.yml
+  - ScrutinioFixtures.yml
+  - SedeFixtures.yml
+  - SpidFixtures.yml
+  - StaffFixtures.yml
+  - StoricoEsitoFixtures.yml
+  - StoricoVotoFixtures.yml
+  - UscitaFixtures.yml
+  - UtenteFixtures.yml
+  - ValutazioneFixtures.yml
+  - VotoScrutinioFixtures.yml

@@ -20,24 +20,24 @@ class Appello {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'alunno
+   * @var int $id Identificativo univoco per l'alunno
    */
-  private $id;
+  private int $id = 0;
 
   /**
-   * @var string $alunno Nome da visualizzare per l'alunno
+   * @var string|null $alunno Nome da visualizzare per l'alunno
    */
-  private $alunno;
+  private ?string $alunno = '';
 
   /**
    * @var string $presenza Indica la presenza dell'alunno [P=presente, A=assente, R=ritardo]
    */
-  private $presenza;
+  private string $presenza = '';
 
   /**
-   * @var \DateTime $ora Ora di eventuale entrata in ritardo
+   * @var \DateTime|null $ora Ora di eventuale entrata in ritardo
    */
-  private $ora;
+  private ?\DateTime $ora = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -45,20 +45,20 @@ class Appello {
   /**
    * Restituisce l'identificativo univoco per l'alunno
    *
-   * @return integer Identificativo univoco per l'alunno
+   * @return int Identificativo univoco per l'alunno
    */
-  public function getId() {
+  public function getId(): int {
     return $this->id;
   }
 
   /**
    * Modifica l'identificativo univoco per l'alunno
    *
-   * @var integer $id Identificativo univoco per l'alunno
+   * @var int $id Identificativo univoco per l'alunno
    *
-   * @return Appello Oggetto Appello
+   * @return Appello Oggetto modificato
    */
-  public function setId($id) {
+  public function setId(int $id): self {
     $this->id = $id;
     return $this;
   }
@@ -68,18 +68,18 @@ class Appello {
    *
    * @return string Nome da visualizzare per l'alunno
    */
-  public function getAlunno() {
+  public function getAlunno(): string {
     return $this->alunno;
   }
 
   /**
    * Modifica il nome da visualizzare per l'alunno
    *
-   * @var string $alunno Nome da visualizzare per l'alunno
+   * @var string|null $alunno Nome da visualizzare per l'alunno
    *
-   * @return Appello Oggetto Appello
+   * @return Appello Oggetto modificato
    */
-  public function setAlunno($alunno) {
+  public function setAlunno(?string $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -89,7 +89,7 @@ class Appello {
    *
    * @return string Indica la presenza dell'alunno
    */
-  public function getPresenza() {
+  public function getPresenza(): string {
     return $this->presenza;
   }
 
@@ -98,9 +98,9 @@ class Appello {
    *
    * @var string $presenza Indica la presenza dell'alunno
    *
-   * @return Appello Oggetto Appello
+   * @return Appello Oggetto modificato
    */
-  public function setPresenza($presenza) {
+  public function setPresenza(string $presenza): self {
     $this->presenza = $presenza;
     return $this;
   }
@@ -108,9 +108,9 @@ class Appello {
   /**
    * Restituisce l'ora di eventuale entrata in ritardo
    *
-   * @return \DateTime Ora di eventuale entrata in ritardo
+   * @return \DateTime|null Ora di eventuale entrata in ritardo
    */
-  public function getOra() {
+  public function getOra(): ?\DateTime {
     return $this->ora;
   }
 
@@ -119,9 +119,9 @@ class Appello {
    *
    * @param \DateTime $ora Ora di eventual entrata in ritardo
    *
-   * @return Appello Oggetto Appello
+   * @return Appello Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra(?\DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -134,9 +134,8 @@ class Appello {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->alunno.' '.$this->presenza;
   }
 
 }
-

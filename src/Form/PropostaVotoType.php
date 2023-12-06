@@ -8,16 +8,15 @@
 
 namespace App\Form;
 
+use App\Entity\PropostaVoto;
+use App\Form\MessageType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\CallbackTransformer;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\PropostaVoto;
-use App\Entity\Alunno;
-use App\Form\MessageType;
 
 
 /**

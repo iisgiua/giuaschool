@@ -32,7 +32,7 @@ class DocumentoTest extends EntityTestCase {
     $this->noStoredFields = ['allegati'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma'],
       'gs_sede' => '*',
@@ -71,11 +71,11 @@ class DocumentoTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'docente' ? $this->getReference("docente_1") :
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 6)) :
-          ($field == 'materia' ? $this->getReference("materia_1") :
-          ($field == 'classe' ? $this->getReference("classe_1") :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_SOSTEGNO_".($i + 1)) :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'cifrato' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'firma' ? $this->faker->boolean() :
           null))))))));
@@ -121,14 +121,14 @@ class DocumentoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAllegato
     $existent->setAllegati(new \Doctrine\Common\Collections\ArrayCollection());
-    $existent->addAllegato($this->getReference('file_1'));
-    $existent->addAllegato($this->getReference('file_2'));
-    $existent->addAllegato($this->getReference('file_1'));
-    $this->assertSame([$this->getReference('file_1'), $this->getReference('file_2')], $existent->getAllegati()->toArray(), $this->entity.'::addAllegato');
+    $existent->addAllegato($this->getReference('file_word_1'));
+    $existent->addAllegato($this->getReference('file_word_2'));
+    $existent->addAllegato($this->getReference('file_word_1'));
+    $this->assertSame([$this->getReference('file_word_1'), $this->getReference('file_word_2')], $existent->getAllegati()->toArray(), $this->entity.'::addAllegato');
     // removeAllegato
-    $existent->removeAllegato($this->getReference('file_1'));
-    $existent->removeAllegato($this->getReference('file_1'));
-    $this->assertSame(array_values([$this->getReference('file_2')]), array_values($existent->getAllegati()->toArray()), $this->entity.'::removeAllegato');
+    $existent->removeAllegato($this->getReference('file_word_1'));
+    $existent->removeAllegato($this->getReference('file_word_1'));
+    $this->assertSame(array_values([$this->getReference('file_word_2')]), array_values($existent->getAllegati()->toArray()), $this->entity.'::removeAllegato');
     // toString
     $this->assertSame('Documento #'.$existent->getId(), (string) $existent, $this->entity.'::toString');
     // datiVersione
@@ -173,7 +173,7 @@ class DocumentoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // listaDestinatari
     $temp = $existent->getListaDestinatari();

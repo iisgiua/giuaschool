@@ -32,7 +32,7 @@ class OsservazioneAlunnoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo'],
       'gs_cattedra' => '*',
@@ -71,10 +71,10 @@ class OsservazioneAlunnoTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."A_1") :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'testo' ? $this->faker->text() :
-          ($field == 'cattedra' ? $this->getReference("cattedra_2") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_curricolare_2") :
           null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -90,7 +90,7 @@ class OsservazioneAlunnoTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['cattedra'] = $this->getReference("cattedra_3");
+      $data[$i]['cattedra'] = $this->getReference("cattedra_curricolare_3");
       $o[$i]->setCattedra($data[$i]['cattedra']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');

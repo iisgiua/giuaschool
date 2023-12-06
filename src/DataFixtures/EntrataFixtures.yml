@@ -25,43 +25,43 @@ include:
 App\Entity\Entrata:
 
   # ----- assenze non giustificate -----
-  entrata_non_giustificata_{1..10}:
-    data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
+  entrata_ingiustificata_{1..5}:
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
     ora: '<dateTimeBetween("08:30", "11:00")>'
-    ritardoBreve: '<boolean(20)>'
+    ritardoBreve: false
     note: '50%? <paragraph(1, true)>: <strval("")>'
     valido: '<boolean(50)>'
     motivazione: ''
     giustificato:
-    alunno: '@alunno_prima_<current()>'
+    alunno: '@alunno_*'
     docente: '@docente_*'
     docenteGiustifica:
     utenteGiustifica:
 
   # ----- assenze non validate -----
-  entrata_non_validata_{1..10}:
+  entrata_nonvalidata_{1..5}:
     data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
     ora: '<dateTimeBetween("08:30", "11:00")>'
-    ritardoBreve: '<boolean(20)>'
+    ritardoBreve: false
     note: '50%? <paragraph(1, true)>: <strval("")>'
     valido: '<boolean(50)>'
     motivazione: '<sentence(3)>'
     giustificato: '<dateTimeBetween(<($data)>, "now")>'
-    alunno: '@alunno_seconda_<current()>'
+    alunno: '@alunno_*'
     docente: '@docente_*'
     docenteGiustifica:
     utenteGiustifica: <($alunno->getGenitori()[0])>
 
   # ----- assenze validate -----
-  entrata_validata_{1..30}:
-    data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
-    ora: '<dateTimeBetween("08:30", "11:00")>'
-    ritardoBreve: '<boolean(20)>'
+  entrata_validata_{1..5}:
+    data (unique): '<dateTimeBetween("-4 month", "-1 day")>'
+    ora: '<dateTimeBetween("08:30", "09:30")>'
+    ritardoBreve: '<($ora <= "08:45:00")>'
     note: '50%? <paragraph(1, true)>: <strval("")>'
     valido: '<boolean(50)>'
     motivazione: '<sentence(3)>'
     giustificato: '<dateTimeBetween(<($data)>, "now")>'
-    alunno: '@alunno_terza_<current()>'
+    alunno: '@alunno_*'
     docente: '@docente_*'
     docenteGiustifica: '@docente_*'
     utenteGiustifica: <($alunno->getGenitori()[0])>

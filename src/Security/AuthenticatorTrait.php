@@ -39,7 +39,7 @@ trait AuthenticatorTrait {
     if ($inizio && $fine && $ora >= $inizio && $ora <= $fine && !($user instanceOf Amministratore)) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di autenticazione durante la modalità manutenzione.', array(
-        'username' => $user->getUsername(),
+        'username' => $user->getUserIdentifier(),
         'ruolo' => $user->getCodiceRuolo()));
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
@@ -101,7 +101,7 @@ trait AuthenticatorTrait {
     }
     // errore: utente disabilitato
     $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-      'username' => $user->getUsername()));
+      'username' => $user->getUserIdentifier()));
     throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 

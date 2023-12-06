@@ -10,7 +10,7 @@ namespace App\Controller;
 
 use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -37,7 +37,8 @@ class SchedaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiMateriaAction(RegistroUtil $reg, $cattedra, $alunno, $periodo) {
+  public function votiMateriaAction(RegistroUtil $reg, int $cattedra, int $alunno, 
+                                    string $periodo): Response {
     // inizializza variabili
     $info = null;
     $dati = null;

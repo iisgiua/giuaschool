@@ -3,7 +3,7 @@
   <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
 </div>
 <p style="text-align:center; font-size:13pt">
-  <strong>Valutazioni della classe {{ classe.anno }}ª {{ classe.sezione }}</strong><br>
+  <strong>Valutazioni della classe {{ classe }}</strong><br>
   <strong>{{ info.materia }} - {{ info.periodo.nome }}</strong>
 </p>
 {% for alunno,a in dati.alunni|filter(a => not info.religione or a.religione == info.religione) %}

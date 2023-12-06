@@ -295,7 +295,7 @@ $(document).ready(function() {
       }
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="avviso_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[name="avviso['+type+'][]"][value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -356,7 +356,7 @@ $(document).ready(function() {
     var par3 = "-"+encodeURIComponent($('#avviso_lista_classi').val() ? $('#avviso_lista_classi').val() : '');
     var par4 = "-";
     $('input[name="avviso[sedi][]"]:checked').each(function() {
-      par4 +=$(this).attr('id').substr($(this).attr('id').lastIndexOf('_')+1)+"-";
+      par4 +=$(this).val()+"-";
     });
     $('#gs-modal-alunni-pag').data('par1', par1).data('par2', par2).data('par3', par3).data('par4', par4);
     alunniSearch(1);
@@ -479,22 +479,31 @@ function alunniSearch(page) {
 {% block _avviso_classi_widget %}
   {% set prec = '' %}
   {% for group_label, group in choices %}
-    {% if group_label[:-2] != prec %}
+    {% if group_label != prec %}
       {% if prec != '' %}
 </div>
       {% endif %}
-      {% set prec = group_label[:-2] %}
+      {% set prec = group_label %}
 <div class="col-sm-6" data-sede="{{ prec }}">
   <div><strong><em>{{ prec }}</em></strong></div>
     {% endif %}
-  <div class="row">
+    {% set sez = '' %}
     {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+  </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+  <div class="row">
+      {% endif %}
       {{- form_widget(form[key], {
         parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
         translation_domain: choice_translation_domain,
       }) -}}
     {% endfor %}
+    {% if sez != '' %}
   </div>
+    {% endif %}
   {% endfor %}
   {% if prec != '' %}
 </div>

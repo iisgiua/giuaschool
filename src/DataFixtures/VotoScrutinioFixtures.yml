@@ -23,15 +23,15 @@ include:
 
 
 App\Entity\VotoScrutinio:
-  voto_scrutinio_{1..10}:
-    orale: '50%? <numberBetween(1, 10)>: 0'
-    scritto: '50%? <numberBetween(1, 10)>: 0'
-    pratico: '50%? <numberBetween(1, 10)>: 0'
-    unico: '50%? <numberBetween(1, 10)>: 0'
+  voto_scrutinio_{P, S, F, G, R, X}:
+    orale: 0
+    scritto: 0
+    pratico: 0
+    unico: '<numberBetween(1, 10)>'
     debito: '50%? <text()>: <strval("")>'
-    recupero: '<randomElement(["A", "C", "S", "P", "I", "R", "N"])>'
+    recupero: '<randomElement(["A", "C", "S", "P"])>'
     assenze: '<numberBetween(1, 100)>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
-    scrutinio: '@scrutinio_*'
-    alunno: '@alunno_prima_<current()>'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    scrutinio: '@scrutinio_<current()>'
+    alunno: '@alunno_*'
     materia: '@materia_*'

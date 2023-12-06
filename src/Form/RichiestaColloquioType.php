@@ -31,7 +31,7 @@ class RichiestaColloquioType extends AbstractType {
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
-    if ($options['formMode'] == 'conferma') {
+    if ($options['form_mode'] == 'conferma') {
       // form di conferma
       $builder
         ->add('appuntamento', TimeType::class, array('label' => 'label.ora',
@@ -43,14 +43,14 @@ class RichiestaColloquioType extends AbstractType {
           'trim' => true,
           'attr' => array('rows' => '3'),
           'required' => false));
-    } elseif ($options['formMode'] == 'rifiuta') {
+    } elseif ($options['form_mode'] == 'rifiuta') {
       // ricevimento periodico
       $builder
         ->add('messaggio', MessageType::class, array('label' => 'label.messaggio_colloquio',
           'trim' => true,
           'attr' => array('rows' => '3'),
           'required' => true));
-    } elseif ($options['formMode'] == 'modifica') {
+    } elseif ($options['form_mode'] == 'modifica') {
       $builder
         ->add('stato', ChoiceType::class, array('label' => 'label.stato_colloquio',
           'choices'  => ['label.stato_colloquio_C' => 'C', 'label.stato_colloquio_N' => 'N'],
@@ -73,10 +73,10 @@ class RichiestaColloquioType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
+      'form_mode' => 'conferma',
       'allow_extra_fields' => true,
-      'formMode' => 'conferma',
       'data_class' => RichiestaColloquio::class));
   }
 

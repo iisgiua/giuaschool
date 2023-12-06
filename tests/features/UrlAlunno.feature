@@ -4,6 +4,7 @@ Funzionalità: Controllo sulla visualizzazione delle pagine del registro
   Per controllare la visualizzazione delle pagine del registro
   Come utente alunno
   Bisogna controllare che le pagine siano correttamente visualizzate
+  Utilizzando "_testFixtures.yml"
 
 
 ################################################################################
@@ -11,15 +12,6 @@ Funzionalità: Controllo sulla visualizzazione delle pagine del registro
 
 Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti alunni
   Dato login utente con ruolo esatto "Alunno"
-  E istanze di tipo "Genitore":
-    | id  | abilitato | alunno  |
-    | $g1 | si        | #logged |
-  E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 1    | A       |
-  E modifica istanze di tipo "Alunno"
-    | username         | #classe |
-    | #logged.username | $cl1    |
   Quando vai alla pagina "<route>"
   Allora vedi pagina "<route>"
   Esempi:

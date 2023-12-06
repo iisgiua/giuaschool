@@ -28,18 +28,18 @@ class AvvisoTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Avviso';
     // campi da testare
-    $this->fields = ['tipo', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
+    $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
     $this->noStoredFields = ['annotazioni', 'sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
+    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
       'gs_annotazione' => '*',
       'gs_classe' => '*',
       'gs_sede' => '*'];
     // SQL write
-    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
+    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -71,11 +71,12 @@ class AvvisoTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'anno' ? $this->faker->randomNumber(4, false) :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'oraFine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'cattedra' ? $this->getReference("cattedra_1") :
-          ($field == 'materia' ? $this->getReference("materia_1") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_curricolare_1") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
           ($field == 'oggetto' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'testo' ? $this->faker->text() :
           ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
@@ -83,8 +84,8 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'docente' ? $this->getReference("docente_1") :
-          null))))))))))))));
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
+          null)))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -262,7 +263,7 @@ class AvvisoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
   }
 

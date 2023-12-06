@@ -64,7 +64,7 @@ class LogProcessor {
     // aggiunge dati sull'utente
     $user = ($this->token->getToken() ? $this->token->getToken()->getUser() : null);
     if ($user && is_object($user)) {
-      $record['extra']['username'] = $user->getUsername();
+      $record['extra']['username'] = $user->getUserIdentifier();
       $record['extra']['roles'] = $user->getRoles();
     }
     // restituisce record modificato

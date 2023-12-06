@@ -57,7 +57,8 @@ class LogoutListener {
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    */
-  public function __construct(RouterInterface $router, Security $security, RequestStack $reqstack, LogHandler $dblogger) {
+  public function __construct(RouterInterface $router, Security $security, RequestStack $reqstack,
+                              LogHandler $dblogger) {
     $this->router = $router;
     $this->security = $security;
     $this->reqstack = $reqstack;
@@ -76,17 +77,21 @@ class LogoutListener {
     // legge utente attuale
     $user = $this->security->getUser();
     if ($user) {
-      // legge eventuale url per il logut SPID
-      $spidLogout = $this->reqstack->getSession()->get('/APP/UTENTE/spid_logout');
-      if ($spidLogout) {
-        // esegue logout SPID su Identity provider
-        $response = new RedirectResponse($spidLogout);
+      $tipo = $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso');
+      // logout da SPID
+      if ($tipo == 'SPID') {
+        // legge eventuale url per il logut SPID
+        $spidLogout = $this->reqstack->getSession()->get('/APP/UTENTE/spid_logout');
+        if ($spidLogout) {
+          // esegue logout SPID su Identity Provider
+          $response = new RedirectResponse($spidLogout);
+        }
       }
       // ditrugge la sessione
       $this->reqstack->getSession()->invalidate();
       // log azione
       $this->dblogger->logAzione('ACCESSO', 'Logout', array(
-        'Username' => $user->getUsername(),
+        'Username' => $user->getUserIdentifier(),
         'Ruolo' => $user->getRoles()[0]));
     }
     // reindirizza a nuova pagina

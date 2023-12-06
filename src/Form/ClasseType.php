@@ -8,17 +8,15 @@
 
 namespace App\Form;
 
+use App\Entity\Classe;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Doctrine\ORM\EntityRepository;
-use App\Entity\Classe;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -39,64 +37,50 @@ class ClasseType extends AbstractType {
     $builder
       ->add('anno', ChoiceType::class, array('label' => 'label.classe_anno',
         'choices' => array('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5),
+        'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sezione', TextType::class, array('label' => 'label.classe_sezione',
         'trim' => true,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
-      ->add('corso', EntityType::class, array('label' => 'label.corso',
-        'class' => 'App\Entity\Corso',
-        'choice_label' => function ($obj) {
-            return $obj->getNomeBreve();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.nomeBreve', 'ASC');
-          },
+      ->add('gruppo', TextType::class, array('label' => 'label.classe_gruppo',
+        'trim' => true,
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App\Entity\Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getNomeBreve();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('coordinatore', EntityType::class, array('label' => 'label.coordinatore',
-        'class' => 'App\Entity\Docente',
-        'placeholder' => 'label.nessuno',
-        'choice_label' => function ($obj) {
-            return $obj->getNome().' '.$obj->getCognome();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->orderBy('d.cognome,d.nome', 'ASC');
-          },
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => false))
-      ->add('segretario', EntityType::class, array('label' => 'label.segretario',
-        'class' => 'App\Entity\Docente',
-        'placeholder' => 'label.nessuno',
-        'choice_label' => function ($obj) {
-            return $obj->getNome().' '.$obj->getCognome();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->orderBy('d.cognome,d.nome', 'ASC');
-          },
-        'attr' => ['widget' => 'gs-row-end'],
         'required' => false))
       ->add('oreSettimanali', IntegerType::class, array('label' => 'label.ore_classe',
+        'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
+      ->add('corso', ChoiceType::class, array('label' => 'label.corso',
+        'choices' => $options['values'][0],
+        'choice_value' => 'id',
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => true))
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'choices' => $options['values'][1],
+        'choice_value' => 'id',
+        'placeholder' => 'label.choose_option',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false))
+      ->add('coordinatore', ChoiceType::class, ['label' => 'label.coordinatore',
+        'choices' => $options['values'][2],
+        'placeholder' => 'label.nessuno',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => false])
+      ->add('segretario', ChoiceType::class, ['label' => 'label.segretario',
+        'choices' => $options['values'][2],
+        'placeholder' => 'label.nessuno',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false])
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -105,9 +89,11 @@ class ClasseType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
+      'return_url' => null,
+      'values' => [],
       'data_class' => Classe::class));
   }
 

@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Sede;
 
@@ -53,7 +54,7 @@ class AnnotazioneRepository extends EntityRepository {
       ->join('a.classe', 'cl')
       ->join('a.docente', 'd')
       ->where('a.data=:data AND d INSTANCE OF App\Entity\Staff')
-      ->orderBy('cl.anno,cl.sezione', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
       ->setParameters(['data' => $search['data']]);
     if ($sede) {
       $query

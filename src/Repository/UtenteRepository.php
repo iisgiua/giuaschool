@@ -9,14 +9,14 @@
 namespace App\Repository;
 
 use App\Entity\Alunno;
-use App\Entity\Amministratore;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
+use App\Entity\Utente;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
-use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 
 /**

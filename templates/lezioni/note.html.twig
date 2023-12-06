@@ -8,15 +8,15 @@
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_note'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_note'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
     {% for periodo,v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-2">Destinatari</th>
+        <th class="col-sm-1">Data</th>
+        <th class="col-sm-3">Destinatari</th>
         <th class="col-sm-5">Nota</th>
         <th class="col-sm-3">Provvedimento</th>
       </tr>
@@ -31,9 +31,9 @@
         </td>
           {% if tipo == 'classe' %}
         <td>
-          <em>Tutta la classe</em>
+          <em>{% if e.gruppo %}Tutto il gruppo {{ classe.anno }}{{ classe.sezione }}-{{ e.gruppo }}{% else %}Tutta la classe{% endif %}</em>
             {% if e.esclusi|length > 0 %}
-          <br>Esclusi: {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ', ' }}{% endfor %}
+          <br><strong>Esclusi:</strong> {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ',<br>' }}{% endfor %}
             {% endif %}
         </td>
           {% else %}

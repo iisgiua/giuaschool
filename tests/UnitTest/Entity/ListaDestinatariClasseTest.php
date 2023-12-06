@@ -32,7 +32,7 @@ class ListaDestinatariClasseTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato'],
       'gs_lista_destinatari' => '*',
@@ -69,8 +69,8 @@ class ListaDestinatariClasseTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 1)) :
-          ($field == 'classe' ? $this->getReference("classe_2") :
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_DOCENTI_".($i + 1)) :
+          ($field == 'classe' ? $this->getReference("classe_2A") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'firmato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null))));
@@ -88,7 +88,7 @@ class ListaDestinatariClasseTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['classe'] = $this->getReference("classe_3");
+      $data[$i]['classe'] = $this->getReference("classe_3A");
       $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');

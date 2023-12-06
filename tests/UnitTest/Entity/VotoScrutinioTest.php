@@ -32,7 +32,7 @@ class VotoScrutinioTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_voto_scrutinio' => ['id', 'creato', 'modificato', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'scrutinio_id', 'alunno_id', 'materia_id'],
       'gs_materia' => '*',
@@ -79,9 +79,9 @@ class VotoScrutinioTest extends EntityTestCase {
           ($field == 'recupero' ? $this->faker->randomElement(["A", "C", "S", "P", "I", "R", "N"]) :
           ($field == 'assenze' ? $this->faker->randomNumber(4, false) :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'scrutinio' ? $this->getReference("scrutinio_".($i + 1)) :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_2") :
+          ($field == 'scrutinio' ? $this->getReference("scrutinio_P") :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."A_2") :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_2") :
           null)))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -164,21 +164,21 @@ class VotoScrutinioTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Scrutinio - NOT BLANK');
-    $existent->setScrutinio($this->getReference("scrutinio_1"));
+    $existent->setScrutinio($this->getReference("scrutinio_F"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Scrutinio - VALID NOT BLANK');
     // alunno
     $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_5"));
+    $existent->setAlunno($this->getReference("alunno_5B_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // materia
     $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
-    $existent->setMateria($this->getReference("materia_2"));
+    $existent->setMateria($this->getReference("materia_curricolare_2"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

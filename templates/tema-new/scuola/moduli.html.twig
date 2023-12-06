@@ -10,6 +10,7 @@
         <tr class="sticky-top">
           <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.nome_modulo'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
         </tr>
       </thead>
@@ -32,6 +33,7 @@
     {% endif %}
           </td>
           <td>{{ m.nome }}</td>
+          <td><strong>{{ m.sede ? m.sede.nomeBreve : 'TUTTE' }}</strong></td>
           <td>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduli_edit', {'id': m.id}) }}" role="button" title="Modifica i dati del modulo">{{ 'label.edit'|trans }}</a>
             <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_modulo'|trans }}" data-href="{{ path('scuola_moduli_delete', {'id': m.id}) }}">{{ 'label.delete'|trans }}</button>
@@ -46,7 +48,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="3">
+          <td colspan="4">
             <a class="btn btn-primary btn-sm" href="{{ path('scuola_moduli_edit') }}" role="button" title="Nuovo modulo">{{ 'label.add'|trans }}</a>
           </td>
         </tr>

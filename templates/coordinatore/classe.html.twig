@@ -20,7 +20,7 @@
             <strong class="gs-big">{{ c.sede.citta }}</strong>
           </td>
           <td>
-            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': c.id}) }}" role="button" title="Classe {{ c.anno }}{{ c.sezione }} - {{ c.corso.nomeBreve }}"><strong>{{ c.anno }}ª {{ c.sezione }}</strong></a>
+            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': c.id}) }}" role="button" title="Classe {{ c.anno }}{{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }} - {{ c.corso.nomeBreve }}"><strong>{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}</strong></a>
             <em>{{ c.corso.nomeBreve }}</em>
           </td>
         </tr>
@@ -51,7 +51,7 @@
           </td>
           <td>
             {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nomeBreve }}">{{ v1.anno }}ª {{ v1.sezione }}</a>
+            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nomeBreve }}">{{ v1 }}</a>
             {% endfor %}
           </td>
         </tr>

@@ -31,7 +31,7 @@ class PresenzaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_presenza' => ['id', 'creato', 'modificato', 'data', 'ora_inizio', 'ora_fine', 'tipo', 'descrizione', 'alunno_id'],
       'gs_utente' => '*'];
@@ -72,7 +72,7 @@ class PresenzaTest extends EntityTestCase {
           ($field == 'oraFine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'descrizione' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           null))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -177,7 +177,7 @@ class PresenzaTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
   }
 

@@ -141,11 +141,11 @@ class DatabaseTestCase extends KernelTestCase {
     $dbParams = $connection->getParams();
     // svuota il database
     $this->objects = [];
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
     $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
     $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     // carica fixtures
     $fixtures = is_array($this->fixtures) ? $this->fixtures : [$this->fixtures];
     $fixturesName = md5(implode('-', $fixtures));
@@ -200,7 +200,7 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @return mixed|null Oggetto relativo al riferimento indicato o null se riferimento non definito
    */
-  protected function getReference(string $name): object {
+  protected function getReference(string $name): ?object {
     // carica fixture alice
     if (isset($this->objects[$name])) {
       return $this->objects[$name];
@@ -214,9 +214,11 @@ class DatabaseTestCase extends KernelTestCase {
    * Usare $property->getValue($object) e $property->setValue($object, $value) per leggere/modificare l'attributo.
  	 *
  	 * @author Joe Sexton <joe@webtipblog.com>
+   *
  	 * @param string $className Nome della classe
  	 * @param string $propertyName Nome dell'attributo
- 	 * @return ReflectionProperty L'attributo richiesto
+   *
+ 	 * @return \ReflectionProperty L'attributo richiesto
  	 */
   protected function getPrivateProperty(string $className, string $propertyName): \ReflectionProperty {
 		$reflector = new \ReflectionClass($className);
@@ -232,7 +234,7 @@ class DatabaseTestCase extends KernelTestCase {
  	 * @author Joe Sexton <joe@webtipblog.com>
  	 * @param string $className Nome della classe
  	 * @param string $propertyName Nome dell'attributo
- 	 * @return ReflectionMethod Il metodo richiesto
+ 	 * @return \ReflectionMethod Il metodo richiesto
  	 */
 	protected function getPrivateMethod(string $className, string $methodName): \ReflectionMethod {
 		$reflector = new \ReflectionClass($className);

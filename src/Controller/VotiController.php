@@ -16,7 +16,6 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -46,7 +45,7 @@ class VotiController extends BaseController {
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
-   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
    *
@@ -57,7 +56,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(Request $request, RegistroUtil $reg, $cattedra, $classe, $periodo) {
+  public function votiAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
+                             int $periodo): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -177,7 +177,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiClasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, $cattedra, $tipo, $data) {
+                                   LogHandler $dblogger, int $cattedra, string $tipo,
+                                   string $data): Response {
     // inizializza
     $label = array();
     $visibile = true;
@@ -212,7 +213,7 @@ class VotiController extends BaseController {
     $elenco_precedente = unserialize(serialize($elenco)); // clona oggetti
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['festivi'] = $reg->listaFestivi();
     $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
@@ -405,7 +406,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAlunnoAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
+                                   LogHandler $dblogger, int $cattedra, int $alunno, string $tipo,
+                                   int $id): Response {
     // inizializza
     $label = array();
     if ($request->isMethod('GET')) {
@@ -453,7 +455,7 @@ class VotiController extends BaseController {
     }
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
+    $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
     $label['bes'] = $alunno->getBes();
@@ -630,7 +632,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiDettagliAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, $cattedra, $classe, $alunno) {
+                                     RegistroUtil $reg, int $cattedra, int $classe,
+                                     int $alunno): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -676,13 +679,15 @@ class VotiController extends BaseController {
     }
     if ($cattedra) {
       // lista alunni
+      $listaAlunni = $reg->alunniInData(new \DateTime(), $classe);
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
+        ->where('a.id IN (:lista)')
+        ->setParameters(['lista' => $listaAlunni])
+        ->orderBY('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      if ($alunno && array_search($alunno->getId(), array_column($alunni, 'id')) !== false) {
+      if ($alunno && in_array($alunno->getId(), $listaAlunni)) {
         // alunno indicato e presente in classe
         $info['alunno_scelto'] = $alunno->getCognome().' '.$alunno->getNome().' ('.
           $alunno->getDataNascita()->format('d/m/Y').')';
@@ -733,7 +738,8 @@ class VotiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiSostegnoAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, GenitoriUtil $gen, $cattedra, $materia) {
+                                     RegistroUtil $reg, GenitoriUtil $gen, int $cattedra,
+                                     int $materia): Response {
     // inizializza variabili
     $materie = null;
     $info = null;
@@ -819,7 +825,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, $cattedra, $classe, $data) {
+  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, int $cattedra, int $classe,
+                                   string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -871,7 +878,7 @@ class VotiController extends BaseController {
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
+      'Voti della classe '.$classe.' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,
       'info' => $info,
@@ -901,7 +908,7 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiEsportaAction(RegistroUtil $reg, $cattedra, $classe, $data) {
+  public function votiEsportaAction(RegistroUtil $reg, int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -964,6 +971,7 @@ class VotiController extends BaseController {
         HeaderUtils::DISPOSITION_ATTACHMENT,
         $nomefile);
     $response->headers->set('Content-Disposition', $disposition);
+    $response->headers->set('Content-Type', 'text/csv');
     return $response;
   }
 
@@ -983,7 +991,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, $id) {
+  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
+                                     int $id): Response {
     // controllo voto
     $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);

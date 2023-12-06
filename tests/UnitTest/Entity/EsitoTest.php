@@ -32,7 +32,7 @@ class EsitoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_esito' => ['id', 'creato', 'modificato', 'esito', 'media', 'credito', 'credito_precedente', 'dati', 'scrutinio_id', 'alunno_id'],
       'gs_classe' => '*',
@@ -75,8 +75,8 @@ class EsitoTest extends EntityTestCase {
           ($field == 'credito' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'creditoPrecedente' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'scrutinio' ? $this->getReference("scrutinio_2") :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
+          ($field == 'scrutinio' ? $this->getReference("scrutinio_P") :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."B_1") :
           null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -140,7 +140,7 @@ class EsitoTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Scrutinio - NOT BLANK');
-    $existent->setScrutinio($this->getReference("scrutinio_5"));
+    $existent->setScrutinio($this->getReference("scrutinio_F"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Scrutinio - VALID NOT BLANK');
     // alunno
     $temp = $existent->getAlunno();

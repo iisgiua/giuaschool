@@ -85,7 +85,7 @@ class NotificheUtil {
     $dati = array();
     $oggi = new \DateTime('today');
     $ora = new \DateTime('now');
-    if ($utente instanceof Genitore) {
+    if ($utente instanceOf Genitore) {
       // notifiche per i genitori
       $dati['colloqui'] = null;
       $dati['avvisi'] = 0;
@@ -118,7 +118,7 @@ class NotificheUtil {
         // legge assenze da giustificare
         $dati['giustificazioni'] = $this->em->getRepository('App\Entity\Assenza')->assenzeIngiustificate($alunno);
       }
-    } elseif ($utente instanceof Alunno) {
+    } elseif ($utente instanceOf Alunno) {
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
@@ -129,7 +129,7 @@ class NotificheUtil {
       $dati['compiti'] = $this->numeroCompitiGenitori($utente);
       // legge assenze da giustificare
       $dati['giustificazioni'] = $this->em->getRepository('App\Entity\Assenza')->assenzeIngiustificate($utente);
-    } elseif ($utente instanceof Docente) {
+    } elseif ($utente instanceOf Docente) {
       // notifiche per i docenti
       $fine = (clone $oggi)->modify('+3 days');
       $dati['richieste'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->inAttesa($utente);
@@ -144,10 +144,10 @@ class NotificheUtil {
       // legge compiti
       $dati['compiti'] = $this->numeroCompiti($utente);
       // legge moduli di richiesta per lo staff
-      if ($utente instanceof Staff) {
+      if ($utente instanceOf Staff) {
         $dati['moduli'] = $this->em->getRepository('App\Entity\Richiesta')->contaNuove($utente);
       }
-    } elseif ($utente instanceof Ata) {
+    } elseif ($utente instanceOf Ata) {
       // notifiche per gli ata
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       $dati['circolari'] = $this->em->getRepository('App\Entity\Circolare')->numeroCircolariUtente($utente);
@@ -180,7 +180,7 @@ class NotificheUtil {
    *
    * @param Docente $docente Docente che ha inserito le verifiche
    *
-   * @return int Numero di veriche previste
+   * @return array Lista verifiche previste
    */
   public function numeroVerifiche(Docente $docente) {
     // conta verifiche di oggi
@@ -235,7 +235,7 @@ class NotificheUtil {
    *
    * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
    *
-   * @return int Numero di veriche previste
+   * @return array Lista verifiche previste
    */
   public function numeroVerificheGenitori(Alunno $alunno) {
     // conta verifiche di oggi
@@ -271,7 +271,7 @@ class NotificheUtil {
    *
    * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
    *
-   * @return int Numero di compiti assegnati
+   * @return array Lista compiti assegnati
    */
   public function numeroCompitiGenitori(Alunno $alunno) {
     // conta compiti di oggi
@@ -304,7 +304,7 @@ class NotificheUtil {
    *
    * @param Docente $docente Docente che ha inserito i compiti
    *
-   * @return int Numero di compiti previsti
+   * @return array Lista compiti previsti
    */
   public function numeroCompiti(Docente $docente) {
     // conta verifiche di oggi

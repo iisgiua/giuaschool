@@ -32,7 +32,7 @@ class ColloquioTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
     // SQL write
@@ -67,7 +67,7 @@ class ColloquioTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'docente' ? $this->getReference("docente_1") :
+          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'inizio' ? $this->faker->dateTime() :
           ($field == 'fine' ? $this->faker->dateTime() :
@@ -147,7 +147,7 @@ class ColloquioTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // data
     $property = $this->getPrivateProperty('App\Entity\Colloquio', 'data');

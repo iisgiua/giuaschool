@@ -36,162 +36,91 @@ include:
 
 
 App\Entity\Circolare:
-  circolare_perClasse:
+  circolare_perclasse:
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     numero: '10'
     data: '<dateTimeBetween("-1 month", "now")>'
     oggetto: '<substr(<text()>, 0, 255)>'
     documento: '<fileObj()>'
     allegati: '<(array())>'
-    ata: '<(false)>'
-    dsga: '<(false)>'
+    ata: false
+    dsga: false
     genitori: 'C'
-    filtroGenitori: '<arrayId(circolare_perClasse, filtroGenitori, @circolare_perClasse, @classe_2A)>'
+    filtroGenitori: '<arrayId(circolare_perclasse, filtroGenitori, @circolare_perclasse, @classe_2A)>'
     alunni: 'C'
-    filtroAlunni: '<arrayId(circolare_perClasse, filtroAlunni, @circolare_perClasse, @classe_2A)>'
+    filtroAlunni: '<arrayId(circolare_perclasse, filtroAlunni, @circolare_perclasse, @classe_2A)>'
     coordinatori: 'N'
-    filtroCoordinatori: '[]'
+    filtroCoordinatori: []
     docenti: 'C'
-    filtroDocenti: '<arrayId(circolare_perClasse, filtroDocenti, @circolare_perClasse, @classe_2A)>'
-    altri: '[]'
-    firma: '<(true)>'
-    notifica: '<(true)>'
-    pubblicata: '<(true)>'
-  circolare_perDocenti:
+    filtroDocenti: '<arrayId(circolare_perclasse, filtroDocenti, @circolare_perclasse, @classe_2A)>'
+    altri: []
+    firma: true
+    notifica: true
+    pubblicata: true
+  circolare_perdocenti:
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     numero: '20'
     data: '<dateTimeBetween("-1 month", "now")>'
     oggetto: '<substr(<text()>, 0, 255)>'
     documento: '<fileObj()>'
     allegati: '<(array())>'
-    ata: '<(false)>'
-    dsga: '<(false)>'
+    ata: false
+    dsga: false
     genitori: 'N'
-    filtroGenitori: '[]'
+    filtroGenitori: []
     alunni: 'N'
-    filtroAlunni: '[]'
+    filtroAlunni: []
     coordinatori: 'N'
-    filtroCoordinatori: '[]'
+    filtroCoordinatori: []
     docenti: 'T'
-    filtroDocenti: '[]'
-    altri: '[]'
-    firma: '<(true)>'
-    notifica: '<(true)>'
-    pubblicata: '<(true)>'
-  circolare_conAllegato:
+    filtroDocenti: []
+    altri: []
+    firma: true
+    notifica: true
+    pubblicata: true
+  circolare_conallegato:
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     numero: '30'
     data: '<dateTimeBetween("-1 month", "now")>'
     oggetto: '<substr(<text()>, 0, 255)>'
     documento: '<fileObj()>'
     allegati: '<words()>'
-    ata: '<(true)>'
-    dsga: '<(true)>'
+    ata: true
+    dsga: true
     genitori: 'N'
-    filtroGenitori: '[]'
+    filtroGenitori: []
     alunni: 'N'
-    filtroAlunni: '[]'
+    filtroAlunni: []
     coordinatori: 'N'
-    filtroCoordinatori: '[]'
+    filtroCoordinatori: []
     docenti: 'T'
-    filtroDocenti: '[]'
-    altri: '[]'
-    firma: '<(true)>'
-    notifica: '<(true)>'
-    pubblicata: '<(true)>'
-  circolare_nonPubblicata:
+    filtroDocenti: []
+    altri: []
+    firma: true
+    notifica: true
+    pubblicata: true
+  circolare_nonpubblicata:
     sedi: '<collection(@sede_1)>'
-    anno: '2023'
+    anno: '<((new Datetime())->format("Y"))>'
     numero: '40'
     data: '<dateTimeBetween("-1 month", "now")>'
     oggetto: '<substr(<text()>, 0, 255)>'
     documento: '<fileObj()>'
     allegati: '<(array())>'
-    ata: '<(false)>'
-    dsga: '<(false)>'
+    ata: false
+    dsga: false
     genitori: 'N'
-    filtroGenitori: '[]'
+    filtroGenitori: []
     alunni: 'N'
-    filtroAlunni: '[]'
+    filtroAlunni: []
     coordinatori: 'N'
-    filtroCoordinatori: '[]'
+    filtroCoordinatori: []
     docenti: 'T'
-    filtroDocenti: '[]'
-    altri: '[]'
-    firma: '<(true)>'
-    notifica: '<(true)>'
-    pubblicata: '<(false)>'
-
-
-####################
-# CircolareClasseFixtures - dati di test
-#
-# Associazione tra la circolare e le classi di destinazione:
-#   circolare: circolare a cui ci si riferisce
-#   classe: classe in cui deve essere letta la circolare
-#   letta: data e ora di lettura della circolare nella classe
-####################
-
-
-App\Entity\CircolareClasse:
-  circolare_classe_perClasse:
-    circolare: '@circolare_perClasse'
-    classe: '@classe_2A'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-
-
-####################
-# CircolareUtenteFixtures - dati di test
-#
-# Entità:
-#   circolare: circolare a cui ci si riferisce
-#   utente: utente destinatario della circolare
-#   letta: data e ora di lettura implicita della circolare da parte dell'utente
-#   confermata: data e ora di conferma esplicita della lettura della circolare da parte dell'utente
-####################
-
-
-App\Entity\CircolareUtente:
-  circolare_utente_perClasse_1:
-    circolare: '@circolare_perClasse'
-    utente: '@docente_curricolare_1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_perClasse_2:
-    circolare: '@circolare_perClasse'
-    utente: '@genitore1_seconda_1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_perClasse_3:
-    circolare: '@circolare_perClasse'
-    utente: '@alunno_seconda_1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_perDocenti_1:
-    circolare: '@circolare_perDocenti'
-    utente: '@docente_curricolare_1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_perDocenti_2:
-    circolare: '@circolare_perDocenti'
-    utente: '@docente_curricolare_2'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_conAllegato_1:
-    circolare: '@circolare_conAllegato'
-    utente: '@docente_curricolare_1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_conAllegato_2:
-    circolare: '@circolare_conAllegato'
-    utente: '@docente_curricolare_2'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
-  circolare_utente_conAllegato_3:
-    circolare: '@circolare_conAllegato'
-    utente: '@ata_T1'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
-    confermata: '$letta'
+    filtroDocenti: []
+    altri: []
+    firma: true
+    notifica: true
+    pubblicata: false

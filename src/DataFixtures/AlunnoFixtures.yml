@@ -27,8 +27,8 @@ include:
 
 App\Entity\Alunno:
 
-  # ----- alunni delle classi -----
-  alunno_prima_{1..50}:
+  # ----- alunni del biennio BIN -----
+  alunno_1A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -40,7 +40,7 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -51,22 +51,22 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "N", "H", "D", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: 0
     credito4: 0
-    classe: '@classe_1*'
-    genitori: '<collection(@genitore1_prima_<current()>, @genitore2_prima_<current()>)>'
+    classe: '@classe_1A'
+    genitori: '<collection(@genitore1_1A_<current()>, @genitore2_1A_<current()>)>'
     rappresentante: '<(array())>'
-  alunno_seconda_{1..50}:
+  alunno_2A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -78,7 +78,7 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -89,22 +89,24 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "N", "H", "D", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: 0
     credito4: 0
-    classe: '@classe_2*'
-    genitori: '<collection(@genitore1_seconda_<current()>, @genitore2_seconda_<current()>)>'
+    classe: '@classe_2A'
+    genitori: '<collection(@genitore1_2A_<current()>, @genitore2_2A_<current()>)>'
     rappresentante: '<(array())>'
-  alunno_terza_{1..50}:
+
+  # ----- alunni del triennio INF -----
+  alunno_3A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -116,7 +118,7 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -127,22 +129,22 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "N", "H", "D", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: 0
     credito4: 0
-    classe: '@classe_3*'
-    genitori: '<collection(@genitore1_terza_<current()>, @genitore2_terza_<current()>)>'
+    classe: '@classe_3A'
+    genitori: '<collection(@genitore1_3A_<current()>, @genitore2_3A_<current()>)>'
     rappresentante: '<(array())>'
-  alunno_quarta_{1..50}:
+  alunno_4A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -154,7 +156,7 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -165,22 +167,22 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "N", "H", "D", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: '<numberBetween(7, 12)>'
     credito4: 0
-    classe: '@classe_4*'
-    genitori: '<collection(@genitore1_quarta_<current()>, @genitore2_quarta_<current()>)>'
+    classe: '@classe_4A'
+    genitori: '<collection(@genitore1_4A_<current()>, @genitore2_4A_<current()>)>'
     rappresentante: '<(array())>'
-  alunno_quinta_{1..50}:
+  alunno_5A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -192,7 +194,7 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -203,24 +205,24 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "N", "H", "D", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: '<numberBetween(7, 12)>'
     credito4: '<numberBetween(8, 13)>'
-    classe: '@classe_5*'
-    genitori: '<collection(@genitore1_quinta_<current()>, @genitore2_quinta_<current()>)>'
+    classe: '@classe_5A'
+    genitori: '<collection(@genitore1_5A_<current()>, @genitore2_5A_<current()>)>'
     rappresentante: '<(array())>'
 
-  # ----- alunni con sostegno -----
-  alunno_sostegno_{1..5}:
+  # ----- alunni del quinquennio LSA -----
+  alunno_1B_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -232,11 +234,359 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dataNascita: '<dateTimeBetween("-20 years", "-14 years")>'
+    dataNascita: '<dateTimeBetween("-16 years", "-14 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1B'
+    genitori: '<collection(@genitore1_1B_<current()>, @genitore2_1B_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_2B_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-17 years", "-15 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_2B'
+    genitori: '<collection(@genitore1_2B_<current()>, @genitore2_2B_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_3B_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-16 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3B'
+    genitori: '<collection(@genitore1_3B_<current()>, @genitore2_3B_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_4B_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-19 years", "-17 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: '<numberBetween(7, 12)>'
+    credito4: 0
+    classe: '@classe_4B'
+    genitori: '<collection(@genitore1_4B_<current()>, @genitore2_4B_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_5B_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-20 years", "-18 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: '<numberBetween(7, 12)>'
+    credito4: '<numberBetween(8, 13)>'
+    classe: '@classe_5B'
+    genitori: '<collection(@genitore1_5B_<current()>, @genitore2_5B_<current()>)>'
+    rappresentante: '<(array())>'
+
+  # ----- alunni del biennio BCH -----
+  alunno_1C_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-16 years", "-14 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1C'
+    genitori: '<collection(@genitore1_1C_<current()>, @genitore2_1C_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_2C_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-17 years", "-15 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_2C'
+    genitori: '<collection(@genitore1_2C_<current()>, @genitore2_2C_<current()>)>'
+    rappresentante: '<(array())>'
+
+  # ----- alunni della classe articolata CHI/AMB -----
+  alunno_3CAMB_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-16 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3CAMB'
+    genitori: '<collection(@genitore1_3CAMB_<current()>, @genitore2_3CAMB_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_3CCHI_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-16 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3CCHI'
+    genitori: '<collection(@genitore1_3CCHI_<current()>, @genitore2_3CCHI_<current()>)>'
+    rappresentante: '<(array())>'
+
+  # ----- alunni con sostegno -----
+  alunno_sostegno_{1..2}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-14 years")>'
     comuneNascita: '<substr(<city()>, 0, 64)>'
     codiceFiscale (unique): '<taxId()>'
     citta: '<substr(<city()>, 0, 32)>'
@@ -249,18 +599,16 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I"])>'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
-    classe: '@classe_*'
-    credito3: '<($classe->getAnno() > 3 ? 8 : 0)>'
-    credito4: '<($classe->getAnno() == 5 ? 12 : 0)>'
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1A'
     genitori: '<collection(@genitore1_sostegno_<current()>, @genitore2_sostegno_<current()>)>'
     rappresentante: '<(array())>'
-
-  # ----- alunni con materia alternativa -----
-  alunno_alternativa_{1..5}:
+  alunno_sostegno_3:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
     nome: '<datoUtente("nome")>'
@@ -272,29 +620,67 @@ App\Entity\Alunno:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dataNascita: '<dateTimeBetween("-20 years", "-14 years")>'
+    dataNascita: '<dateTimeBetween("-18 years", "-14 years")>'
     comuneNascita: '<substr(<city()>, 0, 64)>'
     codiceFiscale (unique): '<taxId()>'
     citta: '<substr(<city()>, 0, 32)>'
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: 'N'
-    noteBes: ''
+    bes: 'H'
+    noteBes: '<paragraph(2, false)>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: 'A'
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
-    classe: '@classe_*'
-    credito3: '<($classe->getAnno() > 3 ? 8 : 0)>'
-    credito4: '<($classe->getAnno() == 5 ? 12 : 0)>'
-    genitori: '<collection(@genitore1_alternativa_<current()>, @genitore2_alternativa_<current()>)>'
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3CCHI'
+    genitori: '<collection(@genitore1_sostegno_1, @genitore2_sostegno_1)>'
+    rappresentante: '<(array())>'
+  alunno_sostegno_4:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-14 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: 'H'
+    noteBes: '<paragraph(2, false)>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3CAMB'
+    genitori: '<collection(@genitore1_sostegno_2, @genitore2_sostegno_2)>'
     rappresentante: '<(array())>'

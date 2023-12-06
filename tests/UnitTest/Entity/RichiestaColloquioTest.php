@@ -32,7 +32,7 @@ class RichiestaColloquioTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio'],
       'gs_colloquio' => '*'];
@@ -70,9 +70,9 @@ class RichiestaColloquioTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'appuntamento' ? $this->faker->dateTime() :
           ($field == 'colloquio' ? $this->getReference("colloquio_1") :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
-          ($field == 'genitore' ? $this->getReference("genitore_1") :
-          ($field == 'genitoreAnnulla' ? $this->getReference("genitore_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
+          ($field == 'genitore' ? $this->getReference("genitore1_1A_1") :
+          ($field == 'genitoreAnnulla' ? $this->getReference("genitore1_1A_1") :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'messaggio' ? $this->faker->optional($weight = 50, $default = '')->text() :
           null)))))));
@@ -158,14 +158,14 @@ class RichiestaColloquioTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // genitore
     $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'genitore');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Genitore - NOT BLANK');
-    $existent->setGenitore($this->getReference("genitore_1"));
+    $existent->setGenitore($this->getReference("genitore2_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Genitore - VALID NOT BLANK');
     // genitoreAnnulla
     $existent->setGenitoreAnnulla(null);

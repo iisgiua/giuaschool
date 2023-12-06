@@ -20,24 +20,24 @@ class ScrutinioAssenza {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $alunno Identificativo univoco per l'alunno
+   * @var int $alunno Identificativo univoco per l'alunno
    */
-  private $alunno;
+  private int $alunno = 0;
 
   /**
    * @var string $sesso Sesso dell'alunno [M=maschio, F=femmina]
    */
-  private $sesso;
+  private string $sesso = '';
 
   /**
    * @var string $scrutinabile Indica se l'alunno è scrutinabile o no [A=limite assenze, D=deroga]
    */
-  private $scrutinabile;
+  private string $scrutinabile = '';
 
   /**
    * @var string $motivazione Motivazione della deroga
    */
-  private $motivazione;
+  private string $motivazione = '';
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -45,20 +45,20 @@ class ScrutinioAssenza {
   /**
    * Restituisce l'identificativo univoco per l'alunno
    *
-   * @return integer Identificativo univoco per l'alunno
+   * @return int Identificativo univoco per l'alunno
    */
-  public function getAlunno() {
+  public function getAlunno(): int {
     return $this->alunno;
   }
 
   /**
    * Modifica l'identificativo univoco per l'alunno
    *
-   * @var integer $alunno Identificativo univoco per l'alunno
+   * @var int $alunno Identificativo univoco per l'alunno
    *
-   * @return ScrutinioAssenza Oggetto ScrutinioAssenza
+   * @return ScrutinioAssenza Oggetto modificato
    */
-  public function setAlunno($alunno) {
+  public function setAlunno(int $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -68,7 +68,7 @@ class ScrutinioAssenza {
    *
    * @return string Sesso dell'alunno
    */
-  public function getSesso() {
+  public function getSesso(): string {
     return $this->sesso;
   }
 
@@ -77,9 +77,9 @@ class ScrutinioAssenza {
    *
    * @var string $sesso Sesso dell'alunno
    *
-   * @return ScrutinioAssenza Oggetto ScrutinioAssenza
+   * @return ScrutinioAssenza Oggetto modificato
    */
-  public function setSesso($sesso) {
+  public function setSesso(string $sesso): self {
     $this->sesso = $sesso;
     return $this;
   }
@@ -89,7 +89,7 @@ class ScrutinioAssenza {
    *
    * @return string Indica se l'alunno è scrutinabile o no
    */
-  public function getScrutinabile() {
+  public function getScrutinabile(): string {
     return $this->scrutinabile;
   }
 
@@ -100,7 +100,7 @@ class ScrutinioAssenza {
    *
    * @return ScrutinioAssenza Oggetto ScrutinioAssenza
    */
-  public function setScrutinabile($scrutinabile) {
+  public function setScrutinabile(string $scrutinabile): self {
     $this->scrutinabile = $scrutinabile;
     return $this;
   }
@@ -110,7 +110,7 @@ class ScrutinioAssenza {
    *
    * @return string Motivazione della deroga
    */
-  public function getMotivazione() {
+  public function getMotivazione(): string {
     return $this->motivazione;
   }
 
@@ -121,7 +121,7 @@ class ScrutinioAssenza {
    *
    * @return ScrutinioAssenza Oggetto ScrutinioAssenza
    */
-  public function setMotivazione($motivazione) {
+  public function setMotivazione(string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }

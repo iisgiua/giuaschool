@@ -4,6 +4,7 @@
 # dati delle classi:
 #   anno: anno della classe
 #   sezione: sezione della classe
+#   gruppo: nome gruppo di alunni
 #   oreSettimanali: numero di ore settimanali della classe
 #   sede: sede a cui appartiene la classe
 #   corso: corso a cui appartiene classe
@@ -19,8 +20,6 @@ include:
 
 
 App\Entity\Classe:
-
-  # ----- definizione classi -----
   classe_{1..2}A:
     anno: '<current()>'
     sezione: 'A'
@@ -37,51 +36,46 @@ App\Entity\Classe:
     corso: '@corso_INF'
     coordinatore:
     segretario:
-  classe_{1..2}B:
+  classe_{1..5}B:
     anno: '<current()>'
     sezione: 'B'
+    oreSettimanali: '<( $anno < 3 ? 27 : 30 )>'
+    sede: '@sede_2'
+    corso: '@corso_LSA'
+    coordinatore:
+    segretario:
+  classe_{1..2}C:
+    anno: '<current()>'
+    sezione: 'C'
     oreSettimanali: '<( $anno == 1 ? 33 : 32 )>'
     sede: '@sede_1'
     corso: '@corso_BCH'
     coordinatore:
     segretario:
-  classe_{3..5}B:
-    anno: '<current()>'
-    sezione: 'B'
+  classe_3C:
+    anno: '3'
+    sezione: 'C'
+    gruppo:
     oreSettimanali: 32
     sede: '@sede_1'
     corso: '@corso_CHI'
     coordinatore:
     segretario:
-  classe_{1..5}C:
-    anno: '<current()>'
+  classe_3CAMB:
+    anno: '3'
     sezione: 'C'
-    oreSettimanali: '<( $anno < 3 ? 27 : 30 )>'
-    sede: '@sede_1'
-    corso: '@corso_LSA'
-    coordinatore:
-    segretario:
-  classe_{1..2}D:
-    anno: '<current()>'
-    sezione: 'D'
-    oreSettimanali: '<( $anno == 1 ? 33 : 32 )>'
-    sede: '@sede_2'
-    corso: '@corso_BIN'
-    coordinatore:
-    segretario:
-  classe_{3..5}D:
-    anno: '<current()>'
-    sezione: 'D'
+    gruppo: 'AMB'
     oreSettimanali: 32
-    sede: '@sede_2'
-    corso: '@corso_INF'
+    sede: '@sede_1'
+    corso: '@corso_AMB'
     coordinatore:
     segretario:
-  classe_{1..5}E:
-    anno: '<current()>'
-    sezione: 'E'
-    oreSettimanali: '<( $anno < 3 ? 27 : 30 )>'
-    sede: '@sede_2'
-    corso: '@corso_LSA'
+  classe_3CCHI:
+    anno: '3'
+    sezione: 'C'
+    gruppo: 'CHI'
+    oreSettimanali: 32
+    sede: '@sede_1'
+    corso: '@corso_CHI'
     coordinatore:
     segretario:

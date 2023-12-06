@@ -8,17 +8,16 @@
 
 namespace App\Form;
 
+use App\Entity\VotoScrutinio;
+use App\Form\MessageType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\CallbackTransformer;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\VotoScrutinio;
-use App\Entity\Alunno;
-use App\Form\MessageType;
 
 
 /**
@@ -54,42 +53,40 @@ class VotoScrutinioType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if (isset($options['attr']['subType'])) {
-      // form parziale
-      if ($options['attr']['subType'] == 'condotta') {
-        // voto di condotta
-        $builder
-          ->add('alunno', HiddenType::class)
-          ->add('unico', HiddenType::class)
-          ->add('motivazione', MessageType::class, array('label' => false,
-            'property_path' => 'dati[motivazione]',
-            'trim' => true,
-            'required' => false))
-          ->add('unanimita', ChoiceType::class, array('label' => false,
-            'property_path' => 'dati[unanimita]',
-            'choices' => ['label.votazione_unanimita' => true, 'label.votazione_maggioranza' => false],
-            'placeholder' => null,
-            'expanded' => true,
-            'multiple' => false,
-            'label_attr' => ['class' => 'radio-inline gs-mr-4'],
-            'required' => false))
-          ->add('contrari', TextType::class, array('label' => false,
-            'property_path' => 'dati[contrari]',
-            'trim' => true,
-            'required' => false));
-      } elseif ($options['attr']['subType'] == 'edcivica') {
-        // voto di ed.civica
-        $builder
-          ->add('alunno', HiddenType::class)
-          ->add('unico', HiddenType::class);
-      } elseif ($options['attr']['subType'] == 'esito') {
-        // esito
-        $builder
-          ->add('alunno', HiddenType::class)
-          ->add('unico', HiddenType::class);
-      } elseif ($options['attr']['subType'] == 'debiti') {
-        // debiti
-        $builder
+    if ($options['form_mode'] == 'condotta') {
+      // voto di condotta
+      $builder
+        ->add('alunno', HiddenType::class)
+        ->add('unico', HiddenType::class)
+        ->add('motivazione', MessageType::class, array('label' => false,
+          'property_path' => 'dati[motivazione]',
+          'trim' => true,
+          'required' => false))
+        ->add('unanimita', ChoiceType::class, array('label' => false,
+          'property_path' => 'dati[unanimita]',
+          'choices' => ['label.votazione_unanimita' => true, 'label.votazione_maggioranza' => false],
+          'placeholder' => null,
+          'expanded' => true,
+          'multiple' => false,
+          'label_attr' => ['class' => 'radio-inline gs-mr-4'],
+          'required' => false))
+        ->add('contrari', TextType::class, array('label' => false,
+          'property_path' => 'dati[contrari]',
+          'trim' => true,
+          'required' => false));
+    } elseif ($options['form_mode'] == 'edcivica') {
+      // voto di ed.civica
+      $builder
+        ->add('alunno', HiddenType::class)
+        ->add('unico', HiddenType::class);
+    } elseif ($options['form_mode'] == 'esito') {
+      // esito
+      $builder
+        ->add('alunno', HiddenType::class)
+        ->add('unico', HiddenType::class);
+    } elseif ($options['form_mode'] == 'debiti') {
+      // debiti
+      $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
         ->add('recupero', ChoiceType::class, array('label' => false,
@@ -108,15 +105,14 @@ class VotoScrutinioType extends AbstractType {
           'trim' => true,
           'attr' => array('rows' => '3'),
           'required' => false));
-      } elseif ($options['attr']['subType'] == 'carenze') {
-        // carenze
-        $builder
+    } elseif ($options['form_mode'] == 'carenze') {
+      // carenze
+      $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
         ->add('debito', MessageType::class, array('label' => false,
           'trim' => true,
           'required' => false));
-      }
     } else {
       // form completo
       $builder
@@ -170,7 +166,10 @@ class VotoScrutinioType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => VotoScrutinio::class));
+    $resolver->setDefined('form_mode');
+    $resolver->setDefaults(array(
+      'form_mode' => 'completo',
+      'data_class' => VotoScrutinio::class));
   }
 
 }

@@ -1,0 +1,85 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0], {'attr': {'class': 'form-inline gs-mb-2'}}) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body gs-big">
+      {% include info.modulo with {form: form[0]} %}
+  {% if info.allegati > 0 %}
+      <hr>
+      <div style="width:96%;margin-right:2%;margin-left:2%;" class="form-group">
+        <label class="control-label">Inserisci gli allegati richiesti: sono ammessi documenti in formato PDF o scansionati in immagini JPEG.</label>
+        <div class="dropzone">
+          <div class="fallback"></div>
+        </div>
+      </div>
+  {% endif %}
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="richiesta_submit" name="richiesta[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+      <button type="button" id="richiesta_cancel" name="richiesta[cancel]" class="btn btn-default" onClick="location.href='{{ path('richieste_classe', {classe: info.classe.id}) }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+  {% include 'include/modal-waiting.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+  {% if info.allegati > 0 %}
+<link href="{{ asset('vendor/dropzone/css/dropzone.min.css') }}" rel="stylesheet">
+<link href="{{ asset('css/tema_dropzone.css') }}" rel="stylesheet">
+  {% endif %}
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+  {% if info.allegati > 0 %}
+<script src="{{ asset('vendor/dropzone/js/dropzone.min.js') }}"></script>
+<script>
+Dropzone.autoDiscover = false;
+var DZ = new Dropzone(".dropzone", {
+  url: "{{ path('file_upload', {'pagina': 'richieste_add', 'param': 'files'}) }}",
+  maxFiles: {{ info.allegati }},
+  maxFilesize: 50,
+  acceptedFiles: ".pdf,.jpg,.jpeg",
+  timeout: 0,
+  paramName: "files",
+  uploadMultiple: true,
+  addRemoveLinks: true,
+  createImageThumbnails: false,
+  clickable: true,
+  dictDefaultMessage: "{{ 'message.upload_dropzone'|trans }}",
+  dictFallbackMessage: "{{ 'exception.upload_no_dropzone'|trans }}",
+  dictInvalidFileType: "{{ 'exception.upload_tipo'|trans }}",
+  dictFileTooBig: "{{ 'exception.upload_dimensione'|trans }}",
+  dictMaxFilesExceeded: "{{ 'exception.upload_numero'|trans }}",
+  dictRemoveFile: "{{ 'label.upload_rimuove_file'|trans }}",
+  dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
+  dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
+  init: function() {
+    this.on("successmultiple", function(files, response) {
+      $.each(files, function(key,file){
+        file.uploaded = response[key];
+        $('#documento_submit').removeAttr('disabled');
+      });
+    });
+    this.on("removedfile", function(file) {
+      $.post("{{ path('file_remove', {'pagina': 'richieste_add', 'param': 'files'}) }}", {"files": file.uploaded});
+      if (file.status == 'success') {
+        $('#documento_submit').attr('disabled', true);
+      }
+    });
+    $('#documento_submit').attr('disabled', true);
+  }
+});
+</script>
+  {% endif %}
+{% endblock %}

@@ -32,7 +32,7 @@ class MenuTest extends EntityTestCase {
     $this->noStoredFields = ['opzioni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_menu' => ['id', 'creato', 'modificato', 'selettore', 'nome', 'descrizione', 'mega'],
       'gs_menu_opzione' => '*'];

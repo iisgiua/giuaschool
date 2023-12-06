@@ -14,14 +14,16 @@
     <div class="panel-body">
       {% if dati.richieste[mk] is defined %}
       <div class="col-sm-6 gs-big">
-        <strong>Invio richiesta: </strong>{{ dati.richieste[mk].nuove[0].inviata|date('d/m/Y H:i') }}
+        <strong>Invio{{ mv.gestione ? ' richiesta' }}: </strong>{{ dati.richieste[mk].nuove[0].inviata|date('d/m/Y H:i') }}
       </div>
       <div class="col-sm-6 gs-big">
+        {% if mv.gestione %}
         <strong>Stato: </strong>
-        {% if dati.richieste[mk].nuove[0].stato == 'I' %}
+          {% if dati.richieste[mk].nuove[0].stato == 'I' %}
         <strong class="text-danger">IN ATTESA</strong>
-        {% else %}
+          {% else %}
         <strong class="text-success">GESTITA</strong>
+          {% endif %}
         {% endif %}
       </div>
         {% if dati.richieste[mk].nuove[0].messaggio %}
@@ -30,23 +32,29 @@
       </div>
         {% endif %}
       <div class="col-sm-12">
-        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id}) }}" title="Scarica il modulo di richiesta compilato">
+        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id}) }}" title="Scarica il modulo compilato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
         </a>
         {% for a in dati.richieste[mk].nuove[0].allegati %}
-        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
+        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id, documento: loop.index}) }}" title="Scarica l'allegato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
         </a>
         {% endfor %}
       </div>
       <div class="text-right">
+        {% if mv.gestione %}
         <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la richiesta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_richiesta'|trans }}"><strong>{{ 'label.cancella_richiesta'|trans }}</strong></button>
+        {% else %}
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}"><strong>{{ 'label.cancella_modulo'|trans }}</strong></button>
+        {% endif %}
       </div>
       {% else %}
       <div class="text-right">
-        <a class="btn btn-primary" href="{{ path('richieste_add', {modulo: mk}) }}" title="Invia una nuova richiesta">
-          <strong>{{ 'label.invia_richiesta'|trans }}</strong>
-        </a>
+        {% if mv.gestione %}
+        <a class="btn btn-primary" href="{{ path('richieste_add', {modulo: mk}) }}" title="Invia una nuova richiesta"><strong>{{ 'label.invia_richiesta'|trans }}</strong></a>
+        {% else %}
+        <a class="btn btn-primary" href="{{ path('richieste_add', {modulo: mk}) }}" title="Invia un nuovo modulo"><strong>{{ 'label.invia_modulo'|trans }}</strong></a>
+        {% endif %}
       </div>
       {% endif %}
     </div>

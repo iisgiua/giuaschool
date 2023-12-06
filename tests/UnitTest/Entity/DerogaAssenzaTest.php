@@ -32,7 +32,7 @@ class DerogaAssenzaTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione'],
       'gs_utente' => '*'];
@@ -69,7 +69,7 @@ class DerogaAssenzaTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'data' ? $this->faker->dateTime() :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'motivazione' ? $this->faker->text() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -137,7 +137,7 @@ class DerogaAssenzaTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
   }
 

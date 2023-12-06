@@ -3,7 +3,7 @@
   <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
 </div>
 <p style="text-align:center; font-size:13pt">
-  <strong>Note disciplinari della classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
+  <strong>Note disciplinari della classe {{ classe }}</strong>
 </p>
 {% for periodo,v in dati %}
 <br>

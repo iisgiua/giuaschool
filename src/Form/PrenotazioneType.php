@@ -9,9 +9,9 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 
 /**
@@ -28,7 +28,7 @@ class PrenotazioneType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'prenotazione') {
+    if ($options['form_mode'] == 'prenotazione') {
       // form prenotazione
       $builder
         ->add('data', ChoiceType::class, array('label' => 'label.date_disponibili',
@@ -45,11 +45,11 @@ class PrenotazioneType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'prenotazione',
-      'values' => null,
+      'form_mode' => 'prenotazione',
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => null));
   }

@@ -15,8 +15,8 @@ use App\Entity\Genitore;
 use App\Entity\Staff;
 use App\Util\GenitoriUtil;
 use App\Util\PagelleUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -43,7 +43,8 @@ class PagelleController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(PagelleUtil $pag, $classe, $tipo, $periodo) {
+  public function documentoClasseAction(PagelleUtil $pag, int $classe, string $tipo, 
+                                        string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe
@@ -152,6 +153,7 @@ class PagelleController extends BaseController {
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle/comunicazioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param int $classe Identificativo della classe
+   * @param int $alunno Identificativo dell'alunno
    * @param string $tipo Tipo del documento da scaricare
    * @param string $periodo Periodo dello scrutinio
    *
@@ -164,7 +166,7 @@ class PagelleController extends BaseController {
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
   public function documentoAlunnoAction(PagelleUtil $pag, GenitoriUtil $gen,
-                                        $classe, $alunno, $tipo, $periodo) {
+                                        int $classe, int $alunno, string $tipo, string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe

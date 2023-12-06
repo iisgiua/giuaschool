@@ -12,11 +12,11 @@ use App\Tests\EntityTestCase;
 
 
 /**
- * Unit test dell'entità FirmaCircolare
+ * Unit test dell'entità GruppoClasse
  *
  * @author Antonello Dessì
  */
-class FirmaCircolareTest extends EntityTestCase {
+class RaggruppamentoTest extends EntityTestCase {
 
   /**
    * Costruttore
@@ -26,18 +26,19 @@ class FirmaCircolareTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\FirmaCircolare';
+    $this->entity = '\App\Entity\Raggruppamento';
     // campi da testare
-    $this->fields = ['circolare', 'utente', 'letto', 'firmato'];
-    $this->noStoredFields = [];
+    $this->fields = ['nome'];
+    $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_firma_circolare' => ['id', 'creato', 'modificato', 'circolare_id', 'utente_id', 'letto', 'firmato'],
-      'gs_circolare' => '*'];
+    $this->canRead = ['gs_raggruppamento' => ['id', 'creato', 'modificato', 'nome'],
+      'gs_utente' => '*'];
     // SQL write
-    $this->canWrite = ['gs_firma_circolare' => ['id', 'creato', 'modificato', 'circolare_id', 'utente_id', 'letto', 'firmato']];
+    $this->canWrite = ['gs_raggruppamento' => ['id', 'creato', 'modificato', 'nome'],
+      'gs_raggruppamento_alunno' => '*'];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -68,11 +69,8 @@ class FirmaCircolareTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'circolare' ? $this->getReference("circolare_".($i + 1)) :
-          ($field == 'utente' ? $this->getReference("docente_2") :
-          ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'firmato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          null))));
+          ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          null);
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -87,8 +85,8 @@ class FirmaCircolareTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_3");
-      $o[$i]->setUtente($data[$i]['utente']);
+      $data[$i]['nome'] = substr($this->faker->text(), 0, 64);
+      $o[$i]->setNome($data[$i]['nome']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -113,8 +111,22 @@ class FirmaCircolareTest extends EntityTestCase {
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    // addAlunni
+    $items = $existent->getAlunni()->toArray();
+    $item = $this->getReference("alunno_1A_1");
+    $existent->addAlunni($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getAlunni()->toArray()), $this->entity.'::addAlunni');
+    $existent->addAlunni($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getAlunni()->toArray()), $this->entity.'::addAlunni');
+    // removeAlunni
+    $items = $existent->getAlunni()->toArray();
+    $item = $items[0];
+    $existent->removeAlunni($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getAlunni()->toArray()), $this->entity.'::removeAlunni');
+    $existent->removeAlunni($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getAlunni()->toArray()), $this->entity.'::removeAlunni');
     // toString
-    $this->assertSame($existent->getCircolare().($existent->getFirmato() ? (' (firmata il '.$existent->getFirmato()->format('d/m/Y').')') : ' (non firmata)'), (string) $existent, $this->entity.'::toString');
+    $this->assertSame($existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -124,55 +136,36 @@ class FirmaCircolareTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
-    // circolare
-    $temp = $existent->getCircolare();
-    $property = $this->getPrivateProperty('App\Entity\FirmaCircolare', 'circolare');
+    // nome
+    $property = $this->getPrivateProperty('App\Entity\Raggruppamento', 'nome');
+    $property->setValue($existent, '');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
+    $existent->setNome($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID NOT BLANK');
+    $existent->setNome(str_repeat('*', 65));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::nome - MAX LENGTH');
+    $existent->setNome(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    // alunni
+    $property = $this->getPrivateProperty('\App\Entity\Raggruppamento', 'alunni');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Circolare - NOT BLANK');
-    $existent->setCircolare($temp);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Circolare - VALID NOT BLANK');
-    // utente
-    $temp = $existent->getUtente();
-    $property = $this->getPrivateProperty('App\Entity\FirmaCircolare', 'utente');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($temp);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
-    // letto
-    $existent->setLetto(new \DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Letto - VALID TYPE');
-    $existent->setLetto(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Letto - VALID NULL');
-    // firmato
-    $existent->setFirmato(new \DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Firmato - VALID TYPE');
-    $existent->setFirmato(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Firmato - VALID NULL');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunni - NOT BLANK');
+    $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("alunno_1A_1")]));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunni - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();
     $objects = $this->em->getRepository($this->entity)->findBy([]);
-    // unique circolare-utente
-    $circolareSaved = $objects[1]->getCircolare();
-    $objects[1]->setCircolare($objects[0]->getCircolare());
-    $utenteSaved = $objects[1]->getUtente();
-    $objects[1]->setUtente($objects[0]->getUtente());
+    // unique nome
+    $nomeSaved = $objects[1]->getNome();
+    $objects[1]->setNome($objects[0]->getNome());
     $err = $this->val->validate($objects[1]);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::circolare-utente - UNIQUE');
-    $objects[1]->setCircolare($circolareSaved);
-    $objects[1]->setUtente($utenteSaved);
-    // unique
-    $newObject = new \App\Entity\FirmaCircolare();
-    foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
-    }
-    $err = $this->val->validate($newObject);
-    $msgs = [];
-    foreach ($err as $e) {
-      $msgs[] = $e->getMessageTemplate();
-    }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::nome - UNIQUE');
+    $objects[1]->setNome($nomeSaved);
+    $err = $this->val->validate($objects[1]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
   }
 
 }

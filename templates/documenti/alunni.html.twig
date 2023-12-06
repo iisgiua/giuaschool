@@ -17,7 +17,7 @@
     {% for i,alu in dati.lista %}
       <tr>
         <td rowspan="{{ dati.documenti[i]|length }}">
-          <strong>{{ alu.classe.anno }}ª {{ alu.classe.sezione }}</strong>
+          <strong>{{ alu.classe }}</strong>
           <br>{{ alu.classe.corso.nomeBreve }} - {{ alu.classe.sede.citta|upper }}
         </td>
         <td rowspan="{{ dati.documenti[i]|length }}">

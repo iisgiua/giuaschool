@@ -7,6 +7,7 @@ Funzionalità: Inserimento proposte di voto per lo scrutinio
   #-- Bisogna controllare filtro del periodo
   #-- Bisogna controllare visualizzazione di altri docenti con stessa cattedra
   Bisogna controllare accesso a pagina
+  Utilizzando "_testFixtures.yml"
 
 
 Contesto: login docente senza cattedre
@@ -27,8 +28,8 @@ Schema dello scenario: Niente dati di recupero per le classi quinte per la catte
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 5    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 5    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -36,8 +37,8 @@ Schema dello scenario: Niente dati di recupero per le classi quinte per la catte
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato |
     | $a1  | $cl1   | Mario    | Rossi   | si        |
@@ -73,8 +74,8 @@ Schema dello scenario: Visualizza messaggio di errore per voti incompleti
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -82,8 +83,8 @@ Schema dello scenario: Visualizza messaggio di errore per voti incompleti
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato | religione |
     | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
@@ -109,8 +110,8 @@ Schema dello scenario: Visualizza messaggio di errore per dati incompleti
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -118,8 +119,8 @@ Schema dello scenario: Visualizza messaggio di errore per dati incompleti
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato |
     | $a1  | $cl1   | Mario    | Rossi   | si        |
@@ -156,8 +157,8 @@ Schema dello scenario: Visualizza messaggio di conferma per voti completi
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno   | sezione |
-    | $cl1 | <anno> | A       |
+    | id   | anno   | sezione | gruppo |
+    | $cl1 | <anno> | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -165,8 +166,8 @@ Schema dello scenario: Visualizza messaggio di conferma per voti completi
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato | religione |
     | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
@@ -195,8 +196,8 @@ Schema dello scenario: Visualizza messaggio di conferma per dati completi
     | id   | periodo   | data   | dataProposte |
     | $ds1 | <periodo> | #dtm() | #dtm()       |
   E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 4    | A       |
+    | id   | anno | sezione | gruppo |
+    | $cl1 | 4    | A       |        |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -204,8 +205,8 @@ Schema dello scenario: Visualizza messaggio di conferma per dati completi
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #abilitato | #classe |
+    | $cl1   | no         | null    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato |
     | $a1  | $cl1   | Mario    | Rossi   | si        |

@@ -63,17 +63,17 @@ class LogHandler {
    * @param string $azione Azione dell'utente
    * @param array $dati Lista di dati che descrivono l'azione
    */
-  public function logAzione($categoria, $azione, $dati) {
+  public function logAzione(string $categoria, string $azione, array $dati = []) {
     // inizializza
     $req = $this->request->getCurrentRequest();
     $tok = $this->token->getToken();
     // dati utente (si presuppone che un utente sia necessariamente connesso)
     $utente = $tok->getUser();
-    $username = $utente->getUsername();
+    $username = $utente->getUserIdentifier();
     $ruolo = $utente->getRoles()[0];
     $alias = null;
     if ($tok instanceOf SwitchUserToken) {
-      $alias = $tok->getOriginalToken()->getUser()->getUsername();
+      $alias = $tok->getOriginalToken()->getUser()->getUserIdentifier();
     }
     // dati di navigazione
     $ip = $req->getClientIp();
@@ -113,11 +113,11 @@ class LogHandler {
     $this->em->flush();
     // dati utente (si presuppone che un utente sia necessariamente connesso)
     $utente = $tok->getUser();
-    $username = $utente->getUsername();
+    $username = $utente->getUserIdentifier();
     $ruolo = $utente->getRoles()[0];
     $alias = null;
     if ($tok instanceOf SwitchUserToken) {
-      $alias = $tok->getOriginalToken()->getUser()->getUsername();
+      $alias = $tok->getOriginalToken()->getUser()->getUserIdentifier();
     }
     // dati di navigazione
     $ip = $req->getClientIp();
@@ -163,11 +163,11 @@ class LogHandler {
     $dati = [];
     // dati utente (si presuppone che un utente sia necessariamente connesso)
     $utente = $tok->getUser();
-    $username = $utente->getUsername();
+    $username = $utente->getUserIdentifier();
     $ruolo = $utente->getRoles()[0];
     $alias = null;
     if ($tok instanceOf SwitchUserToken) {
-      $alias = $tok->getOriginalToken()->getUser()->getUsername();
+      $alias = $tok->getOriginalToken()->getUser()->getUserIdentifier();
     }
     // dati di navigazione
     $ip = $req->getClientIp();
@@ -207,11 +207,11 @@ class LogHandler {
     $dati = [];
     // dati utente (si presuppone che un utente sia necessariamente connesso)
     $utente = $tok->getUser();
-    $username = $utente->getUsername();
+    $username = $utente->getUserIdentifier();
     $ruolo = $utente->getRoles()[0];
     $alias = null;
     if ($tok instanceOf SwitchUserToken) {
-      $alias = $tok->getOriginalToken()->getUser()->getUsername();
+      $alias = $tok->getOriginalToken()->getUser()->getUserIdentifier();
     }
     // dati di navigazione
     $ip = $req->getClientIp();

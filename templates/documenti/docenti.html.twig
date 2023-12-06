@@ -21,7 +21,7 @@
     {% for i,c in dati.lista %}
       <tr>
         <td>
-          <strong>{{ c.anno }}ª {{ c.sezione }}</strong> - {{ c.corso }} - {{ c.sede }}
+          <strong>{{ c.anno }}ª {{ c.sezione~(c.gruppo ? ('-'~c.gruppo)) }}</strong> - {{ c.corso }} - {{ c.sede }}
           {% if info.tipo != 'M' %}<br><strong>{{ c.materia }}{{ (c.alunno is defined and c.alunno is not empty) ? ' - '~c.alunno }}</strong>{% endif %}
         </td>
       {% if info.tipo != 'M' %}

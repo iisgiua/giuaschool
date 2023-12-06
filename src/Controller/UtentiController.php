@@ -8,15 +8,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Alunno;
-use App\Entity\Docente;
 use App\Form\NotificaType;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -24,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -47,7 +44,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction() {
+  public function profiloAction(): Response {
     // mostra la pagina di risposta
     return $this->render('utenti/profilo.html.twig', array(
       'pagina_titolo' => 'page.utenti_profilo',
@@ -68,7 +65,8 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, ValidatorInterface $validator, LogHandler $dblogger) {
+  public function emailAction(Request $request, ValidatorInterface $validator, 
+                              LogHandler $dblogger): Response {
     $success = null;
     // controlli
     $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
@@ -136,7 +134,7 @@ class UtentiController extends BaseController {
    */
   public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
                                  TranslatorInterface $trans, ValidatorInterface $validator,
-                                 LogHandler $dblogger) {
+                                 LogHandler $dblogger): Response {
     $success = null;
     $errore = null;
     $form = null;
@@ -231,7 +229,7 @@ class UtentiController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function otpAction(Request $request, TranslatorInterface $trans, OtpUtil $otp,
-                            LogHandler $dblogger) {
+                            LogHandler $dblogger): Response {
     // inizializza
     $reset = false;
     $qrcode = null;
@@ -275,11 +273,11 @@ class UtentiController extends BaseController {
         $token = $this->reqstack->getSession()->get('/APP/ROUTE/utenti_otp/token');
       } else {
         // crea token
-        $token = $otp->creaToken($this->getUser()->getUsername());
+        $token = $otp->creaToken($this->getUser()->getUserIdentifier());
         $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', $token);
       }
       // crea qrcode
-      $qrcode = $otp->qrcode($this->getUser()->getUsername(), 'Registro Elettronico', $token);
+      $qrcode = $otp->qrcode($this->getUser()->getUserIdentifier(), 'Registro Elettronico', $token);
       // form inserimeno OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
         ->add('otp', TextType::class, array('label' => 'label.otp',
@@ -336,7 +334,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheAction(Request $request, LogHandler $dblogger) {
+  public function notificheAction(Request $request, LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
@@ -350,7 +348,7 @@ class UtentiController extends BaseController {
     }
     // form
     $form = $this->createForm(NotificaType::class, null, [
-      'returnUrl' => $this->generateUrl('utenti_profilo'),
+      'return_url' => $this->generateUrl('utenti_profilo'),
       'values' => [$notifica['tipo'], empty($bot), $notifica['abilitato']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -382,7 +380,6 @@ class UtentiController extends BaseController {
       return $this->redirectToRoute('utenti_profilo');
     }
     // visualizza pagina
-    //-- return $this->renderHtml('utenti', 'notifiche', $dati, $info, );
     return $this->render('utenti/notifiche.html.twig', [
       'pagina_titolo' => 'page.utenti.notifiche',
       'titolo' => 'title.utenti.notifiche',
@@ -401,7 +398,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheConfiguraAction() {
+  public function notificheConfiguraAction(): Response {
     // init
     $dati = [];
     $info = [];
@@ -416,7 +413,7 @@ class UtentiController extends BaseController {
       // imposta informazioni
       $this->getUser()->creaToken();
       $this->em->flush();
-      $token = base64_encode($this->getUser()->getToken().'#'.$this->getUser()->getUsername());
+      $token = base64_encode($this->getUser()->getToken().'#'.$this->getUser()->getUserIdentifier());
       $bot = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
       $info['messaggio'] = 'message.notifiche_configura_telegram';
       $info['url'] = 'https://t.me/'.$bot.'?start='.$token;
@@ -425,7 +422,6 @@ class UtentiController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // visualizza pagina
-    //-- return $this->renderHtml('utenti', 'notifiche_configura', $dati, $info, []);
     return $this->render('utenti/notifiche_configura.html.twig', [
       'pagina_titolo' => 'page.utenti.notifiche',
       'titolo' => 'title.utenti.notifiche_configura',

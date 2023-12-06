@@ -8,7 +8,11 @@
   {% if is_granted('IS_IMPERSONATOR') %}
     <a href="{{ path('sistema_alias_exit') }}" title="Esci dall'alias"><span class="glyphicon glyphicon-log-out gs-mr-2"></span><strong>{{ 'label.alias'|trans|upper }}</strong></a>
   {% else %}
+    {% if is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
+    <a href="#" onClick="logoutGoogle()" title="Esci dal Registro Elettronico"><span class="glyphicon glyphicon-log-out gs-mr-2"></span><strong>{{ 'label.logout'|trans|upper }}</strong></a>
+    {% else %}
     <a href="{{ path('logout') }}" title="Esci dal Registro Elettronico"><span class="glyphicon glyphicon-log-out gs-mr-2"></span><strong>{{ 'label.logout'|trans|upper }}</strong></a>
+    {% endif %}
   {% endif %}
   </div>
 </div>

@@ -62,7 +62,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function scrutiniAction(Request $request, TranslatorInterface $trans, $periodo): Response {
+  public function scrutiniAction(Request $request, TranslatorInterface $trans, string $periodo): Response {
     // init
     $dati = [];
     $info = [];
@@ -100,7 +100,8 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
-      ['returnUrl' => $this->generateUrl('scuola_scrutini'), 'dati' => $definizione->getClassiVisibili()]);
+      ['return_url' => $this->generateUrl('scuola_scrutini'),
+      'values' => $definizione->getClassiVisibili()]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // classi visibili
@@ -161,7 +162,7 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(AmministratoreType::class, $amministratore,
-      ['returnUrl' => $this->generateUrl('scuola_amministratore')]);
+      ['return_url' => $this->generateUrl('scuola_amministratore')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -199,7 +200,7 @@ class ScuolaController extends BaseController {
     // assicura che l'utente sia abilitato
     $preside->setAbilitato(true);
     // form
-    $form = $this->createForm(PresideType::class, $preside, ['returnUrl' => $this->generateUrl('scuola_dirigente')]);
+    $form = $this->createForm(PresideType::class, $preside, ['return_url' => $this->generateUrl('scuola_dirigente')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -233,7 +234,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($istituto);
     }
     // form
-    $form = $this->createForm(IstitutoType::class, $istituto, ['returnUrl' => $this->generateUrl('scuola_istituto')]);
+    $form = $this->createForm(IstitutoType::class, $istituto, ['return_url' => $this->generateUrl('scuola_istituto')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -269,6 +270,7 @@ class ScuolaController extends BaseController {
    * Modifica dei dati di una sede scolastica
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della sede
    *
    * @return Response Pagina di risposta
    *
@@ -279,7 +281,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediEditAction(Request $request, $id): Response {
+  public function sediEditAction(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -297,7 +299,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($sede);
     }
     // form
-    $form = $this->createForm(SedeType::class, $sede, ['returnUrl' => $this->generateUrl('scuola_sedi')]);
+    $form = $this->createForm(SedeType::class, $sede, ['return_url' => $this->generateUrl('scuola_sedi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -315,6 +317,7 @@ class ScuolaController extends BaseController {
    * Cancella una sede scolastica
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della sede
    *
    * @return Response Pagina di risposta
    *
@@ -324,7 +327,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediDeleteAction(Request $request, $id): Response {
+  public function sediDeleteAction(Request $request, int $id): Response {
     // controlla sede
     $sede = $this->em->getRepository('App\Entity\Sede')->find($id);
     if (!$sede) {
@@ -372,6 +375,7 @@ class ScuolaController extends BaseController {
    * Modifica dei dati di un corso scolastico
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
    *
@@ -382,7 +386,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiEditAction(Request $request, $id): Response {
+  public function corsiEditAction(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -400,7 +404,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($corso);
     }
     // form
-    $form = $this->createForm(CorsoType::class, $corso, ['returnUrl' => $this->generateUrl('scuola_corsi')]);
+    $form = $this->createForm(CorsoType::class, $corso, ['return_url' => $this->generateUrl('scuola_corsi')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -418,6 +422,7 @@ class ScuolaController extends BaseController {
    * Cancella un corso scolastico
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo del corso
    *
    * @return Response Pagina di risposta
    *
@@ -427,7 +432,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiDeleteAction(Request $request, $id): Response {
+  public function corsiDeleteAction(Request $request, int $id): Response {
     // controlla corso
     $corso = $this->em->getRepository('App\Entity\Corso')->find($id);
     if (!$corso) {
@@ -475,6 +480,7 @@ class ScuolaController extends BaseController {
    * Modifica dati di una materia scolastica
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
    *
@@ -485,7 +491,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieEditAction(Request $request, $id): Response {
+  public function materieEditAction(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -503,7 +509,7 @@ class ScuolaController extends BaseController {
       $this->em->persist($materia);
     }
     // form
-    $form = $this->createForm(MateriaType::class, $materia, ['returnUrl' => $this->generateUrl('scuola_materie')]);
+    $form = $this->createForm(MateriaType::class, $materia, ['return_url' => $this->generateUrl('scuola_materie')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -521,6 +527,7 @@ class ScuolaController extends BaseController {
    * Cancella una materia scolastica
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della materia
    *
    * @return Response Pagina di risposta
    *
@@ -530,7 +537,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieDeleteAction(Request $request, $id): Response {
+  public function materieDeleteAction(Request $request, int $id): Response {
     // controlla materia
     $materia = $this->em->getRepository('App\Entity\Materia')->find($id);
     if (!$materia) {
@@ -567,7 +574,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiAction(Request $request, $pagina): Response {
+  public function classiAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -590,6 +597,7 @@ class ScuolaController extends BaseController {
    * Modifica dati di una classe
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
    *
@@ -600,7 +608,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiEditAction(Request $request, $id): Response {
+  public function classiEditAction(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -618,7 +626,12 @@ class ScuolaController extends BaseController {
       $this->em->persist($classe);
     }
     // form
-    $form = $this->createForm(ClasseType::class, $classe, ['returnUrl' => $this->generateUrl('scuola_classi')]);
+    $opzioniCorsi = $this->em->getRepository('App\Entity\Corso')->opzioni();
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $form = $this->createForm(ClasseType::class, $classe, [
+      'return_url' => $this->generateUrl('scuola_classi'),
+      'values' => [$opzioniCorsi, $opzioniSedi, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -636,6 +649,7 @@ class ScuolaController extends BaseController {
    * Cancella una classe
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
    *
@@ -645,7 +659,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiDeleteAction(Request $request, $id): Response {
+  public function classiDeleteAction(Request $request, int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -682,7 +696,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaAction(Request $request, $pagina): Response {
+  public function festivitaAction(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -706,6 +720,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
    *
@@ -716,7 +731,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaEditAction(Request $request, TranslatorInterface $trans, $id): Response {
+  public function festivitaEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -736,7 +751,8 @@ class ScuolaController extends BaseController {
     }
     // form
     $form = $this->createForm(FestivitaType::class, $festivita, [
-      'returnUrl' => $this->generateUrl('scuola_festivita'), 'formMode' => ($id ? 'singolo' : 'multiplo')]);
+      'return_url' => $this->generateUrl('scuola_festivita'),
+      'form_mode' => ($id ? 'singolo' : 'multiplo')]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlli aggiuntivi
@@ -773,6 +789,7 @@ class ScuolaController extends BaseController {
    * Cancella una festività
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo della festività
    *
    * @return Response Pagina di risposta
    *
@@ -782,7 +799,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaDeleteAction(Request $request, $id): Response {
+  public function festivitaDeleteAction(Request $request, int $id): Response {
     // controlla festività
     $festivita = $this->em->getRepository('App\Entity\Festivita')->find($id);
     if (!$festivita) {
@@ -835,6 +852,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo dell'orario
    *
    * @return Response Pagina di risposta
    *
@@ -845,7 +863,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioEditAction(Request $request, TranslatorInterface $trans, $id): Response {
+  public function orarioEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -863,7 +881,9 @@ class ScuolaController extends BaseController {
       $this->em->persist($orario);
     }
     // form
-    $form = $this->createForm(OrarioType::class, $orario, ['returnUrl' => $this->generateUrl('scuola_orario')]);
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $form = $this->createForm(OrarioType::class, $orario, [
+      'return_url' => $this->generateUrl('scuola_orario'), 'values' => [$opzioniSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // controlli aggiuntivi
@@ -891,6 +911,7 @@ class ScuolaController extends BaseController {
    * Cancella un orario scolastico
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo dell'orario
    *
    * @return Response Pagina di risposta
    *
@@ -900,7 +921,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioDeleteAction(Request $request, $id): Response {
+  public function orarioDeleteAction(Request $request, int $id): Response {
     // controlla orario
     $orario = $this->em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
@@ -927,6 +948,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo della scansione oraria
    *
    * @return Response Pagina di risposta
    *
@@ -937,7 +959,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioScansioneAction(Request $request, TranslatorInterface $trans, $id): Response {
+  public function orarioScansioneAction(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -951,7 +973,7 @@ class ScuolaController extends BaseController {
     $scansione = $this->em->getRepository('App\Entity\ScansioneOraria')->orario($orario);
     // form
     $form = $this->createForm(ScansioneOrariaSettimanaleType::class, null,
-      ['returnUrl' => $this->generateUrl('scuola_orario'), 'data' => $scansione]);
+      ['return_url' => $this->generateUrl('scuola_orario'), 'values' => $scansione]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati
@@ -1032,6 +1054,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo del modulo
    *
    * @return Response Pagina di risposta
    *
@@ -1042,7 +1065,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliEditAction(Request $request, TranslatorInterface $trans, $id): Response {
+  public function moduliEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $fs = new Filesystem();
     $finder = new Finder();
@@ -1075,8 +1098,9 @@ class ScuolaController extends BaseController {
       }
     }
     // form
+    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
     $form = $this->createForm(DefinizioneRichiestaType::class, $modulo, [
-      'returnUrl' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
+      'return_url' => $this->generateUrl('scuola_moduli'), 'values' => [$opzioniSedi, $campi, $lista]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla campi
@@ -1100,6 +1124,12 @@ class ScuolaController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_campo_duplicato')));
       }
       if ($form->isValid()) {
+        // constrollo richiedenti
+        $richiedenti = explode(',', $modulo->getRichiedenti());
+        if (in_array('DN', $richiedenti, true) && !in_array('SN', $richiedenti, true)) {
+          $richiedenti[] = 'SN';
+          $modulo->setRichiedenti(implode(',', $richiedenti));
+        }
         // memorizza modifiche
         $modulo->setCampi($listaCampi);
         $this->em->flush();
@@ -1117,6 +1147,7 @@ class ScuolaController extends BaseController {
    * Cancella un modulo definito
    *
    * @param Request $request Pagina richiesta
+   * @param int $id Identificativo del modulo
    *
    * @return Response Pagina di risposta
    *
@@ -1126,7 +1157,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliDeleteAction(Request $request, $id): Response {
+  public function moduliDeleteAction(Request $request, int $id): Response {
     // controlla modulo
     $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
     if (!$modulo) {
@@ -1152,7 +1183,7 @@ class ScuolaController extends BaseController {
    * Abilitazione o disabilitazione di un modulo di richiesta
    *
    * @param int $id ID del modulo di richiesta
-   * @param boolean $abilita Vero per abilitare, falso per disabilitare
+   * @param int $abilita Vale 1 per abilitare, 0 per disabilitare
    *
    * @return Response Pagina di risposta
    *
@@ -1162,7 +1193,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliAbilitaAction($id, $abilita): Response {
+  public function moduliAbilitaAction(int $id, int $abilita): Response {
     // controlla modulo
     $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
     if (!$modulo) {

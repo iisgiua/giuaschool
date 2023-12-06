@@ -32,7 +32,7 @@ class OsservazioneClasseTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_osservazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'alunno_id', 'tipo'],
       'gs_materia' => '*',
@@ -72,7 +72,7 @@ class OsservazioneClasseTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'testo' ? $this->faker->text() :
-          ($field == 'cattedra' ? $this->getReference("cattedra_1") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_curricolare_1") :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -153,7 +153,7 @@ class OsservazioneClasseTest extends EntityTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cattedra - NOT BLANK');
-    $existent->setCattedra($this->getReference("cattedra_1"));
+    $existent->setCattedra($this->getReference("cattedra_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Cattedra - VALID NOT BLANK');
   }
 

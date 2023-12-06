@@ -1,0 +1,16 @@
+{% autoescape false %}
+{% if dati.lista|length > 0 %}
+"Sede","Classe","Data","Docente","Inviato"
+  {%- for c,cv in dati.lista[0].definizioneRichiesta.campi %},"{{ c }}"{% endfor -%}
+  {{ '\n' }}
+
+  {%- for r in dati.lista %}
+"{{ r.classe.sede.nomeBreve }}","{{ r.classe }}","{{ r.data|date('d/m/Y') }}","{{ r.utente.cognome }} {{ r.utente.nome }}","{{ r.inviata|date('d/m/Y H:i') }}"
+    {%- for c,cv in r.definizioneRichiesta.campi -%}
+      ,"{{ cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c]|replace({'"': '""'})) }}"
+    {%- endfor -%}
+    {{ '\n' }}
+  {%- endfor -%}
+
+{% endif %}
+{% endautoescape %}

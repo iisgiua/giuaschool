@@ -8,21 +8,14 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Filesystem\Filesystem;
-use App\Util\RegistroUtil;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
-use App\Entity\Assenza;
-use App\Entity\CambioClasse;
-use App\Entity\Entrata;
-use App\Entity\Esito;
-use App\Entity\Festivita;
-use App\Entity\Uscita;
-use App\Entity\VotoScrutinio;
+use App\Util\RegistroUtil;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 
 /**
@@ -171,7 +164,7 @@ class SegreteriaUtil {
         $dati['note'] = $c->getNote();
       }
     }
-    $dati['classe'] = ($classe ? $classe->getAnno().'ª '.$classe->getSezione() : 'NON DEFINITA');
+    $dati['classe'] = ($classe ?? 'NON DEFINITA');
     // mesi da visualizzare
     for ($d = clone $inizio; $d <= $fine; $d->modify('first day of next month')) {
       $m = intval($d->format('m'));
@@ -201,7 +194,7 @@ class SegreteriaUtil {
    *
    * @return array Restituisce i dati come array associativo
    */
-  public function pagelleAlunni(Paginator $lista) {
+  public function pagelleAlunni(Paginator $lista): array {
     $dati = array();
     // trova pagelle di alunni
     foreach ($lista as $alu) {
@@ -324,12 +317,18 @@ class SegreteriaUtil {
     $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
     $fs = new Filesystem();
     // scrutinio rinviato svolto nel corrente A.S.
+    $classeAnno = $storico->getClasse()[0];
+    $classeSezione = strpos($storico->getClasse(), '-') === false ? 
+      substr($storico->getClasse(), 1) :
+      substr($storico->getClasse(), 1, strpos($storico->getClasse(), '-') - 1);
+    $classeGruppo = strpos($storico->getClasse(), '-') === false ? '' : 
+      substr($storico->getClasse(), strpos($storico->getClasse(), '-') + 1);
     $dati['esitoRinviato'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
-      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
-      ->setParameters(['alunno' => $alunno, 'anno' => $storico->getClasse()[0],
-        'sezione' => $storico->getClasse()[1], 'stato' => 'C', 'rinviato' => 'X'])
+      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
+      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione, 
+        'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();

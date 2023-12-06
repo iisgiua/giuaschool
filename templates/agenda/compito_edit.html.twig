@@ -13,15 +13,15 @@
         <ol>
     {% for v in compiti %}
           <li><strong>Materia: {{ v.avviso.cattedra.materia.tipo == 'S' ? v.avviso.materia.nome : v.avviso.cattedra.materia.nome }}</strong><br>
-            <small>Destinatari:
+            <small><strong>Destinatari:
       {% if v.utenti|length > 0 %}
         {% for u in v.utenti %}
               {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}){{ not loop.last ? ',' }}
         {% endfor %}
       {% else %}
-              TUTTA LA CLASSE
+              {% if v.avviso.cattedra.classe.gruppo == '' %}TUTTA LA CLASSE{% else %}GRUPPO {{v.avviso.cattedra.classe}}{% endif %}
       {% endif %}
-            </small>
+            </strong></small>
           </li>
     {% endfor %}
         </ol>

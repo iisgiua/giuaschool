@@ -20,7 +20,7 @@
           {{ form_widget(form.numero) }}
         </div>
       </div>
-      {{ form_row(form.oggetto) }} 
+      {{ form_row(form.oggetto) }}
       <div class="form-group">
         <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
         <div class="col-sm-10">
@@ -354,7 +354,7 @@ $(document).ready(function() {
     });
     if (opt != "") {
       $.each(opt.split(","), function(idx,item){
-        $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+        $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
       });
     }
     $("#gs-modal-"+type).data('caller', 'Coordinatori').modal('show');
@@ -401,7 +401,7 @@ $(document).ready(function() {
       }
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -457,7 +457,7 @@ $(document).ready(function() {
       });
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -513,7 +513,7 @@ $(document).ready(function() {
       });
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
     }
@@ -577,7 +577,7 @@ $(document).ready(function() {
     var par2 = "-"+encodeURIComponent($('#gs-modal-docenti-nome').val());
     var par3 = "-";
     $('input[name="circolare[sedi][]"]:checked').each(function() {
-      par3 +=$(this).attr('id').substr($(this).attr('id').lastIndexOf('_')+1)+"-";
+      par3 +=$(this).val()+"-";
     });
     $('#gs-modal-docenti-pag').data('par1', par1).data('par2', par2).data('par3', par3);
     docentiSearch(1);
@@ -596,7 +596,7 @@ $(document).ready(function() {
       $("#gs-pulsante"+caller).show();
       var lista_id = id.split(',');
       var lista_nomi = nomi.split(',').map(function(item,index){
-        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item.trim()+'</span>';
       });
       $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
     }
@@ -614,7 +614,7 @@ $(document).ready(function() {
     var par3 = "-"+encodeURIComponent($('#circolare_lista_classi').val() ? $('#circolare_lista_classi').val() : '');
     var par4 = "-";
     $('input[name="circolare[sedi][]"]:checked').each(function() {
-      par4 +=$(this).attr('id').substr($(this).attr('id').lastIndexOf('_')+1)+"-";
+      par4 +=$(this).val()+"-";
     });
     $('#gs-modal-alunni-pag').data('par1', par1).data('par2', par2).data('par3', par3).data('par4', par4);
     alunniSearch(1);
@@ -633,7 +633,7 @@ $(document).ready(function() {
       $("#gs-pulsante"+caller).show();
       var lista_id = id.split(',');
       var lista_nomi = nomi.split(',').map(function(item,index){
-        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item.trim()+'</span>';
       });
       $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
     }
@@ -679,13 +679,13 @@ $(document).ready(function() {
 });
 function addUser(caller, element) {
   var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
-  var nome = $(element).parent().text();
+  var nome = $(element).parent().text().trim();
   var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-'+caller+'-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\''+caller+'\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+nome+'</strong></div>';
   var txt = $('#gs-modal-'+caller+'-row').data('nomi');
-  txt = (txt == null || txt == '' ? nome : txt+','+nome);
+  txt = (txt == null || txt == '') ? nome : txt+', '+nome;
   $('#gs-modal-'+caller+'-row').data('nomi', txt);
   txt = $('#gs-modal-'+caller+'-row').data('id');
-  txt = (txt == null || txt == '' ? id : txt+', '+id);
+  txt = (txt == null || txt == '') ? id : txt+','+id;
   $('#gs-modal-'+caller+'-row').data('id', txt);
   $('#gs-modal-'+caller+'-row').append(s);
   $(element).hide();
@@ -789,22 +789,31 @@ function alunniSearch(page) {
 {% block _circolare_classi_widget %}
   {% set prec = '' %}
   {% for group_label, group in choices %}
-    {% if group_label[:-2] != prec %}
+    {% if group_label != prec %}
       {% if prec != '' %}
 </div>
       {% endif %}
-      {% set prec = group_label[:-2] %}
+      {% set prec = group_label %}
 <div class="col-sm-6" data-sede="{{ prec }}">
   <div><strong><em>{{ prec }}</em></strong></div>
     {% endif %}
-  <div class="row">
+    {% set sez = '' %}
     {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+  </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+  <div class="row">
+      {% endif %}
       {{- form_widget(form[key], {
         parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
         translation_domain: choice_translation_domain,
       }) -}}
     {% endfor %}
+    {% if sez != '' %}
   </div>
+    {% endif %}
   {% endfor %}
   {% if prec != '' %}
 </div>

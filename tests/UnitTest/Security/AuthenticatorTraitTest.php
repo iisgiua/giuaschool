@@ -152,9 +152,9 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
   public function testProfiliSenzaCodiceFiscale(): void {
     // init
     $this->logs = [];
-    $ata = $this->getReference('ata_A1');
-    $genitore1 = $this->getReference('genitore1_prima_1');
-    $genitore2 = $this->getReference('genitore2_prima_1');
+    $ata = $this->getReference('ata_A');
+    $genitore1 = $this->getReference('genitore1_1A_1');
+    $genitore2 = $this->getReference('genitore2_1A_1');
     $ata->setCodiceFiscale('')->setNome('Mario')->setCognome('Rossi');
     $genitore1->setCodiceFiscale('')->setNome('Mario')->setCognome('Rossi');
     $genitore2->setCodiceFiscale('')->setNome('Mario')->setCognome('Rossi');
@@ -174,7 +174,7 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
   public function testProfiliNessunoAttivo(): void {
     // init
     $this->logs = [];
-    $ata = $this->getReference('ata_A1');
+    $ata = $this->getReference('ata_A');
     $ata->setAbilitato(false)->setCodiceFiscale('CODICEFISCALE');;
     $this->em->flush();
     // esegue
@@ -226,27 +226,27 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     return [
       // profilo unico
       [['amministratore'], 'amministratore', []],
-      [['ata_A1'], 'ata_A1', []],
+      [['ata_A'], 'ata_A', []],
       [['docente_curricolare_1'], 'docente_curricolare_1', []],
       [['staff_1'], 'staff_1', []],
       [['preside'], 'preside', []],
-      [['genitore1_prima_1'], 'genitore1_prima_1', []],
-      [['alunno_seconda_1'], 'alunno_seconda_1', []],
+      [['genitore1_1A_1'], 'genitore1_1A_1', []],
+      [['alunno_2A_1'], 'alunno_2A_1', []],
       [['utente_1'], 'utente_1', []],
       // profilo multiplo
-      [['genitore1_prima_1', 'genitore1_terza_1'], 'genitore1_prima_1', ['genitore1_prima_1', 'genitore1_terza_1']],
-      [['genitore1_prima_1', 'genitore1_seconda_1', 'genitore1_terza_1'], 'genitore1_prima_1', ['genitore1_prima_1', 'genitore1_seconda_1', 'genitore1_terza_1']],
-      [['docente_curricolare_1', 'genitore1_prima_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_prima_1']],
-      [['docente_curricolare_1', 'genitore1_prima_1', 'genitore1_seconda_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_prima_1', 'genitore1_seconda_1']],
-      [['staff_1', 'genitore1_prima_1'], 'staff_1', ['staff_1', 'genitore1_prima_1']],
-      [['preside', 'genitore1_prima_1'], 'preside', ['preside', 'genitore1_prima_1']],
-      [['ata_A1', 'genitore1_prima_1'], 'ata_A1', ['ata_A1', 'genitore1_prima_1']],
-      [['genitore1_prima_1', 'amministratore'], 'genitore1_prima_1', []],
-      [['genitore1_prima_1', 'ata_A1'], 'genitore1_prima_1', []],
-      [['genitore1_prima_1', 'docente_curricolare_1'], 'genitore1_prima_1', []],
-      [['genitore1_prima_1', 'staff_1'], 'genitore1_prima_1', []],
-      [['genitore1_prima_1', 'preside'], 'genitore1_prima_1', []],
-      [['genitore1_prima_1', 'utente_1', ], 'genitore1_prima_1', []],
+      [['genitore1_1A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_3A_1']],
+      [['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1']],
+      [['docente_curricolare_1', 'genitore1_1A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1']],
+      [['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1']],
+      [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']],
+      [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']],
+      [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']],
+      [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []],
+      [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []],
+      [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []],
+      [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []],
+      [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []],
+      [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []],
     ];
   }
 

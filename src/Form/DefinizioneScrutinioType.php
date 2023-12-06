@@ -8,16 +8,14 @@
 
 namespace App\Form;
 
+use App\Entity\DefinizioneScrutinio;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use App\Entity\DefinizioneScrutinio;
 
 
 /**
@@ -56,7 +54,7 @@ class DefinizioneScrutinioType extends AbstractType {
         'required' => false,
         'property_path' => 'classiVisibili[1]'))
       ->add('classiVisibiliOra1', TimeType::class, array('label' => false,
-        'data' => $options['dati'][1],
+        'data' => $options['values'][1],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
@@ -70,7 +68,7 @@ class DefinizioneScrutinioType extends AbstractType {
         'required' => false,
         'property_path' => 'classiVisibili[2]'))
       ->add('classiVisibiliOra2', TimeType::class, array('label' => false,
-        'data' => $options['dati'][2],
+        'data' => $options['values'][2],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
@@ -84,7 +82,7 @@ class DefinizioneScrutinioType extends AbstractType {
         'required' => false,
         'property_path' => 'classiVisibili[3]'))
       ->add('classiVisibiliOra3', TimeType::class, array('label' => false,
-        'data' => $options['dati'][3],
+        'data' => $options['values'][3],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
@@ -98,7 +96,7 @@ class DefinizioneScrutinioType extends AbstractType {
         'required' => false,
         'property_path' => 'classiVisibili[4]'))
       ->add('classiVisibiliOra4', TimeType::class, array('label' => false,
-        'data' => $options['dati'][4],
+        'data' => $options['values'][4],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
@@ -112,7 +110,7 @@ class DefinizioneScrutinioType extends AbstractType {
         'required' => false,
         'property_path' => 'classiVisibili[5]'))
       ->add('classiVisibiliOra5', TimeType::class, array('label' => false,
-        'data' => $options['dati'][5],
+        'data' => $options['values'][5],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
@@ -121,7 +119,7 @@ class DefinizioneScrutinioType extends AbstractType {
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
   }
 
   /**
@@ -130,11 +128,11 @@ class DefinizioneScrutinioType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('returnUrl');
-    $resolver->setDefined('dati');
+    $resolver->setDefined('return_url');
+    $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'returnUrl' => null,
-      'dati' => array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null),
+      'return_url' => null,
+      'values' => array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null),
       'data_class' => DefinizioneScrutinio::class));
   }
 

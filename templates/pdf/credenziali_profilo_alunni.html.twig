@@ -4,7 +4,7 @@
 </div>
 <p>&nbsp;</p>
 <p style="text-align: right"><span style="font-size:13pt">All'alunn{{ sesso }} <strong>{{ alunno.nome }} {{ alunno.cognome }}</strong>
-<br>Classe: <strong>{{ alunno.classe ? alunno.classe.anno~'ª '~alunno.classe.sezione }}</strong></span></p>
+<br>Classe: <strong>{{ alunno.classe ? alunno.classe }}</strong></span></p>
 <p>&nbsp;</p>
 <p style="text-align: justify">Con le credenziali fornite di seguito potrai accedere al Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }},
 dove potrai visualizzare i dati relativi al tuo percorso scolastico:

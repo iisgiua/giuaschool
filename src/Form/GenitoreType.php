@@ -8,13 +8,13 @@
 
 namespace App\Form;
 
+use App\Entity\Genitore;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use App\Entity\Genitore;
 
 
 /**
@@ -49,7 +49,7 @@ class GenitoreType extends AbstractType {
         'label_attr' => ['class' => 'radio-inline'],
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true));
-    if ($options['formMode'] == 'completo') {
+    if ($options['form_mode'] == 'completo') {
       // form completo per l'amministratore
       $builder
         ->add('numeriTelefono', CollectionType::class, array('label' => 'label.numeri_telefono',
@@ -75,9 +75,9 @@ class GenitoreType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
-      'formMode' => 'completo',
+      'form_mode' => 'completo',
       'data_class' => Genitore::class));
   }
 

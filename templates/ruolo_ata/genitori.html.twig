@@ -21,7 +21,7 @@
     {% for a in lista.lista %}
       <tr>
         <td>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</td>
-        <td>{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione : 'Non definita' }}</td>
+        <td>{{ a.classe ? a.classe : 'Non definita' }}</td>
         <td>
       {% for g in lista.genitori[a.id] %}
           <span class="glyphicon glyphicon-{{ g.spid ? 'ok-circle text-success' : 'ban-circle text-danger' }} gs-big" aria-hidden="true"></span>

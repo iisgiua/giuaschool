@@ -187,7 +187,7 @@ class MenuOpzione {
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
   public function getModificato(): ?\DateTime {
     return $this->modificato;

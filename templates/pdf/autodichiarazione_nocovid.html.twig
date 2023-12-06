@@ -11,7 +11,7 @@
   a {{ dichiarazione.genitoreCitta }},
   {{ ('label.genitore_ruolo_'~dichiarazione.genitoreRuolo)|trans }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
   <strong>{{ alunno.cognome }} {{ alunno.nome }}</b> (codice fiscale {{ alunno.codiceFiscale }})
-  frequentante la <strong>classe {{ alunno.classe.anno }}ª {{ alunno.classe.sezione }}</strong>
+  frequentante la <strong>classe {{ alunno.classe }}</strong>
   presso l'<i>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</i>,
   in qualità di esercente la responsabilità genitoriale,
   consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
@@ -34,7 +34,7 @@
   <strong>{{ alunno.cognome }} {{ alunno.nome }}</b>
   {{ alunno.sesso == 'M' ? 'nato' : 'nata' }} il {{ alunno.dataNascita|date('d/m/Y') }}
   a {{ alunno.comuneNascita }} (codice fiscale {{ alunno.codiceFiscale }}),
-  frequentante la <strong>classe {{ alunno.classe.anno }}ª {{ alunno.classe.sezione }}</strong>
+  frequentante la <strong>classe {{ alunno.classe }}</strong>
   presso l'<i>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</i>,
   consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
   dichiara:

@@ -4,7 +4,7 @@
 </div>
 <p style="text-align:center; font-size:13pt">
   <strong>Situazione dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }} {{ alunno.cognome }} {{ alunno.nome }} (nat{{ alunno.sesso == 'M' ? 'o' : 'a' }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
-  <strong>Classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
+  <strong>Classe {{ classe }}</strong>
 </p>
 <p>&nbsp;</p>
 {% if dati.voti is defined %}
@@ -199,16 +199,16 @@
     <td width="30%">{{ dati.assenze.stat.assenze }}</td>
   </tr>
   <tr nobr="true">
-    <td><strong>Numero di ritardi brevi (entro 10 minuti)</strong></td>
-    <td>{{ dati.assenze.stat.brevi }}</td>
-  </tr>
-  <tr nobr="true">
-    <td><strong>Numero di ritardi (oltre 10 minuti)</strong></td>
+    <td><strong>Numero di ritardi (oltre {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</strong></td>
     <td>{{ dati.assenze.stat.ritardi }}</td>
   </tr>
   <tr nobr="true">
     <td> * <strong><em>considerati per conteggio del numero massimo di ritardi</em></strong></td>
     <td>&nbsp;&nbsp;<em>{{ dati.assenze.stat.ritardi_validi }}</em></td>
+  </tr>
+  <tr nobr="true">
+    <td><strong>Numero di ritardi brevi (entro {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</strong></td>
+    <td>{{ dati.assenze.stat.brevi }}</td>
   </tr>
   <tr nobr="true">
     <td><strong>Numero di uscite anticipate</strong></td>
@@ -220,7 +220,7 @@
   </tr>
   <tr nobr="true">
     <td><strong>Totale ore di assenza</strong></td>
-    <td>{{ dati.assenze.stat.ore }}</td>
+    <td>{{ dati.assenze.stat.ore }} &nbsp;&nbsp; <em>{{ dati.assenze.stat.ore_perc|number_format(2, ',', null) }}%</em></td>
   </tr>
 </table>
   {% for periodo,v in dati.assenze.lista %}
@@ -236,20 +236,8 @@
       {% for tipo,e in v1 %}
   <tr nobr="true">
         {% if tipo == 'assenza' %}
-    <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
-          {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-    <td><strong>Assenza
-            {% if e.ore|length > 0 %}
-      nelle ore:
-              {% for o in e.ore %}
-      {{ o }}ª{{ not loop.last ? ',' }}
-              {% endfor %}
-            {% endif %}
-      </strong>
-    </td>
-          {% else %}
+    <td><strong>{{ e.data }}{% if e.giorni > 1 %} -<br>{{ e.data_fine }}{% endif %}</strong></td>
     <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
-          {% endif %}
     <td><span style="font-size:9pt">{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</span></td>
     <td>{% if not e.giustificato %}<em>Da giustificare</em>{% endif %}</td>
         {% elseif tipo == 'ritardo' %}

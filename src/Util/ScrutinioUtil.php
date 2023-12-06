@@ -98,14 +98,16 @@ class ScrutinioUtil {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               RequestStack $reqstack, LogHandler $dblogger, $root) {
+                              RequestStack $reqstack, LogHandler $dblogger, RegistroUtil $reg, $root) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
     $this->reqstack = $reqstack;
+    $this->reg = $reg;
     $this->dblogger = $dblogger;
     $this->root = $root;
     // imposta directory per gli scrutini
@@ -126,7 +128,16 @@ class ScrutinioUtil {
    * @return array Dati formattati come un array associativo
    */
   public function periodi(Classe $classe) {
-    $lista = array();
+    $lista = [];
+    $listaGruppi = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $listaGruppi = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($listaGruppi)) {
+      // indicata intera classe: legge periodo di primo gruppo
+      return $this->periodi($listaGruppi[0]);
+    }
     // legge definizione scrutini
     $periodi = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
@@ -157,29 +168,14 @@ class ScrutinioUtil {
   public function elencoProposte(Docente $docente, Classe $classe, Materia $materia, $tipo, $periodo) {
     $elenco = array();
     // alunni della classe
-    if ($materia->getTipo() == 'R') {
-      // religione/att.alt.: solo alunni che si avvalgono
-      $lista_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND a.religione IN (:religione)')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1,
-          'religione' => $tipo ? ($tipo == 'N' ? ['S'] : ['A']) : ['S', 'A']])
-        ->getQuery()
-        ->getScalarResult();
-    } else {
-      // non è religione: tutti gli alunni
-      $lista_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
-        ->getQuery()
-        ->getScalarResult();
-    }
+    $listaAlunni = $this->reg->alunniInData(new \DateTime(), $classe);
     // legge i dati degli degli alunni
+    $tipoReligione = $tipo ? ($tipo == 'N' ? "'S'" : "'A'") : "'S', 'A'";
+    $religione = $materia->getTipo() == 'R' ? (' AND a.religione IN ('.$tipoReligione.')') : '';
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->where('a.id IN (:alunni)')
+      ->where('a.id IN (:alunni)'.$religione)
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $lista_alunni])
+      ->setParameters(['alunni' => $listaAlunni])
       ->getQuery()
       ->getResult();
     foreach ($alunni as $alu) {
@@ -188,7 +184,7 @@ class ScrutinioUtil {
     }
     // legge le proposte di voto
     $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->proposte($classe, $periodo,
-      $lista_alunni, [$materia->getId()], $materia->getTipo() == 'E' ? $docente : null);
+      array_keys($elenco['alunni']), [$materia->getId()], $materia->getTipo() == 'E' ? $docente : null);
     foreach ($proposte as $idAlu => $proposta) {
       // inserisce proposte trovate
       $idDoc = array_keys($proposta[$materia->getId()])[0];
@@ -411,7 +407,7 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati dello scrutinio
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return Form Form usato nella pagina corrente dello scrutinio
    */
   public function formScrutinio(Classe $classe, $periodo, $stato, FormBuilder $form, $dati) {
     if ($periodo == 'P' || $periodo == 'S') {
@@ -808,7 +804,7 @@ class ScrutinioUtil {
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:ore,:dati)')
-              ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
+              ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['proposte'][$alunno][$materia]->getUnico(),
                 'debito' => $dati['proposte'][$alunno][$materia]->getDebito(),
                 'recupero' => $dati['proposte'][$alunno][$materia]->getRecupero(),
@@ -875,7 +871,7 @@ class ScrutinioUtil {
    * @param Classe $classe Classe relativa alle proposte di voto
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function presenzeDocenti(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
@@ -958,7 +954,7 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati passati al form
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
    */
   public function presenzeDocentiForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
     // crea form
@@ -1801,7 +1797,7 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati passati al form
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
    */
   public function riepilogoForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
     // crea form
@@ -2183,7 +2179,7 @@ class ScrutinioUtil {
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:assenze,:dati)')
-              ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
+              ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['proposte'][$alunno][$materia]->getUnico(),
                 'debito' => $dati['proposte'][$alunno][$materia]->getDebito(),
                 'recupero' => $dati['proposte'][$alunno][$materia]->getRecupero(),
@@ -2200,7 +2196,7 @@ class ScrutinioUtil {
           ->prepare('INSERT INTO gs_voto_scrutinio '.
             '(scrutinio_id, alunno_id, materia_id, creato, modificato, assenze, dati) '.
             'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:assenze,:dati)')
-          ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno,
+          ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno,
             'materia' => $condotta->getId(),
             'assenze' => 0,
             'dati' => $dati_delibera]);
@@ -2962,7 +2958,7 @@ class ScrutinioUtil {
    * @param Alunno $alunno Alunno di cui restituire i voti
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function elencoVotiAlunno(Docente $docente, Alunno $alunno, $periodo) {
     $dati = array();
@@ -3240,7 +3236,7 @@ class ScrutinioUtil {
     // cancella medie
     $this->em->getConnection()
       ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL,credito_precedente=NULL WHERE scrutinio_id=:scrutinio")
-      ->execute(['scrutinio' => $scrutinio->getId()]);
+      ->executeStatement(['scrutinio' => $scrutinio->getId()]);
     if ($classe->getAnno() == 2) {
       // cancella conferma certificazioni
       $esiti = $this->em->getRepository('App\Entity\Esito')->findByScrutinio($scrutinio);
@@ -3557,7 +3553,7 @@ class ScrutinioUtil {
    * @param Alunno $alunno Alunno dello scrutinio
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function elencoDebitiAlunno(Docente $docente, Alunno $alunno, $periodo) {
     $dati = array();
@@ -3600,7 +3596,7 @@ class ScrutinioUtil {
    * @param Alunno $alunno Alunno dello scrutinio
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function elencoCarenzeAlunno(Docente $docente, Alunno $alunno, $periodo) {
     $dati = array();
@@ -4062,7 +4058,7 @@ class ScrutinioUtil {
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:assenze,:dati)')
-              ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
+              ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['voti'][$alunno][$materia]['unico'],
                 'debito' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['debito'] : null,
                 'recupero' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['recupero'] : null,
@@ -4277,7 +4273,7 @@ class ScrutinioUtil {
    * @param Alunno $alunno Alunno di cui restituire i voti
    * @param string $periodo Periodo relativo allo scrutinio
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function elencoVotiAlunnoSospeso(Docente $docente, Alunno $alunno, $periodo) {
     $dati = array();
@@ -4356,7 +4352,7 @@ class ScrutinioUtil {
    * @param string $periodo Periodo relativo allo scrutinio
    * @param boolean $tutti Se vero riporta tutti i voti, non solo quelli del debito
    *
-   * @return array Dati formattati come un array associativo
+   * @return array|null Dati formattati come un array associativo
    */
   public function elencoVotiAlunnoRinviato(Docente $docente, Alunno $alunno, Classe $classe, $periodo,
                                            $tutti=false) {
@@ -4572,7 +4568,7 @@ class ScrutinioUtil {
     // cancella medie
     $this->em->getConnection()
       ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL,credito_precedente=NULL WHERE scrutinio_id=:scrutinio")
-      ->execute(['scrutinio' => $scrutinio->getId()]);
+      ->executeStatement(['scrutinio' => $scrutinio->getId()]);
     if ($classe->getAnno() == 2) {
       // cancella conferma certificazioni
       $esiti = $this->em->getRepository('App\Entity\Esito')->findByScrutinio($scrutinio);
@@ -4874,7 +4870,7 @@ class ScrutinioUtil {
    * @param int $step Passo della struttura del verbale da modificare
    * @param array $args Argomenti aggiuntivi (array associativo)
    *
-   * @return FormType|null Form usato nella pagina di inserimento
+   * @return Form|null Form usato nella pagina di inserimento
    */
   public function verbaleFormArgomento(Classe $classe, $periodo, FormBuilder $form, $dati, $step, $args) {
     // crea form
@@ -4953,13 +4949,14 @@ class ScrutinioUtil {
   public function quadroVotiPrecedente(Docente $docente, Classe $classe) {
     $dati = array();
     $dati['alunni'] = array();
+    $lista = $this->reg->alunniInData(new \DateTime(), $classe);
     // legge alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,se.classe,se.esito,se.media,se.periodo,se.dati')
       ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
-      ->where('a.classe=:classe')
+      ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['classe' => $classe->getId()])
+      ->setParameters(['lista' => $lista])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -4982,12 +4979,17 @@ class ScrutinioUtil {
     // controllo se scrutinio rinviato dall'A.S. precedente
     foreach ($alunni as $alu) {
       if ($alu['periodo'] == 'X') {
+        $classeAnno = $alu['classe'][0];
+        $classeSezione = strpos($alu['classe'], '-') === false ? substr($alu['classe'], 1) :
+          substr($alu['classe'], 1, strpos($alu['classe'], '-') - 1);
+        $classeGruppo = strpos($alu['classe'], '-') === false ? '' :
+          substr($alu['classe'], strpos($alu['classe'], '-') + 1);
         $esitoRinviato = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->join('s.classe', 'cl')
-          ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
-          ->setParameters(['alunno' => $alu['id'], 'anno' => $alu['classe'][0],
-            'sezione' => substr($alu['classe'], 1), 'stato' => 'C', 'rinviato' => 'X'])
+          ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
+          ->setParameters(['alunno' => $alu['id'], 'anno' => $classeAnno, 'sezione' => $classeSezione,
+            'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
           ->setMaxResults(1)
           ->getQuery()
           ->getOneOrNullResult();
@@ -5071,7 +5073,7 @@ class ScrutinioUtil {
    * @param FormBuilder $form Form per lo scrutinio
    * @param array $dati Dati passati al form
    *
-   * @return FormType|null Form usato nella pagina corrente dello scrutinio
+   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
    */
   public function verbaleForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
     // crea form
@@ -5161,7 +5163,7 @@ class ScrutinioUtil {
               ->prepare('INSERT INTO gs_voto_scrutinio '.
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:ore,:dati)')
-              ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
+              ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['proposte'][$alunno][$materia]['unico'],
                 'debito' => $dati['proposte'][$alunno][$materia]['debito'],
                 'recupero' => $dati['proposte'][$alunno][$materia]['recupero'],

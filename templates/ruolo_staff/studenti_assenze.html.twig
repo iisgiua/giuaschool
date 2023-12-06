@@ -2,12 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.staff_assenze'|trans }} {{ classe ? classe.anno~'ª '~classe.sezione }}</h1>
-{% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-  <div class="alert alert-warning" role="alert">
-    <strong class="gs-big">Spiacente, non è possibile usare questa funzione nella modalità corrente.</strong>
-  </div>
-{% else %}
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.staff_assenze'|trans }} {{ classe ? classe }}</h1>
   {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
@@ -34,7 +29,6 @@
       {{ form_end(form_assenze) }}
     {% endif %}
   {% endif %}
-{% endif %}
 </div>
 {% endblock %}
 

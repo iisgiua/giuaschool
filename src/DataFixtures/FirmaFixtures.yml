@@ -15,16 +15,16 @@ include:
 App\Entity\Firma:
 
   # ----- lezioni delle classi -----
-  firma_{1..100}:
+  firma_{1..5}:
     lezione: '@lezione_<current()>'
     docente: '@docente_curricolare_*'
 
   # ----- lezioni di religione -----
-  firma_religione_{1..30}:
+  firma_religione_{1..5}:
     lezione: '@lezione_religione_<current()>'
     docente: '@docente_religione_*'
 
   # ----- lezioni di sostituzione -----
-  firma_supplenza_{1..10}:
+  firma_supplenza_{1..5}:
     lezione: '@lezione_supplenza_<current()>'
     docente: '@docente_*'

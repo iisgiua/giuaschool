@@ -177,6 +177,7 @@ label.giustifica_connessione: Problemi di connessione nella modalità a distanza
 label.giustificazione: Giustificato?
 label.impostazioni: Impostazioni
 label.indietro: Indietro
+label.back: Indietro
 label.indirizzo: Indirizzo
 label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
@@ -542,6 +543,7 @@ label.richiedenti_modulo: Utenti che possono presentare il modulo
 label.destinatari_modulo: Utenti che possono gestire la richiesta
 label.allegati_modulo: Numero di allegati da inserire nella richiesta
 label.richiesta_unica_modulo: Ammessa una sola richiesta per utente
+label.gestione_modulo: Attiva la gestione degli stati della procedura
 label.campi_modulo: Lista dei campi da compilare
 label.template_modulo: Nome del file del modello
 label.ruolo_funzione_GN: Genitori
@@ -550,6 +552,7 @@ label.ruolo_funzione_AN: Alunni
 label.ruolo_funzione_PN: Dirigente
 label.ruolo_funzione_SN: Staff
 label.ruolo_funzione_DN: Docenti
+label.ruolo_funzione_TN: ATA
 label.nome_campo: Nome del campo
 label.tipo_campo: Tipo del campo
 label.campo_obbligatorio: Campo obbligatorio
@@ -562,7 +565,9 @@ label.tipo_date: Data
 label.tipo_time: Ora
 label.minus: -
 label.invia_richiesta: Nuova richiesta
+label.invia_modulo: Nuovo modulo
 label.cancella_richiesta: Cancella richiesta
+label.cancella_modulo: Cancella modulo
 label.richieste_scadute: Richieste scadute
 label.tipo_richiesta: Codifica del tipo di richiesta
 label.richiedi_giustificazione: Chiedere la giustificazione?
@@ -581,6 +586,7 @@ label.richiesta_sede: Sede di destinazione
 label.richiesta_messaggio: Messaggio in risposta
 label.richiesta_deroga_entrata: Autorizza ingresso
 label.richiesta_deroga_uscita: Autorizza uscita
+label.modulo_tipo: Tipo di modulo
 label.tipo_colloquio_P: In presenza
 label.tipo_colloquio_D: A distanza
 label.durata_colloquio_5: 5 minuti
@@ -622,6 +628,12 @@ label.tipo_archivio: Tipo di documenti da archiviare
 label.selezione_archivio: Elementi da archiviare
 label.docente_curricolare: Docente curricolare
 label.docente_sostegno: Docente di sostegno
+label.classe_gruppo: Gruppo classe
+label.tipo_supplenza: Gruppo alunni
+label.gruppo_religione_T: Tutta la classe
+label.gruppo_religione_S: Gruppo Religione
+label.gruppo_religione_A: Gruppo Mat. Alt.
+label.gruppo_religione_N: Gruppo N.A.
 
 
 ##### PAGINE #####
@@ -731,7 +743,7 @@ title.scuola.moduli_edit: Modifica i dati di un modulo di richiesta
 page.richieste.lista: Lista Richieste
 title.richieste.lista: Lista delle richieste
 page.richieste.add: Modifica Richiesta
-title.richieste.add: Invia un modulo di richiesta
+title.richieste.add: Invia un modulo
 page.richieste.uscita: Gestione Uscite
 title.richieste.uscita: Gestione delle richieste di uscita anticipata
 page.richieste.gestione: Gestione Richieste
@@ -790,6 +802,14 @@ title.utenti.notifiche: Imposta le modalità per l'invio delle notifiche
 title.utenti.notifiche_configura: Configura il canale per l'invio delle notifiche
 page.sistema.telegram: Configura Telegram
 title.sistema.telegram: Configurazione per le notifiche via Telegram
+page.staff.cdc: Staff CdC
+title.staff.cdc: Composizione del Consiglio di Classe
+page.richieste.classe: Moduli Classe
+title.richieste.classe: Moduli per la classe {classe}
+title.richieste.classe_add: Inserimento di un nuovo modulo
+page.richieste.modulo: Gestione Moduli
+title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
+title.richieste.modulo_lista: Moduli inviati
 
 
 page.agenda_compito: Agenda Compiti
@@ -1204,8 +1224,8 @@ message.no_cattedra_piani: Non è previsto il caricamento dei piani di lavoro pe
 message.cancella_piano: Verrà cancellato il documento del piano di lavoro. Vuoi continuare?
 message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe; il documento dovrà comprendere anche gli argomenti di Educazione Civica.<br>I docenti di laboratorio dovranno inserire il proprio piano di lavoro assieme a quello del docente di teoria, in un unico documento."
 message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
-message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
-message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}"
+message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore."
+message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}."
 message.autorizza_uscita_richiesta: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, come da richiesta preventivamente formalizzata."
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
 message.presenti_compiti_oggi: "{num, plural, one {È presente un compito assegnato per oggi} other {Sono presenti # compiti assegnati per oggi}}"
@@ -1325,7 +1345,9 @@ message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
-message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
+message.lezione_esiste_altra: "Non è possibile firmare la lezione della {ora}ª ora.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
+message.cancella_lezione_con_voti: "Non è possibile cancellare la lezione indicata.<br>Hai inserito uno o più valutazioni per questa materia in questa data.<br>Per rimuovere la lezione, devi prima modificare la data delle valutazioni."
+message.modifica_lezione_con_voti: "Non è possibile modificare la materia della lezione indicata.<br>Hai inserito uno o più valutazioni per la materia esistente in questa data.<br>Per cambiare la materia della lezione, devi prima modificare la data delle valutazioni."
 message.no_documenti: Non sono presenti documenti
 message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
@@ -1349,9 +1371,12 @@ message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalit�
 message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
-message.cancella_modulo: Veorrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
+message.no_moduli_classe: Non sono presenti moduli per la classe.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
+message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
+message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
@@ -1390,6 +1415,8 @@ message.telegram_chat_start: "Ciao <b>{nome}</b>, benvenuto in questa chat che s
 message.sistema_telegram: Modifica la configurazione per l'invio delle notifiche via Telegram. Lascia in bianco per disabilitare l'uso di Telegram.
 message.telegram_webhook_ok: La configurazione Telegram è stata eseguita con successo.
 message.recupero_debito_NC: Tutto il programma svolto.
+message.lezione_sostegno_NA_con_religione: "Non è possibile firmare la lezione della {ora}ª ora.<br>Non è consentito utilizzare il sostegno per il gruppo N.A."
+message.lezione_incompatibile: "Non è possibile firmare la lezione della {ora}ª ora.<br>La materia o il gruppo è incompatibile con la lezione esistente."
 
 
 ##### ERRORI #####
@@ -1636,6 +1663,7 @@ exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
+exception.campo_data_successivo_oggi: Non puoi inserire una data successiva a quella di oggi.
 exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
 exception.colloquio_link_invalido: Il link inserito non è valido.
@@ -1674,3 +1702,4 @@ exception.no_docente: Non ha selezionato il docente.
 exception.no_sostegno: Non ha selezionato il docente di sostegno.
 exception.no_classe: Non ha selezionato la classe.
 exception.no_circolare: Non ha selezionato la circolare.
+exception.nota_classe_non_prevista: Non è possibile inserire una nota a tutta la classe.

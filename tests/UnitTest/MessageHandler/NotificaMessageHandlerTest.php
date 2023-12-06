@@ -84,7 +84,8 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
   public function __construct() {
     parent::__construct();
     // dati da caricare
-    $this->fixtures = 'NotificaFixtures';
+    $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures',
+      'CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures', 'IstitutoFixtures'];
   }
 
   /**
@@ -134,7 +135,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
     $utenteId = -1;
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -166,7 +167,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -198,7 +199,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -230,7 +231,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -263,7 +264,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -295,7 +296,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -327,7 +328,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -403,7 +404,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'verifica']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -444,7 +445,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'compito']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -485,7 +486,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'email', 'abilitato' => ['circolare', 'altro']];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -522,7 +523,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -554,7 +555,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -586,7 +587,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->em->flush();
     $utenteId = $docente->getId();
     $tipo = 'circolare';
-    $circolare = $this->getReference('circolare_perClasse');
+    $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
       'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
@@ -659,7 +660,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'verifica'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -699,7 +700,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'compito'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -739,7 +740,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'altro'], 'telegram_chat' => '111111'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -770,7 +771,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->logs = [];
     $nmh = new NotificaMessageHandler($this->em, $this->mockedTranslator, $this->mockedEnvironment,
       $this->mockedMailer, $this->mockedTelegram, $this->mockedLogger);
-    $utente = $this->getReference('alunno_prima_1');
+    $utente = $this->getReference('alunno_1A_1');
     $conf = ['tipo' => 'telegram', 'abilitato' => ['circolare', 'avviso'], 'telegram_chat' => '0000'];
     $utente->setNotifica($conf);
     $this->em->flush();
@@ -808,14 +809,14 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!1!>\";}}', '[1]', 'avviso', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!1!>\";}}', '[2]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
-    $connection->prepare($sql)->execute();
+    $connection->prepare($sql)->executeStatement();
     // esegue
     NotificaMessageHandler::delete($this->em, '<!AVVISO!><!1!>');
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";
     $stmt = $connection->prepare($sql);
-    $result = $stmt->execute();
-    $rset = $result->fetchAll();
+    $result = $stmt->executeQuery();
+    $rset = $result->fetchAllAssociative();
     $this->assertCount(1, $rset);
     $this->assertSame('[3]', $rset[0]['headers']);
   }
@@ -831,15 +832,15 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!1!>\";}}', '[1]', 'avviso', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!1!>\";}}', '[2]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
-    $connection->prepare($sql)->execute();
+    $connection->prepare($sql)->executeStatement();
     // esegue
     $adesso = new \DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";
     $stmt = $connection->prepare($sql);
-    $result = $stmt->execute();
-    $rset = $result->fetchAll();
+    $result = $stmt->executeQuery();
+    $rset = $result->fetchAllAssociative();
     $this->assertTrue($aggiornato);
     $this->assertCount(3, $rset);
     $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr($rset[0]['available_at'], 0, 16)]);
@@ -858,15 +859,15 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!134!>\";}}', '[1]', 'avviso', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:15:\"<!AVVISO!><!1!>\";}}', '[2]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);".
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
-    $connection->prepare($sql)->execute();
+    $connection->prepare($sql)->executeStatement();
     // esegue
     $adesso = new \DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";
     $stmt = $connection->prepare($sql);
-    $result = $stmt->execute();
-    $rset = $result->fetchAll();
+    $result = $stmt->executeQuery();
+    $rset = $result->fetchAllAssociative();
     $this->assertFalse($aggiornato);
     $this->assertCount(2, $rset);
     $this->assertSame(['[1]', '2023-01-01 00:00:00'], [$rset[0]['headers'], $rset[0]['available_at']]);

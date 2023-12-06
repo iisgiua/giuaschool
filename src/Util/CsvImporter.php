@@ -8,28 +8,25 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Validator\ValidatorBuilder;
-use Symfony\Component\Validator\ValidatorInterface;
-use App\Entity\Cattedra;
-use App\Entity\Docente;
-use App\Entity\Ata;
-use App\Entity\Classe;
-use App\Entity\Materia;
 use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\Genitore;
+use App\Entity\Materia;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
 use App\Entity\Provisioning;
-use App\Entity\ScansioneOraria;
-use App\Entity\Sede;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\ValidatorBuilder;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -113,7 +110,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista dei docenti importati
+   * @return array|null Lista dei docenti importati
    */
   public function importaDocenti(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email');
@@ -253,7 +250,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista delle cattedtre importate
+   * @return array|null Lista delle cattedtre importate
    */
   public function importaCattedre(File $file=null, Form $form) {
     $header = array('usernameDocente','classe','materia','usernameAlunno','tipo','supplenza');
@@ -325,17 +322,28 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di classe
-      $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
-        'anno' => $fields['classe'][0],
-        'sezione' => trim(substr($fields['classe'], 1))));
-      if (count($lista) != 1) {
+      $classeAnno = (int) $fields['classe'][0];
+      $classeSezione = trim(substr($fields['classe'], 1));
+      $classeGruppo = '';
+      if (($pos = strpos($classeSezione, '-')) !== false) {
+        $classeGruppo = substr($classeSezione, $pos + 1);
+        $classeSezione = substr($classeSezione, 0, $pos);
+      }
+      $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+          ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+        ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+          'gruppo' => $classeGruppo])
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+      if (!$classe) {
         // errore: classe
         fclose($this->fh);
         $this->fh = null;
         $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
         return $imported;
       }
-      $classe = $lista[0];
       // controlla esistenza di materia
       $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
       if (count($lista) != 1) {
@@ -455,7 +463,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli alunni importati
+   * @return array|null Lista degli alunni importati
    */
   public function importaAlunni(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
@@ -641,9 +649,21 @@ class CsvImporter {
           $fields['classe'] = null;
         } else {
           // classe esistente
-          $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(array(
-            'anno' => $fields['classe'][0],
-            'sezione' => trim(substr($fields['classe'], 1))));
+          $classeAnno = (int) $fields['classe'][0];
+          $classeSezione = trim(substr($fields['classe'], 1));
+          $classeGruppo = '';
+          if (($pos = strpos($classeSezione, '-')) !== false) {
+            $classeGruppo = substr($classeSezione, $pos + 1);
+            $classeSezione = substr($classeSezione, 0, $pos);
+          }
+          $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+            ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+              ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+            ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+              'gruppo' => $classeGruppo])
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
           if (!$classe) {
             // errore: classe
             fclose($this->fh);
@@ -863,7 +883,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli ATA importati
+   * @return array|null Lista degli ATA importati
    */
   public function importaAta(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email', 'tipo', 'segreteria', 'sede');
@@ -1024,7 +1044,7 @@ class CsvImporter {
    * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista degli orari importati
+   * @return array|null Lista degli orari importati
    */
   public function importaOrario(File $file=null, Form $form) {
     $header = array('username', 'sede', 'giorno', 'ora', 'classe', 'materia');
@@ -1152,17 +1172,28 @@ class CsvImporter {
       // controlla esistenza di classe
       $classe = null;
       if ($fields['classe'] != '---') {
-        $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
-          'anno' => $fields['classe'][0],
-          'sezione' => trim(substr($fields['classe'], 1))));
-        if (count($lista) != 1) {
+        $classeAnno = (int) $fields['classe'][0];
+        $classeSezione = trim(substr($fields['classe'], 1));
+        $classeGruppo = '';
+        if (($pos = strpos($classeSezione, '-')) !== false) {
+          $classeGruppo = substr($classeSezione, $pos + 1);
+          $classeSezione = substr($classeSezione, 0, $pos);
+        }
+        $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+          ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+            ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+          ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
+            'gruppo' => $classeGruppo])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getOneOrNullResult();
+        if (!$classe) {
           // errore: classe
           fclose($this->fh);
           $this->fh = null;
           $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
           return $imported;
         }
-        $classe = $lista[0];
       }
       // controlla esistenza di materia
       $materia = null;

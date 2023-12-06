@@ -9,6 +9,7 @@
 namespace App\Tests\Behat;
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ExpectationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -597,7 +598,7 @@ class BrowserContext extends BaseContext {
    */
   public function pulsanteAttivo($button): void {
     $element = $this->session->getPage()->findButton($button);
-    $this->assertFalse($element->getAttribute('disabled'));
+    $this->assertTrue(empty($element->getAttribute('disabled')));
   }
 
   /**
@@ -608,7 +609,7 @@ class BrowserContext extends BaseContext {
    */
   public function pulsanteInattivo($button): void {
     $element = $this->session->getPage()->findButton($button);
-    $this->assertTrue($element->getAttribute('disabled'));
+    $this->assertTrue(!empty($element->getAttribute('disabled')));
   }
 
   /**
@@ -946,9 +947,9 @@ class BrowserContext extends BaseContext {
     $row = [];
     $col = 0;
     foreach ($cellList as $cell) {
-      while (isset($rowspan[$col]) && $rowspan[$col]['num']) {
-        // replica contenuto colonna
-        $row[$col] = $rowspan[$col]['text'];
+      while (isset($rowspan[$col]) && $rowspan[$col]['num'] > 0) {
+        // replica celle vuote
+        $row[$col] = '';
         $rowspan[$col]['num']--;
         if ($rowspan[$col]['num'] == 0) {
           unset($rowspan[$col]);
@@ -959,7 +960,6 @@ class BrowserContext extends BaseContext {
       if ($cell->hasAttribute('rowspan')) {
         $rspan = (int) $cell->getAttribute('rowspan');
         if ($rspan > 1) {
-          $rowspan[$col]['text'] = $text;
           $rowspan[$col]['num'] = $rspan - 1;
         }
       }
@@ -967,9 +967,17 @@ class BrowserContext extends BaseContext {
       if ($cell->hasAttribute('colspan')) {
         $colspan = (int) $cell->getAttribute('colspan');
         for ($i = 1; $i < $colspan; $i++) {
-          // replica contenuto colonna
-          $row[$col++] = $text;
+          // replica celle vuote
+          $row[$col++] = '';
         }
+      }
+    }
+    if (isset($rowspan[$col]) && $rowspan[$col]['num'] > 0) {
+      // replica celle vuote
+      $row[$col] = '';
+      $rowspan[$col]['num']--;
+      if ($rowspan[$col]['num'] == 0) {
+        unset($rowspan[$col]);
       }
     }
     return $row;

@@ -20,7 +20,6 @@ use App\Util\OtpUtil;
 use App\Util\StaffUtil;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -58,7 +57,7 @@ class LoginController extends BaseController {
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
    */
-  public function formAction(AuthenticationUtils $auth, ConfigLoader $config) {
+  public function formAction(AuthenticationUtils $auth, ConfigLoader $config): Response {
     if ($this->isGranted('ROLE_UTENTE')) {
       // reindirizza a pagina HOME
       return $this->redirectToRoute('login_home');
@@ -107,7 +106,7 @@ class LoginController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche) {
+  public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
     if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
       // redirezione alla scelta profilo
       return $this->redirectToRoute('login_profilo');
@@ -141,7 +140,8 @@ class LoginController extends BaseController {
    */
   public function recoveryAction(Request $request, ConfigLoader $config,
                                  UserPasswordHasherInterface $hasher, OtpUtil $otp, StaffUtil $staff,
-                                 MailerInterface $mailer, LoggerInterface $logger, LogHandler $dblogger) {
+                                 MailerInterface $mailer, LoggerInterface $logger,
+                                 LogHandler $dblogger): Response {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
@@ -162,54 +162,54 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $this->email = $form->get('email')->getData();
-      $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $this->email, 'abilitato' => 1]);
+      $email = $form->get('email')->getData();
+      $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
       $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
       if (!$utente) {
         // utente non esiste
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', array(
-          'email' => $this->email,
+          'email' => $email,
           'ip' => $request->getClientIp()));
         $errore = 'exception.invalid_recovery_email';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
         // errore: niente recupero password per utente su id provider
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', array(
-          'email' => $this->email,
+          'email' => $email,
           'ip' => $request->getClientIp()));
         $errore = 'exception.invalid_user_type_recovery';
       } else {
         // effettua il recupero password
-        if ($utente instanceof Amministratore) {
+        if ($utente instanceOf Amministratore) {
           // amministratore
           $num_pwdchars = 12;
           $template_html = 'email/credenziali_recupero_ata.html.twig';
           $template_txt = 'email/credenziali_recupero_ata.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Docente) {
+        } elseif ($utente instanceOf Docente) {
           // docenti/staff/preside
           $num_pwdchars = 10;
           $template_html = 'email/credenziali_recupero_docenti.html.twig';
           $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-        } elseif ($utente instanceof Ata) {
+        } elseif ($utente instanceOf Ata) {
           // ATA
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_recupero_ata.html.twig';
           $template_txt = 'email/credenziali_recupero_ata.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Genitore) {
+        } elseif ($utente instanceOf Genitore) {
           // genitori
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
           $template_txt = 'email/credenziali_alunni.txt.twig';
           $utente_mail = $utente->getAlunno();
           $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceof Alunno) {
+        } elseif ($utente instanceOf Alunno) {
           // alunni
           $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
@@ -227,13 +227,13 @@ class LoginController extends BaseController {
         // log azione
         $logger->warning('Richiesta di recupero Password', array(
           'Username' => $utente->getUsername(),
-          'Email' => $this->email,
+          'Email' => $email,
           'Ruolo' => $utente->getRoles()[0],
           ));
         // crea messaggio
         $message = (new Email())
           ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
-          ->to($this->email)
+          ->to($email)
           ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
           ->text($this->renderView($template_txt,
             array(
@@ -257,7 +257,7 @@ class LoginController extends BaseController {
           // errore di spedizione
           $logger->error('Errore di spedizione email nella richiesta di recupero password.', array(
             'username' => $utente->getUsername(),
-            'email' => $this->email,
+            'email' => $email,
             'ip' => $request->getClientIp(),
             'errore' => $err->getMessage()));
           $errore = 'exception.error_recovery';
@@ -289,7 +289,7 @@ class LoginController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function profiloAction(Request $request, EventDispatcherInterface $disp,
-                                TokenStorageInterface $tokenStorage, LogHandler $dblogger) {
+                                TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {
     // imposta profili
     $lista = [];
     foreach ($this->reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {

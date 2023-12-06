@@ -13,8 +13,6 @@ use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
 use App\Entity\Provisioning;
 use App\Entity\Scrutinio;
-use App\Entity\StoricoEsito;
-use App\Entity\StoricoVoto;
 use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
@@ -29,7 +27,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,11 +63,11 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $banner_login = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
-    $banner_home = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
+    $bannerLogin = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
+    $bannerHome = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'banner',
-      'dati' => [$banner_login, $banner_home]]);
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'banner',
+      'values' => [$bannerLogin, $bannerHome]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
@@ -117,9 +114,9 @@ class SistemaController extends BaseController {
       $manutenzione_fine = \DateTime::createFromFormat('Y-m-d H:i', $manutenzione_fine);
     }
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'manutenzione',
-      'dati' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
-        $manutenzione_fine, clone $manutenzione_fine]]);
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'manutenzione',
+      'values' => [$manutenzione, $manutenzione_inizio, clone $manutenzione_inizio,
+      $manutenzione_fine, clone $manutenzione_fine]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -167,8 +164,8 @@ class SistemaController extends BaseController {
     // legge parametri
     $parametri = $this->em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
-    $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'parametri',
-      'dati' => $parametri]);
+    $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'parametri',
+      'values' => [$parametri]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
@@ -201,7 +198,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // form
-    $form = $this->createForm(UtenteType::class, null, ['formMode' => 'password']);
+    $form = $this->createForm(UtenteType::class, null, ['form_mode' => 'password']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -258,12 +255,13 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, TranslatorInterface $trans, LogHandler $dblogger): Response {
+  public function aliasAction(Request $request, TranslatorInterface $trans,
+                              LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
     // form
-    $form = $this->createForm(UtenteType::class, null, ['formMode' => 'alias']);
+    $form = $this->createForm(UtenteType::class, null, ['form_mode' => 'alias']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
@@ -276,7 +274,7 @@ class SistemaController extends BaseController {
         // memorizza dati in sessione
         $this->reqstack->getSession()->set('/APP/UTENTE/tipo_accesso_reale', $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso'));
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso_reale', $this->reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso'));
-        $this->reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
+        $this->reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUserIdentifier());
         $this->reqstack->getSession()->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
         $this->reqstack->getSession()->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso',
@@ -309,7 +307,7 @@ class SistemaController extends BaseController {
   public function aliasExitAction(Request $request, LogHandler $dblogger): Response  {
     // log azione
     $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
-      'Username' => $this->getUser()->getUsername(),
+      'Username' => $this->getUser()->getUserIdentifier(),
       'Ruolo' => $this->getUser()->getRoles()[0],
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
@@ -347,15 +345,15 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function nuovoAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
-                              $step): Response {
+                              int $step): Response {
     // init
     $dati = [];
     $info = [];
     $info['nuovoAnno'] = (int) (new \DateTime())->format('Y');
     $info['vecchioAnno'] = $info['nuovoAnno'] - 1;
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'nuovo', 'step' => $step,
-      'actionUrl' => $this->generateUrl('sistema_nuovo', ['step' => $step + 1])]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'nuovo', 'values' => [$step],
+      'action_url' => $this->generateUrl('sistema_nuovo', ['step' => $step + 1])]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $fs = new Filesystem();
@@ -410,7 +408,7 @@ class SistemaController extends BaseController {
             ->setParameters(['nessuno' => null])
             ->getQuery()
             ->execute();
-          // cancella dati annuali alunni 
+          // cancella dati annuali alunni
           $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->update()
             ->set('a.autorizzaEntrata', ':no')
@@ -441,7 +439,7 @@ class SistemaController extends BaseController {
                 "FROM gs_utente a ".
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
                 'lista' => $noScrutinabili], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // anno all'estero
@@ -452,21 +450,21 @@ class SistemaController extends BaseController {
                 "FROM gs_utente a ".
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU';";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(), 
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
                 'lista' => $estero], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // alunni scrutinati
             $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
             $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
+              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
               "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
               "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
               "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
               "AND s.id = :scrutinio ".
               "AND e.esito IN ('A', 'N') ".
               "AND (c.anno != 5 OR e.esito = 'N');";
-            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
-              'scrutinio' => $scrutinio->getId()], 
+            $connection->executeStatement($sql, ['lista' => $scrutinabili,
+              'scrutinio' => $scrutinio->getId()],
               ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
               "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
@@ -478,13 +476,13 @@ class SistemaController extends BaseController {
               "AND s.id = :scrutinio ".
               "AND e.esito IN ('A', 'N') ".
               "AND (c.anno != 5 OR e.esito = 'N');";
-            $connection->executeStatement($sql, ['lista' => $scrutinabili, 
-              'scrutinio' => $scrutinio->getId()], 
+            $connection->executeStatement($sql, ['lista' => $scrutinabili,
+              'scrutinio' => $scrutinio->getId()],
               ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
           }
           // scrutini sospesi
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
             "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -501,7 +499,7 @@ class SistemaController extends BaseController {
           $connection->executeStatement($sql);
           // esiti scrutini rinviati al nuovo A.S.
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione), e.esito, 'X', e.media, e.credito, ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'X', e.media, e.credito, ".
             "  e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2 ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
@@ -619,7 +617,7 @@ class SistemaController extends BaseController {
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
-          }        
+          }
           // aggiunge scrutini rinviati
           foreach ($datiScrutinio as $dati) {
             $classe = $this->em->getRepository('App\Entity\Classe')->find($dati['classe']);
@@ -651,28 +649,28 @@ class SistemaController extends BaseController {
           // gestione alunni promossi
           $sql = "UPDATE gs_utente a ".
             "INNER JOIN gs_storico_esito se ON se.alunno_id = a.id ".
-            "INNER JOIN gs_classe c ON c.id = a.classe_id ".            
-            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione) ".
+            "INNER JOIN gs_classe c ON c.id = a.classe_id ".
+            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione AND gruppo = c.gruppo) ".
             "WHERE a.ruolo = 'ALU' AND se.esito IN ('A', 'E');";
           $connection->executeStatement($sql);
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 3: // gestione circolari          
+        case 3: // gestione circolari
           // crea nuova directory
           $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
           // legge circolari pubblicate prima del 1/9 e non già modificate
           $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data<:inizio AND c.documento NOT LIKE :modificato')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
             'inizio' => $info['nuovoAnno'].'-09-01', 'modificato' => $info['vecchioAnno'].'/%'])
             ->getQuery()
             ->getResult();
-          // modifica path e sposta file 
+          // modifica path e sposta file
           foreach ($circolari as $circolare) {
             // sposta file documento
             $file = $path.'/upload/circolari/'.$circolare->getDocumento();
-            $fs->rename($file, 
+            $fs->rename($file,
               $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$circolare->getDocumento());
             // modifica path allegati
             $allegati = $circolare->getAllegati();
@@ -682,7 +680,7 @@ class SistemaController extends BaseController {
               $nuoviAllegati[] = $info['vecchioAnno'].'/'.$allegato;
               $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$allegato);
             }
-            // modifica path su db 
+            // modifica path su db
             $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->update()
             ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
@@ -692,11 +690,11 @@ class SistemaController extends BaseController {
               'id' => $circolare->getId()])
             ->getQuery()
             ->execute();
-          }            
+          }
           // controlla presenza di circolari dal 1/9 in poi
           $nuoveCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data>=:inizio')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1, 
+            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
               'inizio' => $info['nuovoAnno'].'-09-01'])
             ->orderBy('c.numero', 'ASC')
             ->getQuery()
@@ -750,7 +748,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 4: // gestione avvisi 
+        case 4: // gestione avvisi
           // controlla presenza di avvisi dal 1/9 in poi
           $nuoviAvvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
             ->where('a.data>=:inizio AND a.cattedra IS NULL')
@@ -817,7 +815,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 5: // gestione documenti 
+        case 5: // gestione documenti
           // directory da svuotare
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
@@ -845,12 +843,12 @@ class SistemaController extends BaseController {
             if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
               // sposta documento
               $fs->mkdir($path.'/upload/documenti/'.$percorso2, 0770);
-              $fs->rename($path.'/archivio/classi/'.$percorso1.$file, 
+              $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
                 $path.'/upload/documenti/'.$percorso2.$file);
             } else {
               // segna per la cancellazione
               $documento->setAlunno(null);
-            }     
+            }
           }
           $this->em->flush();
           // cancella dati documenti
@@ -886,7 +884,7 @@ class SistemaController extends BaseController {
           $finder = new Finder();
           $finder->in($path.'/archivio/classi')->notName('.gitkeep');
           $fs->remove($finder);
-          // ripristina documenti 
+          // ripristina documenti
           $finder = new Finder();
           $finder->files()->in($path.'/upload/documenti')->notName('.gitkeep');
           foreach ($finder as $file) {
@@ -976,7 +974,7 @@ class SistemaController extends BaseController {
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
-        case 8: // pulizia finale 
+        case 8: // pulizia finale
           // svuota archivio registri
           $fs->remove($path.'/archivio/registri');
           $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
@@ -1050,7 +1048,7 @@ class SistemaController extends BaseController {
       ->getQuery()
       ->getResult();
     $listaClassi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-      ->orderBy('c.anno,c.sezione', 'ASC')
+      ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
       ->getQuery()
       ->getResult();
     $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
@@ -1061,8 +1059,8 @@ class SistemaController extends BaseController {
       ->getQuery()
       ->getResult();
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'archivia',
-      'dati' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'archivia',
+      'values' => [$listaDocenti, $listaSostegno, $listaClassi, $listaCircolari]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // assicura che lo script non sia interrotto
@@ -1176,12 +1174,10 @@ class SistemaController extends BaseController {
             }
             if ($numCircolari > 0) {
               // circolari create
-              $this->reqstack->getSession()->getFlashBag()->add('success', 
-                'Sono state archiviate '.$numCircolari.' circolari.');
+              $this->addFlash('success', 'Sono state archiviate '.$numCircolari.' circolari.');
             } else {
               // nessuna circolare archiviata
-              $this->reqstack->getSession()->getFlashBag()->add('warning', 
-                'Non è stata archiviata nessuna circolare.');
+              $this->addFlash('warning', 'Non è stata archiviata nessuna circolare.');
             }
             break;
         }
@@ -1243,6 +1239,8 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function manutenzioneLogoutAction(Request $request): Response {
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
     $mySession = 'sess_'.$request->cookies->get('PHPSESSID');
     // elimina le sessioni tranne quella corrente
@@ -1278,8 +1276,8 @@ class SistemaController extends BaseController {
     $data = new \DateTime('today');
     $ora = new \DateTime('now');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'log',
-      'returnUrl' => $this->generateUrl('sistema_manutenzione'), 'dati' => [$data, $ora]]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'log',
+      'return_url' => $this->generateUrl('sistema_manutenzione'), 'values' => [$data, $ora]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $msgs = [];
@@ -1336,6 +1334,8 @@ class SistemaController extends BaseController {
    */
   public function manutenzioneDebugAction(Request $request, TranslatorInterface $trans,
                                           KernelInterface $kernel): Response {
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
     // imposta nuovo livello di log
     $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
     // legge .env
@@ -1392,9 +1392,9 @@ class SistemaController extends BaseController {
     $info = [];
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
+    // esegue passi
     $info['step'] = 0;
     $info['prossimo'] = 0;
-    // esegue passi
     switch($step) {
       case 0:   // controlli iniziali
         // legge ultima versione
@@ -1515,7 +1515,6 @@ class SistemaController extends BaseController {
           '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
         $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
         return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
-        break;
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
@@ -1558,7 +1557,8 @@ class SistemaController extends BaseController {
     $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
     $info['email'] = '';
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'email', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'email', 'values' => [
+      $info['server'], $info['user'], $info['password'], $info['host'], $info['port']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form
@@ -1685,7 +1685,8 @@ class SistemaController extends BaseController {
     $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
     $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
     // form
-    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'telegram', 'dati' => $info]);
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'values' => [
+      $info['bot'], $info['token']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati form

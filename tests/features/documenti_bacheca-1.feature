@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione bacheca dei documenti indirizzati all'utente
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 ################################################################################
@@ -132,7 +133,7 @@ Schema dello scenario: visualizza più file per documento di utente connesso
   Allora vedi nella tabella i dati:
     | stato      | riferimento          | documento | azione  |
     | DA LEGGERE | $cl1 $cl1:corso,sede | Prova 1   | Scarica |
-    | DA LEGGERE | $cl1 $cl1:corso,sede | Prova 2   | Scarica |
+    |            |                      | Prova 2   | Scarica |
   Esempi:
     | ruolo    | tipo |
     | Docente  | G    |

@@ -15,8 +15,8 @@ include:
 
 
 App\Entity\OrarioDocente:
-  orario_docente_{1..10}:
-    orario: '@orario_provvisorio<(1 + $current % 2)>'
-    giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
+  orariodocente_{1..5}:
+    orario: '@orario_*'
+    giorno: '<current()>'
     ora: '<numberBetween(1, 4)>'
     cattedra: '@cattedra_*'

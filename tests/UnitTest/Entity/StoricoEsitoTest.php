@@ -32,7 +32,7 @@ class StoricoEsitoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati'],
       'gs_utente' => '*'];
@@ -68,13 +68,13 @@ class StoricoEsitoTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 66)) :
+          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'esito' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'periodo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :
           ($field == 'credito' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'creditoPrecedente' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 6)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."B_1") :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);

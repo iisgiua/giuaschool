@@ -16,7 +16,6 @@ use App\Form\VotoScrutinioType;
 use App\Util\LogHandler;
 use App\Util\ScrutinioUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -27,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -59,7 +59,8 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function proposteAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                 LogHandler $dblogger, $cattedra, $classe, $periodo) {
+                                 LogHandler $dblogger, int $cattedra, int $classe, 
+                                 string $periodo): Response {
     // inizializza variabili
     $info = [];
     $lista_periodi = null;
@@ -292,7 +293,6 @@ class ScrutinioController extends BaseController {
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $stato Stato dello scrutinio (serve per passaggi tra stati)
-   * @param string $periodo Periodo relativo allo scrutinio
    * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
@@ -304,7 +304,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioAction(Request $request, ScrutinioUtil $scr, $classe, $stato, $posizione) {
+  public function scrutinioAction(Request $request, ScrutinioUtil $scr, int $classe, string $stato, 
+                                  int $posizione): Response {
     // inizializza variabili
     $dati = null;
     $form = null;
@@ -422,7 +423,8 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioProposteAction(Request $request, ScrutinioUtil $scr, LogHandler $dblogger,
-                                          $classe, $materia, $periodo, $posizione) {
+                                          int $classe, int $materia, string $periodo, 
+                                          int $posizione): Response {
     // inizializza variabili
     $info = array();
     $elenco = array();
@@ -578,8 +580,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCondottaAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                          $classe, $periodo, $alunno, $posizione) {
+  public function scrutinioCondottaAction(Request $request, TranslatorInterface $trans, 
+                                          ScrutinioUtil $scr, int $classe, string $periodo, int $alunno, 
+                                          int $posizione): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -662,7 +665,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg));
+        $this->addFlash('errore', $trans->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $this->em->flush();
@@ -671,7 +674,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -707,7 +710,8 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioVotiAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                      $classe, $materia, $periodo, $alunno, $posizione) {
+                                      int $classe, int $materia, string $periodo, int $alunno, 
+                                      int $posizione) {
     // inizializza variabili
     $info = array();
     $dati = array();
@@ -802,8 +806,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore',
-          $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
+        $this->addFlash('errore', $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
       }
       // memorizza dati (anche se errati)
       $this->em->flush();
@@ -812,7 +815,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -844,7 +847,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioSvoltoAction(Request $request, ScrutinioUtil $scr, $cattedra, $classe, $periodo) {
+  public function scrutinioSvoltoAction(Request $request, ScrutinioUtil $scr, int $cattedra, int $classe, 
+                                        string $periodo): Response {
     // inizializza variabili
     $dati = array();
     $lista_periodi = null;
@@ -934,8 +938,9 @@ class ScrutinioController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
-   * @param int $classe Identificativo della classe
+   * @param int $alunno Identificativo dell'alunno
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $classe Identificativo della classe
    * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
@@ -948,7 +953,8 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
    public function scrutinioEsitoAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                        $alunno, $periodo, $classe, $posizione) {
+                                        int $alunno, string $periodo, int $classe, 
+                                        int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1127,7 +1133,7 @@ class ScrutinioController extends BaseController {
       }
       // imposta eventuali messaggi di errore
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
+        $this->addFlash('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1147,7 +1153,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(),
@@ -1181,8 +1187,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCreditoAction(Request $request, ScrutinioUtil $scr, $alunno,
-                                         $periodo, $classe, $posizione) {
+  public function scrutinioCreditoAction(Request $request, ScrutinioUtil $scr, int $alunno,
+                                         string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
     $credito = array();
     $credito[3] = [6 =>  7, 7 =>  8, 8 =>  9, 9 => 10, 10 => 11];
@@ -1317,8 +1323,9 @@ class ScrutinioController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
-   * @param int $classe Identificativo della classe
+   * @param int $alunnno Identificativo dell'alunno
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $classe Identificativo della classe
    * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
@@ -1331,7 +1338,8 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCertificazioneAction(Request $request, TranslatorInterface $trans,
-                                                ScrutinioUtil $scr, $alunno, $periodo, $classe, $posizione) {
+                                                ScrutinioUtil $scr, int $alunno, string $periodo, 
+                                                int $classe, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1518,7 +1526,7 @@ class ScrutinioController extends BaseController {
       }
       if ($err_motivazione) {
         // errore: motivazione non inserita
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
+        $this->addFlash('errore', $trans->trans('exception.no_motivazione_certificazione', [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1572,7 +1580,7 @@ class ScrutinioController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioDebitiAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                        $alunno, $periodo, $posizione) {
+                                        int $alunno, string $periodo, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1626,7 +1634,7 @@ class ScrutinioController extends BaseController {
       }
       // messaggi di errore
       foreach ($errore as $msg=>$val) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
+        $this->addFlash('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1681,7 +1689,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCarenzeAction(Request $request, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
+  public function scrutinioCarenzeAction(Request $request, ScrutinioUtil $scr, int $alunno, 
+                                         string $periodo, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1773,7 +1782,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verbaleAction(Request $request, ScrutinioUtil $scr, $classe, $periodo, $step) {
+  public function verbaleAction(Request $request, ScrutinioUtil $scr, int $classe, string $periodo, 
+                                int $step): Response {
     // inizializza variabili
     $dati = null;
     $form = null;
@@ -1860,8 +1870,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioEdcivicaAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                          $classe, $periodo, $alunno, $posizione) {
+  public function scrutinioEdcivicaAction(Request $request, TranslatorInterface $trans, 
+                                          ScrutinioUtil $scr, int $classe, string $periodo, int $alunno, 
+                                          int $posizione): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -1945,7 +1956,7 @@ class ScrutinioController extends BaseController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore',
+        $this->addFlash('errore',
           $trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
       }
       // ok: memorizza dati (anche errati)
@@ -1955,7 +1966,7 @@ class ScrutinioController extends BaseController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $this->reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
+        $this->addFlash('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -1983,7 +1994,7 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioAggiornaAction(Request $request, ScrutinioUtil $scr, $scrutinio) {
+  public function scrutinioAggiornaAction(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
     $risposta = ['status' => 'ok'];
     // controllo scrutinio
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->find($scrutinio);

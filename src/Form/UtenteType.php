@@ -9,13 +9,13 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 
 
 /**
@@ -32,7 +32,7 @@ class UtenteType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'password') {
+    if ($options['form_mode'] == 'password') {
       // form password
       $builder
         ->add('username', TextType::class, array('label' => 'label.username',
@@ -43,19 +43,19 @@ class UtenteType extends AbstractType {
           'first_options' => array('label' => 'label.password'),
           'second_options' => array('label' => 'label.password2'),
           'required' => true));
-    } elseif ($options['formMode'] == 'alias') {
+    } elseif ($options['form_mode'] == 'alias') {
       // form alias
       $builder
         ->add('username', TextType::class, array('label' => 'label.username',
           'required' => true));
     }
     // aggiunge pulsanti al form
-    if ($options['returnUrl']) {
+    if ($options['return_url']) {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit',
           'attr' => ['widget' => 'gs-button-start']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
     } else {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
@@ -68,13 +68,11 @@ class UtenteType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
-    $resolver->setDefined('data');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefaults(array(
-      'formMode' => 'password',
-      'returnUrl' => null,
-      'data' => null,
+      'form_mode' => 'password',
+      'return_url' => null,
       'data_class' => null));
   }
 

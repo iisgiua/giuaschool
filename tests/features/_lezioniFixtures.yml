@@ -1,0 +1,438 @@
+####################
+# _lezioniFixtures - dati per i test sulle lezioni
+####################
+
+
+include:
+  - _testFixtures.yml
+
+
+App\Entity\Cattedra:
+  t_cattedra_1_{1A, 1B, 3C}:
+    attiva: true
+    supplenza: '<boolean(50)>'
+    tipo: 'N'
+    materia: '@materia_curricolare_1'
+    docente: '@docente_nocattedra_2'
+    classe: '@classe_<current()>'
+    alunno:
+  t_cattedra_2_{1A, 3CCHI}:
+    attiva: true
+    supplenza: '<boolean(50)>'
+    tipo: 'N'
+    materia: '@materia_curricolare_2'
+    docente: '@docente_nocattedra_2'
+    classe: '@classe_<current()>'
+    alunno:
+  t_cattedra_3_{1A, 3CAMB}:
+    attiva: true
+    supplenza: '<boolean(50)>'
+    tipo: 'I'
+    materia: '@materia_itp_1'
+    docente: '@docente_nocattedra_3'
+    classe: '@classe_<current()>'
+    alunno:
+  t_cattedra_4_{1A, 3CCHI}:
+    attiva: true
+    supplenza: '<boolean(50)>'
+    tipo: 'N'
+    materia: '@materia_curricolare_3'
+    docente: '@docente_curricolare_3'
+    classe: '@classe_<current()>'
+    alunno:
+
+App\Entity\Lezione:
+  # lezioni 2023-02-01: comuni, religione, sostegno, supplenza
+  t_lezione_1:
+    data: '<date_create("2023-02-01")>'
+    ora: '1'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_curricolare_1'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_2:
+    data: '<date_create("2023-02-01")>'
+    ora: '2'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_curricolare_3'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_3:
+    data: '<date_create("2023-02-01")>'
+    ora: '3'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_SOSTEGNO'
+    argomento: ''
+    attivita: ''
+  t_lezione_4:
+    data: '<date_create("2023-02-01")>'
+    ora: '4'
+    classe: '@classe_1A'
+    gruppo: 'S'
+    tipoGruppo: 'R'
+    materia: '@materia_RELIGIONE'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_5:
+    data: '<date_create("2023-02-01")>'
+    ora: '4'
+    classe: '@classe_1A'
+    gruppo: 'A'
+    tipoGruppo: 'R'
+    materia: '@materia_RELIGIONE'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_6:
+    data: '<date_create("2023-02-01")>'
+    ora: '4'
+    classe: '@classe_1A'
+    gruppo: 'N'
+    tipoGruppo: 'R'
+    materia: '@materia_RELIGIONE'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_7:
+    data: '<date_create("2023-02-01")>'
+    ora: '5'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_SUPPLENZA'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  # lezioni 2023-02-01: gruppo, comuni, compresenza, sostegno
+  t_lezione_8:
+    data: '<date_create("2023-02-01")>'
+    ora: '1'
+    classe: '@classe_3CCHI'
+    gruppo: 'CHI'
+    tipoGruppo: 'C'
+    materia: '@materia_curricolare_3'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_9:
+    data: '<date_create("2023-02-01")>'
+    ora: '1'
+    classe: '@classe_3CAMB'
+    gruppo: 'AMB'
+    tipoGruppo: 'C'
+    materia: '@materia_itp_1'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_10:
+    data: '<date_create("2023-02-01")>'
+    ora: '2'
+    classe: '@classe_3C'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_curricolare_1'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_11:
+    data: '<date_create("2023-02-01")>'
+    ora: '3'
+    classe: '@classe_3CAMB'
+    gruppo: 'AMB'
+    tipoGruppo: 'C'
+    materia: '@materia_itp_1'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+  t_lezione_12:
+    data: '<date_create("2023-02-01")>'
+    ora: '4'
+    classe: '@classe_3C'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_SOSTEGNO'
+    argomento: ''
+    attivita: ''
+  t_lezione_13:
+    data: '<date_create("2023-02-01")>'
+    ora: '5'
+    classe: '@classe_3CCHI'
+    gruppo: 'CHI'
+    tipoGruppo: 'C'
+    materia: '@materia_SUPPLENZA'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+
+App\Entity\Firma:
+  # firma lezioni 1A 2023-02-01
+  t_firma_1:
+    lezione: '@t_lezione_1'
+    docente: '@docente_nocattedra_2'
+  t_firma_2:
+    lezione: '@t_lezione_2'
+    docente: '@docente_curricolare_3'
+  t_firma_3:
+    lezione: '@t_lezione_4'
+    docente: '@docente_religione_1'
+  t_firma_4:
+    lezione: '@t_lezione_5'
+    docente: '@docente_curricolare_5'
+  t_firma_5:
+    lezione: '@t_lezione_6'
+    docente: '@docente_curricolare_4'
+  t_firma_6:
+    lezione: '@t_lezione_7'
+    docente: '@docente_nocattedra_1'
+  # firma lezioni 3C 2023-02-01
+  t_firma_7:
+    lezione: '@t_lezione_8'
+    docente: '@docente_curricolare_3'
+  t_firma_8:
+    lezione: '@t_lezione_9'
+    docente: '@docente_nocattedra_3'
+  t_firma_9:
+    lezione: '@t_lezione_10'
+    docente: '@docente_nocattedra_2'
+  t_firma_10:
+    lezione: '@t_lezione_11'
+    docente: '@docente_nocattedra_3'
+  t_firma_11:
+    lezione: '@t_lezione_11'
+    docente: '@docente_curricolare_4'
+  t_firma_12:
+    lezione: '@t_lezione_13'
+    docente: '@docente_nocattedra_1'
+
+App\Entity\FirmaSostegno:
+  # firma lezioni 1A 2023-02-01
+  t_firma_sostegno_1:
+    lezione: '@t_lezione_1'
+    docente: '@docente_sostegno_1'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+    alunno: '@alunno_sostegno_1'
+  t_firma_sostegno_2:
+    lezione: '@t_lezione_3'
+    docente: '@docente_sostegno_2'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+    alunno: '@alunno_sostegno_1'
+  # firma lezioni 3C 2023-02-01
+  t_firma_sostegno_3:
+    lezione: '@t_lezione_8'
+    docente: '@docente_sostegno_5'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+    alunno: '@alunno_sostegno_3'
+  t_firma_sostegno_4:
+    lezione: '@t_lezione_12'
+    docente: '@docente_sostegno_3'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(1, false)>'
+    alunno: '@alunno_sostegno_4'
+
+App\Entity\Nota:
+  # note 2023-02-02: comuni
+  t_nota_1:
+    tipo: 'C'
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    provvedimento: '<paragraph(1, false)>'
+    classe: '@classe_1A'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento: '@preside'
+  t_nota_2:
+    tipo: 'I'
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    provvedimento: '<paragraph(1, false)>'
+    classe: '@classe_1A'
+    docente: '@docente_curricolare_2'
+    docenteProvvedimento: '@preside'
+    alunni: '<collection(@alunno_1A_1, @alunno_1A_2)>'
+  # note 2023-02-02: gruppi
+  t_nota_3:
+    tipo: 'C'
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    provvedimento: '<paragraph(1, false)>'
+    classe: '@classe_3C'
+    docente: '@docente_curricolare_3'
+    docenteProvvedimento: '@preside'
+  t_nota_4:
+    tipo: 'C'
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    provvedimento: '<paragraph(1, false)>'
+    classe: '@classe_3CCHI'
+    docente: '@docente_curricolare_2'
+    docenteProvvedimento: '@preside'
+  t_nota_5:
+    tipo: 'C'
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    provvedimento: '<paragraph(1, false)>'
+    classe: '@classe_3CAMB'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento: '@preside'
+
+App\Entity\Annotazione:
+  # annotazioni 2023-02-02: comuni
+  t_annotazione_1:
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    visibile: true
+    avviso:
+    classe: '@classe_1A'
+    docente: '@docente_itp_5'
+  # annotazioni 2023-02-02: gruppi
+  t_annotazione_2:
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    visibile: true
+    avviso:
+    classe: '@classe_3CCHI'
+    docente: '@docente_itp_4'
+  t_annotazione_3:
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    visibile: true
+    avviso:
+    classe: '@classe_3CAMB'
+    docente: '@docente_curricolare_5'
+  t_annotazione_4:
+    data: '<date_create("2023-02-02")>'
+    testo: '<paragraph(2, false)>'
+    visibile: true
+    avviso:
+    classe: '@classe_3C'
+    docente: '@docente_curricolare_1'
+
+App\Entity\Assenza:
+  # assenze 2023-02-02: comuni
+  t_assenza_1:
+    data: '<date_create("2023-02-02")>'
+    giustificato:
+    motivazione: ''
+    alunno: '@alunno_sostegno_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+  # assenze 2023-02-02: gruppi
+  t_assenza_2:
+    data: '<date_create("2023-02-02")>'
+    giustificato:
+    motivazione: ''
+    alunno: '@alunno_3CCHI_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+  t_assenza_3:
+    data: '<date_create("2023-02-02")>'
+    giustificato:
+    motivazione: ''
+    alunno: '@alunno_3CAMB_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+
+App\Entity\Entrata:
+  # ritardo 2023-02-02: comuni
+  t_entrata_1:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("09:00")>'
+    ritardoBreve: false
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_1A_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+  # ritardo 2023-02-02: gruppi
+  t_entrata_2:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("09:00")>'
+    ritardoBreve: false
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_3CCHI_2'
+    docente: '@docente_curricolare_5'
+    docenteGiustifica:
+    utenteGiustifica:
+  t_entrata_3:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("09:20")>'
+    ritardoBreve: false
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_3CAMB_2'
+    docente: '@docente_curricolare_4'
+    docenteGiustifica:
+    utenteGiustifica:
+
+App\Entity\Uscita:
+  # uscita 2023-02-02: comuni
+  t_uscita_1:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("12:00")>'
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_1A_2'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+  # uscita 2023-02-02: gruppi
+  t_uscita_2:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("12:00")>'
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_3CCHI_2'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+  t_uscita_3:
+    data: '<date_create("2023-02-02")>'
+    ora: '<date_create("12:30")>'
+    note: '<paragraph(1, true)>'
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_3CAMB_2'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica:
+    utenteGiustifica:
+
+App\Entity\Presenza:
+  # FC 2023-02-02: comuni
+  t_presenza_1:
+    data: '<date_create("2023-02-02")>'
+    oraInizio:
+    oraFine:
+    tipo: 'P'
+    descrizione: '<paragraph(1, true)>'
+    alunno: '@alunno_sostegno_2'
+  # FC 2023-02-02: gruppi
+  t_presenza_2:
+    data: '<date_create("2023-02-02")>'
+    oraInizio:
+    oraFine:
+    tipo: 'P'
+    descrizione: '<paragraph(1, true)>'
+    alunno: '@alunno_sostegno_3'
+  t_presenza_3:
+    data: '<date_create("2023-02-02")>'
+    oraInizio:
+    oraFine:
+    tipo: 'P'
+    descrizione: '<paragraph(1, true)>'
+    alunno: '@alunno_sostegno_4'

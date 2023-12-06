@@ -7,10 +7,10 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe }}</h1>
   <div class="row gs-mb-1">
     <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze_stampa', {'classe': classe.id}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze', {'classe': classe.id, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
@@ -31,6 +31,9 @@
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
           <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
+      {% if a.cambio %}
+          <br><em class="text-danger">{{ a.cambio }}</em>
+      {% endif %}
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
         </td>
         <td>
@@ -85,6 +88,29 @@
     {% endfor %}
     </tbody>
   </table>
+    {% if dati.trasferiti|length > 0 %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-center text-primary gs-h2">Traferiti o ritirati</caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">Alunno</th>
+        <th class="col-sm-7">Situazione</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for alunno,a in dati.trasferiti %}
+      <tr>
+        <td>
+          <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
+        </td>
+        <td>
+          <strong class="text-danger">{{ a.cambio }}</strong>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    {% endif %}
     {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>

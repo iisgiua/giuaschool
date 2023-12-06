@@ -8,6 +8,7 @@ Funzionalità: Visualizzazione pagina per l'inserimento dei documenti BES
   Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente responsabile BES
@@ -97,7 +98,7 @@ Scenario: visualizza più documenti per alunno BES
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       | azione   |
     | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | Cancella |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento PDf   | Cancella |
+    |                                     |        | Documento PDf   | Cancella |
 
 
 ################################################################################
@@ -218,7 +219,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id  | docente | classe | attiva | tipo |
     | $c1 | #logged | $cl1   | si     | N    |
   E pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "3A" da lista "documento_classe"
   E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone

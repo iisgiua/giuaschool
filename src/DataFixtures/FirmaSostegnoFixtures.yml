@@ -15,9 +15,9 @@ include:
 
 
 App\Entity\FirmaSostegno:
-  firma_sostegno_{1..10}:
+  firma_sostegno_{1..5}:
     lezione: '@lezione_sostegno_<current()>'
-    docente: '@docente_*'
-    argomento: '80%? <paragraph(2, false)>: <strval("")>'
-    attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    docente: '@docente_sostegno_*'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
     alunno: '@alunno_sostegno_*'

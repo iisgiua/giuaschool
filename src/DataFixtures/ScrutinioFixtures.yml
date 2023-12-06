@@ -19,13 +19,13 @@ include:
 
 
 App\Entity\Scrutinio:
-  scrutinio_{1..10}:
-    periodo: '<randomElement(["P", "S", "F", "G", "R", "X"])>'
+  scrutinio_{P, S, F, G, R, X}:
+    periodo: '<current()>'
     data: '<dateTimeBetween("-1 month", "now")>'
     inizio: '50%? <dateTimeBetween("-1 month", "now")>'
     fine: '50%? <dateTimeBetween("-1 month", "now")>'
     stato: '<randomElement(["N", "C", "1", "2", "3", "4", "5", "6", "7", "8", "9"])>'
-    classe: '@classe_<( (1 + (int) ($current % 5)).($current % 2 == 0 ? "A" : "B") )>'
-    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    classe: '@classe_*'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
     visibile: '50%? <dateTimeBetween("-1 month", "now")>'
     sincronizzazione: '50%? <randomElement(["E", "C", "V", "B"])>'

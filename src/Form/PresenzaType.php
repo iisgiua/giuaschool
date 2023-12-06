@@ -8,11 +8,8 @@
 
 namespace App\Form;
 
-use App\Entity\Alunno;
 use App\Entity\Presenza;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -57,25 +54,19 @@ class PresenzaType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'add') {
+    if ($options['form_mode'] == 'add') {
       // form aggiungi
       $builder
         ->add('alunno', HiddenType::class)
-        ->add('alunni', EntityType::class, array('label' => 'label.alunni',
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][0])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
+        ->add('alunni', ChoiceType::class, ['label' => 'label.alunni',
+          'choices' => $options['values'][0],
+          'choice_translation_domain' => false,
           'expanded' => true,
           'multiple' => true,
+          'choice_value' => 'id',
           'label_attr' => ['class' => 'checkbox-split-vertical'],
           'required' => true,
-          'mapped' => false))
+          'mapped' => false])
         ->add('data', DateType::class, array('label' => 'label.data_inizio',
           'widget' => 'single_text',
           'html5' => false,
@@ -132,20 +123,14 @@ class PresenzaType extends AbstractType {
         function ($id) {
           return $this->em->getRepository('App\Entity\Alunno')->find($id);
         }));
-    } elseif ($options['formMode'] == 'edit') {
+    } elseif ($options['form_mode'] == 'edit') {
       // form modifica
       $builder
-        ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App\Entity\Alunno',
-          'choice_label' => function ($obj) {
-              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-            },
-          'query_builder' => function(EntityRepository $er) use($options) {
-              return $er->createQueryBuilder('a')
-                ->where('a.abilitato=1 AND a.classe='.$options['values'][0])
-                ->orderBy('a.cognome,a.nome', 'ASC');
-            },
-          'required' => true))
+        ->add('alunno', ChoiceType::class, ['label' => 'label.alunno',
+          'choices' => $options['values'][0],
+          'choice_value' => 'id',
+          'choice_translation_domain' => false,
+          'required' => true])
         ->add('data', DateType::class, array('label' => 'label.data',
           'widget' => 'single_text',
           'html5' => false,
@@ -179,7 +164,7 @@ class PresenzaType extends AbstractType {
           'required' => true))
         ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
           'required' => true));
-    } elseif ($options['formMode'] == 'registro') {
+    } elseif ($options['form_mode'] == 'registro') {
       // form modifica da registro assenze
       $builder
         ->add('oraTipo', ChoiceType::class, array('label' => false,
@@ -218,11 +203,13 @@ class PresenzaType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
-    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('form_mode');
+    $resolver->setDefined('return_url');
     $resolver->setDefined('values');
     $resolver->setDefaults(array(
-      'formMode' => 'edit',
+      'form_mode' => 'edit',
+      'return_url' => null,
+      'values' => [],
       'allow_extra_fields' => true,
       'data_class' => Presenza::class));
   }

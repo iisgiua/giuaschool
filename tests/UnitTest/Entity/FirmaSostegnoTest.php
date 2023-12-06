@@ -32,7 +32,7 @@ class FirmaSostegnoTest extends EntityTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = 'EntityTestFixtures';
+    $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo'],
       'gs_lezione' => '*'];
@@ -70,9 +70,9 @@ class FirmaSostegnoTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_3") :
+          ($field == 'docente' ? $this->getReference("docente_sostegno_3") :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -114,6 +114,14 @@ class FirmaSostegnoTest extends EntityTestCase {
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    // datiVersione
+    $dt = [
+      'lezione' => $existent->getLezione() ? $existent->getLezione()->getId() : null,
+      'docente' => $existent->getDocente() ? $existent->getDocente()->getId() : null,
+      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
+      'argomento' => $existent->getArgomento(),
+      'attivita' => $existent->getAttivita()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

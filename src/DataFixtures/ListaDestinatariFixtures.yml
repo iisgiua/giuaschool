@@ -26,12 +26,27 @@ include:
 
 App\Entity\ListaDestinatari:
 
-  # ----- destinatari DSGA -----
-  lista_destinatari_DSGA:
-    dsga: true
+  # ----- destinatari classi -----
+  lista_destinatari_CLASSI_{1A, 2A, 3A, 4A, 5A}:
+    dsga: false
     ata: false
     docenti: 'N'
     filtroDocenti: []
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    staff: false
+    genitori: 'C'
+    filtroGenitori: '<arrayId(lista_destinatari_CLASSI_<current()>, filtroGenitori, @lista_destinatari_CLASSI_<current()>, @classe_<current()>)>'
+    alunni: 'N'
+    filtroAlunni: []
+    sedi: '<collection(@sede_1)>'
+
+  # ----- destinatari materie -----
+  lista_destinatari_MATERIA_{RELIGIONE, SOSTEGNO, curricolare_1}:
+    dsga: false
+    ata: false
+    docenti: 'M'
+    filtroDocenti: '<arrayId(lista_destinatari_MATERIA_<current()>, filtroDocenti, @lista_destinatari_MATERIA_<current()>, @materia_<current()>)>'
     coordinatori: 'N'
     filtroCoordinatori: []
     staff: false
@@ -39,7 +54,22 @@ App\Entity\ListaDestinatari:
     filtroGenitori: []
     alunni: 'N'
     filtroAlunni: []
-    sedi: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+
+  # ----- destinatari staff -----
+  lista_destinatari_STAFF_{1..2}:
+    dsga: false
+    ata: false
+    docenti: 'N'
+    filtroDocenti: []
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    staff: true
+    genitori: 'N'
+    filtroGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    sedi: '<collection(@sede_<current()>)>'
 
   # ----- destinatari ATA -----
   lista_destinatari_ATA_{1..2}:
@@ -56,38 +86,12 @@ App\Entity\ListaDestinatari:
     filtroAlunni: []
     sedi: '<collection(@sede_<current()>)>'
 
-  # ----- destinatari docenti -----
-  lista_destinatari_DOCENTI_CLASSE_{1A, 2A, 3A, 4A, 5A}:
-    dsga: false
-    ata: false
-    docenti: 'C'
-    filtroDocenti: '<arrayId(lista_destinatari_DOCENTI_CLASSE_<current()>, filtroDocenti, @lista_destinatari_DOCENTI_CLASSE_<current()>, @classe_<current()>)>'
-    coordinatori: 'N'
-    filtroCoordinatori: []
-    staff: false
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
-    sedi: '<collection(@sede_1)>'
-  lista_destinatari_DOCENTI_MATERIA_{RELIGIONE, SOSTEGNO, curricolare_1, curricolare_2, curricolare_3}:
-    dsga: false
-    ata: false
-    docenti: 'M'
-    filtroDocenti: '<arrayId(lista_destinatari_DOCENTI_MATERIA_<current()>, filtroDocenti, @lista_destinatari_DOCENTI_MATERIA_<current()>, @materia_<current()>)>'
-    coordinatori: 'N'
-    filtroCoordinatori: []
-    staff: false
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
-    sedi: '<collection(@sede_1)>'
-  lista_destinatari_DOCENTI_curricolare_{1..5}:
+  # ----- destinatari utenti -----
+  lista_destinatari_DOCENTI_{1..5}:
     dsga: false
     ata: false
     docenti: 'U'
-    filtroDocenti: '<arrayId(lista_destinatari_DOCENTI_curricolare_<current()>, filtroDocenti, @lista_destinatari_DOCENTI_curricolare_<current()>, @docente_curricolare_<current()>)>'
+    filtroDocenti: '<arrayId(lista_destinatari_DOCENTI_<current()>, filtroDocenti, @lista_destinatari_DOCENTI_<current()>, @docente_curricolare_<current()>)>'
     coordinatori: 'N'
     filtroCoordinatori: []
     staff: false
@@ -95,55 +99,34 @@ App\Entity\ListaDestinatari:
     filtroGenitori: []
     alunni: 'N'
     filtroAlunni: []
-    sedi: '<collection(@sede_1)>'
-
-  # ----- destinatari coordinatori -----
-  lista_destinatari_COORDINATORI_{1..5}:
+    sedi: '<collection(@sede_1,@sede_2)>'
+  lista_destinatari_SOSTEGNO_{1..5}:
     dsga: false
     ata: false
-    docenti: 'N'
-    filtroDocenti: []
-    coordinatori: '<randomElement(["C", "U"])>'
-    filtroCoordinatori: '<randomElements([1, 2, 3, 4, 5, 6, 7, 8, 9], 3)>'
+    docenti: 'U'
+    filtroDocenti: '<arrayId(lista_destinatari_SOSTEGNO_<current()>, filtroDocenti, @lista_destinatari_SOSTEGNO_<current()>, @docente_sostegno_<current()>)>'
+    coordinatori: 'N'
+    filtroCoordinatori: []
     staff: false
     genitori: 'N'
     filtroGenitori: []
     alunni: 'N'
     filtroAlunni: []
-    sedi: '<collection(@sede_1)>'
-
-  # ----- destinatari staff -----
-  lista_destinatari_STAFF_{1..5}:
+    sedi: '<collection(@sede_1,@sede_2)>'
+  lista_destinatari_GENITORI_{1..2}:
     dsga: false
     ata: false
-    docenti: 'N'
-    filtroDocenti: []
-    coordinatori: 'N'
-    filtroCoordinatori: []
-    staff: true
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
-    sedi: '<collection(@sede_1)>'
-
-  # ----- destinatari genitori -----
-  lista_destinatari_GENITORI_{1..5}:
-    dsga: false
-    ata: false
-    docenti: 'N'
+    docenti: 'U'
     filtroDocenti: []
     coordinatori: 'N'
     filtroCoordinatori: []
     staff: false
-    genitori: '<randomElement(["C", "U"])>'
-    filtroGenitori: '<randomElements([1, 2, 3, 4, 5, 6, 7, 8, 9], 3)>'
+    genitori: 'N'
+    filtroGenitori: '<arrayId(lista_destinatari_GENITORI_<current()>, filtroGenitori, @lista_destinatari_GENITORI_<current()>, @genitore1_1A_<current()>)>'
     alunni: 'N'
     filtroAlunni: []
     sedi: '<collection(@sede_1)>'
-
-  # ----- destinatari alunni -----
-  lista_destinatari_ALUNNI_{1..5}:
+  lista_destinatari_ALUNNI_{1..2}:
     dsga: false
     ata: false
     docenti: 'N'
@@ -153,6 +136,6 @@ App\Entity\ListaDestinatari:
     staff: false
     genitori: 'N'
     filtroGenitori: []
-    alunni: '<randomElement(["C", "U"])>'
-    filtroAlunni: '<randomElements([1, 2, 3, 4, 5, 6, 7, 8, 9], 3)>'
-    sedi: '<collection(@sede_2)>'
+    alunni: 'U'
+    filtroAlunni: '<arrayId(lista_destinatari_ALUNNI_<current()>, filtroAlunni, @lista_destinatari_ALUNNI_<current()>, @alunno_1A_<current()>)>'
+    sedi: '<collection(@sede_1)>'

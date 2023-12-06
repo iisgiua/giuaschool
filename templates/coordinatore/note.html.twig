@@ -7,11 +7,11 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe }}</h1>
     {% for periodo,v in dati %}
   <div class="row gs-mb-1">
     <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note_stampa', {'classe': classe.id}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {'classe': classe.id, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">

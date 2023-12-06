@@ -1,13 +1,13 @@
 <table border="0" cellpadding="0" style="font-family:helvetica;font-size:8pt">
   <tr>
     <td width="50%" align="left"><strong>FOGLIO FIRME REGISTRO</strong></td>
-    <td width="50%" align="right"><strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - A.S. {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong></td>
+    <td width="50%" align="right"><strong>CLASSE {{ dati.classe }} - A.S. {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong></td>
   </tr>
 </table>
 <br><br>
 <table border="0" cellpadding="0" style="font-family:helvetica;font-size:14pt">
   <tr>
-    <td width="75%" align="left"><strong>CONSIGLIO DI CLASSE: {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong></td>
+    <td width="75%" align="left"><strong>CONSIGLIO DI CLASSE: {{ dati.classe }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong></td>
     <td width="25%" align="right"><strong>{{ dati.periodo }}</strong></td>
   </tr>
 </table>

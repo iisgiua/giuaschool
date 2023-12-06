@@ -8,7 +8,7 @@
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
     {% if errore %}
   <div class="row gs-mb-5">
@@ -31,7 +31,6 @@
     <div class="col-sm-6 text-right">
       <strong class="gs-big">Vista:</strong>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-stop"></span></a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza i dati della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza i dati del mese"><span class="glyphicon glyphicon-th"></span></a>
     </div>
   </div>
@@ -68,6 +67,9 @@
           <div id="note-{{ k }}" style="display:none">
             {% for k1,v1 in v.note.lista %}
             <div class="list-group-item">
+              {% if v1.gruppo  %}
+              <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v1.gruppo }}</strong><br>
+              {% endif %}
               <div class="list-group-item-text">
               {% if v1.alunni is defined %}
                 <small><em>Alunni: {{ v1.alunni }}</em></small><br>
@@ -88,6 +90,9 @@
           <div id="annotazioni-{{ k }}" style="display:none">
             {% for k1,v1 in v.annotazioni.lista %}
             <div class="list-group-item">
+              {% if v1.gruppo  %}
+              <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v1.gruppo }}</strong><br>
+              {% endif %}
               <div class="list-group-item-text">
               {% if v1.alunni is not empty %}
                 <strong>Destinatari ({% for d in v1.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}):
@@ -105,33 +110,37 @@
         </td>
           {% for k1,v1 in v.lezioni %}
         <td>
-            {% if v1.materia %}
-          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività" data-body="lezioni-{{ k }}-{{ k1 }}">{{ v1.materia }}</button>
-          <div id="lezioni-{{ k }}-{{ k1 }}" style="display:none">
+            {% for g,m in v1.materia %}
+          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività" data-body="lezioni-{{ k }}-{{ k1 }}-{{ g[0:1]~g[2:] }}">{{ m }}</button>
+          <div id="lezioni-{{ k }}-{{ k1 }}-{{ g[0:1]~g[2:] }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
-                <strong>{{ v1.inizio }} - {{ v1.fine }} {{ v1.materia }}</strong>
-                <small><em>({% for v2 in v1.docenti %}{{ v2 }}{{ not loop.last ? ', ' }}{% endfor %})</em></small><br>
-                {{ v1.argomenti|raw }}
+
+
+                <strong>{{ v1.inizio }} - {{ v1.fine }}</strong>
+                <strong>{% if g == 'R:S' %}Gruppo: Religione{% elseif g == 'R:N' %}Gruppo: N.A.{% elseif g == 'R:A' %}Gruppo: Mat. Alt.{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}{% endif %}</strong>
+                - {{ m }}
+                <small><em>({% for v2 in v1.docenti[g] %}{{ v2 }}{{ not loop.last ? ', ' }}{% endfor %})</em></small><br>
+                {{ v1.argomenti[g]|raw }}
               </div>
             </div>
-              {% if v1.sostegno is defined %}
-                {% for sk,sv in v1.sostegno.argomento %}
+              {% if v1.sostegno[g]|length > 0 %}
+                {% for sk,sv in v1.sostegno[g].argomento %}
                   {% if sv is not empty %}
             <div class="list-group-item">
               <div class="list-group-item-text">
-                <strong>Argomenti e attività del sostegno - {{ v1.sostegno.alunno[sk] }}</strong>
-                <small><em>({{ v1.sostegno.docente[sk] }})</em></small><br>
+                <strong>Argomenti e attività del sostegno - {{ v1.sostegno[g].alunno[sk] }}</strong>
+                <small><em>({{ v1.sostegno[g].docente[sk] }})</em></small><br>
                 {{ sv|raw }}
               </div>
             </div>
                   {% endif %}
                 {% endfor %}
               {% endif %}
-          </div>
-            {% endif %}
+          </div> 
+            {% endfor %}
         </td>
-          {% endfor %}
+          {% endfor %} 
           {% for k1 in ((v.lezioni|length)+1) .. 8 %}
         <td></td>
           {% endfor %}
@@ -184,13 +193,6 @@ $(document).ready(function() {
       window.location.href = url;
   });
   $('[data-toggle="popover"]').popover();
-  $('#gs-modal-info').on('show.bs.modal', function (event) {
-    var title = $(event.relatedTarget).data('title');
-    var id = $(event.relatedTarget).data('body');
-    var html = $('#'+id).html();
-    $(this).find('#gs-modal-info-label').text(title);
-    $(this).find('#gs-modal-info-body').html(html);
-  });
   $('#gs-modal-info').on('show.bs.modal', function (e) {
     var title = $(e.relatedTarget).data('title');
     var body = $('#'+$(e.relatedTarget).data('body')).html();

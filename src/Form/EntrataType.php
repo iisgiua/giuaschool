@@ -8,14 +8,13 @@
 
 namespace App\Form;
 
+use App\Entity\Entrata;
+use App\Form\MessageType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Doctrine\ORM\EntityRepository;
-use App\Form\MessageType;
-use App\Entity\Entrata;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
 /**
@@ -39,7 +38,7 @@ class EntrataType extends AbstractType {
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true));
-    if ($options['formMode'] == 'staff') {
+    if ($options['form_mode'] == 'staff') {
       $builder
         ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_entrate',
           'choices' => ['label.si' => true, 'label.no' => false],
@@ -60,9 +59,9 @@ class EntrataType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefined('formMode');
+    $resolver->setDefined('form_mode');
     $resolver->setDefaults(array(
-      'formMode' => 'docenti',
+      'form_mode' => 'docenti',
       'allow_extra_fields' => true,
       'data_class' => Entrata::class));
   }

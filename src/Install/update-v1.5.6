@@ -1,0 +1,26 @@
+<?php
+
+return [
+  'fileCopy' => [
+  ],
+  'fileDelete' => [
+    'public/install/app.php',
+    'templates/lezioni/registro_firme_S.html.twig',
+    'src/Entity/FirmaCircolare.php',
+  ],
+  'sqlCommand' => [
+    ["ALTER TABLE gs_firma_circolare DROP FOREIGN KEY FK_BBB7DB2884DD82B; ALTER TABLE gs_firma_circolare DROP FOREIGN KEY FK_BBB7DB286FD5D2A; DROP TABLE gs_firma_circolare;", "SELECT 1 FROM DUAL WHERE NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE TABLE_NAME = 'gs_firma_circolare');"],
+    ["DELETE FROM gs_configurazione WHERE parametro='assenze_dichiarazione';", ""],
+    ["DELETE FROM gs_configurazione WHERE parametro='assenze_ore';", ""],
+    ["ALTER TABLE gs_storico_esito CHANGE classe classe VARCHAR(255) NOT NULL;", ""],
+    ["DROP INDEX UNIQ_170CE9DBC6E493B068B49425 ON gs_classe; ALTER TABLE gs_classe ADD gruppo VARCHAR(64) DEFAULT NULL; CREATE UNIQUE INDEX UNIQ_170CE9DBC6E493B068B49425DD03102F ON gs_classe (anno, sezione, gruppo);", "SELECT 1 FROM DUAL UNION SELECT gruppo FROM gs_classe;"],
+    ["CREATE TABLE gs_raggruppamento (id INT AUTO_INCREMENT NOT NULL, creato DATETIME NOT NULL, modificato DATETIME NOT NULL, nome VARCHAR(64) NOT NULL, UNIQUE INDEX UNIQ_3933541454BD530C (nome), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB; CREATE TABLE gs_raggruppamento_alunno (raggruppamento_id INT NOT NULL, alunno_id INT NOT NULL, INDEX IDX_806C0BB6ADDAA4D2 (raggruppamento_id), INDEX IDX_806C0BB67ABC9740 (alunno_id), PRIMARY KEY(raggruppamento_id, alunno_id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB; ALTER TABLE gs_raggruppamento_alunno ADD CONSTRAINT FK_806C0BB6ADDAA4D2 FOREIGN KEY (raggruppamento_id) REFERENCES gs_raggruppamento (id); ALTER TABLE gs_raggruppamento_alunno ADD CONSTRAINT FK_806C0BB67ABC9740 FOREIGN KEY (alunno_id) REFERENCES gs_utente (id);", "SELECT 1 FROM DUAL UNION SELECT creato FROM gs_raggruppamento;"],
+    ["ALTER TABLE gs_lezione ADD gruppo VARCHAR(64) DEFAULT NULL, ADD tipo_gruppo VARCHAR(1) NOT NULL; CREATE UNIQUE INDEX UNIQ_F1D7CE79ADF3F3639B761FB58F5EA509DD03102F ON gs_lezione (data, ora, classe_id, gruppo); UPDATE gs_lezione SET tipo_gruppo='N';", "SELECT 1 FROM DUAL UNION SELECT gruppo FROM gs_lezione;"],
+    ["ALTER TABLE gs_avviso ADD anno INT NOT NULL; UPDATE gs_avviso SET anno=(SELECT SUBSTR(valore, 1, 4) FROM gs_configurazione WHERE parametro='anno_scolastico');", "SELECT 1 FROM DUAL UNION SELECT anno FROM gs_avviso;"],
+    ["ALTER TABLE gs_definizione_richiesta ADD sede_id INT DEFAULT NULL, ADD gestione TINYINT(1) NOT NULL; ALTER TABLE gs_definizione_richiesta ADD CONSTRAINT FK_FD5221E1E19F41BF FOREIGN KEY (sede_id) REFERENCES gs_sede (id); CREATE INDEX IDX_FD5221E1E19F41BF ON gs_definizione_richiesta (sede_id); UPDATE gs_definizione_richiesta SET gestione=1;", "SELECT 1 FROM DUAL UNION SELECT gestione FROM gs_definizione_richiesta;"],
+    ["ALTER TABLE gs_richiesta ADD classe_id INT DEFAULT NULL;ALTER TABLE gs_richiesta ADD CONSTRAINT FK_F843086B8F5EA509 FOREIGN KEY (classe_id) REFERENCES gs_classe (id);CREATE INDEX IDX_F843086B8F5EA509 ON gs_richiesta (classe_id);", "SELECT 1 FROM DUAL UNION SELECT classe_id FROM gs_richiesta;"],
+    ["UPDATE gs_richiesta AS r, gs_utente AS a SET r.classe_id=a.classe_id WHERE r.utente_id=a.id AND a.ruolo='ALU' AND r.classe_id IS NULL;", "SELECT 1 FROM gs_richiesta WHERE classe_id IS NULL;"],
+  ],
+  'envDelete' => [
+  ]
+];

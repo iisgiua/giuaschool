@@ -39,7 +39,7 @@
           <td><small>{{ a.nome }}</small></td>
           <td><small>{{ a.dataNascita|date('d/m/Y') }}</small></td>
           <td><small>{{ ('label.bes_'~a.bes)|trans }}</small></td>
-          <td><small>{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione }}</small></td>
+          <td><small>{{ a.classe }}</small></td>
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-info-{{ a.id }}">{{ 'label.show'|trans }}</button>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': a.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
@@ -142,7 +142,7 @@
                           <dt class="col-sm-2 text-right">{{ 'label.credito4'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.credito4 }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.classe'|trans }}</dt>
-                          <dd class="col-sm-4">{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione }}</dd>
+                          <dd class="col-sm-4">{{ a.classe }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.frequenza_estero'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.frequenzaEstero ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>

@@ -14,12 +14,12 @@ include:
 
 App\Entity\Genitore:
 
-  # ----- primo genitore degli alunni delle classi -----
-  genitore1_prima_{1..50}:
+  # ----- genitori del biennio BIN -----
+  genitore1_1A_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_prima_<current()>->username, 0, -1)>f'
+    username: '<substr(@alunno_1A_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -27,7 +27,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -39,13 +39,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_prima_<current()>'
+    alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
-  genitore1_seconda_{1..50}:
-    sesso: 'M'
+  genitore2_1A_{1..2}:
+    sesso: 'F'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_seconda_<current()>->username, 0, -1)>f'
+    username: '<substr(@alunno_1A_<current()>->username, 0, -1)>g'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -53,7 +53,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -65,13 +65,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_seconda_<current()>'
+    alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
-  genitore1_terza_{1..50}:
+  genitore1_2A_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_terza_<current()>->username, 0, -1)>f'
+    username: '<substr(@alunno_2A_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -79,7 +79,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -91,13 +91,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_terza_<current()>'
+    alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
-  genitore1_quarta_{1..50}:
-    sesso: 'M'
+  genitore2_2A_{1..2}:
+    sesso: 'F'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_quarta_<current()>->username, 0, -1)>f'
+    username: '<substr(@alunno_2A_<current()>->username, 0, -1)>g'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -105,7 +105,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -117,41 +117,15 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_quarta_<current()>'
-    rappresentante: '<(array())>'
-  genitore1_quinta_{1..50}:
-    sesso: 'M'
-    nome: '<nome($sesso)>'
-    cognome: '<cognome()>'
-    username: '<substr(@alunno_quinta_<current()>->username, 0, -1)>f'
-    email (unique): '<email()>'
-    password: '<passwordCodificata($username)>'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '<(null)>'
-    comuneNascita: ''
-    codiceFiscale (unique): '<taxId()>'
-    citta: ''
-    indirizzo: ''
-    numeriTelefono: '<telefono(2)>'
-    notifica: '<(array())>'
-    giustificaOnline: true
-    alunno: '@alunno_quinta_<current()>'
+    alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
 
-  # ----- secondo genitore degli alunni delle classi -----
-  genitore2_prima_{1..50}:
-    sesso: 'F'
+  # ----- genitori del triennio INF -----
+  genitore1_3A_{1..2}:
+    sesso: 'M'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_prima_<current()>->username, 0, -1)>g'
+    username: '<substr(@alunno_3A_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -159,7 +133,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -171,13 +145,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_prima_<current()>'
+    alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
-  genitore2_seconda_{1..50}:
+  genitore2_3A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_seconda_<current()>->username, 0, -1)>g'
+    username: '<substr(@alunno_3A_<current()>->username, 0, -1)>g'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -185,7 +159,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -197,13 +171,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_seconda_<current()>'
+    alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
-  genitore2_terza_{1..50}:
-    sesso: 'F'
+  genitore1_4A_{1..2}:
+    sesso: 'M'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_terza_<current()>->username, 0, -1)>g'
+    username: '<substr(@alunno_4A_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -211,7 +185,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -223,13 +197,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_terza_<current()>'
+    alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
-  genitore2_quarta_{1..50}:
+  genitore2_4A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_quarta_<current()>->username, 0, -1)>g'
+    username: '<substr(@alunno_4A_<current()>->username, 0, -1)>g'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -237,7 +211,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -249,13 +223,13 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_quarta_<current()>'
+    alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
-  genitore2_quinta_{1..50}:
-    sesso: 'F'
+  genitore1_5A_{1..2}:
+    sesso: 'M'
     nome: '<nome($sesso)>'
     cognome: '<cognome()>'
-    username: '<substr(@alunno_quinta_<current()>->username, 0, -1)>g'
+    username: '<substr(@alunno_5A_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
@@ -263,7 +237,7 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
@@ -275,14 +249,515 @@ App\Entity\Genitore:
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
-    alunno: '@alunno_quinta_<current()>'
+    alunno: '@alunno_5A_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_5A_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_5A_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
 
-  # ----- primo genitore degli alunni con sostegno: si usa genitore già presente -----
-  genitore1_sostegno_{1..5}:
-    sesso: '@genitore1_prima_<current()>->sesso'
-    nome: '@genitore1_prima_<current()>->nome'
-    cognome: '@genitore1_prima_<current()>->cognome'
+  # ----- genitori del quinquennio LSA -----
+  genitore1_1B_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1B_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1B_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_1B_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1B_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1B_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_2B_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2B_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2B_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_2B_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2B_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2B_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_3B_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3B_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3B_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_3B_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3B_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3B_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_4B_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_4B_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_4B_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_4B_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_4B_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_4B_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_5B_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_5B_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_5B_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_5B_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_5B_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_5B_<current()>'
+    rappresentante: '<(array())>'
+
+  # ----- genitori del biennio BCH -----
+  genitore1_1C_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1C_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1C_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_1C_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1C_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1C_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_2C_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2C_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2C_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_2C_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2C_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2C_<current()>'
+    rappresentante: '<(array())>'
+
+
+  # ----- genitori della classe articolata CHI/AMB -----
+  genitore1_3CAMB_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3CAMB_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3CAMB_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_3CAMB_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3CAMB_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3CAMB_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_3CCHI_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3CCHI_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3CCHI_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_3CCHI_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3CCHI_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3CCHI_<current()>'
+    rappresentante: '<(array())>'
+
+  # ----- genitori dell'alunno con sostegno -----
+  genitore1_sostegno_{1..2}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
     username: '<substr(@alunno_sostegno_<current()>->username, 0, -1)>f'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
@@ -291,26 +766,24 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dataNascita: '@genitore1_prima_<current()>->dataNascita'
+    dataNascita: '<(null)>'
     comuneNascita: ''
-    codiceFiscale: '@genitore1_prima_<current()>->codiceFiscale'
+    codiceFiscale (unique): '<taxId()>'
     citta: ''
     indirizzo: ''
-    numeriTelefono: '@genitore1_prima_<current()>->numeriTelefono'
+    numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
-
-  # ----- secondo genitore degli alunni con sostegno: si usa genitore già presente -----
-  genitore2_sostegno_{1..5}:
-    sesso: '@genitore2_prima_<current()>->sesso'
-    nome: '@genitore2_prima_<current()>->nome'
-    cognome: '@genitore2_prima_<current()>->cognome'
+  genitore2_sostegno_{1..2}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
     username: '<substr(@alunno_sostegno_<current()>->username, 0, -1)>g'
     email (unique): '<email()>'
     password: '<passwordCodificata($username)>'
@@ -319,73 +792,17 @@ App\Entity\Genitore:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
-    spid: '70%? 1: 0'
+    spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dataNascita: '@genitore2_prima_<current()>->dataNascita'
+    dataNascita: '<(null)>'
     comuneNascita: ''
-    codiceFiscale: '@genitore2_prima_<current()>->codiceFiscale'
+    codiceFiscale (unique): '<taxId()>'
     citta: ''
     indirizzo: ''
-    numeriTelefono: '@genitore2_prima_<current()>->numeriTelefono'
+    numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
-    rappresentante: '<(array())>'
-
-  # ----- primo genitore degli alunni con materia alternativa: si usa genitore già presente -----
-  genitore1_alternativa_{1..5}:
-    sesso: '@genitore1_terza_<current()>->sesso'
-    nome: '@genitore1_terza_<current()>->nome'
-    cognome: '@genitore1_terza_<current()>->cognome'
-    username: '<substr(@alunno_alternativa_<current()>->username, 0, -1)>f'
-    email (unique): '<email()>'
-    password: '<passwordCodificata($username)>'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '@genitore1_terza_<current()>->dataNascita'
-    comuneNascita: ''
-    codiceFiscale: '@genitore1_terza_<current()>->codiceFiscale'
-    citta: ''
-    indirizzo: ''
-    numeriTelefono: '@genitore1_terza_<current()>->numeriTelefono'
-    notifica: '<(array())>'
-    giustificaOnline: true
-    alunno: '@alunno_alternativa_<current()>'
-    rappresentante: '<(array())>'
-
-  # ----- secondo genitore degli alunni con materia alternativa: si usa genitore già presente -----
-  genitore2_alternativa_{1..5}:
-    sesso: '@genitore2_terza_<current()>->sesso'
-    nome: '@genitore2_terza_<current()>->nome'
-    cognome: '@genitore2_terza_<current()>->cognome'
-    username: '<substr(@alunno_alternativa_<current()>->username, 0, -1)>g'
-    email (unique): '<email()>'
-    password: '<passwordCodificata($username)>'
-    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: true
-    spid: '70%? 1: 0'
-    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: ''
-    ultimoOtp: ''
-    dataNascita: '@genitore2_terza_<current()>->dataNascita'
-    comuneNascita: ''
-    codiceFiscale: '@genitore2_terza_<current()>->codiceFiscale'
-    citta: ''
-    indirizzo: ''
-    numeriTelefono: '@genitore2_terza_<current()>->numeriTelefono'
-    notifica: '<(array())>'
-    giustificaOnline: true
-    alunno: '@alunno_alternativa_<current()>'
     rappresentante: '<(array())>'

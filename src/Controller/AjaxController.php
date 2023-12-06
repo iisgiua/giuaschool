@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Classe;
 use App\Entity\Staff;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -41,7 +40,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction($cognome, $nome, $sede, $pagina) {
+  public function docentiAjaxAction(string $cognome, string $nome, string $sede,
+                                    string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
     $dati = array();
@@ -81,7 +81,7 @@ class AjaxController extends BaseController {
    *
    * @param string $cognome Cognome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
    * @param string $nome Nome (anche parziale) del docente ("-" iniziale per evitare parametro vuoto)
-   * @param int $classe Identificatore della classe degli alunni ("-" iniziale per evitare parametro vuoto)
+   * @param string $classe Identificatore della classe degli alunni ("-" iniziale per evitare parametro vuoto)
    * @param string $sede Lista delle sedi
    * @param string $pagina Numero della pagina della lista
    *
@@ -94,7 +94,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction($cognome, $nome, $classe, $sede, $pagina) {
+  public function alunniAjaxAction(string $cognome, string $nome, string $classe, string $sede,
+                                   string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
       'sede' => array());
@@ -111,8 +112,7 @@ class AjaxController extends BaseController {
     foreach ($alunni as $alu) {
       $dati['lista'][] = array(
         'id' => $alu->getId(),
-        'nome' => $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') '.
-          $alu->getClasse()->getAnno().'ª '.$alu->getClasse()->getSezione());
+        'nome' => ''.$alu.' '.$alu->getClasse());
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;
@@ -143,7 +143,7 @@ class AjaxController extends BaseController {
    *    requirements={"id": "authenticate"},
    *    methods={"GET"})
    */
-  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, $id) {
+  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
     $dati = array();
     $dati[$id] = $tokenManager->getToken($id)->getValue();
@@ -152,7 +152,7 @@ class AjaxController extends BaseController {
   }
 
   /**
-   * Estende la il tempo di scadenza della sessione
+   * Estende il tempo di scadenza della sessione
    *
    * @return JsonResponse Informazioni di risposta
    *
@@ -161,7 +161,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function sessioneAjaxAction() {
+  public function sessioneAjaxAction(): JsonResponse {
     // restituisce dati
     return new JsonResponse(['ok']);
   }
@@ -180,7 +180,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(Classe $classe) {
+  public function classeAjaxAction(Classe $classe): JsonResponse {
     // legge alunni
     $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
     // restituisce dati

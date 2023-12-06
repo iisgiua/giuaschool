@@ -13,6 +13,7 @@ use App\Tests\PersonaProvider;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
+use Behat\Behat\Hook\Scope\BeforeFeatureScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Gherkin\Node\TableNode;
@@ -168,6 +169,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   private $numScreenshots;
 
+  /**
+   * Indica il nome del file con i dati di test
+   *
+   * @var string $fixtures File con i dati di test
+   */
+  private static string $fixtures = '';
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -208,6 +216,23 @@ abstract class BaseContext extends RawMinkContext implements Context {
   }
 
   /**
+   * Inizializzazione delle fixtures utilizzate per caricare i dati
+   * Usa la sintassi seguente per specificare la fixture da caricare: Utilizzando "file.yml"
+   *
+   * @param BeforeFeatureScope $scope Contesto di esecuzione
+   *
+   * @BeforeFeature
+   */
+  public static function beforeFeature(BeforeFeatureScope $scope) {
+    self::$fixtures = '';
+    $descrizione = $scope->getFeature()->getDescription();
+    if (preg_match('/^\s*Utilizzando\s+"([^"]+)"\s*$/im', $descrizione, $matches) === 1) {
+      // usa i dati del file indicato
+      self::$fixtures = $matches[1];
+    }
+  }
+
+  /**
    * Inizializzazione dei test prima di ogni nuovo scenario
    *
    * @param BeforeScenarioScope $scope Contesto di esecuzione
@@ -231,7 +256,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     if (!in_array('noReset', $scope->getFeature()->getTags()) &&
         !in_array('noReset', $scope->getScenario()->getTags())) {
       // database iniziale
-      $this->initDatabase($scope->getFeature()->getFile());
+      $this->initDatabase();
       // cancella file caricati
       $finder = new Finder();
       $finder->in(dirname(dirname(__DIR__)).'/FILES')->files();
@@ -521,27 +546,27 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Svuota il database e carica i dati di test
    *
-   * @param string $file Percorso completo del file della feature corrente
    */
-  protected function initDatabase(string $file): void {
+  protected function initDatabase(): void {
     // init
     $connection = $this->em->getConnection();
     $dbParams = $connection->getParams();
-    $fixture = substr(basename($file), 0, -8);
-    $fixturePath = $this->kernel->getProjectDir().'/tests/features/'.$fixture.'.yml';
-    if (!file_exists($fixturePath)) {
-      // carica dati generici di test
-      $fixture = 'TestFixtures';
-      $fixturePath = $this->kernel->getProjectDir().'/tests/features/'.$fixture.'.yml';
-    }
-    $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.sql';
-    $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.map';
+    $fixturesPath = $this->kernel->getProjectDir().'/tests/features/'.self::$fixtures;
+    $fixturesName = substr(self::$fixtures, 0, strrpos(self::$fixtures, '.'));
+    $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.sql';
+    $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.map';
     // svuota il database
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
     $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
     $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+    $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+    // controllo
+    if (!self::$fixtures) {
+      // nessun dato da caricare
+      return;
+    }
+    // carica dati di test
     if (file_exists($sqlPath)) {
       // carica file SQL
       $process = Process::fromShellCommandline('mysql -u'.$dbParams['user'].' -p'.$dbParams['password'].
@@ -557,9 +582,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($objectMap as $name => $attrs) {
         $this->vars['obj'][$name] = $this->em->getReference($attrs[0], $attrs[1]);
       }
-    } elseif (file_exists($fixturePath)) {
+    } elseif (file_exists($fixturesPath)) {
       // carica fixtures per l'ambiente di test
-      $this->vars['obj'] = $this->alice->load([$fixturePath], [], [], PurgeMode::createNoPurgeMode());
+      $this->vars['obj'] = $this->alice->load([$fixturesPath], [], [], PurgeMode::createNoPurgeMode());
       // esegue modifiche dopo l'inserimento nel db e le rende permanenti
       $this->customProvider->postPersistArrayId();
       $this->em->flush();
@@ -1023,7 +1048,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $attrs[$val_name] = $val;
     }
     // restituisce valori degli attributi
-    return count($attrs) > 1 ? $attrs : array_values($attrs)[0];
+    $attrsVal = array_values($attrs);
+    return count($attrsVal) > 1 ? $attrsVal : $attrsVal[0];
   }
 
   /**
@@ -1097,6 +1123,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * Converte il testo di un parametro di ricerca in una espressione regolare.
    *  I possibili valori contenuti nel testo sono:
    *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
+   *    ?$nome... -> lista di variabili (vedi getVars) separate da ? e cercate in modo non ordinato
    *    /regex/ -> espressione regolare
    *    altro -> stringa di testo
    *
@@ -1114,6 +1141,22 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($value as $val) {
         $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
         $first = false;
+      }
+      $regex = '/'.$regex.'/ui';
+    } elseif ($search && $search[0] == '?') {
+      // ricerca non ordinata di variabili
+      $var_list = explode('?', substr($search, 1));
+      $values = [];
+      foreach ($var_list as $var) {
+        $value = $this->getVars($var);
+        if (is_array($value)) {
+          $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
+        }
+        $values[] = $value;
+      }
+      $regex = '';
+      foreach ($values as $val) {
+        $regex .= '(?=.*'.$val.')';
       }
       $regex = '/'.$regex.'/ui';
     } elseif (preg_match('#^(/.+/\w*)$#', $search)) {

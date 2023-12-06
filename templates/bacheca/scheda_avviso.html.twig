@@ -37,7 +37,7 @@
   <div class="gs-mt-2">
     <strong>Filtro classi:</strong>
   {% for c in dati.classi %}
-    {{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ',' }}
+    {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}{{ not loop.last ? ',' }}
   {% endfor %}
   </div>
 {% elseif dati.materie|length > 0 %}

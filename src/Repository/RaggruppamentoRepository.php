@@ -10,11 +10,10 @@ namespace App\Repository;
 
 
 /**
- * FirmaCircolare - repository
+ * Raggruppamento - repository
  *
  * @author Antonello Dessì
  */
-class FirmaCircolareRepository extends \Doctrine\ORM\EntityRepository {
+class RaggruppamentoRepository extends BaseRepository {
 
 }
-

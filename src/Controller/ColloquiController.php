@@ -17,7 +17,6 @@ use App\Form\RichiestaColloquioType;
 use App\Util\ColloquiUtil;
 use App\Util\LogHandler;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -113,11 +112,10 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'conferma']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'conferma']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // modifica stato
@@ -164,11 +162,10 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'rifiuta']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'rifiuta']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if (empty($richiesta->getMessaggio())) {
@@ -220,11 +217,10 @@ class ColloquiController extends BaseController {
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
-    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
-      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    $info['classe'] = ''.$richiesta->getAlunno()->getClasse();
+    $info['alunno'] = ''.$richiesta->getAlunno();
     // form di inserimento
-    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'modifica']);
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['form_mode' => 'modifica']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if (empty($richiesta->getMessaggio())) {
@@ -320,7 +316,7 @@ class ColloquiController extends BaseController {
     // lista sedi
     $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
     // form di inserimento
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'singolo',
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'singolo',
       'values' => [$listaSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -438,7 +434,6 @@ class ColloquiController extends BaseController {
       unset($listaSedi['']);
     }
     // informazioni per la visualizzazione
-    $sedePredefinita = null;
     foreach ($listaSedi as $idSede) {
       $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
     }
@@ -447,7 +442,7 @@ class ColloquiController extends BaseController {
       $listaOre[$i] = $i;
     }
     // form di inserimento
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'periodico',
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'periodico',
       'values' => [$listaSedi, $listaOre]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -623,7 +618,7 @@ class ColloquiController extends BaseController {
       }
     }
     // form di inserimento
-    $form = $this->createForm(PrenotazioneType::class, null, ['formMode' => 'prenotazione',
+    $form = $this->createForm(PrenotazioneType::class, null, ['form_mode' => 'prenotazione',
       'values' => [$dati['lista']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -688,8 +683,9 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // form di ricerca
-    $form = $this->createForm(FiltroType::class, null, ['formMode' => 'colloqui',
-      'values' => [$docente]]);
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'colloqui',
+      'values' => [$docente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -734,7 +730,7 @@ class ColloquiController extends BaseController {
       // cancella colloquio
       $this->em->remove($ricevimento);
       // memorizzazione e log
-      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio, $ricevimento);
+      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio);
     }
     // redirezione
     return $this->redirectToRoute('colloqui_gestione');

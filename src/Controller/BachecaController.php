@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -43,7 +44,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(Request $request, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -115,7 +116,7 @@ class BachecaController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function avvisiDettagliAction(BachecaUtil $bac, $id) {
+  public function avvisiDettagliAction(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -152,7 +153,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniAction(BachecaUtil $bac, $classe) {
+  public function avvisiAlunniAction(BachecaUtil $bac, int $classe): Response {
     // inizializza
     $dati = null;
     // controllo classe
@@ -185,7 +186,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniFirmaAction(BachecaUtil $bac, $classe, $id) {
+  public function avvisiAlunniFirmaAction(BachecaUtil $bac, int $classe, $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -216,7 +217,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function avvisiATAAction(Request $request, BachecaUtil $bac, $pagina) {
+  public function avvisiATAAction(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;

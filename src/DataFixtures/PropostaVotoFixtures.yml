@@ -26,14 +26,14 @@ include:
 
 
 App\Entity\PropostaVoto:
-  proposta_voto_{1..10}:
-    periodo: '<randomElement(["P", "S", "F"])>'
-    orale: '50%? <numberBetween(1, 10)>: 0'
-    scritto: '50%? <numberBetween(1, 10)>: 0'
-    pratico: '50%? <numberBetween(1, 10)>: 0'
+  proposta_voto_{P, S, F}:
+    periodo: '<current()>'
+    orale: 0
+    scritto: 0
+    pratico: 0
     unico: '50%? <numberBetween(1, 10)>: 0'
     debito: '50%? <text()>: <strval("")>'
-    recupero: '<randomElement(["A", "C", "S", "P", "I", "R", "N"])>'
+    recupero: '<randomElement(["A", "C", "S", "P"])>'
     assenze: '50%? <numberBetween(1, 100)>: 0'
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     alunno: '@alunno_*'

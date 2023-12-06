@@ -6,6 +6,7 @@ Funzionalità: Inserimento dei piani di lavoro dei docenti
   Bisogna controllare prerequisiti per inserimento piano di lavoro
   Bisogna caricare un documento da inserire come piano di lavoro
   Bisogna controllare accesso a pagina
+  Utilizzando "_documentiFixtures.yml"
 
 
 Contesto: login docente senza cattedre
