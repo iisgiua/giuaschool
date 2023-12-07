@@ -24,7 +24,6 @@ RUN \
   mv "$FILE.zip" "v$ZIP.zip" && \
   cd ../../ && \
   cp tests/docker/*.feature tests/features/ && \
-  cp tests/docker/*.yml tests/features/ && \
   rm -r var/cache/* && \
   rm -r tests/temp/* && \
   chown -R www-data:www-data src/* public/* tests/* && \
