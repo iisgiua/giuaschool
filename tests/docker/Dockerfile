@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:11.2 as system_builder
+FROM debian:11.8 as system_builder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
