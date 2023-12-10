@@ -12,6 +12,7 @@ description:
     features:
       - gestione organizzazione scuola (corsi, classi, ecc.)
       - gestione di più sedi scolastiche
+      - gestione di gruppi classe
       - gestione scansione oraria differenziata per sede o per unità oraria
       - gestione utenti alunni e genitori
       - gestione utenti docenti, coordinatori, segretari
@@ -22,6 +23,10 @@ description:
       - gestione prenotazione colloqui
       - invio notifiche per diversi eventi
       - gestione scrutini e documentazione relativa
+      - gestione documenti di classe (piani di lavoro, programmi svolti, relazioni, documento del 15 maggio)
+      - gestione documenti BES (PDF cifrati)
+      - gestione moduli prove di evacuazione
+      - gestione moduli richiesta di vari tipi
       - gestione importazione ed esportazione dei dati
     longDescription: |
       **giua@school** è un progetto nato dalla volontà di utilizzare un Registro
@@ -37,7 +42,7 @@ description:
       Seppure inizialmente incentrato esclusivamente sulle esigenze
       organizzative di questa scuola, il registro elettronico **giua@school**
       ora è sempre più configurabile in ogni suo aspetto, in modo da renderlo
-      utilizzabile anche in altri istituti scolastici.  
+      utilizzabile anche in altri istituti scolastici.
     shortDescription: Registro Elettronico open source
 developmentStatus: stable
 intendedAudience:
@@ -73,7 +78,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2023-07-18'
+releaseDate: '2023-12-10'
 softwareType: standalone/web
-softwareVersion: 1.5.5
+softwareVersion: 1.5.6
 url: 'https://github.com/iisgiua/giuaschool'
