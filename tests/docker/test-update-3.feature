@@ -115,6 +115,7 @@ Schema dello scenario: Inserisce e memorizza le proposte di voto
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 4    | A       |
+    | $cl2 | 5    | A       |
   E ricerca istanze di tipo "Materia":
     | id  | tipo           |
     | $m1 | <tipo_materia> |
@@ -122,8 +123,8 @@ Schema dello scenario: Inserisce e memorizza le proposte di voto
     | id  | docente | classe | materia | attiva | tipo |
     | $c1 | #logged | $cl1   | $m1     | si     | N    |
   E modifica istanze di tipo "Alunno":
-    | classe | #abilitato |
-    | $cl1   | no         |
+    | classe | #classe |
+    | $cl1   | $cl2    |
   E istanze di tipo "Alunno":
     | id   | classe | nome     | cognome | abilitato | religione |
     | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
