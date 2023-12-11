@@ -116,10 +116,11 @@ $(document).ready(function() {
 {% block _assenze_appello_lista_entry_widget %}
   <div class="row">
   {% if disabled %}
-    <label for="{{ form.presenza.vars.id }}_0" class="required gs-radio-inline col-sm-2 text-muted">
-      <input type="radio" id="{{ form.presenza.vars.id }}_0" name="{{ form.presenza.vars.full_name }}" required="required" value="P" disabled="disabled" checked="checked"> Presente</label>
-    <label for="{{ form.presenza.vars.id }}_1" class="required gs-radio-inline col-sm-2 text-muted">
-      <input type="radio" id="{{ form.presenza.vars.id }}_1" name="{{ form.presenza.vars.full_name }}" required="required" value="A" disabled="disabled"> Assente</label>
+    <input type="hidden" id="{{ form.presenza.vars.id }}_0" name="{{ form.presenza.vars.full_name }}" value="P">
+    {# <label for="{{ form.presenza.vars.id }}_0" class="required gs-radio-inline col-sm-2 text-muted"> #}
+      {# <input type="radio" id="{{ form.presenza.vars.id }}_0" name="{{ form.presenza.vars.full_name }}" required="required" value="P" disabled="disabled" checked="checked"> Presente</label> #}
+    {# <label for="{{ form.presenza.vars.id }}_1" class="required gs-radio-inline col-sm-2 text-muted"> #}
+      {# <input type="radio" id="{{ form.presenza.vars.id }}_1" name="{{ form.presenza.vars.full_name }}" required="required" value="A" disabled="disabled"> Assente</label> #}
   {% else %}
     {{ form_widget(form.presenza) }}
   {% endif %}

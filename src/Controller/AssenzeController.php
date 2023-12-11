@@ -423,7 +423,7 @@ class AssenzeController extends BaseController {
       $entrata = (new Entrata())
         ->setData($data_obj)
         ->setAlunno($alunno)
-        ->setValido(true)
+        ->setValido(false)
         ->setDocente($this->getUser());
       // imposta ora
       $ora = new \DateTime();
@@ -632,7 +632,7 @@ class AssenzeController extends BaseController {
       $uscita = (new Uscita())
         ->setData($data_obj)
         ->setAlunno($alunno)
-        ->setValido(true)
+        ->setValido(false)
         ->setDocente($this->getUser());
       // imposta ora
       $ora = new \DateTime();

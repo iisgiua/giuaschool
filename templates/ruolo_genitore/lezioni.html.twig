@@ -22,24 +22,40 @@
   <table class="table table-bordered table-hover table-striped">
     <thead class="bg-success">
       <tr>
-        <th>Ora</th>
-        <th>Materia</th>
-        <th>Argomenti</th>
-        <th>Attività</th>
-        {% if alunno.bes == 'H' %}<th>Sostegno</th>{% endif %}
+        <th class="col-sm-2">Ora</th>
+        <th class="col-sm-2">Materia</th>
+        <th class="col-sm-4">Argomenti</th>
+        <th class="col-sm-{{ alunno.bes == 'H' ? 2 : 4 }}">Attività</th>
+        {% if alunno.bes == 'H' %}<th class="col-sm-2">Sostegno</th>{% endif %}
       </tr>
     </thead>
     <tbody>
       {% for k,v in dati['lezioni'] %}
       <tr>
-        <td><strong>{{ v.inizio }} - {{ v.fine }}</strong></td>
-        <td>{{ v.materia }}</td>
-        <td><small>{{ v.argomenti|raw }}</small></td>
-        <td><small>{{ v.attivita|raw }}</small></td>
+        <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
+        <td>
+          <strong>{% if v.materia|keys|first == 'R:S' %}Gruppo: Religione<br>{% elseif v.materia|keys|first == 'R:N' %}Gruppo: N.A.<br>{% elseif v.materia|keys|first == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif v.materia|keys|first[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}<br>{% endif %}</strong>
+          {{ v.materia|first }}
+        </td>
+        <td><small>{{ (v.argomenti|first)|raw }}</small></td>
+        <td><small>{{ (v.attivita|first)|raw }}</small></td>
         {% if alunno.bes == 'H' %}
-        <td><small>{{ v.sostegno|raw }}</small></td>
+        <td><small>{{ (v.sostegno|first)|raw }}</small></td>
         {% endif %}
       </tr>
+        {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
+      <tr>
+        <td>
+          <strong>{% if g == 'R:S' %}Gruppo: Religione<br>{% elseif g == 'R:N' %}Gruppo: N.A.<br>{% elseif g == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}<br>{% endif %}</strong>
+          {{ m }}
+        </td>
+        <td><small>{{ v.argomenti[g]|raw }}</small></td>
+        <td><small>{{ v.argomenti[g]|raw }}</small></td>
+          {% if alunno.bes == 'H' %}
+        <td><small>{{ v.sostegno[g]|raw }}</small></td>
+          {% endif %}
+      </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>

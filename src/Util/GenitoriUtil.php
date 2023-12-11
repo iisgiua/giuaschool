@@ -140,38 +140,41 @@ class GenitoriUtil {
       $dati_lezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
       $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
       // legge lezione
-      $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->join('l.classe', 'c')
         ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
         ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
         ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'anno' => $classe->getAnno(),
           'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->getQuery()
-        ->getOneOrNullResult();
-      if ($lezione) {
-        // esiste lezione
-        $dati_lezioni[$ora]['materia'] = $lezione->getMateria()->getNomeBreve();
-        $dati_lezioni[$ora]['argomenti'] = trim($lezione->getArgomento());
-        $dati_lezioni[$ora]['attivita'] = trim($lezione->getAttivita());
-        $dati_lezioni[$ora]['sostegno'] = '';
-        if ($alunno->getBes() == 'H') {
-          // legge sostegno
-          $sostegno = $this->em->getRepository('App\Entity\FirmaSostegno')->createQueryBuilder('fs')
-            ->where('fs.lezione=:lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-            ->setParameters(['lezione' => $lezione, 'alunno' => $alunno])
-            ->getQuery()
-            ->getResult();
-          foreach ($sostegno as $sost) {
-            $dati_lezioni[$ora]['sostegno'] .= ' '.trim($sost->getArgomento().' '.$sost->getAttivita());
+        ->getResult();
+      if (count($lezioni) > 0) {
+        // esistono lezioni
+        foreach ($lezioni as $lezione) {
+          $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+          $dati_lezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve();
+          $dati_lezioni[$ora]['argomenti'][$gruppo] = trim($lezione->getArgomento());
+          $dati_lezioni[$ora]['attivita'][$gruppo] = trim($lezione->getAttivita());
+          $argSostegno = '';
+          if ($alunno->getBes() == 'H') {
+            // legge sostegno
+            $sostegno = $this->em->getRepository('App\Entity\FirmaSostegno')->createQueryBuilder('fs')
+              ->where('fs.lezione=:lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
+              ->setParameters(['lezione' => $lezione, 'alunno' => $alunno])
+              ->getQuery()
+              ->getResult();
+            foreach ($sostegno as $sost) {
+              $argSostegno .= ' '.trim($sost->getArgomento().' - '.$sost->getAttivita());
+            }
           }
-          $dati_lezioni[$ora]['sostegno'] = trim($dati_lezioni[$ora]['sostegno']);
+          $dati_lezioni[$ora]['sostegno'][$gruppo] = trim($argSostegno);
         }
       } else {
         // nessuna lezione esistente
-        $dati_lezioni[$ora]['materia'] = '';
-        $dati_lezioni[$ora]['argomenti'] = '';
-        $dati_lezioni[$ora]['attivita'] = '';
-        $dati_lezioni[$ora]['sostegno'] = '';
+        $dati_lezioni[$ora]['materia']['N:'] = '';
+        $dati_lezioni[$ora]['argomenti']['N:'] = '';
+        $dati_lezioni[$ora]['attivita']['N:'] = '';
+        $dati_lezioni[$ora]['sostegno']['N:'] = '';
       }
     }
     // memorizza lezioni del giorno

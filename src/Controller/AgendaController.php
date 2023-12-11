@@ -235,14 +235,14 @@ class AgendaController extends BaseController {
         // legge materia scelta
         $materia = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
           ->join('c.classe', 'cl')
-          ->where('c.materia=:materia AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)')
+          ->where("c.tipo='N' AND c.materia=:materia AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
           ->setParameters(['materia' => $form->get('materia_sostegno')->getData(),
             'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
             'sezione' => $avviso->getCattedra()->getClasse()->getSezione(),
             'gruppo' => $avviso->getCattedra()->getClasse()->getGruppo()])
           ->getQuery()
           ->getOneOrNullResult();
-        if (!$materia ||
+          if (!$materia ||
             ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
               $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }

@@ -386,7 +386,7 @@ class RichiesteController extends BaseController {
       $uscita = (new Uscita())
         ->setData($data)
         ->setAlunno($alunno)
-        ->setValido(true)
+        ->setValido(false)
         ->setDocente($this->getUser())
         ->setOra($ora)
         ->setNote($nota);
@@ -623,7 +623,7 @@ class RichiesteController extends BaseController {
     $dati = [];
     // controlla richiesta
     $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
-    if (!$richiestagetUtente() || $richiesta->getStato() == 'R') {
+    if (!$richiesta || $richiesta->getStato() == 'R') {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
