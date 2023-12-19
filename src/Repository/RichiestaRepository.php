@@ -61,7 +61,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('r.definizioneRichiesta', 'dr')
       ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
-      ->where('dr.abilitata=:abilitata AND c.sede=:sede')
+      ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
       ->setParameters(['abilitata' => 1, 'sede' => $criteri['sede']])
       ->orderBy('dr.nome,r.data,r.inviata', 'ASC');
@@ -145,7 +145,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
-      ->where('dr.abilitata=:abilitata AND dr.tipo!=:tipo AND r.stato=:stato')
+      ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND dr.tipo!=:tipo AND r.stato=:stato')
       ->andWhere($sql)
       ->groupBy('s.nomeBreve')
       ->orderBy('s.ordinamento', 'ASC')
