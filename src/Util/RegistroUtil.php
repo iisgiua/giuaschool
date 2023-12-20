@@ -1457,16 +1457,23 @@ class RegistroUtil {
       $dati['voti'][$alu['id']]['P'] = array();
     }
     // legge i voti degli degli alunni
+    $parametri = ['alunni' => $tutti, 'materia' => $cattedra->getMateria(),
+        'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()];
+    $sql = '';
+    if ($cattedra->getClasse()->getGruppo()) {
+      $sql = " AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)";
+      $parametri['gruppo'] = $cattedra->getClasse()->getGruppo();
+    }
     $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.alunno', 'a')
       ->join('v.lezione', 'l')
       ->join('v.docente', 'd')
-      ->where('a.id IN (:alunni) AND v.materia=:materia AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
+      ->join('l.classe', 'c')
+      ->where("a.id IN (:alunni) AND v.materia=:materia AND l.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione".$sql)
       ->orderBy('l.data', 'ASC')
-      ->setParameters(['alunni' => $tutti, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse(), 'inizio' => $inizio->format('Y-m-d'),
-        'fine' => $fine->format('Y-m-d')])
+      ->setParameters($parametri)
       ->getQuery()
       ->getArrayResult();
     foreach ($voti as $v) {
@@ -2429,14 +2436,21 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge i voti degli degli alunni
+    $parametri = ['alunno' => $alunno, 'materia' => $cattedra->getMateria(),
+      'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()];
+    $sql = '';
+    if ($cattedra->getClasse()->getGruppo()) {
+      $sql = " AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)";
+      $parametri['gruppo'] = $cattedra->getClasse()->getGruppo();
+    }
     $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.docente', 'd')
       ->join('v.lezione', 'l')
-      ->where('v.alunno=:alunno AND v.materia=:materia AND l.classe=:classe')
+      ->join('l.classe', 'c')
+      ->where("v.alunno=:alunno AND v.materia=:materia AND c.anno=:anno AND c.sezione=:sezione".$sql)
       ->orderBy('v.tipo,l.data', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse()]);
+      ->setParameters($parametri);
     if ($filtro) {
       $voti = $voti
         ->andWhere('d.id=:docente')

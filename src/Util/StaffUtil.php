@@ -411,7 +411,7 @@ class StaffUtil {
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
       ->join('l.classe', 'cl')
-      ->where('v.alunno IN (:lista) AND v.media=1 AND v.voto>0 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND l.data BETWEEN :inizio AND :fine AND m.media=1')
+      ->where("v.alunno IN (:lista) AND v.media=1 AND v.voto>0 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL) AND l.data BETWEEN :inizio AND :fine AND m.media=1")
       ->groupBy('v.alunno,v.materia,v.tipo')
       ->setParameters(['lista' => $listaAlunni, 'anno' => $classe->getAnno(),
         'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo(),
