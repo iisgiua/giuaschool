@@ -1732,17 +1732,25 @@ class RegistroUtil {
       return $this->argomentiSostegno($cattedra);
     }
     // legge lezioni
+    $parametri = ['materia' => $cattedra->getMateria(), 'docente' => $cattedra->getDocente(),
+      'sede' => $cattedra->getClasse()->getSede(), 'anno' => $cattedra->getClasse()->getAnno(),
+      'sezione' => $cattedra->getClasse()->getSezione()];
+    $sql = '';
+    if ($cattedra->getClasse()->getGruppo()) {
+      $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
+      $parametri['gruppo'] = $cattedra->getClasse()->getGruppo();
+    }
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->join('l.classe', 'cl')
       ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
       ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->leftJoin('f.docente', 'd')
       ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->where('l.materia=:materia AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND cl.anno=:anno AND cl.sezione=:sezione'.$sql)
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-        'docente' => $cattedra->getDocente(), 'sede' => $cattedra->getClasse()->getSede()]);
+      ->setParameters($parametri);
     if ($cattedra->getMateria()->getTipo() == 'R') {
       // religione e mat.alt.
       $lezioni = $lezioni
