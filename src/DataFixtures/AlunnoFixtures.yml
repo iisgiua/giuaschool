@@ -51,13 +51,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -89,13 +89,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -129,13 +129,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -167,13 +167,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -205,13 +205,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -245,13 +245,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -283,13 +283,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -321,13 +321,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -359,13 +359,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -397,13 +397,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -437,13 +437,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -475,13 +475,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -515,13 +515,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -553,13 +553,13 @@ App\Entity\Alunno:
     indirizzo: '<streetAddress()>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    bes: '<randomElement(["N", "N", "N", "H", "D", "B"])>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
     noteBes: '30%? <paragraph(2, false)>: <strval("")>'
     autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: '<ife(<current()>==1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -599,7 +599,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: 'S'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -637,14 +637,14 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: 'S'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: 0
     credito4: 0
     classe: '@classe_3CCHI'
-    genitori: '<collection(@genitore1_sostegno_1, @genitore2_sostegno_1)>'
+    genitori: '<collection(@genitore1_sostegno_3, @genitore2_sostegno_3)>'
     rappresentante: '<(array())>'
   alunno_sostegno_4:
     sesso: '<randomElement(["M", "F"])>'
@@ -675,12 +675,52 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<randomElement(["S", "S", "S", "U", "U", "D", "I", "A"])>'
+    religione: 'S'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
     credito3: 0
     credito4: 0
     classe: '@classe_3CAMB'
-    genitori: '<collection(@genitore1_sostegno_2, @genitore2_sostegno_2)>'
+    genitori: '<collection(@genitore1_sostegno_4, @genitore2_sostegno_4)>'
+    rappresentante: '<(array())>'
+
+  # ----- alunni con materia altenativa -----
+  alunno_alternativa_1:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-15 years", "-14 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: 'N'
+    noteBes: ''
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'A'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1A'
+    genitori: '<collection(@genitore1_alternativa_1, @genitore2_alternativa_1)>'
     rappresentante: '<(array())>'

@@ -59,26 +59,26 @@ App\Entity\Materia:
     Media: true
     Ordinamento: 20
   materia_curricolare_2:
+    Nome: 'Storia'
+    NomeBreve: 'Storia'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 30
+  materia_curricolare_3:
     Nome: 'Lingua straniera: Inglese'
     NomeBreve: 'Inglese'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 50
-  materia_curricolare_3:
+  materia_curricolare_4:
     Nome: 'Matematica'
     NomeBreve: 'Matematica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 60
-  materia_curricolare_4:
-    Nome: 'Storia'
-    NomeBreve: 'Storia'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 110
   materia_curricolare_5:
     Nome: 'Scienze motorie e sportive'
     NomeBreve: 'Sc. motorie'

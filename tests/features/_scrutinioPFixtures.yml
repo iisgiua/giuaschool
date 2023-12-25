@@ -1,0 +1,177 @@
+####################
+# _scrutinioPFixtures - dati per i test sugli scrutini del primo periodo
+####################
+
+
+include:
+  - ../../src/DataFixtures/ConfigurazioneFixtures.yml
+  - ../../src/DataFixtures/MenuFixtures.yml
+  - ../../src/DataFixtures/IstitutoFixtures.yml
+  - ../../src/DataFixtures/SedeFixtures.yml
+  - ../../src/DataFixtures/CorsoFixtures.yml
+  - ../../src/DataFixtures/MateriaFixtures.yml
+  - ../../src/DataFixtures/AmministratoreFixtures.yml
+  - ../../src/DataFixtures/PresideFixtures.yml
+  - ../../src/DataFixtures/StaffFixtures.yml
+  - ../../src/DataFixtures/DocenteFixtures.yml
+  - ../../src/DataFixtures/AtaFixtures.yml
+  - ../../src/DataFixtures/ClasseFixtures.yml
+  - ../../src/DataFixtures/AlunnoFixtures.yml
+  - ../../src/DataFixtures/GenitoreFixtures.yml
+
+
+App\Entity\DefinizioneScrutinio:
+  definizione_scrutinio_P:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    argomenti: '<array_combine(<words(3)>, <sentences(3)>)>'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    periodo: 'P'
+    dataProposte: '<dateTimeBetween("-1 month", "now")>'
+    struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
+    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>])>'
+
+App\Entity\Cattedra:
+  cattedra_1A_{1..12}:
+    attiva: true
+    supplenza: '<($current==9)>'
+    tipo: '<case(<current()>, [8,12], ["I","A"], "N")>'
+    materia: '@<case(<current()>, [6,7,8,9,10,11,12], [materia_RELIGIONE,materia_itp_1,materia_itp_1,materia_curricolare_1,materia_SOSTEGNO,materia_SOSTEGNO,materia_RELIGIONE,], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7,8,9,10,11,12], [docente_religione_1,docente_itp_1,docente_itp_2,docente_nocattedra_1,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_2], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno: '<case(<current()>, [10,11], [@alunno_sostegno_1,@alunno_sostegno_2], null)>'
+  cattedra_1A_civica_{1..12}:
+    attiva: true
+    supplenza: '<($current==9)>'
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7,8,9,10,11,12], [docente_religione_1,docente_itp_1,docente_itp_2,docente_nocattedra_1,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_2], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno:
+  cattedra_2A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_2A'
+    alunno:
+  cattedra_2A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_2A'
+    alunno:
+  cattedra_3A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3A'
+    alunno:
+  cattedra_3A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3A'
+    alunno:
+  cattedra_4A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_4A'
+    alunno:
+  cattedra_4A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_4A'
+    alunno:
+  cattedra_5A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_5A'
+    alunno:
+  cattedra_5A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_5A'
+    alunno:
+  cattedra_3C_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    classe: '@classe_3C'
+    alunno:
+  cattedra_3C_civica_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_curricolare_<current()>'
+    classe: '@classe_3C'
+    alunno:
+  cattedra_3CCHI_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_3'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+  cattedra_3CCHI_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+  cattedra_3CAMB_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_2'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+  cattedra_3CAMB_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+
+App\Entity\PropostaVoto:
+  proposta_P_1A_{0..44}:
+    periodo: 'P'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    assenze: '<numberBetween(0, 100)>'
+    dati: '<(array())>'
+    classe: '@classe_1A'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'

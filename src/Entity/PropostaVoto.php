@@ -97,11 +97,11 @@ class PropostaVoto {
   private ?string $debito = null;
 
   /**
-   * @var string|null $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
+   * @var string|null $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","C","S","P","I","R","N"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","C","S","P","I"}, strict=true, message="field.choice")
    */
   private ?string $recupero = null;
 

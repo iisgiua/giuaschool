@@ -8,6 +8,7 @@
 
 namespace App\Tests;
 
+use App\Entity\Alunno;
 use Doctrine\Common\Collections\ArrayCollection;
 use Faker\Generator;
 use Faker\Provider\Base;
@@ -66,7 +67,7 @@ class CustomProvider extends Base {
    * @return mixed Il valore indicato dalla condizione
    */
   public function ife($test, $ifTrue, $ifFalse) {
-    return $test ? $ifTrue : $ifFalse;
+    return eval('return '.$test.';') ? $ifTrue :  $ifFalse;
   }
 
   /**
@@ -80,7 +81,25 @@ class CustomProvider extends Base {
    * @return mixed Il valore indicato dalla condizione
    */
   public function ifand($test1, $test2, $ifTrue, $ifFalse) {
-    return ($test1 && $test2) ? $ifTrue : $ifFalse;
+    return (eval('return '.$test1.';') && eval('return '.$test2.';')) ? $ifTrue : $ifFalse;
+  }
+
+  /**
+   * Restituisce il valore corrispondente da un lista predefinita, come uno switch-case
+   *
+   * @param mixed $test Caso da considerare
+   * @param array $cases Lista dei casi possibili
+   * @param array $values Lista dei valori da restituire, corrispondenti ai casi indicati
+   * @param mixed $default Valore restituito se il caso indicato non è presente
+   *
+   * @return mixed Il valore relativo al caso indicato
+   */
+  public function case($test, $cases, $values, $default) {
+    $index = array_search(eval('return '.$test.';'), $cases);
+    if ($index === false) {
+      return $default;
+    }
+    return $values[$index];
   }
 
   /**
@@ -128,6 +147,35 @@ class CustomProvider extends Base {
         $list[0]->{'set'.ucfirst($property)}(array_map(function($o) { return $o->getId(); }, $list[1]));
       }
     }
+  }
+
+  /**
+   * Restituisce un voto casuale (0-10)
+   *
+   * @return int Voto generato
+   */
+  public function voto(): int {
+    return static::numberBetween(0, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di Ed.Civica (2-10)
+   *
+   * @return int Voto generato
+   */
+  public function votoEdCivica(): int {
+    return static::numberBetween(2, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di religione (20-27)
+   *
+   * @param Alunno $alunno Istanza dell'alunno
+   *
+   * @return int|null Voto generato
+   */
+  public function votoReligione(Alunno $alunno): ?int {
+    return in_array($alunno->getReligione(), ['S', 'A'], true) ? static::numberBetween(20, 27) : null;
   }
 
 }

@@ -302,9 +302,9 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->logDebug('laSezioneContiene -> '.$ricerca.' | '. $sezione->getText());
+    $this->logDebug('laSezioneContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
     $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()),
-      '+++ laSezioneContiene -> '.$ricerca.' | '. $sezione->getText());
+      '+++ laSezioneContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
   }
 
   /**
@@ -316,7 +316,9 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneNonContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->assertFalse($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()));
+    $this->logDebug('laSezioneNonContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
+    $this->assertFalse($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()),
+      '+++ laSezioneNonContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
   }
 
   /**
@@ -701,6 +703,31 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella :indice senza intestazioni:
+   * @Then vedi la tabella senza intestazioni:
+   */
+  public function vediLaTabellaSenzaIntestazioni($indice=1, TableNode $dati): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    // controlla dati
+    $datiValori = $dati->getHash();
+    $this->assertEquals(count($datiValori), count($valori), 'Table row count is different');
+    foreach ($datiValori as $ri=>$riga) {
+      foreach (array_values($riga) as $co=>$val) {
+        $cerca = $this->convertSearch($val);
+        $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
+        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+          'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
+      }
+    }
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati,
    * ma non considera l'ordine delle righe
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
@@ -719,6 +746,44 @@ class BrowserContext extends BaseContext {
     foreach ($datiIntestazioni as $i=>$nome) {
       $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
     }
+    // controlla dati
+    $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
+    $righeTrovate = [];
+    for ($ri = 0; $ri < count($valori); $ri++) {
+      foreach ($dati->getHash() as $idx=>$riga) {
+        if (in_array($dati->getRowLine($idx), $righeTrovate)) {
+          $trovato = false;
+          continue;
+        }
+        $trovato = true;
+        foreach (array_values($riga) as $co=>$val) {
+          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+            $trovato = false;
+            break;
+          }
+        }
+        if ($trovato) {
+          break;
+        }
+      }
+      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found');
+      $righeTrovate[] = $dati->getRowLine($idx);
+    }
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella :indice non ordinata senza intestazioni:
+   * @Then vedi la tabella non ordinata senza intestazioni:
+   */
+  public function vediLaTabellaNonOrdinataSenzaIntestazioni($indice=1, TableNode $dati): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
     $righeTrovate = [];

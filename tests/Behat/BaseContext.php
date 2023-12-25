@@ -961,6 +961,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "#slg($v1)": trasforma in maiuscolo con - per caratteri non alfanumerici (slug) il valore indicato
+   *  "#cas($v,c1:c2:..,r1:r2:..,$d)": confronta $v con le costanti $c e se lo trova restituisce il valore $r corrispondente, altrimenti restituisce $d
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -976,7 +977,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|arc|upr|slg)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|arc|upr|slg|cas)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -1009,6 +1010,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $var = substr(substr($var, 5), 0 , -1);
         return strtoupper($this->slugger->slug($this->getVar($var)));
       }
+      // controlla funzione case
+      if ($fn[1] == 'cas') {
+        $case = explode(',', substr(substr($var, 5), 0 , -1));
+        $val = $this->getVar($case[0]);
+        $caseC = explode(':', $case[1]);
+        $caseR = explode(':', $case[2]);
+        $caseD = $this->convertText($case[3]);
+        foreach ($caseC as $idx => $c) {
+          if ($val == $c) {
+            return $caseR[$idx];
+          }
+        }
+        return $caseD;
+      }
     }
     // tipo di variabile
     $type =  $var[0] == '#' ? 'sys' : ($var[0] == '$' ? 'exec' : 'obj');
@@ -1017,11 +1032,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $var_parts = explode(':', $var);
     if (count($var_parts) == 1) {
       // restituisce intera variabile di sistema
-      $this->assertTrue(isset($this->vars[$type][$var]));
+      $this->assertTrue(isset($this->vars[$type][$var]), 'Error with variable '.$var);
       return $this->vars[$type][$var];
     }
     $var_name = $var_parts[0];
-    $this->assertTrue(isset($this->vars[$type][$var_name]) && is_object($this->vars[$type][$var_name]));
+    $this->assertTrue(isset($this->vars[$type][$var_name]) && is_object($this->vars[$type][$var_name]), 'Error in var: '.$var_name);
     $var_attrs = explode(',', $var_parts[1]);
     $attrs = array();
     foreach ($var_attrs as $attr) {

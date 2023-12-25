@@ -122,8 +122,8 @@ App\Entity\Docente:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    responsabileBes: '<boolean(50)>'
-    responsabileBesSede: '<ifand($responsabileBes, $dataNascita, @sede_2, null)>'
+    responsabileBes: '<ife(<current()><3, true, false)>'
+    responsabileBesSede: '<ife(<current()>==2, @sede_1, <(null)>)>'
     rappresentante: '<(array())>'
 
   # ----- docenti senza cattedra -----
@@ -150,6 +150,6 @@ App\Entity\Docente:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    responsabileBes: '<boolean(50)>'
-    responsabileBesSede: '<ifand($responsabileBes, $dataNascita, @sede_2, null)>'
+    responsabileBes: false
+    responsabileBesSede:
     rappresentante: '<(array())>'

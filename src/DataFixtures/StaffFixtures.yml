@@ -35,7 +35,7 @@ App\Entity\Staff:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    sede: '70%? <ife($codiceFiscale, @sede_1, @sede_2)>: <(null)>'
+    sede: '<case(<current()>, [2,3], [@sede_1,@sede_2], null)>'
     responsabileBes: false
     responsabileBesSede:
     rappresentante: '<(array())>'
