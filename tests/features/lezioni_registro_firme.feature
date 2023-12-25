@@ -20,7 +20,7 @@ Scenario: Vista giornaliera area comune con lezioni comuni, religione, sostegno,
   Allora vedi la tabella:
     | ora               | materia                     | docenti                                                              | argomenti/attività              | azioni                |
     | 1ª: 08:30 - 09:30 | Italiano                    | ?@docente_nocattedra_2:nome,cognome?@docente_sostegno_1:nome,cognome | @t_lezione_1:argomento,attivita | /^Modifica Cancella$/ |
-    | 2ª: 09:30 - 10:30 | Matematica                  | @docente_curricolare_3:nome,cognome                                  | @t_lezione_2:argomento,attivita | /^Aggiungi$/          |
+    | 2ª: 09:30 - 10:30 | Inglese                     | @docente_curricolare_3:nome,cognome                                  | @t_lezione_2:argomento,attivita | /^Aggiungi$/          |
     | 3ª: 10:30 - 11:30 | Sostegno                    | @docente_sostegno_2:nome,cognome                                     | @t_lezione_3:argomento,attivita | /^Aggiungi$/          |
     | 4ª: 11:30 - 12:30 | Gruppo: Mat. Alt. Religione | @docente_curricolare_5:nome,cognome                                  | @t_lezione_5:argomento,attivita | /^Aggiungi$/          |
     |                   | Gruppo: N.A. Religione      | @docente_curricolare_4:nome,cognome                                  | @t_lezione_6:argomento,attivita |                       |
@@ -36,7 +36,7 @@ Schema dello scenario: Vista giornaliera area gruppi con lezioni di gruppo, comu
   Allora vedi la tabella:
     | ora               | materia                    | docenti                                                                 | argomenti/attività               | azioni       |
     | 1ª: 08:30 - 09:30 | Gruppo: 3C-AMB Informatica | @docente_nocattedra_3:nome,cognome                                      | @t_lezione_9:argomento,attivita  | <azione1>    |
-    |                   | Gruppo: 3C-CHI Matematica  | ?@docente_curricolare_3:nome,cognome?@docente_sostegno_5:nome,cognome   | @t_lezione_8:argomento,attivita  |              |
+    |                   | Gruppo: 3C-CHI Inglese     | ?@docente_curricolare_3:nome,cognome?@docente_sostegno_5:nome,cognome   | @t_lezione_8:argomento,attivita  |              |
     | 2ª: 09:30 - 10:30 | Italiano                   | @docente_nocattedra_2:nome,cognome                                      | @t_lezione_10:argomento,attivita | <azione2>    |
     | 3ª: 10:30 - 11:30 | Gruppo: 3C-AMB Informatica | ?@docente_nocattedra_3:nome,cognome?@docente_curricolare_4:nome,cognome | @t_lezione_11:argomento,attivita | <azione3>    |
     | 4ª: 11:30 - 12:30 | Sostegno                   | @docente_sostegno_3:nome,cognome                                        | @t_lezione_12:argomento,attivita | /^Aggiungi$/ |
@@ -96,8 +96,8 @@ Scenario: Vista mensile area comune con lezioni
     | cattedra            | classe        | data       | vista |
     | @t_cattedra_1_1A:id | @classe_1A:id | 2023-02-01 | M     |
   Allora vedi nella riga "1" della tabella i dati:
-    | data | eventi | 1ª       | 2ª         | 3ª       | 4ª                                                                | 5ª        | 6ª | 7ª | 8ª |
-    | Me 1 |        | Italiano | Matematica | Sostegno | Religione / Att. alt. Religione / Att. alt. Religione / Att. alt. | Supplenza |    |    |    |
+    | data | eventi | 1ª       | 2ª      | 3ª       | 4ª                                                                | 5ª        | 6ª | 7ª | 8ª |
+    | Me 1 |        | Italiano | Inglese | Sostegno | Religione / Att. alt. Religione / Att. alt. Religione / Att. alt. | Supplenza |    |    |    |
 
 Schema dello scenario: Vista mensile area a gruppi con lezioni
   Dato login utente "<docente>"
@@ -105,8 +105,8 @@ Schema dello scenario: Vista mensile area a gruppi con lezioni
     | cattedra      | classe      | data       | vista |
     | <cattedra>:id | <classe>:id | 2023-02-01 | M     |
   Allora vedi nella riga "1" della tabella i dati:
-    | data | eventi | 1ª                     | 2ª       | 3ª          | 4ª       | 5ª        | 6ª | 7ª | 8ª |
-    | Me 1 |        | Informatica Matematica | Italiano | Informatica | Sostegno | Supplenza |    |    |    |
+    | data | eventi | 1ª                  | 2ª       | 3ª          | 4ª       | 5ª        | 6ª | 7ª | 8ª |
+    | Me 1 |        | Informatica Inglese | Italiano | Informatica | Sostegno | Supplenza |    |    |    |
   Esempi:
     | docente                        | cattedra            | classe        |
     | @docente_nocattedra_2:username | @t_cattedra_2_3CCHI | @classe_3CCHI |
@@ -148,7 +148,7 @@ Schema dello scenario: Vista mensile area a gruppi con dettagli lezione
   Quando pagina attiva "lezioni_registro_firme" con parametri:
     | cattedra      | classe      | data       | vista |
     | <cattedra>:id | <classe>:id | 2023-02-01 | M     |
-  E premi pulsante "Matematica"
+  E premi pulsante "Inglese"
   E la sezione "#gs-modal-info-body > .list-group-item:nth-child(1)" contiene "@docente_curricolare_3:nome,cognome @t_lezione_8:argomento,attivita"
   E la sezione "#gs-modal-info-body > .list-group-item:nth-child(2)" contiene "@alunno_sostegno_3:cognome,nome @docente_sostegno_5:nome,cognome @t_firma_sostegno_3:argomento,attivita"
   Esempi:

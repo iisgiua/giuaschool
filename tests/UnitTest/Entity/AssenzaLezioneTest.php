@@ -71,8 +71,8 @@ class AssenzaLezioneTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."A_1") :
-          ($field == 'lezione' ? $this->getReference("lezione_2") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_2") :
+          ($field == 'lezione' ? $this->getReference("lezione_".($i+1)) :
           ($field == 'ore' ? $this->faker->randomFloat() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -135,11 +135,12 @@ class AssenzaLezioneTest extends EntityTestCase {
     $existent->setAlunno($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // lezione
+    $temp = $existent->getLezione();
     $property = $this->getPrivateProperty('App\Entity\AssenzaLezione', 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
-    $existent->setLezione($this->getReference("lezione_3"));
+    $existent->setLezione($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();
