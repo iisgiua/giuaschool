@@ -87,12 +87,13 @@ Scenario: visualizza lista cattedre corretta per i programmi
   E selezioni opzione "Programmi" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi la tabella:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                      | docenti                          | documento              |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome | Documento non inserito |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome | Documento non inserito |
-  E vedi nella tabella i dati:
+  E vedi la tabella non ordinata:
     | classe e materia                                      | docenti                          | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome | Documento non inserito |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c3:docente.nome,docente.cognome | Documento non inserito |
 
 Scenario: visualizza lista cattedre corretta per le relazioni
@@ -133,12 +134,19 @@ Scenario: visualizza lista cattedre corretta per le relazioni
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
   Allora vedi la tabella non ordinata:
-    | classe e materia                                                                  | docenti                                                           | documento              |
-    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
-    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
-    | $c7:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome  | $c7:docente.nome,docente.cognome $c8:docente.nome,docente.cognome | Documento non inserito |
-    | $c10:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c10:docente.nome,docente.cognome                                 | Documento non inserito |
-    | $c11:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c11:docente.nome,docente.cognome                                 | Documento non inserito |
+    | classe e materia                                                                  | docenti                           | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c1:docente.nome,docente.cognome  | Documento non inserito |
+    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c2:docente.nome,docente.cognome  | Documento non inserito |
+    | $c7:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome  | $c7:docente.nome,docente.cognome  | Documento non inserito |
+    | $c10:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c10:docente.nome,docente.cognome | Documento non inserito |
+    | $c11:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c11:docente.nome,docente.cognome | Documento non inserito |
+  E vedi la tabella non ordinata:
+    | classe e materia                                                                  | docenti                           | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c1:docente.nome,docente.cognome  | Documento non inserito |
+    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c3:docente.nome,docente.cognome  | Documento non inserito |
+    | $c7:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome  | $c8:docente.nome,docente.cognome  | Documento non inserito |
+    | $c10:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c10:docente.nome,docente.cognome | Documento non inserito |
+    | $c11:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c11:docente.nome,docente.cognome | Documento non inserito |
 
 Scenario: visualizza lista cattedre corretta per i documenti del 15 maggio
   Data modifica istanze di tipo "Classe":
