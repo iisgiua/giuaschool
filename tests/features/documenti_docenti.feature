@@ -87,10 +87,13 @@ Scenario: visualizza lista cattedre corretta per i programmi
   E selezioni opzione "Programmi" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi la tabella non ordinata:
-    | classe e materia                                      | docenti                                                           | documento              |
-    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
-    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
+  Allora vedi la tabella:
+    | classe e materia                                      | docenti                          | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome | Documento non inserito |
+    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome | Documento non inserito |
+  E vedi nella tabella i dati:
+    | classe e materia                                      | docenti                          | documento              |
+    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c3:docente.nome,docente.cognome | Documento non inserito |
 
 Scenario: visualizza lista cattedre corretta per le relazioni
   Data ricerca istanze di tipo "Materia":

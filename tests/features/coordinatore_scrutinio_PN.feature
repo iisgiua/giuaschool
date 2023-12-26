@@ -18,7 +18,7 @@ Scenario: visualizzazione pagina con voti mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "Religione / Att. alt.: manca il voto per uno o più alunni. Informatica: manca il voto per uno o più alunni."
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto per uno o più alunni\.\s*Informatica: manca il voto per uno o più alunni\./"
   E la sezione "#gs-main .alert-warning" non contiene "manca"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 
