@@ -302,9 +302,9 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->logDebug('laSezioneContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
-    $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()),
-      '+++ laSezioneContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
+    $text = ($sezione && $sezione->isVisible()) ? $sezione->getText() : '';
+    $this->logDebug('laSezioneContiene -> '.$ricerca.' | '.$text);
+    $this->assertTrue(preg_match($ricerca, $text), '+++ laSezioneContiene -> '.$ricerca.' | '.$text);
   }
 
   /**
@@ -316,9 +316,9 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneNonContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->logDebug('laSezioneNonContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
-    $this->assertFalse($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()),
-      '+++ laSezioneNonContiene -> '.$ricerca.' | '. ($sezione ? $sezione->getText() : ''));
+    $text = ($sezione && $sezione->isVisible()) ? $sezione->getText() : '';
+    $this->logDebug('laSezioneNonContiene -> '.$ricerca.' | '.$text);
+    $this->assertFalse(preg_match($ricerca, $text), '+++ laSezioneNonContiene -> '.$ricerca.' | '.$text);
   }
 
   /**
@@ -976,6 +976,7 @@ class BrowserContext extends BaseContext {
    *
    */
   protected function waitForPage(): void {
+    sleep(1);
     $this->session->wait(30000, "document.readyState === 'complete'");
   }
 

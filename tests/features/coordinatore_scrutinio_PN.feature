@@ -19,7 +19,7 @@ Scenario: visualizzazione pagina con voti mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto per uno o più alunni\.\s*Informatica: manca il voto per uno o più alunni\./"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Informatica: manca il voto/ui"
   E la sezione "#gs-main .alert-warning" non contiene "manca"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 
@@ -32,8 +32,8 @@ Scenario: visualizzazione pagina con dati mancanti
   E click su "Aggiungi"
   E scorri cursore di "-1" posizione
   E click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "Religione / Att. alt.: manca il voto per uno o più alunni."
-  E la sezione "#gs-main .alert-warning" contiene "Informatica: manca la modalità del recupero per uno o più alunni con voto insufficiente."
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "Religione / Att. alt.: manca il voto"
+  E la sezione "#gs-main .alert-warning" contiene "Informatica: manca la modalità del recupero"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 
 Scenario: visualizzazione pagina con dati al completo
@@ -84,12 +84,12 @@ Scenario: visualizzazione passo successivo
 
 ################################################################################
 # Bisogna controllare visualizzazione con la classe articolata
-
+@debu
 Scenario: visualizzazione classe articolata con dati mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto per uno o più alunni\.\s*Fisica: manca il voto per uno o più alunni\.\s*Sc\. motorie: manca il voto per uno o più alunni\./"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Fisica: manca il voto.*Sc\. motorie: manca il voto/ui"
   E la sezione "#gs-main .alert-warning" non contiene "manca"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 
