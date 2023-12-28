@@ -2539,15 +2539,29 @@ class RegistroUtil {
     $oggi = (new \DateTime())->format('Y-m-d');
     // ore di assenza per periodo
     foreach ($periodi as $k=>$periodo) {
+      // controllo ed.civica
+      $sql = '';
+      $parametri = ['materia' => $cattedra->getMateria(), 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede(),
+        'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()];
+      $parametri2 = ['alunno' => $alunno, 'materia' => $cattedra->getMateria(),
+        'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+        'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()];
+      if ($cattedra->getMateria()->getTipo() != 'E') {
+        $sql = " AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)";
+        $parametri['gruppo'] = $cattedra->getClasse()->getGruppo();
+        $parametri2['gruppo'] = $cattedra->getClasse()->getGruppo();
+      }
+      // controllo periodo
       if ($periodo['nome'] != '' && $oggi >= $periodo['inizio']) {
         // lezioni del periodo
         $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('SUM(so.durata)')
+          ->join('l.classe', 'c')
           ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
           ->join('so.orario', 'o')
-          ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-          ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-            'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
+          ->where('l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND c.anno=:anno AND c.sezione=:sezione'.$sql)
+          ->setParameters($parametri)
           ->getQuery()
           ->getSingleScalarResult();
         $ore = $lezioni;
@@ -2556,9 +2570,9 @@ class RegistroUtil {
         $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
           ->select('SUM(al.ore)')
           ->join('al.lezione', 'l')
-          ->where('al.alunno=:alunno AND l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine')
-          ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(),
-            'materia' => $cattedra->getMateria(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+          ->join('l.classe', 'c')
+          ->where('al.alunno=:alunno AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione'.$sql)
+          ->setParameters($parametri2)
           ->getQuery()
           ->getSingleScalarResult();
         $dati_periodo[$k]['assenze'] = number_format($assenze, 1, ',', null);

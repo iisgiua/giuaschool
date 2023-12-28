@@ -4,6 +4,7 @@ Funzionalità: inizio scrutinio del primo periodo
   Per iniziare lo scrutinio del primo periodo
   Come utente staff
   Bisogna controllare visualizzazione della pagina
+  Bisogna controllare visualizzazione con la classe articolata
   Utilizzando "_scrutinioPFixtures.yml"
 
 
@@ -79,3 +80,45 @@ Scenario: visualizzazione passo successivo
     | classe        | stato |
     | @classe_1A:id | 1     |
   E la sezione "#gs-main h2" contiene "Passo 1"
+
+
+################################################################################
+# Bisogna controllare visualizzazione con la classe articolata
+
+Scenario: visualizzazione classe articolata con dati mancanti
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto per uno o più alunni\.\s*Fisica: manca il voto per uno o più alunni\.\s*Sc\. motorie: manca il voto per uno o più alunni\./"
+  E la sezione "#gs-main .alert-warning" non contiene "manca"
+  E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
+
+Scenario: visualizzazione classe articolata con dati al completo
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "Chiudi"
+  E click su "Inserisci i voti mancanti" con indice "2"
+  E click su "Aggiungi"
+  E scorri cursore di "2" posizione
+  E click su "Conferma"
+  E click su "Chiudi"
+  E click su "Inserisci i voti mancanti" con indice "2"
+  E click su "Aggiungi"
+  E scorri cursore di "4" posizioni
+  E click su "Conferma"
+  E click su "Chiudi"
+  E click su "Inserisci i voti mancanti"
+  E click su "Aggiungi"
+  E scorri cursore di "-1" posizioni
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" non contiene "manca"
+  E la sezione "#gs-main .alert-warning" non contiene "manca"
+  E la sezione "#gs-main form #gs-button-start" contiene "Apri lo scrutinio"
+  E vedi nella tabella "1" le colonne:
+    | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Fisica | Sc. motorie | Ed. civica |
+  E vedi la tabella "2" non ordinata senza intestazioni:
+    | Alunno                                               | Religione / Att. alt.                                                                                                          | Italiano                                                         | Storia                                                           | Inglese                                                          | Matematica                                                       | Fisica                                                           | Sc. motorie                                                      | Ed. civica |
+    | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome       | #cas(@proposta_P_3CAMB_5:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@proposta_P_3CAMB_0:unico,0,NC,@proposta_P_3CAMB_0:unico)   | #cas(@proposta_P_3CAMB_1:unico,0,NC,@proposta_P_3CAMB_1:unico)   | #cas(@proposta_P_3CAMB_2:unico,0,NC,@proposta_P_3CAMB_2:unico)   | #cas(@proposta_P_3CAMB_3:unico,0,NC,@proposta_P_3CAMB_3:unico)   | #cas(@proposta_P_3CAMB_6:unico,0,NC,@proposta_P_3CAMB_6:unico)   | #cas(@proposta_P_3CAMB_4:unico,0,NC,@proposta_P_3CAMB_4:unico)   |            |
+    | @alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome       | NA                                                                                                                             | #cas(@proposta_P_3CAMB_10:unico,0,NC,@proposta_P_3CAMB_10:unico) | #cas(@proposta_P_3CAMB_11:unico,0,NC,@proposta_P_3CAMB_11:unico) | #cas(@proposta_P_3CAMB_12:unico,0,NC,@proposta_P_3CAMB_12:unico) | #cas(@proposta_P_3CAMB_13:unico,0,NC,@proposta_P_3CAMB_13:unico) | #cas(@proposta_P_3CAMB_16:unico,0,NC,@proposta_P_3CAMB_16:unico) | #cas(@proposta_P_3CAMB_14:unico,0,NC,@proposta_P_3CAMB_14:unico) |            |
+    | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome | Mediocre                                                                                                                       | #cas(@proposta_P_3CAMB_20:unico,0,NC,@proposta_P_3CAMB_20:unico) | #cas(@proposta_P_3CAMB_21:unico,0,NC,@proposta_P_3CAMB_21:unico) | #cas(@proposta_P_3CAMB_22:unico,0,NC,@proposta_P_3CAMB_22:unico) | #cas(@proposta_P_3CAMB_23:unico,0,NC,@proposta_P_3CAMB_23:unico) | 8                                                                | 10                                                               | --         |

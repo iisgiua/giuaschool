@@ -766,7 +766,9 @@ class BrowserContext extends BaseContext {
           break;
         }
       }
-      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found');
+      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found:'."\n".
+        '+++ Row: '.var_export($valori[$ri], true)."\n".
+        '+++ Table: '.var_export(array_map(fn($v) => array_map(fn($v1) => $this->convertSearch($v1), array_values($v)), $dati->getHash()), true)."\n");
       $righeTrovate[] = $dati->getRowLine($idx);
     }
   }
@@ -804,7 +806,9 @@ class BrowserContext extends BaseContext {
           break;
         }
       }
-      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found');
+      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found:'."\n".
+        '+++ Row: '.var_export($valori[$ri], true)."\n".
+        '+++ Table: '.var_export(array_map(fn($v) => array_map(fn($v1) => $this->convertSearch($v1), array_values($v)), $dati->getHash()), true)."\n");
       $righeTrovate[] = $dati->getRowLine($idx);
     }
   }

@@ -37,7 +37,7 @@ class SchedaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiMateriaAction(RegistroUtil $reg, int $cattedra, int $alunno, 
+  public function votiMateriaAction(RegistroUtil $reg, int $cattedra, int $alunno,
                                     string $periodo): Response {
     // inizializza variabili
     $info = null;
@@ -54,7 +54,7 @@ class SchedaController extends BaseController {
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
-    // valutazioni
+    // valutazioniitalia
     $materiaTipo = $cattedra->getMateria()->getTipo();
     $valutazioni[$materiaTipo] = unserialize(
       $this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_'.$materiaTipo));
@@ -64,7 +64,7 @@ class SchedaController extends BaseController {
       $valutazioni['lista'][$val] = trim($listaVoti[$key], '"');
     }
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

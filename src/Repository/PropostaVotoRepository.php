@@ -87,8 +87,10 @@ class PropostaVotoRepository extends EntityRepository {
                            ?Docente $docente = null): array {
     // query di base
     $query = $this->createQueryBuilder('pv')
-      ->where('pv.classe=:classe AND pv.periodo=:periodo')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo]);
+      ->join('pv.classe', 'c')
+      ->where("pv.periodo=:periodo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
+      ->setParameters(['periodo' => $periodo, 'anno' => $classe->getAnno(),
+        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()]);
     // filtro alunno
     if (!empty($alunni)) {
       $query->andWhere('pv.alunno IN (:alunni)')->setParameter('alunni', $alunni);

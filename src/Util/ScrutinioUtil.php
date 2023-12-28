@@ -78,6 +78,11 @@ class ScrutinioUtil {
   private $dblogger;
 
   /**
+   * @var RegistroUtil $reg Funzioni di utilità per il registro
+   */
+  private $reg;
+
+  /**
    * @var string $root Directory principale dell'applicazione
    */
   private $root;
@@ -596,13 +601,7 @@ class ScrutinioUtil {
       $alunni = $this->em->getRepository('App\Entity\Alunno')->alunniInData($data, $classe);
     } else {
       // alunni in classe alla data odierna
-      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
-        ->getQuery()
-        ->getResult();
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->alunniInData(new \DateTime(), $classe);
     }
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
@@ -611,9 +610,11 @@ class ScrutinioUtil {
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->join('c.classe', 'cl')
+      ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {

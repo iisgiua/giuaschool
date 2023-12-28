@@ -265,7 +265,7 @@ window.setInterval(function(){
       </div>
     </div>
   </div>
-  <div id="row_{{ form.debito.vars.id }}"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or form.unico.vars.value >= app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? ' style="display:none"' }}>
+  <div class="col-sm-12" id="row_{{ form.debito.vars.id }}"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or form.unico.vars.value >= app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? ' style="display:none"' }}>
     <div class="form-group">
       <label class="control-label col-sm-2 text-danger" for="{{ form.recupero.vars.id }}">Recupero</label>
       <div class="col-sm-10">

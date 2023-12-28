@@ -111,20 +111,20 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
     classe: '@classe_5A'
     alunno:
-  cattedra_3C_{1..5}:
+  cattedra_3C_{1..6}:
     attiva: true
     supplenza: false
     tipo: 'N'
-    materia: '@materia_curricolare_<current()>'
-    docente: '@docente_curricolare_<current()>'
+    materia: '@<case(<current()>, [6], [materia_RELIGIONE], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
     classe: '@classe_3C'
     alunno:
-  cattedra_3C_civica_{1..5}:
+  cattedra_3C_civica_{1..6}:
     attiva: true
     supplenza: false
     tipo: 'N'
     materia: '@materia_EDCIVICA'
-    docente: '@docente_curricolare_<current()>'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
     classe: '@classe_3C'
     alunno:
   cattedra_3CCHI_1:
@@ -175,3 +175,31 @@ App\Entity\PropostaVoto:
     classe: '@classe_1A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_P_3CAMB_{0..23}:
+    periodo: 'P'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [5,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    assenze: '<numberBetween(0, 100)>'
+    dati: '<(array())>'
+    classe: '@classe_<case(<($current%10)>, [6], [3CAMB], 3C)>'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_RELIGIONE,materia_itp_2,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_2,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_P_3CCHI_{0..23}:
+    periodo: 'P'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [5,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    assenze: '<numberBetween(0, 100)>'
+    dati: '<(array())>'
+    classe: '@classe_<case(<($current%10)>, [6], [3CCHI], 3C)>'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_RELIGIONE,materia_itp_3,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_3,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
