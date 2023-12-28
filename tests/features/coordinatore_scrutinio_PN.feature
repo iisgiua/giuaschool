@@ -5,7 +5,7 @@ Funzionalità: inizio scrutinio del primo periodo
   Come utente staff
   Bisogna controllare visualizzazione della pagina
   Bisogna controllare visualizzazione con la classe articolata
-  Utilizzando "_scrutinioPFixtures.yml"
+  Utilizzando "_scrutinioPNFixtures.yml"
 
 
 Contesto: login utente staff

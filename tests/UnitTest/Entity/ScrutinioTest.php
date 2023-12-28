@@ -68,7 +68,7 @@ class ScrutinioTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'periodo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'periodo' ? "".($i+1) :
           ($field == 'data' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'inizio' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'fine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
