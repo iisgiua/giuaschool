@@ -1166,6 +1166,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $value = $this->getVars($var);
         if (is_array($value)) {
           $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
+        } else {
+          $value = preg_quote($value, '/');
         }
         $values[] = $value;
       }

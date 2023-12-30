@@ -46,10 +46,12 @@ class ScrutinioPresenzaType extends AbstractType {
         'multiple' => false,
         'required' => true))
       ->add('sostituto', TextType::class, array('label' => false,
+        'empty_data' => '',
         'attr' => ['placeholder' => 'label.scrutinio_sostituto'],
         'trim' => true,
         'required' => false))
       ->add('surrogaProtocollo', TextType::class, array('label' => 'label.scrutinio_surroga_protocollo',
+        'empty_data' => '',
         'trim' => true,
         'required' => false))
       ->add('surrogaData', DateType::class, array('label' => 'label.scrutinio_surroga_data',

@@ -594,38 +594,38 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che il pulsante indicato sia abiliato
-   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
+   *  $testoParam: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
    *
-   * @Then pulsante :nome attivo
+   * @Then pulsante :testoParam attivo
    */
-  public function pulsanteAttivo($button): void {
-    $element = $this->session->getPage()->findButton($button);
+  public function pulsanteAttivo($testoParam): void {
+    $element = $this->session->getPage()->findButton($testoParam);
     $this->assertTrue(empty($element->getAttribute('disabled')));
   }
 
   /**
    * Controlla che il pulsante indicato sia disabiliato
-   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
+   *  $testoParam: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
    *
-   * @Then pulsante :nome inattivo
+   * @Then pulsante :testoParam inattivo
    */
-  public function pulsanteInattivo($button): void {
-    $element = $this->session->getPage()->findButton($button);
+  public function pulsanteInattivo($testoParam): void {
+    $element = $this->session->getPage()->findButton($testoParam);
     $this->assertTrue(!empty($element->getAttribute('disabled')));
   }
 
   /**
    * Seleziona opzione da lista di scelta tramite SELECT
    *  $valore: testo o valore dell'opzione
-   *  $lista: lista identifica tramite attributo id|name|label
+   *  $testoParam: lista identificata tramite attributo id|name|label
    *
-   * @Given opzione :valore selezionata da lista :lista
-   * @When selezioni opzione :valore da lista :lista
+   * @Given opzione :valore selezionata da lista :testoParam
+   * @When selezioni opzione :valore da lista :testoParam
    */
-  public function selezioniOpzioneDaLista($valore, $lista): void {
-    $field = $this->session->getPage()->findField($lista);
+  public function selezioniOpzioneDaLista($valore, $testoParam): void {
+    $field = $this->session->getPage()->findField($testoParam);
     if (!$field || !$field->isVisible()) {
-      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$lista.'")');
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$testoParam.'")');
       foreach ($labels as $lab) {
         if (!$lab->isVisible()) {
           continue;
@@ -648,19 +648,19 @@ class BrowserContext extends BaseContext {
   /**
    * Seleziona opzione da lista di scelta tramite RADIO BUTTON
    *  $valore: testo o valore dell'opzione
-   *  $lista: lista identifica tramite attributo id|name
+   *  $testoParam: lista identifica tramite attributo id|name
    *
-   * @Given opzione :valore selezionata da pulsanti radio :lista
-   * @When selezioni opzione :valore da pulsanti radio :lista
+   * @Given opzione :valore selezionata da pulsanti radio :testoParam
+   * @When selezioni opzione :valore da pulsanti radio :testoParam
    */
-  public function selezioniOpzioneDaPulsantiRadio($valore, $lista): void {
+  public function selezioniOpzioneDaPulsantiRadio($valore, $testoParam): void {
     $options = $this->session->getPage()->findAll('named', ['radio', $valore]);
     $this->assertNotEmpty($options);
     $option = null;
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($lista).'_\d+$/i', $id) || strtolower($lista) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
         $option = $opt;
         break;
       }
@@ -839,12 +839,12 @@ class BrowserContext extends BaseContext {
   /**
    * Inserisce un valore in un campo di testo specificato
    *  $valore: testo da inserire nel campo
-   *  $campo: campo identificato da attributi id|name o label
+   *  $testoParam: campo identificato da attributi id|name o label
    *
-   * @When inserisci :valore nel campo :campo
+   * @When inserisci :valore nel campo :testoParam
    */
-  public function inserisciNelCampo($valore, $campo): void {
-    $fields = $this->session->getPage()->findAll('named', ['field', $campo]);
+  public function inserisciNelCampo($valore, $testoParam): void {
+    $fields = $this->session->getPage()->findAll('named', ['field', $testoParam]);
     $this->assertNotEmpty($fields);
     $field = null;
     foreach ($fields as $f) {
@@ -884,15 +884,15 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che il valore impostato nel campo del form sia uguale a quello indicato
-   *  $campo: campo del form identificato tramite attributo id|name|label
+   *  $testoParam: campo del form identificato tramite attributo id|name|label
    *  $valore: testo o valore presente nel campo del form
    *
-   * @Then il campo :campo contiene :valore
+   * @Then il campo :testoParam contiene :valore
    */
-  public function campoContiene($campo, $valore): void {
-    $field = $this->session->getPage()->findField($campo);
+  public function campoContiene($testoParam, $valore): void {
+    $field = $this->session->getPage()->findField($testoParam);
     if (!$field || !$field->isVisible()) {
-      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$campo.'")');
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$testoParam.'")');
       foreach ($labels as $lab) {
         if (!$lab->isVisible()) {
           continue;
@@ -909,15 +909,15 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che il valore impostato nel campo del form sia diverso da quello indicato
-   *  $campo: campo del form identificato tramite attributo id|name|label
+   *  $testoParam: campo del form identificato tramite attributo id|name|label
    *  $valore: testo o valore del campo del form
    *
-   * @Then il campo :campo non contiene :valore
+   * @Then il campo :testoParam non contiene :valore
    */
-  public function campoNonContiene($campo, $valore): void {
-    $field = $this->session->getPage()->findField($campo);
+  public function campoNonContiene($testoParam, $valore): void {
+    $field = $this->session->getPage()->findField($testoParam);
     if (!$field || !$field->isVisible()) {
-      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$campo.'")');
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$testoParam.'")');
       foreach ($labels as $lab) {
         if (!$lab->isVisible()) {
           continue;

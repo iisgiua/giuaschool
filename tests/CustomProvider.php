@@ -8,7 +8,6 @@
 
 namespace App\Tests;
 
-use App\Entity\Alunno;
 use Doctrine\Common\Collections\ArrayCollection;
 use Faker\Generator;
 use Faker\Provider\Base;
@@ -26,11 +25,18 @@ class CustomProvider extends Base {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * Lista dei dati che devono essere aggiornati dopo la memorizzazione su db
+   * Lista degli attributi da aggiornare dopo la memorizzazione su db
    *
-   * @var array $postPersist Lista delle informazioni per la modifica post memorizzazione
+   * @var array $postPersistProperty Lista delle informazioni sugli attributi di classe da modificare
    */
-  protected static array $postPersist = [];
+  protected static array $postPersistProperty = [];
+
+  /**
+   * Lista dei dati da aggiornare dopo la memorizzazione su db
+   *
+   * @var array $postPersistData Lista delle informazioni sui dati da modificare
+   */
+  protected static array $postPersistData = [];
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -42,7 +48,8 @@ class CustomProvider extends Base {
    */
   public function __construct(Generator $generator) {
     parent::__construct($generator);
-    $postPersist = [];
+    $postPersistProperty = [];
+    $postPersistData = [];
   }
 
   /**
@@ -119,7 +126,7 @@ class CustomProvider extends Base {
   }
 
   /**
-   * Crea e restituisce una lista di id relativi agli oggetti indicati.
+   * Crea e restituisce una lista di id relativi agli oggetti indicati, da inserire in un attributo di classe.
    * Viene creata una lista vuota e memorizzati i dati per l'aggiornamento dopo la memorizzazione su db.
    * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
    *
@@ -132,7 +139,27 @@ class CustomProvider extends Base {
    */
   public function arrayId($name, $property, $obj, $args): array {
     // memorizza informazioni
-    static::$postPersist[$name][$property] = [$obj, array_slice(func_get_args(), 3)];
+    static::$postPersistProperty[$name][$property] = [$obj, array_slice(func_get_args(), 3)];
+    // restituisce lista vuota
+    return array();
+  }
+
+  /**
+   * Crea e restituisce una lista di id relativi agli oggetti indicati, da inserire in un campo di un attributo di classe.
+   * Viene creata una lista vuota e memorizzati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
+   * @param string $property Nome dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param string $field Nome del campo dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param mixed $obj Oggetto su cui devono essere memorizzati gli id
+   * @param mixed $args Lista di oggetti da cui leggere gli id, passati come parametri variabili
+   *
+   * @return array Restituisce una lista vuota
+   */
+  public function arrayDataId($name, $property, $field, $obj, $args): array {
+    // memorizza informazioni
+    static::$postPersistData[$name][$property][$field] = [$obj, array_slice(func_get_args(), 4)];
     // restituisce lista vuota
     return array();
   }
@@ -142,40 +169,20 @@ class CustomProvider extends Base {
    *
    */
   public function postPersistArrayId(): void {
-    foreach (static::$postPersist as $name => $attrs) {
+    foreach (static::$postPersistProperty as $name => $attrs) {
       foreach ($attrs as $property => $list) {
         $list[0]->{'set'.ucfirst($property)}(array_map(function($o) { return $o->getId(); }, $list[1]));
       }
     }
-  }
-
-  /**
-   * Restituisce un voto casuale (0-10)
-   *
-   * @return int Voto generato
-   */
-  public function voto(): int {
-    return static::numberBetween(0, 10);
-  }
-
-  /**
-   * Restituisce un voto casuale di Ed.Civica (2-10)
-   *
-   * @return int Voto generato
-   */
-  public function votoEdCivica(): int {
-    return static::numberBetween(2, 10);
-  }
-
-  /**
-   * Restituisce un voto casuale di religione (20-27)
-   *
-   * @param Alunno $alunno Istanza dell'alunno
-   *
-   * @return int|null Voto generato
-   */
-  public function votoReligione(Alunno $alunno): ?int {
-    return in_array($alunno->getReligione(), ['S', 'A'], true) ? static::numberBetween(20, 27) : null;
+    foreach (static::$postPersistData as $name => $attrs) {
+      foreach ($attrs as $property => $fields) {
+        foreach ($fields as $field => $list) {
+          $values = $list[0]->{'get'.ucfirst($property)}();
+          $values[$field] = array_map(function($o) { return $o->getId(); }, $list[1]);
+          $list[0]->{'set'.ucfirst($property)}($values);
+        }
+      }
+    }
   }
 
 }

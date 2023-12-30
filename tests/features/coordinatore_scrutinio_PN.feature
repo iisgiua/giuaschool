@@ -19,7 +19,8 @@ Scenario: visualizzazione pagina con voti mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Informatica: manca il voto/ui"
+  Allora la sezione "#gs-main h2" contiene "Proposte di voto"
+  E la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Informatica: manca il voto/ui"
   E la sezione "#gs-main .alert-warning" non contiene "manca"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 
@@ -84,12 +85,13 @@ Scenario: visualizzazione passo successivo
 
 ################################################################################
 # Bisogna controllare visualizzazione con la classe articolata
-@debu
+
 Scenario: visualizzazione classe articolata con dati mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Fisica: manca il voto.*Sc\. motorie: manca il voto/ui"
+  Allora la sezione "#gs-main h2" contiene "Proposte di voto"
+  E la sezione "#gs-modal-error .alert-danger" contiene "/Religione \/ Att\. alt\.: manca il voto.*Fisica: manca il voto.*Sc\. motorie: manca il voto/ui"
   E la sezione "#gs-main .alert-warning" non contiene "manca"
   E la sezione "#gs-main form #gs-button-start" non contiene "Apri lo scrutinio"
 

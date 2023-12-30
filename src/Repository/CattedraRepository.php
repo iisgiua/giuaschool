@@ -115,10 +115,10 @@ class CattedraRepository extends BaseRepository {
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
       ->join('c.classe', 'cl')
-      ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")
+      ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
       ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo(),])
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     // elimina docenti in più

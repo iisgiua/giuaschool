@@ -8,6 +8,7 @@
 
 namespace App\Tests;
 
+use App\Entity\Alunno;
 use Faker\Generator;
 use Faker\Provider\it_IT\Person;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -367,6 +368,35 @@ class PersonaProvider extends Person {
     }
     // restituisce i dati generati
     return $tel;
+  }
+
+  /**
+   * Restituisce un voto casuale (0-10)
+   *
+   * @return int Voto generato
+   */
+  public function voto(): int {
+    return static::numberBetween(0, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di Ed.Civica (2-10)
+   *
+   * @return int Voto generato
+   */
+  public function votoEdCivica(): int {
+    return static::numberBetween(2, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di religione (20-27)
+   *
+   * @param Alunno $alunno Istanza dell'alunno
+   *
+   * @return int|null Voto generato
+   */
+  public function votoReligione(Alunno $alunno): ?int {
+    return in_array($alunno->getReligione(), ['S', 'A'], true) ? static::numberBetween(20, 27) : null;
   }
 
 }

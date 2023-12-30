@@ -571,7 +571,7 @@ class ScrutinioUtil {
     if (method_exists($this, $func) && ($res = $this->$func($docente, $request, $form, $classe, $scrutinio))) {
       // ok
       return $stato;
-    } elseif ($res === null) {
+    } elseif (empty($res)) {
       // situazione anomala: forza ricarica pagina
       return null;
     }
@@ -775,11 +775,15 @@ class ScrutinioUtil {
           $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
+            ->join('l.classe', 'c')
             ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-            ->where('al.alunno=:alunno AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND (l.classe=:classe OR l.classe=cc.classe)')
+            ->where('al.alunno=:alunno AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine')
+            ->andWhere("(c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe")
             ->setParameters(['alunno' => $alunno, 'materia' => $materia,
               'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'), 'classe' => $classe->getId()])
+              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
+              'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+              'gruppo' => $classe->getGruppo()])
             ->getQuery()
             ->getSingleScalarResult();
           $ore = ($ore ? ((int) $ore) : 0);
@@ -928,7 +932,7 @@ class ScrutinioUtil {
     }
     // imposta data/ora
     $dati['scrutinio']['data'] = $scrutinio->getData() ? $scrutinio->getData() : new \DateTime();
-    $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
+    $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 20) ? '00' : '30'));
     $dati['scrutinio']['inizio'] = $scrutinio->getInizio() ? $scrutinio->getInizio() : $ora;
     // imposta altri valori
     $valori = $scrutinio->getDati();
