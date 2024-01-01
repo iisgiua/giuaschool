@@ -1,7 +1,7 @@
 # language: it
 
-Funzionalità: inizio scrutinio del primo periodo
-  Per iniziare lo scrutinio del primo periodo
+Funzionalità: primo passo scrutinio del primo periodo
+  Per svolgere il primo passo dello scrutinio del primo periodo
   Come utente staff
   Bisogna controllare visualizzazione della pagina
   Bisogna controllare visualizzazione con la classe articolata
@@ -57,7 +57,10 @@ Scenario: visualizzazione passo successivo
     | @classe_1A:id |
   Quando selezioni opzione "@docente_curricolare_1:id" da lista "scrutinio_segretario"
   E click su "Conferma"
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora vedi la pagina "coordinatore_scrutinio" con parametri:
+    | classe        | stato |
+    | @classe_1A:id | 2     |
+  E la sezione "#gs-main h2" contiene "Passo 2"
 
 Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -74,7 +77,7 @@ Scenario: memorizzazione dati e passo successivo
   E selezioni opzione "@docente_curricolare_1:id" da lista "scrutinio_presiede_docente"
   E selezioni opzione "@docente_curricolare_2:id" da lista "scrutinio_segretario"
   E click su "Conferma"
-  E click su "Torna al passo precedente"
+  E click su "passo precedente"
   Allora la sezione "#gs-main h2" contiene "Passo 1"
   E il campo "scrutinio_data" contiene "01/01/2020"
   E il campo "scrutinio_inizio" contiene "10:30"

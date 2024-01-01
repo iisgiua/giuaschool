@@ -489,6 +489,34 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Clicca su link o pulsante all'interno di una data sezione
+   *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   *  $selettore: selettore css che individua più sezioni o elementi in cui cercare il testo
+   *  $ricerca: testo da cercare come espressione regolare
+   *
+   * @When click su :testo in sezione :selettore che contiene :ricerca
+   */
+  public function clickInSezione($testo, $selettore, $ricerca): void {
+    $sezioni = $this->session->getPage()->findAll('css', $selettore);
+    $this->assertNotEmpty($sezioni);
+    $trovato = false;
+    foreach ($sezioni as $sezione) {
+      $text = $sezione->isVisible() ? $sezione->getText() : '';
+      if (preg_match($ricerca, $text)) {
+        $trovato = true;
+        break;
+      }
+    }
+    $this->assertTrue($trovato, 'Selector not found');
+    $link = $sezione->find('named', array('link_or_button', $testo));
+    $this->assertNotEmpty($link);
+    $link->click();
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
+    $this->waitForPage();
+  }
+
+  /**
    * Controlla che sia stato scaricato il file indicato
    *  $testoParam: nome assegnato al file (con parametri)
    *  $dimensione: lunghezza del file in byte

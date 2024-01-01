@@ -1194,9 +1194,11 @@ class ScrutinioUtil {
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+        ->join('c.classe', 'cl')
+        ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+          'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {

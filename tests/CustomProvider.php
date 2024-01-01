@@ -127,7 +127,7 @@ class CustomProvider extends Base {
 
   /**
    * Crea e restituisce una lista di id relativi agli oggetti indicati, da inserire in un attributo di classe.
-   * Viene creata una lista vuota e memorizzati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Viene creata una lista vuota e conservati i dati per l'aggiornamento dopo la memorizzazione su db.
    * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
    *
    * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
@@ -146,7 +146,7 @@ class CustomProvider extends Base {
 
   /**
    * Crea e restituisce una lista di id relativi agli oggetti indicati, da inserire in un campo di un attributo di classe.
-   * Viene creata una lista vuota e memorizzati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Viene creata una lista vuota e conservati i dati per l'aggiornamento dopo la memorizzazione su db.
    * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
    *
    * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
@@ -159,9 +159,94 @@ class CustomProvider extends Base {
    */
   public function arrayDataId($name, $property, $field, $obj, $args): array {
     // memorizza informazioni
-    static::$postPersistData[$name][$property][$field] = [$obj, array_slice(func_get_args(), 4)];
+    static::$postPersistData[$name][$property]['A:'.$field] = [$obj, array_slice(func_get_args(), 4)];
     // restituisce lista vuota
     return array();
+  }
+
+  /**
+   * Crea e restituisce un vettore associativo di id relativi agli oggetti indicati, da inserire in un campo di un attributo di classe.
+   * Viene creata una lista vuota e conservati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
+   * @param string $property Nome dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param string $field Nome del campo dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param mixed $obj Oggetto su cui devono essere memorizzati gli id
+   * @param array $keys Lista di chiavi del vettore associativo (id o altro)
+   * @param array $values Lista di valori del vettore associativo (id o altro)
+   *
+   * @return array Restituisce una lista vuota
+   */
+  public function arrayMultiDataId($name, $property, $field, $obj, $keys, $values): array {
+    // memorizza informazioni
+    static::$postPersistData[$name][$property]['M:'.$field] = [$obj, $keys, $values];
+    // restituisce lista vuota
+    return array();
+  }
+
+  /**
+   * Crea e restituisce un vettore multidimensionale associativo di id relativi agli oggetti indicati, da inserire in un campo di un attributo di classe.
+   * Viene creata una lista vuota e conservati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
+   * @param string $property Nome dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param string $field Nome del campo dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param mixed $obj Oggetto su cui devono essere memorizzati gli id
+   * @param array $keys Lista di chiavi del vettore associativo (id o altro)
+   * @param array $args Lista di coppie chiave-valore del vettore associativo (id o altro)
+   *
+   * @return array Restituisce una lista vuota
+   */
+  public function arrayMulti2DataId($name, $property, $field, $obj, $keys, $args): array {
+    // memorizza informazioni
+    static::$postPersistData[$name][$property]['2:'.$field] = [$obj, $keys, array_slice(func_get_args(), 5)];
+    // restituisce lista vuota
+    return array();
+  }
+
+  /**
+   * Crea e restituisce una lista di oggetti con id relativi agli oggetti indicati, da inserire in un campo di un attributo di classe.
+   * Viene creata una lista vuota e conservati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui deve essere memorizzata la lista
+   * @param string $property Nome dell'attributo dell'oggetto sul quale deve essere memorizzata la lista
+   * @param string $field Nome del campo dell'attributo dell'oggetto sul quale deve essere memorizzata la lista
+   * @param mixed $obj Oggetto su cui deve essere memorizzata la lista
+   * @param string $class Nome della classe di cui creare i nuovi oggetti
+   * @param array $keys Lista di chiavi del vettore associativo (id o altro)
+   * @param mixed $args Lista di coppie chiave-valore da impostare nell'oggetto creato
+   *
+   * @return array Restituisce una lista vuota
+   */
+  public function arrayObjDataId($name, $property, $field, $obj, $class, $keys, $args): array {
+    // memorizza informazioni
+    static::$postPersistData[$name][$property]['O:'.$field] = [$obj, $class, $keys, array_slice(func_get_args(), 6)];
+    // restituisce lista vuota
+    return array();
+  }
+
+
+  /**
+   * Crea e restituisce un id relativo all'oggetto indicato, da inserire in un campo di un attributo di classe.
+   * Viene creata un valore vuoto e conservato il dato per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui deve essere memorizzato l'id
+   * @param string $property Nome dell'attributo dell'oggetto sul quale deve essere memorizzato l'id
+   * @param string $field Nome del campo dell'attributo dell'oggetto sul quale deve essere memorizzato l'id
+   * @param mixed $obj Oggetto su cui deve essere memorizzato l'id
+   * @param mixed $arg Oggetto da cui leggere l'id
+   *
+   * @return null Restituisce un valore nullo
+   */
+  public function dataId($name, $property, $field, $obj, $arg) {
+    // memorizza informazioni
+    static::$postPersistData[$name][$property]['S:'.$field] = [$obj, [$arg]];
+    // restituisce un valore vuoto
+    return null;
   }
 
   /**
@@ -178,7 +263,54 @@ class CustomProvider extends Base {
       foreach ($attrs as $property => $fields) {
         foreach ($fields as $field => $list) {
           $values = $list[0]->{'get'.ucfirst($property)}();
-          $values[$field] = array_map(function($o) { return $o->getId(); }, $list[1]);
+          $fieldName = substr($field, 2);
+          if (substr($field, 0, 2) == 'A:') {
+            // lista
+            $values[$fieldName] = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
+          } elseif (substr($field, 0, 2) == 'M:') {
+            // vettore associativo
+            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
+            $arrayValues = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[2]);
+            $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
+          } elseif (substr($field, 0, 2) == '2:') {
+            // vettore multidimensionale associativo
+            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
+            $arrayValues = [];
+            foreach ($list[2] as $arrayList) {
+              $arrayList = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $arrayList);
+              $index = 0;
+              $temp = [];
+              foreach ($arrayList as $arrayValue) {
+                if ($index % 2 == 0) {
+                  $temp[$arrayValue] = $arrayList[$index + 1];
+                }
+                $index++;
+              }
+              $arrayValues[] = $temp;
+            }
+            $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
+          } elseif (substr($field, 0, 2) == 'O:') {
+            // vettore di oggetti
+            $class = $list[1];
+            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[2]);
+            $arrayValues = [];
+            foreach ($list[3] as $arrayList) {
+              $arrayList = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $arrayList);
+              $index = 0;
+              $object = new $class();
+              foreach ($arrayList as $arrayValue) {
+                if ($index % 2 == 0) {
+                  $object->{'set'.ucfirst($arrayValue)}($arrayList[$index + 1]);
+                }
+                $index++;
+              }
+              $arrayValues[] = $object;
+            }
+            $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
+          } else {
+            // valore
+            $values[$fieldName] = (is_object($list[1][0]) && get_class($list[1][0]) != 'DateTime') ? $list[1][0]->getId() : $list[1][0];
+          }
           $list[0]->{'set'.ucfirst($property)}($values);
         }
       }

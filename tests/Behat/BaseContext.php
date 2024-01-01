@@ -962,6 +962,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "#slg($v1)": trasforma in maiuscolo con - per caratteri non alfanumerici (slug) il valore indicato
    *  "#cas($v,c1:c2:..,r1:r2:..,$d)": confronta $v con le costanti $c e se lo trova restituisce il valore $r corrispondente, altrimenti restituisce $d
+   *  "#med($v1,v2,...)": restituice la media dei valori $v
+   *  "#mdc($v1,v2,...)": restituice la media dei voti di Ed.Civica $v
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -977,7 +979,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|arc|upr|slg|cas)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|arc|upr|slg|cas|med|mdc)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -1023,6 +1025,17 @@ abstract class BaseContext extends RawMinkContext implements Context {
           }
         }
         return $caseD;
+      }
+      // controlla funzione media
+      if ($fn[1] == 'med' || $fn[1] == 'mdc') {
+        $vars = explode(',', substr(substr($var, 5), 0 , -1));
+        $values = [];
+        foreach ($vars as $var) {
+          $temp = in_array(substr($var, 0, 1), ['$', '#', '@']) ? $this->getVar($var) : $var;
+          $values[] = ($fn[1] == 'mdc' && $temp == 2) ? 0 : $temp;
+        }
+        $media = (float) array_reduce($values, fn($c, $i) => $c + $i, 0) / count($values);
+        return number_format($media, 2, ',', null);
       }
     }
     // tipo di variabile

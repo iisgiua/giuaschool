@@ -399,4 +399,26 @@ class PersonaProvider extends Person {
     return in_array($alunno->getReligione(), ['S', 'A'], true) ? static::numberBetween(20, 27) : null;
   }
 
+  /**
+   * Restituisce una data creata da una stringa costante
+   *
+   * @param string $data Stringa data nel formato "gg/mm/aaaa"
+   *
+   * @return \DateTime Oggetto data
+   */
+  public function dataFissa(string $data): \DateTime {
+    return \DateTime::createFromFormat('d/m/Y H:i:s', $data.' 00:00:00');
+  }
+
+  /**
+   * Restituisce un orario creato da una stringa costante
+   *
+   * @param string $ora Stringa ora nel formato "hh:mm"
+   *
+   * @return \DateTime Oggetto data
+   */
+  public function oraFissa(string $ora): \DateTime {
+    return \DateTime::createFromFormat('H:i:s', $ora.':00');
+  }
+
 }

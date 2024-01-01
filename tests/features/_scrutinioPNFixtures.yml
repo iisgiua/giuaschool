@@ -28,7 +28,7 @@ App\Entity\DefinizioneScrutinio:
     periodo: 'P'
     dataProposte: '<dateTimeBetween("-1 month", "now")>'
     struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
-    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>, <(new \DateTime())>])>'
+    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(null)>, <(null)>, <(null)>, <(null)>, <(null)>])>'
 
 App\Entity\Cattedra:
   cattedra_1A_{1..12}:
@@ -188,7 +188,7 @@ App\Entity\PropostaVoto:
     dati: '<(array())>'
     classe: '@classe_<case(<($current%10)>, [6], [3CAMB], 3C)>'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_RELIGIONE,materia_itp_2,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
-    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_2,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_2,docente_itp_2,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
   proposta_P_3CCHI_{0..23}:
     periodo: 'P'
     orale:
@@ -202,4 +202,4 @@ App\Entity\PropostaVoto:
     dati: '<(array())>'
     classe: '@classe_<case(<($current%10)>, [6], [3CCHI], 3C)>'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_RELIGIONE,materia_itp_3,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
-    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_3,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_3,docente_itp_3,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
