@@ -740,8 +740,10 @@ class ScrutinioController extends BaseController {
       // scrutini altri periodi
       $materia = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
-        ->setParameters(['materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
+        ->join('c.classe', 'cl')
+        ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();

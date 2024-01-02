@@ -389,6 +389,33 @@ class PersonaProvider extends Person {
   }
 
   /**
+   * Restituisce un voto casuale di Ed.Civica, escluso NC (3-10)
+   *
+   * @return int Voto generato
+   */
+  public function votoEdCivicaNoNC(): int {
+    return static::numberBetween(3, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di Condotta (4-10)
+   *
+   * @return int Voto generato
+   */
+  public function votoCondotta(): int {
+    return static::numberBetween(4, 10);
+  }
+
+  /**
+   * Restituisce un voto casuale di Condotta, escluso NC (5-10)
+   *
+   * @return int Voto generato
+   */
+  public function votoCondottaNoNC(): int {
+    return static::numberBetween(5, 10);
+  }
+
+  /**
    * Restituisce un voto casuale di religione (20-27)
    *
    * @param Alunno $alunno Istanza dell'alunno

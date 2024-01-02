@@ -169,7 +169,7 @@ App\Entity\PropostaVoto:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
     unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
-    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: '<numberBetween(0, 100)>'
     dati: '<(array())>'
     classe: '@classe_1A'
@@ -183,7 +183,7 @@ App\Entity\PropostaVoto:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
     unico: '<case(<($current%10)>, [5,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
-    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: '<numberBetween(0, 100)>'
     dati: '<(array())>'
     classe: '@classe_<case(<($current%10)>, [6], [3CAMB], 3C)>'
@@ -197,7 +197,7 @@ App\Entity\PropostaVoto:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
     unico: '<case(<($current%10)>, [5,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
-    recupero: <case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: '<numberBetween(0, 100)>'
     dati: '<(array())>'
     classe: '@classe_<case(<($current%10)>, [6], [3CCHI], 3C)>'

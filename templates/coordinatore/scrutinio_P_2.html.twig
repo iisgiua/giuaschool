@@ -50,7 +50,7 @@
           {% endif %}
         {% elseif m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
-        {% elseif dati.voti[alunno][materia].unico is not defined %}
+        {% elseif dati.voti[alunno][materia].unico is not defined or dati.voti[alunno][materia].unico is empty %}
             <span>--</span>
         {% else %}
             <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>

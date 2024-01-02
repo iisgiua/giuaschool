@@ -1,6 +1,6 @@
 # language: it
 
-Funzionalità: secondo passo scrutinio del primo periodo
+Funzionalità: secondo passo dello scrutinio del primo periodo
   Per svolgere il secondo passo dello scrutinio del primo periodo
   Come utente staff
   Bisogna controllare visualizzazione della pagina

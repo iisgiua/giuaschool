@@ -22,7 +22,7 @@ App\Entity\Materia:
     Media: false
     Ordinamento: 0
   materia_RELIGIONE:
-    Nome: 'Religione Cattolica o attivit&agrave; alternative'
+    Nome: 'Religione Cattolica o attività alternative'
     NomeBreve: 'Religione / Att. alt.'
     Tipo: 'R'
     Valutazione: 'G'

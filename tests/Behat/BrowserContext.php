@@ -493,10 +493,12 @@ class BrowserContext extends BaseContext {
    *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
    *  $selettore: selettore css che individua più sezioni o elementi in cui cercare il testo
    *  $ricerca: testo da cercare come espressione regolare
+   *  $indice: indice progressivo dei pulsanti presenti nella sezione (parte da 1)
    *
    * @When click su :testo in sezione :selettore che contiene :ricerca
+   * @When click su :testo in sezione :selettore che contiene :ricerca con indice :indice
    */
-  public function clickInSezione($testo, $selettore, $ricerca): void {
+  public function clickInSezione($testo, $selettore, $ricerca, $indice=1): void {
     $sezioni = $this->session->getPage()->findAll('css', $selettore);
     $this->assertNotEmpty($sezioni);
     $trovato = false;
@@ -508,9 +510,9 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato, 'Selector not found');
-    $link = $sezione->find('named', array('link_or_button', $testo));
-    $this->assertNotEmpty($link);
-    $link->click();
+    $links = $sezione->findAll('named', array('link_or_button', $testo));
+    $this->assertNotEmpty($links[$indice - 1]);
+    $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
     sleep(1);
     $this->waitForPage();
@@ -882,6 +884,19 @@ class BrowserContext extends BaseContext {
       $field = $f;
       break;
     }
+    $this->assertNotEmpty($field);
+    $field->setValue($valore);
+  }
+
+  /**
+   * Inserisce un valore nel campo nascosto specificato
+   *  $valore: testo da inserire nel campo
+   *  $testoParam: campo identificato dall'id
+   *
+   * @When inserisci :valore nel campo nascosto :testoParam
+   */
+  public function inserisciNelCampoNascosto($valore, $testoParam): void {
+    $field = $this->session->getPage()->find('css', 'input[id="'.$testoParam.'"]');
     $this->assertNotEmpty($field);
     $field->setValue($valore);
   }
