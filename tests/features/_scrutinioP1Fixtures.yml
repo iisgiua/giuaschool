@@ -178,9 +178,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_P_1A_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_P_1A_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_P_1A_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,1,2,3,4,5,7], [4,5,6,7,8,9,<(null)>], @proposta_P_1A_<current()>->unico)>'
+    debito:
+    recupero:
     assenze: '<numberBetween(0, 100)>'
     alunno: '<case(<($current%10)>, [7], [@proposta_P_1A_0->alunno], @proposta_P_1A_<current()>->alunno)>'
     materia: '<case(<($current%10)>, [7], [@materia_EDCIVICA], @proposta_P_1A_<current()>->materia)>'

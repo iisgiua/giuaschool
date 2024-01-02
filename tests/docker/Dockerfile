@@ -41,7 +41,7 @@ RUN \
   php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Composer installer verified'; } else { echo 'Composer installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
   php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   rm composer-setup.php && \
-# Configure Apache/PHP
+# Configure Apache/PHP/MySQL
   a2enmod rewrite && \
   a2enmod ssl && \
   sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/apache2/php.ini && \
@@ -52,6 +52,7 @@ COPY ./tests/docker/apache2-certificate.crt /etc/ssl/cert/apache2-certificate.cr
 COPY ./tests/docker/apache2-certificate.key /etc/ssl/private/apache2-certificate.key
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.conf
+COPY ./tests/docker/50-client.cnf /etc/mysql/mariadb.conf.d/50-client.cnf
 
 
 ########## Second Step - Build Symfony framework
