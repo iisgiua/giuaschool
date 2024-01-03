@@ -99,6 +99,8 @@ $(document).ready(function() {
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+    var dati = {numeroVerbale: $('#scrutinio_numeroVerbale').val(), fine: $('#scrutinio_fine').val()};
+    $.post("{{ path('coordinatore_scrutinio_aggiorna', {scrutinio: dati.scrutinio.id}) }}", dati);
   });
   $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
     $('form[name="scrutinio"]').submit();

@@ -1786,7 +1786,7 @@ class ScrutinioUtil {
     }
     if ($periodo != '1') {
       // legge ora finale
-      $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
+      $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 20) ? '00' : '30'));
       $dati['scrutinio']['fine'] = $scrutinio->getFine() ? $scrutinio->getFine() : $ora;
     } else {
       // legge data
@@ -5041,7 +5041,7 @@ class ScrutinioUtil {
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBY(['periodo' => $periodo, 'classe' => $classe]);
     $dati_scrutinio = $scrutinio->getDati();
     // legge ora fine
-    $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
+    $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 20) ? '00' : '30'));
     $dati['scrutinio']['id'] = $scrutinio->getId();
     $dati['scrutinio']['fine'] = $scrutinio->getFine() ? $scrutinio->getFine() : $ora;
     // legge numero verbale

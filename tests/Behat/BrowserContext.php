@@ -702,6 +702,56 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla se l'opzione è selezionata in lista di scelta tramite SELECT
+   *  $valore: testo o valore dell'opzione
+   *  $testoParam: lista identifica tramite attributo id|name
+   *
+   * @Then vedi opzione :valore in lista :testoParam
+   */
+  public function vediOpzioneInLista($valore, $testoParam): void {
+    $field = $this->session->getPage()->findField($testoParam);
+    if (!$field || !$field->isVisible()) {
+      $field = null;
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$testoParam.'")');
+      foreach ($labels as $lab) {
+        if (!$lab->isVisible()) {
+          continue;
+        }
+        $id = $lab->getAttribute('for');
+        $field = $this->session->getPage()->find('css', 'SELECT[id="'.$id.'"]');
+        if ($field) {
+          break;
+        }
+      }
+    }
+    $this->assertNotEmpty($field);
+    $option = $field->find('named', ['option', $valore]);
+    $this->assertTrue($option && $option->isSelected());
+  }
+
+  /**
+   * Controlla se l'opzione è selezionata in lista di scelta tramite RADIO BUTTON
+   *  $valore: testo o valore dell'opzione
+   *  $testoParam: lista identifica tramite attributo id|name
+   *
+   * @Then vedi opzione :valore in pulsanti radio :testoParam
+   */
+  public function vediOpzioneSelezionataInPulsantiRadio($valore, $testoParam): void {
+    $options = $this->session->getPage()->findAll('named', ['radio', $valore]);
+    $this->assertNotEmpty($options);
+    $option = null;
+    foreach ($options as $opt) {
+      $id = $opt->getAttribute('id');
+      $name = $opt->getAttribute('name');
+      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+        $option = $opt;
+        break;
+      }
+    }
+    $this->assertTrue($option && $option->isChecked());
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione e dati da confrontare con la tabella indicata
