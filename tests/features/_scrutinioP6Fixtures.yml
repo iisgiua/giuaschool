@@ -1,10 +1,10 @@
 ####################
-# _scrutinioP1Fixtures - dati per i test sugli scrutini del primo periodo, passo 3
+# _scrutinioP6Fixtures - dati per i test sugli scrutini del primo periodo, passo 6
 ####################
 
 
 include:
-  - _scrutinioP4Fixtures.yml
+  - _scrutinioP5Fixtures.yml
 
 
 parameters:

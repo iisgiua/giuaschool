@@ -238,7 +238,7 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [0,1,2,3,4,5,7], [4,5,6,7,8,9,<(null)>], @proposta_P_1A_<current()>->unico)>'
+    unico: '<case(<($current%10)>, [0,1,2,3,4,6,7], [4,5,6,7,8,9,<(null)>], @proposta_P_3CAMB_<current()>->unico)>'
     debito:
     recupero:
     assenze: '<numberBetween(0, 100)>'
@@ -274,7 +274,7 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [0,1,2,3,4,5,7], [4,5,6,7,8,9,<(null)>], @proposta_P_1A_<current()>->unico)>'
+    unico: '<case(<($current%10)>, [0,1,2,3,4,6,7], [4,5,6,7,8,9,<(null)>], @proposta_P_3CCHI_<current()>->unico)>'
     debito:
     recupero:
     assenze: '<numberBetween(0, 100)>'

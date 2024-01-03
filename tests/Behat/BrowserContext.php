@@ -595,19 +595,24 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Decodifica un file PDF e controlla la presenza del testo indicato
+   * Controlla la presenza del testo indicato all'interno di un file PDF (anche con password)
    *  $ricerca: testo da cercare nel file
    *  $testoParam: nome del file con percorso relativo alla directory FILES (con parametri)
    *  $valore: password per la decodifica
    *
-   * @Then vedi :ricerca in file :testoParam decodificato con :valore
+   * @Then vedi :ricerca in PDF :testoParam
+   * @Then vedi :ricerca in PDF :testoParam con password :valore
    */
-  public function vediInFileDecodificato($ricerca, $testoParam, $valore): void {
+  public function vediInPDF($ricerca, $testoParam, $valore=null): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
     $convertito = substr($nomefile, 0, -3).'txt';
     $testo = null;
     try {
-      $proc = new Process(['/usr/bin/pdftotext', '-upw', $valore, $nomefile, $convertito]);
+      if ($valore) {
+        $proc = new Process(['/usr/bin/pdftotext', '-upw', $valore, $nomefile, $convertito]);
+      } else {
+        $proc = new Process(['/usr/bin/pdftotext', $nomefile, $convertito]);
+      }
       $proc->setTimeout(0);
       $proc->run();
       if ($proc->isSuccessful() && file_exists($convertito)) {
