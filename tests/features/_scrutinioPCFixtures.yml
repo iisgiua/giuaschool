@@ -1,10 +1,10 @@
 ####################
-# _scrutinioP6Fixtures - dati per i test sugli scrutini del primo periodo, passo 6
+# _scrutinioPCFixtures - dati per i test sugli scrutini del primo periodo, passo finale
 ####################
 
 
 include:
-  - _scrutinioP5Fixtures.yml
+  - _scrutinioP6Fixtures.yml
 
 
 parameters:
@@ -84,10 +84,6 @@ parameters:
         8: '8'
         9: '9'
         10: '10'
-  delibera:
-    motivazione:
-    unanimita: true
-    contrari:
 
 
 App\Entity\Scrutinio:
@@ -95,8 +91,8 @@ App\Entity\Scrutinio:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
     inizio: '<oraFissa("10:30")>'
-    fine:
-    stato: '6'
+    fine: '<oraFissa("11:30")>'
+    stato: 'C'
     classe: '@classe_1A'
     dati:
       alunni: '<arrayDataId(scrutinio_1A_P, dati, alunni, @scrutinio_1A_P, @alunno_1A_1, @alunno_1A_2, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1)>'
@@ -108,15 +104,18 @@ App\Entity\Scrutinio:
       docenti: '<arrayMulti2DataId(scrutinio_1A_P, dati, docenti, @scrutinio_1A_P, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1, @docente_itp_2, @docente_sostegno_1, @docente_sostegno_2, @docente_nocattedra_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N], [@materia_itp_1, I, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, A, @materia_EDCIVICA, N])>'
       verbale:
         3:
-          validato: false
+          validato: true
+      argomento:
+        2: 'Testo verbale passo 2...'
+      numeroVerbale: 3
     visibile:
     sincronizzazione:
   scrutinio_3CAMB_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
     inizio: '<oraFissa("10:30")>'
-    fine:
-    stato: '6'
+    fine: '<oraFissa("11:30")>'
+    stato: 'C'
     classe: '@classe_3CAMB'
     dati:
       alunni: '<arrayDataId(scrutinio_3CAMB_P, dati, alunni, @scrutinio_3CAMB_P, @alunno_3CAMB_1, @alunno_3CAMB_2, @alunno_sostegno_4)>'
@@ -128,15 +127,18 @@ App\Entity\Scrutinio:
       docenti: '<arrayMulti2DataId(scrutinio_3CAMB_P, dati, docenti, @scrutinio_3CAMB_P, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_2], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_2, N, @materia_EDCIVICA, N])>'
       verbale:
         3:
-          validato: false
+          validato: true
+      argomento:
+        2: 'Testo verbale passo 2...'
+      numeroVerbale: 3
     visibile:
     sincronizzazione:
   scrutinio_3CCHI_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
     inizio: '<oraFissa("10:30")>'
-    fine:
-    stato: '6'
+    fine: '<oraFissa("11:30")>'
+    stato: 'C'
     classe: '@classe_3CCHI'
     dati:
       alunni: '<arrayDataId(scrutinio_3CCHI_P, dati, alunni, @scrutinio_3CCHI_P, @alunno_3CCHI_1, @alunno_3CCHI_2, @alunno_sostegno_3)>'
@@ -148,44 +150,9 @@ App\Entity\Scrutinio:
       docenti: '<arrayMulti2DataId(scrutinio_3CCHI_P, dati, docenti, @scrutinio_3CCHI_P, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_3], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_3, N, @materia_EDCIVICA, N])>'
       verbale:
         3:
-          validato: false
+          validato: true
+      argomento:
+        2: 'Testo verbale passo 2...'
+      numeroVerbale: 3
     visibile:
     sincronizzazione:
-
-App\Entity\VotoScrutinio:
-  voto_P_1A_{0, 1, 7}:
-    scrutinio: '@scrutinio_1A_P'
-    orale:
-    scritto:
-    pratico:
-    unico: '<case(<current()>, [0,1,7], [4,5,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
-    alunno: '@proposta_P_1A_<current()>->alunno'
-    materia: '@proposta_P_1A_<current()>->materia'
-    dati: '<{delibera}>'
-  voto_P_3CAMB_{0, 1, 6, 7}:
-    scrutinio: '@scrutinio_3CAMB_P'
-    orale:
-    scritto:
-    pratico:
-    unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
-    alunno: '@proposta_P_3CAMB_<current()>->alunno'
-    materia: '@proposta_P_3CAMB_<current()>->materia'
-    dati: '<{delibera}>'
-  voto_P_3CCHI_{0, 1, 6, 7}:
-    scrutinio: '@scrutinio_3CCHI_P'
-    orale:
-    scritto:
-    pratico:
-    unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
-    alunno: '@proposta_P_3CCHI_<current()>->alunno'
-    materia: '@proposta_P_3CCHI_<current()>->materia'
-    dati: '<{delibera}>'

@@ -41,6 +41,9 @@ class BrowserContext extends BaseContext {
                               UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
     parent::__construct($kernel, $em, $router, $hasher, $slugger);
     $this->vars['sys']['logged'] = null;
+    $this->vars['sys']['other'] = null;
+    $this->vars['sys']['pdf'] = null;
+    $this->vars['sys']['pdfRiga'] = -1;
   }
 
   /**
@@ -495,10 +498,10 @@ class BrowserContext extends BaseContext {
    *  $ricerca: testo da cercare come espressione regolare
    *  $indice: indice progressivo dei pulsanti presenti nella sezione (parte da 1)
    *
-   * @When click su :testo in sezione :selettore che contiene :ricerca
-   * @When click su :testo in sezione :selettore che contiene :ricerca con indice :indice
+   * @When click su :testoParam in sezione :selettore che contiene :ricerca
+   * @When click su :testoParam in sezione :selettore che contiene :ricerca con indice :indice
    */
-  public function clickInSezione($testo, $selettore, $ricerca, $indice=1): void {
+  public function clickInSezione($testoParam, $selettore, $ricerca, $indice=1): void {
     $sezioni = $this->session->getPage()->findAll('css', $selettore);
     $this->assertNotEmpty($sezioni);
     $trovato = false;
@@ -510,7 +513,7 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato, 'Selector not found');
-    $links = $sezione->findAll('named', array('link_or_button', $testo));
+    $links = $sezione->findAll('named', array('link_or_button', $testoParam));
     $this->assertNotEmpty($links[$indice - 1]);
     $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
@@ -625,6 +628,114 @@ class BrowserContext extends BaseContext {
     $this->assertTrue($testo && preg_match($ricerca, $testo));
     $this->files[] = 'FILES/'.$testoParam;
     $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+  }
+
+  /**
+   * Analizza e conserva il contenuto di un file PDF (anche con password)
+   *  $testoParam: nome del file con percorso relativo alla directory FILES (con parametri)
+   *  $valore: password per la decodifica
+   *
+   * @Given analisi PDF :testoParam
+   * @Given analisi PDF :testoParam con password :valore
+   * @When analizzi PDF :testoParam
+   * @When analizzi PDF :testoParam con password :valore
+   */
+  public function analizziPDF($testoParam, $valore=null): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
+    $convertito = substr($nomefile, 0, -3).'txt';
+    $testo = null;
+    try {
+      if ($valore) {
+        $proc = new Process(['/usr/bin/pdftotext', '-layout', '-upw', $valore, $nomefile, $convertito]);
+      } else {
+        $proc = new Process(['/usr/bin/pdftotext', '-layout', $nomefile, $convertito]);
+      }
+      $proc->setTimeout(0);
+      $proc->run();
+      if ($proc->isSuccessful() && file_exists($convertito)) {
+        // conversione ok
+        $testo = file($convertito, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+      } else {
+        $this->logDebug('ERRORE analizziPDF -> '.$proc->getErrorOutput());
+      }
+    } catch (\Exception $err) {
+      // errore: evita eccezione
+      $this->logDebug('ERRORE analizziPDF -> '.$err);
+    }
+    $this->assertNotEmpty($testo);
+    $this->vars['sys']['pdf'] = $testo;
+    $this->vars['sys']['pdfRiga'] = -1;
+    $this->files[] = 'FILES/'.$testoParam;
+    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+  }
+
+  /**
+   * Cerca il testo in tutto il contenuto del PDF analizzato
+   *  $ricerca: testo da cercare nel file
+   *
+   * @Then vedi testo :ricerca in PDF analizzato
+   */
+  public function vediTestoInPDFAnalizzato($ricerca): void {
+    $this->assertNotEmpty($this->vars['sys']['pdf']);
+    $testo = implode(' ', $this->vars['sys']['pdf']);
+    $this->assertTrue(preg_match($ricerca, $testo), '+++ vediTestoInPDFAnalizzato -> '.$ricerca.' | '.$testo);
+  }
+
+  /**
+   * Cerca il testo nel contenuto del PDF analizzato, nella riga indicata
+   *  $ricerca: testo da cercare nel file
+   *  $valore: numero riga (parte da 1)
+   *
+   * @Then vedi testo :ricerca in PDF analizzato alla riga :valore
+   */
+  public function vediTestoInPDFAnalizzatoAllaRiga($ricerca, $valore): void {
+    $this->assertNotEmpty($this->vars['sys']['pdf']);
+    $this->assertNotEmpty($this->vars['sys']['pdf'][$valore - 1]);
+    $testo = $this->vars['sys']['pdf'][$valore - 1];
+    $this->assertTrue(preg_match($ricerca, $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
+    $this->vars['sys']['pdfRiga'] = $valore - 1;
+  }
+
+  /**
+   * Cerca il testo nel contenuto del PDF analizzato, in più righe successive
+   *  $ricerca: testo da cercare nel file
+   *  $num: numero di righe successive
+   *
+   * @Then vedi testo :ricerca in PDF analizzato in una riga
+   * @Then vedi testo :ricerca in PDF analizzato in :valore righe
+   */
+  public function vediTestoInPDFAnalizzatoInRiga($ricerca, $num=1): void {
+    $this->vars['sys']['pdfRiga'] = -1;
+    $this->vediPoiTestoInPDFAnalizzatoInRiga($ricerca, $num);
+  }
+
+  /**
+   * Cerca il testo nel contenuto del PDF analizzato, in più righe successive, dalla posizione corrente
+   *  $ricerca: testo da cercare nel file
+   *  $num: numero di righe successive
+   *
+   * @Then vedi poi testo :ricerca in PDF analizzato in una riga
+   * @Then vedi poi testo :ricerca in PDF analizzato in :valore righe
+   */
+  public function vediPoiTestoInPDFAnalizzatoInRiga($ricerca, $num=1): void {
+    $this->assertNotEmpty($this->vars['sys']['pdf']);
+    $riga = $this->vars['sys']['pdfRiga'] + 1;
+    $this->assertNotEmpty($this->vars['sys']['pdf'][$riga]);
+    $this->assertNotEmpty($this->vars['sys']['pdf'][$riga + $num - 1]);
+    $trovato = false;
+    for ($cnt = $riga; $cnt < count($this->vars['sys']['pdf']) - $num + 1; $cnt++) {
+      $testo = '';
+      for ($cnt2 = 0; $cnt2 < $num; $cnt2++) {
+        $testo .= ($cnt > 0 ? ' ' : '').$this->vars['sys']['pdf'][$cnt + $cnt2];
+      }
+      $this->logDebug('+++ vediTestoInPDFAnalizzatoInRiga -> '.$ricerca.' | '.$testo);
+      if (preg_match($ricerca, $testo)) {
+        $trovato = true;
+        $this->vars['sys']['pdfRiga'] = $cnt + $num - 1;
+        break;
+      }
+    }
+    $this->assertTrue($trovato, '+++ vediTestoInPDFAnalizzatoInRiga -> '.$ricerca.' | '.$testo);
   }
 
   /**

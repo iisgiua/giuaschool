@@ -130,9 +130,11 @@ class PagelleUtil {
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+        ->join('c.classe', 'cl')
+        ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->orderBy('m.ordinamento,m.nome', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+          'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -519,7 +521,8 @@ class PagelleUtil {
   public function riepilogoVoti(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    $nomeClasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$nomeClasse;
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -528,7 +531,7 @@ class PagelleUtil {
       // primo/secondo trimestre/quadrimestre
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $nomefile = $classe->getAnno().$classe->getSezione().'-riepilogo-voti-'.
+      $nomefile = $nomeClasse.'-riepilogo-voti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
@@ -882,7 +885,8 @@ class PagelleUtil {
   public function firmeRegistro(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    $nomeClasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$nomeClasse;
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -891,7 +895,7 @@ class PagelleUtil {
       // primo/secondo trimestre/quadrimestre
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $nomefile = $classe->getAnno().$classe->getSezione().'-firme-registro-'.
+      $nomefile = $nomeClasse.'-firme-registro-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
@@ -1506,9 +1510,11 @@ class PagelleUtil {
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->join('c.classe', 'cl')
+      ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -1621,7 +1627,8 @@ class PagelleUtil {
   public function pagella(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    $nomeClasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$nomeClasse;
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -1630,7 +1637,7 @@ class PagelleUtil {
       // primo/secondo trimestre/quadrimestre
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $nomefile = $classe->getAnno().$classe->getSezione().'-pagella-'.
+      $nomefile = $nomeClasse.'-pagella-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
@@ -1771,9 +1778,11 @@ class PagelleUtil {
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.tipo')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo IN (:tipo) AND m.tipo!=:sostegno')
+        ->join('c.classe', 'cl')
+        ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => ['N', 'A'], 'sostegno' => 'S'])
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+          'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -1861,7 +1870,8 @@ class PagelleUtil {
   public function debiti(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    $nomeClasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$nomeClasse;
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -1870,7 +1880,7 @@ class PagelleUtil {
       // primo/secondo trimestre/quadrimestre
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $nomefile = $classe->getAnno().$classe->getSezione().'-debiti-'.
+      $nomefile = $nomeClasse.'-debiti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
@@ -2685,7 +2695,8 @@ class PagelleUtil {
   public function verbale(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    $nomeClasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$nomeClasse;
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -2694,7 +2705,7 @@ class PagelleUtil {
       // primo/secondo trimestre/quadrimestre
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-'.
+      $nomefile = $nomeClasse.'-scrutinio-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento

@@ -956,14 +956,17 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "$": come primo carattere, indica variabile di esecuzione
    *  "#": come primo carattere, indica variabile di sistema
    *  "@": come primo carattere, indica riferimento a oggetto fixture
-   *  "#dtm(G,M,A,h,m,s)": indica variabile DateTime con i valori indicati
-   *  "#dtm()": indica variabile DateTime con il valore della data e ora corrente
+   *  "#dtm(G,M,A,h,m,s)": indica variabile oggetto DateTime con i valori indicati
+   *  "#dtm()": indica variabile oggetto DateTime con il valore della data e ora corrente
+   *  "#dat($v)": indica variabile DateTime $v formattata come "gg/mm/AAAA"
+   *  "#tim($v)": indica variabile DateTime $v formattata come "HH:MM"
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "#slg($v1)": trasforma in maiuscolo con - per caratteri non alfanumerici (slug) il valore indicato
+   *  "#str(nome)": restituisce la stringa indicata, senza uso di variabili
    *  "#cas($v,c1:c2:..,r1:r2:..,$d)": confronta $v con le costanti $c e se lo trova restituisce il valore $r corrispondente, altrimenti restituisce $d
-   *  "#med($v1,v2,...)": restituice la media dei valori $v
-   *  "#mdc($v1,v2,...)": restituice la media dei voti di Ed.Civica $v
+   *  "#med($v1,v2,...)": restituisce la media dei valori $v
+   *  "#mdc($v1,v2,...)": restituisce la media dei voti di Ed.Civica $v
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -979,7 +982,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|arc|upr|slg|cas|med|mdc)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|dat|tim|arc|upr|slg|str|cas|med|mdc|uno)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -991,6 +994,12 @@ abstract class BaseContext extends RawMinkContext implements Context {
         // crea variabile DateTime
         $dtm = new \Datetime();
         return $dtm;
+      }
+      // controlla funzione date e time
+      if ($fn[1] == 'dat' || $fn[1] == 'tim') {
+        $var = substr(substr($var, 5), 0 , -1);
+        $val = $this->getVar($var);
+        return ($fn[1] == 'dat') ? $val->format('d/m/Y') : $val->format('H:i');
       }
       // controlla funzione ArrayCollection
       if ($fn[1] == 'arc') {
@@ -1011,6 +1020,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
       if ($fn[1] == 'slg') {
         $var = substr(substr($var, 5), 0 , -1);
         return strtoupper($this->slugger->slug($this->getVar($var)));
+      }
+      // controlla funzione stringa
+      if ($fn[1] == 'str') {
+        $var = substr(substr($var, 5), 0 , -1);
+        return $var;
       }
       // controlla funzione case
       if ($fn[1] == 'cas') {
@@ -1160,22 +1174,26 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertSearch($search) {
-    if ($search && in_array($search[0], ['$', '#', '@'], true))  {
-      // valore della variabile di esecuzione
-      $value = $this->getVars($search);
-      $value = is_array($value) ? $value : [$value];
-      $regex = '';
-      $first = true;
-      foreach ($value as $val) {
-        $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
-        $first = false;
-      }
-      $regex = '/'.$regex.'/ui';
-    } elseif ($search && $search[0] == '?') {
+    if (strpos($search, '?') !== false) {
       // ricerca non ordinata di variabili
-      $var_list = explode('?', substr($search, 1));
+      if ($search[0] == '?') {
+        // ricerca non ordinata di tutte le variabili
+        $varList = explode('?', substr($search, 1));
+        $first = '';
+      } else {
+        // ricerca prima variabile seguita da altre non ordinate
+        $varList = explode('?', substr($search, strpos($search, '?') + 1));
+        $value = $this->getVars(substr($search, 0, strpos($search, '?')));
+        $value = is_array($value) ? $value : [$value];
+        $first = '';
+        $init = true;
+        foreach ($value as $val) {
+          $first .= (!$init ? '.*' : '').preg_quote($val, '/');
+          $init = false;
+        }
+      }
       $values = [];
-      foreach ($var_list as $var) {
+      foreach ($varList as $var) {
         $value = $this->getVars($var);
         if (is_array($value)) {
           $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
@@ -1187,6 +1205,17 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $regex = '';
       foreach ($values as $val) {
         $regex .= '(?=.*'.$val.')';
+      }
+      $regex = '/'.$first.$regex.'/ui';
+    } elseif ($search && in_array($search[0], ['$', '#', '@'], true))  {
+      // valore della variabile di esecuzione
+      $value = $this->getVars($search);
+      $value = is_array($value) ? $value : [$value];
+      $regex = '';
+      $first = true;
+      foreach ($value as $val) {
+        $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
+        $first = false;
       }
       $regex = '/'.$regex.'/ui';
     } elseif (preg_match('#^(/.+/\w*)$#', $search)) {

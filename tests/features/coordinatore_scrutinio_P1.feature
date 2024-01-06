@@ -21,18 +21,18 @@ Scenario: visualizzazione pagina passo 1
     | @classe_1A:id |
   Allora la sezione "#gs-main h2" contiene "Passo 1"
   E vedi la tabella non ordinata:
-    | Docente                             |	Materia                                                       |	Presenza         |
-    | @docente_curricolare_1:cognome,nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_2:cognome,nome | ?@materia_curricolare_2:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_3:cognome,nome | ?@materia_curricolare_3:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_4:cognome,nome | ?@materia_curricolare_4:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_5:cognome,nome | ?@materia_curricolare_5:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_religione_1:cognome,nome   | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
-    | @docente_itp_1:cognome,nome         | ?@materia_itp_1:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
-    | @docente_itp_2:cognome,nome         | ?@materia_itp_1:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
-    | @docente_sostegno_1:cognome,nome    | ?@materia_SOSTEGNO:nomeBreve?@materia_EDCIVICA:nomeBreve      | Presente Assente |
-    | @docente_sostegno_2:cognome,nome    | ?@materia_SOSTEGNO:nomeBreve?@materia_EDCIVICA:nomeBreve      | Presente Assente |
-    | @docente_nocattedra_1:cognome,nome  | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
+    | Docente                                                      |	Materia                                                       |	Presenza         |
+    | @docente_curricolare_1:cognome+ +@docente_curricolare_1:nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_2:cognome+ +@docente_curricolare_2:nome | ?@materia_curricolare_2:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_3:cognome+ +@docente_curricolare_3:nome | ?@materia_curricolare_3:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_4:cognome+ +@docente_curricolare_4:nome | ?@materia_curricolare_4:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_5:cognome+ +@docente_curricolare_5:nome | ?@materia_curricolare_5:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_religione_1:cognome+ +@docente_religione_1:nome     | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
+    | @docente_itp_1:cognome+ +@docente_itp_1:nome                 | ?@materia_itp_1:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
+    | @docente_itp_2:cognome+ +@docente_itp_2:nome                 | ?@materia_itp_1:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
+    | @docente_sostegno_1:cognome+ +@docente_sostegno_1:nome       | ?@materia_SOSTEGNO:nomeBreve?@materia_EDCIVICA:nomeBreve      | Presente Assente |
+    | @docente_sostegno_2:cognome+ +@docente_sostegno_2:nome       | ?@materia_SOSTEGNO:nomeBreve?@materia_EDCIVICA:nomeBreve      | Presente Assente |
+    | @docente_nocattedra_1:cognome+ +@docente_nocattedra_1:nome   | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
 
 Scenario: visualizzazione pagina con dati mancanti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -100,11 +100,11 @@ Scenario: visualizzazione classe articolata
     | @classe_3CAMB:id |
   Allora la sezione "#gs-main h2" contiene "Passo 1"
   E vedi la tabella non ordinata:
-    | Docente                             |	Materia                                                       |	Presenza         |
-    | @docente_curricolare_1:cognome,nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_2:cognome,nome | ?@materia_curricolare_2:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_3:cognome,nome | ?@materia_curricolare_3:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_4:cognome,nome | ?@materia_curricolare_4:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_curricolare_5:cognome,nome | ?@materia_curricolare_5:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
-    | @docente_religione_1:cognome,nome   | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
-    | @docente_itp_2:cognome,nome         | ?@materia_itp_2:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
+    | Docente                                                      |	Materia                                                       |	Presenza         |
+    | @docente_curricolare_1:cognome+ +@docente_curricolare_1:nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_2:cognome+ +@docente_curricolare_2:nome | ?@materia_curricolare_2:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_3:cognome+ +@docente_curricolare_3:nome | ?@materia_curricolare_3:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_4:cognome+ +@docente_curricolare_4:nome | ?@materia_curricolare_4:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_curricolare_5:cognome+ +@docente_curricolare_5:nome | ?@materia_curricolare_5:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
+    | @docente_religione_1:cognome+ +@docente_religione_1:nome     | ?@materia_RELIGIONE:nomeBreve?@materia_EDCIVICA:nomeBreve     | Presente Assente |
+    | @docente_itp_2:cognome+ +@docente_itp_2:nome                 | ?@materia_itp_2:nomeBreve?@materia_EDCIVICA:nomeBreve         | Presente Assente |
