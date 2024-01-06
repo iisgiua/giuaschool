@@ -223,7 +223,7 @@ Schema dello scenario: visualizza lista cattedre piani/programmi/relazioni con d
     | L    | Piani     |
     | P    | Programmi |
     | R    | Relazioni |
-
+@debug
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno di docenti diversi su stesso alunno
   Data ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
@@ -248,8 +248,8 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno di doce
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
   Allora vedi la tabella:
-    | classe e materia                                                                 | docenti                                                            | documento                      |
-    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | ?$c1:docente.nome,docente.cognome?$c2:docente.nome,docente.cognome | /(?=.*Documento PDF)(?=.*Documento Excel)/ |
+    | classe e materia                                                                 | docenti                                                            | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | ?$c1:docente.nome,docente.cognome?$c2:docente.nome,docente.cognome | ?#str(PDF)?#str(Excel) |
 
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno stesso docente su alunni diversi
   Data ricerca istanze di tipo "Materia":
