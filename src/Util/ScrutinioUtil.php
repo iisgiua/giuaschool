@@ -1544,6 +1544,23 @@ class ScrutinioUtil {
           }
         }
       }
+      // imposta esito
+      $esito = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
+        'alunno' => $a]);
+      if (!$esito) {
+        // crea nuovo esito
+        $datiEsito = array(
+          'unanimita' => true,
+          'contrari' => null,
+          'giudizio' => null);
+        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($a);
+        $esito = (new Esito())
+          ->setScrutinio($scrutinio)
+          ->setAlunno($alunno)
+          ->setEsito('A')
+          ->setDati($datiEsito);
+        $this->em->persist($esito);
+      }
     }
     if (empty($errori)) {
       // aggiorna stato

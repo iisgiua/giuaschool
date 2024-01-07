@@ -200,6 +200,11 @@ class PagelleUtil {
             ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
+      // ordina docenti
+      uasort($dati['docenti'], function($a, $b) {
+        $pa = explode(' ', $a);
+        $pb = explode(' ', $b);
+        return strcmp($pa[1].' '.$pa[2], $pb[1].' '.$pb[2]); });
       // presidente
       if ($scrutinio->getDato('presiede_ds')) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
