@@ -25,6 +25,9 @@
       {% if a.cambio %}
           <br><em class="text-danger">{{ a.cambio }}</em>
       {% endif %}
+      {% if a.frequenzaEstero %}
+          <br><em class="text-danger">Frequenta all'estero</em>
+      {% endif %}
         </td>
         <td>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>

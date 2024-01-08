@@ -956,7 +956,7 @@ class RegistroUtil {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe')
+        ->where('a.classe=:classe AND a.frequenzaEstero=0')
         ->setParameters(['classe' => $classe])
         ->getQuery()
         ->getScalarResult();
@@ -967,7 +967,7 @@ class RegistroUtil {
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe AND NOT EXISTS ('.$cambio->getDQL().')')
+        ->where('a.classe=:classe AND a.frequenzaEstero=0 AND NOT EXISTS ('.$cambio->getDQL().')')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
@@ -975,7 +975,7 @@ class RegistroUtil {
       $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
+        ->where('a.frequenzaEstero=0 AND :data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
@@ -2744,7 +2744,7 @@ class RegistroUtil {
       ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id')
-      ->where('a.classe=:classe AND a.abilitato=1 AND NOT EXISTS ('.$cambio->getDQL().')')
+      ->where('a.classe=:classe AND a.abilitato=1 AND a.frequenzaEstero=0 AND NOT EXISTS ('.$cambio->getDQL().')')
       ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
         'classe' => $classe])
       ->getQuery()
@@ -2753,7 +2753,7 @@ class RegistroUtil {
     $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id')
       ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-      ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
+      ->where('a.frequenzaEstero=0 AND cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
       ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
         'classe' => $classe])
       ->getQuery()

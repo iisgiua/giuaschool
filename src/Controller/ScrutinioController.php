@@ -145,7 +145,7 @@ class ScrutinioController extends BaseController {
     }
     if ($cattedra) {
       // legge lista periodi
-      $lista_periodi = $scr->periodi($classe);
+      $lista_periodi = $scr->periodiProposte($classe);
       // rimuove eventuali scrutini di giudizio sospeso e supplettivi
       unset($lista_periodi['G']);
       unset($lista_periodi['R']);
@@ -892,7 +892,7 @@ class ScrutinioController extends BaseController {
     }
     if ($cattedra) {
       // legge lista periodi
-      $lista_periodi = $scr->periodi($classe);
+      $lista_periodi = $scr->periodiScrutini($classe);
       // aggiunde periodo per A.S. precedente
       $lista_periodi['A'] = 'C';
       // elimina rinviati A.S. precedente (incluso in precedente)

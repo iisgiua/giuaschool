@@ -230,7 +230,7 @@ class StaffUtil {
     $listaTrasferiti = array_keys($alunniClasse['trasferiti']);
     // dati alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.frequenzaEstero,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $listaAlunni])
@@ -522,7 +522,7 @@ class StaffUtil {
     $listaTrasferiti = array_keys($alunniClasse['trasferiti']);
     // dati alunni
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.frequenzaEstero,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $listaAlunni])

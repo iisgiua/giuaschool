@@ -126,13 +126,13 @@ class ScrutinioUtil {
   }
 
   /**
-   * Restituisce la lista dei periodi inseriti per lo scrutinio
+   * Restituisce la lista dei periodi per le proposte di voto
    *
    * @param Classe $classe Classe di cui leggere i periodi attivi dello scrutinio
    *
    * @return array Dati formattati come un array associativo
    */
-  public function periodi(Classe $classe) {
+  public function periodiProposte(Classe $classe) {
     $lista = [];
     $listaGruppi = [];
     if (empty($classe->getGruppo())) {
@@ -140,8 +140,60 @@ class ScrutinioUtil {
       $listaGruppi = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
     }
     if (!empty($listaGruppi)) {
-      // indicata intera classe: legge periodo di primo gruppo
-      return $this->periodi($listaGruppi[0]);
+      // intera classe articolata: restituisce gruppo con più scrutini aperti
+      $cont = -1;
+      foreach ($listaGruppi as $gruppo) {
+        $periodi = $this->periodiProposte($gruppo);
+        $contaScrutini = array_reduce($periodi, fn($c, $v) => $c + ($v != 'N' ? 1 : 0), 0);
+        if ($contaScrutini > $cont) {
+          $lista = $periodi;
+          $cont = $contaScrutini;
+        }
+      }
+      return $lista;
+    }
+    // legge definizione scrutini
+    $periodi = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->createQueryBuilder('d')
+      ->select('d.periodo,s.stato')
+      ->leftJoin('App\Entity\Scrutinio', 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
+      ->where('d.dataProposte<=:data')
+      ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'classe' => $classe])
+      ->orderBy('d.data', 'ASC')
+      ->getQuery()
+      ->getResult();
+    foreach ($periodi as $p) {
+      $lista[$p['periodo']] = ($p['stato'] ? $p['stato'] : 'N');
+    }
+    // restituisce valori
+    return $lista;
+  }
+
+  /**
+   * Restituisce la lista dei periodi per gli scrutini svolti
+   *
+   * @param Classe $classe Classe di cui leggere i periodi attivi dello scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function periodiScrutini(Classe $classe) {
+    $lista = [];
+    $listaGruppi = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $listaGruppi = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($listaGruppi)) {
+      // intera classe articolata: restituisce gruppo con meno scrutini chiusi
+      $cont = 100;
+      foreach ($listaGruppi as $gruppo) {
+        $periodi = $this->periodiScrutini($gruppo);
+        $contaScrutini = array_reduce($periodi, fn($c, $v) => $c + ($v == 'C' ? 1 : 0), 0);
+        if ($contaScrutini < $cont) {
+          $lista = $periodi;
+          $cont = $contaScrutini;
+        }
+      }
+      return $lista;
     }
     // legge definizione scrutini
     $periodi = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->createQueryBuilder('d')
@@ -1150,6 +1202,19 @@ class ScrutinioUtil {
     $dati = array();
     // periodo dello scrutinio
     $dati['periodo'] = $periodo;
+    // controllo classe articolata
+    $listaGruppi = [];
+    if (empty($classe->getGruppo())) {
+      // legge eventuali gruppi di intera classe
+      $listaGruppi = $this->em->getRepository('App\Entity\Classe')->gruppi($classe);
+    }
+    if (!empty($listaGruppi)) {
+      // intera classe articolata: restituisce tutti i voti
+      foreach ($listaGruppi as $gruppo) {
+        $dati['gruppi'][$gruppo->getGruppo()] = $this->quadroVoti($docente, $gruppo, $periodo);
+      }
+      return $dati;
+    }
     // legge dati scrutinio
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo]);

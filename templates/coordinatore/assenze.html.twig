@@ -34,6 +34,9 @@
       {% if a.cambio %}
           <br><em class="text-danger">{{ a.cambio }}</em>
       {% endif %}
+      {% if a.frequenzaEstero %}
+          <br><em class="text-danger">Frequenta all'estero</em>
+      {% endif %}
           {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
         </td>
         <td>

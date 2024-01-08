@@ -19,7 +19,12 @@
     <tbody>
     {% for u in lista %}
       <tr>
-        <td>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</td>
+        <td>
+          {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})
+      {% if u.frequenzaEstero %}
+          <br><em class="text-danger">Frequenta all'estero</em>
+      {% endif %}
+        </td>
         <td>{{ u.classe ? u.classe : 'Non definita' }}</td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('segreteria_assenze_mostra', {'alunno': u.id}) }}" role="button" title="Clicca per visualizzare le assenze"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ 'label.visualizza'|trans }}</strong></a>

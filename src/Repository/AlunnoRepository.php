@@ -91,7 +91,7 @@ class AlunnoRepository extends BaseRepository {
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
       ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
-      ->where('a.abilitato=:abilitato AND a.classe IS NOT NULL AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
+      ->where('a.abilitato=:abilitato AND a.frequenzaEstero=0 AND a.classe IS NOT NULL AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->andWhere('cl.sede IN (:sede)')
       ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
@@ -120,7 +120,7 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
+      ->where('a.abilitato=:abilitato AND a.frequenzaEstero=0 AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
         'abilitato' => 1]);
@@ -231,7 +231,7 @@ class AlunnoRepository extends BaseRepository {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
+        ->where('a.classe=:classe AND a.abilitato=:abilitato AND a.frequenzaEstero=0')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['classe' => $classe, 'abilitato' => 1])
         ->getQuery()
@@ -243,7 +243,7 @@ class AlunnoRepository extends BaseRepository {
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe AND NOT EXISTS ('.$cambio->getDQL().')')
+        ->where('a.classe=:classe AND a.frequenzaEstero=0 AND NOT EXISTS ('.$cambio->getDQL().')')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getArrayResult();
@@ -251,7 +251,7 @@ class AlunnoRepository extends BaseRepository {
       $alunni_id2 = $this->createQueryBuilder('a')
         ->select('a.id')
         ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
+        ->where('a.frequenzaEstero=0 AND :data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getArrayResult();
@@ -398,9 +398,9 @@ class AlunnoRepository extends BaseRepository {
       $alunni = $alunni->where('a.classe IS NULL');
     }
     if ($abilitato === true) {
-      $alunni = $alunni->andWhere('a.abilitato = 1');
+      $alunni = $alunni->andWhere('a.abilitato = 1 AND a.frequenzaEstero = 0');
     } elseif ($abilitato === false) {
-      $alunni = $alunni->andWhere('a.abilitato = 0');
+      $alunni = $alunni->andWhere('a.abilitato = 0 OR a.frequenzaEstero = 1');
     }
     $alunni = $alunni
       ->orderBy('a.cognome,a.nome,a.dataNascita,a.username')
