@@ -28,6 +28,7 @@
       <tr>
         <th>Data</th>
         <th>Tipo</th>
+        <th>Docente</th>
         <th>Argomenti o descrizione della prova</th>
         <th>Voto</th>
         <th>Giudizio</th>
@@ -40,6 +41,7 @@
       <tr>
         <td><strong>{{ e.data }}</strong></td>
         <td>{{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</td>
+        <td><small>{{ e.docente }}</small></td>
         <td><small>{{ e.argomento }}</small></td>
         <td>
             {% if not e.media %}

@@ -90,7 +90,7 @@
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
-        <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
+        <td><strong>Assenza</strong></td>
         <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}

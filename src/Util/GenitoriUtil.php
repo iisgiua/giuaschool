@@ -214,7 +214,7 @@ class GenitoriUtil {
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
-      ->orderBy('m.nomeBreve', 'ASC')
+      ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
@@ -410,11 +410,12 @@ class GenitoriUtil {
     $dati = array();
     // legge voti
     $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-      ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve')
+      ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve,d.sesso,d.cognome,d.nome')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
+      ->join('v.docente', 'd')
       ->where('v.alunno=:alunno AND v.visibile=:visibile')
-      ->orderBy('m.nomeBreve', 'ASC')
+      ->orderBy('m.ordinamento', 'ASC')
       ->addOrderBy('l.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'visibile' => 1]);
     if ($materia) {
@@ -441,6 +442,7 @@ class GenitoriUtil {
         'data' => $data_str,
         'id' => $v['id'],
         'tipo' => $v['tipo'],
+        'docente' => ($v['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$v['cognome'].' '.$v['nome'],
         'argomento' => $v['argomento'],
         'voto' => $v['voto'],
         'voto_str' => $voto_str,

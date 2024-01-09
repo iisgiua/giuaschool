@@ -27,28 +27,33 @@
     <thead class="bg-success">
       <tr>
         <th>Materia</th>
-        <th>Valutazioni</th>
+        <th>Scritto</th>
+        <th>Orale</th>
+        <th>Pratico</th>
       </tr>
     </thead>
     <tbody>
       {% for materia,v1 in v %}
       <tr>
         <td><strong>{{ materia }}</strong></td>
+        {% for row in ['S', 'O', 'P'] %}
         <td>
-        {% for data,v2 in v1 %}
-          {% for e in v2 %}
-            {% if not e.media %}
+          {% for data,v2 in v1 %}
+            {% for e in v2 %}
+              {% if e.tipo == row %}
+                {% if not e.media %}
           <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
-            {% elseif e.voto > 0 %}
+                {% elseif e.voto > 0 %}
           <button type="button" class="btn btn-xs btn-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
-            {% else %}
+                {% else %}
           <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
-            {% endif %}
+                {% endif %}
           <div id="voti-{{ e.id }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <p><strong>Data:</strong> {{ e.data }}</p>
                 <p><strong>Tipo:</strong> {{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</p>
+                <p><strong>Docente:</strong> {{e.docente }}</p>
               {% if e.argomento is not empty %}
                 <p><strong>Argomenti o descrizione della prova:</strong><br>{{ e.argomento }}</p>
               {% endif %}
@@ -61,9 +66,11 @@
               </div>
             </div>
           </div>
+              {% endif %}
+            {% endfor %}
           {% endfor %}
-        {% endfor %}
         </td>
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
