@@ -558,6 +558,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->em->flush();
   }
 
+
   //==================== METODI PROTETTI DELLA CLASSE ====================
 
   /**
@@ -975,8 +976,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "@": come primo carattere, indica riferimento a oggetto fixture
    *  "#dtm(G,M,A,h,m,s)": indica variabile oggetto DateTime con i valori indicati
    *  "#dtm()": indica variabile oggetto DateTime con il valore della data e ora corrente
-   *  "#dat($v)": indica variabile DateTime $v formattata come "gg/mm/AAAA"
-   *  "#tim($v)": indica variabile DateTime $v formattata come "HH:MM"
+   *  "#dat($v)": indica variabile DateTime $v (ora corrente se vuota) formattata come "gg/mm/AAAA"
+   *  "#tim($v)": indica variabile DateTime $v (ora corrente se vuota) formattata come "HH:MM"
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "#slg($v1)": trasforma in maiuscolo con - per caratteri non alfanumerici (slug) il valore indicato
@@ -1015,7 +1016,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione date e time
       if ($fn[1] == 'dat' || $fn[1] == 'tim') {
         $var = substr(substr($var, 5), 0 , -1);
-        $val = $this->getVar($var);
+        $val = $var == '' ? new \DateTime() : $this->getVar($var);
         return ($fn[1] == 'dat') ? $val->format('d/m/Y') : $val->format('H:i');
       }
       // controlla funzione ArrayCollection

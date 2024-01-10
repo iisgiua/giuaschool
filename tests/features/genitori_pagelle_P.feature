@@ -1,15 +1,15 @@
 # language: it
 
-Funzionalità: visualizzazione pagelle per il primo periodo
-  Per mostrare le pagelle del primo periodo
+Funzionalità: visualizzazione esito scrutinio per il primo periodo
+  Per mostrare esito scrutinio del primo periodo
   Come utente genitore o alunno
-  Bisogna controllare visualizzazione della pagella
-  Bisogna controllare visualizzazione della pagella con la classe articolata
+  Bisogna controllare visualizzazione esito scrutinio
+  Bisogna controllare visualizzazione esito scrutinio con la classe articolata
   Utilizzando "_scrutinioPCFixtures.yml"
 
 
 ################################################################################
-# Bisogna controllare visualizzazione della pagella
+# Bisogna controllare visualizzazione esito scrutinio
 
 Schema dello scenario: dati non presenti se visualizzazione non abilitata
 	Data modifica istanza "@scrutinio_1A_P" con i dati:
@@ -31,7 +31,8 @@ Scenario: pagina dati con visualizzazione abilitata
     | #dtm(1,1,2020,0,0,0) |
   E login utente "@alunno_1A_1:username"
   Quando vai alla pagina "genitori_pagelle"
-  Allora la sezione "#gs-main table:nth-child(3) caption" contiene "Scrutinio del Primo Quadrimestre"
+  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat() #tim()"
+  E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                    | Ore di assenza       |
     | @materia_RELIGIONE:nome     |	#cas(@voto_P_1A_6:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_P_1A_6:assenze |
@@ -43,7 +44,7 @@ Scenario: pagina dati con visualizzazione abilitata
     | @materia_curricolare_5:nome |	#cas(@voto_P_1A_4:unico,0,NC,@voto_P_1A_4:unico)                                                                        | @voto_P_1A_4:assenze |
     | @materia_EDCIVICA:nome      |	#cas(@voto_P_1A_7:unico,2,NC,@voto_P_1A_7:unico)                                                                        | @voto_P_1A_7:assenze |
     | @materia_CONDOTTA:nome      |	#cas(@voto_P_1A_8:unico,4,NC,@voto_P_1A_8:unico)                                                                        |                      |
-  E la sezione "#gs-main table:nth-child(4) caption" contiene "Recupero dei debiti formativi"
+  E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
     | @materia_curricolare_1:nome | Argomento...            | Studio individuale   |
@@ -86,9 +87,9 @@ Scenario: visualizzazione comunicazione debiti
 
 
 ################################################################################
-# Bisogna controllare visualizzazione della pagella con la classe articolata
+# Bisogna controllare visualizzazione esito scrutinio con la classe articolata
 
-Schema dello scenario: dati non presenti se visualizzazione non abilitata
+Schema dello scenario: dati non presenti se visualizzazione non abilitata su classe articolata
 	Data modifica istanza "@scrutinio_3CAMB_P" con i dati:
     | visibile |
     | <data>   |
@@ -108,7 +109,8 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
     | #dtm(1,1,2020,0,0,0) |
   E login utente "@alunno_3CAMB_1:username"
   Quando vai alla pagina "genitori_pagelle"
-  Allora la sezione "#gs-main table:nth-child(3) caption" contiene "Scrutinio del Primo Quadrimestre"
+  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat() #tim()"
+  E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                       | Ore di assenza          |
     | @materia_RELIGIONE:nome     |	#cas(@voto_P_3CAMB_5:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_P_3CAMB_5:assenze |
@@ -120,14 +122,14 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
     | @materia_curricolare_5:nome |	#cas(@voto_P_3CAMB_4:unico,0,NC,@voto_P_3CAMB_4:unico)                                                                     | @voto_P_3CAMB_4:assenze |
     | @materia_EDCIVICA:nome      |	#cas(@voto_P_3CAMB_7:unico,2,NC,@voto_P_3CAMB_7:unico)                                                                     | @voto_P_3CAMB_7:assenze |
     | @materia_CONDOTTA:nome      |	#cas(@voto_P_3CAMB_8:unico,4,NC,@voto_P_3CAMB_8:unico)                                                                     |                         |
-  E la sezione "#gs-main table:nth-child(4) caption" contiene "Recupero dei debiti formativi"
+  E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
     | @materia_curricolare_1:nome | Argomento...            | Studio individuale   |
     | @materia_curricolare_2:nome | Argomento...            | Studio individuale   |
     | @materia_itp_2:nome         | Argomento...            | Studio individuale   |
 
-Scenario: visualizzazione comunicazione voti
+Scenario: visualizzazione comunicazione voti per la classe articolata
 	Data modifica istanza "@scrutinio_3CAMB_P" con i dati:
     | visibile             |
     | #dtm(1,1,2020,0,0,0) |
@@ -148,7 +150,7 @@ Scenario: visualizzazione comunicazione voti
   E vedi poi testo "@materia_EDCIVICA:nome #cas(@voto_P_3CAMB_7:unico,2,NC,@voto_P_3CAMB_7:unico) @voto_P_3CAMB_7:assenze" in PDF analizzato in una riga
   E vedi poi testo "@materia_CONDOTTA:nome #cas(@voto_P_3CAMB_8:unico,4,NC,@voto_P_3CAMB_8:unico)" in PDF analizzato in una riga
 
-Scenario: visualizzazione comunicazione voti
+Scenario: visualizzazione comunicazione debiti per la classe articolata
 	Data modifica istanza "@scrutinio_3CAMB_P" con i dati:
     | visibile             |
     | #dtm(1,1,2020,0,0,0) |
