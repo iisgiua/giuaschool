@@ -578,6 +578,28 @@ class StaffUtil {
         if ($d[0] != 'A') {
           $dati['scrutini'][$d[1]->getPeriodo()] =
             $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());
+          $dati['scrutini'][$d[1]->getPeriodo()]['valutazioni'] = $d[1]->getDato('valutazioni');
+          // presa visione
+          if (empty($dati['scrutini'][$d[1]->getPeriodo()]['esito']->getDati()['visto'])) {
+            $visto = '---';
+          } else {
+            $datiVisto = $dati['scrutini'][$d[1]->getPeriodo()]['esito']->getDati()['visto'];
+            $visto = [];
+            foreach ($datiVisto as $utenteId => $dataOra) {
+              $utente = $this->em->getRepository('App\Entity\Utente')->find($utenteId);
+              if ($utente instanceOf Alunno) {
+                $visto[] = $dataOra->format('d/m/Y H:i').' (alunn'.
+                  ($utente->getSesso() == 'M' ? 'o' : 'a').')';
+              } elseif ($utente->getCognome() == '#NESSUN DATO#' || $utente->getNome() == '#NESSUN DATO#') {
+                $visto[] = $dataOra->format('d/m/Y H:i').' (genitore)';
+              } else {
+                $visto[] = $dataOra->format('d/m/Y H:i').' (genitore '.$utente->getCognome().' '.
+                  $utente->getNome().')';
+              }
+            }
+            $visto = implode(', ', $visto);
+          }
+          $dati['scrutini'][$d[1]->getPeriodo()]['visto'] = $visto;
         }
       }
     }

@@ -796,13 +796,17 @@ class GenitoriUtil {
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     $dati['scrutinio'] = $scrutinio;
+    $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
+      'alunno' => $alunno]);
     // legge materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->join('c.classe', 'cl')
+      ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+        'gruppo' => $classe->getGruppo()])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -847,8 +851,6 @@ class GenitoriUtil {
       $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
       if (in_array($alunno->getId(), $scrutinati)) {
         // scrutinato
-        $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
-          'alunno' => $alunno]);
         if ($dati['esito']->getEsito() != 'N') {
           // carenze (esclusi non ammessi)
           $valori = $dati['esito']->getDati();
@@ -874,8 +876,6 @@ class GenitoriUtil {
       }
     } elseif ($periodo == 'G') {
       // scrutinato
-      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
-        'alunno' => $alunno]);
       if ($dati['esito'] && $dati['esito']->getEsito() == 'X') {
         // scrutinio rinviato
         $scrutinio_rinviato = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,

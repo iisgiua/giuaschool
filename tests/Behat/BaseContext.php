@@ -540,6 +540,23 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->log('ADD', 'File: '.$dest);
   }
 
+  /**
+   * Modifica nel database una istanza esistente
+   *  $valore: nome della variabile dell'istanza (es. @nome)
+   *  $tabella: i nomi dei campi sono gli attributi, il contenuto sono i valori da assegnare
+   *
+   * @Given modifica istanza :valore con i dati:
+   */
+  public function modificaIstanza($valore, TableNode $tabella) {
+    $this->assertTrue(is_object($valore));
+    foreach ($tabella->getHash() as $row) {
+      foreach ($row as $key=>$val) {
+        $var = $this->convertText($val);
+        $valore->{'set'.ucfirst($key)}($var);
+      }
+    }
+    $this->em->flush();
+  }
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 

@@ -516,11 +516,6 @@ class GenitoriController extends BaseController {
         if ($periodo == 'A') {
           // precedente A.S.
           $dati = $gen->pagellePrecedenti($alunno);
-        } else {
-          // altri periodi
-          $dati = $gen->pagelle($classe, $alunno, $periodo);
-        }
-        if ($periodo == 'A') {
           // legge valutazioni da configurazione
           $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
           $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
@@ -548,10 +543,14 @@ class GenitoriController extends BaseController {
           }
           $dati['valutazioni'] = $valutazioni;
         } else {
+          // altri periodi
+          $dati = $gen->pagelle($classe, $alunno, $periodo);
           // legge valutazioni da scrutinio
           $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
+          // imposta presa visione
+          $this->em->getRepository('App\Entity\Esito')->presaVisione($dati['esito'], $this->getUser());
         }
       }
     } else {

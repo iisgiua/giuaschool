@@ -60,7 +60,10 @@
     {% for periodo,v in dati.scrutini %}
       {% if periodo == 'P' or periodo == 'S' %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong></caption>
+    <caption class="text-info text-center gs-big gs-pb-0">
+      <strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong><br>
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-4">Materia</th>
@@ -72,26 +75,20 @@
         {% for materia,m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' and alunno.religione != 'A' %}
+          {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
-        <td></td>
-            {% else %}
-        <td><span class="label label-{{ v.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['P']['R'][v.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
-            {% endif %}
-          {% elseif m.tipo == 'C' %}
-        <td><span class="label label-{{ v.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</span></td>
         <td></td>
           {% else %}
         <td>
-          <span class="label label-{{ v.voti[materia].unico < 5 ? 'danger' : (v.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</span>
+          <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
             {% if v.debiti[materia] is defined %}
-              <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
-              <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
+          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
+          <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
             {% endif %}
         </td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+        <td>
+          <span class="label label-default">{{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}</span>
+        </td>
           {% endif %}
       </tr>
         {% endfor %}

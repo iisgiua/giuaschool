@@ -24,6 +24,11 @@
     </div>
   </div>
     {% if dati.voti is defined %}
+      {% if dati.esito.dati.visto[app.user.id] is defined and dati.esito.dati.visto[app.user.id] %}
+  <div class="text-primary text-center ">
+    <strong><em>Presa visione: {{ dati.esito.dati.visto[app.user.id]|date('d/m/Y H:i') }}</em></strong>
+  </div>
+      {% endif %}
       {% if periodo == 'A' %}
   <div class="text-info text-center gs-big _gs-pb-2">
     <strong>Scrutinio dell' {{ 'label.periodo_A'|trans }}</strong>
