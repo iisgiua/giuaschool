@@ -580,7 +580,8 @@ class StaffUtil {
             $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());
           $dati['scrutini'][$d[1]->getPeriodo()]['valutazioni'] = $d[1]->getDato('valutazioni');
           // presa visione
-          if (empty($dati['scrutini'][$d[1]->getPeriodo()]['esito']->getDati()['visto'])) {
+          if (empty($dati['scrutini'][$d[1]->getPeriodo()]['esito']) ||
+              empty($dati['scrutini'][$d[1]->getPeriodo()]['esito']->getDati()['visto'])) {
             $visto = '---';
           } else {
             $datiVisto = $dati['scrutini'][$d[1]->getPeriodo()]['esito']->getDati()['visto'];
