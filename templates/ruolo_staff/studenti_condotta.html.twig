@@ -1,0 +1,84 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
+    <div id="staff_studenti_condotta">
+      <div class="form-group">
+        <label class="sr-only control-label" for="{{ form[0].sede.vars.id }}">{{ form[0].sede.vars.label|trans }}</label>
+        {{ form_widget(form[0].sede) }}
+      </div>
+      <div class="form-group">
+        <label class="sr-only control-label" for="{{ form[0].classe.vars.id }}">{{ form[0].classe.vars.label|trans }}</label>
+        {{ form_widget(form[0].classe) }}
+      </div>
+      <div class="input-group date">
+        {{ form_widget(form[0].inizio, {'attr': {'widget': false}}) }}
+        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      </div>
+      <div class="input-group date">
+        {{ form_widget(form[0].fine, {'attr': {'widget': false}}) }}
+        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      </div>
+      <div class="form-group">
+        {{ form_widget(form[0].submit) }}
+      </div>
+      {{ form_widget(form[0]._token) }}
+    </div>
+  </form>
+  {% if dati|length == 0 %}
+  <div class="alert alert-info text-center gs-big">
+    <strong>Non sono presenti dati</strong>
+  </div>
+  {% else %}
+  <table class="table table-bordered table-hover">
+    <thead class="bg-info">
+      <tr>
+        <th class="col-sm-2">Ricevimento</th>
+        <th class="col-sm-2">Modalità</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in dati.lista %}
+      <tr><td>{{dump(r)}}</td></tr>
+
+    {# <tr>
+        <td class="gs-big">
+          {{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}
+        </td>
+        <td class="gs-big">
+          {{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }}
+        </td>
+      </tr> #}
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#{{ form[0].vars.id }} .input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    todayBtn: "linked",
+    language: "it",
+    autoclose: true,
+    todayHighlight: true,
+    zIndexOffset: 1200
+    });
+});
+</script>
+{% endblock %}

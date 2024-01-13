@@ -816,7 +816,7 @@ class GenitoriController extends BaseController {
     $fs = new Filesystem();
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3,
-      'label.giustifica_sport' => 4, 'label.giustifica_connessione' => 5, 'label.giustifica_altro' => 9);
+      'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno

@@ -10,6 +10,7 @@ namespace App\Repository;
 
 use App\Entity\Alunno;
 use App\Entity\Classe;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**

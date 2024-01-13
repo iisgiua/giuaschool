@@ -2932,6 +2932,109 @@ class StaffController extends BaseController {
   }
 
   /**
+   * Visualizza statistiche sulla condotta degli studenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/staff/studenti/condotta/{pagina}", name="staff_studenti_condotta",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function studentiCondottaAction(Request $request, $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    $search = [];
+    // recupera criteri dalla sessione
+    $search['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/sede');
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
+    $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/classe');
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/inizio', null);
+    $inizio = \DateTime::createFromFormat('Y-m-d', $search['inizio'] ? $search['inizio'] :
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
+    $search['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/fine', null);
+    $fine = ($search['fine'] ? \DateTime::createFromFormat('Y-m-d', $search['fine']) : new \DateTime());
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/pagina', $pagina);
+    }
+    // legge sede
+    $sedeStaff = $this->getUser()->getSede();
+    // form di ricerca
+    if ($sedeStaff) {
+      $opzioniSedi[$sedeStaff->getNomeBreve()] = $sedeStaff;
+    } else {
+      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    }
+    foreach ($opzioniSedi as $s) {
+      $info['sedi'][$s->getId()] = $s->getNomeBreve();
+    }
+    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $sedeStaff ? $sedeStaff->getId() : null, false);
+    $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_condotta', FormType::class)
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'data' => $sede,
+        'choices' => $opzioniSedi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_sede',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $opzioniClassi,
+        'choice_value' => 'id',
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('inizio', DateType::class, array('label' => false,
+        'data' => $inizio,
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker', 'title' => 'label.data_inizio'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false))
+      ->add('fine', DateType::class, array('label' => false,
+        'data' => $fine,
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker', 'title' => 'label.data_fine'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.visualizza'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $search['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() : 0);
+      $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $search['inizio'] = ($form->get('inizio')->getData() ? $form->get('inizio')->getData()->format('Y-m-d') : 0);
+      $search['fine'] = ($form->get('fine')->getData() ? $form->get('fine')->getData()->format('Y-m-d') : 0);
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/sede', $search['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/classe', $search['classe']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/inizio', $search['inizio']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/fine', $search['fine']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $this->em->getRepository('App\Entity\Nota')->statisticaCondotta($search, $pagina);
+    // mostra la pagina di risposta
+    return $this->renderHtml('ruolo_staff', 'studenti_condotta', $dati, $info, [$form->createView()]);
+  }
+
+  /**
    * Visualizza i componenti del consiglio di classe
    *
    * @param Request $request Pagina richiesta

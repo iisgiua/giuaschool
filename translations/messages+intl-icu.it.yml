@@ -810,6 +810,8 @@ title.richieste.classe_add: Inserimento di un nuovo modulo
 page.richieste.modulo: Gestione Moduli
 title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
 title.richieste.modulo_lista: Moduli inviati
+page.ruolo_staff.studenti: Gestione Alunni
+title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
 
 
 page.agenda_compito: Agenda Compiti

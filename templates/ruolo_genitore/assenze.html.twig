@@ -28,7 +28,7 @@
       <tr>
           {% if tipo == 'assenza' %}
         <td class="text-danger"><strong>{{ v.data }}{% if v.giorni > 1 %} - {{ v.data_fine }}{% endif %}</strong></td>
-        <td><strong>Assenza{% if v.giorni > 1 %} di {{ v.giorni }} giorni{% endif %}</strong></td>
+        <td><strong>Assenza{% if v.giorni > 1 %} di più giorni{% endif %}</strong></td>
         <td>
           <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': v.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
         </td>

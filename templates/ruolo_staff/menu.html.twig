@@ -25,6 +25,7 @@
         <li{{ app.request.attributes.get('_route')[:22] == 'staff_studenti_deroghe' ? ' class="active"' }}><a href="{{ path('staff_studenti_deroghe') }}" title="Inserimento delle deroghe sull'ora di entrata o uscita e di altre annotazioni">Gestione deroghe</a></li>
         <li{{ app.request.attributes.get('_route')[:25] == 'staff_studenti_situazione' ? ' class="active"' }}><a href="{{ path('staff_studenti_situazione') }}" title="Mostra la situazione degli alunni">Situazione alunni</a></li>
         <li{{ app.request.attributes.get('_route')[:26] == 'staff_studenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_studenti_statistiche') }}" title="Mostra le statische di presenza degli alunni">Statistiche presenza</a></li>
+        {# <li{{ app.request.attributes.get('_route') == 'staff_studenti_condotta' ? ' class="active"' }}><a href="{{ path('staff_studenti_condotta') }}" title="Mostra le statische sulla condotta degli alunni">Statistiche condotta</a></li> #}
         <li{{ app.request.attributes.get('_route') == 'documenti_alunni' ? ' class="active"' }}><a href="{{ path('documenti_alunni') }}" title="Mostra i documenti degli alunni">Visualizza documenti</a></li>
         <li{{ app.request.attributes.get('_route')[:14] == 'staff_password' ? ' class="active"' }}><a href="{{ path('staff_password') }}" title="Genera le credenziali di accesso per alunni e genitori">Password</a></li>
     </ul>
