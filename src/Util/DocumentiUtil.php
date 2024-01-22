@@ -645,7 +645,7 @@ class DocumentiUtil {
       // utente è tra i destinatari: ok
       return true;
     }
-    if ($documento->getTipo() == 'R' && ($utente instanceOf Docente)) {
+    if (in_array($documento->getTipo(), ['L', 'P', 'R']) && ($utente instanceOf Docente)) {
       // documento di tipo relazione e utente docente
       $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1,
         'docente' => $utente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria()]);
