@@ -5,6 +5,17 @@ framework:
     reset_on_message: true
     failure_transport: errore
     transports:
+      errore:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: false
+          table_name: gs_messenger_messages
+          queue_name: errore
+        retry_strategy:
+          max_retries: 3
+          delay: 3600000
+          multiplier: 1
+          max_delay: 0
       notifica:
         dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
         options:
@@ -36,7 +47,7 @@ framework:
         retry_strategy:
           max_retries: 3
           delay: 10000
-          multiplier: 3
+          multiplier: 4
           max_delay: 0
       circolare:
         dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
@@ -49,19 +60,20 @@ framework:
           delay: 10000
           multiplier: 3
           max_delay: 0
-      errore:
+      azione:
         dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
         options:
           auto_setup: false
           table_name: gs_messenger_messages
-          queue_name: errore
+          queue_name: azione
         retry_strategy:
           max_retries: 3
-          delay: 3600000
-          multiplier: 1
+          delay: 600000
+          multiplier: 4
           max_delay: 0
     routing:
       'App\Message\NotificaMessage': notifica
       'App\Message\AvvisoMessage': avviso
       'App\Message\EventoMessage': evento
       'App\Message\CircolareMessage': circolare
+      'App\Message\UtenteActionMessage': azione
