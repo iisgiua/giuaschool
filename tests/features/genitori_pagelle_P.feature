@@ -31,7 +31,7 @@ Scenario: pagina dati con visualizzazione abilitata
     | #dtm(1,1,2020,0,0,0) |
   E login utente "@alunno_1A_1:username"
   Quando vai alla pagina "genitori_pagelle"
-  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat() #tim()"
+  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                    | Ore di assenza       |
@@ -109,7 +109,7 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
     | #dtm(1,1,2020,0,0,0) |
   E login utente "@alunno_3CAMB_1:username"
   Quando vai alla pagina "genitori_pagelle"
-  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat() #tim()"
+  Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                       | Ore di assenza          |
