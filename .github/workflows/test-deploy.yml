@@ -110,7 +110,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
 
       - name: Set matrix of features
         id: set-matrix
