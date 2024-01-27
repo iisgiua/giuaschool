@@ -426,7 +426,7 @@ class AgendaController extends BaseController {
     // solo cattedre attive e normali, no sostegno, no ed.civ.
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('DISTINCT m.id,m.nome')
+      ->select('DISTINCT m.id,m.nome,m.nomeBreve')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->where("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")

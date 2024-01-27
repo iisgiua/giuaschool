@@ -128,7 +128,7 @@ class PagelleUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
@@ -251,7 +251,7 @@ class PagelleUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
@@ -350,7 +350,7 @@ class PagelleUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
@@ -1513,7 +1513,7 @@ class PagelleUtil {
     $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
     // legge materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.tipo')
+      ->select('DISTINCT m.id,m.nome,m.tipo,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
@@ -1781,7 +1781,7 @@ class PagelleUtil {
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
@@ -1827,7 +1827,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
@@ -2423,7 +2423,7 @@ class PagelleUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento,m.nome', 'ASC')
@@ -2476,7 +2476,7 @@ class PagelleUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
@@ -2649,7 +2649,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')

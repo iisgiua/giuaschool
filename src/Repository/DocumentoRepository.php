@@ -309,7 +309,7 @@ class DocumentoRepository extends BaseRepository {
   public function lista($criteri, Utente $utente, $pagina) {
     // query base
     $documenti = $this->createQueryBuilder('d')
-      ->select('DISTINCT d as documento,ldu.letto,ldu.firmato')
+      ->select('DISTINCT d as documento,ldu.letto,ldu.firmato,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo')
       ->join('d.listaDestinatari', 'ld')
       ->join('App\Entity\ListaDestinatariUtente', 'ldu', 'WITH', 'ldu.listaDestinatari=ld.id')
       ->leftJoin('d.classe', 'cl')

@@ -210,7 +210,7 @@ class GenitoriUtil {
    */
   public function materie(Classe $classe, $sostegno) {
     $materie = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('DISTINCT m.id,m.nomeBreve')
+      ->select('DISTINCT m.id,m.nomeBreve,m.ordinamento')
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
@@ -800,7 +800,7 @@ class GenitoriUtil {
       'alunno' => $alunno]);
     // legge materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.tipo')
+      ->select('DISTINCT m.id,m.nome,m.tipo,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")

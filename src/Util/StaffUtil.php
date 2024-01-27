@@ -388,7 +388,7 @@ class StaffUtil {
     $dati['medie'] = [];
     // lista materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve')
+      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("m.valutazione='N' AND m.media=1 AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")

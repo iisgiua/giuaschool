@@ -111,7 +111,7 @@ class CattedraRepository extends BaseRepository {
   public function docentiScrutinio(Classe $classe) {
     // docenti del CdC (escluso potenziamento)
     $docenti = $this->createQueryBuilder('c')
-      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
+      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.ordinamento,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
       ->join('c.classe', 'cl')

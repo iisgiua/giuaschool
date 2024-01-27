@@ -660,7 +660,7 @@ class ScrutinioUtil {
     }
     // legge materie (no sostegno)
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
@@ -1257,7 +1257,7 @@ class ScrutinioUtil {
     } else {
       // scrutini altri periodi
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
@@ -3068,7 +3068,7 @@ class ScrutinioUtil {
     $dati['scrutinio'] = $scrutinio;
     // legge materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
@@ -4036,7 +4036,7 @@ class ScrutinioUtil {
       }
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
@@ -4383,7 +4383,7 @@ class ScrutinioUtil {
     $dati['scrutinio'] = $scrutinio;
     // legge materie
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
+      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')

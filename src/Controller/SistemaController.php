@@ -552,7 +552,7 @@ class SistemaController extends BaseController {
             $dati = [];
             // dati materie
             $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-              ->select('DISTINCT m.id')
+              ->select('DISTINCT m.id,m.ordinamento')
               ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
               ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
               ->orderBy('m.ordinamento', 'ASC')

@@ -264,7 +264,7 @@ class DocenteRepository extends BaseRepository {
   public function sedi(Docente $docente): array {
     // legge sedi
     $sedi = $this->createQueryBuilder('d')
-      ->select('DISTINCT s.id,s.nomeBreve')
+      ->select('DISTINCT s.id,s.nomeBreve,s.ordinamento')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->join('c.classe', 'cl')
       ->join('cl.sede', 's')
