@@ -31,7 +31,7 @@ jobs:
           type: "stable"
 
       - name: Create cache registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-images-${{ github.sha }}
@@ -79,7 +79,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create cache registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-images-${{ github.sha }}
@@ -129,7 +129,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create cache registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-images-${{ github.sha }}
