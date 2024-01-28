@@ -14,7 +14,6 @@ namespace App\Repository;
  *
  * @author Antonello Dessì
  */
-class AmministratoreRepository extends UtenteRepository {
+class AmministratoreRepository extends BaseRepository {
 
 }
-

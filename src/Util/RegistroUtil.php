@@ -2657,13 +2657,14 @@ class RegistroUtil {
    */
   public function programma(Cattedra $cattedra) {
     // inizializza
-    $dati = array();
+    $dati = [];
+    $dati['argomenti'] = [];
     // legge lezioni
     $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-    ->select('l.id,l.data,l.ora,l.argomento')
-    ->where('l.classe=:classe AND l.materia=:materia')
-    ->orderBy('l.data,l.ora', 'ASC')
-    ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()]);
+      ->select('l.id,l.data,l.ora,l.argomento')
+      ->where('l.classe=:classe AND l.materia=:materia')
+      ->orderBy('l.data,l.ora', 'ASC')
+      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()]);
     if ($cattedra->getMateria()->getTipo() == 'R') {
       // religione e mat.alt.
       $lezioni = $lezioni
@@ -2685,7 +2686,7 @@ class RegistroUtil {
       if (!isset($dati['argomenti'][$key])) {
         // memorizza argomento
         $argomento = ucfirst($argomento);
-        if (!in_array(substr($argomento,-1), ['.', '!', '?'])) {
+        if (!in_array(substr($argomento, -1), ['.', '!', '?'])) {
           // aggiunge punto
           if (in_array(substr($argomento, -1), [',', ';', ':'])) {
             // toglie ultimo carattere

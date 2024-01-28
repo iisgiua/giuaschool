@@ -632,7 +632,14 @@ class StaffUtil {
    * @return Paginator Oggetto Paginator
    */
   public function statistiche($docente, $inizio, $fine, $page=1, $limit=10) {
-
+    // compatibilità MySQL >= 5.7
+    $mode = $this->em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
+    if (strpos($mode, 'ONLY_FULL_GROUP_BY') !== false) {
+      $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
+      $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
+        str_replace(',,', ',', $mode));
+      $this->em->getConnection()->executeStatement("SET sql_mode='$mode'");
+    }
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
@@ -744,7 +751,6 @@ class StaffUtil {
    * @return array Dati formattati come array associativo
    */
   public function statisticheStampa($docente, $inizio, $fine) {
-
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')

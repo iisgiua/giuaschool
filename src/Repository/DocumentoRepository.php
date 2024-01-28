@@ -135,6 +135,14 @@ class DocumentoRepository extends BaseRepository {
    * @return array Dati formattati come array associativo
    */
   public function docenti($criteri, Sede $sede=null, $pagina) {
+    // compatibilità MySQL >= 5.7
+    $mode = $this->_em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
+    if (strpos($mode, 'ONLY_FULL_GROUP_BY') !== false) {
+      $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
+      $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
+        str_replace(',,', ',', $mode));
+      $this->_em->getConnection()->executeStatement("SET sql_mode='$mode'");
+    }
     // query base
     $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')

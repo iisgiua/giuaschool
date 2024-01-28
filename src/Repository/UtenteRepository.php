@@ -14,8 +14,6 @@ use App\Entity\Docente;
 use App\Entity\Genitore;
 use App\Entity\Utente;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 
@@ -25,23 +23,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @author Antonello Dessì
  */
 class UtenteRepository extends EntityRepository {
-
-  /**
-   * Paginatore dei risultati della query
-   *
-   * @param Query $dql Query da mostrare
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function paginate($dql, $page=1, $limit=10) {
-    $paginator = new Paginator($dql);
-    $paginator->getQuery()
-      ->setFirstResult($limit * ($page - 1))
-      ->setMaxResults($limit);
-    return $paginator;
-  }
 
   /**
    * Trova un utente in base al nome normalizzato
