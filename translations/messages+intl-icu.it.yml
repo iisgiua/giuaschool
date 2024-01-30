@@ -1560,7 +1560,7 @@ exception.upload_tipo: Questo tipo di file non è permesso!
 exception.user_card: Utente non abilitato all'uso di questa modalità di accesso.
 exception.cambio_password_noemail: Prima di effettuare il cambio della password devi inserire la tua email.<br>In questo modo sarà possibile utilizzare la funzione di recupero password.
 exception.verbale_argomento_vuoto: Non si può lasciare l'argomento vuoto.
-exception.verbale_argomento_mancante: "Devi inserire o confermare il {sezione} dell'ordine del giorno."
+exception.verbale_argomento_mancante: "Devi inserire o confermare il punto {sezione} dell'ordine del giorno."
 exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn{sex} {alunno}.
 exception.voto_condotta: Manca il voto di condotta per uno o più alunni.
 exception.voto_edcivica: Manca il voto di Ed. civica per uno o più alunni.
