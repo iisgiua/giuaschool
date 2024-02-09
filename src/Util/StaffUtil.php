@@ -138,22 +138,36 @@ class StaffUtil {
    * Restituisce le note della classe indicata.
    *
    * @param Classe $classe Classe selezionata
+   * @param \DateTime|null $inizio Data iniziale del periodo previsto
+   * @param \DateTime|null $fine Data finale del periodo previsto
    *
    * @return array Dati restituiti come array associativo
    */
-  public function note(Classe $classe) {
+  public function note(Classe $classe, \DateTime $inizio=null, \DateTime $fine=null) {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
     $dati = array();
     // legge note di classe
+    $params = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+    $where = '';
+    if ($classe->getGruppo()) {
+      $params['gruppo'] = $classe->getGruppo();
+      $where = " AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)";
+    }
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov,c.gruppo")
       ->join('n.docente', 'd')
       ->join('n.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where("n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
-      ->setParameters(['tipo' => 'C', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+      ->where("n.annullata IS NULL AND n.tipo='C' AND c.anno=:anno AND c.sezione=:sezione".$where)
+      ->setParameters($params);
+    if ($inizio && $fine) {
+      $note
+        ->andWhere('n.data BETWEEN :inizio AND :fine')
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'));
+    }
+    $note = $note
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -178,9 +192,15 @@ class StaffUtil {
       ->join('n.docente', 'd')
       ->join('a.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where("n.tipo=:tipo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
-      ->setParameters(['tipo' => 'I', 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+      ->where("n.annullata IS NULL AND n.tipo='I' AND c.anno=:anno AND c.sezione=:sezione".$where)
+      ->setParameters($params);
+    if ($inizio && $fine) {
+      $individuali
+        ->andWhere('n.data BETWEEN :inizio AND :fine')
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'));
+    }
+    $individuali = $individuali
       ->getQuery()
       ->getResult();
     // imposta array associativo per note individuali

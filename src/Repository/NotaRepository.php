@@ -10,7 +10,6 @@ namespace App\Repository;
 
 use App\Entity\Alunno;
 use App\Entity\Classe;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -43,6 +42,43 @@ class NotaRepository extends BaseRepository {
     }
     // restituisce valore
     return $note->getQuery()->getSingleScalarResult();
+  }
+
+  /**
+   * Restituisce la statistica sulla condotta delle classi
+   *
+   * @param array $search Criteri di ricerca
+   * @param int $pagina Numero pagina da visualizzare
+   *
+   * @return array Vettore associativo con i dati della statistica
+   */
+  public function statisticaCondotta(array $search, int $pagina): array {
+    $mode = $this->_em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
+    if (strpos($mode, 'ONLY_FULL_GROUP_BY') !== false) {
+      $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
+      $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
+        str_replace(',,', ',', $mode));
+      $this->_em->getConnection()->executeStatement("SET sql_mode='$mode'");
+    }
+    // query base
+    $note = $this->_em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+      ->select("COUNT(n.id) AS tot,SUM(IF(n.tipo='C',1,0)) AS nc,SUM(IF(n.tipo='I',1,0)) AS ni,c AS classe")
+      ->join('App\Entity\Classe', 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
+      ->join('App\Entity\Nota', 'n', 'WITH', 'n.classe=c2.id')
+      ->where("(c.gruppo IS NULL OR c.gruppo='') AND n.annullata IS NULL AND n.data BETWEEN :inizio AND :fine")
+      ->groupBy('c.anno,c.sezione')
+      ->orderBy('tot', 'DESC')
+      ->addOrderBy('c.anno,c.sezione')
+      ->setParameters(['inizio' => $search['inizio'], 'fine' => $search['fine']]);
+    // criterio sulla sede
+    if ($search['sede']) {
+      // controlla classe di appartenenza
+      $note
+        ->andWhere('c.sede=:sede')
+        ->setParameter('sede', $search['sede']);
+    }
+    // esegue query
+    return $this->paginazione($note->getQuery(), $pagina);
   }
 
 }

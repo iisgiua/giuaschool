@@ -28,16 +28,16 @@ class NotaTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Nota';
     // campi da testare
-    $this->fields = ['tipo', 'data', 'testo', 'provvedimento', 'classe', 'docente', 'docenteProvvedimento'];
+    $this->fields = ['tipo', 'data', 'testo', 'provvedimento', 'annullata', 'classe', 'docente', 'docenteProvvedimento'];
     $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id'],
+    $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'annullata', 'classe_id', 'docente_id', 'docente_provvedimento_id'],
       'gs_classe' => '*'];
     // SQL write
-    $this->canWrite = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id']];
+    $this->canWrite = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'annullata', 'classe_id', 'docente_id', 'docente_provvedimento_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -72,10 +72,11 @@ class NotaTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'testo' ? $this->faker->text() :
           ($field == 'provvedimento' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'annullata' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'docenteProvvedimento' ? $this->getReference("docente_curricolare_1") :
-          null)))))));
+          null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

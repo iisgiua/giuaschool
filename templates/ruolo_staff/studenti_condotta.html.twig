@@ -9,10 +9,6 @@
         <label class="sr-only control-label" for="{{ form[0].sede.vars.id }}">{{ form[0].sede.vars.label|trans }}</label>
         {{ form_widget(form[0].sede) }}
       </div>
-      <div class="form-group">
-        <label class="sr-only control-label" for="{{ form[0].classe.vars.id }}">{{ form[0].classe.vars.label|trans }}</label>
-        {{ form_widget(form[0].classe) }}
-      </div>
       <div class="input-group date">
         {{ form_widget(form[0].inizio, {'attr': {'widget': false}}) }}
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -33,27 +29,29 @@
   </div>
   {% else %}
   <table class="table table-bordered table-hover">
-    <thead class="bg-info">
+    <thead class="bg-success">
       <tr>
-        <th class="col-sm-2">Ricevimento</th>
-        <th class="col-sm-2">Modalità</th>
+        <th class="col-sm-2">Sede</th>
+        <th class="col-sm-2">Classe</th>
+        <th class="col-sm-6">Numero note</th>
+        <th class="col-sm-2">Azioni</th>
       </tr>
     </thead>
     <tbody>
-    {% for r in dati.lista %}
-      <tr><td>{{dump(r)}}</td></tr>
-
-    {# <tr>
-        <td class="gs-big">
-          {{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}
+    {% for c in dati.lista %}
+      <tr>
+        <td><strong class="big">{{ c.classe.sede.nomeBreve }}</strong></td>
+        <td><strong class="big">{{ c.classe }}</strong></td>
+        <td><strong class="big">{{ c.tot }}</strong> ({{ c.nc }} note di classe, {{ c.ni }} note individuali)</td>
+        <td>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le note disciplinari della classe" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_note', {'classe': c.classe.id, 'inizio': info.inizio, 'fine': info.fine}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Mostra note</button>
         </td>
-        <td class="gs-big">
-          {{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }}
-        </td>
-      </tr> #}
+      </tr>
     {% endfor %}
     </tbody>
   </table>
+    {% include 'include/modal-remote.html.twig' %}
+    {% include 'include/paginate.html.twig' with {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'staff_studenti_condotta'} %}
   {% endif %}
 </div>
 {% endblock %}
@@ -79,6 +77,18 @@ $(document).ready(function() {
     todayHighlight: true,
     zIndexOffset: 1200
     });
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $('#gs-errori').hide();
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
 });
 </script>
 {% endblock %}

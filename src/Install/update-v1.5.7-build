@@ -1,0 +1,16 @@
+<?php
+
+return [
+  'fileCopy' => [
+  ],
+  'fileDelete' => [
+    'public/install/app.php',
+  ],
+  'sqlCommand' => [
+    ["ALTER TABLE gs_nota ADD annullata DATE DEFAULT NULL;", "SELECT 1 FROM DUAL UNION SELECT annullata FROM gs_nota;"],
+    ["INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SCUOLA', 'nota_modifica', 'Indica il numero di minuti entro cui si può modificare una nota; 0 non permette mai la modifica.<br>[intero]', '30', 0);", "SELECT * FROM gs_configurazione WHERE parametro='nota_modifica';"],
+    ["INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SCUOLA', 'nota_provvedimento', 'Indica chi può inserire il provvedimento disciplinare in una nota; a scelta tra: lo staff, lo staff e il coordinatore, oppure il docente che l''ha inserita con il coordinatore e lo staff;<br>[S = staff, C = coordinatore e staff, D = docente, coordinatore e staff]', 'S', 0);", "SELECT * FROM gs_configurazione WHERE parametro='nota_provvedimento';"],
+  ],
+  'envDelete' => [
+  ]
+];

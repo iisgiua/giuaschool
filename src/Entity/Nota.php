@@ -87,6 +87,13 @@ class Nota {
   private ?string $provvedimento = '';
 
   /**
+   * @var \DateTime|null $annullata Data di annullamento della nota (null se è valida)
+   *
+   * @ORM\Column(type="date", nullable=true)
+   */
+  private ?\DateTime $annullata = null;
+
+  /**
    * @var Classe|null $classe Classe della nota
    *
    * @ORM\ManyToOne(targetEntity="Classe")
@@ -259,6 +266,27 @@ class Nota {
    */
   public function setProvvedimento(?string $provvedimento): self {
     $this->provvedimento = $provvedimento;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data di annullamento della nota (null se è valida)
+   *
+   * @return \DateTime|null Data di annullamento della nota (null se è valida)
+   */
+  public function getAnnullata(): ?\DateTime {
+    return $this->annullata;
+  }
+
+  /**
+   * Modifica la data di annullamento della nota (null se è valida)
+   *
+   * @param \DateTime|null $annullata Data di annullamento della nota (null se è valida)
+   *
+   * @return self Oggetto modificato
+   */
+  public function setAnnullata(?\DateTime $annullata): self {
+    $this->annullata = $annullata;
     return $this;
   }
 

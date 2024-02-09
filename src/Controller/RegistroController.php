@@ -1340,22 +1340,22 @@ class RegistroController extends BaseController
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $id Identificativo della nota (se nullo aggiunge)
+   * @param string $tipo Tipo di form: N solo dati della nota, P solo provvedimento
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/registro/nota/edit/{cattedra}/{classe}/{data}/{id}", name="lezioni_registro_nota_edit",
-   *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0},
+   * @Route("/lezioni/registro/nota/edit/{cattedra}/{classe}/{data}/{id}/{tipo}", name="lezioni_registro_nota_edit",
+   *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+", "tipo": "N|P"},
+   *    defaults={"id": 0, "tipo": "N"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function notaEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                                  LogHandler $dblogger, int $cattedra, int $classe, string $data,
-                                 int $id): Response {
+                                 int $id, string $tipo): Response {
     // inizializza
     $label = array();
-    $docente_staff = in_array('ROLE_STAFF', $this->getUser()->getRoles());
     // controlla cattedra
     if ($cattedra > 0) {
       // lezioni di una cattedra esistente
@@ -1406,6 +1406,11 @@ class RegistroController extends BaseController
       }
       $alunni_id = substr($alunni_id, 1);
       $nota_old['alunni'] = $alunni_id;
+      $azione = ($tipo == 'P' ? 'extra' : 'edit');
+      if ($azione == 'extra') {
+        // imposta docente del provvedimento
+        $nota->setDocenteProvvedimento($this->getUser());
+      }
     } else {
       // azione add
       $nota = (new Nota())
@@ -1413,9 +1418,11 @@ class RegistroController extends BaseController
         ->setData($dataObj)
         ->setClasse($classe)
         ->setDocente($this->getUser());
+      $this->em->persist($nota);
+      $azione = 'add';
     }
     // controlla permessi
-    if (!$reg->azioneNota(($id > 0 ? 'edit' : 'add'), $dataObj, $this->getUser(), $classe, ($id > 0 ? $nota : null))) {
+    if (!$reg->azioneNota($azione, $dataObj, $this->getUser(), $classe, ($id > 0 ? $nota : null))) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1426,42 +1433,47 @@ class RegistroController extends BaseController
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
     $label['materia'] = $materia;
+    $label['azione'] = $azione;
     // lista alunni della classe
-    $listaAlunni = $reg->alunniInData($dataObj, $classe);
+    $listaAlunni = $reg->presentiInData($dataObj, $classe);
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('nota_edit', FormType::class, $nota)
-      ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_nota',
-        'choices' => ['label.nota_classe' => 'C', 'label.nota_individuale' => 'I'],
-        'expanded' => true,
-        'multiple' => false,
-        'disabled' => false,
-        'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('alunni', EntityType::class, array('label' => 'label.alunni',
-        'class' => 'App\Entity\Alunno',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-          },
-        'query_builder' => function (EntityRepository $er) use ($listaAlunni) {
-          return $er->createQueryBuilder('a')
-            ->where('a.id IN (:lista)')
-            ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['lista' => $listaAlunni]);
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'disabled' => false,
-        'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
-        'required' => true))
-      ->add('testo', MessageType::class, array('label' => 'label.testo',
-        'trim' => true,
-        'disabled' => false,
-        'required' => true));
-    if ($docente_staff) {
-      // docente è dello staff
-      $form->add('provvedimento', MessageType::class, array('label' => 'label.provvedimento',
-        'trim' => true,
-        'required' => false));
+    $form = $this->container->get('form.factory')->createNamedBuilder('nota_edit', FormType::class, $nota);
+    if ($tipo == 'N') {
+      // dati per la nota
+      $form
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_nota',
+          'choices' => ['label.nota_classe' => 'C', 'label.nota_individuale' => 'I'],
+          'expanded' => true,
+          'multiple' => false,
+          'disabled' => false,
+          'label_attr' => ['class' => 'radio-inline'],
+          'required' => true))
+        ->add('alunni', EntityType::class, array('label' => 'label.alunni',
+          'class' => 'App\Entity\Alunno',
+          'choice_label' => function ($obj) {
+              return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
+            },
+          'query_builder' => function (EntityRepository $er) use ($listaAlunni) {
+            return $er->createQueryBuilder('a')
+              ->where('a.id IN (:lista)')
+              ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+              ->setParameters(['lista' => $listaAlunni]);
+            },
+          'expanded' => true,
+          'multiple' => true,
+          'disabled' => false,
+          'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
+          'required' => true))
+        ->add('testo', MessageType::class, array('label' => 'label.testo',
+          'trim' => true,
+          'disabled' => false,
+          'required' => true));
+    } else {
+      // dati provvedimento
+      $form
+        ->add('provvedimento', MessageType::class, array('label' => 'label.provvedimento',
+          'trim' => true,
+          'required' => true));
     }
     $form = $form
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -1472,39 +1484,33 @@ class RegistroController extends BaseController
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // valida tipo
-      if ($nota->getTipo() == 'I') {
-        if (count($nota->getAlunni()) == 0) {
-          $form->get('alunni')->addError(new FormError($trans->trans('field.notblank', [], 'validators')));
-        }
-      } elseif ($materia->getTipo() == 'R' || $materia->getTipo() == 'U') {
-        // nota di classe per religione o supplenza: non previsto
-        $form->get('testo')->addError(
-          new FormError($trans->trans('exception.nota_classe_non_prevista')));
-      } else {
-        // nota di classe per altre materie
-        $nota->setAlunni(new ArrayCollection());
-        // valida testo: errore se contiene nomi di alunni
-        $nome = $reg->contieneNomiAlunni($dataObj, $classe, $nota->getTesto());
-        if ($nome) {
-          // errore
+      // dati per la nota
+      if ($tipo == 'N') {
+        // valida tipo di nota
+        if ($nota->getTipo() == 'I') {
+          if (count($nota->getAlunni()) == 0) {
+            $form->get('alunni')->addError(new FormError($trans->trans('field.notblank', [], 'validators')));
+          }
+        } elseif ($materia->getTipo() == 'R') {
+          // nota di classe per religione: non previsto
           $form->get('testo')->addError(
-            new FormError($trans->trans('exception.nota_con_nome', ['nome' => $nome])));
+            new FormError($trans->trans('exception.nota_classe_non_prevista')));
+        } else {
+          // nota di classe per altre materie
+          $nota->setAlunni(new ArrayCollection());
+          // valida testo: errore se contiene nomi di alunni
+          $nome = $reg->contieneNomiAlunni($dataObj, $classe, $nota->getTesto());
+          if ($nome) {
+            // errore
+            $form->get('testo')->addError(
+              new FormError($trans->trans('exception.nota_con_nome', ['nome' => $nome])));
+          }
         }
       }
       if ($form->isValid()) {
-        // imposta valori
-        if ($docente_staff) {
-          // docente è dello staff
-          $nota->setDocenteProvvedimento($nota->getProvvedimento() == '' ? null : $this->getUser());
-        }
-        if (!$id) {
-          // nuovo
-          $this->em->persist($nota);
-        }
         // ok: memorizza dati
         $this->em->flush();
-        // log azione
+        // log azion
         if (!$id) {
           // nuovo
           $dblogger->logAzione('REGISTRO', 'Crea nota', array('Nota' => $nota->getId()));
@@ -1520,8 +1526,9 @@ class RegistroController extends BaseController
             ));
         }
         // messaggio
-        if (!$docente_staff) {
-          $this->addFlash('danger', $trans->trans('message.nota_edit_temporizzato'));
+        $minuti = abs($this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_modifica', 0));
+        if ($azione != 'extra' && $minuti > 0) {
+          $this->addFlash('danger', $trans->trans('message.nota_edit_temporizzato', ['minuti' => $minuti]));
         }
         // redirezione
         return $this->redirectToRoute('lezioni_registro_firme');
@@ -1531,7 +1538,7 @@ class RegistroController extends BaseController
     return $this->render('lezioni/nota_edit.html.twig', array(
       'pagina_titolo' => 'page.lezioni_registro',
       'form' => $form->createView(),
-      'form_title' => ($id > 0 ? 'title.modifica_nota' : 'title.nuova_nota'),
+      'form_title' => ($azione == 'add' ? 'title.nuova_nota' : ($azione == 'edit' ? 'title.modifica_nota' : 'title.provvedimento_nota')),
       'label' => $label,
     ));
   }
@@ -1586,6 +1593,55 @@ class RegistroController extends BaseController
       'Docente provvedimento' => ($nota->getDocenteProvvedimento() ? $nota->getDocenteProvvedimento()->getId() : null),
       'Tipo nota' => $nota->getTipo(),
       'Alunni' => $alunni_id
+      ));
+    // redirezione
+    return $this->redirectToRoute('lezioni_registro_firme');
+  }
+
+  /**
+   * Annulla formalmente una nota disciplinare dal registro
+   *
+   * @param Request $request Pagina richiesta
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Identificativo della nota disciplinare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/registro/nota/cancel/{id}", name="lezioni_registro_nota_cancel",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function notaCancelAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
+                                   int $id): Response {
+    // controlla nota
+    $nota = $this->em->getRepository('App\Entity\Nota')->find($id);
+    if (!$nota) {
+      // nota non esiste, niente da fare
+      return $this->redirectToRoute('lezioni_registro_firme');
+    }
+    // controlla permessi
+    if (!$reg->azioneNota('cancel', $nota->getData(), $this->getUser(), $nota->getClasse(), $nota)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // annulla nota
+    $nota->setAnnullata(new \DateTime());
+    // ok: memorizza dati
+    $this->em->flush();
+    // log azione
+    $dblogger->logAzione('REGISTRO', 'Annulla nota', array(
+      'Nota' => $nota->getId(),
+      'Classe' => $nota->getClasse()->getId(),
+      'Docente' => $nota->getDocente()->getId(),
+      'Data' => $nota->getData()->format('Y-m-d'),
+      'Testo' => $nota->getTesto(),
+      'Provvedimento' => $nota->getProvvedimento(),
+      'Docente provvedimento' => ($nota->getDocenteProvvedimento() ? $nota->getDocenteProvvedimento()->getId() : null),
+      'Tipo nota' => $nota->getTipo(),
+      'Alunni' => implode(',', array_map(fn($a) => $a->getId(), $nota->getAlunni()->toArray()))
       ));
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');

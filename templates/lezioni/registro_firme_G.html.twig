@@ -100,7 +100,7 @@
       </div>
       <div class="list-group gs-mb-2">
       {% for k,v in dati[data].note.lista %}
-        <div class="list-group-item">
+        <div class="list-group-item{{ v.annullata ? ' gs-bg-secondary' }}">
         {% if v.gruppo  %}
           <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v.gruppo }}</strong><br>
         {% endif %}
@@ -114,9 +114,17 @@
         {% endif %}
         {% if v.delete is defined %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+        {% elseif v.cancel is defined %}
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Annulla la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.cancel }}" data-text="{{ 'message.annulla_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
         {% endif %}
         {% if v.edit is defined %}
-            <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
+            <a class="btn btn-primary btn-xs pull-right gs-ml-3" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
+        {% endif %}
+        {% if v.extra is defined %}
+            <a class="btn btn-primary btn-xs pull-right" href="{{ v.extra }}" role="button" title="Inserisci il provvedimento disciplinare">Provvedimento</a>
+        {% endif %}
+        {% if v.annullata %}
+            <div class="text-center"><strong class="gs-big">ANNULLATA</strong></div>
         {% endif %}
           </div>
         </div>

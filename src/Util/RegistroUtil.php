@@ -319,33 +319,65 @@ class RegistroUtil {
       }
     } elseif ($azione == 'edit') {
       // azione di modifica
-      if ($nota) {
+      if ($nota && !$nota->getAnnullata()) {
         // esiste nota
-        $ora = (new \DateTime())->modify('-30 min');
-        if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
-          // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
-          return true;
-        }
-        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
-            $classe->getId() == $nota->getClasse()->getId()) {
-          // solo staff: ok
+        $minuti = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_modifica', 0);
+        $ora = (new \DateTime())->modify('-'.abs($minuti).' min');
+        if ($docente->getId() == $nota->getDocente()->getId() && $ora <= $nota->getModificato() &&
+            $classe->getId() == $nota->getClasse()->getId() &&
+            (!$nota->getDocenteProvvedimento() || $nota->getDocenteProvvedimento()->getId() == $docente->getId())) {
+          // stesso docente, no provvedimento, entro i minuti previsti: ok
           return true;
         }
       }
     } elseif ($azione == 'delete') {
       // azione di cancellazione
-      if ($nota) {
+      if ($nota && !$nota->getAnnullata()) {
         // esiste nota
-        $ora = (new \DateTime())->modify('-30 min');
-        if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
-            $ora <= $nota->getModificato() && $classe->getId() == $nota->getClasse()->getId()) {
-          // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
+        $minuti = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_modifica', 0);
+        $ora = (new \DateTime())->modify('-'.abs($minuti).' min');
+        if ($docente->getId() == $nota->getDocente()->getId() && $ora <= $nota->getModificato() &&
+            $classe->getId() == $nota->getClasse()->getId() &&
+            (!$nota->getDocenteProvvedimento() || $nota->getDocenteProvvedimento()->getId() == $docente->getId())) {
+          // stesso docente, no provvedimento, entro i minuti previsti: ok
           return true;
         }
-        if (in_array('ROLE_STAFF', $docente->getRoles(), true) &&
-            $classe->getId() == $nota->getClasse()->getId()) {
-          // solo staff: ok
+      }
+    } elseif ($azione == 'cancel') {
+      // azione di annullamento
+      if ($nota && !$nota->getAnnullata()) {
+        // esiste nota non annullata
+        $minuti = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_modifica', 0);
+        $ora = (new \DateTime())->modify('-'.abs($minuti).' min');
+        if ($docente->getId() == $nota->getDocente()->getId() && $ora > $nota->getModificato() &&
+            $classe->getId() == $nota->getClasse()->getId() &&
+            (!$nota->getDocenteProvvedimento() || $nota->getDocenteProvvedimento()->getId() == $docente->getId())) {
+          // stesso docente, no provvedimento, oltre i minuti previsti: ok
+          return true;
+        }
+        if ($docente->getId() != $nota->getDocente()->getId() && $nota->getDocenteProvvedimento() &&
+            $docente->getId() == $nota->getDocenteProvvedimento()->getId()) {
+          // docente del provvedimento diverso da autore nota: ok
+          return true;
+        }
+      }
+    } elseif ($azione == 'extra') {
+      // azione extra per l'inserimento/modifica del provvedimento
+      if ($nota && !$nota->getAnnullata()) {
+        // esiste nota
+        if (in_array('ROLE_STAFF', $docente->getRoles()) && $classe->getId() == $nota->getClasse()->getId()) {
+          // staff: ok
+          return true;
+        }
+        $tipo = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_provvedimento', 'S');
+        if (in_array($tipo, ['C', 'D']) && $classe->getId() == $nota->getClasse()->getId() &&
+            $classe->getCoordinatore() && $docente->getId() == $classe->getCoordinatore()->getId()) {
+          // coordinatore e tipo C o D: ok
+          return true;
+        }
+        if ($tipo == 'D' && $classe->getId() == $nota->getClasse()->getId() &&
+            $docente->getId() == $nota->getDocente()->getId()) {
+          // stesso docente e tipo D: ok
           return true;
         }
       }
@@ -607,6 +639,7 @@ class RegistroUtil {
       $nt['gruppo'] = $n->getClasse()->getGruppo();
       $nt['testo'] = $n->getTesto();
       $nt['provvedimento'] = $n->getProvvedimento();
+      $nt['annullata'] = $n->getAnnullata();
       $nt['docente'] = $n->getDocente()->getNome().' '.$n->getDocente()->getCognome();
       $nt['docente_provvedimento'] = ($n->getDocenteProvvedimento() ?
         $n->getDocenteProvvedimento()->getNome().' '.$n->getDocenteProvvedimento()->getCognome() : null);
@@ -633,6 +666,17 @@ class RegistroUtil {
         // pulsante delete
         $nt['delete'] = $this->router->generate('lezioni_registro_nota_delete', array(
           'id' => $n->getId()));
+      }
+      if ($this->azioneNota('cancel', $n->getData(), $docente, $classe, $n)) {
+        // pulsante annulla
+        $nt['cancel'] = $this->router->generate('lezioni_registro_nota_cancel', array(
+          'id' => $n->getId()));
+      }
+      if ($this->azioneNota('extra', $n->getData(), $docente, $classe, $n)) {
+        // pulsante provvedimento
+        $nt['extra'] = $this->router->generate('lezioni_registro_nota_edit', array(
+          'cattedra' => $cattedra ? $cattedra->getId() : 0, 'classe' => $classe->getId(),
+          'data' => $n->getData()->format('Y-m-d'), 'id' => $n->getId(), 'tipo' => 'P'));
       }
       // raggruppa note per data
       $lista[] = $nt;
@@ -984,6 +1028,30 @@ class RegistroUtil {
     // restituisce lista di ID
     $alunniId = array_map('current', $alunni);
     return $alunniId;
+  }
+
+  /**
+   * Restituisce la lista degli alunni della classe indicata presenti alla data indicata.
+   *
+   * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
+   * @param Classe $classe Classe scolastica
+   *
+   * @return array Lista degli ID degli alunni
+   */
+  public function presentiInData(\DateTime $data, Classe $classe): array {
+    // alunni della classe
+    $lista = $this->alunniInData($data, $classe);
+    // assenti
+    $assenti = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('a')
+      ->select('(a.alunno) as id')
+      ->where('a.alunno IN (:lista) AND a.data=:data')
+      ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    $idAssenti = array_column($assenti, 'id');
+    $presenti = array_diff($lista, $idAssenti);
+    // restituisce id presenti
+    return $presenti;
   }
 
   /**

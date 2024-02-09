@@ -6,6 +6,7 @@
 #   data: data della nota
 #   testo: testo della nota
 #   provvedimento: provvedimento disciplinare preso per la nota
+#   annullata: data di annullamento della nota (null se è valida)
 #   classe: classe della nota
 #   docente: docente che ha messo la nota
 #   docenteProvvedimento: docente che ha preso il provvedimento disciplinare
@@ -26,6 +27,7 @@ App\Entity\Nota:
     data: '<dateTimeBetween("-1 month", "now")>'
     testo: '<text()>'
     provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '50%? <dateTimeBetween("-1 month", "now")>: <strval("")>'
     classe: '@classe_*'
     docente: '@docente_*'
     docenteProvvedimento: '50%? @staff_*'

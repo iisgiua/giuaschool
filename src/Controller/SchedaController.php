@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 use App\Util\RegistroUtil;
+use App\Util\StaffUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -133,6 +134,46 @@ class SchedaController extends BaseController {
     }
     // visualizza pagina
     return $this->render('schede/voti_materia.html.twig', array(
+      'info' => $info,
+      'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Dettaglio delle note della classe indicata nel periodo previsto
+   *
+   * @param StaffUtil $staff Funzioni di utilità per lo staff
+   * @param int $classe Identificativo della classe
+   * @param string $inizio Data iniziale del periodo previsto
+   * @param string $inizio Data finale del periodo previsto
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/scheda/note/{classe}/{inizio}/{fine}", name="scheda_note",
+   *    requirements={"classe": "\d+", "inizio": "\d\d\d\d-\d\d-\d\d", "fine": "\d\d\d\d-\d\d-\d\d"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function noteAction(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
+    // inizializza variabili
+    $info = null;
+    $dati = null;
+    // controllo classe
+    $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(['id' => $classe]);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo date
+    $dataInizio = \DateTime::createFromFormat('Y-m-d', $inizio);
+    $dataFine = \DateTime::createFromFormat('Y-m-d', $fine);
+    // informazioni
+    $info['classe'] = $classe;
+    // legge dati
+    $dati = $staff->note($classe, $dataInizio, $dataFine);
+    // visualizza pagina
+    return $this->render('schede/note.html.twig', array(
       'info' => $info,
       'dati' => $dati,
     ));

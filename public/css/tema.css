@@ -417,6 +417,10 @@
   background-color: #777;
 }
 
+.gs-bg-secondary {
+  background-color: #CCC;
+}
+
 .gs-text-normal {
   color: #000;
 }

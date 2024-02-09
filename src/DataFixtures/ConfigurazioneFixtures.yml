@@ -191,18 +191,18 @@ App\Entity\Configurazione:
     descrizione: 'Ora di inizio notifica giornaliera delle nuove circolari\<br>[ora in formato HH:MM]'
     valore: '17:00'
     gestito: false
-  # configurazione_SCUOLA12:
-  #   categoria: 'SCUOLA'
-  #   parametro: 'assenze_dichiarazione'
-  #   descrizione: 'Indica se le assenze online devono inglobare l''autodichiarazione NO-COVID\<br>[booleano, 0 o 1]'
-  #   valore: '0'
-  #   gestito: false
-  # configurazione_SCUOLA13:
-  #   categoria: 'SCUOLA'
-  #   parametro: 'assenze_ore'
-  #   descrizione: 'Indica se le assenze devono essere gestite su base oraria e non giornaliera\<br>[booleano, 0 o 1]'
-  #   valore: '0'
-  #   gestito: false
+  configurazione_SCUOLA12:
+    categoria: 'SCUOLA'
+    parametro: 'nota_modifica'
+    descrizione: 'Indica il numero di minuti entro cui si può modificare una nota; 0 permette la modifica senza limitazioni.\<br>[intero]'
+    valore: '30'
+    gestito: false
+  configurazione_SCUOLA13:
+    categoria: 'SCUOLA'
+    parametro: 'nota_provvedimento'
+    descrizione: 'Indica chi può inserire il provvedimento disciplinare in una nota; a scelta tra: solo lo staff, lo staff e il coordinatore, o il docente che l''ha inserita, il coordinatore e lo staff;\<br>[S = staff, C = coordinatore e staff, D = docente, coordinatore e staff]'
+    valore: 'S'
+    gestito: false
   configurazione_SCUOLA14:
     categoria: 'SCUOLA'
     parametro: 'voti_finali_R'

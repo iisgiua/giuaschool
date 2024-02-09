@@ -1011,6 +1011,7 @@ title.modifica_email: Cambia l'indirizzo di posta elettronica
 title.modifica_entrata: Modifica il ritardo dell'alunno
 title.modifica_lezione: Modifica una lezione esistente
 title.modifica_nota: Modifica una nota disciplinare
+title.provvedimento_nota: Inserisci il provvedimento disciplinare per una nota
 title.modifica_osservazione_personale: Modifica l'osservazione personale
 title.modifica_osservazione: Modifica l'osservazione sull'alunno
 title.modifica_password: Cambia la password di accesso
@@ -1091,6 +1092,7 @@ message.cattedra_mancante: Devi prima scegliere la classe o la materia per poter
 message.cancella_lezione: Verrà cancellata la firma e, se sei l'unico docente, anche l'intera lezione. Vuoi continuare?
 message.cancella_annotazione: Verrà cancellata l'annotazione sul registro. Vuoi continuare?
 message.cancella_nota: Verrà cancellata la nota disciplinare. Vuoi continuare?
+message.annulla_nota: Verrà formalmente annullata la nota disciplinare. Vuoi continuare?
 message.voti_supplenza: Non è possibile inserire valutazioni per una supplenza.
 message.argomenti_supplenza: Non è possibile visualizzare gli argomenti per una supplenza.
 message.nessun_dato: Non sono presenti dati da visualizzare
@@ -1344,7 +1346,7 @@ message.note_classe_alunno_inserito: "Inserimento in data {date}"
 message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
 message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
-message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
+message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata entro i prossimi {minuti} minuti. Poi sarà resa definitiva.
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.lezione_esiste_altra: "Non è possibile firmare la lezione della {ora}ª ora.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
