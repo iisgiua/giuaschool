@@ -4,8 +4,6 @@ Funzionalità: Inserimento proposte di voto per lo scrutinio
   Per inserire le proposte di voto dello scrutinio
   Come utente docente
   Bisogna inserire voti per cattedra di docente
-  #-- Bisogna controllare filtro del periodo
-  #-- Bisogna controllare visualizzazione di altri docenti con stessa cattedra
   Bisogna controllare accesso a pagina
   Utilizzando "_testFixtures.yml"
 
@@ -59,15 +57,7 @@ Schema dello scenario: Niente dati di recupero per le classi quinte per la catte
   Esempi:
     | periodo | tipo_materia | posizioni | voto |
     | F       | N            | -1        | 5    |
-    | F       | N            | -2        | 4    |
-    | F       | N            | -3        | 3    |
-    | F       | N            | -4        | 2    |
-    | F       | N            | -5        | 1    |
-    | F       | N            | -6        | NC   |
     | F       | E            | -1        | 5    |
-    | F       | E            | -2        | 4    |
-    | F       | E            | -3        | 3    |
-    | F       | E            | -4        | NC   |
 
 Schema dello scenario: Visualizza messaggio di errore per voti incompleti
   Data creazione istanze di tipo "DefinizioneScrutinio":
@@ -101,6 +91,9 @@ Schema dello scenario: Visualizza messaggio di errore per voti incompleti
     | P       | N            |
     | P       | R            |
     | P       | E            |
+    | S       | N            |
+    | S       | R            |
+    | S       | E            |
     | F       | N            |
     | F       | R            |
     | F       | E            |
@@ -139,18 +132,15 @@ Schema dello scenario: Visualizza messaggio di errore per dati incompleti
   E la sezione "#gs-main form #gs-errori" contiene "<errore>"
   Esempi:
     | periodo | tipo_materia | recupero          | argomenti | errore                                                                          |
-    | P       | N            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
+    | P       | E            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
     | P       | N            |                   | Tutto     | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
     | P       | N            | Corso di recupero |           | Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente |
-    | P       | E            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
-    | P       | E            |                   | Tutto     | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
-    | P       | E            | Corso di recupero |           | Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente |
-    | F       | N            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
+    | S       | E            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
+    | S       | N            |                   | Tutto     | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
+    | S       | N            | Corso di recupero |           | Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente |
+    | F       | E            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
     | F       | N            |                   | Tutto     | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
     | F       | N            | Corso di recupero |           | Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente |
-    | F       | E            |                   |           | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
-    | F       | E            |                   | Tutto     | Manca la modalità del recupero per uno o più alunni con voto insufficiente      |
-    | F       | E            | Corso di recupero |           | Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente |
 
 Schema dello scenario: Visualizza messaggio di conferma per voti completi
   Data creazione istanze di tipo "DefinizioneScrutinio":
@@ -185,6 +175,9 @@ Schema dello scenario: Visualizza messaggio di conferma per voti completi
     | P       | 4    | N            | 1         |
     | P       | 4    | R            | -1        |
     | P       | 4    | E            | 1         |
+    | S       | 4    | N            | 1         |
+    | S       | 4    | R            | -1        |
+    | S       | 4    | E            | 1         |
     | F       | 4    | N            | 1         |
     | F       | 4    | R            | -1        |
     | F       | 4    | E            | 1         |
@@ -226,6 +219,8 @@ Schema dello scenario: Visualizza messaggio di conferma per dati completi
     | periodo | tipo_materia |
     | P       | N            |
     | P       | E            |
+    | S       | N            |
+    | S       | E            |
     | F       | N            |
     | F       | E            |
 

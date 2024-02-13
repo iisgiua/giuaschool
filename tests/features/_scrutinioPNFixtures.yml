@@ -22,13 +22,13 @@ include:
 
 App\Entity\DefinizioneScrutinio:
   definizione_scrutinio_P:
-    data: '<dateTimeBetween("-1 month", "now")>'
+    data: '<dataFissa("31/12/2019")>'
     argomenti:
       1: "Scrutinio del Primo Quadrimestre"
       2: "Situazioni particolari da segnalare"
     dati: '<([])>'
     periodo: 'P'
-    dataProposte: '<dateTimeBetween("-1 month", "now")>'
+    dataProposte: '<dataFissa("23/12/2019")>'
     struttura:
       1: ["ScrutinioInizio", false, []]
       2: ["ScrutinioSvolgimento", false, '<array_combine(["sezione","argomento"], ["Punto primo",<(1)>])>']

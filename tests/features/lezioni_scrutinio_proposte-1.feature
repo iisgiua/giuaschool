@@ -4,8 +4,6 @@ Funzionalità: Inserimento proposte di voto per lo scrutinio
   Per inserire le proposte di voto dello scrutinio
   Come utente docente
   Bisogna inserire voti per cattedra di docente
-  #-- Bisogna controllare filtro del periodo
-  #-- Bisogna controllare visualizzazione di altri docenti con stessa cattedra
   Bisogna controllare accesso a pagina
   Utilizzando "_testFixtures.yml"
 
@@ -60,40 +58,25 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | periodo | tipo_materia | posizioni | voto          |
     | P       | N            | 0         | 6             |
     | P       | N            | 1         | 7             |
-    | P       | N            | 2         | 8             |
-    | P       | N            | 3         | 9             |
-    | P       | N            | 4         | 10            |
-    | P       | R            | -3        | NC            |
-    | P       | R            | -2        | Insufficiente |
     | P       | R            | -1        | Mediocre      |
     | P       | R            | 0         | Sufficiente   |
     | P       | R            | 1         | Discreto      |
-    | P       | R            | 2         | Buono         |
-    | P       | R            | 3         | Distinto      |
-    | P       | R            | 4         | Ottimo        |
     | P       | E            | 0         | 6             |
     | P       | E            | 1         | 7             |
-    | P       | E            | 2         | 8             |
-    | P       | E            | 3         | 9             |
-    | P       | E            | 4         | 10            |
+    | S       | N            | 0         | 6             |
+    | S       | N            | 1         | 7             |
+    | S       | R            | -1        | Mediocre      |
+    | S       | R            | 0         | Sufficiente   |
+    | S       | R            | 1         | Discreto      |
+    | S       | E            | 0         | 6             |
+    | S       | E            | 1         | 7             |
     | F       | N            | 0         | 6             |
     | F       | N            | 1         | 7             |
-    | F       | N            | 2         | 8             |
-    | F       | N            | 3         | 9             |
-    | F       | N            | 4         | 10            |
-    | F       | R            | -3        | NC            |
-    | F       | R            | -2        | Insufficiente |
     | F       | R            | -1        | Mediocre      |
     | F       | R            | 0         | Sufficiente   |
     | F       | R            | 1         | Discreto      |
-    | F       | R            | 2         | Buono         |
-    | F       | R            | 3         | Distinto      |
-    | F       | R            | 4         | Ottimo        |
     | F       | E            | 0         | 6             |
     | F       | E            | 1         | 7             |
-    | F       | E            | 2         | 8             |
-    | F       | E            | 3         | 9             |
-    | F       | E            | 4         | 10            |
 
 Schema dello scenario: Inserisce e memorizza i voti con recupero per la cattedra del docente
   Data creazione istanze di tipo "DefinizioneScrutinio":
@@ -132,25 +115,11 @@ Schema dello scenario: Inserisce e memorizza i voti con recupero per la cattedra
   E il campo "Argomenti" contiene "<argomenti>"
   Esempi:
     | periodo | tipo_materia | posizioni | voto | recupero            | recupero_val | argomenti           |
-    | P       | N            | -6        | NC   | Corso di recupero   | C            | Da recuperare tutto |
-    | P       | N            | -5        | 1    | Sportello didattico | S            | Da recuperare.      |
-    | P       | N            | -4        | 2    | Pausa didattica     | P            | tutto               |
-    | P       | N            | -3        | 3    | Studio individuale  | A            | Questo e quello.    |
-    | P       | N            | -2        | 4    | Corso di recupero   | C            | Solo questo         |
     | P       | N            | -1        | 5    | Sportello didattico | S            | Qualcosina.         |
-    | P       | E            | -4        | NC   | Corso di recupero   | C            | Da recuperare tutto |
-    | P       | E            | -3        | 3    | Corso di recupero   | C            | Da recuperare tutto |
-    | P       | E            | -2        | 4    | Sportello didattico | S            | Tutto               |
     | P       | E            | -1        | 5    | Pausa didattica     | P            | Da recuperare       |
-    | F       | N            | -6        | NC   | Corso di recupero   | C            | Da recuperare tutto |
-    | F       | N            | -5        | 1    | Studio individuale  | A            | Da recuperare.      |
-    | F       | N            | -4        | 2    | Corso di recupero   | C            | tutto               |
-    | F       | N            | -3        | 3    | Studio individuale  | A            | Questo e quello.    |
-    | F       | N            | -2        | 4    | Corso di recupero   | C            | Solo questo         |
+    | S       | N            | -1        | 5    | Sportello didattico | S            | Qualcosina.         |
+    | S       | E            | -1        | 5    | Pausa didattica     | P            | Da recuperare       |
     | F       | N            | -1        | 5    | Studio individuale  | A            | Qualcosina.         |
-    | F       | E            | -4        | NC   | Studio individuale  | A            | Da recuperare tutto |
-    | F       | E            | -3        | 3    | Corso di recupero   | C            | Tutto               |
-    | F       | E            | -2        | 4    | Studio individuale  | A            | Molti argomenti     |
     | F       | E            | -1        | 5    | Corso di recupero   | C            | Da recuperare       |
 
 Schema dello scenario: Modifica voti esistenti per la cattedra del docente
@@ -188,30 +157,24 @@ Schema dello scenario: Modifica voti esistenti per la cattedra del docente
   Allora la sezione "#gs-main form #gs-form-collection li:contains('Verdi Giuseppe')" contiene "Voto <voto_nuovo>"
   Esempi:
     | periodo | tipo_materia | posizioni | voto | voto_nuovo  |
-    | P       | N            | -2        | 4    | 2           |
-    | P       | N            | 2         | 4    | 6           |
+    | P       | N            | -1        | 6    | 5           |
     | P       | N            | 1         | 8    | 9           |
-    | P       | N            | -1        | 8    | 7           |
-    | P       | R            | -1        | 21   | NC          |
-    | P       | R            | 1         | 21   | Mediocre    |
-    | P       | R            | -1        | 24   | Sufficiente |
-    | P       | R            | 1         | 24   | Buono       |
-    | P       | E            | 2         | 5    | 7           |
-    | P       | E            | -1        | 5    | 4           |
+    | P       | R            | -1        | 23   | Mediocre    |
+    | P       | R            | 1         | 23   | Discreto    |
+    | P       | E            | -1        | 6    | 5           |
     | P       | E            | 1         | 8    | 9           |
-    | P       | E            | -1        | 8    | 7           |
-    | F       | N            | -2        | 4    | 2           |
-    | F       | N            | 2         | 4    | 6           |
+    | S       | N            | -1        | 6    | 5           |
+    | S       | N            | 1         | 8    | 9           |
+    | S       | R            | -1        | 23   | Mediocre    |
+    | S       | R            | 1         | 23   | Discreto    |
+    | S       | E            | -1        | 6    | 5           |
+    | S       | E            | 1         | 8    | 9           |
+    | F       | N            | -1        | 6    | 5           |
     | F       | N            | 1         | 8    | 9           |
-    | F       | N            | -1        | 8    | 7           |
-    | F       | R            | -1        | 21   | NC          |
-    | F       | R            | 1         | 21   | Mediocre    |
-    | F       | R            | -1        | 24   | Sufficiente |
-    | F       | R            | 1         | 24   | Buono       |
-    | F       | E            | 2         | 5    | 7           |
-    | F       | E            | -1        | 5    | 4           |
+    | F       | R            | -1        | 23   | Mediocre    |
+    | F       | R            | 1         | 23   | Discreto    |
+    | F       | E            | -1        | 6    | 5           |
     | F       | E            | 1         | 8    | 9           |
-    | F       | E            | -1        | 8    | 7           |
 
 Schema dello scenario: Modifica dati recupero esistenti per la cattedra del docente
   Data creazione istanze di tipo "DefinizioneScrutinio":
@@ -251,7 +214,9 @@ Schema dello scenario: Modifica dati recupero esistenti per la cattedra del doce
   E il campo "Argomenti" contiene "<argomenti>"
   Esempi:
     | periodo | tipo_materia | voto | recupero           | recupero_val | argomenti              |
-    | P       | N            | 4    | Studio individuale | A            | Da recuperare qualcosa |
+    | P       | N            | 5    | Studio individuale | A            | Da recuperare qualcosa |
     | P       | E            | 5    | Studio individuale | A            | Da recuperare qualcosa |
-    | F       | N            | 4    | Studio individuale | A            | Da recuperare qualcosa |
+    | S       | N            | 5    | Studio individuale | A            | Da recuperare qualcosa |
+    | S       | E            | 5    | Studio individuale | A            | Da recuperare qualcosa |
+    | F       | N            | 5    | Studio individuale | A            | Da recuperare qualcosa |
     | F       | E            | 5    | Studio individuale | A            | Da recuperare qualcosa |

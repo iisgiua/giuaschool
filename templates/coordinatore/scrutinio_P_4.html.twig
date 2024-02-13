@@ -20,13 +20,13 @@
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if m.tipo == 'C' %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per la Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per la Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': periodo, 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% elseif m.tipo == 'E' %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'P', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': periodo, 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': periodo, 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
@@ -49,13 +49,13 @@
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'C' %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': periodo, 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
         {% elseif m.tipo == 'E' %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione di Ed. Civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione di Ed. Civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': periodo, 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
         {% elseif m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
         {% else %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': periodo, 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
         {% endif %}
           </td>
       {% endfor %}

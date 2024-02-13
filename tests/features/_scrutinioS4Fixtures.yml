@@ -1,0 +1,187 @@
+####################
+# _scrutinioS4Fixtures - dati per i test sugli scrutini del secondo periodo, passo 4
+####################
+
+
+include:
+  - _scrutinioS3Fixtures.yml
+
+
+parameters:
+  valutazioni:
+    R:
+      min: 20
+      max: 27
+      suff: 23
+      med: 23
+      valori: '20,21,22,23,24,25,26,27'
+      etichette: '"NC","","","Suff.","","","","Ottimo"'
+      voti: '"Non Classificato","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"'
+      votiAbbr: '"NC","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"'
+      lista:
+        20: 'NC'
+        21: 'Insufficiente'
+        22: 'Mediocre'
+        23: 'Sufficiente'
+        24: 'Discreto'
+        25: 'Buono'
+        26: 'Distinto'
+        27: 'Ottimo'
+    E:
+      min: 2
+      max: 10
+      suff: 6
+      med: 5
+      valori: '2,3,4,5,6,7,8,9,10'
+      etichette: '"NC",3,4,5,6,7,8,9,10'
+      voti: '"Non Classificato",3,4,5,6,7,8,9,10'
+      votiAbbr: '"NC",3,4,5,6,7,8,9,10'
+      lista:
+        2: 'NC'
+        3: '3'
+        4: '4'
+        5: '5'
+        6: '6'
+        7: '7'
+        8: '8'
+        9: '9'
+        10: '10'
+    C:
+      min: 4
+      max: 10
+      suff: 6
+      med: 6
+      valori: '4,5,6,7,8,9,10'
+      etichette: '"NC",5,6,7,8,9,10'
+      voti: '"Non Classificato",5,6,7,8,9,10'
+      votiAbbr: '"NC",5,6,7,8,9,10'
+      lista:
+        4: 'NC'
+        5: '5'
+        6: '6'
+        7: '7'
+        8: '8'
+        9: '9'
+        10: '10'
+    N:
+      min: 0
+      max: 10
+      suff: 6
+      med: 5
+      valori: '0,1,2,3,4,5,6,7,8,9,10'
+      etichette: '"NC",1,2,3,4,5,6,7,8,9,10'
+      voti: '"Non Classificato",1,2,3,4,5,6,7,8,9,10'
+      votiAbbr: '"NC",1,2,3,4,5,6,7,8,9,10'
+      lista:
+        0: 'NC'
+        1: '1'
+        2: '2'
+        3: '3'
+        4: '4'
+        5: '5'
+        6: '6'
+        7: '7'
+        8: '8'
+        9: '9'
+        10: '10'
+
+
+App\Entity\Scrutinio:
+  scrutinio_1A_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("10:30")>'
+    fine:
+    stato: '4'
+    classe: '@classe_1A'
+    dati:
+      alunni: '<arrayDataId(scrutinio_1A_S, dati, alunni, @scrutinio_1A_S, @alunno_1A_1, @alunno_1A_2, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_1A_S, dati, presenze, @scrutinio_1A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1, @docente_itp_2, @docente_sostegno_1, @docente_sostegno_2, @docente_nocattedra_1], [docente, @docente_curricolare_1, presenza, 0, sostituto, "Bianchi Maria", sessoSostituto, F, surrogaProtocollo, 999, surrogaData, <dataFissa("31/12/2019")>], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1], [docente, @docente_itp_2], [docente, @docente_sostegno_1], [docente, @docente_sostegno_2], [docente, @docente_nocattedra_1])>'
+      presiede_ds: false
+      presiede_docente: '<dataId(scrutinio_1A_S, dati, presiede_docente, @scrutinio_1A_S, @docente_curricolare_1)>'
+      segretario: '<dataId(scrutinio_1A_S, dati, segretario, @scrutinio_1A_S, @docente_curricolare_2)>'
+      docenti: '<arrayMulti2DataId(scrutinio_1A_S, dati, docenti, @scrutinio_1A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1, @docente_itp_2, @docente_sostegno_1, @docente_sostegno_2, @docente_nocattedra_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N], [@materia_itp_1, I, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, A, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+  scrutinio_3CAMB_S:
+    periodo: 'S'
+    data: '<dataFissa("01/01/2020")>'
+    inizio: '<oraFissa("10:30")>'
+    fine:
+    stato: '4'
+    classe: '@classe_3CAMB'
+    dati:
+      alunni: '<arrayDataId(scrutinio_3CAMB_S, dati, alunni, @scrutinio_3CAMB_S, @alunno_3CAMB_1, @alunno_3CAMB_2, @alunno_sostegno_4)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_3CAMB_S, dati, presenze, @scrutinio_3CAMB_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_2], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_2])>'
+      presiede_ds: true
+      presiede_docente:
+      segretario: '<dataId(scrutinio_3CAMB_S, dati, segretario, @scrutinio_3CAMB_S, @docente_curricolare_1)>'
+      docenti: '<arrayMulti2DataId(scrutinio_3CAMB_S, dati, docenti, @scrutinio_3CAMB_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_2], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_2, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+  scrutinio_3CCHI_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("10:30")>'
+    fine:
+    stato: '4'
+    classe: '@classe_3CCHI'
+    dati:
+      alunni: '<arrayDataId(scrutinio_3CCHI_S, dati, alunni, @scrutinio_3CCHI_S, @alunno_3CCHI_1, @alunno_3CCHI_2, @alunno_sostegno_3)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_3CCHI_S, dati, presenze, @scrutinio_3CCHI_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_3], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_3])>'
+      presiede_ds: true
+      presiede_docente:
+      segretario: '<dataId(scrutinio_3CCHI_S, dati, segretario, @scrutinio_3CCHI_S, @docente_curricolare_1)>'
+      docenti: '<arrayMulti2DataId(scrutinio_3CCHI_S, dati, docenti, @scrutinio_3CCHI_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_3], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_3, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+
+App\Entity\VotoScrutinio:
+  voto_S_1A_{8, 18, 28, 38, 48}:
+    scrutinio: '@scrutinio_1A_S'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
+    unico: '<votoCondottaNoNC()>'
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: '<case(<(1+(int)($current/10))>, [3,4], [<(false)>,<(false)>], true)>'
+      contrari: '<case(<(1+(int)($current/10))>, [3,4], [@docente_curricolare_1->cognome,@docente_curricolare_1->cognome], <(null)>)>'
+  voto_S_3CAMB_{8, 18, 28}:
+    scrutinio: '@scrutinio_3CAMB_S'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
+    unico: '<votoCondottaNoNC()>'
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: true
+      contrari:
+  voto_S_3CCHI_{8, 18, 28}:
+    scrutinio: '@scrutinio_3CCHI_S'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
+    unico: '<votoCondottaNoNC()>'
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: true
+      contrari:

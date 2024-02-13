@@ -358,8 +358,8 @@ class ScrutinioController extends BaseController {
           }
         }
         // imposta il template
-        $template = 'coordinatore/scrutinio_'.(in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']).
-          '_'.$scrutinio['stato'].'.html.twig';
+        $periodoStato = ($scrutinio['periodo'] == 'S' ? 'P' : (in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']));
+        $template = 'coordinatore/scrutinio_'.$periodoStato.'_'.$scrutinio['stato'].'.html.twig';
       } else {
         // scrutinio o chiuso o inesitente
         $scrutinio = $scr->scrutinioChiuso($classe);
@@ -387,8 +387,8 @@ class ScrutinioController extends BaseController {
             }
           }
           // imposta il template
-          $template = 'coordinatore/scrutinio_'.(in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']).
-            '_'.$scrutinio['stato'].'.html.twig';
+          $periodoStato = ($scrutinio['periodo'] == 'S' ? 'P' : (in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']));
+          $template = 'coordinatore/scrutinio_'.$periodoStato.'_'.$scrutinio['stato'].'.html.twig';
         }
       }
     }
@@ -396,6 +396,7 @@ class ScrutinioController extends BaseController {
     return $this->render($template, array(
       'pagina_titolo' => 'page.coordinatore_scrutinio',
       'classe' => $classe,
+      'periodo' => $scrutinio['periodo'],
       'dati' => $dati,
       'form' => ($form ? $form->createView() : null),
       'posizione' => $posizione,

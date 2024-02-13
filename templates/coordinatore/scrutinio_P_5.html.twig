@@ -45,9 +45,9 @@
           </td>
           <td>
               {% if dati.esiti[alunno].debiti is defined and dati.esiti[alunno].debiti %}
-            <button type="button" class="btn btn-sm btn-success gs-button-remote gs-ml-4" title="Modifica la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': 'P'}) }}"><strong>COMPILATA</strong></button>
+            <button type="button" class="btn btn-sm btn-success gs-button-remote gs-ml-4" title="Modifica la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': periodo}) }}"><strong>COMPILATA</strong></button>
               {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote gs-ml-4" title="Compila la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': 'P'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote gs-ml-4" title="Compila la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
               {% endif %}
           </td>
             {% endif %}

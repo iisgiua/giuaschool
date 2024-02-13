@@ -5,6 +5,14 @@ return [
   ],
   'fileDelete' => [
     'public/install/app.php',
+    'templates/coordinatore/scrutinio_S_N.html.twig',
+    'templates/coordinatore/scrutinio_S_1.html.twig',
+    'templates/coordinatore/scrutinio_S_2.html.twig',
+    'templates/coordinatore/scrutinio_S_3.html.twig',
+    'templates/coordinatore/scrutinio_S_4.html.twig',
+    'templates/coordinatore/scrutinio_S_5.html.twig',
+    'templates/coordinatore/scrutinio_S_6.html.twig',
+    'templates/coordinatore/scrutinio_S_C.html.twig',
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_nota ADD annullata DATE DEFAULT NULL;", "SELECT 1 FROM DUAL UNION SELECT annullata FROM gs_nota;"],
