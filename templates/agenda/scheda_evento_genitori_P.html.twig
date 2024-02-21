@@ -16,6 +16,10 @@
       <strong>Docente: {{ c.avviso.docente.nome }} {{ c.avviso.docente.cognome }}</strong>
     </div>
     <div class="gs-text-normal gs-pt-3 gs-pb-3">{{ c.testo|raw|nl2br }}</div>
+    <div class="text-right gs-text-normal">
+      <em>(inserito in data: {{ c.avviso.creato|date('d/m/Y') }})</em>
+      {% if c.avviso.modificato > c.avviso.creato %}<br><em>(modificato in data: {{ c.avviso.modificato|date('d/m/Y') }})</em>{% endif %}
+    </div>
   </div>
 {% endfor %}
 </div>
