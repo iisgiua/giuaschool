@@ -726,7 +726,8 @@ class SistemaController extends BaseController {
             "TRUNCATE gs_circolare_classe;",
             "TRUNCATE gs_circolare_sede;",
             "TRUNCATE gs_circolare_utente;",
-            "TRUNCATE gs_firma_circolare;"];
+            // "TRUNCATE gs_firma_circolare;"
+            ];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
           }

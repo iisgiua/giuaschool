@@ -1257,14 +1257,13 @@ class ScrutinioUtil {
       }
     } else {
       // scrutini altri periodi
+      $listaMaterie = array_unique(array_merge([], ...
+        array_map(fn($m) => array_keys($m), $scrutinio->getDato('docenti'))));
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
-        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->join('c.classe', 'cl')
-        ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
+        ->where("m.id IN (:lista) AND m.tipo!='S'")
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-          'gruppo' => $classe->getGruppo()])
+        ->setParameters(['lista' => $listaMaterie])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
