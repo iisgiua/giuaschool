@@ -74,6 +74,13 @@ class AvvisoType extends AbstractType {
           'multiple' => true,
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => false))
+        ->add('destinatariSpeciali', ChoiceType::class, array('label' => 'label.destinatari_speciali',
+          'choices' => ['label.RSPP' => 'S'],
+          'placeholder' => false,
+          'expanded' => true,
+          'multiple' => true,
+          'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
+          'required' => false))
         ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari',
           'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D', 'label.genitori' => 'G',
             'label.alunni' => 'A', 'label.rappresentanti_R' => 'R', 'label.rappresentanti_I' => 'I',

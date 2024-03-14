@@ -28,18 +28,18 @@ class AvvisoTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Avviso';
     // campi da testare
-    $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
+    $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatariSpeciali', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
     $this->noStoredFields = ['annotazioni', 'sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
+    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari_speciali', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
       'gs_annotazione' => '*',
       'gs_classe' => '*',
       'gs_sede' => '*'];
     // SQL write
-    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
+    $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari_speciali', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -81,11 +81,12 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'testo' ? $this->faker->text() :
           ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'destinatariSpeciali' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
-          null)))))))))))))));
+          null))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -177,6 +178,16 @@ class AvvisoTest extends EntityTestCase {
     $existent->removeDestinatarioAta('uno');
     $existent->removeDestinatarioAta('uno');
     $this->assertSame(array_values(['due']), array_values($existent->getDestinatariAta()), $this->entity.'::removeDestinatarioAta');
+    // addDestinatarioSpeciale
+    $existent->setDestinatariSpeciali([]);
+    $existent->addDestinatarioSpeciale('uno');
+    $existent->addDestinatarioSpeciale('due');
+    $existent->addDestinatarioSpeciale('uno');
+    $this->assertSame(['uno', 'due'], $existent->getDestinatariSpeciali(), $this->entity.'::setDestinatarioSpeciale');
+    // removeDestinatarioSpeciale
+    $existent->removeDestinatarioSpeciale('uno');
+    $existent->removeDestinatarioSpeciale('uno');
+    $this->assertSame(array_values(['due']), array_values($existent->getDestinatariSpeciali()), $this->entity.'::removeDestinatarioSpeciale');
     // addDestinatario
     $existent->setDestinatari([]);
     $existent->addDestinatario('uno');

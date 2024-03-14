@@ -208,6 +208,17 @@ class ModuloType extends AbstractType {
           'expanded' => true,
           'multiple' => true,
           'required' => true));
+    } elseif ($options['form_mode'] == 'rspp') {
+      // form rspp
+      $builder
+      ->add('docente', ChoiceType::class, ['label' => 'label.docente',
+        'data' => $options['values'][0],
+        'choices' => $options['values'][1],
+        'choice_value' => 'id',
+        'placeholder' => 'label.nessuno',
+        'choice_translation_domain' => false,
+        'attr' => ['widget' => 'search'],
+        'required' => false]);
     } elseif ($options['form_mode'] == 'telegram') {
       // form configurazione telegram
       $builder

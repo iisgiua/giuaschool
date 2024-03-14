@@ -125,7 +125,7 @@ class StaffController extends BaseController {
           'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
           'label.rappresentanti_I' => 'I', 'label.rappresentanti_L' => 'L',
           'label.rappresentanti_S' => 'S', 'label.rappresentanti_P' => 'P',
-          'label.dsga' => 'E', 'label.ata' => 'T'],
+          'label.dsga' => 'E', 'label.ata' => 'T', 'label.RSPP' => 'Z'],
         'placeholder' => 'label.tutti_destinatari',
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => function($val, $key, $index) {
@@ -291,12 +291,13 @@ class StaffController extends BaseController {
         // sedi non definite
         $form->addError(new FormError($trans->trans('exception.avviso_sede_nulla')));
       }
-      if (!$avviso->getDestinatariAta() && !$avviso->getDestinatari()) {
+      if (!$avviso->getDestinatariAta() && !$avviso->getDestinatariSpeciali() && !$avviso->getDestinatari()) {
         // destinatari non definiti
         $form->addError(new FormError($trans->trans('exception.avviso_destinatari_nulli')));
       }
-      if ($form->get('creaAnnotazione')->getData() && $avviso->getDestinatariAta() && !$avviso->getDestinatari()) {
-        // errore: annotazione con destinatari ATA
+      if ($form->get('creaAnnotazione')->getData() && ($avviso->getDestinatariAta() || $avviso->getDestinatariSpeciali())
+          && !$avviso->getDestinatari()) {
+        // errore: annotazione con destinatari ATA/Speciali
         $form->addError(new FormError($trans->trans('exception.annotazione_solo_ata')));
       }
       if ($form->get('creaAnnotazione')->getData() && count($allegati) > 0) {
@@ -434,6 +435,7 @@ class StaffController extends BaseController {
             'Allegati' => $avviso_old->getAllegati(),
             'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
             'Destinatari ATA' => $avviso_old->getDestinatariAta(),
+            'Destinatari Speciali' => $avviso_old->getDestinatariSpeciali(),
             'Destinatari' => $avviso_old->getDestinatari(),
             'Filtro Tipo' => $avviso_old->getFiltroTipo(),
             'Filtro' => $avviso_old->getFiltro(),

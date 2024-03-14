@@ -634,6 +634,7 @@ label.gruppo_religione_T: Tutta la classe
 label.gruppo_religione_S: Gruppo Religione
 label.gruppo_religione_A: Gruppo Mat. Alt.
 label.gruppo_religione_N: Gruppo N.A.
+label.RSPP: RSPP
 
 
 ##### PAGINE #####
@@ -812,6 +813,8 @@ title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
 title.richieste.modulo_lista: Moduli inviati
 page.ruolo_staff.studenti: Gestione Alunni
 title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
+page.docenti.rspp: Configura RSPP
+title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
 
 
 page.agenda_compito: Agenda Compiti

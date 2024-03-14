@@ -41,6 +41,12 @@ class Docente extends Utente {
    */
   private ?Sede $responsabileBesSede = null;
 
+  /**
+   * @var bool $rspp Indica se il docente è il responsabile della sicurezza
+   * @ORM\Column(name="rspp", type="boolean", nullable=false)
+   */
+  private bool $rspp = false;
+
 
   //==================== METODI SETTER/GETTER ====================
 
@@ -86,6 +92,27 @@ class Docente extends Utente {
     return $this;
   }
 
+  /**
+   * Restituisce se il docente è il responsabile della sicurezza
+   *
+   * @return bool Vero se il docente è il responsabile della sicurezza, falso altrimenti
+   */
+  public function getRspp(): bool {
+    return $this->rspp;
+  }
+
+  /**
+   * Modifica se il docente è il responsabile della sicurezza
+   *
+   * @param bool $rspp Vero se il docente è il responsabile della sicurezza, falso altrimenti
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRspp(bool $rspp): self {
+    $this->rspp = $rspp;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -111,7 +138,7 @@ class Docente extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, B=responsabile bes
+   * Le possibili funzioni sono: N=nessuna, B=responsabile bes, S=responsabile sicurezza
    *
    * @return array Lista della codifica delle funzioni
    */
@@ -119,6 +146,9 @@ class Docente extends Utente {
     $lista = $this->getRappresentante() ?? [];
     if ($this->responsabileBes) {
       $lista[] = 'B';
+    }
+    if ($this->rspp) {
+      $lista[] = 'S';
     }
     $lista[] = 'N';
     return $lista;

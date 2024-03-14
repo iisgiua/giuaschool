@@ -155,6 +155,13 @@ class Avviso {
    private ?array $destinatariAta = array();
 
   /**
+   * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
+   *
+   * @ORM\Column(name="destinatari_speciali", type="simple_array", nullable=true)
+   */
+   private ?array $destinatariSpeciali = array();
+
+  /**
    * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
    *
    * @ORM\Column(type="simple_array", nullable=true)
@@ -519,6 +526,27 @@ class Avviso {
   }
 
   /**
+   * Modifica i destinatari speciali dell'avviso [S=RSPP]
+   *
+   * @param array|null $destinatariAta Destinatari speciali dell'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDestinatariSpeciali(?array $destinatariSpeciali): self {
+    $this->destinatariSpeciali = $destinatariSpeciali;
+    return $this;
+  }
+
+  /**
+   * Indica i destinatari speciali dell'avviso [S=RSPP]
+   *
+   * @return array|null Destinatari speciali dell'avviso
+   */
+  public function getDestinatariSpeciali(): ?array {
+    return $this->destinatariSpeciali;
+  }
+
+  /**
    * Modifica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
    * @param array|null $destinatariAta Personale ATA destinatario dell'avviso
@@ -727,6 +755,34 @@ class Avviso {
   public function removeDestinatarioAta(string $destinatario): self {
     if (in_array($destinatario, $this->destinatariAta)) {
       unset($this->destinatariAta[array_search($destinatario, $this->destinatariAta)]);
+    }
+    return $this;
+  }
+
+  /**
+   * Aggiunge un destinatario speciale dell'avviso [S=RSPP]
+   *
+   * @param string $destinatario Destinatario speciale dell'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function addDestinatarioSpeciale(string $destinatario): self {
+    if (!in_array($destinatario, $this->destinatariSpeciali)) {
+      $this->destinatariSpeciali[] = $destinatario;
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un destinatario speciale dell'avviso [S=RSPP]
+   *
+   * @param string $destinatario Destinatario speciale dell'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function removeDestinatarioSpeciale(string $destinatario): self {
+    if (in_array($destinatario, $this->destinatariSpeciali)) {
+      unset($this->destinatariSpeciali[array_search($destinatario, $this->destinatariSpeciali)]);
     }
     return $this;
   }

@@ -253,6 +253,9 @@ class BachecaUtil {
       } elseif ($ricerca['destinatari'] == 'T') {
         $avvisi = $avvisi->andWhere('INSTR(a.destinatariAta, :destinatari)>0')
           ->setParameter('destinatari', 'A');
+      } elseif ($ricerca['destinatari'] == 'Z') {
+        $avvisi = $avvisi->andWhere('INSTR(a.destinatariSpeciali, :destinatari)>0')
+          ->setParameter('destinatari', 'S');
       }
     }
     if (isset($ricerca['classe']) && $ricerca['classe']) {
@@ -560,6 +563,11 @@ class BachecaUtil {
     if (in_array('A', $avviso->getDestinatariAta())) {
       // aggiunge ATA
       $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Ata')->getIdAta($sedi));
+    }
+    // RSPP
+    if (in_array('S', $avviso->getDestinatariSpeciali())) {
+      // aggiunge RSPP
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')->getIdRspp());
     }
     // coordinatori
     if (in_array('C', $avviso->getDestinatari())) {

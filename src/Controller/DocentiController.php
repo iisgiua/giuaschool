@@ -1357,4 +1357,45 @@ class DocentiController extends BaseController {
     return $this->redirectToRoute('docenti_rappresentanti');
   }
 
+  /**
+   * Modifica dei dati del responsabile della sicurezza (un solo utente possibile)
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/rspp", name="docenti_rspp",
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function rsppAction(Request $request): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // legge dati
+    $rspp = $this->em->getRepository('App\Entity\Docente')->findOneBy(['rspp' => 1]);
+    // form
+    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rspp',
+      'return_url' => $this->generateUrl('docenti_rspp'),
+      'values' => [$rspp, $opzioniDocenti]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // cancella precedente rspp
+      if ($rspp) {
+        $rspp->setRspp(false);
+      }
+      // imposta nuovo rspp
+      $docente = $form->get('docente')->getData();
+      if ($docente) {
+        $docente->setRspp(true);
+      }
+      // memorizza modifiche
+      $this->em->flush();
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('docenti', 'rspp', $dati, $info, [$form->createView(), 'message.required_fields']);
+  }
+
 }

@@ -32,6 +32,7 @@
     {% if 'P' in dati.avviso.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
     {% if 'D' in dati.avviso.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
     {% if 'A' in dati.avviso.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
+    {% if 'S' in dati.avviso.destinatariSpeciali %}<span class="gs-mr-2">RSPP</span>{% endif %}
   </div>
 {% if dati.classi|length > 0 %}
   <div class="gs-mt-2">

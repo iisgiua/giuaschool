@@ -593,10 +593,21 @@ App\Entity\MenuOpzione:
   menu_opzione_DOCENTI8:
     ruolo: 'M'
     funzione: ''
+    nome: 'RSPP'
+    descrizione: 'Configura il responsabile della sicurezza'
+    url: 'docenti_rspp'
+    ordinamento: 8
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI9:
+    ruolo: 'M'
+    funzione: ''
     nome: 'Rappresentanti&nbsp;Docenti'
     descrizione: 'Configura i rappresentanti dei docenti'
     url: 'docenti_rappresentanti'
-    ordinamento: 8
+    ordinamento: 9
     abilitato: true
     icona: ''
     menu: '@menu_DOCENTI'

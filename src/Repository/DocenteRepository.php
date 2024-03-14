@@ -385,4 +385,20 @@ class DocenteRepository extends BaseRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce l'utente RSPP
+   *
+   * @return array ID dell'utente RSPP
+   */
+  public function getIdRspp(): array {
+    $rspp = $this->createQueryBuilder('d')
+      ->select('d.id')
+      ->where('d.abilitato=1 AND d.rspp=1')
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($rspp, 'id');
+  }
+
 }

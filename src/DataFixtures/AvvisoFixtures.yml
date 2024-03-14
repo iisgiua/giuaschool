@@ -14,6 +14,7 @@
 #   testo: testo dell'avviso
 #   allegati: lista di file allegati all'avviso
 #   destinatariAta: indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+#   destinatariSpeciali: Indica i destinatari speciali dell'avviso [S=RSPP]
 #   destinatari: indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
 #   filtroTipo: indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
 #   filtro: lista degli ID per il tipo di filtro specificato
@@ -46,6 +47,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array("D", "A"))>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G", "A"))>'
     filtroTipo: 'C'
     filtro: '<arrayId(avviso_U, filtro, @avviso_U, @classe_2A)>'
@@ -63,6 +65,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array("D", "A"))>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G", "A"))>'
     filtroTipo: 'C'
     filtro: '<arrayId(avviso_E, filtro, @avviso_E, @classe_3A)>'
@@ -80,6 +83,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array("D", "A"))>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("D", "G", "A"))>'
     filtroTipo: 'C'
     filtro: '<arrayId(avviso_A, filtro, @avviso_A, @classe_3B)>'
@@ -97,6 +101,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G"))>'
     filtroTipo: 'U'
     filtro: '<arrayId(avviso_I, filtro, @avviso_I, @genitore1_3A_1)>'
@@ -114,6 +119,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G"))>'
     filtroTipo: 'U'
     filtro: '<arrayId(avviso_D, filtro, @avviso_D, @genitore2_1A_1)>'
@@ -131,6 +137,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("A"))>'
     filtroTipo: 'U'
     filtro: '<arrayId(avviso_O, filtro, @avviso_O, @alunno_2A_1)>'
@@ -148,6 +155,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G", "A"))>'
     filtroTipo: 'T'
     filtro:
@@ -165,6 +173,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("G", "A"))>'
     filtroTipo: 'T'
     filtro:
@@ -182,6 +191,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array())>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("D", "G", "A"))>'
     filtroTipo: 'C'
     filtro: '<arrayId(avviso_C, filtro, @avviso_C, @classe_3A)>'
@@ -199,6 +209,7 @@ App\Entity\Avviso:
     testo: '<text()>'
     allegati: '<(array("prova.pdf"))>'
     destinatariAta: '<(array())>'
+    destinatariSpeciali: '<(array())>'
     destinatari: '<(array("A"))>'
     filtroTipo: 'U'
     filtro: '<arrayId(avviso_C_allegato, filtro, @avviso_C_allegato, @alunno_4A_1)>'
