@@ -3,6 +3,7 @@
 #
 # dati dei docenti dello staff: gli stessi dei docenti più i seguenti
 #   sede: la sede di riferimento per il ruolo di staff (se definita)
+#   rspp: indica se il docente è il resposabile della sicurezza
 #   rappresentante: indica se il dipendente ATA è eletto come rappresentante [I=di istituto]
 ####################
 
@@ -38,4 +39,5 @@ App\Entity\Staff:
     sede: '<case(<current()>, [2,3], [@sede_1,@sede_2], null)>'
     responsabileBes: false
     responsabileBesSede:
+    rspp: false
     rappresentante: '<(array())>'
