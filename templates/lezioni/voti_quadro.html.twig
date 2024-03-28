@@ -43,7 +43,7 @@
       <tr>
         <th class="col-sm-4">Alunno</th>
     {% if edit %}
-        <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione scritta per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione scritta per la classe" data-body="gs-voti-scritto"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Scritto</button></th>
+        <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione scritta o grafica per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione scritta o grafica per la classe" data-body="gs-voti-scritto"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Scritto / Grafico</button></th>
         <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione orale per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione orale per la classe" data-body="gs-voti-orale"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Orale</button></th>
         <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione pratica per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione pratica per la classe" data-body="gs-voti-pratica"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Pratica</button></th>
         <div id="gs-voti-scritto" style="display:none">
@@ -60,7 +60,7 @@
       {% endif %}
           <div class="list-group-item gs-pt-3 gs-pb-3">
             <div class="list-group-item-text row text-right gs-pr-3 gs-pl-3">
-              <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Nuova valutazione scritta per la classe"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+              <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Nuova valutazione scritta o grafica per la classe"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
             </div>
           </div>
         </div>
@@ -167,7 +167,7 @@
           {% endfor %}
         <td>
           {% if edit %}
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione scritta per l'alunno">S</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione scritta o grafica per l'alunno">S</a>
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione orale per l'alunno">O</a>
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione pratica per l'alunno">P</a>
           {% endif %}

@@ -40,7 +40,7 @@
           {% for e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
-        <td>{{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</td>
+        <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
         <td><small>{{ e.docente }}</small></td>
         <td><small>{{ e.argomento }}</small></td>
         <td>
