@@ -40,7 +40,7 @@
           {% for e in v2 %}
       <tr>
         <td><small>{{ e.data }}</small></td>
-        <td><small>{{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</small></td>
+        <td><small>{{ ('label.voti_'~e.tipo)|trans }}</small></td>
         <td><small>{{ e.argomento }}</small></td>
         <td>{% if e.voto > 0 %}<span class="label label-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }} gs-big">{{ e.voto_str }}</span>{% endif %}</td>
         <td><small>{{ e.giudizio }}</small></td>
