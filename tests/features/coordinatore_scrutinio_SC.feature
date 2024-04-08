@@ -21,7 +21,7 @@ Scenario: visualizzazione pagina passo finale
     | classe        |
     | @classe_1A:id |
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
-  Allora la sezione "#gs-main table caption" contiene "Secondo Quadrimestre"
+  Allora la sezione "#gs-main table caption" contiene "Secondo Trimestre"
   E vedi la tabella:
     | Documento                      | Note                                                          | Azioni                                                                                                                                                                                                                                                  |
     | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                                                                                                                                                                                 |
@@ -75,7 +75,7 @@ Scenario: visualizzazione classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
-  E la sezione "#gs-main table caption" contiene "Secondo Quadrimestre"
+  E la sezione "#gs-main table caption" contiene "Secondo Trimestre"
   E vedi la tabella:
     | Documento                      | Note                                                          | Azioni                                                                                                                                              |
     | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                                                                             |
@@ -93,7 +93,7 @@ Scenario: controllo riepilogo dei voti
     | classe        |
     | @classe_1A:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Riepilogo voti"
-  E analizzi PDF "archivio/scrutini/secondo/1A/1A-riepilogo-voti-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/1A/1A-riepilogo-voti-secondo-trimestre.pdf"
   Allora vedi testo "RIEPILOGO VOTI 1ª A" in PDF analizzato alla riga "1"
   E vedi testo "@alunno_1A_1:cognome,nome #str(Voto) #cas(@voto_S_1A_6:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_S_1A_0:unico,0,NC,@voto_S_1A_0:unico) #cas(@voto_S_1A_1:unico,0,NC,@voto_S_1A_1:unico) #cas(@voto_S_1A_2:unico,0,NC,@voto_S_1A_2:unico) #cas(@voto_S_1A_3:unico,0,NC,@voto_S_1A_3:unico) #cas(@voto_S_1A_5:unico,0,NC,@voto_S_1A_5:unico) #cas(@voto_S_1A_4:unico,0,NC,@voto_S_1A_4:unico) #cas(@voto_S_1A_7:unico,2,NC,@voto_S_1A_7:unico) #cas(@voto_S_1A_8:unico,4,NC,@voto_S_1A_8:unico)" in PDF analizzato in una riga
   E vedi testo "#dat(@alunno_1A_1:dataNascita) #str(Ass.) @voto_S_1A_6:assenze @voto_S_1A_0:assenze @voto_S_1A_1:assenze @voto_S_1A_2:assenze @voto_S_1A_3:assenze @voto_S_1A_5:assenze @voto_S_1A_4:assenze @voto_S_1A_7:assenze #med(@voto_S_1A_0:unico,@voto_S_1A_1:unico,@voto_S_1A_2:unico,@voto_S_1A_3:unico,@voto_S_1A_4:unico,@voto_S_1A_5:unico,@voto_S_1A_7:unico,@voto_S_1A_8:unico)" in PDF analizzato in una riga
@@ -113,7 +113,7 @@ Scenario: controllo riepilogo dei voti per la classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Riepilogo voti"
-  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-riepilogo-voti-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-riepilogo-voti-secondo-trimestre.pdf"
   Allora vedi testo "RIEPILOGO VOTI 3ª C-AMB" in PDF analizzato alla riga "1"
   E vedi testo "@alunno_3CAMB_1:cognome,nome #str(Voto) #cas(@voto_S_3CAMB_5:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_S_3CAMB_0:unico,0,NC,@voto_S_3CAMB_0:unico) #cas(@voto_S_3CAMB_1:unico,0,NC,@voto_S_3CAMB_1:unico) #cas(@voto_S_3CAMB_2:unico,0,NC,@voto_S_3CAMB_2:unico) #cas(@voto_S_3CAMB_3:unico,0,NC,@voto_S_3CAMB_3:unico) #cas(@voto_S_3CAMB_6:unico,0,NC,@voto_S_3CAMB_6:unico) #cas(@voto_S_3CAMB_4:unico,0,NC,@voto_S_3CAMB_4:unico) #cas(@voto_S_3CAMB_7:unico,2,NC,@voto_S_3CAMB_7:unico) #cas(@voto_S_3CAMB_8:unico,4,NC,@voto_S_3CAMB_8:unico)" in PDF analizzato in una riga
   E vedi testo "#dat(@alunno_3CAMB_1:dataNascita) #str(Ass.) @voto_S_3CAMB_5:assenze @voto_S_3CAMB_0:assenze @voto_S_3CAMB_1:assenze @voto_S_3CAMB_2:assenze @voto_S_3CAMB_3:assenze @voto_S_3CAMB_6:assenze @voto_S_3CAMB_4:assenze @voto_S_3CAMB_7:assenze #med(@voto_S_3CAMB_0:unico,@voto_S_3CAMB_1:unico,@voto_S_3CAMB_2:unico,@voto_S_3CAMB_3:unico,@voto_S_3CAMB_4:unico,@voto_S_3CAMB_6:unico,@voto_S_3CAMB_7:unico,@voto_S_3CAMB_8:unico)" in PDF analizzato in una riga
@@ -129,7 +129,7 @@ Scenario: controllo foglio firme registro dei voti
     | classe        |
     | @classe_1A:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Foglio firme Registro dei voti"
-  E analizzi PDF "archivio/scrutini/secondo/1A/1A-firme-registro-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/1A/1A-firme-registro-secondo-trimestre.pdf"
   Allora vedi testo "/FOGLIO FIRME REGISTRO +CLASSE 1ª A/" in PDF analizzato alla riga "1"
   E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome #str(Bianchi) #str(Maria)" in PDF analizzato in una riga
   E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in una riga
@@ -145,7 +145,7 @@ Scenario: controllo foglio firme registro dei voti per la classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Foglio firme Registro dei voti"
-  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-firme-registro-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-firme-registro-secondo-trimestre.pdf"
   Allora vedi testo "/FOGLIO FIRME REGISTRO +CLASSE 3ª C-AMB/" in PDF analizzato alla riga "1"
   E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome @docente_curricolare_1:cognome,nome" in PDF analizzato in una riga
   E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in una riga
@@ -160,9 +160,9 @@ Scenario: controllo verbale
     | classe        |
     | @classe_1A:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Verbale"
-  E analizzi PDF "archivio/scrutini/secondo/1A/1A-scrutinio-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/1A/1A-scrutinio-secondo-trimestre.pdf"
   Allora vedi testo "Verbale n. 3" in PDF analizzato alla riga "2"
-  E vedi testo "SCRUTINIO DEL SECONDO QUADRIMESTRE" in PDF analizzato alla riga "3"
+  E vedi testo "SCRUTINIO DEL SECONDO TRIMESTRE" in PDF analizzato alla riga "3"
   E vedi testo "1ª A" in PDF analizzato alla riga "4"
   E vedi testo "@docente_curricolare_2:cognome+ +@docente_curricolare_2:nome?@materia_curricolare_2:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
   E vedi testo "@docente_curricolare_3:cognome+ +@docente_curricolare_3:nome?@materia_curricolare_3:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
@@ -188,9 +188,9 @@ Scenario: controllo verbale classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Verbale"
-  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-scrutinio-secondo-quadrimestre.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-scrutinio-secondo-trimestre.pdf"
   Allora vedi testo "Verbale n. 3" in PDF analizzato alla riga "2"
-  E vedi testo "SCRUTINIO DEL SECONDO QUADRIMESTRE" in PDF analizzato alla riga "3"
+  E vedi testo "SCRUTINIO DEL SECONDO TRIMESTRE" in PDF analizzato alla riga "3"
   E vedi testo "3ª C-AMB" in PDF analizzato alla riga "4"
   E vedi testo "@docente_curricolare_1:cognome+ +@docente_curricolare_1:nome?@materia_curricolare_1:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
   E vedi testo "@docente_curricolare_2:cognome+ +@docente_curricolare_2:nome?@materia_curricolare_2:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
@@ -210,7 +210,7 @@ Scenario: controllo pagella
     | classe        |
     | @classe_1A:id |
   Quando click su "{{@alunno_1A_1:cognome}} {{@alunno_1A_1:nome}}" in sezione "#gs-main table tbody tr" che contiene "Comunicazione Pagella"
-  E analizzi PDF "archivio/scrutini/secondo/1A/1A-pagella-secondo-quadrimestre-{{@alunno_1A_1:id}}.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/1A/1A-pagella-secondo-trimestre-{{@alunno_1A_1:id}}.pdf"
   Allora vedi testo "@alunno_1A_1:cognome @alunno_1A_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "1ª A" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(ORE)" in PDF analizzato in una riga
@@ -229,7 +229,7 @@ Scenario: controllo pagella per classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Quando click su "{{@alunno_3CAMB_1:cognome}} {{@alunno_3CAMB_1:nome}}" in sezione "#gs-main table tbody tr" che contiene "Comunicazione Pagella"
-  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-pagella-secondo-quadrimestre-{{@alunno_3CAMB_1:id}}.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-pagella-secondo-trimestre-{{@alunno_3CAMB_1:id}}.pdf"
   Allora vedi testo "@alunno_3CAMB_1:cognome @alunno_3CAMB_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "3ª C-AMB" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(ORE)" in PDF analizzato in una riga
@@ -248,7 +248,7 @@ Scenario: controllo debiti
     | classe        |
     | @classe_1A:id |
   Quando click su "{{@alunno_1A_1:cognome}} {{@alunno_1A_1:nome}}" in sezione "#gs-main table tbody tr" che contiene "Comunicazione Debiti"
-  E analizzi PDF "archivio/scrutini/secondo/1A/1A-debiti-secondo-quadrimestre-{{@alunno_1A_1:id}}.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/1A/1A-debiti-secondo-trimestre-{{@alunno_1A_1:id}}.pdf"
   Allora vedi testo "@alunno_1A_1:cognome @alunno_1A_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "1ª A" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(Argomenti) #str(Modalità)" in PDF analizzato in una riga
@@ -260,7 +260,7 @@ Scenario: controllo debiti per classe articolata
     | classe           |
     | @classe_3CAMB:id |
   Quando click su "{{@alunno_3CAMB_1:cognome}} {{@alunno_3CAMB_1:nome}}" in sezione "#gs-main table tbody tr" che contiene "Comunicazione Debiti"
-  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-debiti-secondo-quadrimestre-{{@alunno_3CAMB_1:id}}.pdf"
+  E analizzi PDF "archivio/scrutini/secondo/3CAMB/3CAMB-debiti-secondo-trimestre-{{@alunno_3CAMB_1:id}}.pdf"
   Allora vedi testo "@alunno_3CAMB_1:cognome @alunno_3CAMB_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "3ª C-AMB" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(Argomenti) #str(Modalità)" in PDF analizzato in una riga
