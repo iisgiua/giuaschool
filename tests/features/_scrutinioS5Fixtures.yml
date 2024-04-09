@@ -104,10 +104,78 @@ App\Entity\Scrutinio:
       docenti: '<arrayMulti2DataId(scrutinio_1A_S, dati, docenti, @scrutinio_1A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1, @docente_itp_2, @docente_sostegno_1, @docente_sostegno_2, @docente_nocattedra_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N], [@materia_itp_1, I, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_SOSTEGNO, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, A, @materia_EDCIVICA, N])>'
     visibile:
     sincronizzazione:
+  scrutinio_2A_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("11:30")>'
+    fine:
+    stato: '5'
+    classe: '@classe_2A'
+    dati:
+      alunni: '<arrayDataId(scrutinio_2A_S, dati, alunni, @scrutinio_2A_S, @alunno_2A_1, @alunno_2A_2)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_2A_S, dati, presenze, @scrutinio_2A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
+      presiede_ds: false
+      presiede_docente: '<dataId(scrutinio_2A_S, dati, presiede_docente, @scrutinio_2A_S, @docente_curricolare_1)>'
+      segretario: '<dataId(scrutinio_2A_S, dati, segretario, @scrutinio_2A_S, @docente_curricolare_2)>'
+      docenti: '<arrayMulti2DataId(scrutinio_2A_S, dati, docenti, @scrutinio_2A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+  scrutinio_3A_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("12:30")>'
+    fine:
+    stato: '5'
+    classe: '@classe_3A'
+    dati:
+      alunni: '<arrayDataId(scrutinio_3A_S, dati, alunni, @scrutinio_3A_S, @alunno_3A_1, @alunno_3A_2)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_3A_S, dati, presenze, @scrutinio_3A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
+      presiede_ds: false
+      presiede_docente: '<dataId(scrutinio_3A_S, dati, presiede_docente, @scrutinio_3A_S, @docente_curricolare_1)>'
+      segretario: '<dataId(scrutinio_3A_S, dati, segretario, @scrutinio_3A_S, @docente_curricolare_2)>'
+      docenti: '<arrayMulti2DataId(scrutinio_3A_S, dati, docenti, @scrutinio_3A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+  scrutinio_4A_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("14:30")>'
+    fine:
+    stato: '5'
+    classe: '@classe_4A'
+    dati:
+      alunni: '<arrayDataId(scrutinio_4A_S, dati, alunni, @scrutinio_4A_S, @alunno_4A_1, @alunno_4A_2)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_4A_S, dati, presenze, @scrutinio_4A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
+      presiede_ds: false
+      presiede_docente: '<dataId(scrutinio_4A_S, dati, presiede_docente, @scrutinio_4A_S, @docente_curricolare_1)>'
+      segretario: '<dataId(scrutinio_4A_S, dati, segretario, @scrutinio_4A_S, @docente_curricolare_2)>'
+      docenti: '<arrayMulti2DataId(scrutinio_4A_S, dati, docenti, @scrutinio_4A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
+  scrutinio_5A_S:
+    periodo: 'S'
+    data: '<dataFissa("01/04/2020")>'
+    inizio: '<oraFissa("15:30")>'
+    fine:
+    stato: '5'
+    classe: '@classe_5A'
+    dati:
+      alunni: '<arrayDataId(scrutinio_5A_S, dati, alunni, @scrutinio_5A_S, @alunno_5A_1, @alunno_5A_2)>'
+      valutazioni: '<{valutazioni}>'
+      presenze: '<arrayObjDataId(scrutinio_5A_S, dati, presenze, @scrutinio_5A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
+      presiede_ds: false
+      presiede_docente: '<dataId(scrutinio_5A_S, dati, presiede_docente, @scrutinio_5A_S, @docente_curricolare_1)>'
+      segretario: '<dataId(scrutinio_5A_S, dati, segretario, @scrutinio_5A_S, @docente_curricolare_2)>'
+      docenti: '<arrayMulti2DataId(scrutinio_5A_S, dati, docenti, @scrutinio_5A_S, [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [@materia_curricolare_1, N, @materia_EDCIVICA, N], [@materia_curricolare_2, N, @materia_EDCIVICA, N], [@materia_curricolare_3, N, @materia_EDCIVICA, N], [@materia_curricolare_4, N, @materia_EDCIVICA, N], [@materia_curricolare_5, N, @materia_EDCIVICA, N], [@materia_RELIGIONE, N, @materia_EDCIVICA, N], [@materia_itp_1, N, @materia_EDCIVICA, N])>'
+    visibile:
+    sincronizzazione:
   scrutinio_3CAMB_S:
     periodo: 'S'
     data: '<dataFissa("01/04/2020")>'
-    inizio: '<oraFissa("10:30")>'
+    inizio: '<oraFissa("16:30")>'
     fine:
     stato: '5'
     classe: '@classe_3CAMB'
@@ -124,7 +192,7 @@ App\Entity\Scrutinio:
   scrutinio_3CCHI_S:
     periodo: 'S'
     data: '<dataFissa("01/04/2020")>'
-    inizio: '<oraFissa("10:30")>'
+    inizio: '<oraFissa("17:30")>'
     fine:
     stato: '5'
     classe: '@classe_3CCHI'
@@ -151,6 +219,50 @@ App\Entity\Esito:
       giudizio:
     scrutinio: '@scrutinio_1A_S'
     alunno: '@alunno_<case(<current()>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<current()>)>'
+  esito_S_2A_{1..2}:
+    esito: 'A'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_2A_S'
+    alunno: '@alunno_2A_<current()>'
+  esito_S_3A_{1..2}:
+    esito: 'A'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_3A_S'
+    alunno: '@alunno_3A_<current()>'
+  esito_S_4A_{1..2}:
+    esito: 'A'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_4A_S'
+    alunno: '@alunno_4A_<current()>'
+  esito_S_5A_{1..2}:
+    esito: 'A'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_5A_S'
+    alunno: '@alunno_5A_<current()>'
   esito_S_3CAMB_{1..3}:
     esito: 'A'
     media: 0
