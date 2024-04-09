@@ -179,7 +179,7 @@ App\Entity\Scrutinio:
   scrutinio_3CAMB_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
-    inizio: '<oraFissa("15:30")>'
+    inizio: '<oraFissa("16:30")>'
     fine:
     stato: '3'
     classe: '@classe_3CAMB'
@@ -196,7 +196,7 @@ App\Entity\Scrutinio:
   scrutinio_3CCHI_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
-    inizio: '<oraFissa("16:30")>'
+    inizio: '<oraFissa("17:30")>'
     fine:
     stato: '3'
     classe: '@classe_3CCHI'

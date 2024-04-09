@@ -108,7 +108,7 @@ App\Entity\Scrutinio:
       argomento:
         2: 'Testo verbale passo 2...'
       numeroVerbale: 3
-    visibile:
+    visibile: '<dataFissa("02/04/2020")>'
     sincronizzazione:
   scrutinio_3CAMB_S:
     periodo: 'S'
@@ -131,7 +131,7 @@ App\Entity\Scrutinio:
       argomento:
         2: 'Testo verbale passo 2...'
       numeroVerbale: 3
-    visibile:
+    visibile: '<dataFissa("02/04/2020")>'
     sincronizzazione:
   scrutinio_3CCHI_S:
     periodo: 'S'
@@ -154,5 +154,5 @@ App\Entity\Scrutinio:
       argomento:
         2: 'Testo verbale passo 2...'
       numeroVerbale: 3
-    visibile:
+    visibile: '<dataFissa("02/04/2020")>'
     sincronizzazione:

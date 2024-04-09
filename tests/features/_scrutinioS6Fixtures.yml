@@ -161,7 +161,7 @@ App\Entity\VotoScrutinio:
     unico: '<case(<current()>, [0,1,7], [4,5,6], 0)>'
     debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
     recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
+    assenze: 5
     alunno: '@proposta_S_1A_<current()>->alunno'
     materia: '@proposta_S_1A_<current()>->materia'
     dati: '<{delibera}>'
@@ -173,7 +173,7 @@ App\Entity\VotoScrutinio:
     unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
     debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
     recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
+    assenze: 5
     alunno: '@proposta_S_3CAMB_<current()>->alunno'
     materia: '@proposta_S_3CAMB_<current()>->materia'
     dati: '<{delibera}>'
@@ -185,7 +185,7 @@ App\Entity\VotoScrutinio:
     unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
     debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
     recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: '<numberBetween(0, 100)>'
+    assenze: 5
     alunno: '@proposta_S_3CCHI_<current()>->alunno'
     materia: '@proposta_S_3CCHI_<current()>->materia'
     dati: '<{delibera}>'

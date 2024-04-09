@@ -153,7 +153,7 @@ App\Entity\VotoScrutinio:
     unico: '<ife(<($current>=10)>, <votoEdCivicaNoNC()>, 6)>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 15)>'
+    assenze: 0
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_S_3CAMB_{7, 17, 27}:
@@ -165,7 +165,7 @@ App\Entity\VotoScrutinio:
     unico: '<votoEdCivicaNoNC()>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 15)>'
+    assenze: 0
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_S_3CCHI_{7, 17, 27}:
@@ -177,6 +177,6 @@ App\Entity\VotoScrutinio:
     unico: '<votoEdCivicaNoNC()>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 15)>'
+    assenze: 0
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
