@@ -2217,7 +2217,7 @@ class ScrutinioUtil {
                                         Classe $classe, Scrutinio $scrutinio) {
     // controlli sulle proposte
     $this->reqstack->getSession()->getFlashBag()->clear();
-    $dati = $this->quadroProposte($docente, $classe, 'F');
+    $dati = $this->quadroProposte($docente, $classe, $scrutinio->getPeriodo());
     if (isset($dati['errori']) && (in_array(1, array_values($dati['errori'])) ||
         in_array(10, array_values($dati['errori'])))) {
       // mancano valutazioni
@@ -2226,8 +2226,10 @@ class ScrutinioUtil {
     $this->reqstack->getSession()->getFlashBag()->clear();
     // alunni con voto in scrutinio
     $alunni_esistenti = $this->em->getRepository('App\Entity\VotoScrutinio')->alunni($scrutinio);
-    // condotta
-    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+    // materia ed. civica
+    $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
+    $dati['materie'][$edcivica->getId()] = ['id' => $edcivica->getId(), 'nome' => $edcivica->getNome(),
+      'nomeBreve' => $edcivica->getNomeBreve(), 'tipo' => $edcivica->getTipo()];
     // conteggio assenze e inserimento voti
     $dati_delibera = serialize(array('motivazione' => null, 'unanimita' => true, 'contrari' => null));
     foreach ($dati['alunni'] as $alunno=>$alu) {
@@ -2238,11 +2240,17 @@ class ScrutinioUtil {
           $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
+            ->join('l.classe', 'c')
             ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-            ->where('al.alunno=:alunno AND l.materia=:materia AND l.data>:inizio AND l.data<=:fine AND (l.classe=:classe OR l.classe=cc.classe)')
+            ->where('al.alunno=:alunno AND l.materia=:materia AND l.data>:inizio AND l.data<=:fine')
+            ->andWhere("(c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe")
             ->setParameters(['alunno' => $alunno, 'materia' => $materia,
-              'inizio' => (empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome')) ? $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine') : $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 'classe' => $classe->getId()])
+              'inizio' => empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome')) ?
+                $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine') :
+                $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine'),
+              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'),
+              'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+              'gruppo' => $classe->getGruppo()])
             ->getQuery()
             ->getSingleScalarResult();
           $ore = ($ore ? ((int) $ore) : 0);
@@ -2277,21 +2285,7 @@ class ScrutinioUtil {
           }
         }
       }
-      // inserisce condotta
-      if (!array_key_exists($alunno, $alunni_esistenti) ||
-          !in_array($condotta->getId(), $alunni_esistenti[$alunno])) {
-        // voto fittizio di condotta
-        $this->em->getConnection()
-          ->prepare('INSERT INTO gs_voto_scrutinio '.
-            '(scrutinio_id, alunno_id, materia_id, creato, modificato, assenze, dati) '.
-            'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:assenze,:dati)')
-          ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno,
-            'materia' => $condotta->getId(),
-            'assenze' => 0,
-            'dati' => $dati_delibera]);
-      }
     }
-    $this->em->flush();
     // memorizza alunni
     $dati_scrutinio = $scrutinio->getDati();
     $dati_scrutinio['alunni'] = array_keys($dati['alunni']);
@@ -2325,11 +2319,6 @@ class ScrutinioUtil {
    */
   public function passaggioStato_F_1_N(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
-    // controlla se docente fa parte di staff
-    if (!($docente instanceOf Staff)) {
-      // errore
-      return false;
-    }
     // inizializza messaggi di errore
     $this->reqstack->getSession()->getFlashBag()->clear();
     // aggiorna stato
