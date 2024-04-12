@@ -30,9 +30,9 @@ class ScrutinioAssenza {
   private string $sesso = '';
 
   /**
-   * @var string $scrutinabile Indica se l'alunno è scrutinabile o no [A=limite assenze, D=deroga]
+   * @var string|null $scrutinabile Indica se l'alunno è scrutinabile o no [A=limite assenze, D=deroga]
    */
-  private string $scrutinabile = '';
+  private ?string $scrutinabile = '';
 
   /**
    * @var string $motivazione Motivazione della deroga
@@ -87,20 +87,20 @@ class ScrutinioAssenza {
   /**
    * Restituisce se l'alunno è scrutinabile o no [A=no per limite assenze, D=si per deroga]
    *
-   * @return string Indica se l'alunno è scrutinabile o no
+   * @return string|null Indica se l'alunno è scrutinabile o no
    */
-  public function getScrutinabile(): string {
+  public function getScrutinabile(): ?string {
     return $this->scrutinabile;
   }
 
   /**
    * Modifica se l'alunno è scrutinabile o no [A=no per limite assenze, D=si per deroga]
    *
-   * @var string $scrutinabile Indica se l'alunno è scrutinabile o no
+   * @var string|null $scrutinabile Indica se l'alunno è scrutinabile o no
    *
    * @return ScrutinioAssenza Oggetto ScrutinioAssenza
    */
-  public function setScrutinabile(string $scrutinabile): self {
+  public function setScrutinabile(?string $scrutinabile): self {
     $this->scrutinabile = $scrutinabile;
     return $this;
   }
@@ -127,4 +127,3 @@ class ScrutinioAssenza {
   }
 
 }
-

@@ -2478,8 +2478,10 @@ class ScrutinioUtil {
     $dati['assenze_extra'] = [];
     // legge scrutinio finale e intermedi
     $scrutinio_F = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
-    $scrutinio_S = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe]);
-    $scrutinio_P = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe]);
+    $scrutinio_S = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe,
+      'stato' => 'C']);
+    $scrutinio_P = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe,
+      'stato' => 'C']);
     if (!$scrutinio_F || !$scrutinio_P) {
       // errore
       return null;
@@ -2507,7 +2509,7 @@ class ScrutinioUtil {
       ->join('vs.scrutinio', 's')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.id IN (:alunni) AND (s.id IN (:scrutini) OR (s.classe=cc.classe AND s.periodo IN (:periodi)))')
-      ->groupBy('a.id')
+      ->groupBy('a.id,a.cognome,a.nome,a.sesso,a.dataNascita')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni'], 'scrutini' => $listaScrutini,
         'periodi' => ['P', 'S']])
@@ -2577,11 +2579,10 @@ class ScrutinioUtil {
     }
     // alunni all'estero
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes,cc.note')
-      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id AND cc.classe=:classe')
-      ->where('a.frequenzaEstero=:estero AND a.classe IS NULL AND a.abilitato=:abilitato')
+      ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes')
+      ->where('a.id IN (:alunni) AND a.frequenzaEstero=1')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['classe' => $classe, 'estero' => 1, 'abilitato' => 0])
+      ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni']])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
