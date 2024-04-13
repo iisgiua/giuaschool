@@ -670,6 +670,20 @@ App\Entity\Genitore:
     alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
 
+App\Entity\CambioClasse:
+  cambio_classe_1A_1:
+    alunno: '@alunno_1A_1'
+    inizio: '<dataFissa("01/09/2019")>'
+    fine: '<dataFissa("01/12/2019")>'
+    classe:
+    note: 'Inserimento in data 02/12/2019'
+  cambio_classe_1A_2:
+    alunno: '@alunno_1A_2'
+    inizio: '<dataFissa("01/09/2019")>'
+    fine: '<dataFissa("01/12/2019")>'
+    classe: '@classe_1B'
+    note: 'Cambio sezione dalla 1B in data 02/12/2019'
+
 App\Entity\PropostaVoto:
   proposta_P_1A_{0..44}:
     periodo: 'P'
