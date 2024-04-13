@@ -119,7 +119,7 @@ App\Entity\Scrutinio:
     stato: '6'
     classe: '@classe_2A'
     dati:
-      alunni: '<arrayDataId(scrutinio_2A_P, dati, alunni, @scrutinio_2A_P, @alunno_2A_1, @alunno_2A_2)>'
+      alunni: '<arrayDataId(scrutinio_2A_P, dati, alunni, @scrutinio_2A_P, @alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_2A_P, dati, presenze, @scrutinio_2A_P, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -139,7 +139,7 @@ App\Entity\Scrutinio:
     stato: '6'
     classe: '@classe_3A'
     dati:
-      alunni: '<arrayDataId(scrutinio_3A_P, dati, alunni, @scrutinio_3A_P, @alunno_3A_1, @alunno_3A_2)>'
+      alunni: '<arrayDataId(scrutinio_3A_P, dati, alunni, @scrutinio_3A_P, @alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_3A_P, dati, presenze, @scrutinio_3A_P, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -159,7 +159,7 @@ App\Entity\Scrutinio:
     stato: '6'
     classe: '@classe_4A'
     dati:
-      alunni: '<arrayDataId(scrutinio_4A_P, dati, alunni, @scrutinio_4A_P, @alunno_4A_1, @alunno_4A_2)>'
+      alunni: '<arrayDataId(scrutinio_4A_P, dati, alunni, @scrutinio_4A_P, @alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_4A_P, dati, presenze, @scrutinio_4A_P, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -179,7 +179,7 @@ App\Entity\Scrutinio:
     stato: '6'
     classe: '@classe_5A'
     dati:
-      alunni: '<arrayDataId(scrutinio_5A_P, dati, alunni, @scrutinio_5A_P, @alunno_5A_1, @alunno_5A_2)>'
+      alunni: '<arrayDataId(scrutinio_5A_P, dati, alunni, @scrutinio_5A_P, @alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_5A_P, dati, presenze, @scrutinio_5A_P, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -194,7 +194,7 @@ App\Entity\Scrutinio:
   scrutinio_3CAMB_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
-    inizio: '<oraFissa("10:30")>'
+    inizio: '<oraFissa("16:30")>'
     fine:
     stato: '6'
     classe: '@classe_3CAMB'
@@ -214,7 +214,7 @@ App\Entity\Scrutinio:
   scrutinio_3CCHI_P:
     periodo: 'P'
     data: '<dataFissa("01/01/2020")>'
-    inizio: '<oraFissa("10:30")>'
+    inizio: '<oraFissa("17:30")>'
     fine:
     stato: '6'
     classe: '@classe_3CCHI'

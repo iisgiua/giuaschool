@@ -116,7 +116,7 @@ App\Entity\Scrutinio:
     stato: '3'
     classe: '@classe_2A'
     dati:
-      alunni: '<arrayDataId(scrutinio_2A_S, dati, alunni, @scrutinio_2A_S, @alunno_2A_1, @alunno_2A_2)>'
+      alunni: '<arrayDataId(scrutinio_2A_S, dati, alunni, @scrutinio_2A_S, @alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_2A_S, dati, presenze, @scrutinio_2A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -133,7 +133,7 @@ App\Entity\Scrutinio:
     stato: '3'
     classe: '@classe_3A'
     dati:
-      alunni: '<arrayDataId(scrutinio_3A_S, dati, alunni, @scrutinio_3A_S, @alunno_3A_1, @alunno_3A_2)>'
+      alunni: '<arrayDataId(scrutinio_3A_S, dati, alunni, @scrutinio_3A_S, @alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_3A_S, dati, presenze, @scrutinio_3A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -150,7 +150,7 @@ App\Entity\Scrutinio:
     stato: '3'
     classe: '@classe_4A'
     dati:
-      alunni: '<arrayDataId(scrutinio_4A_S, dati, alunni, @scrutinio_4A_S, @alunno_4A_1, @alunno_4A_2)>'
+      alunni: '<arrayDataId(scrutinio_4A_S, dati, alunni, @scrutinio_4A_S, @alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_4A_S, dati, presenze, @scrutinio_4A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -167,7 +167,7 @@ App\Entity\Scrutinio:
     stato: '3'
     classe: '@classe_5A'
     dati:
-      alunni: '<arrayDataId(scrutinio_5A_S, dati, alunni, @scrutinio_5A_S, @alunno_5A_1, @alunno_5A_2)>'
+      alunni: '<arrayDataId(scrutinio_5A_S, dati, alunni, @scrutinio_5A_S, @alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_5A_S, dati, presenze, @scrutinio_5A_S, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -221,54 +221,54 @@ App\Entity\VotoScrutinio:
     unico: '<ife(<($current>=10)>, <votoEdCivicaNoNC()>, 6)>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: 0
+    assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_2A_{7, 17}:
+  voto_S_2A_{7, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_2A_S'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_2A_<(1+(int)($current/10))>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
+    unico: 6
+    debito:
+    recupero:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_3A_{7, 17}:
+  voto_S_3A_{7, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_3A_S'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_3A_<(1+(int)($current/10))>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
+    unico: 6
+    debito:
+    recupero:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_4A_{7, 17}:
+  voto_S_4A_{7, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_4A_S'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_4A_<(1+(int)($current/10))>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
+    unico: 6
+    debito:
+    recupero:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_5A_{7, 17}:
+  voto_S_5A_{7, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_5A_S'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_5A_<(1+(int)($current/10))>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
+    unico: 6
+    debito:
+    recupero:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
@@ -281,7 +281,7 @@ App\Entity\VotoScrutinio:
     unico: '<votoEdCivicaNoNC()>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: 0
+    assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_S_3CCHI_{7, 17, 27}:
@@ -293,6 +293,6 @@ App\Entity\VotoScrutinio:
     unico: '<votoEdCivicaNoNC()>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: 0
+    assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'

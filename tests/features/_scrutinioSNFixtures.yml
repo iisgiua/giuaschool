@@ -37,7 +37,7 @@ App\Entity\DefinizioneScrutinio:
   definizione_scrutinio_S:
     data: '<dataFissa("31/03/2020")>'
     argomenti:
-      1: "Scrutinio del Secondo Quadrimestre"
+      1: "Scrutinio del Secondo Trimestre"
       2: "Situazioni particolari da segnalare"
     dati: '<([])>'
     periodo: 'S'
@@ -64,13 +64,13 @@ App\Entity\PropostaVoto:
     classe: '@classe_1A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_S_2A_{0..19}:
+  proposta_S_2A_{0..59}:
     periodo: 'S'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_2A_<(1+(int)($current/10))>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -78,13 +78,13 @@ App\Entity\PropostaVoto:
     classe: '@classe_2A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_S_3A_{0..19}:
+  proposta_S_3A_{0..59}:
     periodo: 'S'
     orale:
     scritto:
     pratico:
-    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 3A_<(1+(int)($current/10))>)>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    alunno: '@alunno_3A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -92,13 +92,13 @@ App\Entity\PropostaVoto:
     classe: '@classe_3A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_S_4A_{0..19}:
+  proposta_S_4A_{0..59}:
     periodo: 'S'
     orale:
     scritto:
     pratico:
-    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 4A_<(1+(int)($current/10))>)>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    alunno: '@alunno_4A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -106,13 +106,13 @@ App\Entity\PropostaVoto:
     classe: '@classe_4A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_S_5A_{0..19}:
+  proposta_S_5A_{0..59}:
     periodo: 'S'
     orale:
     scritto:
     pratico:
-    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 5A_<(1+(int)($current/10))>)>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    alunno: '@alunno_5A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
