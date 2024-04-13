@@ -238,9 +238,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_1A_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_1A_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_1A_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_1A_<current()>->alunno'
     materia: '@proposta_S_1A_<current()>->materia'
@@ -250,9 +250,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [4,<(null)>], @proposta_S_1A_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_1A_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [C,<(null)>], @proposta_S_1A_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_1A_<current()>->alunno'
     materia: '@proposta_S_1A_<current()>->materia'
@@ -262,9 +262,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_1A_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_1A_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_1A_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_1A_<current()>->alunno'
     materia: '@proposta_S_1A_<current()>->materia'
@@ -274,9 +274,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_1A_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [4,<(null)>], @proposta_S_1A_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_1A_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [C,<(null)>], @proposta_S_1A_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_1A_<current()>->alunno'
     materia: '@proposta_S_1A_<current()>->materia'
@@ -586,9 +586,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_3CAMB_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_3CAMB_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_3CAMB_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_3CAMB_<current()>->alunno'
     materia: '@proposta_S_3CAMB_<current()>->materia'
@@ -598,9 +598,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CAMB_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_3CAMB_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_3CAMB_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_3CAMB_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_3CAMB_<current()>->alunno'
     materia: '@proposta_S_3CAMB_<current()>->materia'
@@ -622,9 +622,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_3CCHI_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_3CCHI_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_3CCHI_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_3CCHI_<current()>->alunno'
     materia: '@proposta_S_3CCHI_<current()>->materia'
@@ -634,9 +634,9 @@ App\Entity\VotoScrutinio:
     orale:
     scritto:
     pratico:
-    unico: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->unico)>'
-    debito: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->debito)>'
-    recupero: '<case(<($current%10)>, [7], [<(null)>], @proposta_S_3CCHI_<current()>->recupero)>'
+    unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_S_3CCHI_<current()>->unico)>'
+    debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_S_3CCHI_<current()>->debito)>'
+    recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_S_3CCHI_<current()>->recupero)>'
     assenze: '<numberBetween(0, 10)>'
     alunno: '@proposta_S_3CCHI_<current()>->alunno'
     materia: '@proposta_S_3CCHI_<current()>->materia'
