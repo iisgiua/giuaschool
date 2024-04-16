@@ -241,7 +241,7 @@ App\Entity\VotoScrutinio:
     unico: '<case(<current()>, [0,1,7], [4,5,6], 0)>'
     debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
     recupero: '<ife(<current()>!=7, "A", <(null)>)>'
-    assenze: 5
+    assenze: 10
     alunno: '@proposta_P_1A_<current()>->alunno'
     materia: '@proposta_P_1A_<current()>->materia'
     dati: '<{delibera}>'

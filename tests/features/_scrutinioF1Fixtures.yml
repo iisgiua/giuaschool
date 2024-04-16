@@ -241,7 +241,7 @@ App\Entity\VotoScrutinio:
     unico: '<case(<($current%10)>, [0,7], [5,<(null)>], @proposta_F_1A_<current()>->unico)>'
     debito: '<case(<($current%10)>, [0,7], [<text()>,<(null)>], @proposta_F_1A_<current()>->debito)>'
     recupero: '<case(<($current%10)>, [0,7], [A,<(null)>], @proposta_F_1A_<current()>->recupero)>'
-    assenze: 35
+    assenze: '<case(<($current%10)>, [6], [0], 35)>'
     alunno: '@proposta_F_1A_<current()>->alunno'
     materia: '@proposta_F_1A_<current()>->materia'
     dati: '<{delibera}>'

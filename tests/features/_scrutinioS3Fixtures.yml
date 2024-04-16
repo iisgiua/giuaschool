@@ -221,7 +221,7 @@ App\Entity\VotoScrutinio:
     unico: '<ife(<($current>=10)>, <votoEdCivicaNoNC()>, 6)>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 10)>'
+    assenze: '<ife(<($current<20)>,10, <voto()>)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_S_2A_{7, 17, 27, 37, 47, 57}:

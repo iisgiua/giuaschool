@@ -2470,79 +2470,99 @@ class ScrutinioUtil {
    * @return array|null Dati formattati come un array associativo
    */
   public function controlloAssenze(Docente $docente, Classe $classe, $periodo) {
-    $dati = array();
-    $dati['alunni'] = array();
-    $dati['no_scrutinabili']['alunni'] = array();
-    $dati['no_scrutinabili']['form'] = array();
-    $dati['estero'] = array();
+    $dati = [];
+    $dati['alunni'] = [];
+    $dati['no_scrutinabili']['alunni'] = [];
+    $dati['no_scrutinabili']['form'] = [];
+    $dati['estero'] = [];
     $dati['assenze_extra'] = [];
     // legge scrutinio finale e intermedi
-    $scrutinio_F = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
-    $scrutinio_S = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe,
+    $scrutinioF = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
+    $scrutinioP = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe,
       'stato' => 'C']);
-    $scrutinio_P = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe,
+    $scrutinioS = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe,
       'stato' => 'C']);
-    if (!$scrutinio_F || !$scrutinio_P) {
+    if (!$scrutinioF || !$scrutinioP) {
       // errore
       return null;
     }
-    $listaScrutini = $scrutinio_S ? [$scrutinio_P, $scrutinio_S, $scrutinio_F] : [$scrutinio_P, $scrutinio_F];
     // legge dati alunni trasferiti da altra scuola
+    $scrutinioDati = $scrutinioF->getDati();
     $alunniTrasferiti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,cc.note')
       ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.id IN (:alunni) AND cc.classe IS NULL')
-      ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni']])
+      ->setParameters(['alunni' => $scrutinioDati['alunni']])
       ->getQuery()
       ->getArrayResult();
-    $datiExtra = $scrutinio_F->getDati()['assenze_extra'] ?? [];
     foreach ($alunniTrasferiti as $alu) {
-      $dati['assenze_extra'][$alu['id']] = [$datiExtra[$alu['id']] ?? 0, $alu['note']];
+      $dati['assenze_extra'][$alu['id']] = [$scrutinioDati['assenze_extra'][$alu['id']] ?? 0,
+        $alu['note']];
     }
     // calcola limite assenze
     $dati['monteore'] = $classe->getOreSettimanali() * 33;
     $dati['maxassenze'] = (int) ($dati['monteore'] / 4);
-    // calcola ore totali assenza alunni (compresi cambi classe in periodi intermedi)
+    // calcola ore totali di tutti i periodi
+    $listaScrutini = $scrutinioS ? [$scrutinioP, $scrutinioS, $scrutinioF] : [$scrutinioP, $scrutinioF];
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.sesso,a.dataNascita,SUM(vs.assenze) AS ore')
       ->join('App\Entity\VotoScrutinio', 'vs', 'WITH', 'vs.alunno=a.id')
       ->join('vs.scrutinio', 's')
-      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
-      ->where('a.id IN (:alunni) AND (s.id IN (:scrutini) OR (s.classe=cc.classe AND s.periodo IN (:periodi)))')
+      ->where('a.id IN (:alunni) AND s.id IN (:scrutini)')
       ->groupBy('a.id,a.cognome,a.nome,a.sesso,a.dataNascita')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni'], 'scrutini' => $listaScrutini,
-        'periodi' => ['P', 'S']])
+      ->setParameters(['alunni' => $scrutinioDati['alunni'], 'scrutini' => $listaScrutini])
       ->getQuery()
       ->getArrayResult();
-    // legge dati scrutinio
-    $scrutinio_dati = $scrutinio_F->getDati();
+    // imposta ore assenze di alunni
     foreach ($alunni as $a) {
       // non scrutinato in primo periodo
-      if (!in_array($a['id'], $scrutinio_P->getDati()['alunni'])) {
-        $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
-        ->select('SUM(al.ore)')
-        ->join('al.lezione', 'l')
-        ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-        ->setParameters(['alunno' => $a['id'],
-          'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
-          'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
-        ->getQuery()
-        ->getSingleScalarResult();
+      if (!in_array($a['id'], $scrutinioP->getDati()['alunni'])) {
+        // controlla se scrutinato in altra classe
+        $ore = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+          ->select('SUM(vs.assenze)')
+          ->join('vs.scrutinio', 's')
+          ->where("vs.alunno=:alunno AND s.periodo='P' AND s.id!=:scrutinio")
+          ->setParameters(['alunno' => $a['id'], 'scrutinio' => $scrutinioP])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($ore === null) {
+          // conta assenze di lezioni
+          $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+            ->select('SUM(al.ore)')
+            ->join('al.lezione', 'l')
+            ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
+            ->setParameters(['alunno' => $a['id'],
+              'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
+              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
+            ->getQuery()
+            ->getSingleScalarResult();
+        }
         $ore = ($ore ? ((int) $ore) : 0);
         $a['ore'] += $ore;
       }
       // non scrutinato in secondo periodo
-      if ($scrutinio_S && !in_array($a['id'], $scrutinio_S->getDati()['alunni'])) {
-        $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
-        ->select('SUM(al.ore)')
-        ->join('al.lezione', 'l')
-        ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
-        ->setParameters(['alunno' => $a['id'],
-          'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
-          'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
-        ->getQuery()
-        ->getSingleScalarResult();
+      if ($scrutinioS && !in_array($a['id'], $scrutinioS->getDati()['alunni'])) {
+        // controlla se scrutinato in altra classe
+        $ore = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+          ->select('SUM(vs.assenze)')
+          ->join('vs.scrutinio', 's')
+          ->where("vs.alunno=:alunno AND s.periodo='S' AND s.id!=:scrutinio")
+          ->setParameters(['alunno' => $a['id'], 'scrutinio' => $scrutinioS])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($ore === null) {
+          // conta assenze di lezioni
+          $ore = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
+            ->select('SUM(al.ore)')
+            ->join('al.lezione', 'l')
+            ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
+            ->setParameters(['alunno' => $a['id'],
+              'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
+              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
+            ->getQuery()
+            ->getSingleScalarResult();
+        }
         $ore = ($ore ? ((int) $ore) : 0);
         $a['ore'] += $ore;
       }
@@ -2565,12 +2585,12 @@ class ScrutinioUtil {
           ->setAlunno($a['id'])
           ->setSesso($a['sesso']);
         // recupera dati esistenti
-        if (isset($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga'])) {
+        if (isset($scrutinioDati['no_scrutinabili'][$a['id']]['deroga'])) {
           // scrutinabile in deroga
           $dati['no_scrutinabili']['form'][$a['id']]
             ->setScrutinabile('D')
-            ->setMotivazione($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga']);
-        } elseif (isset($scrutinio_dati['no_scrutinabili'][$a['id']])) {
+            ->setMotivazione($scrutinioDati['no_scrutinabili'][$a['id']]['deroga']);
+        } elseif (isset($scrutinioDati['no_scrutinabili'][$a['id']])) {
           // non scrutinabile
           $dati['no_scrutinabili']['form'][$a['id']]
             ->setScrutinabile('A');
@@ -2580,9 +2600,9 @@ class ScrutinioUtil {
     // alunni all'estero
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes')
-      ->where('a.id IN (:alunni) AND a.frequenzaEstero=1')
+      ->where('a.classe=:classe AND a.frequenzaEstero=1')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $scrutinio_F->getDati()['alunni']])
+      ->setParameters(['classe' => $classe])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {

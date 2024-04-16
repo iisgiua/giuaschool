@@ -794,7 +794,7 @@ class BrowserContext extends BaseContext {
   /**
    * Seleziona opzione da lista di scelta tramite RADIO BUTTON
    *  $valore: testo o valore dell'opzione
-   *  $testoParam: lista identifica tramite attributo id|name
+   *  $testoParam: lista identificata tramite attributo id|name
    *
    * @Given opzione :valore selezionata da pulsanti radio :testoParam
    * @When selezioni opzione :valore da pulsanti radio :testoParam

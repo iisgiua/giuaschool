@@ -11,10 +11,19 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 2: controllo del limite di assenze degli alunni</h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
-    {% if dati.assenze_extra|length > 0 %}
-    <div class="gs-mt-5">
-      <strong class="text-info gs-big">* Inserimento delle assenze fatte in altre scuole per gli alunni trasferiti in corso d'anno:</strong>
+    {% if dati.estero is not empty %}
+  <div id="gs-alunni-estero" class="gs-mt-5">
+    <p class="gs-mb-0"><strong class="text-info gs-big">* Alunni che frequentano l'anno all'estero:</strong></p>
+    <div class="alert alert-success gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
+        {% for alunno,a in dati.estero %}
+      <strong><span class="gs-big">{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span></strong><br>
+        {% endfor %}
     </div>
+  </div>
+    {% endif %}
+    {% if dati.assenze_extra|length > 0 %}
+  <div id="gs-alunni-trasferiti" class="gs-mt-5">
+    <p class="gs-mb-0"><strong class="text-info gs-big">* Inserimento delle assenze registrate in altre scuole per gli alunni trasferiti in corso d'anno:</strong></p>
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
         <tr>
@@ -24,21 +33,21 @@
         </tr>
       </thead>
       <tbody>
-      {% for alu,da in dati.assenze_extra %}
+        {% for alu,da in dati.assenze_extra %}
         <tr>
           <td>
-        {% if dati.alunni[alu] is defined %}
+          {% if dati.alunni[alu] is defined %}
             {{ dati.alunni[alu].cognome }} {{ dati.alunni[alu].nome }} ({{ dati.alunni[alu].dataNascita|date("d/m/Y") }})
-        {% else %}
+          {% else %}
             {{ dati.no_scrutinabili.alunni[alu].cognome }} {{ dati.no_scrutinabili.alunni[alu].nome }} ({{ dati.no_scrutinabili.alunni[alu].dataNascita|date("d/m/Y") }})
-        {% endif %}
+          {% endif %}
           </td>
           <td><small>{{ da[1] }}</small></td>
           <td>
             <input type="number" id="scrutinio_assenze_{{ alu }}" name="scrutinio[assenze][{{ alu }}]" required="required" min="0" class="form-control" value="{{ da[0] }}">
           </td>
         </tr>
-      {% endfor %}
+        {% endfor %}
       </tbody>
       <tfoot>
         <tr>
@@ -48,44 +57,29 @@
         </tr>
       </tfoot>
     </table>
-    {% else %}  
-    <div class="gs-mt-5">
-      <strong class="text-info gs-big">* Nessun alunno risulta trasferito in corso d'anno da altra scuola.</strong>
-    </div>
-    {% endif %}
-  <div class="gs-mt-5">
-    <strong class="text-info gs-big">* Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong>
   </div>
+    {% endif %}
+  <div id="gs-alunni-no-scrutinabili" class="gs-mt-5">
+    <p class="gs-mb-0"><strong class="text-info gs-big">* Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong></p>
     {% for alunno,a in form.lista %}
-  <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
-    <div>
-      <strong><span class="gs-big">{{ dati.no_scrutinabili.alunni[alunno].cognome }} {{ dati.no_scrutinabili.alunni[alunno].nome }} ({{ dati.no_scrutinabili.alunni[alunno].dataNascita|date('d/m/Y') }})</span>, ore di assenza {{ dati.no_scrutinabili.alunni[alunno].ore }} (pari al {{ dati.no_scrutinabili.alunni[alunno].percentuale|number_format(2,',') }}%):</strong>
+    <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
+      <div>
+        <strong><span class="gs-big">{{ dati.no_scrutinabili.alunni[alunno].cognome }} {{ dati.no_scrutinabili.alunni[alunno].nome }} ({{ dati.no_scrutinabili.alunni[alunno].dataNascita|date('d/m/Y') }})</span>, ore di assenza {{ dati.no_scrutinabili.alunni[alunno].ore }} (pari al {{ dati.no_scrutinabili.alunni[alunno].percentuale|number_format(2,',') }}%):</strong>
+      </div>
+      {{ form_widget(a.scrutinabile) }}
+      <div class="gs-ml-5">
+        {{ form_widget(a.testo, {'disabled': 'disabled'}) }}
+        {{ form_widget(a.motivazione, {'disabled': 'disabled'}) }}
+      </div>
+      {{ form_widget(a.alunno) }}
+      {{ form_widget(a.sesso) }}
     </div>
-    {{ form_widget(a.scrutinabile) }}
-    <div class="gs-ml-5">
-      {{ form_widget(a.testo, {'disabled': 'disabled'}) }}
-      {{ form_widget(a.motivazione, {'disabled': 'disabled'}) }}
+    {% else %}
+    <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
+      <strong class="gs-big">NESSUNO</strong>
     </div>
-    {{ form_widget(a.alunno) }}
-    {{ form_widget(a.sesso) }}
-  </div>
-    {% else %}
-  <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
-    <strong class="gs-big">NESSUNO</strong>
-  </div>
-    {% endfor %}
-    {% if dati.estero is not empty %}
-  <div class="gs-mt-5">
-    <strong class="text-info gs-big">* Alunni che frequentano l'anno all'estero:</strong>
-  </div>
-  <div class="alert alert-success gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
-    {% for alunno,a in dati.estero %}
-    <strong><span class="gs-big">{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>: {{ a.note }}</strong><br>
-    {% else %}
-    <strong class="gs-big">NESSUNO</strong>
     {% endfor %}
   </div>
-    {% endif %}
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
       <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '1'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
@@ -149,7 +143,7 @@ $(document).ready(function() {
   $('input[type=number]').on('input', function() {
     $('#gs-aggiorna').prop('disabled', false).removeClass('btn-default').addClass('btn-success');
     $('#gs-avanti').prop('disabled', true).removeClass('btn-primary').addClass('btn-default');
-  }); 
+  });
   // init
   {% for messaggio in app.flashes('errore') %}
     {% if loop.first %}
