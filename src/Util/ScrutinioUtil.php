@@ -2999,10 +2999,6 @@ class ScrutinioUtil {
         $errore['exception.contrari_condotta'] = true;
       }
     }
-    // imposta eventuali messaggi di errore
-    foreach ($errore as $msg=>$v) {
-      $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans($msg));
-    }
     if (empty($errore)) {
       // aggiorna stato
       $scrutinio->setStato('5');
@@ -3017,6 +3013,10 @@ class ScrutinioUtil {
         ));
       // ok
       return true;
+    }
+    // imposta eventuali messaggi di errore
+    foreach ($errore as $msg=>$v) {
+      $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans($msg));
     }
     // errori presenti
     return false;
