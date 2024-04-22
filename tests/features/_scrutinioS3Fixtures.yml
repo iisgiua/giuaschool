@@ -212,7 +212,7 @@ App\Entity\Scrutinio:
     sincronizzazione:
 
 App\Entity\VotoScrutinio:
-  voto_S_1A_{7, 17, 27, 37, 47}:
+  voto_S_1A_{6, 17, 27, 37, 47}:
     scrutinio: '@scrutinio_1A_S'
     orale:
     scritto:
@@ -224,7 +224,7 @@ App\Entity\VotoScrutinio:
     assenze: '<ife(<($current<20)>,10, <voto()>)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_2A_{7, 17, 27, 37, 47, 57}:
+  voto_S_2A_{6, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_2A_S'
     orale:
     scritto:
@@ -236,7 +236,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_3A_{7, 17, 27, 37, 47, 57}:
+  voto_S_3A_{6, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_3A_S'
     orale:
     scritto:
@@ -248,7 +248,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_4A_{7, 17, 27, 37, 47, 57}:
+  voto_S_4A_{6, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_4A_S'
     orale:
     scritto:
@@ -260,7 +260,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_5A_{7, 17, 27, 37, 47, 57}:
+  voto_S_5A_{6, 17, 27, 37, 47, 57}:
     scrutinio: '@scrutinio_5A_S'
     orale:
     scritto:
@@ -272,7 +272,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_3CAMB_{7, 17, 27}:
+  voto_S_3CAMB_{6, 17, 27}:
     scrutinio: '@scrutinio_3CAMB_S'
     orale:
     scritto:
@@ -284,7 +284,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_S_3CCHI_{7, 17, 27}:
+  voto_S_3CCHI_{6, 17, 27}:
     scrutinio: '@scrutinio_3CCHI_S'
     orale:
     scritto:

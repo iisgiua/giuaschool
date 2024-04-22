@@ -3077,12 +3077,13 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
+    $listaMaterie = array_unique(array_merge([], ...
+      array_map(fn($m) => array_keys($m), $scrutinio->getDato('docenti'))));
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
+      ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $alunno->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['lista' => $listaMaterie])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -4392,12 +4393,13 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
+    $listaMaterie = array_unique(array_merge([], ...
+      array_map(fn($m) => array_keys($m), $scrutinio->getDato('docenti'))));
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
+      ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $alunno->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['lista' => $listaMaterie])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -4472,16 +4474,24 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
+    $listaMaterie = array_unique(array_merge([], ...
+      array_map(fn($m) => array_keys($m), $scrutinio->getDato('docenti'))));
     $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
-      ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
+      ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
+      ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['lista' => $scrutinio->getDato('materie'), 'sostegno' => 'S'])
+      ->setParameters(['lista' => $listaMaterie])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
+    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+    $dati['materie'][$condotta->getId()] = array(
+      'id' => $condotta->getId(),
+      'nome' => $condotta->getNome(),
+      'nomeBreve' => $condotta->getNomeBreve(),
+      'tipo' => $condotta->getTipo());
     // legge solo i voti con debito
     $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
       ->join('vs.materia', 'm')

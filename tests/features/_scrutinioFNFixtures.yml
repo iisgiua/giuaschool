@@ -23,8 +23,386 @@ App\Entity\DefinizioneScrutinio:
       4: ["ScrutinioFine", false, []]
     classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(null)>, <(null)>, <(null)>, <(null)>, <(null)>])>'
 
+App\Entity\Alunno:
+  alunno_2A_{7}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-17 years", "-15 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_2A'
+    genitori: '<collection(@genitore1_2A_<current()>, @genitore2_2A_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_3A_{7}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-18 years", "-16 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_3A'
+    genitori: '<collection(@genitore1_3A_<current()>, @genitore2_3A_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_4A_{7}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-19 years", "-17 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: '<numberBetween(7, 12)>'
+    credito4: 0
+    classe: '@classe_4A'
+    genitori: '<collection(@genitore1_4A_<current()>, @genitore2_4A_<current()>)>'
+    rappresentante: '<(array())>'
+  alunno_5A_{7}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-20 years", "-18 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: '<randomElement(["N", "N", "N", "D", "B"])>'
+    noteBes: '30%? <paragraph(2, false)>: <strval("")>'
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: '<numberBetween(7, 12)>'
+    credito4: '<numberBetween(8, 13)>'
+    classe: '@classe_5A'
+    genitori: '<collection(@genitore1_5A_<current()>, @genitore2_5A_<current()>)>'
+    rappresentante: '<(array())>'
+
+App\Entity\Genitore:
+  genitore1_2A_{7}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2A_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2A_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_2A_{7}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_2A_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_2A_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_3A_{7}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3A_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3A_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_3A_{7}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_3A_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_3A_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_4A_{7}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_4A_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_4A_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_4A_{7}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_4A_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_4A_<current()>'
+    rappresentante: '<(array())>'
+  genitore1_5A_{7}:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_5A_<current()>->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_5A_<current()>'
+    rappresentante: '<(array())>'
+  genitore2_5A_{7}:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_5A_<current()>->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_5A_<current()>'
+    rappresentante: '<(array())>'
+
 App\Entity\PropostaVoto:
-  proposta_F_1A_{0..44}:
+  proposta_F_1A_{0..8}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_1A'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_1,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_1A_{10..44}:
     periodo: 'F'
     orale:
     scritto:
@@ -38,13 +416,27 @@ App\Entity\PropostaVoto:
     classe: '@classe_1A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_2A_{0..59}:
+  proposta_F_2A_{0..8}:
     periodo: 'F'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_2A_<(1+(int)($current/10))>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_2A'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_1,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_2A_{10..59}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_2A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -52,13 +444,41 @@ App\Entity\PropostaVoto:
     classe: '@classe_2A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_3A_{0..59}:
+  proposta_F_2A_{60..69}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_2A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [4,6,7,8,9], [5, 23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_2A'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_3A_{0..8}:
     periodo: 'F'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_3A_<(1+(int)($current/10))>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_3A'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_1,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_3A_{10..59}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_3A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -66,13 +486,41 @@ App\Entity\PropostaVoto:
     classe: '@classe_3A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_4A_{0..59}:
+  proposta_F_3A_{60..69}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_3A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [4,6,7,8,9], [5, 23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_3A'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_4A_{0..8}:
     periodo: 'F'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_4A_<(1+(int)($current/10))>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_4A'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_1,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_4A_{10..59}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_4A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -80,13 +528,41 @@ App\Entity\PropostaVoto:
     classe: '@classe_4A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_5A_{0..59}:
+  proposta_F_4A_{60..69}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_4A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [4,6,7,8,9], [5, 23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_4A'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_5A_{0..8}:
     periodo: 'F'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_5A_<(1+(int)($current/10))>'
-    unico: '<case(<($current%10)>, [6,7,8,9], [<votoReligione($alunno)>, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_5A'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_1,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_5A_{10..59}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_5A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [6,7,8,9], [23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <(5+(int)($current/10))>)>'
     debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
     recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
     assenze: 0
@@ -94,7 +570,35 @@ App\Entity\PropostaVoto:
     classe: '@classe_5A'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_3CAMB_{0..23}:
+  proposta_F_5A_{60..69}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_5A_<(1+(int)($current/10))>'
+    unico: '<case(<($current%10)>, [4,6,7,8,9], [5, 23, <votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_5A'
+    materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_itp_1,materia_RELIGIONE,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_itp_1,docente_religione_1,docente_curricolare_1,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_3CAMB_{0..8}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_<case(<($current%10)>, [6], [3CAMB], 3C)>'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_2,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_2,docente_itp_2,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_3CAMB_{10..23}:
     periodo: 'F'
     orale:
     scritto:
@@ -108,7 +612,21 @@ App\Entity\PropostaVoto:
     classe: '@classe_<case(<($current%10)>, [6], [3CAMB], 3C)>'
     materia: '@<case(<($current%10)>, [5,6,7,8,9], [materia_RELIGIONE,materia_itp_2,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
     docente: '@<case(<($current%10)>, [5,6,7,8,9], [docente_religione_1,docente_itp_2,docente_itp_2,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
-  proposta_F_3CCHI_{0..23}:
+  proposta_F_3CCHI_{0..8}:
+    periodo: 'F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
+    unico: '<case(<($current%10)>, [6,7,8], [<votoEdCivica()>, <votoEdCivica()>, <votoEdCivica()>], <voto()>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 0
+    dati: '<(array())>'
+    classe: '@classe_<case(<($current%10)>, [6], [3CCHI], 3C)>'
+    materia: '@<case(<($current%10)>, [5,6,7,8], [materia_itp_3,materia_EDCIVICA,materia_EDCIVICA,materia_EDCIVICA], materia_curricolare_<(1+$current%10)>)>'
+    docente: '@<case(<($current%10)>, [5,6,7,8], [docente_itp_3,docente_itp_3,docente_curricolare_2,docente_curricolare_3], docente_curricolare_<(1+$current%10)>)>'
+  proposta_F_3CCHI_{10..23}:
     periodo: 'F'
     orale:
     scritto:

@@ -5,23 +5,33 @@
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
   {% for voto in form.lista %}
+    {% if dati.materie[voto.vars.value.materia.id].tipo != 'R' or alunno.religione in ['S', 'A'] %}
       <li class="list-group-item gs-pt-2 gs-pb-2">
         <div class="form-group gs-mb-0">
           <label class="control-label col-sm-3 gs-pl-1 gs-pr-1" for="{{ voto.unico.vars.id }}">{{ dati.materie[voto.vars.value.materia.id].nomeBreve }}</label>
           <div class="col-sm-9">
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].med ? 'danger' : (voto.unico.vars.value < dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].lista[voto.unico.vars.value] }}</span>
-    {% if dati.materie[voto.vars.value.materia.id].tipo == 'R' %}
+      {% if dati.materie[voto.vars.value.materia.id].tipo == 'R' %}
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider-giudizi', 'data-slider-value': voto.unico.vars.value}}) }}</div>
-    {% elseif dati.materie[voto.vars.value.materia.id].tipo == 'N' %}
+      {% elseif dati.materie[voto.vars.value.materia.id].tipo == 'N' %}
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
-    {% else %}
-            {{ form_widget(voto.unico) }}
-    {% endif %}
+      {% elseif dati.materie[voto.vars.value.materia.id].tipo == 'E' %}
+            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider-civica', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+      {% endif %}
            </div>
         </div>
         {{ form_widget(voto.alunno) }}
       </li>
+    {% endif %}
   {% endfor %}
+      <li class="list-group-item gs-pt-2 gs-pb-2">
+        <div class="form-group gs-mb-0">
+          <label class="control-label col-sm-3 gs-pl-1 gs-pr-1">{{ dati.materia_condotta }}</label>
+          <div class="col-sm-9">
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ dati.voto_condotta < dati.valutazioni['C'].med ? 'danger' : (dati.voto_condotta < dati.valutazioni['C'].suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni['C'].lista[dati.voto_condotta] }}</span>
+          </div>
+        </div>
+      </li>
     </ul>
     <div class="form-group gs-mb-2">
       <label class="control-label col-sm-2" for="{{ form.esito.vars.id }}">Esito</label>
@@ -62,6 +72,7 @@
 <script>
 var votiN = [{{ dati.valutazioni['N'].voti|raw }}];
 var votiR = [{{ dati.valutazioni['R'].voti|raw }}];
+var votiE = [{{ dati.valutazioni['E'].voti|raw }}];
 var inizio = 1;
 $(document).ready(function() {
   $("#gs-form-collection input.slider").slider({
@@ -97,6 +108,24 @@ $(document).ready(function() {
     var d = [{{ dati.valutazioni['R'].votiAbbr|raw }}];
     var c = (e.value.newValue < {{ dati.valutazioni['R'].med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni['R'].suff }} ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni['R'].min }}]);
+    inizio = 1;
+    $('#esito_esito').change();
+  });
+  $("#gs-form-collection input.slider-civica").slider({
+    min: {{ dati.valutazioni['E'].min }},
+    max: {{ dati.valutazioni['E'].max }},
+    step: 1,
+    ticks: [{{ dati.valutazioni['E'].valori }}],
+    ticks_labels: [{{ dati.valutazioni['E'].etichette|raw }}],
+    ticks_snap_bounds: 0,
+    focus: true,
+    formatter: function(val) { return votiE[val - {{ dati.valutazioni['E'].min }}]; },
+    natural_arrow_keys: true
+  });
+  $("#gs-form-collection").on("change", "input.slider-civica", function(e) {
+    var d = [{{ dati.valutazioni['E'].votiAbbr|raw }}];
+    var c = (e.value.newValue < {{ dati.valutazioni['E'].med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni['E'].suff }} ? 'label-warning' : 'label-success'));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni['E'].min }}]);
     inizio = 1;
     $('#esito_esito').change();
   });

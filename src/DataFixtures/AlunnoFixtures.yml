@@ -57,7 +57,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -95,7 +95,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -135,7 +135,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -173,7 +173,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -211,7 +211,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -251,7 +251,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -289,7 +289,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -327,7 +327,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -365,7 +365,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -403,7 +403,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -443,7 +443,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -481,7 +481,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -521,7 +521,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''
@@ -559,7 +559,7 @@ App\Entity\Alunno:
     autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
     note: '30%? <paragraph(1, true)>: <strval("")>'
     frequenzaEstero: false
-    religione: '<ife(<current()>==1, "S", "U")>'
+    religione: '<ife($current!=1, "S", "U")>'
     giustificaOnline: true
     richiestaCertificato: false
     foto: ''

@@ -1000,6 +1000,11 @@ class ScrutinioController extends BaseController {
       // scrutinio finale: tutti i voti
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     }
+    // impedisce che condotta sia modificata
+    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+    $dati['materia_condotta'] = $condotta->getNomeBreve();
+    $dati['voto_condotta'] = $dati['voti'][$condotta->getId()]->getUnico();
+    unset($dati['voti'][$condotta->getId()]);
     // esiti possibili
     $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
     if ($periodo == 'G') {

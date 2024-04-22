@@ -233,38 +233,38 @@ App\Entity\Scrutinio:
     sincronizzazione:
 
 App\Entity\VotoScrutinio:
-  voto_P_1A_{0, 1, 7}:
+  voto_P_1A_{0, 1, 6}:
     scrutinio: '@scrutinio_1A_P'
     orale:
     scritto:
     pratico:
-    unico: '<case(<current()>, [0,1,7], [4,5,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
+    unico: '<case(<current()>, [0,1,6], [4,5,6], 0)>'
+    debito: '<ife(<current()>!=6, "Argomento...", <(null)>)>'
+    recupero: '<ife(<current()>!=6, "A", <(null)>)>'
     assenze: 10
     alunno: '@proposta_P_1A_<current()>->alunno'
     materia: '@proposta_P_1A_<current()>->materia'
     dati: '<{delibera}>'
-  voto_P_3CAMB_{0, 1, 6, 7}:
+  voto_P_3CAMB_{0, 1, 5, 6}:
     scrutinio: '@scrutinio_3CAMB_P'
     orale:
     scritto:
     pratico:
-    unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
+    unico: '<case(<current()>, [0,1,5,6], [4,5,2,6], 0)>'
+    debito: '<ife(<current()>!=6, "Argomento...", <(null)>)>'
+    recupero: '<ife(<current()>!=6, "A", <(null)>)>'
     assenze: 5
     alunno: '@proposta_P_3CAMB_<current()>->alunno'
     materia: '@proposta_P_3CAMB_<current()>->materia'
     dati: '<{delibera}>'
-  voto_P_3CCHI_{0, 1, 6, 7}:
+  voto_P_3CCHI_{0, 1, 5, 6}:
     scrutinio: '@scrutinio_3CCHI_P'
     orale:
     scritto:
     pratico:
-    unico: '<case(<current()>, [0,1,6,7], [4,5,2,6], 0)>'
-    debito: '<ife(<current()>!=7, "Argomento...", <(null)>)>'
-    recupero: '<ife(<current()>!=7, "A", <(null)>)>'
+    unico: '<case(<current()>, [0,1,5,6], [4,5,2,6], 0)>'
+    debito: '<ife(<current()>!=6, "Argomento...", <(null)>)>'
+    recupero: '<ife(<current()>!=6, "A", <(null)>)>'
     assenze: 5
     alunno: '@proposta_P_3CCHI_<current()>->alunno'
     materia: '@proposta_P_3CCHI_<current()>->materia'

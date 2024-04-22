@@ -44,7 +44,7 @@ Scenario: visualizzazione pagina passo 2 - aggiunta assenze
     | @alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+) | Inserimento in data 02/12/2019 |                |
   E il campo "scrutinio_assenze_{{@alunno_1A_1:id}}" contiene "100"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_2:cognome+ +@alunno_1A_2:nome+ (+#dat(@alunno_1A_2:dataNascita)+), ore di assenza 315 "
-  E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+), ore di assenza 340 "
+  E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+), ore di assenza 310 "
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
@@ -119,7 +119,7 @@ Scenario: memorizzazione dati e passo successivo
     | @alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+) | Inserimento in data 02/12/2019 |                |
   E il campo "scrutinio_assenze_{{@alunno_1A_1:id}}" contiene "100"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_2:cognome+ +@alunno_1A_2:nome+ (+#dat(@alunno_1A_2:dataNascita)+), ore di assenza 315 "
-  E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+), ore di assenza 340 "
+  E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome+ (+#dat(@alunno_1A_1:dataNascita)+), ore di assenza 310 "
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" non contiene "@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"

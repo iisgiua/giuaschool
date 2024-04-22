@@ -109,8 +109,8 @@ App\Entity\Scrutinio:
       monteore: 1089
       maxassenze: 272
       estero: '<arrayDataId(scrutinio_1A_F, dati, estero, @scrutinio_1A_F, @alunno_1A_6)>'
-      scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, scrutinabili, @scrutinio_1A_F, [@alunno_1A_2, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1], ["ore", 315, "percentuale", 28.92562], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
-      no_scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, no_scrutinabili, @scrutinio_1A_F, [@alunno_1A_1, @alunno_1A_2], ["ore", 340, "percentuale", 31.221304], ["ore", 315, "percentuale", 28.92562, "deroga", "Vista la situazione di salute"])>'
+      scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, scrutinabili, @scrutinio_1A_F, [@alunno_1A_1, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1], ["ore", 310, "percentuale", 28.46648], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
+      no_scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, no_scrutinabili, @scrutinio_1A_F, [@alunno_1A_1, @alunno_1A_2], ["ore", 310, "percentuale", 28.46648, "deroga", "Vista la situazione di salute"], ["ore", 315, "percentuale", 28.92562])>'
       assenze_extra: '<arrayMultiDataId(scrutinio_1A_F, dati, assenze_extra, @scrutinio_1A_F, [@alunno_1A_1], [100])>'
     visibile:
     sincronizzazione:
@@ -122,7 +122,7 @@ App\Entity\Scrutinio:
     stato: '4'
     classe: '@classe_2A'
     dati:
-      alunni: '<arrayDataId(scrutinio_2A_F, dati, alunni, @scrutinio_2A_F, @alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6)>'
+      alunni: '<arrayDataId(scrutinio_2A_F, dati, alunni, @scrutinio_2A_F, @alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6, @alunno_2A_7)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_2A_F, dati, presenze, @scrutinio_2A_F, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -132,7 +132,7 @@ App\Entity\Scrutinio:
       monteore: 1056
       maxassenze: 264
       estero: '<([])>'
-      scrutinabili: '<arrayMulti2DataId(scrutinio_2A_F, dati, scrutinabili, @scrutinio_2A_F, [@alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
+      scrutinabili: '<arrayMulti2DataId(scrutinio_2A_F, dati, scrutinabili, @scrutinio_2A_F, [@alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6, @alunno_2A_7], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
     visibile:
@@ -145,9 +145,9 @@ App\Entity\Scrutinio:
     stato: '4'
     classe: '@classe_3A'
     dati:
-      alunni: '<arrayDataId(scrutinio_3A_F, dati, alunni, @scrutinio_3A_F, @alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6)>'
+      alunni: '<arrayDataId(scrutinio_3A_F, dati, alunni, @scrutinio_3A_F, @alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6, @alunno_3A_7)>'
       valutazioni: '<{valutazioni}>'
-      presenze: '<arrayObjDataId(scrutinio_3A_F,dati, presenze, @scrutinio_3A_F, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
+      presenze: '<arrayObjDataId(scrutinio_3A_F, dati, presenze, @scrutinio_3A_F, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
       presiede_docente: '<dataId(scrutinio_3A_F, dati, presiede_docente, @scrutinio_3A_F, @docente_curricolare_1)>'
       segretario: '<dataId(scrutinio_3A_F, dati, segretario, @scrutinio_3A_F, @docente_curricolare_2)>'
@@ -155,7 +155,7 @@ App\Entity\Scrutinio:
       monteore: 1056
       maxassenze: 264
       estero: '<([])>'
-      scrutinabili: '<arrayMulti2DataId(scrutinio_3A_F, dati, scrutinabili, @scrutinio_3A_F, [@alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
+      scrutinabili: '<arrayMulti2DataId(scrutinio_3A_F, dati, scrutinabili, @scrutinio_3A_F, [@alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6, @alunno_3A_7], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
     visibile:
@@ -168,7 +168,7 @@ App\Entity\Scrutinio:
     stato: '4'
     classe: '@classe_4A'
     dati:
-      alunni: '<arrayDataId(scrutinio_4A_F, dati, alunni, @scrutinio_4A_F, @alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6)>'
+      alunni: '<arrayDataId(scrutinio_4A_F, dati, alunni, @scrutinio_4A_F, @alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6, @alunno_4A_7)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_4A_F, dati, presenze, @scrutinio_4A_F, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -178,7 +178,7 @@ App\Entity\Scrutinio:
       monteore: 1056
       maxassenze: 264
       estero: '<([])>'
-      scrutinabili: '<arrayMulti2DataId(scrutinio_4A_F, dati, scrutinabili, @scrutinio_4A_F, [@alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
+      scrutinabili: '<arrayMulti2DataId(scrutinio_4A_F, dati, scrutinabili, @scrutinio_4A_F, [@alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6, @alunno_4A_7], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
     visibile:
@@ -191,7 +191,7 @@ App\Entity\Scrutinio:
     stato: '4'
     classe: '@classe_5A'
     dati:
-      alunni: '<arrayDataId(scrutinio_5A_F, dati, alunni, @scrutinio_5A_F, @alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6)>'
+      alunni: '<arrayDataId(scrutinio_5A_F, dati, alunni, @scrutinio_5A_F, @alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6, @alunno_5A_7)>'
       valutazioni: '<{valutazioni}>'
       presenze: '<arrayObjDataId(scrutinio_5A_F, dati, presenze, @scrutinio_5A_F, "App\Form\ScrutinioPresenza", [@docente_curricolare_1, @docente_curricolare_2, @docente_curricolare_3, @docente_curricolare_4, @docente_curricolare_5, @docente_religione_1, @docente_itp_1], [docente, @docente_curricolare_1], [docente, @docente_curricolare_2], [docente, @docente_curricolare_3], [docente, @docente_curricolare_4], [docente, @docente_curricolare_5], [docente, @docente_religione_1], [docente, @docente_itp_1])>'
       presiede_ds: false
@@ -201,7 +201,7 @@ App\Entity\Scrutinio:
       monteore: 1056
       maxassenze: 264
       estero: '<([])>'
-      scrutinabili: '<arrayMulti2DataId(scrutinio_5A_F, dati, scrutinabili, @scrutinio_5A_F, [@alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
+      scrutinabili: '<arrayMulti2DataId(scrutinio_5A_F, dati, scrutinabili, @scrutinio_5A_F, [@alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6, @alunno_5A_7], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
     visibile:
@@ -254,7 +254,7 @@ App\Entity\Scrutinio:
     sincronizzazione:
 
 App\Entity\VotoScrutinio:
-  voto_F_1A_{17, 27, 37, 47}:
+  voto_F_1A_{6, 27, 37, 47}:
     scrutinio: '@scrutinio_1A_F'
     orale:
     scritto:
@@ -263,10 +263,10 @@ App\Entity\VotoScrutinio:
     unico: '<ife(<($current>=10)>, <votoEdCivicaNoNC()>, 6)>'
     debito: '<ife(<($unico<6)>, <text()>, null)>'
     recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<ife(<($current<20)>,35, <voto()>)>'
+    assenze: '<ife(<($current<20)>,20,<voto()>)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_2A_{7, 17, 27, 37, 47, 57}:
+  voto_F_2A_{6, 17, 27, 37, 47, 57, 67}:
     scrutinio: '@scrutinio_2A_F'
     orale:
     scritto:
@@ -278,7 +278,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_3A_{7, 17, 27, 37, 47, 57}:
+  voto_F_3A_{6, 17, 27, 37, 47, 57, 67}:
     scrutinio: '@scrutinio_3A_F'
     orale:
     scritto:
@@ -290,7 +290,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_4A_{7, 17, 27, 37, 47, 57}:
+  voto_F_4A_{6, 17, 27, 37, 47, 57, 67}:
     scrutinio: '@scrutinio_4A_F'
     orale:
     scritto:
@@ -302,7 +302,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_5A_{7, 17, 27, 37, 47, 57}:
+  voto_F_5A_{6, 17, 27, 37, 47, 57, 67}:
     scrutinio: '@scrutinio_5A_F'
     orale:
     scritto:
@@ -314,7 +314,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_3CAMB_{7, 17, 27}:
+  voto_F_3CAMB_{6, 17, 27}:
     scrutinio: '@scrutinio_3CAMB_F'
     orale:
     scritto:
@@ -326,7 +326,7 @@ App\Entity\VotoScrutinio:
     assenze: '<numberBetween(0, 10)>'
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
-  voto_F_3CCHI_{7, 17, 27}:
+  voto_F_3CCHI_{6, 17, 27}:
     scrutinio: '@scrutinio_3CCHI_F'
     orale:
     scritto:
