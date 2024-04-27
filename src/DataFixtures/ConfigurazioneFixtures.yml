@@ -251,6 +251,24 @@ App\Entity\Configurazione:
     descrizione: 'Indica il tipo di gestione delle uscite anticipate degli alunni: tramite autorizzazione preventiva o con giustificazione (come per i ritardi)\<br>[formato: A=autorizzazione, G=giustificazione]'
     valore: 'A'
     gestito: false
+  configurazione_SCUOLA22:
+    categoria: 'SCUOLA'
+    parametro: 'competenze_lingua1'
+    descrizione: 'Indica la prima lingua del curricolo per la certificazione delle competenze.\<br>[testo]'
+    valore: 'Inglese'
+    gestito: false
+  configurazione_SCUOLA23:
+    categoria: 'SCUOLA'
+    parametro: 'competenze_lingua2'
+    descrizione: 'Indica l''eventuale seconda lingua del curricolo per la certificazione delle competenze.\<br>[testo]'
+    valore: ''
+    gestito: false
+  configurazione_SCUOLA24:
+    categoria: 'SCUOLA'
+    parametro: 'competenze_lingua3'
+    descrizione: 'Indica l''eventuale terza lingua del curricolo per la certificazione delle competenze.\<br>[testo]'
+    valore: ''
+    gestito: false
 
   # ----- categoria ACCESSO -----
   configurazione_ACCESSO1:

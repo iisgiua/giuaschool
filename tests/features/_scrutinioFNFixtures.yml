@@ -7,6 +7,14 @@ include:
   - _scrutinioPCFixtures.yml
 
 
+App\Entity\Configurazione:
+  configurazione_SCUOLA23:
+    categoria: 'SCUOLA'
+    parametro: 'competenze_lingua2'
+    descrizione: 'Indica l''eventuale seconda lingua del curricolo per la certificazione delle competenze.\<br>[testo]'
+    valore: 'Francese'
+    gestito: false
+
 App\Entity\DefinizioneScrutinio:
   definizione_scrutinio_F:
     data: '<dataFissa("15/06/2020")>'

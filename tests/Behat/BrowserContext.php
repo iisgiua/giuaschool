@@ -818,6 +818,32 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Seleziona opzione da lista di scelta tramite CHECKBOX
+   *  $valore: testo o valore dell'opzione
+   *  $testoParam: lista identificata tramite attributo id|name
+   *
+   * @Given opzione :valore selezionata da checkbox :testoParam
+   * @When selezioni opzione :valore da checkbox :testoParam
+   */
+  public function selezioniOpzioneDaCheckbox($valore, $testoParam): void {
+    $options = $this->session->getPage()->findAll('named', ['checkbox', $valore]);
+    $this->assertNotEmpty($options);
+    $option = null;
+    foreach ($options as $opt) {
+      $id = $opt->getAttribute('id');
+      $name = $opt->getAttribute('name');
+      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+        $option = $opt;
+        break;
+      }
+    }
+    $this->assertNotEmpty($option);
+    $option->click();
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
+  }
+
+  /**
    * Controlla se l'opzione è selezionata in lista di scelta tramite SELECT
    *  $valore: testo o valore dell'opzione
    *  $testoParam: lista identifica tramite attributo id|name
@@ -854,6 +880,28 @@ class BrowserContext extends BaseContext {
    */
   public function vediOpzioneSelezionataInPulsantiRadio($valore, $testoParam): void {
     $options = $this->session->getPage()->findAll('named', ['radio', $valore]);
+    $this->assertNotEmpty($options);
+    $option = null;
+    foreach ($options as $opt) {
+      $id = $opt->getAttribute('id');
+      $name = $opt->getAttribute('name');
+      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+        $option = $opt;
+        break;
+      }
+    }
+    $this->assertTrue($option && $option->isChecked());
+  }
+
+  /**
+   * Controlla se l'opzione è selezionata in lista di scelta tramite CHECKBOX
+   *  $valore: testo o valore dell'opzione
+   *  $testoParam: lista identifica tramite attributo id|name
+   *
+   * @Then vedi opzione :valore in checkbox :testoParam
+   */
+  public function vediOpzioneSelezionataInCheckbox($valore, $testoParam): void {
+    $options = $this->session->getPage()->findAll('named', ['checkbox', $valore]);
     $this->assertNotEmpty($options);
     $option = null;
     foreach ($options as $opt) {

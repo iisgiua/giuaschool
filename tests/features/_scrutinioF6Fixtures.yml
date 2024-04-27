@@ -1,10 +1,10 @@
 ####################
-# _scrutinioF3Fixtures - dati per i test sugli scrutini finali, passo 3
+# _scrutinioF6Fixtures - dati per i test sugli scrutini finali, passo 6
 ####################
 
 
 include:
-  - _scrutinioF2Fixtures.yml
+  - _scrutinioF5Fixtures.yml
 
 
 parameters:
@@ -84,6 +84,10 @@ parameters:
         8: '8'
         9: '9'
         10: '10'
+  delibera:
+    motivazione:
+    unanimita: true
+    contrari:
 
 
 App\Entity\Scrutinio:
@@ -92,7 +96,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("10:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_1A'
     dati:
       alunni: '<arrayDataId(scrutinio_1A_F, dati, alunni, @scrutinio_1A_F, @alunno_1A_1, @alunno_1A_2, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1)>'
@@ -115,7 +119,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("11:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_2A'
     dati:
       alunni: '<arrayDataId(scrutinio_2A_F, dati, alunni, @scrutinio_2A_F, @alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6, @alunno_2A_7)>'
@@ -138,7 +142,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("12:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_3A'
     dati:
       alunni: '<arrayDataId(scrutinio_3A_F, dati, alunni, @scrutinio_3A_F, @alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6, @alunno_3A_7)>'
@@ -161,7 +165,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("14:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_4A'
     dati:
       alunni: '<arrayDataId(scrutinio_4A_F, dati, alunni, @scrutinio_4A_F, @alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6, @alunno_4A_7)>'
@@ -184,7 +188,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("15:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_5A'
     dati:
       alunni: '<arrayDataId(scrutinio_5A_F, dati, alunni, @scrutinio_5A_F, @alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6, @alunno_5A_7)>'
@@ -207,7 +211,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("16:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_3CAMB'
     dati:
       alunni: '<arrayDataId(scrutinio_3CAMB_F, dati, alunni, @scrutinio_3CAMB_F, @alunno_3CAMB_1, @alunno_3CAMB_2, @alunno_sostegno_4)>'
@@ -230,7 +234,7 @@ App\Entity\Scrutinio:
     data: '<dataFissa("11/06/2020")>'
     inizio: '<oraFissa("17:30")>'
     fine:
-    stato: '3'
+    stato: '6'
     classe: '@classe_3CCHI'
     dati:
       alunni: '<arrayDataId(scrutinio_3CCHI_F, dati, alunni, @scrutinio_3CCHI_F, @alunno_3CCHI_1, @alunno_3CCHI_2, @alunno_sostegno_3)>'
@@ -248,3 +252,285 @@ App\Entity\Scrutinio:
       assenze_extra: '<([])>'
     visibile:
     sincronizzazione:
+
+App\Entity\VotoScrutinio:
+  voto_F_1A_{0..5}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2], [5,4,2], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, "Argomento...", null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 20
+    alunno: '@proposta_F_1A_<current()>->alunno'
+    materia: '@proposta_F_1A_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_1A_{20..26}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2,3,6], [10,9,8,7,23], 6)>'
+    debito:
+    recupero:
+    assenze: 10
+    alunno: '@proposta_F_1A_<current()>->alunno'
+    materia: '@proposta_F_1A_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_1A_{30..36}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2,3,6], [10,9,8,7,23], 7)>'
+    debito:
+    recupero:
+    assenze: 10
+    alunno: '@proposta_F_1A_<current()>->alunno'
+    materia: '@proposta_F_1A_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_1A_{40..46}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [6], [22], <($current%10)>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, <text()>, null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 10
+    alunno: '@proposta_F_1A_<current()>->alunno'
+    materia: '@proposta_F_1A_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CAMB_{0..5}:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2], [5,4,2], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, "Argomento...", null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 10
+    alunno: '@proposta_F_3CAMB_<current()>->alunno'
+    materia: '@proposta_F_3CAMB_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CAMB_{10..16}:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2,3,5], [10,9,8,7,23], 7)>'
+    debito:
+    recupero:
+    assenze: 10
+    alunno: '@proposta_F_3CAMB_<current()>->alunno'
+    materia: '@proposta_F_3CAMB_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CAMB_{20..26}:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [5], [22], <($current%10)>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, "Argomento...", null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 10
+    alunno: '@proposta_F_3CAMB_<current()>->alunno'
+    materia: '@proposta_F_3CAMB_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CCHI_{0..5}:
+    scrutinio: '@scrutinio_3CCHI_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2], [5,4,2], 6)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, "Argomento...", null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 10
+    alunno: '@proposta_F_3CCHI_<current()>->alunno'
+    materia: '@proposta_F_3CCHI_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CCHI_{10..16}:
+    scrutinio: '@scrutinio_3CCHI_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [0,1,2,3,5], [10,9,8,7,23], 7)>'
+    debito:
+    recupero:
+    assenze: 10
+    alunno: '@proposta_F_3CCHI_<current()>->alunno'
+    materia: '@proposta_F_3CCHI_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_3CCHI_{20..26}:
+    scrutinio: '@scrutinio_3CCHI_F'
+    orale:
+    scritto:
+    pratico:
+    unico: '<case(<($current%10)>, [5], [22], <($current%10)>)>'
+    debito: '<ife(<($unico!==null&&$unico<6)>, "Argomento...", null)>'
+    recupero: '<case($unico, [0,1,2,3,4,5], [C,C,C,P,S,A], null)>'
+    assenze: 10
+    alunno: '@proposta_F_3CCHI_<current()>->alunno'
+    materia: '@proposta_F_3CCHI_<current()>->materia'
+    dati: '<{delibera}>'
+  voto_F_1A_{6, 27, 37, 47}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
+    materia: '@materia_EDCIVICA'
+    dati: '<{delibera}>'
+  voto_F_1A_{7, 28, 38, 48}:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
+    unico: 9
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
+  voto_F_3CAMB_{6, 17, 27}:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
+    materia: '@materia_EDCIVICA'
+    dati: '<{delibera}>'
+  voto_F_3CAMB_{7, 18, 28}:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
+    unico: 9
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
+  voto_F_3CCHI_{6, 17, 27}:
+    scrutinio: '@scrutinio_3CCHI_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
+    materia: '@materia_EDCIVICA'
+    dati: '<{delibera}>'
+  voto_F_3CCHI_{7, 18, 28}:
+    scrutinio: '@scrutinio_3CCHI_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
+    unico: 9
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
+
+App\Entity\Esito:
+  esito_F_1A_{1..4}:
+    esito: '<case(<($current)>, [1,4], [S,N], A)>'
+    media: '<case(<($current)>, [1,2,3], [5.75,7.88,8.13], 4.00)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [4], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_1A_F'
+    alunno: '@alunno_<case(<current()>, [2,3,4], [sostegno_1,sostegno_2,alternativa_1], 1A_<current()>)>'
+  esito_F_2A_{1..7}:
+    esito: '<case(<($current)>, [1,7], [N,S], A)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [1], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_2A_F'
+    alunno: '@alunno_2A_<current()>'
+  esito_F_3A_{1..7}:
+    esito: '<case(<($current)>, [1,7], [N,S], A)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [1], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_3A_F'
+    alunno: '@alunno_3A_<current()>'
+  esito_F_4A_{1..7}:
+    esito: '<case(<($current)>, [1,7], [N,S], A)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [1], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_4A_F'
+    alunno: '@alunno_4A_<current()>'
+  esito_F_5A_{1..7}:
+    esito: '<case(<($current)>, [1], [N], A)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [1,7], ["Motivazione per la non ammissione...","Motivazione per l''ammissione con insufficienza..."], null)>'
+    scrutinio: '@scrutinio_5A_F'
+    alunno: '@alunno_5A_<current()>'
+  esito_F_3CAMB_{1..3}:
+    esito: '<case(<($current)>, [1,3], [S,N], A)>'
+    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.00)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [3], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_3CAMB_F'
+    alunno: '@alunno_<case(<current()>, [3], [sostegno_4], 3CAMB_<current()>)>'
+  esito_F_3CCHI_{1..3}:
+    esito: '<case(<($current)>, [1,3], [S,N], A)>'
+    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.00)>'
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: '<case(<($current)>, [1], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [1], [@docente_curricolare_1->cognome], null)>'
+      giudizio: '<case(<($current)>, [3], ["Motivazione per la non ammissione..."], null)>'
+    scrutinio: '@scrutinio_3CCHI_F'
+    alunno: '@alunno_<case(<current()>, [3], [sostegno_3], 3CCHI_<current()>)>'

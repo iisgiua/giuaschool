@@ -28,112 +28,195 @@
       </li>
     </ul>
     <div>
-      <div><strong><em>Livelli relativi all’acquisizione delle competenze di ciascun asse:</strong></em></div>
+      <div><strong><em>Livelli relativi all’acquisizione delle competenze chiave:</strong></em></div>
       <ul>
-        <li><strong>LIVELLO BASE</strong>: lo studente svolge compiti semplici in situazioni note, mostrando di possedere conoscenze ed abilità essenziali e di saper applicare regole e procedure fondamentali.</li>
-        <li><strong>LIVELLO INTERMEDIO</strong>: lo studente svolge compiti e risolve problemi complessi in situazioni note, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</li>
-        <li><strong>LIVELLO AVANZATO</strong>: lo studente svolge compiti e problemi complessi in situazioni anche non note, mostrando padronanza nell’uso delle conoscenze e delle abilità.</li>
+        <li><strong>LIVELLO A - AVANZATO</strong>: svolge compiti e risolve problemi complessi, mostrando padronanza nell'uso delle conoscenze e delle abilità; propone e sostiene le proprie opinioni e assume in modo responsabile decisioni consapevoli.</li>
+        <li><strong>LIVELLO B - INTERMEDIO</strong>: svolge compiti e risolve problemi in situazioni nuove, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</li>
+        <li><strong>LIVELLO C - BASE</strong>: svolge compiti semplici anche in situazioni nuove, mostrando di possedere conoscenze e abilità fondamentali e di saper applicare basilari regole e procedure apprese.</li>
+        <li><strong>LIVELLO D - INIZIALE</strong>: se opportunamente guidato/a, svolge compiti semplici in situazioni note.</li>
       </ul>
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_italiano'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Padroneggiare gli strumenti espressivi ed argomentativi indispensabili per gestire l’interazione comunicativa verbale in vari contesti</li>
-          <li>Leggere comprendere e interpretare testi scritti di vario tipo</li>
-          <li>Produrre testi di vario tipo in relazione ai differenti scopi comunicativi</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_alfabetica">* {{ 'label.competenza_alfabetica'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_italiano) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Padroneggiare la lingua di scolarizzazione in forma sia orale sia scritta in tutti i suoi aspetti
+        (comprensione, interpretazione, produzione) utilizzando materiali di vario genere all’interno
+        delle diverse discipline, dei diversi contesti e scopi comunicativi.<br>
+        Comunicare e relazionarsi con gli altri in modo efficace e opportuno.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_italiano_motivazione) }}
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_alfabetica) }}</div>
+    </div>
+     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_linguistica1">* {{ 'label.competenza_linguistica'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Utilizzare le diverse lingue<sup>1</sup> in forma orale e scritta (comprensione orale e scritta, produzione
+        scritta e produzione/interazione orale) in modo appropriato ed efficace per diversi scopi
+        comunicativi in diversi contesti sociali e culturali in base ai propri bisogni o desideri.<br>
+        Comunicare in maniera appropriata, efficace e rispettosa con interlocutori che hanno riferimenti
+        culturali diversi dai propri.
+        <br><br><sup>1</sup>
+        <em>Specificare il livello per ciascuna lingua del curricolo, tenendo a riferimento
+        anche i livelli di competenza attesi previsti nelle Indicazioni nazionali e nelle Linee Guida
+        vigenti.</em>
+      </div>
+      <div class="col-sm-6 text-right gs-pt-3"><strong>{{ app.session.get('/CONFIG/SCUOLA/competenze_lingua1') }}:</strong></div>
+      <div class="col-sm-6">{{ form_widget(form.competenza_linguistica1) }}</div>
+  {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua2') %}
+      <div class="col-sm-6 text-right gs-pt-3"><strong>{{ app.session.get('/CONFIG/SCUOLA/competenze_lingua2') }}:</strong></div>
+      <div class="col-sm-6">{{ form_widget(form.competenza_linguistica2) }}</div>
+  {% endif %}
+  {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua3') %}
+      <div class="col-sm-6 text-right gs-pt-3"><strong>{{ app.session.get('/CONFIG/SCUOLA/competenze_lingua3') }}:</strong></div>
+      <div class="col-sm-6">{{ form_widget(form.competenza_linguistica3) }}</div>
+  {% endif %}
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_lingua'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Utilizzare la lingua Inglese per i principali scopi comunicativi ed operativi</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_matematica">* {{ 'label.competenza_matematica'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_lingua) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole
+        anche sotto forma grafica.<br>
+        Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni.<br>
+        Individuare le strategie appropriate per la soluzione di problemi.<br>
+        Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con
+        l’ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le
+        potenzialità offerte da applicazioni specifiche di tipo informatico.<br>
+        Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e
+        riconoscere nelle sue varie forme i concetti di sistema e di complessità, utilizzando le
+        metodologie proprie dell’indagine scientifica.<br>
+        Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia
+        a partire dall’esperienza, anche in relazione agli impatti ambientali e sociali di tali
+        trasformazioni.<br>
+        Individuare potenzialità e limiti delle tecnologie nel contesto culturale e sociale in cui
+        vengono applicate anche a tutela della sostenibilità ambientale, sociale ed economica, con
+        attenzione alle questioni etiche e della sicurezza, in particolare per quanto concerne il
+        processo scientifico e tecnologico in relazione all’individuo, alla famiglia, alla comunità e
+        alle questioni di dimensione globale.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_lingua_motivazione) }}
-      </div>
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_matematica) }}</div>
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_linguaggio'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio artistico e letterario</li>
-          <li>Utilizzare e produrre testi multimediali</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_digitale">* {{ 'label.competenza_digitale'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_linguaggio) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Utilizzare le reti e gli strumenti informatici nelle attività di studio, ricerca e
+        approfondimento disciplinari, analizzando, confrontando e valutando criticamente la credibilità
+        e l’affidabilità delle fonti di dati, informazioni e contenuti digitali.<br>
+        Osservare le norme comportamentali nell'ambito dell'utilizzo delle tecnologie digitali.<br>
+        Proteggere la propria reputazione, gestire e tutelare i dati e le informazioni personali che si
+        producono e si condividono attraverso diversi strumenti digitali, ambienti e servizi, rispettare
+        i dati e le identità altrui.<br>
+        Osservare le principali regole a tutela della riservatezza applicate dai servizi digitali
+        relativamente all'uso dei dati personali.<br>
+        Evitare, usando tecnologie digitali, rischi per la salute e minacce al proprio benessere fisico
+        e psicologico.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_linguaggio_motivazione) }}
-      </div>
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_digitale) }}</div>
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_matematica'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole anche sotto forma grafica</li>
-          <li>Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni</li>
-          <li>Individuare le strategie appropriate per la soluzione dei problemi</li>
-          <li>Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con l’ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le potenzialità offerte da applicazioni specifiche di tipo informatico</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_personale">* {{ 'label.competenza_personale'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_matematica) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Osservare comportamenti e atteggiamenti rispettosi verso il proprio benessere personale, sociale
+        e fisico e quello degli altri, della comunità e del pianeta.<br>
+        Collaborare e partecipare, interagendo in gruppo, comprendendo i diversi punti di vista,
+        valorizzando le proprie e le altrui risorse, gestendo la conflittualità, contribuendo
+        all’apprendimento comune ed alla realizzazione delle attività collettive, nel rispetto dei
+        diritti degli altri e delle diversità, superando i pregiudizi; osservare atteggiamenti e
+        comportamenti improntati a integrità ed empatia.<br>
+        Imparare ad imparare, organizzando il proprio apprendimento, individuando, scegliendo ed
+        utilizzando varie fonti e varie modalità di informazione e di formazione (formale, non formale
+        ed informale), anche in funzione dei tempi disponibili, delle proprie strategie e del proprio
+        metodo di studio e di lavoro.<br>
+        Sviluppare fiducia nei propri mezzi, valutare i propri punti
+        critici, potenzialità e risorse; mantenere motivazione e interesse ad imparare sempre.<br>
+        Individuare collegamenti e relazioni, identificando, elaborando e rappresentando
+        argomentazioni coerenti, relazioni tra fenomeni, eventi e concetti, anche appartenenti a diversi
+        ambiti disciplinari e lontani nello spazio e nel tempo, cogliendone la natura sistemica e
+        complessa, ricercando analogie e differenze, coerenze ed incoerenze; stabilendo cause ed effetti
+        in relazione a scenari/futuri possibili, riconoscendone la loro natura probabilistica.<br>
+        Ricercare ed interpretare criticamente l’informazione proveniente dai diversi ambiti ed
+        attraverso diversi strumenti comunicativi, valutandone l’attendibilità e l’utilità, distinguendo
+        fatti e opinioni.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_matematica_motivazione) }}
-      </div>
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_personale) }}</div>
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_scienze'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e riconoscere nelle varie forme i concetti di sistema e di complessità</li>
-          <li>Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall’esperienza</li>
-          <li>Essere consapevoli delle potenzialità e dei limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_cittadinanza">* {{ 'label.competenza_cittadinanza'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_scienze) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Agire in modo autonomo e responsabile inserendosi in modo attivo e consapevole nella vita
+        sociale, facendo valere i propri diritti e bisogni e riconoscendo al contempo quelli altrui, le
+        opportunità comuni, i limiti, le regole, le responsabilità.<br>
+        Collocare l’esperienza personale in un sistema di regole fondato sul reciproco riconoscimento
+        dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e
+        dell’ambiente e delle future generazioni.<br>
+        Osservare comportamenti e atteggiamenti rispettosi dell’ambiente, dei beni comuni, della
+        sostenibilità ambientale, economica, sociale, coerentemente con l’Agenda 2030 per lo sviluppo
+        sostenibile.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_scienze_motivazione) }}
-      </div>
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_cittadinanza) }}</div>
     </div>
     <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
-      <label class="col-sm-12 text-center gs-mb-0">{{ 'label.certificazione_storia'|trans }}</label>
-      <div class="col-sm-12">
-        <ul class="gs-mb-0">
-          <li>Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali</li>
-          <li>Collocare l’esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell’ambiente</li>
-          <li>Riconoscere le caratteristiche essenziali del sistema socio economico per orientarsi nel tessuto produttivo del proprio territorio</li>
-        </ul>
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_imprenditoriale">* {{ 'label.competenza_imprenditoriale'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
-      <div class="col-sm-9 col-sm-offset-3">
-        {{ form_widget(form.certificazione_storia) }}
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Elaborare e realizzare progetti riguardanti le proprie attività di studio e di lavoro,
+        utilizzando le proprie conoscenze per stabilire obiettivi significativi e realistici e le
+        relative priorità, valutando i vincoli e le possibilità esistenti, definendo strategie di azione
+        e verificando i risultati raggiunti.<br>
+        Individuare, affrontare e risolvere problemi costruendo e verificando ipotesi, reperendo le
+        fonti e le risorse adeguate, raccogliendo e valutando i dati, proponendo soluzioni e utilizzando,
+        secondo il tipo di problema, contenuti e metodi delle diverse discipline; pianificare e
+        progettare; scegliere tra opzioni diverse, sempre agendo con integrità, nel rispetto del bene
+        comune e trasformando le idee e le opportunità in valore per gli altri.<br>
+        Collaborare con altri, valorizzando le loro risorse, le idee, i contributi al lavoro.<br>
+        Riconoscere le caratteristiche essenziali del sistema socioeconomico per orientarsi nel tessuto
+        produttivo del territorio.
       </div>
-      <label class="control-label col-sm-3">Motivazione</label>
-      <div class="col-sm-9">
-        {{ form_widget(form.certificazione_storia_motivazione) }}
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_imprenditoriale) }}</div>
+    </div>
+    <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_culturale">* {{ 'label.competenza_culturale'|trans }}</label>
+      <div class="col-sm-2 text-right gs-pb-1">
+        <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza la descrizione delle competenze"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
       </div>
+      <div class="col-sm-12 gs-show-hide-item" style="display:none">
+        Comunicare e rappresentare creativamente eventi, fenomeni, principi, concetti, norme,
+        procedure, atteggiamenti, stati d’animo, emozioni, ecc. utilizzando linguaggi diversi (verbale,
+        matematico, scientifico, simbolico, corporeo, artistico, ecc.) e diverse conoscenze disciplinari,
+        mediante supporti cartacei, informatici, multimediali, ecc.<br>
+        Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio culturale,
+        artistico, letterario, paesaggistico.<br>
+        Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica
+        attraverso il confronto fra epoche e culture, in una dimensione sincronica attraverso il
+        confronto fra aree geografiche e culturali.
+      </div>
+      <div class="col-sm-6 col-sm-offset-6">{{ form_widget(form.competenza_culturale) }}</div>
+    </div>
+    <div class="form-group bg-success gs-mb-1 gs-pb-2 gs-pt-2">
+      <label class="col-sm-10 gs-mb-0" for="certificazione_competenza_altro">*
+        {{ alunno.sesso == 'M' ? 'Lo studente' : 'La studentessa' }}
+        ha inoltre mostrato significative competenze nello svolgimento di attività scolastiche
+        e/o extrascolastiche, relativamente a:
+      </label>
+      <div class="col-sm-12">{{ form_widget(form.competenza_altro) }}</div>
     </div>
   <div class="modal-footer">
     {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
@@ -144,17 +227,17 @@
 
 <script>
 $(document).ready(function() {
-  $('select').change(function(e) {
-    var t=$(this).parent().parent().find('textarea');
-    var l=$(this).parent().next('label');
-    if ($(this).val() == 'N') {
-      t.fadeIn();
-      l.fadeIn();
+  $('button.gs-show-hide').on('click', function (event) {
+    var el = $(this).parent().siblings('div.gs-show-hide-item');
+    if (el.is(':visible')) {
+      el.fadeOut();
+      $(this).attr('title', 'Visualizza la descrizione delle competenze');
+      $(this).html('<span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza');
     } else {
-      t.val('');
-      t.fadeOut();
-      l.fadeOut();
+      el.fadeIn();
+      $(this).attr('title', 'Nasconde la descrizione delle competenze');
+      $(this).html('<span class="glyphicon glyphicon-resize-small gs-mr-2"></span>Nascondi');
     }
-  }).change();
+  });
 });
 </script>

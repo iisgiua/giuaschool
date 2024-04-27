@@ -268,7 +268,7 @@ Scenario: memorizzazione dati e passo successivo
   E scorri cursore "7" di "-10" posizioni
   E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
-  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
   E scorri cursore "1" di "10" posizioni
   E scorri cursore "2" di "10" posizioni
   E scorri cursore "3" di "10" posizioni
@@ -279,7 +279,7 @@ Scenario: memorizzazione dati e passo successivo
   E scorri cursore "8" di "10" posizioni
   E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome"
   E scorri cursore "1" di "10" posizioni
   E scorri cursore "2" di "10" posizioni
   E scorri cursore "3" di "10" posizioni
@@ -290,7 +290,7 @@ Scenario: memorizzazione dati e passo successivo
   E scorri cursore "8" di "10" posizioni
   E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
   E scorri cursore "1" di "10" posizioni
   E scorri cursore "2" di "10" posizioni
   E scorri cursore "3" di "10" posizioni
@@ -412,7 +412,7 @@ Scenario: visualizzazione passo successivo per classe articolata
   E scorri cursore "7" di "-10" posizioni
   E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
-  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
   E scorri cursore "1" di "10" posizioni
   E scorri cursore "2" di "10" posizioni
   E scorri cursore "3" di "10" posizioni
@@ -423,7 +423,7 @@ Scenario: visualizzazione passo successivo per classe articolata
   E scorri cursore "8" di "10" posizioni
   E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
   E scorri cursore "1" di "10" posizioni
   E scorri cursore "2" di "10" posizioni
   E scorri cursore "3" di "10" posizioni

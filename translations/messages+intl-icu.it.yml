@@ -45,16 +45,18 @@ label.cattedra_compito: Classe e materia
 label.cattedra_verifica: Classe e materia
 label.cattedra: Classe e materia
 label.cattedre: Cattedre
-label.certificazione_italiano: Asse dei linguaggi - Lingua italiana
-label.certificazione_lingua: Asse dei linguaggi - Lingua straniera
-label.certificazione_linguaggio: Asse dei linguaggi - Altri linguaggi
-label.certificazione_livello_A: Livello avanzato
-label.certificazione_livello_B: Livello base
-label.certificazione_livello_I: Livello intermedio
-label.certificazione_livello_N: Livello base non raggiunto
-label.certificazione_matematica: Asse matematico
-label.certificazione_scienze: Asse scientifico-tecnologico
-label.certificazione_storia: Asse storico-sociale
+label.competenza_livello_A: Livello A - Avanzato
+label.competenza_livello_B: Livello B - Intermedio
+label.competenza_livello_C: Livello C - Base
+label.competenza_livello_D: Livello D - Iniziale
+label.competenza_alfabetica: Competenza alfabetica funzionale
+label.competenza_linguistica: Competenza multilinguistica
+label.competenza_matematica: Competenza matematica e competenza in scienze, tecnologie e ingegneria
+label.competenza_digitale: Competenza digitale
+label.competenza_personale: Competenza personale, sociale e capacità di imparare a imparare
+label.competenza_cittadinanza: Competenza in materia di cittadinanza
+label.competenza_imprenditoriale: Competenza imprenditoriale
+label.competenza_culturale: Competenza in materia di consapevolezza ed espressione culturali
 label.choose_option: Scegli un'opzione
 label.circolari_da_leggere: Da leggere
 label.avvisi_da_leggere: Da leggere
@@ -1523,7 +1525,6 @@ exception.no_credito_esito: Non è stato inserito il credito per l'alunn{sex} {a
 exception.no_debito_esito: Mancano gli argomenti da recuperare di una o più materie per l'alunn{sex} {alunno}.
 exception.no_debito: Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente.
 exception.no_debito_scrutinio: "<strong>{materia}</strong>: mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente."
-exception.no_motivazione_certificazione: "Non è stata inserita la motivazione di almeno un <em>Livello base non raggiunto</em> per l'alunn{sex} {alunno}."
 exception.no_motivazione: Devi inserire la motivazione
 exception.no_privacy: "Devi accettare la clausola sulla privacy per poter utilizzare il servizio"
 exception.no_recupero_debito_scrutinio: "<strong>{materia}</strong>: manca l'indicazione sul recupero di uno o più alunni con debito formativo."

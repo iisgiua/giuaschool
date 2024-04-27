@@ -985,6 +985,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "#cas($v,c1:c2:..,r1:r2:..,$d)": confronta $v con le costanti $c e se lo trova restituisce il valore $r corrispondente, altrimenti restituisce $d
    *  "#med($v1,v2,...)": restituisce la media dei valori $v
    *  "#mdc($v1,v2,...)": restituisce la media dei voti di Ed.Civica $v
+   *  "#sum($v1,v2,...)": restituisce la somma dei valori $v
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -1000,7 +1001,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|dat|tim|arc|upr|slg|str|cas|med|mdc|uno)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|dat|tim|arc|upr|slg|str|cas|med|mdc|sum)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -1068,6 +1069,15 @@ abstract class BaseContext extends RawMinkContext implements Context {
         }
         $media = (float) array_reduce($values, fn($c, $i) => $c + $i, 0) / count($values);
         return number_format($media, 2, ',', null);
+      }
+      // controlla funzione somma
+      if ($fn[1] == 'sum') {
+        $vars = explode(',', substr(substr($var, 5), 0 , -1));
+        $values = [];
+        foreach ($vars as $var) {
+          $values[] = in_array(substr($var, 0, 1), ['$', '#', '@']) ? $this->getVar($var) : $var;
+        }
+        return array_reduce($values, fn($c, $i) => $c + $i, 0);
       }
     }
     // tipo di variabile

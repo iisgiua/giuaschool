@@ -1396,10 +1396,10 @@ class ScrutinioController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('certificazione', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_certificazione', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione, 'classe' => $classe->getId()]))
-      ->add('certificazione_italiano', ChoiceType::class, array('label' => 'label.certificazione_italiano',
-        'data' => isset($valori['certificazione_italiano']) ? $valori['certificazione_italiano'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_alfabetica', ChoiceType::class, array('label' => 'label.competenza_alfabetica',
+        'data' => isset($valori['competenza_alfabetica']) ? $valori['competenza_alfabetica'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1408,15 +1408,55 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_italiano_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_italiano_motivazione']) ? $valori['certificazione_italiano_motivazione'] : null,
-        'trim' => true,
-        'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('certificazione_lingua', ChoiceType::class, array('label' => 'label.certificazione_lingua',
-        'data' => isset($valori['certificazione_lingua']) ? $valori['certificazione_lingua'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_linguistica1', ChoiceType::class, array('label' => 'label.competenza_linguistica',
+        'data' => isset($valori['competenza_linguistica1']) ? $valori['competenza_linguistica1'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
+        'placeholder' => null,
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true));
+    if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua2'))) {
+      // seconda lingua
+      $form = $form
+        ->add('competenza_linguistica2', ChoiceType::class, array('label' => 'label.competenza_linguistica',
+          'data' => isset($valori['competenza_linguistica2']) ? $valori['competenza_linguistica2'] : 'C',
+          'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+            'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
+          'placeholder' => null,
+          'expanded' => false,
+          'multiple' => false,
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => true));
+    }
+    if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua3'))) {
+      // terza lingua
+      $form = $form
+        ->add('competenza_linguistica3', ChoiceType::class, array('label' => 'label.competenza_linguistica',
+          'data' => isset($valori['competenza_linguistica3']) ? $valori['competenza_linguistica3'] : 'C',
+          'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+            'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
+          'placeholder' => null,
+          'expanded' => false,
+          'multiple' => false,
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => true));
+    }
+    $form = $form
+      ->add('competenza_matematica', ChoiceType::class, array('label' => 'label.competenza_matematica',
+        'data' => isset($valori['competenza_matematica']) ? $valori['competenza_matematica'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1425,15 +1465,10 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_lingua_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_lingua_motivazione']) ? $valori['certificazione_lingua_motivazione'] : null,
-        'trim' => true,
-        'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('certificazione_linguaggio', ChoiceType::class, array('label' => 'label.certificazione_linguaggio',
-        'data' => isset($valori['certificazione_linguaggio']) ? $valori['certificazione_linguaggio'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_digitale', ChoiceType::class, array('label' => 'label.competenza_digitale',
+        'data' => isset($valori['competenza_digitale']) ? $valori['competenza_digitale'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1442,15 +1477,10 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_linguaggio_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_linguaggio_motivazione']) ? $valori['certificazione_linguaggio_motivazione'] : null,
-        'trim' => true,
-        'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('certificazione_matematica', ChoiceType::class, array('label' => 'label.certificazione_matematica',
-        'data' => isset($valori['certificazione_matematica']) ? $valori['certificazione_matematica'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_personale', ChoiceType::class, array('label' => 'label.competenza_personale',
+        'data' => isset($valori['competenza_personale']) ? $valori['competenza_personale'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1459,15 +1489,10 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_matematica_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_matematica_motivazione']) ? $valori['certificazione_matematica_motivazione'] : null,
-        'trim' => true,
-        'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('certificazione_scienze', ChoiceType::class, array('label' => 'label.certificazione_scienze',
-        'data' => isset($valori['certificazione_scienze']) ? $valori['certificazione_scienze'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_cittadinanza', ChoiceType::class, array('label' => 'label.competenza_cittadinanza',
+        'data' => isset($valori['competenza_cittadinanza']) ? $valori['competenza_cittadinanza'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1476,15 +1501,10 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_scienze_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_scienze_motivazione']) ? $valori['certificazione_scienze_motivazione'] : null,
-        'trim' => true,
-        'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('certificazione_storia', ChoiceType::class, array('label' => 'label.certificazione_storia',
-        'data' => isset($valori['certificazione_storia']) ? $valori['certificazione_storia'] : null,
-        'choices' => ['label.certificazione_livello_B' => 'B', 'label.certificazione_livello_I' => 'I',
-          'label.certificazione_livello_A' => 'A', 'label.certificazione_livello_N' => 'N'],
+      ->add('competenza_imprenditoriale', ChoiceType::class, array('label' => 'label.competenza_imprenditoriale',
+        'data' => isset($valori['competenza_imprenditoriale']) ? $valori['competenza_imprenditoriale'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
@@ -1493,8 +1513,20 @@ class ScrutinioController extends BaseController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_storia_motivazione', MessageType::class, array('label' => false,
-        'data' => isset($valori['certificazione_storia_motivazione']) ? $valori['certificazione_storia_motivazione'] : null,
+      ->add('competenza_culturale', ChoiceType::class, array('label' => 'label.competenza_culturale',
+        'data' => isset($valori['competenza_culturale']) ? $valori['competenza_culturale'] : 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
+        'placeholder' => null,
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
+      ->add('competenza_altro', MessageType::class, array('label' => false,
+        'data' => isset($valori['competenza_altro']) ? $valori['competenza_altro'] : 'Niente da segnalare.',
         'trim' => true,
         'attr' => ['rows' => 4],
         'required' => false))
@@ -1502,58 +1534,23 @@ class ScrutinioController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // controlla errori
-      $err_motivazione = false;
-      if ($form->get('certificazione_italiano')->getData() == 'N' &&
-          $form->get('certificazione_italiano_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
+      // modifica dati
+      $valori['certificazione'] = true;
+      $valori['competenza_alfabetica'] = $form->get('competenza_alfabetica')->getData();
+      $valori['competenza_linguistica1'] = $form->get('competenza_linguistica1')->getData();
+      if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua2'))) {
+        $valori['competenza_linguistica2'] = $form->get('competenza_linguistica2')->getData();
       }
-      if ($form->get('certificazione_lingua')->getData() == 'N' &&
-          $form->get('certificazione_lingua_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
+      if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua3'))) {
+        $valori['competenza_linguistica3'] = $form->get('competenza_linguistica3')->getData();
       }
-      if ($form->get('certificazione_linguaggio')->getData() == 'N' &&
-          $form->get('certificazione_linguaggio_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
-      }
-      if ($form->get('certificazione_matematica')->getData() == 'N' &&
-          $form->get('certificazione_matematica_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
-      }
-      if ($form->get('certificazione_scienze')->getData() == 'N' &&
-          $form->get('certificazione_scienze_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
-      }
-      if ($form->get('certificazione_storia')->getData() == 'N' &&
-          $form->get('certificazione_storia_motivazione')->getData() == '') {
-        // motivazione non presente
-        $err_motivazione = true;
-      }
-      if ($err_motivazione) {
-        // errore: motivazione non inserita
-        $this->addFlash('errore', $trans->trans('exception.no_motivazione_certificazione', [
-          'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-          'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
-      }
-      // modifica dati (anche se errati)
-      $valori['certificazione'] = (!$err_motivazione);
-      $valori['certificazione_italiano'] = $form->get('certificazione_italiano')->getData();
-      $valori['certificazione_italiano_motivazione'] = $form->get('certificazione_italiano_motivazione')->getData();
-      $valori['certificazione_lingua'] = $form->get('certificazione_lingua')->getData();
-      $valori['certificazione_lingua_motivazione'] = $form->get('certificazione_lingua_motivazione')->getData();
-      $valori['certificazione_linguaggio'] = $form->get('certificazione_linguaggio')->getData();
-      $valori['certificazione_linguaggio_motivazione'] = $form->get('certificazione_linguaggio_motivazione')->getData();
-      $valori['certificazione_matematica'] = $form->get('certificazione_matematica')->getData();
-      $valori['certificazione_matematica_motivazione'] = $form->get('certificazione_matematica_motivazione')->getData();
-      $valori['certificazione_scienze'] = $form->get('certificazione_scienze')->getData();
-      $valori['certificazione_scienze_motivazione'] = $form->get('certificazione_scienze_motivazione')->getData();
-      $valori['certificazione_storia'] = $form->get('certificazione_storia')->getData();
-      $valori['certificazione_storia_motivazione'] = $form->get('certificazione_storia_motivazione')->getData();
+      $valori['competenza_matematica'] = $form->get('competenza_matematica')->getData();
+      $valori['competenza_digitale'] = $form->get('competenza_digitale')->getData();
+      $valori['competenza_personale'] = $form->get('competenza_personale')->getData();
+      $valori['competenza_cittadinanza'] = $form->get('competenza_cittadinanza')->getData();
+      $valori['competenza_imprenditoriale'] = $form->get('competenza_imprenditoriale')->getData();
+      $valori['competenza_culturale'] = $form->get('competenza_culturale')->getData();
+      $valori['competenza_altro'] = $form->get('competenza_altro')->getData();
       $dati['esito']->setDati($valori);
       // memorizza dati
       $this->em->flush();
