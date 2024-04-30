@@ -260,10 +260,10 @@ App\Entity\VotoScrutinio:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
-    unico: '<ife(<($current>=10)>, <votoEdCivicaNoNC()>, 6)>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<ife(<($current<20)>,20,<voto()>)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_F_2A_{6, 17, 27, 37, 47, 57, 67}:
@@ -320,10 +320,10 @@ App\Entity\VotoScrutinio:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 10)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'
   voto_F_3CCHI_{6, 17, 27}:
@@ -332,9 +332,9 @@ App\Entity\VotoScrutinio:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
-    unico: '<votoEdCivicaNoNC()>'
-    debito: '<ife(<($unico<6)>, <text()>, null)>'
-    recupero: '<ife(<($unico<6)>, "A", null)>'
-    assenze: '<numberBetween(0, 10)>'
+    unico: 8
+    debito:
+    recupero:
+    assenze: 10
     materia: '@materia_EDCIVICA'
     dati: '<{delibera}>'

@@ -179,7 +179,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
-        uses: metcalfc/changelog-generator@v4.0.1
+        uses: metcalfc/changelog-generator@v4.3.1
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 

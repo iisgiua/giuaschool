@@ -3583,7 +3583,7 @@ class ScrutinioUtil {
         ->join('App\Entity\Esito', 'e', 'WITH', 'a.id=e.alunno')
         ->join('e.scrutinio', 's')
         ->join('App\Entity\VotoScrutinio', 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
-        ->join('App\Entity\PropostaVoto', 'pv', 'WITH', 'pv.classe=s.classe AND pv.periodo=s.periodo AND pv.alunno=a.id')
+        ->join('App\Entity\PropostaVoto', 'pv', 'WITH', 'pv.periodo=s.periodo AND pv.alunno=a.id')
         ->join('vs.materia', 'm')
         ->where('a.id in (:lista) AND e.esito IN (:esiti) AND s.classe=:classe AND s.periodo=:periodo AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff AND m.tipo=:tipo')
         ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
@@ -3711,7 +3711,7 @@ class ScrutinioUtil {
       ->join('vs.scrutinio', 's')
       ->join('vs.materia', 'm')
       ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
-      ->join('App\Entity\PropostaVoto', 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.classe=s.classe AND pv.periodo=s.periodo')
+      ->join('App\Entity\PropostaVoto', 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.periodo=s.periodo')
       ->where('vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND m.tipo=:tipo AND e.esito IN (:esiti) AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
@@ -3722,8 +3722,8 @@ class ScrutinioUtil {
     foreach ($dati['carenze'] as $voto) {
       $proposta = $this->em->getRepository('App\Entity\PropostaVoto')->createQueryBuilder('pv')
         ->join('pv.materia', 'm')
-        ->where('pv.alunno=:alunno AND pv.classe=:classe AND pv.periodo=:periodo AND m.tipo=:tipo AND m.id=:materia')
-        ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
+        ->where('pv.alunno=:alunno AND pv.periodo=:periodo AND m.tipo=:tipo AND m.id=:materia')
+        ->setParameters(['alunno' => $alunno, 'periodo' => $periodo,
           'tipo' => 'N', 'materia' => $voto->getMateria()])
         ->getQuery()
         ->setMaxResults(1)

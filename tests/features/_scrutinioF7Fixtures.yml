@@ -475,14 +475,14 @@ App\Entity\Esito:
     dati:
       unanimita: true
       contrari:
-      giudizio:
+      giudizio: 'Motivazione per l''ammissione con insufficienza...'
       creditoScolastico: ['F']
       creditoMinimo: '<case(<($current)>, [2,3,4,5,6], [9,10,11,13,14], 7)>'
     scrutinio: '@scrutinio_5A_F'
     alunno: '@alunno_5A_<current()>'
   esito_F_3CAMB_{2}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.00)>'
+    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.13)>'
     credito: 10
     creditoPrecedente: 0
     dati:
@@ -495,7 +495,7 @@ App\Entity\Esito:
     alunno: '@alunno_<case(<current()>, [3], [sostegno_4], 3CAMB_<current()>)>'
   esito_F_3CCHI_{2}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.00)>'
+    media: '<case(<($current)>, [1,2], [5.75,8.13], 4.13)>'
     credito: 10
     creditoPrecedente: 0
     dati:

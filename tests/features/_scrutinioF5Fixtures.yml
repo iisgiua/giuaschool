@@ -256,15 +256,15 @@ App\Entity\VotoScrutinio:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3,4,5], [sostegno_1,sostegno_2,alternativa_1], 1A_<(1+(int)($current/10))>)>'
-    unico: '<votoCondottaNoNC()>'
+    unico: 9
     debito:
     recupero:
     assenze: 0
     materia: '@materia_CONDOTTA'
     dati:
       motivazione: '<text()>'
-      unanimita: '<case(<(1+(int)($current/10))>, [3,4], [<(false)>,<(false)>], true)>'
-      contrari: '<case(<(1+(int)($current/10))>, [3,4], [@docente_curricolare_1->cognome,@docente_curricolare_1->cognome], <(null)>)>'
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
   voto_F_2A_{7, 18, 28, 38, 48, 58, 68}:
     scrutinio: '@scrutinio_2A_F'
     orale:
@@ -331,27 +331,27 @@ App\Entity\VotoScrutinio:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_4], 3CAMB_<(1+(int)($current/10))>)>'
-    unico: '<votoCondottaNoNC()>'
+    unico: 9
     debito:
     recupero:
     assenze: 0
     materia: '@materia_CONDOTTA'
     dati:
       motivazione: '<text()>'
-      unanimita: true
-      contrari:
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
   voto_F_3CCHI_{7, 18, 28}:
     scrutinio: '@scrutinio_3CCHI_F'
     orale:
     scritto:
     pratico:
     alunno: '@alunno_<case(<(1+(int)($current/10))>, [3], [sostegno_3], 3CCHI_<(1+(int)($current/10))>)>'
-    unico: '<votoCondottaNoNC()>'
+    unico: 9
     debito:
     recupero:
     assenze: 0
     materia: '@materia_CONDOTTA'
     dati:
       motivazione: '<text()>'
-      unanimita: true
-      contrari:
+      unanimita: '<case(<($current)>, [7], [<(false)>], true)>'
+      contrari: '<case(<($current)>, [7], [@docente_curricolare_1->cognome], <(null)>)>'
