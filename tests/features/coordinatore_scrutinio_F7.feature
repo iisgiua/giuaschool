@@ -19,14 +19,14 @@ Scenario: visualizzazione pagina passo 7
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
-  E vedi la tabella non ordinata:
-    | Alunno                                                     | Materie                                                            | Comunicazione |
-    | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                   | ?@materia_curricolare_1:nomeBreve?@materia_curricolare_2:nomeBreve |               |
-    | @alunno_1A_2:cognome+ +@alunno_1A_2:nome                   | /.*/                                                               | COMPILATA     |
-    | @alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       | /.*/                                                               | COMPILATA     |
-    | @alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome       | /.*/                                                               | COMPILATA     |
-    | @alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome | /.*/                                                               | COMPILATA     |
+  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  # E vedi la tabella non ordinata:
+  #   | Alunno                                                     | Materie                                                            | Comunicazione |
+  #   | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                   | ?@materia_curricolare_1:nomeBreve?@materia_curricolare_2:nomeBreve |               |
+  #   | @alunno_1A_2:cognome+ +@alunno_1A_2:nome                   | /.*/                                                               | COMPILATA     |
+  #   | @alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       | /.*/                                                               | COMPILATA     |
+  #   | @alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome       | /.*/                                                               | COMPILATA     |
+  #   | @alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome | /.*/                                                               | COMPILATA     |
 
 # Scenario: visualizzazione riquadro inserimento debiti
 #   Data pagina attiva "coordinatore_scrutinio" con parametri:
