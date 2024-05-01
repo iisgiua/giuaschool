@@ -223,7 +223,7 @@ Schema dello scenario: visualizza lista cattedre piani/programmi/relazioni con d
     | L    | Piani     |
     | P    | Programmi |
     | R    | Relazioni |
-@debug
+
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno di docenti diversi su stesso alunno
   Data ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |

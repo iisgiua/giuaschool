@@ -1924,9 +1924,8 @@ class ScrutinioController extends BaseController {
     // legge proposte di voto
     $dati['proposte'] = $this->em->getRepository('App\Entity\PropostaVoto')->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
     foreach ($dati['proposte'] as $alu=>$prop) {
-      if (isset($prop['debito']) && $dati['voti'][$alu]->getUnico() === null) {
-        $dati['voti'][$alu]->setDebito($prop['debito']);
-        $dati['voti'][$alu]->setRecupero('A');
+      if (!empty($prop['debito']) && $dati['voti'][$alu]->getUnico() !== null) {
+        $dati['proposte'][$alu]['debito'] = null;
       }
     }
     // legge dati valutazioni
@@ -1965,6 +1964,13 @@ class ScrutinioController extends BaseController {
       foreach ($errore as $msg=>$v) {
         $this->addFlash('errore',
           $trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
+      }
+      // imposta debiti e recupero
+      foreach ($dati['proposte'] as $alu=>$prop) {
+        if (!empty($prop['debito'])) {
+          $dati['voti'][$alu]->setDebito($prop['debito']);
+          $dati['voti'][$alu]->setRecupero('A');
+        }
       }
       // ok: memorizza dati (anche errati)
       $this->em->flush();

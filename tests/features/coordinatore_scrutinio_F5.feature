@@ -97,8 +97,8 @@ Scenario: visualizzazione pagina con dati mancanti - contrari a condotta
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Quando click su "Modifica la valutazione della Condotta" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
-  E selezioni opzione "Maggioranza" da pulsanti radio "condotta_lista_{{@alunno_1A_1:id}}_unanimita"
+  Quando click su "Modifica la valutazione della Condotta" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  E selezioni opzione "Maggioranza" da pulsanti radio "condotta_lista_{{@alunno_sostegno_1:id}}_unanimita"
   E click su "Conferma"
   Allora la sezione "#gs-modal-error .alert-danger" contiene "Non sono stati indicati i docenti contrari"
 
@@ -397,7 +397,7 @@ Scenario: visualizzazione riquadro inserimento voto singolo altra materia per cl
   Quando click su "Modifica la valutazione della materia" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome" con indice "2"
   Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "@materia_curricolare_1:nome"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
-@debug
+
 Scenario: visualizzazione passo successivo per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |

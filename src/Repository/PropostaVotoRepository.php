@@ -58,7 +58,7 @@ class PropostaVotoRepository extends EntityRepository {
       $docente = ($prop['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ').$prop['nome'].' '.$prop['cognome'];
       $dati[$prop['id_alunno']]['proposte'][$docente] = $prop['unico'];
       // aggiunge eventuali argomenti da recuperare
-      if ($prop['unico'] < $valutazioni['suff'] && $prop['debito']) {
+      if ($prop['unico'] < $valutazioni['suff'] && !empty($prop['debito'])) {
         $dati[$prop['id_alunno']]['debito'] = (isset($dati[$prop['id_alunno']]['debito']) ?
           ($dati[$prop['id_alunno']]['debito']."\n") : '').$prop['debito'];
       }
