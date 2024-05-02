@@ -637,7 +637,7 @@ class ScrutinioController extends BaseController {
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'condotta'])))
+        'entry_options' => array('label' => false, 'form_mode' => 'condotta')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -782,14 +782,13 @@ class ScrutinioController extends BaseController {
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
-    $tipo = (($periodo == 'P' || $periodo == 'S') ? 'debiti' : 'esito');
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => $tipo] )))
+        'entry_options' => array('label' => false, 'form_mode' => 'esito')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -1025,7 +1024,7 @@ class ScrutinioController extends BaseController {
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'esito'] )))
+        'entry_options' => array('label' => false, 'form_mode' => 'esito')))
       ->add('esito', ChoiceType::class, array('label' => false,
         'data' => $dati['esito']->getEsito(),
         'choices' => $lista_esiti,
@@ -1624,7 +1623,7 @@ class ScrutinioController extends BaseController {
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['debiti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'debiti'])))
+        'entry_options' => array('label' => false, 'form_mode' => 'debiti')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -1734,7 +1733,7 @@ class ScrutinioController extends BaseController {
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['carenze'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'carenze'])))
+        'entry_options' => array('label' => false, 'form_mode' => 'carenze')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -1933,14 +1932,13 @@ class ScrutinioController extends BaseController {
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni')['E'];
     // form di inserimento
-    $tipo = (($periodo == 'P' || $periodo == 'S') ? 'debiti' : 'edcivica');
     $form = $this->container->get('form.factory')->createNamedBuilder('edcivica', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_edcivica', ['classe' => $classe->getId(),
         'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => $tipo])))
+        'entry_options' => array('label' => false, 'form_mode' => 'edcivica')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' =>['class' => 'btn-primary']))
       ->getForm();

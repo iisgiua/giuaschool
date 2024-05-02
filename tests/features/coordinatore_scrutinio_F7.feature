@@ -31,6 +31,16 @@ Scenario: visualizzazione pagina passo 7
     | @alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome | @materia_itp_1:nomeBreve+, +@materia_curricolare_5:nomeBreve         |               |
     | @alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome | @materia_itp_1:nomeBreve+, +@materia_curricolare_5:nomeBreve         |               |
 
+Scenario: visualizzazione pagina passo 7 per classi quinte
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_5A:id |
+  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main form > div:nth-child(3) > table > caption" non contiene "Debiti formativi"
+  E non vedi la tabella:
+    | Alunno | Materie | Comunicazione |
+  E la sezione "#gs-main form > div:nth-child(4) > table > caption" non contiene "Comunicazione carenze"
+
 Scenario: visualizzazione riquadro inserimento debiti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
