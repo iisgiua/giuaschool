@@ -45,7 +45,7 @@ Scenario: prime - passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: prime - memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -136,9 +136,34 @@ Scenario: seconde - visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_2A:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: seconde - memorizzazione dati e passo successivo
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+  E click su "Conferma"
+  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
+  E click su "Conferma"
+  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_4:cognome+ +@alunno_2A_4:nome"
+  E click su "Conferma"
+  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_5:cognome+ +@alunno_2A_5:nome"
+  E click su "Conferma"
+  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
+  E click su "Conferma"
+  E click su "Conferma"
+  E click su "passo precedente"
+  Allora la sezione "#gs-main h2" contiene "Passo 6"
+  E vedi la tabella "2" non ordinata senza intestazioni:
+    | Alunno | Media | Certificazione |
+    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | COMPILATA |
+    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | COMPILATA |
+    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | COMPILATA |
+    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | COMPILATA |
+    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | COMPILATA |
+
+Scenario: seconde - memorizzazione dati e passo successivo con dettagli
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_2A:id |
@@ -164,16 +189,8 @@ Scenario: seconde - memorizzazione dati e passo successivo
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Certificazione |
-    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | COMPILATA |
-    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | COMPILATA |
-    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | COMPILATA |
-    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | COMPILATA |
-    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | COMPILATA |
   E click su "Modifica la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  E opzione "A" selezionata da lista "certificazione_competenza_alfabetica"
+  Allora opzione "A" selezionata da lista "certificazione_competenza_alfabetica"
   E opzione "B" selezionata da lista "certificazione_competenza_linguistica1"
   E opzione "C" selezionata da lista "certificazione_competenza_linguistica2"
   E opzione "D" selezionata da lista "certificazione_competenza_matematica"
@@ -371,7 +388,7 @@ Scenario: terze - visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_3A:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: quarte - visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -391,7 +408,7 @@ Scenario: quarte - visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_4A:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: quinte - visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -413,7 +430,7 @@ Scenario: quinte - visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_5A:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: terze - memorizzazione dati e passo successivo - credito minimo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -662,7 +679,7 @@ Scenario: classe articolata - visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe           | stato |
     | @classe_3CAMB:id | 7     |
-  Allora la sezione "#gs-main h2" contiene "Passo 7"
+  E la sezione "#gs-main h2" contiene "Passo 7"
 
 Scenario: classe articolata - memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
