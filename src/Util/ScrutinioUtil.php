@@ -3815,17 +3815,6 @@ class ScrutinioUtil {
    */
   public function passaggioStato_F_8_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
-    // legge definizione scrutinio e verbale
-    $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo('F');
-    $scrutinio_dati = $scrutinio->getDati();
-    foreach ($def->getStruttura() as $step=>$args) {
-      if ($args[0] == 'Argomento') {
-        // resetta validazione
-        $scrutinio_dati['verbale'][$step]['validato'] = false;
-      }
-    }
-    // memorizza dati scrutinio
-    $scrutinio->setDati($scrutinio_dati);
     // aggiorna stato
     $scrutinio->setStato('7');
     $this->em->flush();
@@ -3842,7 +3831,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 7->C per lo scrutinio del periodo P
+   * Esegue il passaggio di stato 8->C per lo scrutinio del periodo P
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -5140,7 +5129,8 @@ class ScrutinioUtil {
     // periodo dello scrutinio
     $dati['periodo'] = $periodo;
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBY(['periodo' => $periodo, 'classe' => $classe]);
+    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBY(['periodo' => $periodo,
+      'classe' => $classe]);
     $dati_scrutinio = $scrutinio->getDati();
     // legge ora fine
     $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 20) ? '00' : '30'));
@@ -5165,7 +5155,8 @@ class ScrutinioUtil {
           $struttura[$step]['inizio'] = isset($args[2]['inizio']) ? $args[2]['inizio'] : '';
           $struttura[$step]['fine'] = isset($args[2]['fine']) ? $args[2]['fine'] : '';
           $struttura[$step]['testo'] = isset($scrutinio->getDati()['argomento'][$num_arg]) ?
-            $scrutinio->getDati()['argomento'][$num_arg] : (isset($args[2]['default']) ? $args[2]['default'] : '');
+            $scrutinio->getDati()['argomento'][$num_arg] : (isset($args[2]['default']) ?
+            $args[2]['default'] : '');
         }
       }
     }
