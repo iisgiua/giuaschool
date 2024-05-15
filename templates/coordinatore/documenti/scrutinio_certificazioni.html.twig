@@ -6,16 +6,15 @@
   <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
   <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
 </div>
+
+
 <div style="font-family:times;font-size:11pt">
-  <p style="text-align:center"><strong><span style="font-size:14pt">CERTIFICATO delle COMPETENZE DI BASE</span>
-    <br><span style="font-size:11pt">acquisite nell'assolvimento dell'OBBLIGO DI ISTRUZIONE</span></strong></p>
+  <p style="text-align:center;font-size:14pt">
+    <strong>CERTIFICAZIONE DELLE COMPETENZE
+      <br>IN ASSOLVIMENTO DELL’OBBLIGO DI ISTRUZIONE</strong>
+  </p>
   <p>&nbsp;</p>
-  <p>N° ..............</p>
-  <p style="text-align:center"><strong>IL DIRIGENTE SCOLASTICO</strong></p>
-  <p>Visto il regolamento emanato dal Ministro dell'Istruzione, Università e Ricerca con decreto 22 agosto 2007, n.139;</p>
-  <p>Visti gli atti di ufficio;</p>
-  <p style="text-align:center;font-size:14pt"><strong>CERTIFICA
-    <br><em>che {{ alu.sesso == 'M' ? 'lo studente' : 'la studentessa' }}</em></strong></p>
+
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
       <td width="9%">cognome</td>
@@ -24,26 +23,19 @@
       <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.nome|upper }}</strong></td>
     </tr>
   </table>
+
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
-      <td width="9%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} il</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
-      <td width="11%" align="right">a&nbsp;&nbsp;</td>
+      <td width="9%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
       <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }}</strong></td>
+      <td width="11%" align="right">il</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
     </tr>
   </table>
-  <table border="0" cellpadding="0" cellspacing="5">
-    <tr>
-      <td width="75%">iscritt{{ alu.sesso == 'M' ? 'o' : 'a' }} nell'anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} presso questo Istituto nella classe II sezione</td>
-      <td width="25%" style="border-bottom-width:0.1px"><strong>{{ dati.classe.sezione }} - {{ dati.classe.sede.citta }}</strong></td>
-    </tr>
-  </table>
-  <table border="0" cellpadding="0" cellspacing="5">
-    <tr>
-      <td width="17%">indirizzo di studio</td>
-      <td width="83%" style="border-bottom-width:0.1px"><strong>{{ dati.classe.corso.nome }}</strong></td>
-    </tr>
-  </table>
+
+
+
+
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
       <td>nell'assolvimento dell'obbligo di istruzione, della durata di 10 anni,</td>
@@ -55,6 +47,12 @@
       <td>le competenze di base di seguito indicate.</td>
     </tr>
   </table>
+
+
+</div>
+
+  {#
+
   <p>&nbsp;</p>
   <p>&nbsp;</p>
   <p>&nbsp;</p>
@@ -72,7 +70,8 @@
     <li><strong>LIVELLO INTERMEDIO: lo studente svolge compiti e risolve problemi complessi in situazioni note, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</strong></li>
     <li><strong>LIVELLO AVANZATO: lo studente svolge compiti e problemi complessi in situazioni anche non note, mostrando padronanza nell’uso delle conoscenze e delle abilità. Es. proporre e sostenere le proprie opinioni e assumere autonomamente decisioni consapevoli.</strong></li>
   </ul>
-</div>
+
+
 <tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
 <tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
 <tcpdf method="AddPage" />
@@ -162,5 +161,5 @@
       <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
     </td>
   </tr>
-</table>
+</table> #}
 {% endfor %}

@@ -49,8 +49,8 @@ Scenario: pagina dati con visualizzazione abilitata
   E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
-    | @materia_curricolare_1:nome | Argomento...            | Studio individuale   |
-    | @materia_curricolare_2:nome | Argomento...            | Studio individuale   |
+    | @materia_curricolare_1:nome | Argomento               | Studio individuale   |
+    | @materia_curricolare_2:nome | Argomento               | Studio individuale   |
 
 Scenario: visualizzazione comunicazione voti
   Dato login utente "@alunno_1A_2:username"
@@ -82,8 +82,8 @@ Scenario: visualizzazione comunicazione debiti
   Allora vedi testo "@alunno_1A_1:cognome @alunno_1A_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "1ª A" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(Argomenti) #str(Modalità)" in PDF analizzato in una riga
-  E vedi poi testo "@materia_curricolare_1:nome #cas(@voto_S_1A_0:unico,0,NC,@voto_S_1A_0:unico) #str(Argomento...) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
-  E vedi poi testo "@materia_curricolare_2:nome #cas(@voto_S_1A_1:unico,0,NC,@voto_S_1A_1:unico) #str(Argomento...) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
+  E vedi poi testo "@materia_curricolare_1:nome #cas(@voto_S_1A_0:unico,0,NC,@voto_S_1A_0:unico) #str(Argomento) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
+  E vedi poi testo "@materia_curricolare_2:nome #cas(@voto_S_1A_1:unico,0,NC,@voto_S_1A_1:unico) #str(Argomento) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
 
 
 ################################################################################
@@ -127,9 +127,9 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
   E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
-    | @materia_curricolare_1:nome | Argomento...            | Studio individuale   |
-    | @materia_curricolare_2:nome | Argomento...            | Studio individuale   |
-    | @materia_itp_2:nome         | Argomento...            | Studio individuale   |
+    | @materia_curricolare_1:nome | Argomento               | Studio individuale   |
+    | @materia_curricolare_2:nome | Argomento               | Studio individuale   |
+    | @materia_itp_2:nome         | Argomento               | Studio individuale   |
 
 Scenario: visualizzazione comunicazione voti per la classe articolata
 	Dato login utente "@alunno_3CAMB_2:username"
@@ -161,6 +161,6 @@ Scenario: visualizzazione comunicazione debiti per la classe articolata
   Allora vedi testo "@alunno_3CAMB_1:cognome @alunno_3CAMB_1:nome" in PDF analizzato alla riga "3"
   E vedi testo "3ª C-AMB" in PDF analizzato alla riga "4"
   E vedi poi testo "#str(MATERIA) #str(VOTO) #str(Argomenti) #str(Modalità)" in PDF analizzato in una riga
-  E vedi poi testo "@materia_curricolare_1:nome #cas(@voto_S_3CAMB_0:unico,0,NC,@voto_S_3CAMB_0:unico) #str(Argomento...) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
-  E vedi poi testo "@materia_curricolare_2:nome #cas(@voto_S_3CAMB_1:unico,0,NC,@voto_S_3CAMB_1:unico) #str(Argomento...) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
-  E vedi poi testo "@materia_itp_2:nome #cas(@voto_S_3CAMB_5:unico,0,NC,@voto_S_3CAMB_5:unico) #str(Argomento...) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
+  E vedi poi testo "@materia_curricolare_1:nome #cas(@voto_S_3CAMB_0:unico,0,NC,@voto_S_3CAMB_0:unico) #str(Argomento) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
+  E vedi poi testo "@materia_curricolare_2:nome #cas(@voto_S_3CAMB_1:unico,0,NC,@voto_S_3CAMB_1:unico) #str(Argomento) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe
+  E vedi poi testo "@materia_itp_2:nome #cas(@voto_S_3CAMB_5:unico,0,NC,@voto_S_3CAMB_5:unico) #str(Argomento) #str(Studio) #str(individuale)" in PDF analizzato in "2" righe

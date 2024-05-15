@@ -177,7 +177,7 @@ Scenario: seconde - memorizzazione dati e passo successivo con dettagli
   E selezioni opzione "C" da lista "certificazione_competenza_cittadinanza"
   E selezioni opzione "D" da lista "certificazione_competenza_imprenditoriale"
   E selezioni opzione "A" da lista "certificazione_competenza_culturale"
-  E inserisci "Altra competenza..." nel campo "certificazione_competenza_altro"
+  E inserisci "Altra competenza" nel campo "certificazione_competenza_altro"
   E click su "Conferma"
   E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
   E click su "Conferma"
@@ -199,7 +199,7 @@ Scenario: seconde - memorizzazione dati e passo successivo con dettagli
   E opzione "C" selezionata da lista "certificazione_competenza_cittadinanza"
   E opzione "D" selezionata da lista "certificazione_competenza_imprenditoriale"
   E opzione "A" selezionata da lista "certificazione_competenza_culturale"
-  E il campo "certificazione_competenza_altro" contiene "Altra competenza..."
+  E il campo "certificazione_competenza_altro" contiene "Altra competenza"
 
 
 ###############################################################################

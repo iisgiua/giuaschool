@@ -122,7 +122,7 @@
   {% if dati.no_scrutinabili|length > 0 %}
   <p>Il Consiglio di Classe, avendo constatato il superamento del numero massimo di assenze previsto
     dalla normativa in vigore (art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009), non accompagnato
-    da una adeguata e documentata motivazione, delibera <strong>l'esclusione dallo scrutinio e la non ammissione
+    da una adeguata e documentata motivazione, delibera <strong>l'esclusione dallo scrutinio e pertanto la non ammissione
     {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva'}}</strong>
     degli alunni seguenti:
    </p>
@@ -150,12 +150,15 @@
     alunni iscritti alla classe, sono da scrutinare {{ dati.scrutinati|length }} alunni.
   </p>
   <p>Si passa quindi alle operazioni di scrutinio.
-    Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del Coordinatore,
-    basata sui criteri di valutazione deliberati dagli Organi Collegiali. I voti proposti sono
+    Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del
+    Coordinatore della disciplina,
+    basata sui criteri di valutazione deliberati dal Collegio dei Docenti. I voti proposti sono
     approvati all'unanimità.
   </p>
-  <p>Di seguito, su proposta del Coordinatore, viene deliberato il voto di comportamento,
-    indicato nel seguente prospetto:
+  <p>Il Presidente ricorda i criteri di valutazione della condotta presenti nel PTOF, precisando che
+    per l'attribuzione del voto non devono necessariamente concorrere tutti i descrittori correlati.
+    Di seguito, su proposta del Coordinatore di classe, viene deliberato il voto di comportamento,
+    sintetizzato nel seguente prospetto:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
@@ -239,8 +242,10 @@
 {% endif %}
   <p>Tutte le deliberazioni sopra indicate sono state assunte individualmente per ciascun alunno.</p>
 {% if dati.classe.anno >= 3 %}
-  <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico
-    che risultano sintetizzate nella seguente tabella:
+  <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico,
+    ai sensi del D.Lvo. 62 del 13 aprile 2017 e sulla base dei criteri stabiliti nel PTOF per
+    l'assegnazione del punteggio più alto relativo alla fascia di appartenenza.
+    Tali delibere vengono sintetizzate nella seguente tabella:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
   {% if dati.classe.anno == 3 %}
@@ -404,10 +409,11 @@
 {% if dati.classe.anno == 2 %}
   <p>&nbsp;</p>
   <p><strong>Punto terzo. Certificazione delle Competenze.</strong></p>
-  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139 e D.M. 27 gennaio 2010 n. 9)
+  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139, D.M. 27 gennaio 2010 n. 9 e
+    D.M. 30 gennaio 2024 n. 14)
     in esito all’assolvimento all’obbligo di istruzione, il Consiglio di Classe predispone, per ogni alunno
-    ammesso alla classe successiva, la certificazione delle competenze acquisite, negli assi dei linguaggi,
-    matematico, scientifico e storico sociale, in relazione al percorso formativo effettuato.
+    ammesso alla classe successiva, la certificazione delle competenze acquisite, in relazione al percorso
+    formativo effettuato.
   </p>
 {% endif %}
   <p>&nbsp;</p>

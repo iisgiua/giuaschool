@@ -27,7 +27,7 @@ App\Entity\Nota:
     data: '<dateTimeBetween("-1 month", "now")>'
     testo: '<text()>'
     provvedimento: '50%? <text()>: <strval("")>'
-    annullata: '50%? <dateTimeBetween("-1 month", "now")>: <strval("")>'
+    annullata: '50%? <dateTimeBetween("-1 month", "now")>: <(null)>'
     classe: '@classe_*'
     docente: '@docente_*'
     docenteProvvedimento: '50%? @staff_*'

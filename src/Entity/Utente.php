@@ -207,6 +207,15 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $comuneNascita = '';
 
   /**
+   * @var string|null $provinciaNascita Provincia del comune di nascita dell'utente
+   *
+   * @ORM\Column(name="provincia_nascita", type="string", length=2, nullable=true)
+   *
+   * @Assert\Length(max=2,maxMessage="field.maxlength")
+   */
+  private ?string $provinciaNascita = '';
+
+  /**
    * @var string|null $codiceFiscale Codice fiscale dell'utente
    *
    * @ORM\Column(name="codice_fiscale", type="string", length=16, nullable=true)
@@ -223,6 +232,15 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
   private ?string $citta = '';
+
+  /**
+   * @var string|null $provincia Provincia della città di residenza dell'utente
+   *
+   * @ORM\Column(type="string", length=2, nullable=true)
+   *
+   * @Assert\Length(max=2,maxMessage="field.maxlength")
+   */
+  private ?string $provincia = '';
 
   /**
    * @var string|null $indirizzo Indirizzo di residenza dell'utente
@@ -770,6 +788,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   }
 
   /**
+   * Restituisce la provincia del comune di nascita dell'utente
+   *
+   * @return string|null Provincia del comune di nascita dell'utente
+   */
+  public function getProvinciaNascita(): ?string {
+    return $this->provinciaNascita;
+  }
+
+  /**
+   * Modifica la provincia del comune di nascita dell'utente
+   *
+   * @param string|null $provinciaNascita Provincia del comune di nascita dell'utente
+   *
+   * @return self Oggetto modificato
+   */
+  public function setProvinciaNascita(?string $provinciaNascita): self {
+    $this->provinciaNascita = $provinciaNascita;
+    return $this;
+  }
+
+  /**
    * Restituisce il codice fiscale dell'utente (univoco)
    *
    * @return string|null Codice fiscale dell'utente
@@ -808,6 +847,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    */
   public function setCitta(?string $citta): self {
     $this->citta = $citta;
+    return $this;
+  }
+
+  /**
+   * Restituisce la provincia della città di residenza dell'utente
+   *
+   * @return string|null Provincia della città di residenza dell'utente
+   */
+  public function getProvincia(): ?string {
+    return $this->provincia;
+  }
+
+  /**
+   * Modifica la provincia della città di residenza dell'utente
+   *
+   * @param string|null $provincia Provincia della città di residenza dell'utente
+   *
+   * @return self Oggetto modificato
+   */
+  public function setProvincia(?string $provincia): self {
+    $this->provincia = $provincia;
     return $this;
   }
 

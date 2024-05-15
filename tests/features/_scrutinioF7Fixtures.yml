@@ -252,7 +252,7 @@ App\Entity\Scrutinio:
 App\Entity\Esito:
   esito_F_2A_{2..6}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 0
     creditoPrecedente: 0
     dati:
@@ -274,7 +274,7 @@ App\Entity\Esito:
     alunno: '@alunno_2A_<current()>'
   esito_F_3A_{2}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 7
     creditoPrecedente: 0
     dati:
@@ -287,7 +287,7 @@ App\Entity\Esito:
     alunno: '@alunno_3A_<current()>'
   esito_F_3A_{3}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 8
     creditoPrecedente: 0
     dati:
@@ -300,7 +300,7 @@ App\Entity\Esito:
     alunno: '@alunno_3A_<current()>'
   esito_F_3A_{4}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 10
     creditoPrecedente: 0
     dati:
@@ -313,7 +313,7 @@ App\Entity\Esito:
     alunno: '@alunno_3A_<current()>'
   esito_F_3A_{5}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 11
     creditoPrecedente: 0
     dati:
@@ -326,7 +326,7 @@ App\Entity\Esito:
     alunno: '@alunno_3A_<current()>'
   esito_F_3A_{6}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 12
     creditoPrecedente: 0
     dati:
@@ -339,7 +339,7 @@ App\Entity\Esito:
     alunno: '@alunno_3A_<current()>'
   esito_F_4A_{2}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 8
     creditoPrecedente: '@alunno_4A_<current()>->credito3'
     dati:
@@ -352,7 +352,7 @@ App\Entity\Esito:
     alunno: '@alunno_4A_<current()>'
   esito_F_4A_{3}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 9
     creditoPrecedente: '@alunno_4A_<current()>->credito3'
     dati:
@@ -365,7 +365,7 @@ App\Entity\Esito:
     alunno: '@alunno_4A_<current()>'
   esito_F_4A_{4}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 11
     creditoPrecedente: '@alunno_4A_<current()>->credito3'
     dati:
@@ -378,7 +378,7 @@ App\Entity\Esito:
     alunno: '@alunno_4A_<current()>'
   esito_F_4A_{5}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 12
     creditoPrecedente: '@alunno_4A_<current()>->credito3'
     dati:
@@ -391,7 +391,7 @@ App\Entity\Esito:
     alunno: '@alunno_4A_<current()>'
   esito_F_4A_{6}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 13
     creditoPrecedente: '@alunno_4A_<current()>->credito3'
     dati:
@@ -404,7 +404,7 @@ App\Entity\Esito:
     alunno: '@alunno_4A_<current()>'
   esito_F_5A_{2}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 9
     creditoPrecedente: '<(@alunno_5A_2->getCredito3() + @alunno_5A_2->getCredito4())>'
     dati:
@@ -417,7 +417,7 @@ App\Entity\Esito:
     alunno: '@alunno_5A_<current()>'
   esito_F_5A_{3}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 10
     creditoPrecedente: '<(@alunno_5A_3->getCredito3() + @alunno_5A_3->getCredito4())>'
     dati:
@@ -430,7 +430,7 @@ App\Entity\Esito:
     alunno: '@alunno_5A_<current()>'
   esito_F_5A_{4}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 12
     creditoPrecedente: '<(@alunno_5A_4->getCredito3() + @alunno_5A_4->getCredito4())>'
     dati:
@@ -443,7 +443,7 @@ App\Entity\Esito:
     alunno: '@alunno_5A_<current()>'
   esito_F_5A_{5}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 14
     creditoPrecedente: '<(@alunno_5A_5->getCredito3() + @alunno_5A_5->getCredito4())>'
     dati:
@@ -456,7 +456,7 @@ App\Entity\Esito:
     alunno: '@alunno_5A_<current()>'
   esito_F_5A_{6}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 15
     creditoPrecedente: '<(@alunno_5A_6->getCredito3() + @alunno_5A_6->getCredito4())>'
     dati:
@@ -469,7 +469,7 @@ App\Entity\Esito:
     alunno: '@alunno_5A_<current()>'
   esito_F_5A_{7}:
     esito: 'A'
-    media: '<case(<($current)>, [1,2,3,4,5,6], [5.75,6.00,6.88,7.63,8.38,9.13], 5.88)>'
+    media: '<case(<($current)>, [1,2,3,4,5,6], [5.25,6.00,6.88,7.63,8.38,9.13], 5.88)>'
     credito: 7
     creditoPrecedente: '<(@alunno_5A_7->getCredito3() + @alunno_5A_7->getCredito4())>'
     dati:

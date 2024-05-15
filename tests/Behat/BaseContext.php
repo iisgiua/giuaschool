@@ -986,6 +986,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "#med($v1,v2,...)": restituisce la media dei valori $v
    *  "#mdc($v1,v2,...)": restituisce la media dei voti di Ed.Civica $v
    *  "#sum($v1,v2,...)": restituisce la somma dei valori $v
+   *  "#nos($nome)": verifica che la stringa indicata non sia presente
+   *  "#noc()": verifica che non sia presente alcuna cifra
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -1001,7 +1003,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|dat|tim|arc|upr|slg|str|cas|med|mdc|sum)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|dat|tim|arc|upr|slg|str|cas|med|mdc|sum|nos|noc)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -1078,6 +1080,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
           $values[] = in_array(substr($var, 0, 1), ['$', '#', '@']) ? $this->getVar($var) : $var;
         }
         return array_reduce($values, fn($c, $i) => $c + $i, 0);
+      }
+      // controlla funzione stringa non presente
+      if ($fn[1] == 'nos') {
+        $var = substr(substr($var, 5), 0 , -1);
+        $obj = new \stdClass();
+        $obj->str = $var;
+        $obj->func = 'nos';
+        return $obj;
+      }
+      // controlla funzione cifra non presente
+      if ($fn[1] == 'noc') {
+        $obj = new \stdClass();
+        $obj->func = 'noc';
+        return $obj;
       }
     }
     // tipo di variabile
@@ -1242,7 +1258,16 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $regex = '';
       $first = true;
       foreach ($value as $val) {
-        $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
+        if (is_object($val)) {
+          // espressioni regolari speciali
+          if ($val->func == 'nos') {
+            $regex .= '(?!.*\b'.$val->str.'\b)';
+          } elseif ($val->func == 'noc') {
+            $regex .= '(?!.*\d)';
+          }
+        } else {
+          $regex .= (!$first ? '.*' : '').'\b'.preg_quote($val, '/').'\b';
+        }
         $first = false;
       }
       $regex = '/'.$regex.'/ui';

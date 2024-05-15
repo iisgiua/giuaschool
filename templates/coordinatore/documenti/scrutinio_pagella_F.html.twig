@@ -53,7 +53,7 @@
       <td><strong>Media: {{ dati.esito.media|number_format(2, ',') }}</strong></td>
       <td><strong>Credito: {{ dati.esito.credito }}</strong></td>
   {% if dati.classe.anno > 3 %}
-      <td><strong>Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong></td>
+      <td><strong>Credito precedente: {{ dati.esito.creditoPrecedente }}</strong></td>
   {% endif %}
     </tr>
   </table>

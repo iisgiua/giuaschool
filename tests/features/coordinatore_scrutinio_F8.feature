@@ -53,7 +53,7 @@ Scenario: visualizzazione passo successivo
   Quando inserisci "5" nel campo "scrutinio_numeroVerbale"
   E inserisci "11:30" nel campo "scrutinio_fine"
   E click su "Conferma"
-  E inserisci "Testo del secondo punto del verbale..." nel campo "verbale_testo"
+  E inserisci "Testo del secondo punto del verbale" nel campo "verbale_testo"
   E click su "Conferma" con indice "2"
   E click su "Chiudi lo scrutinio"
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
@@ -68,14 +68,14 @@ Scenario: memorizzazione dati e passo successivo
   Quando inserisci "3" nel campo "scrutinio_numeroVerbale"
   E inserisci "11:30" nel campo "scrutinio_fine"
   E click su "Conferma"
-  E inserisci "Testo del secondo punto del verbale..." nel campo "verbale_testo"
+  E inserisci "Testo del secondo punto del verbale" nel campo "verbale_testo"
   E click su "Conferma" con indice "2"
   E click su "Chiudi lo scrutinio"
   E click su "passo precedente"
   Allora la sezione "#gs-main h2" contiene "Passo 8"
   E il campo "scrutinio_numeroVerbale" contiene "3"
   E il campo "scrutinio_fine" contiene "11:30"
-  E la sezione "#gs-main form .alert-success > div:nth-child(1)" contiene "Testo del secondo punto del verbale..."
+  E la sezione "#gs-main form .alert-success > div:nth-child(1)" contiene "Testo del secondo punto del verbale"
 
 
 ################################################################################

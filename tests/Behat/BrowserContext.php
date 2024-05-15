@@ -665,8 +665,21 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($testo);
     $this->vars['sys']['pdf'] = $testo;
     $this->vars['sys']['pdfRiga'] = -1;
+    $this->vars['sys']['pdfSegnalibro'] = -1;
     $this->files[] = 'FILES/'.$testoParam;
     $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+  }
+
+  /**
+   * Analizza e conserva il contenuto di un file PDF (anche con password)
+   *  $testoParam: nome del file con percorso relativo alla directory FILES (con parametri)
+   *  $valore: password per la decodifica
+   *
+   * @Given impostazione segnalibro PDF
+   * @When imposti segnalibro PDF
+   */
+  public function impostiSegnalibroPDF(): void {
+    $this->vars['sys']['pdfSegnalibro'] = $this->vars['sys']['pdfRiga'];
   }
 
   /**
@@ -736,6 +749,19 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato, '+++ vediTestoInPDFAnalizzatoInRiga -> '.$ricerca.' | '.$testo);
+  }
+  /**
+   * Cerca il testo nel contenuto del PDF analizzato, in più righe successive, dal segnalibro
+   *  $ricerca: testo da cercare nel file
+   *  $num: numero di righe successive
+   *
+   * @Then vedi da segnalibro il testo :ricerca in PDF analizzato in una riga
+   * @Then vedi da segnalibro il testo :ricerca in PDF analizzato in :valore righe
+   */
+  public function vediDaSegnalibroTestoInPDFAnalizzatoInRiga($ricerca, $num=1): void {
+    $this->assertNotEmpty($this->vars['sys']['pdf']);
+    $this->vars['sys']['pdfRiga'] = $this->vars['sys']['pdfSegnalibro'];
+    $this->vediPoiTestoInPDFAnalizzatoInRiga($ricerca, $num);
   }
 
   /**

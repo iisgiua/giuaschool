@@ -123,6 +123,12 @@ App\Entity\Configurazione:
     descrizione: 'Indica il codice segreto usato per l''esecuzione di un comando tramite URL\<br>[testo]'
     valore: ''
     gestito: true
+  configurazione_SISTEMA12:
+    categoria: 'SISTEMA'
+    parametro: 'scarica_competenze'
+    descrizione: 'Indica se la certificazione delle competenze, compilata nello scrutinio finale della classe seconda, deve essere scaricabile da alunni e genitori.\<br>[formato: S=si, N=no]'
+    valore: 'N'
+    gestito: false
 
   # ----- categoria SCUOLA -----
   configurazione_SCUOLA1:

@@ -23,10 +23,10 @@
         <tr>
           <td><strong>Verbale</strong></td>
           <td>
-            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà inserita nel registro dei verbali e l'altra conservata agli atti.<br>
-            <strong><em>Far firmare al presidente e al segretario della seduta.</em></strong><br>
+            <strong>Stampare in duplice copia</strong> e consegnare in Segreteria Didattica.<br>
             <br>
-            Formato del documento: <em>PDF</em>
+            <strong><em>Deve firmare il presidente e il segretario.</em></strong>
+          </td>
           <td>
             <div class="gs-mb-2">
               <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -36,10 +36,9 @@
         <tr>
           <td><strong>Riepilogo voti</strong></td>
           <td>
-            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
-            <strong><em>Far firmare a tutti i docenti e al presidente.</em></strong><br>
+            <strong>Stampare in duplice copia</strong> e consegnare in Segreteria Didattica.<br>
             <br>
-            Formato del documento: <em>PDF</em>
+            <strong><em>Devono firmare tutti i docenti.</em></strong>
           </td>
           <td>
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -48,10 +47,9 @@
         <tr>
           <td><strong>Foglio firme Registro dei voti</strong></td>
           <td>
-            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
-            <strong><em>Far firmare a tutti i docenti, al segretario e al presidente.</em></strong><br>
+            <strong>Stampare in un'unica copia</strong> e consegnare in Segreteria Didattica.<br>
             <br>
-            Formato del documento: <em>PDF</em>
+            <strong><em>Devono firmare tutti i docenti.</em></strong>
           </td>
           <td>
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -61,10 +59,7 @@
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
+            <strong>Stampare in un'unica copia</strong> e consegnare in Segreteria Didattica.
           </td>
           <td>
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -74,10 +69,7 @@
         <tr>
           <td><strong>Tabellone esiti</strong></td>
           <td>
-            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
+            Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -86,10 +78,7 @@
         <tr>
           <td><strong>Comunicazione Non Ammessi</strong></td>
           <td>
-            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
+            Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
     {% for a in dati.non_ammessi %}
@@ -103,10 +92,7 @@
         <tr>
           <td><strong>Comunicazione Debiti</strong></td>
           <td>
-            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
+            Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
       {% for a in dati.debiti %}
@@ -119,10 +105,7 @@
         <tr>
           <td><strong>Comunicazione Carenze</strong></td>
           <td>
-            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
+            Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
       {% for a in dati.carenze %}

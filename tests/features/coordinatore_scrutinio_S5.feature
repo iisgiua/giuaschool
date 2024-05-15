@@ -57,9 +57,9 @@ Scenario: visualizzazione passo successivo
     | @classe_1A:id |
   Quando click su "Compila la comunicazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_0_recupero"
-  E inserisci "Testo..." nel campo "debiti_lista_0_debito"
+  E inserisci "Testo" nel campo "debiti_lista_0_debito"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_1_recupero"
-  E inserisci "Testo..." nel campo "debiti_lista_1_debito"
+  E inserisci "Testo" nel campo "debiti_lista_1_debito"
   E click su "Conferma"
   E click su "Conferma"
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
@@ -73,9 +73,9 @@ Scenario: memorizzazione dati e passo successivo
     | @classe_1A:id |
   Quando click su "Compila la comunicazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_0_recupero"
-  E inserisci "Primo testo..." nel campo "debiti_lista_0_debito"
+  E inserisci "Primo testo" nel campo "debiti_lista_0_debito"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_1_recupero"
-  E inserisci "Secondo testo..." nel campo "debiti_lista_1_debito"
+  E inserisci "Secondo testo" nel campo "debiti_lista_1_debito"
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
@@ -93,17 +93,17 @@ Scenario: memorizzazione dati e passo successivo con dettagli
     | @classe_1A:id |
   Quando click su "Compila la comunicazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_0_recupero"
-  E inserisci "Primo testo..." nel campo "debiti_lista_0_debito"
+  E inserisci "Primo testo" nel campo "debiti_lista_0_debito"
   E selezioni opzione "Studio individuale" da lista "debiti_lista_1_recupero"
-  E inserisci "Secondo testo..." nel campo "debiti_lista_1_debito"
+  E inserisci "Secondo testo" nel campo "debiti_lista_1_debito"
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
   E click su "Modifica la comunicazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
   Allora vedi opzione "Studio individuale" in lista "debiti_lista_0_recupero"
-  E il campo "debiti_lista_0_debito" contiene "Primo testo..."
+  E il campo "debiti_lista_0_debito" contiene "Primo testo"
   E vedi opzione "Studio individuale" in lista "debiti_lista_1_recupero"
-  E il campo "debiti_lista_1_debito" contiene "Secondo testo..."
+  E il campo "debiti_lista_1_debito" contiene "Secondo testo"
 
 
 ################################################################################
