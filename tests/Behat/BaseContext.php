@@ -1261,12 +1261,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
         if (is_object($val)) {
           // espressioni regolari speciali
           if ($val->func == 'nos') {
-            $regex .= '(?!.*\b'.$val->str.'\b)';
+            $delimiter = ctype_alnum($val->str) ? '\b' : '';
+            $regex .= '(?!.*'.$delimiter.$val->str.$delimiter.')';
           } elseif ($val->func == 'noc') {
             $regex .= '(?!.*\d)';
           }
         } else {
-          $regex .= (!$first ? '.*' : '').'\b'.preg_quote($val, '/').'\b';
+          $delimiter = ctype_alnum($val) ? '\b' : '';
+          $regex .= (!$first ? '.*' : '').$delimiter.preg_quote($val, '/').$delimiter;
         }
         $first = false;
       }

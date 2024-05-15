@@ -28,6 +28,7 @@ return [
     ["INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SCUOLA', 'competenze_lingua3', 'Indica l\'eventuale terza lingua del curricolo per la certificazione delle competenze.<br>[testo]', '', 0);", "SELECT * FROM gs_configurazione WHERE parametro='competenze_lingua3';"],
     ["UPDATE gs_configurazione SET parametro='scarica_competenze',descrizione='Indica se la certificazione delle competenze, compilata nello scrutinio finale della classe seconda, deve essere scaricabile da alunni e genitori.<br>[formato: S=si, N=no]' WHERE parametro='scrutinio_genitori_competenze';", ""],
     ["INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SISTEMA', 'scarica_competenze', 'Indica se la certificazione delle competenze, compilata nello scrutinio finale della classe seconda, deve essere scaricabile da alunni e genitori.<br>[formato: S=si, N=no]', 'N', 0);", "SELECT * FROM gs_configurazione WHERE parametro='scarica_competenze';"],
+    ["ALTER TABLE gs_utente ADD provincia_nascita VARCHAR(2) DEFAULT NULL, ADD provincia VARCHAR(2) DEFAULT NULL;", "SELECT provincia FROM gs_utente;"],
   ],
   'envDelete' => [
   ]
