@@ -53,10 +53,10 @@ Scenario: visualizza lista cattedre corretta per i piani di lavoro
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
   Allora vedi la tabella non ordinata:
-    | classe e materia                                      | docenti                                                           | documento              |
-    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
-    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
-    | $c4:classe,classe.corso,classe.sede,materia.nomeBreve | $c4:docente.nome,docente.cognome                                  | Documento non inserito |
+    | classe e materia                                      | docenti                                                                        | documento              |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome                                               | Documento non inserito |
+    | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | ?$c2:docente.nome+ +$c2:docente.cognome?$c3:docente.nome+ +$c3:docente.cognome | Documento non inserito |
+    | $c4:classe,classe.corso,classe.sede,materia.nomeBreve | $c4:docente.nome,docente.cognome                                               | Documento non inserito |
 
 Scenario: visualizza lista cattedre corretta per i programmi
   Data ricerca istanze di tipo "Materia":
