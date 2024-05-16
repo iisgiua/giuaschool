@@ -1258,7 +1258,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $regex = '';
       $first = true;
       foreach ($value as $val) {
-        if (is_object($val)) {
+        if (is_object($val) && ($val instanceof stdClass)) {
           // espressioni regolari speciali
           if ($val->func == 'nos') {
             $delimiter = (ctype_alnum((''.$val->str)[0]) && ctype_alnum(substr($val->str, -1))) ? '\b' : '';
