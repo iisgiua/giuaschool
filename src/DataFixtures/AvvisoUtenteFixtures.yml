@@ -19,11 +19,11 @@ App\Entity\AvvisoUtente:
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_U_2:
     avviso: '@avviso_U'
-    utente: '@genitore1_*'
+    utente: '@genitore1_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_U_3:
     avviso: '@avviso_U'
-    utente: '@alunno_*'
+    utente: '@alunno_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_E_1:
     avviso: '@avviso_E'
@@ -31,11 +31,11 @@ App\Entity\AvvisoUtente:
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_E_2:
     avviso: '@avviso_E'
-    utente: '@genitore1_*'
+    utente: '@genitore1_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_E_3:
     avviso: '@avviso_E'
-    utente: '@alunno_*'
+    utente: '@alunno_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_A_1:
     avviso: '@avviso_A'
@@ -43,11 +43,11 @@ App\Entity\AvvisoUtente:
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_A_2:
     avviso: '@avviso_A'
-    utente: '@genitore1_*'
+    utente: '@genitore1_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_A_3:
     avviso: '@avviso_A'
-    utente: '@alunno_*'
+    utente: '@alunno_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_A_4:
     avviso: '@avviso_A'
@@ -67,19 +67,19 @@ App\Entity\AvvisoUtente:
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_V_1:
     avviso: '@avviso_V'
-    utente: '@alunno_*'
+    utente: '@alunno_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_V_2:
     avviso: '@avviso_V'
-    utente: '@genitore2_*'
+    utente: '@genitore2_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_P_1:
     avviso: '@avviso_P'
-    utente: '@alunno_*'
+    utente: '@alunno_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_P_2:
     avviso: '@avviso_P'
-    utente: '@genitore2_*'
+    utente: '@genitore2_1A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
   avviso_utente_C_1:
     avviso: '@avviso_C'

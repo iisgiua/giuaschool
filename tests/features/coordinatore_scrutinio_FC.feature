@@ -324,7 +324,7 @@ Scenario: controllo verbale
   E vedi da segnalibro il testo "@docente_itp_2:cognome+ +@docente_itp_2:nome?@materia_itp_1:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
   E vedi da segnalibro il testo "@docente_sostegno_1:cognome+ +@docente_sostegno_1:nome?@materia_SOSTEGNO:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
   E vedi da segnalibro il testo "@docente_sostegno_2:cognome+ +@docente_sostegno_2:nome?@materia_SOSTEGNO:nome?@materia_EDCIVICA:nome" in PDF analizzato in "2" righe
-  E vedi poi testo "#str(assenti) @docente_curricolare_1:cognome,nome #str(sostituito) #str(Bianchi) #str(Maria) @materia_curricolare_1:nome @materia_EDCIVICA:nome" in PDF analizzato in "3" righe
+  E vedi poi testo "#str(assenti) @docente_curricolare_1:cognome,nome #str(Bianchi) #str(Maria) @materia_curricolare_1:nome @materia_EDCIVICA:nome" in PDF analizzato in "3" righe
   E vedi poi testo "gli alunni che presentano un numero di assenze superiore al 25% dell’orario annuale" in PDF analizzato in una riga
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #dat(@alunno_1A_1:dataNascita) #str(1089) #str(272) #str(310)" in PDF analizzato in una riga
