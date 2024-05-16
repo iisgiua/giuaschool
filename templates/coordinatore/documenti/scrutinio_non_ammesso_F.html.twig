@@ -15,13 +15,13 @@
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione esito di non ammissione</strong></p>
   <br>
 {% if dati.tipo == 'A' %}
-  <p>Si comunica che il Consiglio di Classe, nella fase preliminare delle operazioni di scrutinio finale dell’Anno Scolastico
+  <p>Si comunica che il Consiglio di Classe, nella fase preliminare delle operazioni di scrutinio finale dell'Anno Scolastico
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }},
     avendo constatato che l'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
     ha superato il numero massimo di assenze previsto dalla normativa in vigore, ha deliberato,
-    ai sensi dell’ art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009,
-    <strong>l’esclusione dell'alunn{{ dati.sex }} dallo scrutinio e pertanto la sua NON AMMISSIONE
+    ai sensi dell' art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009,
+    <strong>l'esclusione dell'alunn{{ dati.sex }} dallo scrutinio e pertanto la sua NON AMMISSIONE
     {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva' }}</strong>.
   </p>
 {% else %}
