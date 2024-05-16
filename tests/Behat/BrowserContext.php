@@ -119,8 +119,8 @@ class BrowserContext extends BaseContext {
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
     $others = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
-      ->where('u.username!=:username AND u.codiceFiscale!=:codFiscale AND u INSTANCE OF '.get_class($user))
-      ->setParameters(['username' => $user->getUsername(), 'codFiscale' => $user->getCodiceFiscale()])
+      ->where('u.username!=:username AND u INSTANCE OF '.get_class($user))
+      ->setParameters(['username' => $user->getUsername()])
       ->getQuery()
       ->getResult();
     $other = null;

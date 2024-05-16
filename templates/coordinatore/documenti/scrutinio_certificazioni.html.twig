@@ -8,33 +8,31 @@
 </div>
 
 
-<div style="font-family:times;font-size:11pt">
+<div style="font-family:times;font-size:12pt">
   <p style="text-align:center;font-size:14pt">
     <strong>CERTIFICAZIONE DELLE COMPETENZE
       <br>IN ASSOLVIMENTO DELL’OBBLIGO DI ISTRUZIONE</strong>
   </p>
   <p>&nbsp;</p>
-
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
-      <td width="20%">Si certifica che</td>
-      <td width="80%" style="border-bottom-width:0.1px"><strong>{{ alu.cognome|upper }} {{ alu.nome|upper }},</strong></td>
+      <td width="15%">Si certifica che</td>
+      <td width="85%" style="border-bottom-width:0.1px"><strong>{{ alu.cognome|upper }} {{ alu.nome|upper }}</strong></td>
     </tr>
   </table>
-
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
-      <td width="11%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
-      <td width="9%" align="right">il</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }},</strong></td>
+      <td width="15%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
+      <td width="55%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
+      <td width="10%" align="right">il</td>
+      <td width="20%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
     </tr>
   </table>
-
-
-  <p style="text-align:center;font-size:14pt">
-    ha raggiunto, in assolvimento dell'obbligo di istruzione, i livelli di competenza di seguito illustrati.
+  <p>ha raggiunto, in assolvimento dell'obbligo di istruzione, i livelli di competenza di seguito
+    illustrati.
   </p>
+
+
 
 
 </div>

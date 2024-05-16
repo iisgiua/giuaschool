@@ -2380,7 +2380,7 @@ class PagelleUtil {
       $dati['classe'] = $classe;
       // alunni ammessi
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,a.provinciaNascita,e.dati')
         ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->where('a.id IN (:lista) AND e.scrutinio=:scrutinio AND e.esito=:esito')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -2408,7 +2408,7 @@ class PagelleUtil {
       $sospesi = (($periodo == 'G' || $periodo == 'R') ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('alunni'));
       // alunni ammessi
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,a.provinciaNascita,e.dati')
         ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=:scrutinio')
         ->where('a.id IN (:lista) AND e.esito=:esito')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
