@@ -17,18 +17,16 @@
 
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
-      <td width="9%">cognome</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.cognome|upper }}</strong></td>
-      <td width="11%" align="right">nome&nbsp;&nbsp;</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.nome|upper }}</strong></td>
+      <td width="20%">Si certifica che</td>
+      <td width="80%" style="border-bottom-width:0.1px"><strong>{{ alu.cognome|upper }} {{ alu.nome|upper }}</strong></td>
     </tr>
   </table>
 
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
-      <td width="9%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
-      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }}</strong></td>
-      <td width="11%" align="right">il</td>
+      <td width="11%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
+      <td width="9%" align="right">il</td>
       <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
     </tr>
   </table>

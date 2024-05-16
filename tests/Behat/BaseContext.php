@@ -1267,8 +1267,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
             $regex .= '(?!.*\d)';
           }
         } else {
-          $delimiter = (ctype_alnum((''.$val)[0]) && ctype_alnum(substr($val, -1))) ? '\b' : '';
-          $regex .= (!$first ? '.*' : '').$delimiter.preg_quote($val, '/').$delimiter;
+          $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
         }
         $first = false;
       }
