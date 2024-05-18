@@ -10,26 +10,22 @@
   <tr nobr="true">
     <td align="center" style="width:10mm"><strong>Pr.</strong></td>
     <td align="center" style="width:50mm"><strong>Alunno</strong></td>
-{% if dati.classe.anno >= 3 %}
+{% if dati.classe.anno == 5 %}
     <td align="center" style="width:20mm"><strong>Credito</strong></td>
-  {% if dati.classe.anno >= 4 %}
     <td align="center" style="width:20mm"><strong>Credito<br>Prec.</strong></td>
     <td align="center" style="width:20mm"><strong>Credito<br>Tot.</strong></td>
-  {% endif %}
 {% endif %}
-{% set esitoDim = 180 - (10 + 50 + (dati.classe.anno == 3 ? 20 : (dati.classe.anno >= 4 ? 60 : 0))) %}
+{% set esitoDim = 180 - (10 + 50 + (dati.classe.anno == 5 ? 60 : 0)) %}
     <td align="center" style="width:{{ esitoDim }}mm"><strong>Esito</strong></td>
   </tr>
 {% for id,alu in dati.alunni %}
   <tr nobr="true">
     <td align="center">{{ loop.index }}</td>
     <td><strong>{{ alu.cognome }} {{ alu.nome }}</strong></td>
-  {% if dati.classe.anno >= 3 %}
+  {% if dati.classe.anno == 5 %}
     <td align="center"><strong>{{ (id in dati.no_scrutinabili) or (id in dati.estero) or (dati.esiti[id].esito != 'A') ? '' : dati.esiti[id].credito }}</strong></td>
-    {% if dati.classe.anno >= 4 %}
     <td align="center"><strong>{{ (id in dati.no_scrutinabili) or (id in dati.estero) or (dati.esiti[id].esito != 'A') ? '' : dati.esiti[id].creditoPrecedente }}</strong></td>
     <td align="center"><strong>{{ (id in dati.no_scrutinabili) or (id in dati.estero) or (dati.esiti[id].esito != 'A') ? '' : (dati.esiti[id].credito + dati.esiti[id].creditoPrecedente) }}</strong></td>
-    {% endif %}
   {% endif %}
     <td>
   {% if id in dati.estero %}
@@ -39,7 +35,7 @@
   {% elseif dati.esiti[id].esito == 'A' %}
       <strong>AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</strong>
   {% elseif dati.esiti[id].esito == 'S' %}
-      <strong>GIUDIZIO SOSPESO</strong>
+      <strong>SOSPENSIONE DEL GIUDIZIO</strong>
   {% endif %}
     </td>
   </tr>

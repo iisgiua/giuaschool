@@ -578,10 +578,10 @@ Scenario: controllo tabellone esiti
   E vedi testo "SCRUTINIO FINALE" in PDF analizzato alla riga "3"
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_1A_6:cognome,nome #str(ALL'ESTERO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #str(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #str(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_1A_2:cognome,nome #str(NON)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_alternativa_1:cognome,nome #str(NON)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
@@ -595,12 +595,12 @@ Scenario: controllo tabellone esiti classe terza
   E vedi testo "SCRUTINIO FINALE" in PDF analizzato alla riga "3"
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_3A_1:cognome,nome #noc() #str(NON)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_2:cognome,nome @esito_F_3A_2:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_3:cognome,nome @esito_F_3A_3:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_4:cognome,nome @esito_F_3A_4:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_5:cognome,nome @esito_F_3A_5:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_6:cognome,nome @esito_F_3A_6:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3A_7:cognome,nome #noc() #str(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_2:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_3:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_4:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_5:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_6:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3A_7:cognome,nome #noc() #str(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
 Scenario: controllo tabellone esiti classe quarta
@@ -613,12 +613,12 @@ Scenario: controllo tabellone esiti classe quarta
   E vedi testo "SCRUTINIO FINALE" in PDF analizzato alla riga "3"
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_4A_1:cognome,nome #noc() #str(NON)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_2:cognome,nome @esito_F_4A_2:credito @alunno_4A_2:credito3 #sum(@esito_F_4A_2:credito,@alunno_4A_2:credito3) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_3:cognome,nome @esito_F_4A_3:credito @alunno_4A_3:credito3 #sum(@esito_F_4A_3:credito,@alunno_4A_3:credito3) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_4:cognome,nome @esito_F_4A_4:credito @alunno_4A_4:credito3 #sum(@esito_F_4A_4:credito,@alunno_4A_4:credito3) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_5:cognome,nome @esito_F_4A_5:credito @alunno_4A_5:credito3 #sum(@esito_F_4A_5:credito,@alunno_4A_5:credito3) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_6:cognome,nome @esito_F_4A_6:credito @alunno_4A_6:credito3 #sum(@esito_F_4A_6:credito,@alunno_4A_6:credito3) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_4A_7:cognome,nome #noc() #str(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_2:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_3:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_4:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_5:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_6:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_4A_7:cognome,nome #noc() #str(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
 Scenario: controllo tabellone esiti classe quinta
@@ -631,12 +631,12 @@ Scenario: controllo tabellone esiti classe quinta
   E vedi testo "SCRUTINIO FINALE" in PDF analizzato alla riga "3"
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_5A_1:cognome,nome #noc() #str(NON)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_2:cognome,nome @esito_F_5A_2:credito #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) #sum(@esito_F_5A_2:credito,@alunno_5A_2:credito3,@alunno_5A_2:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_3:cognome,nome @esito_F_5A_3:credito #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) #sum(@esito_F_5A_3:credito,@alunno_5A_3:credito3,@alunno_5A_3:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_4:cognome,nome @esito_F_5A_4:credito #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) #sum(@esito_F_5A_4:credito,@alunno_5A_4:credito3,@alunno_5A_4:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_5:cognome,nome @esito_F_5A_5:credito #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) #sum(@esito_F_5A_5:credito,@alunno_5A_5:credito3,@alunno_5A_5:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_6:cognome,nome @esito_F_5A_6:credito #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) #sum(@esito_F_5A_6:credito,@alunno_5A_6:credito3,@alunno_5A_6:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_5A_7:cognome,nome @esito_F_5A_7:credito #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) #sum(@esito_F_5A_7:credito,@alunno_5A_7:credito3,@alunno_5A_7:credito4) #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_2:cognome,nome @esito_F_5A_2:credito #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) #sum(@esito_F_5A_2:credito,@alunno_5A_2:credito3,@alunno_5A_2:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_3:cognome,nome @esito_F_5A_3:credito #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) #sum(@esito_F_5A_3:credito,@alunno_5A_3:credito3,@alunno_5A_3:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_4:cognome,nome @esito_F_5A_4:credito #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) #sum(@esito_F_5A_4:credito,@alunno_5A_4:credito3,@alunno_5A_4:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_5:cognome,nome @esito_F_5A_5:credito #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) #sum(@esito_F_5A_5:credito,@alunno_5A_5:credito3,@alunno_5A_5:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_6:cognome,nome @esito_F_5A_6:credito #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) #sum(@esito_F_5A_6:credito,@alunno_5A_6:credito3,@alunno_5A_6:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_5A_7:cognome,nome @esito_F_5A_7:credito #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) #sum(@esito_F_5A_7:credito,@alunno_5A_7:credito3,@alunno_5A_7:credito4) #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
 Scenario: controllo tabellone esiti classe articolata
@@ -648,8 +648,8 @@ Scenario: controllo tabellone esiti classe articolata
   Allora vedi testo "CLASSE 3ª C-AMB" in PDF analizzato alla riga "2"
   E vedi testo "SCRUTINIO FINALE" in PDF analizzato alla riga "3"
   E imposti segnalibro PDF
-  E vedi da segnalibro il testo "@alunno_3CAMB_1:cognome,nome #noc() #str(SOSPESO)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_3CAMB_2:cognome,nome @esito_F_3CAMB_2:credito #nos(NON) #nos(SOSPESO)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3CAMB_1:cognome,nome #noc() #str(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_3CAMB_2:cognome,nome #noc() #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_sostegno_4:cognome,nome #noc() #str(NON)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
@@ -866,3 +866,71 @@ Scenario: controllo pagella per classe articolata
   E vedi poi testo "@materia_EDCIVICA:nome #cas(@voto_F_3CAMB_6:unico,2,NC,@voto_F_3CAMB_6:unico) @voto_F_3CAMB_6:assenze" in PDF analizzato in una riga
   E vedi poi testo "@materia_CONDOTTA:nome #cas(@voto_F_3CAMB_7:unico,4,NC,@voto_F_3CAMB_7:unico)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_3CAMB_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
+
+Scenario: controllo certificazioni
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Certificazione competenze"
+  E analizzi PDF "archivio/scrutini/finale/2A/2A-scrutinio-finale-certificazioni.pdf"
+  Allora vedi testo "CERTIFICAZIONE DELLE COMPETENZE" in PDF analizzato in una riga
+  E vedi poi testo "#str(certifica) @alunno_2A_2:cognome,nome" in PDF analizzato in una riga
+  E vedi poi testo "@alunno_2A_2:comunenascita #dat(@alunno_2A_2:dataNascita)" in PDF analizzato in una riga
+  E vedi poi testo "/Padroneggiare la lingua di scolarizzazione.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Inglese.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Francese.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le tecniche e le procedure del calcolo aritmetico.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le reti e gli strumenti informatici.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Osservare comportamenti e atteggiamenti rispettosi.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Agire in modo autonomo e responsabile.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Elaborare e realizzare progetti.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Comunicare e rappresentare creativamente eventi.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/ha inoltre mostrato significative competenze.*relativamente a:\s+Altra competenza\.\.\.$/" in PDF analizzato in "3" righe
+  E vedi testo "#str(certifica) @alunno_2A_3:cognome,nome" in PDF analizzato in una riga
+  E vedi poi testo "@alunno_2A_3:comunenascita #dat(@alunno_2A_3:dataNascita)" in PDF analizzato in una riga
+  E vedi poi testo "/Padroneggiare la lingua di scolarizzazione.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Inglese.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Francese.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le tecniche e le procedure del calcolo aritmetico.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le reti e gli strumenti informatici.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Osservare comportamenti e atteggiamenti rispettosi.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Agire in modo autonomo e responsabile.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Elaborare e realizzare progetti.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/Comunicare e rappresentare creativamente eventi.*\sB$/" in PDF analizzato in una riga
+  E vedi poi testo "/ha inoltre mostrato significative competenze.*relativamente a:\s+Altra competenza\.\.\.$/" in PDF analizzato in "3" righe
+  E vedi testo "#str(certifica) @alunno_2A_4:cognome,nome" in PDF analizzato in una riga
+  E vedi poi testo "@alunno_2A_4:comunenascita #dat(@alunno_2A_4:dataNascita)" in PDF analizzato in una riga
+  E vedi poi testo "/Padroneggiare la lingua di scolarizzazione.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Inglese.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Francese.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le tecniche e le procedure del calcolo aritmetico.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le reti e gli strumenti informatici.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Osservare comportamenti e atteggiamenti rispettosi.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Agire in modo autonomo e responsabile.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Elaborare e realizzare progetti.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/Comunicare e rappresentare creativamente eventi.*\sC$/" in PDF analizzato in una riga
+  E vedi poi testo "/ha inoltre mostrato significative competenze.*relativamente a:\s+Altra competenza\.\.\.$/" in PDF analizzato in "3" righe
+  E vedi testo "#str(certifica) @alunno_2A_5:cognome,nome" in PDF analizzato in una riga
+  E vedi poi testo "@alunno_2A_5:comunenascita #dat(@alunno_2A_5:dataNascita)" in PDF analizzato in una riga
+  E vedi poi testo "/Padroneggiare la lingua di scolarizzazione.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Inglese.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Francese.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le tecniche e le procedure del calcolo aritmetico.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le reti e gli strumenti informatici.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Osservare comportamenti e atteggiamenti rispettosi.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Agire in modo autonomo e responsabile.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Elaborare e realizzare progetti.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/Comunicare e rappresentare creativamente eventi.*\sD$/" in PDF analizzato in una riga
+  E vedi poi testo "/ha inoltre mostrato significative competenze.*relativamente a:\s+Altra competenza\.\.\.$/" in PDF analizzato in "3" righe
+  E vedi testo "#str(certifica) @alunno_2A_6:cognome,nome" in PDF analizzato in una riga
+  E vedi poi testo "@alunno_2A_6:comunenascita #dat(@alunno_2A_6:dataNascita)" in PDF analizzato in una riga
+  E vedi poi testo "/Padroneggiare la lingua di scolarizzazione.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Inglese.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Lingua Francese.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le tecniche e le procedure del calcolo aritmetico.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Utilizzare le reti e gli strumenti informatici.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Osservare comportamenti e atteggiamenti rispettosi.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Agire in modo autonomo e responsabile.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Elaborare e realizzare progetti.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/Comunicare e rappresentare creativamente eventi.*\sA$/" in PDF analizzato in una riga
+  E vedi poi testo "/ha inoltre mostrato significative competenze.*relativamente a:\s+Altra competenza\.\.\.$/" in PDF analizzato in "3" righe

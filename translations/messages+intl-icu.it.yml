@@ -49,6 +49,10 @@ label.competenza_livello_A: Livello A - Avanzato
 label.competenza_livello_B: Livello B - Intermedio
 label.competenza_livello_C: Livello C - Base
 label.competenza_livello_D: Livello D - Iniziale
+label.competenza_descrizione_livello_A: Avanzato
+label.competenza_descrizione_livello_B: Intermedio
+label.competenza_descrizione_livello_C: Base
+label.competenza_descrizione_livello_D: Iniziale
 label.competenza_alfabetica: Competenza alfabetica funzionale
 label.competenza_linguistica: Competenza multilinguistica
 label.competenza_matematica: Competenza matematica e competenza in scienze, tecnologie e ingegneria

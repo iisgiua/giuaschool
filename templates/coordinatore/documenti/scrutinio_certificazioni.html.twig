@@ -6,13 +6,21 @@
   <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
   <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
 </div>
-
-
+<p>&nbsp;</p>
+<div style="text-align:center;font-family:times">
+  <img src="@{{ image64('logo-italia-bn.png') }}" width="40">
+  <br><em style="font-size:14pt"><strong>Ministero dell'istruzione e del merito</strong></em>
+  <br><span style="font-size:10pt">Istituzione scolastica</span>
+  <br><strong style="font-size:12pt">{{ app.session.get('/CONFIG/ISTITUTO/tipo') }} <em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em> - {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta')|upper }}</strong>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <div style="font-family:times;font-size:12pt">
   <p style="text-align:center;font-size:14pt">
     <strong>CERTIFICAZIONE DELLE COMPETENZE
-      <br>IN ASSOLVIMENTO DELL’OBBLIGO DI ISTRUZIONE</strong>
+      <br>IN ASSOLVIMENTO DELL'OBBLIGO DI ISTRUZIONE</strong>
   </p>
+  <p>&nbsp;</p>
   <p>&nbsp;</p>
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
@@ -23,129 +31,177 @@
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
       <td width="15%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
-      <td width="55%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
-      <td width="10%" align="right">il</td>
-      <td width="20%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
+      <td width="65%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
+      <td width="5%" align="right">il</td>
+      <td width="15%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
     </tr>
   </table>
-  <p>ha raggiunto, in assolvimento dell'obbligo di istruzione, i livelli di competenza di seguito
+  <p>
+    ha raggiunto, in assolvimento dell'obbligo di istruzione, i livelli di competenza di seguito
     illustrati.
   </p>
-
-
-
-
 </div>
-
-  {#
-
-  <p>&nbsp;</p>
-  <p>&nbsp;</p>
-  <p>&nbsp;</p>
-  <table border="0" cellpadding="0" cellspacing="5">
-    <tr>
-      <td width="25%">&nbsp;</td>
-      <td width="50%" style="font-family:helvetica;font-size:9pt;border-top-width:0.5px" align="center"><strong>Note</strong></td>
-      <td width="25%">&nbsp;</td>
-    </tr>
-  </table>
-  <p style="font-family:helvetica;font-size:9pt"><strong>1) Il presente certificato ha validità nazionale.</strong></p>
-  <p style="font-family:helvetica;font-size:9pt"><strong>2) I livelli relativi all’acquisizione delle competenze di ciascun asse sono i seguenti:</strong></p>
-  <ul style="font-family:helvetica;font-size:9pt">
-    <li><strong>LIVELLO BASE: lo studente svolge compiti semplici in situazioni note, mostrando di possedere conoscenze ed abilità essenziali e di saper applicare regole e procedure fondamentali. Nel caso in cui non sia stato raggiunto il livello base, è riportata l’espressione "Livello base non raggiunto", con l’indicazione della relativa motivazione.</strong></li>
-    <li><strong>LIVELLO INTERMEDIO: lo studente svolge compiti e risolve problemi complessi in situazioni note, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</strong></li>
-    <li><strong>LIVELLO AVANZATO: lo studente svolge compiti e problemi complessi in situazioni anche non note, mostrando padronanza nell’uso delle conoscenze e delle abilità. Es. proporre e sostenere le proprie opinioni e assumere autonomamente decisioni consapevoli.</strong></li>
-  </ul>
-
-
 <tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
 <tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
 <tcpdf method="AddPage" />
-<p style="text-align:center;font-family:helvetica;font-size:11pt"><strong>COMPETENZE DI BASE E RELATIVI LIVELLI RAGGIUNTI</strong></p>
 <table border="1" cellpadding="2" cellspacing="0" style="font-family:helvetica;font-size:9pt">
   <tr>
-    <td width="50%" style="font-size:10pt" align="center"><strong>ASSE DEI LINGUAGGI</strong></td>
-    <td width="50%" style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
+    <td width="17%" style="font-size:10pt" align="center"><strong>COMPETENZA<br>CHIAVE</strong></td>
+    <td width="70%" style="font-size:10pt" align="center"><strong>COMPETENZE IN ASSOLVIMENTO DELL'OBBLIGO DI ISTRUZIONE</strong></td>
+    <td width="13%" style="font-size:10pt" align="center"><strong>LIVELLO<sup>1</sup></strong></td>
   </tr>
   <tr>
-    <td><strong><em>Lingua Italiana:</em></strong>
-      <ul>
-        <li>Padroneggiare gli strumenti espressivi ed argomentativi indispensabili per gestire l'interazione comunicativa verbale in vari contesti</li>
-        <li>Leggere comprendere e interpretare testi scritti di vario tipo</li>
-        <li>Produrre testi di vario tipo in relazione ai differenti scopi comunicativi</li>
-      </ul>
+    <td><strong>{{ 'label.competenza_alfabetica'|trans }}</strong></td>
+    <td align="justify">Padroneggiare la lingua di scolarizzazione in forma sia orale sia scritta in tutti i suoi aspetti (comprensione, interpretazione, produzione) utilizzando materiali di vario genere all'interno delle diverse discipline, dei diversi contesti e scopi comunicativi.
+      Comunicare e relazionarsi con gli altri in modo efficace e opportuno.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_italiano'])|trans }}{{ alu.dati['certificazione_italiano'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_italiano_motivazione']) : '' }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_alfabetica'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_alfabetica'])|trans }}</strong></td>
   </tr>
   <tr>
-    <td><strong><em>Lingua straniera:</em></strong>
-      <ul>
-        <li>Utilizzare la lingua Inglese per i principali scopi comunicativi ed operativi</li>
-      </ul>
+    <td rowspan="{{ app.session.get('/CONFIG/SCUOLA/competenze_lingua2') is empty ? 2 : (app.session.get('/CONFIG/SCUOLA/competenze_lingua3') is empty ? 3 : 4) }}"><strong>{{ 'label.competenza_linguistica'|trans }}</strong></td>
+    <td  align="justify" colspan="2">Utilizzare le diverse lingue<sup><strong>*</strong></sup> in forma orale e scritta (comprensione orale e scritta, produzione scritta e produzione/interazione orale) in modo appropriato ed efficace per diversi scopi comunicativi in diversi contesti sociali e culturali in base ai propri bisogni o desideri.
+      Comunicare in maniera appropriata, efficace e rispettosa con interlocutori che hanno riferimenti culturali diversi dai propri.<br>
+      <sup><strong>(*)</strong></sup><em>Specificare il livello per ciascuna lingua del curricolo, tenendo a riferimento anche i livelli di competenza attesi previsti nelle Indicazioni nazionali e nelle Linee Guida vigenti.</em>
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_lingua'])|trans }}{{ alu.dati['certificazione_lingua'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_lingua_motivazione']) : '' }}</strong></td>
   </tr>
   <tr>
-    <td><strong><em>Altri linguaggi:</em></strong>
-      <ul>
-        <li>Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio artistico e letterario</li>
-        <li>Utilizzare e produrre testi multimediali</li>
-      </ul>
+    <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua1') }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica1'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica1'])|trans }}</strong></td>
+  </tr>
+  {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua2') is not empty %}
+  <tr>
+    <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua2') }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica2'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica2'])|trans }}</strong></td>
+  </tr>
+  {% endif %}
+  {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua3') is not empty %}
+  <tr>
+    <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua3') }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica3'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica3'])|trans }}</strong></td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td><strong>{{ 'label.competenza_matematica'|trans }}</strong></td>
+    <td align="justify">Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole anche sotto forma grafica.
+      Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni.
+      Individuare le strategie appropriate per la soluzione di problemi.
+      Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con l'ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le potenzialità offerte da applicazioni specifiche di tipo informatico.
+      Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e riconoscere nelle sue varie forme i concetti di sistema e di complessità, utilizzando le metodologie proprie dell'indagine scientifica.
+      Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall'esperienza, anche in relazione agli impatti ambientali e sociali di tali trasformazioni.
+      Individuare potenzialità e limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate anche a tutela della sostenibilità ambientale, sociale ed economica, con attenzione alle questioni etiche e della sicurezza, in particolare per quanto concerne il processo scientifico e tecnologico in relazione all'individuo, alla famiglia, alla comunità e alle questioni di dimensione globale.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_linguaggio'])|trans }}{{ alu.dati['certificazione_linguaggio'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_linguaggio_motivazione']) : '' }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_matematica'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_matematica'])|trans }}</strong></td>
   </tr>
   <tr>
-    <td style="font-size:10pt" align="center"><strong>ASSE MATEMATICO</strong></td>
-    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <ul>
-        <li>Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole anche sotto forma grafica</li>
-        <li>Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni</li>
-        <li>Individuare le strategie appropriate per la soluzione dei problemi</li>
-        <li>Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con l’ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le potenzialità offerte da applicazioni specifiche di tipo informatico</li>
-      </ul>
+    <td><strong>{{ 'label.competenza_digitale'|trans }}</strong></td>
+    <td align="justify">Utilizzare le reti e gli strumenti informatici nelle attività di studio, ricerca e approfondimento disciplinari, analizzando, confrontando e valutando criticamente la credibilità e l'affidabilità delle fonti di dati, informazioni e contenuti digitali.
+      Osservare le norme comportamentali nell'ambito dell'utilizzo delle tecnologie digitali.
+      Proteggere la propria reputazione, gestire e tutelare i dati e le informazioni personali che si producono e si condividono attraverso diversi strumenti digitali, ambienti e servizi, rispettare i dati e le identità altrui.
+      Osservare le principali regole a tutela della riservatezza applicate dai servizi digitali relativamente all'uso dei dati personali.
+      Evitare, usando tecnologie digitali, rischi per la salute e minacce al proprio benessere fisico e psicologico.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_matematica'])|trans }}{{ alu.dati['certificazione_matematica'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_matematica_motivazione']) : '' }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_digitale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_digitale'])|trans }}</strong></td>
   </tr>
   <tr>
-    <td style="font-size:10pt" align="center"><strong>ASSE SCIENTIFICO-TECNOLOGICO</strong></td>
-    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <ul>
-        <li>Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e riconoscere nelle varie forme i concetti di sistema e di complessità</li>
-        <li>Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall’esperienza</li>
-        <li>Essere consapevoli delle potenzialità e dei limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate</li>
-      </ul>
+    <td><strong>{{ 'label.competenza_personale'|trans }}</strong></td>
+    <td align="justify">Osservare comportamenti e atteggiamenti rispettosi verso il proprio benessere personale, sociale e fisico e quello degli altri, della comunità e del pianeta.
+      Collaborare e partecipare, interagendo in gruppo, comprendendo i diversi punti di vista, valorizzando le proprie e le altrui risorse, gestendo la conflittualità, contribuendo all'apprendimento comune ed alla realizzazione delle attività collettive, nel rispetto dei diritti degli altri e delle diversità, superando i pregiudizi; osservare atteggiamenti e comportamenti improntati a integrità ed empatia.
+      Imparare ad imparare, organizzando il proprio apprendimento, individuando, scegliendo ed utilizzando varie fonti e varie modalità di informazione e di formazione (formale, non formale ed informale), anche in funzione dei tempi disponibili, delle proprie strategie e del proprio metodo di studio e di lavoro.
+      Sviluppare fiducia nei propri mezzi, valutare i propri punti critici, potenzialità e risorse; mantenere motivazione e interesse ad imparare sempre.
+      Individuare collegamenti e relazioni, identificando, elaborando e rappresentando argomentazioni coerenti, relazioni tra fenomeni, eventi e concetti, anche appartenenti a diversi ambiti disciplinari e lontani nello spazio e nel tempo, cogliendone la natura sistemica e complessa, ricercando analogie e differenze, coerenze ed incoerenze; stabilendo cause ed effetti in relazione a scenari/futuri possibili, riconoscendone la loro natura probabilistica.
+      Ricercare ed interpretare criticamente l'informazione proveniente dai diversi ambiti ed attraverso diversi strumenti comunicativi, valutandone l'attendibilità e l'utilità, distinguendo fatti e opinioni.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_scienze'])|trans }}{{ alu.dati['certificazione_scienze'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_scienze_motivazione']) : '' }}</strong></td>
-  </tr>
-  <tr>
-    <td style="font-size:10pt" align="center"><strong>ASSE STORICO-SOCIALE</strong></td>
-    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <ul>
-        <li>Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali</li>
-        <li>Collocare l’esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell’ambiente</li>
-        <li>Riconoscere le caratteristiche essenziali del sistema socio economico per orientarsi nel tessuto produttivo del proprio territorio</li>
-      </ul>
-    </td>
-    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_storia'])|trans }}{{ alu.dati['certificazione_storia'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_storia_motivazione']) : '' }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_personale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_personale'])|trans }}</strong></td>
   </tr>
 </table>
-<p style="font-family:helvetica;font-size:9pt">Le competenze di base relative agli assi culturali sopra richiamati sono state acquisite dallo studente con riferimento alle competenze chiave di cittadinanza di cui all’allegato 2 del regolamento citato in premessa (1. imparare ad imparare; 2. progettare; 3. comunicare; 4. collaborare e partecipare; 5. agire in modo autonomo e responsabile; 6. risolvere problemi; 7. individuare collegamenti e relazioni; 8. acquisire e interpretare l’informazione).</p>
+<tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
+<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
+<tcpdf method="AddPage" />
+<table border="1" cellpadding="2" cellspacing="0" style="font-family:helvetica;font-size:9pt">
+  <tr>
+    <td width="17%" style="font-size:10pt" align="center"><strong>COMPETENZA<br>CHIAVE</strong></td>
+    <td width="70%" style="font-size:10pt" align="center"><strong>COMPETENZE IN ASSOLVIMENTO DELL'OBBLIGO DI ISTRUZIONE</strong></td>
+    <td width="13%" style="font-size:10pt" align="center"><strong>LIVELLO<sup>1</sup></strong></td>
+  </tr>
+  <tr>
+    <td><strong>{{ 'label.competenza_cittadinanza'|trans }}</strong></td>
+    <td align="justify">Agire in modo autonomo e responsabile inserendosi in modo attivo e consapevole nella vita sociale, facendo valere i propri diritti e bisogni e riconoscendo al contempo quelli altrui, le opportunità comuni, i limiti, le regole, le responsabilità.
+      Collocare l'esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell'ambiente e delle future generazioni.
+      Osservare comportamenti e atteggiamenti rispettosi dell'ambiente, dei beni comuni, della sostenibilità ambientale, economica, sociale, coerentemente con l'Agenda 2030 per lo sviluppo sostenibile.
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_cittadinanza'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_cittadinanza'])|trans }}</strong></td>
+  </tr>
+  <tr>
+    <td><strong>{{ 'label.competenza_imprenditoriale'|trans }}</strong></td>
+    <td align="justify">Elaborare e realizzare progetti riguardanti le proprie attività di studio e di lavoro, utilizzando le proprie conoscenze per stabilire obiettivi significativi e realistici e le relative priorità, valutando i vincoli e le possibilità esistenti, definendo strategie di azione e verificando i risultati raggiunti.
+      Individuare, affrontare e risolvere problemi costruendo e verificando ipotesi, reperendo le fonti e le risorse adeguate, raccogliendo e valutando i dati, proponendo soluzioni e utilizzando, secondo il tipo di problema, contenuti e metodi delle diverse discipline; pianificare e progettare; scegliere tra opzioni diverse, sempre agendo con integrità, nel rispetto del bene comune e trasformando le idee e le opportunità in valore per gli altri.
+      Collaborare con altri, valorizzando le loro risorse, le idee, i contributi al lavoro.
+      Riconoscere le caratteristiche essenziali del sistema socioeconomico per orientarsi nel tessuto produttivo del territorio.
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_imprenditoriale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_imprenditoriale'])|trans }}</strong></td>
+  </tr>
+  <tr>
+    <td><strong>{{ 'label.competenza_culturale'|trans }}</strong></td>
+    <td align="justify">Comunicare e rappresentare creativamente eventi, fenomeni, principi, concetti, norme, procedure, atteggiamenti, stati d'animo, emozioni, ecc. utilizzando linguaggi diversi (verbale, matematico, scientifico, simbolico, corporeo, artistico, ecc.) e diverse conoscenze disciplinari, mediante supporti cartacei, informatici, multimediali, ecc.
+      Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio culturale, artistico, letterario, paesaggistico.
+      Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e culture, in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali.
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_culturale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_culturale'])|trans }}</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3" align="justify">{{ alu.sesso == 'M' ? 'Lo studente' : 'La studentessa' }}
+      ha inoltre mostrato significative competenze nello svolgimento di attività scolastiche e/o extrascolastiche, relativamente a:<br>
+      <div style="font-size:10pt"><strong>{{ alu.dati['competenza_altro'] }}</strong></div>
+    </td>
+  </tr>
+</table>
 <p>&nbsp;</p>
-<table style="font-family:helvetica;font-size:11pt" border="0" cellpadding="0" nobr="true">
+<p>&nbsp;</p>
+<table style="font-family:helvetica;font-size:12pt" border="0" cellpadding="0" nobr="true">
   <tr nobr="true">
     <td width="55%" align="left">{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ dati.scrutinio.data|date('d/m/Y') }}.</td>
     <td width="45%" align="center">Il Dirigente Scolastico
       <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
     </td>
   </tr>
-</table> #}
+</table>
+{% set righe = 7 - ((alu.dati['competenza_altro']|length) / 90)|format_number({fraction_digit: 0, rounding_mode: 'floor'}) %}
+{% if righe >= 1 %}
+  {% for i in 1..righe %}
+<p>&nbsp;</p>
+  {% endfor %}
+{% endif %}
+<table style="font-family:helvetica;font-size:9pt" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td width="25%" style="border-bottom-width:0.1px"><strong><sup>(1)</sup> Livello</strong></td>
+    <td width="75%" style="border-bottom-width:0.1px"><strong>Indicatori esplicativi</strong></td>
+  </tr>
+  <tr>
+    <td><strong><em>{{ 'label.competenza_livello_A'|trans }}</em></strong></td>
+    <td align="justify">
+      <div>L'alunno/a svolge compiti e risolve problemi complessi, mostrando padronanza nell'uso delle conoscenze e delle abilità; propone e sostiene le proprie opinioni e assume in modo responsabile decisioni consapevoli.</div>
+      <div style="font-size:5pt">&nbsp;</div>
+    </td>
+  </tr>
+  <tr>
+    <td><strong><em>{{ 'label.competenza_livello_B'|trans }}</em></strong></td>
+    <td align="justify">
+      <div>L'alunno/a svolge compiti e risolve problemi in situazioni nuove, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</div>
+      <div style="font-size:5pt">&nbsp;</div>
+    </td>
+</tr>
+  <tr>
+    <td><strong><em>{{ 'label.competenza_livello_C'|trans }}</em></strong></td>
+    <td align="justify">
+      <div>L'alunno/a svolge compiti semplici anche in situazioni nuove, mostrando di possedere conoscenze e abilità fondamentali e di saper applicare basilari regole e procedure apprese.</div>
+      <div style="font-size:5pt">&nbsp;</div>
+    </td>
+  </tr>
+  <tr>
+    <td><strong><em>{{ 'label.competenza_livello_D'|trans }}</em></strong></td>
+    <td align="justify">
+      <div>L'alunno/a, se opportunamente guidato/a, svolge compiti semplici in situazioni note.</div>
+    </td>
+  </tr>
+</table>
 {% endfor %}
