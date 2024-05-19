@@ -16,7 +16,9 @@ Schema dello scenario: dati non presenti se visualizzazione non abilitata
     | visibile |
     | <data>   |
   E login utente "<utente>"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   Allora la sezione "#gs-main .alert-warning" contiene "Dati non disponibili"
   Esempi:
     | utente                   | data                 |
@@ -27,7 +29,9 @@ Schema dello scenario: dati non presenti se visualizzazione non abilitata
 
 Scenario: pagina dati con visualizzazione abilitata
   Dato login utente "@alunno_1A_1:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
@@ -49,7 +53,9 @@ Scenario: pagina dati con visualizzazione abilitata
 
 Scenario: visualizzazione comunicazione voti
   Dato login utente "@alunno_1A_2:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   E click su "Comunicazione dei voti"
   E analizzi PDF "archivio/scrutini/primo/1A/1A-pagella-primo-quadrimestre-{{@alunno_1A_2:id}}.pdf"
   Allora vedi testo "@alunno_1A_2:cognome @alunno_1A_2:nome" in PDF analizzato alla riga "3"
@@ -67,7 +73,9 @@ Scenario: visualizzazione comunicazione voti
 
 Scenario: visualizzazione comunicazione debiti
 	Dato login utente "@alunno_1A_1:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   E click su "Comunicazione dei debiti"
   E analizzi PDF "archivio/scrutini/primo/1A/1A-debiti-primo-quadrimestre-{{@alunno_1A_1:id}}.pdf"
   Allora vedi testo "@alunno_1A_1:cognome @alunno_1A_1:nome" in PDF analizzato alla riga "3"
@@ -85,7 +93,9 @@ Schema dello scenario: dati non presenti se visualizzazione non abilitata su cla
     | visibile |
     | <data>   |
   E login utente "<utente>"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   Allora la sezione "#gs-main .alert-warning" contiene "Dati non disponibili"
   Esempi:
     | utente                      | data                 |
@@ -96,7 +106,9 @@ Schema dello scenario: dati non presenti se visualizzazione non abilitata su cla
 
 Scenario: pagina dati con visualizzazione abilitata per la classe articolata
 	Dato login utente "@alunno_3CAMB_1:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Primo Quadrimestre"
   E vedi la tabella "1":
@@ -119,7 +131,9 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
 
 Scenario: visualizzazione comunicazione voti per la classe articolata
 	Dato login utente "@alunno_3CAMB_2:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   E click su "Comunicazione dei voti"
   E analizzi PDF "archivio/scrutini/primo/3CAMB/3CAMB-pagella-primo-quadrimestre-{{@alunno_3CAMB_2:id}}.pdf"
   Allora vedi testo "@alunno_3CAMB_2:cognome @alunno_3CAMB_2:nome" in PDF analizzato alla riga "3"
@@ -137,7 +151,9 @@ Scenario: visualizzazione comunicazione voti per la classe articolata
 
 Scenario: visualizzazione comunicazione debiti per la classe articolata
 	Dato login utente "@alunno_3CAMB_1:username"
-  Quando vai alla pagina "genitori_pagelle"
+  Quando vai alla pagina "genitori_pagelle" con parametri:
+    | periodo |
+    | P       |
   E click su "Comunicazione dei debiti"
   E analizzi PDF "archivio/scrutini/primo/3CAMB/3CAMB-debiti-primo-quadrimestre-{{@alunno_3CAMB_1:id}}.pdf"
   Allora vedi testo "@alunno_3CAMB_1:cognome @alunno_3CAMB_1:nome" in PDF analizzato alla riga "3"

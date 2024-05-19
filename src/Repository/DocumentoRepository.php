@@ -53,10 +53,11 @@ class DocumentoRepository extends BaseRepository {
    * Recupera i programmi del docente indicato
    *
    * @param Docente $docente Docente di riferimento
+   * @param bool $programmiQuinte Vero se è consentito caricare programmi per le quinte
    *
    * @return array Dati formattati come array associativo
    */
-  public function programmi(Docente $docente) {
+  public function programmi(Docente $docente, bool $programmiQuinte) {
     // query
     $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
@@ -65,10 +66,15 @@ class DocumentoRepository extends BaseRepository {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND cl.anno!=:quinta AND c.docente=:docente')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND c.docente=:docente')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nome', 'ASC')
       ->setParameters(['documento' => 'P', 'attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E'],
-        'quinta' => 5, 'docente' => $docente])
+        'docente' => $docente]);
+    if (!$programmiQuinte) {
+      $cattedre
+        ->andWhere('cl.anno!=5');
+    }
+    $cattedre = $cattedre
       ->getQuery()
       ->getResult();
     // restituisce dati

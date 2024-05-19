@@ -48,8 +48,9 @@ class DocumentiController extends BaseController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function programmiAction(DocumentiUtil $doc): Response {
+    $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     // recupera dati
-    $dati = $doc->programmiDocente($this->getUser());
+    $dati = $doc->programmiDocente($this->getUser(), $programmiQuinte);
     // mostra la pagina di risposta
     return $this->render('documenti/programmi.html.twig', array(
       'pagina_titolo' => 'page.documenti_programmi',
@@ -78,6 +79,7 @@ class DocumentiController extends BaseController {
                                      LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
+    $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     $varSessione = '/APP/FILE/documenti_programmi_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
@@ -99,7 +101,7 @@ class DocumentiController extends BaseController {
       ->setListaDestinatari(new ListaDestinatari());
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+    if (!$doc->azioneDocumento('add', $this->getUser(), $documento, $programmiQuinte)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }

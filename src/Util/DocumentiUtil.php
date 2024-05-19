@@ -8,25 +8,19 @@
 
 namespace App\Util;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Docente;
+use App\Entity\Documento;
+use App\Entity\File;
+use App\Entity\ListaDestinatari;
+use App\Entity\ListaDestinatariClasse;
+use App\Entity\ListaDestinatariUtente;
+use App\Entity\Sede;
+use App\Entity\Staff;
+use App\Entity\Utente;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
-use App\Entity\Utente;
-use App\Entity\Docente;
-use App\Entity\Staff;
-use App\Entity\Documento;
-use App\Entity\ListaDestinatari;
-use App\Entity\ListaDestinatariUtente;
-use App\Entity\ListaDestinatariClasse;
-use App\Entity\File;
-use App\Entity\Sede;
-use App\Entity\Alunno;
-use App\Entity\Ata;
-use App\Entity\Cattedra;
-use App\Entity\Classe;
-use App\Entity\Genitore;
-use App\Entity\Materia;
 
 
 /**
@@ -124,12 +118,13 @@ class DocumentiUtil {
    * Recupera i programmi svolti del docente indicato
    *
    * @param Docente $docente Docente selezionato
+   * @param bool $programmiQuinte Vero se è consentito caricare programmi per le quinte
    *
    * @return array Dati formattati come array associativo
    */
-  public function programmiDocente(Docente $docente) {
+  public function programmiDocente(Docente $docente, bool $programmiQuinte) {
     $dati = [];
-    $cattedre = $this->em->getRepository('App\Entity\Documento')->programmi($docente);
+    $cattedre = $this->em->getRepository('App\Entity\Documento')->programmi($docente, $programmiQuinte);
     foreach ($cattedre as $cattedra) {
       $id = $cattedra['cattedra_id'];
       $dati[$id] = $cattedra;
@@ -142,12 +137,12 @@ class DocumentiUtil {
           ->setClasse($this->em->getRepository('App\Entity\Classe')->find($cattedra['classe_id']))
           ->setMateria($this->em->getRepository('App\Entity\Materia')->find($cattedra['materia_id']));
         // controlla azioni
-        if ($this->azioneDocumento('add', $docente, $documento)) {
+        if ($this->azioneDocumento('add', $docente, $documento, $programmiQuinte)) {
           $dati[$id]['add'] = 1;
         }
       } else {
         // documento presente, controlla azioni
-        if ($this->azioneDocumento('delete', $docente, $dati[$id]['documento'])) {
+        if ($this->azioneDocumento('delete', $docente, $dati[$id]['documento'], $programmiQuinte)) {
           $dati[$id]['delete'] = 1;
         }
       }
@@ -162,10 +157,12 @@ class DocumentiUtil {
    * @param string $azione Azione da controllare
    * @param Docente $docente Docente che esegue l'azione
    * @param Documento $documento Documento su cui eseguire l'azione
+   * @param bool $programmiQuinte Vero se è consentito caricare programmi per le quinte
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneDocumento($azione, Docente $docente, Documento $documento) {
+  public function azioneDocumento($azione, Docente $docente, Documento $documento,
+                                  bool $programmiQuinte = false) {
     switch ($azione) {
       case 'add':     // crea
         if (!$documento->getId()) {
@@ -184,8 +181,9 @@ class DocumentiUtil {
                   return true;
                 }
                 if ($documento->getMateria()->getTipo() != 'S' &&
-                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
-                  // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L' ||
+                    ($documento->getTipo() == 'P' && $programmiQuinte))) {
+                  // cattedra curricolare, escluso quinte per relazioni o programmi: ok
                   return true;
                 }
               }
@@ -235,8 +233,9 @@ class DocumentiUtil {
                   return true;
                 }
                 if ($documento->getMateria()->getTipo() != 'S' &&
-                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
-                  // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L' ||
+                    ($documento->getTipo() == 'P' && $programmiQuinte))) {
+                  // cattedra curricolare, escluso quinte per relazioni o programmi: ok
                   return true;
                 }
               }
