@@ -2846,12 +2846,21 @@ class ScrutinioUtil {
         $dati_scrutini['estero'] = empty($dati['estero']) ? [] : array_keys($dati['estero']);
         foreach ($dati_scrutini['estero'] as $alu) {
           // crea nuovo esito per gli alunni all'estero
-          $esito = (new Esito())
-            ->setScrutinio($scrutinio)
-            ->setAlunno($this->em->getReference('App\Entity\Alunno', $alu))
+          $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
+          $esito = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
+            'alunno' => $alunno]);
+          if (!$esito) {
+            $esito = (new Esito())
+              ->setScrutinio($scrutinio)
+              ->setAlunno($alunno);
+            $this->em->persist($esito);
+          }
+          $esito
+            ->setMedia(0)
+            ->setCredito(0)
+            ->setCreditoPrecedente(0)
             ->setDati($dati_esito)
             ->setEsito('E');
-          $this->em->persist($esito);
         }
         $dati_scrutini['scrutinabili'] = null;
         foreach ($dati['alunni'] as $alu=>$val) {
@@ -2870,12 +2879,21 @@ class ScrutinioUtil {
             $dati_scrutini['scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
           } else {
               // crea nuovo esito per gli alunni non ammessi per le assenze
-              $esito = (new Esito())
-                ->setScrutinio($scrutinio)
-                ->setAlunno($this->em->getReference('App\Entity\Alunno', $alu))
+              $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
+              $esito = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
+                'alunno' => $alunno]);
+              if (!$esito) {
+                $esito = (new Esito())
+                  ->setScrutinio($scrutinio)
+                  ->setAlunno($alunno);
+                $this->em->persist($esito);
+              }
+              $esito
+                ->setMedia(0)
+                ->setCredito(0)
+                ->setCreditoPrecedente(0)
                 ->setDati($dati_esito)
                 ->setEsito('L');
-              $this->em->persist($esito);
           }
         }
         // aggiorna dati
