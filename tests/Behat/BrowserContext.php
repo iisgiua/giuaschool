@@ -983,7 +983,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaSenzaIntestazioni($indice=1, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $datiValori = $dati->getHash();
     $this->assertEquals(count($datiValori), count($valori), 'Table row count is different');
@@ -1055,7 +1055,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaNonOrdinataSenzaIntestazioni($indice=1, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
     $righeTrovate = [];
@@ -1268,20 +1268,25 @@ class BrowserContext extends BaseContext {
    * NB: viene gestito COLSPAN e ROWSPAN, ma non la presenza di entrambi su stessa cella
    *
    * @param NodeElement $table Tabella da cui estrarre i dati
+   * @param bool $intestazioni Vero per verificare la presenza delle intestazioni
    *
    * @return array Lista con intestazione e dati della tabella
    */
-  protected function parseTable($table): array {
+  protected function parseTable($table, $intestazioni=true): array {
     // intestazione (considera solo prima riga)
     $header = $this->parseTableRow($table->findAll('xpath', '/thead/tr[1]/th'));
-    $this->assertNotEmpty($header);
+    if ($intestazioni) {
+      $this->assertNotEmpty($header);
+    }
     // contenuto
     $bodyRows = $table->findAll('xpath', '/tbody/tr');
     $body = [];
     $rowspan = [];
     foreach ($bodyRows as $bodyRow) {
       $row = $this->parseTableRow($bodyRow->findAll('xpath', '/td'), $rowspan);
-      $this->assertTrue(count($header) == count($row));
+      if ($intestazioni) {
+        $this->assertTrue(count($header) == count($row));
+      }
       $body[] = $row;
     }
     return array($header, $body);

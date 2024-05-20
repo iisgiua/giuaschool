@@ -2839,7 +2839,20 @@ class ScrutinioUtil {
         $dati_scrutini['monteore'] = $dati['monteore'];
         $dati_scrutini['maxassenze'] = $dati['maxassenze'];
         // dati alunni
+        $dati_esito = array(
+          'unanimita' => true,
+          'contrari' => null,
+          'giudizio' => null);
         $dati_scrutini['estero'] = empty($dati['estero']) ? [] : array_keys($dati['estero']);
+        foreach ($dati_scrutini['estero'] as $alu) {
+          // crea nuovo esito per gli alunni all'estero
+          $esito = (new Esito())
+            ->setScrutinio($scrutinio)
+            ->setAlunno($this->em->getReference('App\Entity\Alunno', $alu))
+            ->setDati($dati_esito)
+            ->setEsito('E');
+          $this->em->persist($esito);
+        }
         $dati_scrutini['scrutinabili'] = null;
         foreach ($dati['alunni'] as $alu=>$val) {
           $dati_scrutini['scrutinabili'][$alu]['ore'] = $val['ore'];
@@ -2855,6 +2868,14 @@ class ScrutinioUtil {
             $dati_scrutini['no_scrutinabili'][$alu]['deroga'] = $val->getMotivazione();
             $dati_scrutini['scrutinabili'][$alu]['ore'] = $dati['no_scrutinabili']['alunni'][$alu]['ore'];
             $dati_scrutini['scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
+          } else {
+              // crea nuovo esito per gli alunni non ammessi per le assenze
+              $esito = (new Esito())
+                ->setScrutinio($scrutinio)
+                ->setAlunno($this->em->getReference('App\Entity\Alunno', $alu))
+                ->setDati($dati_esito)
+                ->setEsito('L');
+              $this->em->persist($esito);
           }
         }
         // aggiorna dati

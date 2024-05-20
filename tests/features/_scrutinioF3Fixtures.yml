@@ -248,3 +248,27 @@ App\Entity\Scrutinio:
       assenze_extra: '<([])>'
     visibile:
     sincronizzazione:
+
+App\Entity\Esito:
+  esito_F_1A_5:
+    esito: 'E'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_1A_F'
+    alunno: '@alunno_1A_6'
+  esito_F_1A_6:
+    esito: 'L'
+    media: 0
+    credito: 0
+    creditoPrecedente: 0
+    dati:
+      unanimita: true
+      contrari:
+      giudizio:
+    scrutinio: '@scrutinio_1A_F'
+    alunno: '@alunno_1A_2'

@@ -848,6 +848,8 @@ class GenitoriUtil {
     // esito scrutinio
     if ($periodo == 'F') {
       $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
+      $noscrutinati = ($scrutinio->getDato('no_scrutinabili') == null ? [] : array_keys($scrutinio->getDato('no_scrutinabili')));
+      $estero = ($scrutinio->getDato('estero') == null ? [] : $scrutinio->getDato('estero'));
       if (in_array($alunno->getId(), $scrutinati)) {
         // scrutinato
         if ($dati['esito']->getEsito() != 'N') {
@@ -858,20 +860,12 @@ class GenitoriUtil {
             $dati['carenze'] = 1;
           }
         }
-        // legge proposte
-        $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->createQueryBuilder('pv')
-          ->where('pv.classe=:classe AND pv.alunno=:alunno AND pv.periodo=:periodo AND pv.unico IS NOT NULL')
-          ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
-          ->getQuery()
-          ->getResult();
-        foreach ($proposte as $p) {
-          // inserisce proposte
-          $dati['proposte'][$p->getMateria()->getId()] = array(
-            'unico' => $p->getUnico());
-        }
-      } else {
+      } else if (in_array($alunno->getId(), $noscrutinati))  {
         // non scrutinato
         $dati['noscrutinato'] = 1;
+      } else if (in_array($alunno->getId(), $estero))  {
+        // non scrutinato
+        $dati['estero'] = 1;
       }
     } elseif ($periodo == 'G') {
       // scrutinato
@@ -958,7 +952,7 @@ class GenitoriUtil {
     // controlla presenza alunno in scrutinio
     foreach ($scrutini as $sc) {
       $alunni = ($sc->getPeriodo() == 'G' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
-      if (in_array($alunno->getId(), $alunni)) {
+      if (in_array($alunno->getId(), $alunni) || $alunno->getFrequenzaEstero()) {
         $periodi[] = array($sc->getPeriodo(), $sc);
       }
     }
