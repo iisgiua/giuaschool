@@ -88,7 +88,7 @@ class PdfManager {
    *
    * @param string $filename Nome del file da inviare al browser
    * @param string $mode Modo di invio al browser: I=inline, D=download
-   * 
+   *
    * @return Response Pagina di risposta
    */
   public function send(string $filename, string $mode = 'D'): Response {
@@ -197,6 +197,23 @@ class PdfManager {
     }
     // errore: restituisce falso
     return false;
+  }
+
+  /**
+   * Restituisce il nome di file normalizzato in maiuscolo
+   *
+   * @param string $nome Nome di file da normalizzare
+   *
+   * @return string Nome di file normalizzato
+   */
+  public function normalizzaNome($nome) {
+    $testo = mb_strtoupper($nome, 'UTF-8');
+    $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
+    $testo = preg_replace('/\W+/','-', $testo);
+    if (substr($testo, -1) == '-') {
+      $testo = substr($testo, 0, -1);
+    }
+    return $testo;
   }
 
 }

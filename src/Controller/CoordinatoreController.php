@@ -479,9 +479,8 @@ class CoordinatoreController extends BaseController {
         ));
       $pdf->createFromHtml($html);
       // invia il documento
-      $nomefile = 'situazione-alunno-'.
-        strtoupper(str_replace(' ', '-', $alunno->getCognome().'-'.$alunno->getNome())).'.pdf';
-      return $pdf->send($nomefile);
+      $nomefile = 'situazione-alunno-'.$alunno->getCognome().'-'.$alunno->getNome();
+      return $pdf->send($pdf->normalizzaNome($nomefile));
     }
     // visualizza pagina
     return $this->render('coordinatore/situazione_alunno.html.twig', array(
