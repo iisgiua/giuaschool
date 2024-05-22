@@ -43,7 +43,7 @@ class PagelleController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(PagelleUtil $pag, int $classe, string $tipo, 
+  public function documentoClasseAction(PagelleUtil $pag, int $classe, string $tipo,
                                         string $periodo): Response {
     // inizializza
     $nomefile = null;
@@ -227,7 +227,7 @@ class PagelleController extends BaseController {
           // carenze
           $nomefile = $pag->carenze($classe, $alunno, $periodo);
           break;
-        case 'G':
+        case 'E':
           // certificazione
           $nomefile = $pag->certificazione($classe, $alunno, $periodo);
           break;

@@ -290,10 +290,10 @@
         <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'C', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione per il recupero autonomo"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
           {% endif %}
-          {% if classe.anno == 2 and dati.esito.esito == 'A' and app.session.get('/CONFIG/SISTEMA/scrutinio_genitori_competenze') == 'S' %}
+          {% if classe.anno == 2 and dati.esito.esito == 'A' and app.session.get('/CONFIG/SISTEMA/scarica_competenze') == 'S' %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Certificazione delle competenze</strong></td>
-        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'G', 'periodo': periodo}) }}" role="button" title="Scarica la certificazione delle competenze"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': periodo}) }}" role="button" title="Scarica la certificazione delle competenze"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
           {% endif %}
           {% if is_granted('ROLE_ALUNNO') %}
@@ -371,10 +371,10 @@
         <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
         {% endif %}
-        {% if classe.anno == 2 and dati.esito.esito == 'A' and app.session.get('/CONFIG/SISTEMA/scrutinio_genitori_competenze') == 'S' %}
+        {% if classe.anno == 2 and dati.esito.esito == 'A' and app.session.get('/CONFIG/SISTEMA/scarica_competenze') == 'S' %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Certificazione delle competenze</strong></td>
-        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'G', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica la certificazione delle competenze"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica la certificazione delle competenze"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
         {% endif %}
       <tr class="gs-big">
