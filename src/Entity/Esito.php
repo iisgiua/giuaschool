@@ -55,7 +55,7 @@ class Esito {
   /**
    * @var string|null $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
+   * @ORM\Column(type="string", length=1, nullable=true)
    *
    * @Assert\Choice(choices={"A","N","S","R","L","E","X"}, strict=true, message="field.choice")
    */

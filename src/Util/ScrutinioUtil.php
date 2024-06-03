@@ -2839,37 +2839,26 @@ class ScrutinioUtil {
         $dati_scrutini['monteore'] = $dati['monteore'];
         $dati_scrutini['maxassenze'] = $dati['maxassenze'];
         // dati alunni
-        $dati_esito = array(
-          'unanimita' => true,
-          'contrari' => null,
-          'giudizio' => null);
         $dati_scrutini['estero'] = empty($dati['estero']) ? [] : array_keys($dati['estero']);
         foreach ($dati_scrutini['estero'] as $alu) {
-          // crea nuovo esito per gli alunni all'estero
+          // esito speciale per gli alunni all'estero
           $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
-          $esito = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
-            'alunno' => $alunno]);
-          if (!$esito) {
-            $esito = (new Esito())
-              ->setScrutinio($scrutinio)
-              ->setAlunno($alunno);
-            $this->em->persist($esito);
-          }
-          $esito
-            ->setMedia(0)
-            ->setCredito(0)
-            ->setCreditoPrecedente(0)
-            ->setDati($dati_esito)
-            ->setEsito('E');
+          $esito = $this->em->getRepository('App\Entity\Esito')->impostaSpeciale($scrutinio,
+            $alunno, 'E');
         }
         $dati_scrutini['scrutinabili'] = null;
         foreach ($dati['alunni'] as $alu=>$val) {
           $dati_scrutini['scrutinabili'][$alu]['ore'] = $val['ore'];
           $dati_scrutini['scrutinabili'][$alu]['percentuale'] = $val['percentuale'];
+          $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
+          // esito normale
+          $esito = $this->em->getRepository('App\Entity\Esito')->impostaSpeciale($scrutinio,
+            $alunno);
         }
         $dati_scrutini['no_scrutinabili'] = null;
         foreach ($form->get('lista')->getData() as $val) {
           $alu = $val->getAlunno();
+          $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
           $dati_scrutini['no_scrutinabili'][$alu]['ore'] = $dati['no_scrutinabili']['alunni'][$alu]['ore'];
           $dati_scrutini['no_scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
           if ($val->getScrutinabile() == 'D') {
@@ -2877,23 +2866,13 @@ class ScrutinioUtil {
             $dati_scrutini['no_scrutinabili'][$alu]['deroga'] = $val->getMotivazione();
             $dati_scrutini['scrutinabili'][$alu]['ore'] = $dati['no_scrutinabili']['alunni'][$alu]['ore'];
             $dati_scrutini['scrutinabili'][$alu]['percentuale'] = $dati['no_scrutinabili']['alunni'][$alu]['percentuale'];
+            // esito normale
+            $esito = $this->em->getRepository('App\Entity\Esito')->impostaSpeciale($scrutinio,
+              $alunno);
           } else {
-              // crea nuovo esito per gli alunni non ammessi per le assenze
-              $alunno = $this->em->getReference('App\Entity\Alunno', $alu);
-              $esito = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
-                'alunno' => $alunno]);
-              if (!$esito) {
-                $esito = (new Esito())
-                  ->setScrutinio($scrutinio)
-                  ->setAlunno($alunno);
-                $this->em->persist($esito);
-              }
-              $esito
-                ->setMedia(0)
-                ->setCredito(0)
-                ->setCreditoPrecedente(0)
-                ->setDati($dati_esito)
-                ->setEsito('L');
+              // esito speciale per gli alunni non ammessi per le assenze
+              $esito = $this->em->getRepository('App\Entity\Esito')->impostaSpeciale($scrutinio,
+                $alunno, 'L');
           }
         }
         // aggiorna dati

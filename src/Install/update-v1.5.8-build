@@ -7,6 +7,7 @@ return [
     'public/install/app.php',
   ],
   'sqlCommand' => [
+    ["ALTER TABLE gs_esito CHANGE esito esito VARCHAR(1) DEFAULT NULL;", ""],
   ],
   'envDelete' => [
   ]
