@@ -2186,7 +2186,7 @@ class ScrutinioUtil {
       $alunni = $scrutinio->getDato('alunni');
     } elseif ($periodo == 'F') {
       // legge lista alunni scrutinabili
-      return array_keys($scrutinio->getDato('scrutinabili'));
+      return array_keys($scrutinio->getDato('scrutinabili') ?? []);
     } elseif ($periodo == 'G' || $periodo == 'R') {
       // legge lista alunni sospesi
       $sospesi = ($scrutinio ? $scrutinio->getDati()['sospesi'] : []);
@@ -2482,7 +2482,7 @@ class ScrutinioUtil {
       'stato' => 'C']);
     $scrutinioS = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe,
       'stato' => 'C']);
-    if (!$scrutinioF || !$scrutinioP) {
+    if (!$scrutinioF) {
       // errore
       return null;
     }
@@ -2503,7 +2503,13 @@ class ScrutinioUtil {
     $dati['monteore'] = $classe->getOreSettimanali() * 33;
     $dati['maxassenze'] = (int) ($dati['monteore'] / 4);
     // calcola ore totali di tutti i periodi
-    $listaScrutini = $scrutinioS ? [$scrutinioP, $scrutinioS, $scrutinioF] : [$scrutinioP, $scrutinioF];
+    $listaScrutini = [$scrutinioF];
+    if ($scrutinioP) {
+      $listaScrutini[] = $scrutinioP;
+    }
+    if ($scrutinioS) {
+      $listaScrutini[] = $scrutinioS;
+    }
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.sesso,a.dataNascita,SUM(vs.assenze) AS ore')
       ->join('App\Entity\VotoScrutinio', 'vs', 'WITH', 'vs.alunno=a.id')
@@ -2517,7 +2523,7 @@ class ScrutinioUtil {
     // imposta ore assenze di alunni
     foreach ($alunni as $a) {
       // non scrutinato in primo periodo
-      if (!in_array($a['id'], $scrutinioP->getDati()['alunni'])) {
+      if ($scrutinioP && !in_array($a['id'], $scrutinioP->getDati()['alunni'])) {
         // controlla se scrutinato in altra classe
         $ore = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
           ->select('SUM(vs.assenze)')
@@ -2632,7 +2638,7 @@ class ScrutinioUtil {
         'entry_type' => ScrutinioAssenzaType::class,
         'entry_options' => array('label' => false),
          ));
-    if (count($dati['assenze_extra']) > 0) {
+    if (count($dati['assenze_extra'] ?? []) > 0) {
       $assenze = array_map(fn($v) => $v[0], $dati['assenze_extra']);
       $form
         ->add('assenze', CollectionType::class, ['label' => false,
