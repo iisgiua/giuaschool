@@ -26,7 +26,7 @@
         <div class="panel-title text-center"><strong>Accesso Alunni e Docenti</strong></div>
       </div>
       <div class="panel-body gs-pt-1 gs-pb-1">
-          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Entra con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
+          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Entra con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
           <div class="text-center gs-mt-5">
             <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Entra con GOOGLE</strong></a>
           </div>
