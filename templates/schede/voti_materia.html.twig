@@ -70,16 +70,23 @@
     </div>
   {% endif %}
   </div>
-{% else %}
+{% endfor %}
+{% if dati.lista is empty and dati.scrutini is empty %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">Non sono presenti valutazioni</strong>
   </div>
-{% endfor %}
+{% endif %}
 {% if dati.scrutini is defined %}
   {% for scr in dati.scrutini %}
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big"><em>{{ scr.nome }}</em></strong><br>
-    <strong class="gs-big"><em>{{ scr.voto ? scr.voto : 'Non sono presenti valutazioni' }}</em></strong><br>
+    <strong class="gs-big"><em>{{ scr.voto ? scr.voto : 'Non sono presenti valutazioni' }}</em></strong>
+    {% if scr.info is not empty %}
+    <div class="text-left">
+      <strong class="">Recupero: <em>{{ ('label.recupero_'~scr.info.recupero)|trans }}</em></strong><br>
+      <strong class="">Debito:<br>&nbsp;&nbsp;<em>{{ scr.info.debito }}</em></strong><br>
+    </div>
+    {% endif %}
   </div>
   {% endfor %}
 {% endif %}

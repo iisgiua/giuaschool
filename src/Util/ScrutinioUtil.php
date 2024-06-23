@@ -223,9 +223,48 @@ class ScrutinioUtil {
    * @return array Dati formattati come un array associativo
    */
   public function elencoProposte(Docente $docente, Classe $classe, Materia $materia, $tipo, $periodo) {
-    $elenco = array();
-    // alunni della classe
-    $listaAlunni = $this->reg->alunniInData(new \DateTime(), $classe);
+    $elenco = [];
+    $elenco['alunni'] = [];
+    $elenco['proposte'] = [];
+    $listaAlunni = [];
+    if ($periodo == 'G') {
+      // alunni con sospensione nella materia
+      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')
+        ->findOneBy(['periodo' => 'F', 'classe' => $classe]);
+      $votiSospesi = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+        ->join('vs.scrutinio', 's')
+        ->join('vs.alunno', 'a')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
+        ->where("vs.alunno IN (:alunni) AND vs.scrutinio=:scrutinio AND vs.unico<6 AND vs.materia=:materia AND e.esito='S'")
+        ->setParameters(['alunni' => array_keys($scrutinio->getDato('scrutinabili')),
+          'scrutinio' => $scrutinio, 'materia' => $materia])
+        ->getQuery()
+        ->getResult();
+      foreach ($votiSospesi as $voto) {
+        $listaAlunni[] = $voto->getAlunno()->getId();
+        $elenco['sospesi'][$voto->getAlunno()->getId()] = $voto;
+      }
+    } elseif ($periodo == 'R') {
+      // alunni con scrutinio rinviato
+      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')
+        ->findOneBy(['periodo' => 'G', 'classe' => $classe]);
+      $votiSospesi = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+        ->join('vs.scrutinio', 's')
+        ->join('vs.alunno', 'a')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
+        ->where("vs.alunno IN (:alunni) AND vs.scrutinio=:scrutinio AND vs.unico<6 AND vs.materia=:materia AND e.esito='X'")
+        ->setParameters(['alunni' => array_keys($scrutinio->getDato('alunni')),
+          'scrutinio' => $scrutinio, 'materia' => $materia])
+        ->getQuery()
+        ->getResult();
+      foreach ($votiSospesi as $voto) {
+        $listaAlunni[] = $voto->getAlunno()->getId();
+        $elenco['sospesi'][$voto->getAlunno()->getId()] = $voto;
+      }
+    } else {
+      // alunni della classe
+      $listaAlunni = $this->reg->alunniInData(new \DateTime(), $classe);
+    }
     // legge i dati degli degli alunni
     $tipoReligione = $tipo ? ($tipo == 'N' ? "'S'" : "'A'") : "'S', 'A'";
     $religione = $materia->getTipo() == 'R' ? (' AND a.religione IN ('.$tipoReligione.')') : '';

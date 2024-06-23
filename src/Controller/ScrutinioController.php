@@ -63,26 +63,14 @@ class ScrutinioController extends BaseController {
                                  string $periodo): Response {
     // inizializza variabili
     $info = [];
-    $lista_periodi = null;
+    $listaPeriodi = null;
     $form = null;
-    $form_title = null;
+    $formTitle = null;
     $elenco = array();
     $elenco['alunni'] = array();
-    $title['P']['N'] = 'message.proposte';
-    $title['P']['R'] = 'message.proposte_religione';
-    $title['P']['E'] = 'message.proposte';
-    $title['S']['N'] = 'message.proposte';
-    $title['S']['R'] = 'message.proposte_religione';
-    $title['S']['E'] = 'message.proposte';
-    $title['F']['N'] = 'message.proposte';
-    $title['F']['R'] = 'message.proposte_religione';
-    $title['F']['E'] = 'message.proposte';
-    $title['G']['N'] = 'message.proposte_non_previste';
-    $title['G']['R'] = 'message.proposte_non_previste';
-    $title['G']['E'] = 'message.proposte_non_previste';
-    $title['X']['N'] = 'message.proposte_non_previste';
-    $title['X']['R'] = 'message.proposte_non_previste';
-    $title['X']['E'] = 'message.proposte_non_previste';
+    $title['N'] = in_array($periodo, ['P', 'S', 'F']) ? 'message.proposte' : 'message.proposte_sospesi';
+    $title['E'] = $title['N'];
+    $title['R'] = 'message.proposte_religione';
     $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
@@ -145,22 +133,21 @@ class ScrutinioController extends BaseController {
     }
     if ($cattedra) {
       // legge lista periodi
-      $lista_periodi = $scr->periodiProposte($classe);
-      // rimuove eventuali scrutini di giudizio sospeso e supplettivi
-      unset($lista_periodi['G']);
-      unset($lista_periodi['R']);
-      unset($lista_periodi['X']);
+      $listaPeriodi = $scr->periodiProposte($classe);
       if ($periodo == '0') {
         // cerca periodo attivo
-        $periodo = array_search('N', $lista_periodi);
-      } elseif (!array_key_exists($periodo, $lista_periodi)) {
+        $periodo = array_search('N', $listaPeriodi);
+      } elseif (!array_key_exists($periodo, $listaPeriodi)) {
         // periodo indicato non valido
         $periodo = null;
       }
       if ($periodo) {
         // elenco proposte/alunni
         $elenco = $scr->elencoProposte($this->getUser(), $classe, $cattedra->getMateria(), $cattedra->getTipo(), $periodo);
-        if ($lista_periodi[$periodo] == 'N') {
+        if (empty($elenco['alunni'])) {
+          // non è previsto inserire le proposte
+          $formTitle = 'message.proposte_non_previste';
+        } elseif ($listaPeriodi[$periodo] == 'N') {
           // è possibile inserire le proposte
           $proposte_prec = unserialize(serialize($elenco['proposte'])); // clona oggetti
           // opzioni di proposte
@@ -168,15 +155,15 @@ class ScrutinioController extends BaseController {
             'data' => $elenco['proposte'],
             'entry_type' => PropostaVotoType::class,
             'entry_options' => array('label' => false)];
-          $form_title = $title[$periodo][$cattedra->getMateria()->getTipo()];
-          if ($cattedra->getMateria()->getTipo() == 'R') {
-            // religione
+          $formTitle = $title[$cattedra->getMateria()->getTipo()];
+          if ($cattedra->getMateria()->getTipo() == 'R' || in_array($periodo, ['G', 'R', 'X'])) {
+            // nessun recupero
             $opzioni['attr'] = ['no_recupero' => true];
           }
           if ($periodo == 'F' && $classe->getAnno() == 5) {
             // scrutinio finale di una quinta: no recupero
             $opzioni['attr'] = ['no_recupero' => true];
-            $form_title = 'message.proposte_quinte';
+            $formTitle = 'message.proposte_quinte';
           }
           // form di inserimento
           $form = $this->container->get('form.factory')->createNamedBuilder('proposte', FormType::class)
@@ -217,9 +204,12 @@ class ScrutinioController extends BaseController {
                 // corregge voto max
                 $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['max']);
               }
+              if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
+                $errori[1] = 'exception.proposta_sospeso_inferiore_a_finale';
+              }
               if ($prop->getUnico() < $info['valutazioni']['suff'] && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
-                  $errori[2] = 'exception.no_recupero';
+                $errori[2] = 'exception.no_recupero';
               } elseif ($prop->getUnico() < $info['valutazioni']['suff'] && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
                 // manca argomenti debito
                 if ($prop->getUnico() > $info['valutazioni']['min']) {
@@ -238,7 +228,8 @@ class ScrutinioController extends BaseController {
                 // aggiorna docente proposta
                 $prop->setDocente($this->getUser());
               }
-              if ($prop->getUnico() >= $info['valutazioni']['suff'] || isset($opzioni['attr']['no_recupero'])) {
+              if (!in_array($periodo, ['G', 'R', 'X']) &&
+                  ($prop->getUnico() >= $info['valutazioni']['suff'] || isset($opzioni['attr']['no_recupero']))) {
                 // svuota campi inutili
                 $prop->setDebito('');
               }
@@ -264,8 +255,8 @@ class ScrutinioController extends BaseController {
             }
           }
         } else {
-          // non è possibile inserire le proposte
-          $form_title = 'message.proposte_no';
+          // non è possibile modificare le proposte inserite
+          $formTitle = 'message.proposte_no';
         }
       }
     }
@@ -278,11 +269,11 @@ class ScrutinioController extends BaseController {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'periodo' => $periodo,
-      'lista_periodi' => $lista_periodi,
+      'lista_periodi' => $listaPeriodi,
       'info' => $info,
       'proposte' => $elenco,
       'form' => ($form ? $form->createView() : null),
-      'form_title' => $form_title,
+      'form_title' => $formTitle,
     ));
   }
 
@@ -855,7 +846,7 @@ class ScrutinioController extends BaseController {
                                         string $periodo): Response {
     // inizializza variabili
     $dati = array();
-    $lista_periodi = null;
+    $listaPeriodi = null;
     $info = array();
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
@@ -892,24 +883,24 @@ class ScrutinioController extends BaseController {
     }
     if ($cattedra) {
       // legge lista periodi
-      $lista_periodi = $scr->periodiScrutini($classe);
+      $listaPeriodi = $scr->periodiScrutini($classe);
       // aggiunde periodo per A.S. precedente
-      $lista_periodi['A'] = 'C';
+      $listaPeriodi['A'] = 'C';
       // elimina rinviati A.S. precedente (incluso in precedente)
-      unset($lista_periodi['X']);
+      unset($listaPeriodi['X']);
       if ($periodo == '0') {
         // cerca scrutinio chiuso
         $scrutinio = $scr->scrutinioChiuso($classe);
-        $periodo = (isset($scrutinio['periodo']) && in_array($scrutinio['periodo'], $lista_periodi)) ?
+        $periodo = (isset($scrutinio['periodo']) && in_array($scrutinio['periodo'], $listaPeriodi)) ?
           $scrutinio['periodo'] : null;
-      } elseif (!isset($lista_periodi[$periodo]) || $lista_periodi[$periodo] != 'C') {
+      } elseif (!isset($listaPeriodi[$periodo]) || $listaPeriodi[$periodo] != 'C') {
         // periodo indicato non valido
         $periodo = null;
       }
       if ($periodo == 'G' || $periodo == 'R') {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, 'G');
-        if (isset($lista_periodi['R']) && $lista_periodi['R'] == 'C') {
+        if (isset($listaPeriodi['R']) && $listaPeriodi['R'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'R');
         }
         $periodo = 'G';
@@ -930,7 +921,7 @@ class ScrutinioController extends BaseController {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'periodo' => $periodo,
-      'lista_periodi' => $lista_periodi,
+      'listaPeriodi' => $listaPeriodi,
       'info' => $info,
       'dati' => $dati,
     ));

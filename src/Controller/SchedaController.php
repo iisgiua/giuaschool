@@ -13,6 +13,7 @@ use App\Util\StaffUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -26,6 +27,7 @@ class SchedaController extends BaseController {
    * Dettaglio delle valutazioni per la cattedra e l'alunno indicati
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $cattedra Identificativo della cattedra
    * @param int $alunno Identificativo dell'alunno
    * @param string $periodo Periodo dell'anno scolastico
@@ -33,13 +35,13 @@ class SchedaController extends BaseController {
    * @return Response Pagina di risposta
    *
    * @Route("/scheda/voti/materia/{cattedra}/{alunno}/{periodo}", name="scheda_voti_materia",
-   *    requirements={"cattedra": "\d+", "alunno": "\d+", "periodo": "P|S|F|I|1|2|0"},
+   *    requirements={"cattedra": "\d+", "alunno": "\d+", "periodo": "P|S|F|G|R|X"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiMateriaAction(RegistroUtil $reg, int $cattedra, int $alunno,
-                                    string $periodo): Response {
+  public function votiMateriaAction(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
+                                    int $alunno, string $periodo): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -55,7 +57,7 @@ class SchedaController extends BaseController {
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
-    // valutazioniitalia
+    // valutazioni
     $materiaTipo = $cattedra->getMateria()->getTipo();
     $valutazioni[$materiaTipo] = unserialize(
       $this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_'.$materiaTipo));
@@ -72,7 +74,7 @@ class SchedaController extends BaseController {
     }
     // informazioni alunno
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.
-        $alunno->getDataNascita()->format('d/m/Y').')';
+      $alunno->getDataNascita()->format('d/m/Y').')';
     $info['sesso'] = $alunno->getSesso();
     // recupera dati
     $dati = $reg->dettagliVoti($this->getUser(), $cattedra, $alunno, $info['edcivica']);
@@ -122,6 +124,22 @@ class SchedaController extends BaseController {
         // imposta valutazione
         $dati['scrutini'][1]['voto'] =
           $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
+      }
+    } elseif (in_array($periodo, ['G', 'R'])) {
+      // scrutinio sospeso
+      $periodoNome = $trans->trans('label.periodo_G');
+      // voto finale
+      $dati['scrutini'][0]['nome'] = $trans->trans('label.periodo_F');
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'F',
+        [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
+      if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
+        // valutazione non presente
+        $dati['scrutini'][0]['voto'] = null;
+      } else {
+        // imposta valutazione
+        $dati['scrutini'][0]['voto'] =
+          $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
+        $dati['scrutini'][0]['info'] = $voti[$alunno->getId()][$cattedra->getMateria()->getId()];
       }
     }
     // cancella dati inutili
