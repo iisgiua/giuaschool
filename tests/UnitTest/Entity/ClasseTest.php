@@ -142,7 +142,7 @@ class ClasseTest extends EntityTestCase {
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sezione - NOT BLANK');
-    $existent->setSezione($this->faker->randomLetter());
+    $existent->setSezione('A');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sezione - VALID NOT BLANK');
     $existent->setSezione(str_repeat('*', 65));
     $err = $this->val->validate($existent);
