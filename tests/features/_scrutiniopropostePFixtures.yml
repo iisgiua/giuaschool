@@ -1,0 +1,253 @@
+####################
+# _scrutiniopropostePFixtures - dati per i test sulle proposte di voto per gli scrutini del primo periodo
+####################
+
+
+include:
+  - ../../src/DataFixtures/ConfigurazioneFixtures.yml
+  - ../../src/DataFixtures/MenuFixtures.yml
+  - ../../src/DataFixtures/IstitutoFixtures.yml
+  - ../../src/DataFixtures/SedeFixtures.yml
+  - ../../src/DataFixtures/CorsoFixtures.yml
+  - ../../src/DataFixtures/MateriaFixtures.yml
+  - ../../src/DataFixtures/AmministratoreFixtures.yml
+  - ../../src/DataFixtures/PresideFixtures.yml
+  - ../../src/DataFixtures/StaffFixtures.yml
+  - ../../src/DataFixtures/DocenteFixtures.yml
+  - ../../src/DataFixtures/AtaFixtures.yml
+  - ../../src/DataFixtures/ClasseFixtures.yml
+  - ../../src/DataFixtures/AlunnoFixtures.yml
+  - ../../src/DataFixtures/GenitoreFixtures.yml
+
+
+App\Entity\Configurazione:
+  configurazione_SCUOLA1:
+    categoria: 'SCUOLA'
+    parametro: 'anno_scolastico'
+    descrizione: 'Anno scolastico corrente\<br>[formato: AAAA/AAAA]'
+    valore: '2019/2020'
+    gestito: false
+  configurazione_SCUOLA2:
+    categoria: 'SCUOLA'
+    parametro: 'anno_inizio'
+    descrizione: 'Data dell''inizio dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2019-09-14'
+    gestito: false
+  configurazione_SCUOLA3:
+    categoria: 'SCUOLA'
+    parametro: 'anno_fine'
+    descrizione: 'Data della fine dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2020-06-10'
+    gestito: false
+  configurazione_SCUOLA4:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_nome'
+    descrizione: 'Nome del primo periodo dell''anno scolastico (primo trimestre/quadrimestre)\<br>[testo]'
+    valore: 'Primo Quadrimestre'
+    gestito: false
+  configurazione_SCUOLA5:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_fine'
+    descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso<br>[formato: AAAA-MM-GG]'
+    valore: '2020-01-31'
+    gestito: false
+  configurazione_SCUOLA6:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_nome'
+    descrizione: 'Nome del secondo periodo dell''anno scolastico (secondo trimestre/quadrimestre/pentamestre)\<br>[testo]'
+    valore: 'Secondo Quadrimestre'
+    gestito: false
+  configurazione_SCUOLA7:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_fine'
+    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a <em>anno_fine</em><br>[formato AAAA-MM-GG]'
+    valore: '2020-06-10'
+    gestito: false
+  configurazione_SCUOLA8:
+    categoria: 'SCUOLA'
+    parametro: 'periodo3_nome'
+    descrizione: 'Nome del terzo periodo dell''anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \<em>periodo2_fine</em>+1 e finisce a <em>anno_fine</em><br>[testo]'
+    valore: ''
+    gestito: false
+
+App\Entity\DefinizioneScrutinio:
+  definizione_scrutinio_P:
+    data: '<dataFissa("31/12/2019")>'
+    argomenti:
+      1: "Scrutinio del Primo Quadrimestre"
+      2: "Situazioni particolari da segnalare"
+    dati: '<([])>'
+    periodo: 'P'
+    dataProposte: '<dataFissa("23/12/2019")>'
+    struttura:
+      1: ["ScrutinioInizio", false, []]
+      2: ["ScrutinioSvolgimento", false, '<array_combine(["sezione","argomento"], ["Punto primo",<(1)>])>']
+      3: ["Argomento", true, '<array_combine(["sezione","argomento","obbligatorio","inizio","seVuoto","default","fine"], ["Punto secondo",<(2)>,<(false)>,"","","",""])>']
+      4: ["ScrutinioFine", false, []]
+    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(null)>, <(null)>, <(null)>, <(null)>, <(null)>])>'
+
+App\Entity\Cattedra:
+  cattedra_1A_{1..12}:
+    attiva: true
+    supplenza: '<($current==1)>'
+    tipo: '<case(<current()>, [8,11], ["I","A"], "N")>'
+    materia: '@<case(<current()>, [6,7,8,9,10,11,12], [materia_RELIGIONE,materia_itp_1,materia_itp_1,materia_SOSTEGNO,materia_SOSTEGNO,materia_RELIGIONE,materia_curricolare_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7,8,9,10,11,12], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1,docente_nocattedra_2], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno: '<case(<current()>, [9,10], [@alunno_sostegno_1,@alunno_sostegno_2], null)>'
+  cattedra_1A_civica_{1..11}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7,8,9,10,11], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno:
+  cattedra_3C_{1..6}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@<case(<current()>, [6], [materia_RELIGIONE], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3C'
+    alunno:
+  cattedra_3C_civica_{1..6}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3C'
+    alunno:
+  cattedra_3CCHI_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_3'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+  cattedra_3CCHI_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+  cattedra_3CAMB_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_2'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+  cattedra_3CAMB_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+
+App\Entity\Alunno:
+  alunno_1A_6:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".s")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<dateTimeBetween("-16 years", "-14 years")>'
+    comuneNascita: '<substr(<city()>, 0, 64)>'
+    provinciaNascita: '<stateAbbr()>'
+    codiceFiscale (unique): '<taxId()>'
+    citta: '<substr(<city()>, 0, 32)>'
+    provincia: '<stateAbbr()>'
+    indirizzo: '<streetAddress()>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    bes: 'N'
+    noteBes:
+    autorizzaEntrata: '30%? <paragraph(1, false)>: <strval("")>'
+    autorizzaUscita: '30%? <paragraph(1, false)>: <strval("")>'
+    note: '30%? <paragraph(1, true)>: <strval("")>'
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1A'
+    genitori: '<collection(@genitore1_1A_6, @genitore2_1A_6)>'
+    rappresentante: '<(array())>'
+
+App\Entity\Genitore:
+  genitore1_1A_6:
+    sesso: 'M'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1A_6->username, 0, -1)>f'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    provinciaNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    provincia: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1A_6'
+    rappresentante: '<(array())>'
+  genitore2_1A_6:
+    sesso: 'F'
+    nome: '<nome($sesso)>'
+    cognome: '<cognome()>'
+    username: '<substr(@alunno_1A_6->username, 0, -1)>g'
+    email (unique): '<email()>'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: true
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: ''
+    ultimoOtp: ''
+    dataNascita: '<(null)>'
+    comuneNascita: ''
+    provinciaNascita: ''
+    codiceFiscale (unique): '<taxId()>'
+    citta: ''
+    provincia: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_1A_6'
+    rappresentante: '<(array())>'

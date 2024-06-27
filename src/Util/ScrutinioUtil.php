@@ -229,15 +229,25 @@ class ScrutinioUtil {
     $listaAlunni = [];
     if ($periodo == 'G') {
       // alunni con sospensione nella materia
-      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')
-        ->findOneBy(['periodo' => 'F', 'classe' => $classe]);
+      $cond = '';
+      $param = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+      if (!empty($classe->getGruppo())) {
+        $cond = ' AND c.gruppo=:gruppo';
+        $param['gruppo'] = $classe->getGruppo();
+      }
+      $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+        ->join('s.classe', 'c')
+        ->where("s.periodo='F' AND c.anno=:anno AND c.sezione=:sezione".$cond)
+        ->setParameters($param)
+        ->getQuery()
+        ->getResult();
+      $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutini));
       $votiSospesi = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->join('vs.alunno', 'a')
         ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
-        ->where("vs.alunno IN (:alunni) AND vs.scrutinio=:scrutinio AND vs.unico<6 AND vs.materia=:materia AND e.esito='S'")
-        ->setParameters(['alunni' => array_keys($scrutinio->getDato('scrutinabili')),
-          'scrutinio' => $scrutinio, 'materia' => $materia])
+        ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.unico<6 AND vs.materia=:materia AND e.esito='S'")
+        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutini, 'materia' => $materia])
         ->getQuery()
         ->getResult();
       foreach ($votiSospesi as $voto) {
@@ -246,15 +256,25 @@ class ScrutinioUtil {
       }
     } elseif ($periodo == 'R') {
       // alunni con scrutinio rinviato
-      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')
-        ->findOneBy(['periodo' => 'G', 'classe' => $classe]);
+      $cond = '';
+      $param = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+      if (!empty($classe->getGruppo())) {
+        $cond = ' AND c.gruppo=:gruppo';
+        $param['gruppo'] = $classe->getGruppo();
+      }
+      $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+        ->join('s.classe', 'c')
+        ->where("s.periodo='G' AND c.anno=:anno AND c.sezione=:sezione".$cond)
+        ->setParameters($param)
+        ->getQuery()
+        ->getResult();
+      $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutini));
       $votiSospesi = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->join('vs.alunno', 'a')
         ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
-        ->where("vs.alunno IN (:alunni) AND vs.scrutinio=:scrutinio AND vs.unico<6 AND vs.materia=:materia AND e.esito='X'")
-        ->setParameters(['alunni' => array_keys($scrutinio->getDato('alunni')),
-          'scrutinio' => $scrutinio, 'materia' => $materia])
+        ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.unico<6 AND vs.materia=:materia AND e.esito='X'")
+        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutini, 'materia' => $materia])
         ->getQuery()
         ->getResult();
       foreach ($votiSospesi as $voto) {

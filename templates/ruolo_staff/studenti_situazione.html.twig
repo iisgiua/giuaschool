@@ -26,6 +26,9 @@
           <br><strong class="text-danger">{{ lista.cambio[a.id].note }}</strong>
         {% endif %}
       {% endif %}
+      {% if a.frequenzaEstero %}
+          <br><em class="text-danger">Frequenta all'estero</em>
+      {% endif %}
         </td>
         <td>
           {{ a.classe }}

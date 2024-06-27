@@ -1,0 +1,50 @@
+####################
+# _scrutinioproposteSFixtures - dati per i test sulle proposte di voto per gli scrutini del secondo periodo
+####################
+
+
+include:
+  - _scrutiniopropostePFixtures.yml
+
+
+App\Entity\Configurazione:
+  configurazione_SCUOLA4:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_nome'
+    descrizione: 'Nome del primo periodo dell''anno scolastico (primo trimestre/quadrimestre)\<br>[testo]'
+    valore: 'Primo Trimestre'
+    gestito: false
+  configurazione_SCUOLA6:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_nome'
+    descrizione: 'Nome del secondo periodo dell''anno scolastico (secondo trimestre/quadrimestre/pentamestre)\<br>[testo]'
+    valore: 'Secondo Trimestre'
+    gestito: false
+  configurazione_SCUOLA7:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_fine'
+    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a <em>anno_fine</em><br>[formato AAAA-MM-GG]'
+    valore: '2020-03-31'
+    gestito: false
+  configurazione_SCUOLA8:
+    categoria: 'SCUOLA'
+    parametro: 'periodo3_nome'
+    descrizione: 'Nome del terzo periodo dell''anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \<em>periodo2_fine</em>+1 e finisce a <em>anno_fine</em><br>[testo]'
+    valore: 'Terzo Trimestre'
+    gestito: false
+
+App\Entity\DefinizioneScrutinio:
+  definizione_scrutinio_S:
+    data: '<dataFissa("31/03/2020")>'
+    argomenti:
+      1: "Scrutinio del Secondo Trimestre"
+      2: "Situazioni particolari da segnalare"
+    dati: '<([])>'
+    periodo: 'S'
+    dataProposte: '<dataFissa("01/03/2020")>'
+    struttura:
+      1: ["ScrutinioInizio", false, []]
+      2: ["ScrutinioSvolgimento", false, '<array_combine(["sezione","argomento"], ["Punto primo",<(1)>])>']
+      3: ["Argomento", true, '<array_combine(["sezione","argomento","obbligatorio","inizio","seVuoto","default","fine"], ["Punto secondo",<(2)>,<(false)>,"","","",""])>']
+      4: ["ScrutinioFine", false, []]
+    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<(null)>, <(null)>, <(null)>, <(null)>, <(null)>])>'

@@ -55,11 +55,18 @@ class VotoScrutinioRepository extends BaseRepository {
   public function voti(Classe $classe, string $periodo, array $alunni = [], array $materie = [],
                        string $stato = ''): array {
     // query di base
+    $cond = '';
+    $param = ['periodo' => $periodo, 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+    if (!empty($classe->getGruppo())) {
+      $cond = ' AND c.gruppo=:gruppo';
+      $param['gruppo'] = $classe->getGruppo();
+    }
     $query = $this->createQueryBuilder('vs')
       ->select('s.periodo,(vs.materia) AS materia,(vs.alunno) AS alunno,vs AS voto')
       ->join('vs.scrutinio', 's')
-      ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+      ->join('s.classe', 'c')
+      ->where('s.periodo=:periodo AND c.anno=:anno AND c.sezione=:sezione'.$cond)
+      ->setParameters($param)
       ->orderBy('s.data');
     // filtro alunno
     if (!empty($alunni)) {

@@ -58,7 +58,7 @@
   {% endif %}
   {% if dati.scrutini is defined %}
     {% for periodo,v in dati.scrutini %}
-      {% if periodo == 'P' or periodo == 'S' %}
+      {% if (periodo == 'P' or periodo == 'S') and not alunno.frequenzaEstero %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0">
       <strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong><br>
@@ -95,23 +95,39 @@
     </tbody>
   </table>
       {% elseif periodo == 'F' %}
-        {% if v.noscrutinato is defined and v.noscrutinato == 'A' %}
+        {% if v.esito.esito == 'L' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
     <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.no_scrutinabile_assenze'|trans }}</strong>
+    <div class="text-info gs-big">
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </div>
   </div>
-        {% elseif v.noscrutinato is defined and v.noscrutinato == 'C' %}
+        {% elseif v.esito.esito == 'R' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
     <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong>
-  </div>
+    <div class="text-info gs-big">
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </div>
+ </div>
+        {% elseif v.esito.esito == 'E' %}
+  <div class="alert alert-warning gs-mt-4 text-center" role="alert">
+    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ 'label.frequenza_estero'|trans }}</strong>
+    <div class="text-info gs-big">
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </div>
+ </div>
         {% else %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
+    <caption class="text-info text-center gs-big gs-pb-0">
+      <strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong><br>
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-4">Materia</th>
-        <th class="col-sm-2">Proposta</th>
         <th class="col-sm-4">Voto</th>
         <th class="col-sm-2">Ore di assenza</th>
       </tr>
@@ -120,30 +136,20 @@
           {% for materia,m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
-            {% if m.tipo == 'R' %}
-              {% if alunno.religione != 'S' and alunno.religione != 'A' %}
+            {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
-        <td><strong>--</strong></td>
-        <td></td>
-              {% else %}
-        <td><span class="label label-{{ v.proposte[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.proposte[materia].unico] }}</span></td>
-        <td><span class="label label-{{ v.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
-              {% endif %}
-            {% elseif m.tipo == 'C' %}
-        <td> </td>
-        <td><span class="label label-{{ v.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</span></td>
         <td></td>
             {% else %}
-        <td><span class="label label-{{ v.proposte[materia].unico < 5 ? 'danger' : (v.proposte[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.proposte[materia].unico == 0 ? 'NC' : v.proposte[materia].unico }}</span></td>
         <td>
-          <span class="label label-{{ v.voti[materia].unico < 5 ? 'danger' : (v.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</span>
-              {% if v.debiti[materia] is defined and v.esito.esito == 'S' %}
-              <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
-              <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
+          <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
+              {% if v.debiti[materia] is defined %}
+          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
+          <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
               {% endif %}
         </td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+        <td>
+          <span class="label label-default">{{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}</span>
+        </td>
             {% endif %}
       </tr>
           {% endfor %}
@@ -152,7 +158,7 @@
         {% endif %}
       {% elseif periodo == 'G' %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-4">Materia</th>
