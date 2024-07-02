@@ -177,19 +177,8 @@ $(document).ready(function() {
         natural_arrow_keys: true
       });
     $(this).hide();
-    $(this).siblings('button.gs-button-delete').show();
     $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.suff }}', true, true);
     $(this).siblings('div').find('div').focus();
-    e.preventDefault();
-  });
-  $('#gs-form-collection button.gs-button-delete').on('click', function(e) {
-    $(this).parentsUntil('li').find('div:nth-child(3)').hide();
-    $(this).siblings('div').find('input').slider('destroy');
-    $(this).siblings('div').find('input').val('');
-    $(this).siblings('div').attr('style', 'display:none');
-    $(this).siblings('span').removeClass('label-success label-danger label-warning').addClass('label-default').text('--');
-    $(this).hide();
-    $(this).siblings('button.gs-button-add').show();
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
@@ -239,9 +228,6 @@ window.setInterval(function(){
   {% if form.unico.vars.value is not empty %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').med ? 'label-danger' : (form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? 'label-warning' : 'label-success') }} gs-mr-4 gs-big">{{ app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').lista[form.unico.vars.value] }}</span>
         <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-   {% if form.vars.data.materia.tipo == 'E' %}
-        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
-    {% endif %}
         <div style="display:inline"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" class="slider" type="text" value="{{ form.unico.vars.value }}" data-slider-value="{{ form.unico.vars.value }}"></div>
   {% else %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>

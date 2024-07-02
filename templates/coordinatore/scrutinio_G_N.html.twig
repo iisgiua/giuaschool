@@ -32,6 +32,10 @@
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+      {% if dati.errori[materia] is defined and dati.errori[materia] == 1 and dati.modifica %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i voti mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <br>
+      {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
     {% endfor %}
@@ -47,13 +51,20 @@
       {% endif %}
           </td>
       {% for materia,m in dati.materie %}
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2{{ m.tipo != 'R' and dati.voti[alunno][materia].unico < 6 ? ' bg-danger' }}">
-        {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
-            <span>NA</span>
+        {% if m.tipo != 'R' and dati.voti[alunno][materia].unico < 6 %}
+            <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2 bg-danger">
+              <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : 'label-warning' }}" title="Valutazione dello scrutinio finale">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
+              <span class="label label-primary gs-ml-4" title="Proposta di voto">{{ dati.proposte[alunno][materia] is not defined ? '--' : dati.valutazioni[m.tipo].lista[dati.proposte[alunno][materia].unico] }}</span>
+            </td>
         {% else %}
-            <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
+            <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
+              <span>NA</span>
+          {% else %}
+              <span class="label label-success">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
+          {% endif %}
+            </td>
         {% endif %}
-          </td>
       {% endfor %}
         </tr>
     {% endfor %}
@@ -63,7 +74,7 @@
     {% if not dati.blocco %}
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big">
-      Una volta aperto lo scrutinio, sarà possibile inserire i voti definitivi per le materie con sospensione del giudizio.
+      Le modifiche alle proposte di voto saranno possibili durante l'esecuzione dello scrutinio.
     </strong>
   </div>
   <div class="text-center">
@@ -71,17 +82,35 @@
   </div>
     {% endif %}
     {{ form_end(form) }}
+    {% include 'include/modal-remote.html.twig' %}
     {% include 'include/modal-waiting.html.twig' %}
   {% endif %}
 </div>
 {% endblock %}
 
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-slider/css/bootstrap-slider.min.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block pagina_js_fine %}
 {{ parent() }}
+<script src="{{ asset('vendor/bootstrap-slider/js/bootstrap-slider.min.js') }}"></script>
 <script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover({container: 'body'});
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (event) {
+    window.dispatchEvent(new Event('resize'));
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
   $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
     $('form[name="scrutinio"]').submit();
   });

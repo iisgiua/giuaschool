@@ -398,6 +398,7 @@ class ScrutinioController extends BaseController {
    * Gestione delle proposte di voto mancanti al momento dell'inizio dello scrutinio
    *
    * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -414,7 +415,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioProposteAction(Request $request, ScrutinioUtil $scr, LogHandler $dblogger,
+  public function scrutinioProposteAction(Request $request, TranslatorInterface $trans,
+                                          ScrutinioUtil $scr, LogHandler $dblogger,
                                           int $classe, int $materia, string $periodo,
                                           int $posizione): Response {
     // inizializza variabili
@@ -518,6 +520,15 @@ class ScrutinioController extends BaseController {
           $this->em->detach($prop);
           continue;
         }
+        if (!empty($elenco['sospesi'][$key]) && !empty($prop->getUnico()) &&
+            $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
+          // voto inferiore a quello dello scrutinio finale
+          $this->addFlash('errore', $trans->trans('exception.proposta_sospeso_inferiore_a_finale'));
+          $this->em->detach($prop);
+          continue;
+        }
+        // rimuove info debito
+        $prop->setDebito(null);
         // info log
         if ($proposte_prec[$key]->getUnico() === null && $prop->getUnico() !== null) {
           // proposta aggiunta
@@ -799,6 +810,21 @@ class ScrutinioController extends BaseController {
           $this->em->detach($voto);
           $errore['exception.no_voto_scrutinio'] = true;
         }
+        if (in_array($periodo, ['G', 'R'])) {
+          // legge voto dello scrutinio finale
+          $votoFinale = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+            ->join('vs.scrutinio', 's')
+            ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
+            ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno, 'materia' => $materia,
+              'classe' => $classe])
+            ->getQuery()
+            ->getOneOrNullResult();
+          if ($votoFinale) {
+            // voto inferiore a quello assegnato nello scrutinio finale
+            $this->em->detach($voto);
+            $errore['exception.scrutinio_voto_sospeso_inferiore_a_finale'] = true;
+          }
+        }
       }
       foreach ($errore as $msg=>$v) {
         $this->addFlash('errore', $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
@@ -993,7 +1019,8 @@ class ScrutinioController extends BaseController {
     // impedisce che condotta sia modificata
     $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
     $dati['materia_condotta'] = $condotta->getNomeBreve();
-    $dati['voto_condotta'] = $dati['voti'][$condotta->getId()]->getUnico();
+    $dati['voto_condotta'] = !empty($dati['voti'][$condotta->getId()]) ?
+      $dati['voti'][$condotta->getId()]->getUnico() : null;
     unset($dati['voti'][$condotta->getId()]);
     // esiti possibili
     $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
@@ -1070,6 +1097,21 @@ class ScrutinioController extends BaseController {
         } elseif ($voto->getUnico() < $dati['valutazioni'][$voto->getMateria()->getTipo()]['suff']) {
           // voto insufficiente
           $insuff_cont++;
+        }
+        if (in_array($periodo, ['G', 'R'])) {
+          // legge voto dello scrutinio finale
+          $votoFinale = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+            ->join('vs.scrutinio', 's')
+            ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
+            ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno,
+              'materia' => $voto->getMateria(), 'classe' => $classe])
+            ->getQuery()
+            ->getOneOrNullResult();
+          if ($votoFinale) {
+            // voto inferiore a quello assegnato nello scrutinio finale
+            $this->em->detach($voto);
+            $errore['exception.scrutinio_voto_sospeso_inferiore_a_finale_alunno'] = true;
+          }
         }
       }
       if ($form->get('esito')->getData() === null) {
@@ -1253,7 +1295,7 @@ class ScrutinioController extends BaseController {
     $creditoSospeso = false;
     if ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       foreach ($dati['voti'] as $voto) {
-        if (!empty($voto->getDebito()) && $voto->getUnico() >= 7) {
+        if (!empty($voto->getRecupero()) && $voto->getUnico() >= 7) {
           $creditoSospeso = true;
         }
       }

@@ -1663,6 +1663,8 @@ exception.orari_sovrapposti: L'orario si sovrappone al precedente
 exception.log_errori_vuoto: Non sono presenti messaggi di errore per la data e ora indicate.
 exception.scrutinio_svolgimento: Non è stata inserito il tipo di scrutinio svolto
 exception.voto_sospeso_inferiore_a_finale: Il voto dell'alunn{sex} {alunno} per la materia {materia} è inferiore a quello deliberato nello scrutinio finale.
+exception.scrutinio_voto_sospeso_inferiore_a_finale: "<strong>{materia}</strong>: il voto è inferiore a quello deliberato nello scrutinio finale."
+exception.scrutinio_voto_sospeso_inferiore_a_finale_alunno: Sono presenti voti inferiori a quelli deliberati nello scrutinio finale per l'alunn{sex} {alunno}.
 exception.proposta_sospeso_inferiore_a_finale: La proposta di voto di uno o più alunni è inferiore a quella deliberata nello scrutinio finale.
 exception.modulo_campo_duplicato: I nomi dei campi del modulo devono essere univoci.
 exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza nome.

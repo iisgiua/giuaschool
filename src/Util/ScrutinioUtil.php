@@ -299,8 +299,9 @@ class ScrutinioUtil {
       $elenco['proposte'][$alu->getId()] = null;
     }
     // legge le proposte di voto
+    $propostaDocente = ($materia->getTipo() == 'E' && in_array($periodo, ['P', 'S', 'F'])) ? $docente : null;
     $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->proposte($classe, $periodo,
-      array_keys($elenco['alunni']), [$materia->getId()], $materia->getTipo() == 'E' ? $docente : null);
+      array_keys($elenco['alunni']), [$materia->getId()], $propostaDocente);
     foreach ($proposte as $idAlu => $proposta) {
       // inserisce proposte trovate
       $idDoc = array_keys($proposta[$materia->getId()])[0];
@@ -4051,6 +4052,7 @@ class ScrutinioUtil {
   public function riepilogoSospesi(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
     $dati['alunni'] = array();
+    $dati['errori'] = array();
     // periodo dello scrutinio
     $dati['periodo'] = $periodo;
     if ($periodo == 'X') {
@@ -4153,6 +4155,24 @@ class ScrutinioUtil {
           'assenze' => $v->getAssenze(),
           'dati' => $v->getDati());
       }
+      // legge le proposte di voto (tutte le materie, anche voti nulli)
+      $proposte = $this->em->getRepository('App\Entity\PropostaVoto')
+        ->proposte($classe, $periodo, array_keys($dati['alunni']), array_keys($dati['materie']));
+      foreach ($dati['alunni'] as $alu => $aluDati) {
+        foreach ($dati['materie'] as $mat => $matDati) {
+          if (!empty($dati['voti'][$alu][$mat]) && $dati['voti'][$alu][$mat]['unico'] < 6) {
+            if (empty($proposte[$alu][$mat]) ||
+                empty($proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])]) ||
+                empty($proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])]->getUnico())) {
+              // mancano valutazioni
+              $dati['errori'][$mat] = 1;
+            } else {
+              // conserva proposta di voto
+              $dati['proposte'][$alu][$mat] = $proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])];
+            }
+          }
+        }
+      }
     }
     // legge lista valutazioni
     $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
@@ -4181,10 +4201,16 @@ class ScrutinioUtil {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
     $dati['valutazioni'] = $valutazioni;
+    // imposta messaggi
+    foreach ($dati['errori'] as $mat => $err) {
+      $this->reqstack->getSession()->getFlashBag()->add('errore',
+        $this->trans->trans('exception.no_voto_scrutinio', ['materia' => $dati['materie'][$mat]['nomeBreve']]));
+    }
     // imposta blocco
     $defScrutinio = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     $oggi = new \DateTime();
-    $dati['blocco'] = ($oggi < $defScrutinio->getData());
+    $dati['modifica'] = ($oggi >= $defScrutinio->getData());
+    $dati['blocco'] = (!$dati['modifica'] || !empty($dati['errori']));
     // restituisce dati
     return $dati;
   }
@@ -4202,16 +4228,18 @@ class ScrutinioUtil {
    */
   public function passaggioStato_G_N_1(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
-    $this->reqstack->getSession()->getFlashBag()->clear();
     // legge dati
     $dati = $this->riepilogoSospesi($docente, $classe, $scrutinio->getPeriodo());
+    $this->reqstack->getSession()->getFlashBag()->clear();
+    if (!empty($dati['errori'])) {
+      // mancano valutazioni
+      return false;
+    }
     // alunni con voto in scrutinio
     $alunni_esistenti = $this->em->getRepository('App\Entity\VotoScrutinio')->alunni($scrutinio);
     // inserimento voti
     foreach ($dati['alunni'] as $alunno=>$alu) {
-      $alunno_obj = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       foreach ($dati['materie'] as $materia=>$mat) {
-        $materia_obj = $this->em->getRepository('App\Entity\Materia')->find($materia);
         // esclude alunni NA per religione
         if ($mat['tipo'] != 'R' || in_array($alu['religione'], ['S', 'A'])) {
           // inserisce voti e assenze
@@ -4232,8 +4260,8 @@ class ScrutinioUtil {
                 '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
                 'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:assenze,:dati)')
               ->executeStatement(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
-                'unico' => $dati['voti'][$alunno][$materia]['unico'],
-                'debito' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['debito'] : null,
+                'unico' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['proposte'][$alunno][$materia]->getUnico() : $dati['voti'][$alunno][$materia]['unico'],
+                'debito' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['proposte'][$alunno][$materia]->getDebito() : null,
                 'recupero' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['recupero'] : null,
                 'assenze' => $dati['voti'][$alunno][$materia]['assenze'],
                 'dati' => serialize($dati['voti'][$alunno][$materia]['dati'])]);
@@ -4866,17 +4894,6 @@ class ScrutinioUtil {
    */
   public function passaggioStato_G_4_3(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
-    // legge definizione scrutinio e verbale
-    $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($scrutinio->getPeriodo());
-    $scrutinio_dati = $scrutinio->getDati();
-    foreach ($def->getStruttura() as $step=>$args) {
-      if ($args[0] == 'Argomento') {
-        // resetta validazione
-        $scrutinio_dati['verbale'][$step]['validato'] = false;
-      }
-    }
-    // memorizza dati scrutinio
-    $scrutinio->setDati($scrutinio_dati);
     // aggiorna stato
     $scrutinio->setStato('3');
     $this->em->flush();

@@ -6,8 +6,8 @@
     <ul id="gs-form-collection" class="list-group">
   {% for voto in dati.voti %}
       <li class="list-group-item gs-pt-1 gs-pb-1">
-        <div class="form-group gs-mb-0{{ voto.debito is not empty ? ' bg-danger' }}">
-          <label class="control-label col-sm-6 gs-pl-1 gs-pr-1{{ voto.debito is not empty ? ' text-danger' }}">{{ dati.materie[voto.materia.id].nomeBreve }}</label>
+        <div class="form-group gs-mb-0{{ voto.recupero is not empty ? ' bg-danger' }}">
+          <label class="control-label col-sm-6 gs-pl-1 gs-pr-1{{ voto.recupero is not empty ? ' text-danger' }}">{{ dati.materie[voto.materia.id].nomeBreve }}</label>
           <div class="col-sm-6">
             <span style="display:inline-block;width:7em;" class="label label-success gs-big">{{ dati.valutazioni[dati.materie[voto.materia.id].tipo].lista[voto.unico] }}</span>
           </div>

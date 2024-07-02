@@ -86,7 +86,7 @@ $(document).ready(function() {
     ticks_labels: [{{ dati.valutazioni['E'].etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
-    formatter: function(val) { return votiN[val - {{ dati.valutazioni['E'].min }}]; },
+    formatter: function(val) { return votiE[val - {{ dati.valutazioni['E'].min }}]; },
     natural_arrow_keys: true
   });
   $("#gs-form-collection").on("change", "input.slider-civica", function(e) {
