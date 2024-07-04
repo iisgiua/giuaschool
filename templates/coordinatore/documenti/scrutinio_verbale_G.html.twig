@@ -108,15 +108,18 @@
 {% endif %}
   <p>Tutte le deliberazioni sopra indicate sono state assunte individualmente per ciascun alunno.</p>
 {% if dati.classe.anno == 2 %}
-  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139 e D.M. 27 gennaio 2010 n. 9)
+  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139, D.M. 27 gennaio 2010 n. 9 e
+    D.M. 30 gennaio 2024 n. 14)
     in esito all’assolvimento all’obbligo di istruzione, il Consiglio di Classe predispone, per ogni alunno
-    ammesso alla classe successiva, la certificazione delle competenze acquisite, negli assi dei linguaggi,
-    matematico, scientifico e storico sociale, in relazione al percorso formativo effettuato.
+    ammesso alla classe successiva, la certificazione delle competenze acquisite, in relazione al percorso
+    formativo effettuato.
   </p>
 {% endif %}
 {% if dati.classe.anno >= 3 and dati.ammessi > 0 %}
   <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico
-    che risultano sintetizzate nella seguente tabella:
+    ai sensi del D.Lvo. 62 del 13 aprile 2017 e sulla base dei criteri stabiliti nel PTOF per
+    l'assegnazione del punteggio più alto relativo alla fascia di appartenenza.
+    Tali delibere vengono sintetizzate nella seguente tabella:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
   {% if dati.classe.anno == 3 %}
@@ -187,8 +190,8 @@
   </table>
   <p>Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati,
     deve dare comunicazione dell’esito di non ammissione alle famiglie degli alunni minorenni, mediante
-    fonogramma registrato.
-    Le famiglie potranno visualizzare gli esiti dello scrutinio sul
+    fonogramma registrato. Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell'esito dello scrutinio.
+    Le famiglie potranno visualizzare queste comunicazioni direttamente sul
     registro elettronico, nel rispetto della normativa sulla privacy.
   </p>
 {% endif %}

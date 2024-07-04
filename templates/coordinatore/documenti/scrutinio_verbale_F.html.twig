@@ -17,9 +17,9 @@
   <ol>
     <li><strong>Scrutini finali;</strong></li>
 {% if dati.classe.anno == 5 %}
-    <li><strong>Individuazione di situazioni particolari da segnalare.</strong></li>
+    <li><strong>Situazioni particolari da segnalare.</strong></li>
 {% else %}
-    <li><strong>Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></li>
+    <li><strong>Individuazione degli interventi di recupero e situazioni particolari da segnalare.</strong></li>
 {% endif %}
 {% if dati.classe.anno == 2 %}
     <li><strong>Certificazione delle Competenze.</strong></li>
@@ -391,13 +391,13 @@
   </table>
   <p>&nbsp;</p>
 {% if dati.classe.anno != 5 %}
-  <p><strong>Punto secondo. Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></p>
+  <p><strong>Punto secondo. Individuazione degli interventi di recupero e situazioni particolari da segnalare.</strong></p>
   <p>Terminata la fase deliberativa, si procede all'individuazione degli interventi
     di recupero e alla compilazione delle comunicazioni per le famiglie relative agli alunni
     con debito formativo.
   </p>
 {% else %}
-  <p><strong>Punto secondo. Individuazione di situazioni particolari da segnalare.</strong></p>
+  <p><strong>Punto secondo. Situazioni particolari da segnalare.</strong></p>
 {% endif %}
 {% if dati.scrutinio.dati.argomento is defined and dati.scrutinio.dati.argomento[2] %}
   <p>Tra le situazioni particolari si segnala quanto segue:

@@ -520,7 +520,7 @@ class ScrutinioController extends BaseController {
           $this->em->detach($prop);
           continue;
         }
-        if (!empty($elenco['sospesi'][$key]) && !empty($prop->getUnico()) &&
+        if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() !== null &&
             $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
           // voto inferiore a quello dello scrutinio finale
           $this->addFlash('errore', $trans->trans('exception.proposta_sospeso_inferiore_a_finale'));
@@ -926,6 +926,7 @@ class ScrutinioController extends BaseController {
       if ($periodo == 'G' || $periodo == 'R') {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, 'G');
+        $dati['finale'] = $scr->quadroVoti($this->getUser(), $classe, 'F');
         if (isset($listaPeriodi['R']) && $listaPeriodi['R'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'R');
         }
@@ -947,7 +948,7 @@ class ScrutinioController extends BaseController {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'periodo' => $periodo,
-      'listaPeriodi' => $listaPeriodi,
+      'lista_periodi' => $listaPeriodi,
       'info' => $info,
       'dati' => $dati,
     ));

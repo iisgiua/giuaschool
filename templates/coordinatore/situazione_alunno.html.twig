@@ -157,8 +157,20 @@
   </table>
         {% endif %}
       {% elseif periodo == 'G' %}
+        {% if v.esito.esito == 'X' %}
+  <div class="alert alert-warning gs-mt-4 text-center" role="alert">
+    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ 'label.esito_X'|trans }}</strong>
+    <div class="text-info gs-big">
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </div>
+  </div>
+        {% else %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
+    <caption class="text-info text-center gs-big gs-pb-0">
+      <strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong><br>
+      <em><small>Presa visione: {{ v.visto }}</small></em>
+    </caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-4">Materia</th>
@@ -170,27 +182,22 @@
           {% for materia,m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
-            {% if m.tipo == 'R' %}
-              {% if alunno.religione != 'S' %}
+            {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
-        <td></td>
-              {% else %}
-        <td><span class="label label-{{ v.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
-              {% endif %}
-            {% elseif m.tipo == 'C' %}
-        <td><span class="label label-{{ v.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</span></td>
         <td></td>
             {% else %}
         <td>
-          <span class="label label-{{ v.voti[materia].unico < 5 ? 'danger' : (v.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</span>
+          <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
         </td>
-        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+        <td>
+          <span class="label label-default">{{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}</span>
+        </td>
             {% endif %}
       </tr>
           {% endfor %}
     </tbody>
   </table>
+        {% endif %}
       {% endif %}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">

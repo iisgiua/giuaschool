@@ -369,9 +369,11 @@ class PagelleUtil {
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
-        ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+        ->join('c.classe', 'cl')
+        ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
+          'gruppo' => $classe->getGruppo()])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -431,6 +433,12 @@ class PagelleUtil {
             ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
+      // ordina docenti
+      uasort($dati['docenti'], function ($a, $b) {
+        $pa = explode(' ', $a);
+        $pb = explode(' ', $b);
+        return strcmp($pa[1] . ' ' . $pa[2], $pb[1] . ' ' . $pb[2]);
+      });
       // presidente
       if ( $dati['scrutinio']->getDato('presiede_ds') ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
