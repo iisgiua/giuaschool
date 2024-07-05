@@ -315,7 +315,7 @@
   </div>
         {% elseif dati.esito.esito == 'A' %}
   <div class="alert alert-success" role="alert">
-    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong><br>
           {% if classe.anno >= 3 %}
     <strong class="gs-big">Media dei voti: {{ dati.esito.media|number_format(2,',') }}</strong><br>
     <strong class="gs-big">Credito: {{ dati.esito.credito }}</strong><br>
@@ -324,6 +324,7 @@
     <strong class="gs-big">Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong><br>
     <strong class="gs-big">Credito totale: {{ dati.esito.credito + dati.esito.creditoPrecedente }}</strong><br>
           {% endif %}
+    </div>
   </div>
         {% elseif dati.esito.esito == 'N' %}
   <div class="alert alert-danger" role="alert">

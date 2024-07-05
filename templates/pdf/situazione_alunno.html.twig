@@ -41,7 +41,7 @@
 {% endif %}
 {% if dati.scrutini is defined %}
   {% for periodo,v in dati.scrutini %}
-    {% if periodo == 'P' %}
+    {% if (periodo == 'P' or periodo == 'S') and not alunno.frequenzaEstero %}
 <br><div style="text-align:center"><strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
@@ -52,137 +52,102 @@
       {% for materia,m in v.materie %}
   <tr nobr="true" style="font-size:11pt">
     <td><strong>{{ m.nome }}</strong></td>
-        {% if m.tipo == 'R' %}
-          {% if alunno.religione != 'S' %}
-      <td><strong>--</strong></td>
-      <td></td>
-          {% else %}
-      <td> {{ info.giudizi['P']['R'][v.voti[materia].unico] }}</td>
-      <td>{{ v.voti[materia].assenze }}</td>
-          {% endif %}
-        {% elseif m.tipo == 'C' %}
-      <td>&nbsp;&nbsp;{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</td>
-      <td></td>
-        {% else %}
-      <td>
-        {{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}
-          {% if v.debiti[materia] is defined %}
-        <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
-        <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
-          {% endif %}
-      </td>
-      <td>{{ v.voti[materia].assenze }}</td>
-        {% endif %}
-    </tr>
-      {% endfor %}
-</table>
-    {% elseif periodo == '1' %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
-<table border="1" cellpadding="2" style="font-size:10pt">
-  <tr nobr="true">
-    <td width="43%" style="text-align:center">Materia</td>
-    <td width="25%" style="text-align:center">Profitto</td>
-    <td width="16%" style="text-align:center">Debito formativo</td>
-    <td width="16%" style="text-align:center">Ore di assenza</td>
-  </tr>
-      {% for materia,m in v.materie %}
-  <tr nobr="true">
-    <td><strong>{{ m.nome }}</strong></td>
-        {% if m.tipo == 'R' and alunno.religione != 'S' %}
-    <td><strong>--</strong></td>
-    <td></td>
-    <td></td>
-        {% elseif m.tipo == 'C'  %}
-    <td>{{ info.condotta['1'][v.voti[materia].unico] }}</td>
-    <td></td>
+        {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
+    <td>&nbsp;&nbsp;--</td>
     <td></td>
         {% else %}
-    <td>{{ info.giudizi['1'][v.voti[materia].unico] }}</td>
     <td>
+      {{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}
           {% if v.debiti[materia] is defined %}
-      {{ ('label.recupero_'~v.voti[materia].recupero)|trans }}
+      <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
+      <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
           {% endif %}
     </td>
-    <td>{{ v.voti[materia].assenze }}</td>
+    <td>
+      {{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}
+    </td>
         {% endif %}
   </tr>
       {% endfor %}
 </table>
     {% elseif periodo == 'F' %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
-      {% if v.noscrutinato is defined and v.noscrutinato == 'A' %}
-<div style="text-align:center"><strong>{{ 'label.no_scrutinabile_assenze'|trans }}</strong></div>
-      {% elseif v.noscrutinato is defined and v.noscrutinato == 'C' %}
-<div style="text-align:center"><strong>{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong></div>
+      {% if v.esito.esito == 'L' %}
+<div style="text-align:center">
+  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ 'label.no_scrutinabile_assenze'|trans }}</strong>
+</div>
+      {% elseif v.esito.esito == 'R' %}
+<div style="text-align:center">
+  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong>
+</div>
+      {% elseif v.esito.esito == 'E' %}
+<div style="text-align:center">
+  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ 'label.frequenza_estero'|trans }}</strong>
+</div>
       {% else %}
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
-    <td width="34%" style="text-align:center">Materia</td>
-    <td width="15%" style="text-align:center">Proposta</td>
-    <td width="35%" style="text-align:center">Voto</td>
-    <td width="16%" style="text-align:center">Ore di assenza</td>
+    <td width="49%" style="text-align:center"><strong>Materia</strong></td>
+    <td width="35%" style="text-align:center"><strong>Voto</strong></td>
+    <td width="16%" style="text-align:center"><strong>Ore di assenza</strong></td>
   </tr>
         {% for materia,m in v.materie %}
   <tr nobr="true">
     <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' %}
-    <td><strong>--</strong></td>
-    <td><strong>--</strong></td>
-    <td></td>
-            {% else %}
-    <td>{{ info.giudizi['F']['R'][v.proposte[materia].unico] }}</td>
-    <td>{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</td>
-    <td>{{ v.voti[materia].assenze }}</td>
-            {% endif %}
-          {% elseif m.tipo == 'C' %}
-    <td></td>
-    <td>{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</td>
+          {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
+    <td>&nbsp;&nbsp;--</td>
     <td></td>
           {% else %}
-    <td>{{ v.proposte[materia].unico == 0 ? 'NC' : v.proposte[materia].unico }}</td>
-    <td>
-      {{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}
-            {% if v.debiti[materia] is defined %}
-      <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
-      <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
+      <td>
+        {{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}
+            {% if v.esito.esito == 'S' and v.debiti[materia] is defined %}
+        <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
+        <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
             {% endif %}
-    </td>
-    <td>{{ v.voti[materia].assenze }}</td>
+      </td>
+      <td>
+        {{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}
+      </td>
           {% endif %}
   </tr>
         {% endfor %}
 </table>
       {% endif %}
     {% elseif periodo == 'G' %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
+      {% if v.esito.esito == 'X' %}
+<div style="text-align:center">
+  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ 'label.esito_X'|trans }}</strong>
+</div>
+      {% else %}
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
-    <td width="34%" style="text-align:center">Materia</td>
-    <td width="50%" style="text-align:center">Voto</td>
-    <td width="16%" style="text-align:center">Ore di assenza</td>
+    <td width="34%" style="text-align:center"><strong>Materia</strong></td>
+    <td width="50%" style="text-align:center"><strong>Voto</strong></td>
+    <td width="16%" style="text-align:center"><strong>Ore di assenza</strong></td>
   </tr>
         {% for materia,m in v.materie %}
   <tr nobr="true">
     <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' %}
-    <td><strong>--</strong></td>
-    <td></td>
-            {% else %}
-    <td>{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</td>
-    <td>{{ v.voti[materia].assenze }}</td>
-            {% endif %}
-          {% elseif m.tipo == 'C' %}
-    <td>{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</td>
+          {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
+    <td>&nbsp;&nbsp;--</td>
     <td></td>
           {% else %}
-    <td>{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</td>
-    <td>{{ v.voti[materia].assenze }}</td>
+    <td>
+      {{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}
+    </td>
+    <td>
+      {{ m.tipo == 'C' ? '' : v.voti[materia].assenze }}
+    </td>
           {% endif %}
   </tr>
         {% endfor %}
 </table>
+      {% endif %}
     {% endif %}
   {% else %}
 <p style="text-align:center">

@@ -142,7 +142,7 @@
             {% else %}
         <td>
           <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
-              {% if v.debiti[materia] is defined %}
+              {% if v.esito.esito == 'S' and v.debiti[materia] is defined %}
           <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
           <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
               {% endif %}
