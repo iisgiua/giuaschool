@@ -21,7 +21,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere l'alunno">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['P','S','F','G'] %}
+    {% for p in ['P','S','F','G','R','X'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}

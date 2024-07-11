@@ -205,7 +205,10 @@ class ScrutinioController extends BaseController {
                 $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['max']);
               }
               if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
+                // voto inferiore a quello dello scrutinio di giugno: non lo memorizza
                 $errori[1] = 'exception.proposta_sospeso_inferiore_a_finale';
+                $this->em->detach($prop);
+                continue;
               }
               if ($prop->getUnico() < $info['valutazioni']['suff'] && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
@@ -264,7 +267,8 @@ class ScrutinioController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/proposte_'.($periodo ? $periodo : 'P').'.html.twig', array(
+    $pagina = ($periodo ? (($periodo == 'R' || $periodo == 'X') ? 'G' : $periodo) : 'P');
+    return $this->render('lezioni/proposte_'.$pagina.'.html.twig', array(
       'pagina_titolo' => 'page.lezioni_proposte',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -557,7 +561,8 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/proposte_'.$periodo.'.html.twig', array(
+    $pagina = ($periodo == 'R' || $periodo == 'X') ? 'G' : $periodo;
+    return $this->render('coordinatore/proposte_'.$pagina.'.html.twig', array(
       'classe' => $classe,
       'info' => $info,
       'proposte' => $elenco,

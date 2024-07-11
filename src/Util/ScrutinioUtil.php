@@ -262,19 +262,32 @@ class ScrutinioUtil {
         $cond = ' AND c.gruppo=:gruppo';
         $param['gruppo'] = $classe->getGruppo();
       }
-      $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+      $scrutiniF = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+        ->join('s.classe', 'c')
+        ->where("s.periodo='F' AND c.anno=:anno AND c.sezione=:sezione".$cond)
+        ->setParameters($param)
+        ->getQuery()
+        ->getResult();
+      $scrutiniG = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
         ->join('s.classe', 'c')
         ->where("s.periodo='G' AND c.anno=:anno AND c.sezione=:sezione".$cond)
         ->setParameters($param)
         ->getQuery()
         ->getResult();
-      $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutini));
+      $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutiniG));
+      $rinviati = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
+        ->select('(e.alunno)')
+        ->join('e.scrutinio', 's')
+        ->join('e.alunno', 'a')
+        ->where("e.alunno IN (:alunni) AND e.scrutinio IN (:scrutini) AND e.esito='X'")
+        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutiniG])
+        ->getQuery()
+        ->getResult();
       $votiSospesi = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->join('vs.alunno', 'a')
-        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
-        ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.unico<6 AND vs.materia=:materia AND e.esito='X'")
-        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutini, 'materia' => $materia])
+        ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.materia=:materia AND vs.unico<6")
+        ->setParameters(['alunni' => $rinviati, 'scrutini' => $scrutiniF, 'materia' => $materia])
         ->getQuery()
         ->getResult();
       foreach ($votiSospesi as $voto) {

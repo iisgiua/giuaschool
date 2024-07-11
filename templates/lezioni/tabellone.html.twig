@@ -267,11 +267,13 @@
           </td>
           {% endfor %}
           <td>
-            {% if dati.esiti[alunno].esito == 'X' %}
+              {% if dati.esiti[alunno].esito == 'X' and dati.rinviati.esiti[alunno] is defined and dati.rinviati.esiti[alunno].esito != 'X' %}
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.medie[alunno] < 5 ? 'danger' : (dati.rinviati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.medie[alunno] }}</span></span>
+              {% elseif dati.esiti[alunno].esito == 'X' %}
             <span class="gs-big"><span class="label label-{{ dati.finale.medie[alunno] < 5 ? 'danger' : (dati.finale.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.finale.medie[alunno] }}</span></span>
-            {% else %}
+              {% else %}
             <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
-            {% endif %}
+              {% endif %}
           </td>
           <td>
           {% if dati.esiti[alunno].esito == 'A' or (dati.esiti[alunno].esito == 'X' and dati.rinviati.esiti[alunno] is defined and dati.rinviati.esiti[alunno].esito == 'A') %}
@@ -330,7 +332,9 @@
           </td>
           {% endfor %}
           <td>
-            {% if gd.esiti[alunno].esito == 'X' %}
+            {% if gd.esiti[alunno].esito == 'X' and gd.rinviati.esiti[alunno] is defined and gd.rinviati.esiti[alunno].esito != 'X' %}
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.rinviati.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.gruppi[g].medie[alunno] }}</span></span>
+            {% elseif gd.esiti[alunno].esito == 'X' %}
             <span class="gs-big"><span class="label label-{{ dati.finale.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.finale.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.finale.gruppi[g].medie[alunno] }}</span></span>
             {% else %}
             <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ gd.medie[alunno] }}</span></span>
