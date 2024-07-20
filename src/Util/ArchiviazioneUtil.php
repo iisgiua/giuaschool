@@ -384,7 +384,6 @@ class ArchiviazioneUtil {
   public function scriveRegistroDocente(Docente $docente, Cattedra $cattedra, $periodo) {
     // inizializza dati
     $docente_s = $docente->getNome().' '.$docente->getCognome();
-    $docente_sesso = $docente->getSesso();
     $classe_s = ''.$cattedra->getClasse();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = $cattedra->getMateria()->getNome();
@@ -419,41 +418,20 @@ class ArchiviazioneUtil {
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
+    // eventuali gruppi
+    $gruppiClasse = $this->em->getRepository('App\Entity\Classe')->gruppi($cattedra->getClasse());
     // ore totali (in unità orarie, non minuti effettivi)
-    if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R') {
-      // materia alternativa: aggiunge ore firmate con altra disciplina
-      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.id!=:cattedra')
-        ->getDql();
-      $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('SUM(so.durata)')
-        ->join('l.materia', 'm')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->andWhere('l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))')
-        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
-          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-          'sede' => $cattedra->getClasse()->getSede(), 'materia' => $cattedra->getMateria(),
-          'civica' => 'E', 'cattedra' => $cattedra->getId()])
-        ->getQuery()
-        ->getSingleScalarResult();
-    } else {
-      // altro tipo di cattedra
-      $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('SUM(so.durata)')
-        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-        ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-          'sede' => $cattedra->getClasse()->getSede()])
-        ->getQuery()
-        ->getSingleScalarResult();
-    }
+    $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->select('SUM(so.durata)')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('so.orario', 'o')
+      ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+        'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+        'sede' => $cattedra->getClasse()->getSede()])
+      ->getQuery()
+      ->getSingleScalarResult();
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
     // voti in lezione di altra materia
     $votiNoLezione = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
@@ -468,42 +446,18 @@ class ArchiviazioneUtil {
       ->getSingleScalarResult();
     if ($ore > 0 || $votiNoLezione > 0) {
       // legge lezioni del periodo
-      if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R') {
-        // materia alternativa: aggiunge ore firmate con altra disciplina
-        $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-          ->select('c.id')
-          ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.id!=:cattedra')
-          ->getDql();
-        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
-          ->join('l.materia', 'm')
-          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-          ->join('so.orario', 'o')
-          ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-          ->andWhere('l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))')
-          ->orderBy('l.data,l.ora', 'ASC')
-          ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
-            'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-            'sede' => $cattedra->getClasse()->getSede(), 'materia' => $cattedra->getMateria(),
-            'civica' => 'E', 'cattedra' => $cattedra->getId()])
-          ->getQuery()
-          ->getArrayResult();
-      } else {
-        // altro tipo di cattedra
-        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
-          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-          ->join('so.orario', 'o')
-          ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-          ->orderBy('l.data,l.ora', 'ASC')
-          ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-            'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-            'sede' => $cattedra->getClasse()->getSede()])
-          ->getQuery()
-          ->getArrayResult();
-      }
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->orderBy('l.data,l.ora', 'ASC')
+        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+          'sede' => $cattedra->getClasse()->getSede()])
+        ->getQuery()
+        ->getArrayResult();
       // legge assenze
       $lista = array();
       $lista_alunni = array();
@@ -626,15 +580,30 @@ class ArchiviazioneUtil {
               continue;
             }
             // nome
+            $aluCorrenteRitirato = false;
+            if (empty($gruppiClasse)) {
+              // nessun gruppo classe
+              if ($alu['frequenzaEstero'] || $alu['idclasse'] != $cattedra->getClasse()->getId()) {
+                // segnala presenza di almeno un alunno ritirato/trasferito/estero
+                $aluritirati = true;
+                // segnala che l'alunno corrente è ritirato/trasferito/estero
+                $aluCorrenteRitirato = true;
+              }
+            } else {
+              // ci sono gruppi classe
+              if ($alu['frequenzaEstero'] || ($alu['idclasse'] != $cattedra->getClasse()->getId() &&
+                  (!in_array($alu['idclasse'], array_map(fn($o) => $o->getId(), $gruppiClasse)) ||
+                  !empty($cattedra->getClasse()->getGruppo())))) {
+                // segnala presenza di almeno un alunno ritirato/trasferito/estero
+                $aluritirati = true;
+                // segnala che l'alunno corrente è ritirato/trasferito/estero
+                $aluCorrenteRitirato = true;
+              }
+            }
             $html .= '<tr nobr="true" style="font-size:9pt">'.
-              '<td align="left"> '.
-              (($alu['idclasse'] != $cattedra->getClasse()->getId() || $alu['frequenzaEstero']) ? '* ' : '').
+              '<td align="left"> '.($aluCorrenteRitirato ? '* ' : '').
               $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')'.
               '</td>';
-            if ($alu['idclasse'] != $cattedra->getClasse()->getId() || $alu['frequenzaEstero']) {
-              // segnala presenza di alunni ritirati/estero
-              $aluritirati = true;
-            }
             // assenze
             for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
               $g = $giornilezione[$ng];
@@ -705,7 +674,7 @@ class ArchiviazioneUtil {
       }
       // legge voti
       $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-        ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento,l.data')
+        ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.media,v.voto,v.giudizio,v.argomento,l.data')
         ->join('v.lezione', 'l')
         ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
@@ -746,6 +715,9 @@ class ArchiviazioneUtil {
             foreach ($vv as $v) {
               $argomento = $this->ripulisceTesto($v['argomento']);
               $giudizio = $this->ripulisceTesto($v['giudizio']);
+              if (!$v['media']) {
+                $argomento .= '<br><em>(Non utilizzata nel calcolo della media)</em>';
+              }
               $html .= '<tr nobr="true">'.
                   '<td style="border:1pt solid #000">'.$dt.'</td>'.
                   '<td style="border:1pt solid #000">'.($v['tipo'] == 'S' ? 'Scritto' : ($v['tipo'] == 'O' ? 'Orale' : 'Pratico')).'</td>'.
@@ -828,6 +800,42 @@ class ArchiviazioneUtil {
       }
       $html .= '</table>';
       $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+    }
+    // scrive proposta per giudizio sospeso
+    if ($periodo['scrutinio'] == 'F') {
+      // legge le proposte di voto
+      $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->createQueryBuilder('pv')
+        ->select('(pv.alunno) AS idalunno,pv.unico,pv.debito,pv.periodo')
+        ->where('pv.docente=:docente AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo IN (:periodi)')
+        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
+          'materia' => $cattedra->getMateria(), 'periodi' => ['G', 'R']])
+        ->orderBy('pv.periodo', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      if (!empty($proposte)) {
+        foreach ($proposte as $p) {
+          // inserisce proposte trovate
+          $dati['sospesi'][$p['idalunno']]['proposta'] = $p['unico'];
+          $dati['sospesi'][$p['idalunno']]['prova'] = $p['debito'];
+        }
+        // intestazione di pagina
+        $this->intestazionePagina('Esami giudizio sospeso della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+        // intestazione tabella
+        $html = '<table border="1"><tr><td style="width:30%"><b>Alunno</b></td><td style="width:60%"><b>Giudizio sulla verifica</b></td><td style="width:10%"><b>Proposta<br>di voto</b></td></tr>';
+        // dati alunni
+        foreach ($dati['sospesi'] as $alu => $aluDati) {
+          $alunno = $dati['alunni'][$alu]['cognome'].' '.$dati['alunni'][$alu]['nome'].
+            ' ('.$dati['alunni'][$alu]['dataNascita']->format('d/m/Y').')';
+          $html .= '<tr nobr="true" style="font-size:9pt">'.
+                      '<td align="left"> '.$alunno.'</td>'.
+                      '<td align="left"> '.$aluDati['prova'].'</td>'.
+                      '<td><b>'.$aluDati['proposta'].'</b></td>'.
+                      '</tr>';
+        }
+        // fine tabella
+        $html .= '</table>';
+        $this->pdf->getHandler()->writeHTML($html, false, false, false, false, 'C');
+      }
     }
   }
 
@@ -1828,7 +1836,7 @@ class ArchiviazioneUtil {
    * Crea tutti i registri di classe
    *
    * @param array $circolari Lista delle circolari da archiviare
-   * 
+   *
    * @return int Numero di circolari correttamente archiviate (0 o 1)
    */
   public function tuttiDocumentiCircolari(array $circolari): int {
@@ -1844,7 +1852,7 @@ class ArchiviazioneUtil {
    * Archivia la circolare
    *
    * @param Circolare $circolare Circolare da archiviare
-   * 
+   *
    * @return int Numero di circolari correttamente archiviate (0 o 1)
    */
   public function documentoCircolare(Circolare $circolare): int {
@@ -1866,7 +1874,7 @@ class ArchiviazioneUtil {
     // controllo esistenza del file
     if (!$fs->exists($file)) {
       // segnala errore
-      $this->reqstack->getSession()->getFlashBag()->add('warning', 
+      $this->reqstack->getSession()->getFlashBag()->add('warning',
         'Circolare n. '.$circolare->getNumero().' del '.$circolare->getData()->format('d-m-Y').
         ' non creata.');
       $num = 0;
@@ -1881,7 +1889,7 @@ class ArchiviazioneUtil {
       // controllo esistenza del file
       if (!$fs->exists($file)) {
         // segnala errore
-        $this->reqstack->getSession()->getFlashBag()->add('warning', 
+        $this->reqstack->getSession()->getFlashBag()->add('warning',
           'Allegato n. '.($k + 1).' della circolare n. '.$circolare->getNumero().
           ' non creato.');
         $num = 0;

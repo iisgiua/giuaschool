@@ -1032,7 +1032,7 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
-    $listaDocenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+    $docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
@@ -1040,7 +1040,13 @@ class SistemaController extends BaseController {
       ->setParameters(['tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
-    $listaSostegno = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+    $listaDocenti = [];
+    foreach ($docenti as $docente) {
+      $nome = $docente->getCognome().' '.$docente->getNome().' ('.
+        $docente->getUsername().')';
+      $listaDocenti[$nome] = $docente;
+    }
+    $sostegno = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
@@ -1048,10 +1054,13 @@ class SistemaController extends BaseController {
       ->setParameters(['tipo' => 'S'])
       ->getQuery()
       ->getResult();
-    $listaClassi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
-      ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
-      ->getQuery()
-      ->getResult();
+    $listaSostegno = [];
+    foreach ($sostegno as $docente) {
+      $nome = $docente->getCognome().' '.$docente->getNome().' ('.
+        $docente->getUsername().')';
+      $listaSostegno[$nome] = $docente;
+    }
+    $listaClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
     $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
       ->where('c.pubblicata=:si AND c.anno=:anno')
       ->orderBy('c.numero', 'ASC')
@@ -1107,10 +1116,9 @@ class SistemaController extends BaseController {
               // crea tutti i registri
               $arch->tuttiRegistriDocente($listaDocenti);
             } else {
-              $id = $docente->getId();
-              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaDocenti), true);
-              $lista = array_slice($listaDocenti, $pos);
-              // crea sottoinsieme dei registri
+              $key = $docente->getCognome().' '.$docente->getNome().' ('.$docente->getUsername().')';
+              $pos = array_search($key, array_keys($listaDocenti), true);
+              $lista = array_slice($listaDocenti, $pos, null, true);
               $arch->tuttiRegistriDocente($lista);
             }
             break;
@@ -1122,10 +1130,9 @@ class SistemaController extends BaseController {
               // crea tutti i registri
               $arch->tuttiRegistriSostegno($listaSostegno);
             } else {
-              $id = $sostegno->getId();
-              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaSostegno), true);
-              $lista = array_slice($listaSostegno, $pos);
-              // crea sottoinsieme dei registri
+              $key = $sostegno->getCognome().' '.$sostegno->getNome().' ('.$sostegno->getUsername().')';
+              $pos = array_search($key, array_keys($listaSostegno), true);
+              $lista = array_slice($listaSostegno, $pos, null, true);
               $arch->tuttiRegistriSostegno($lista);
             }
             break;
