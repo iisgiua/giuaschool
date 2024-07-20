@@ -902,10 +902,10 @@ class ArchiviazioneUtil {
   public function scriveRegistroSostegno(Docente $docente, Cattedra $cattedra, $periodo) {
     // inizializza dati
     $docente_s = $docente->getNome().' '.$docente->getCognome();
-    $docente_sesso = $docente->getSesso();
     $classe_s = ''.$cattedra->getClasse();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - '.$cattedra->getClasse()->getSede()->getNomeBreve();
     $materia_s = 'Sostegno';
+    $alunno = $cattedra->getAlunno();
     $alunno_s = $cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
     $periodo_s = $periodo['nome'];
@@ -921,13 +921,15 @@ class ArchiviazioneUtil {
     // ore totali
     $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('SUM(so.durata)')
+      ->join('l.classe', 'c')
       ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND fs.alunno=:alunno')
       ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
       ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-        'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-        'sede' => $cattedra->getClasse()->getSede()])
+        'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(),
+        'gruppo' => $cattedra->getClasse()->getGruppo(), 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
       ->getQuery()
       ->getSingleScalarResult();
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
@@ -936,14 +938,16 @@ class ArchiviazioneUtil {
       $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita,fs.argomento AS argomento_sos,fs.attivita AS attivita_sos,m.nomeBreve AS materia')
         ->join('l.materia', 'm')
+        ->join('l.classe', 'c')
         ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND fs.alunno=:alunno')
         ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
         ->orderBy('l.data,l.ora', 'ASC')
         ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-          'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-          'sede' => $cattedra->getClasse()->getSede()])
+          'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(),
+          'gruppo' => $cattedra->getClasse()->getGruppo(), 'inizio' => $periodo['inizio'],
+          'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
         ->getArrayResult();
       // legge assenze
@@ -1030,10 +1034,27 @@ class ArchiviazioneUtil {
         $html = ($html_col == '' ? $html_inizio : $html_inizio_rs).$html.'</tr>'.
           ($html_col == '' ? '' : '<tr>'.$html_col.'</tr>');
         // dati alunno
+        $gruppiClasse = $this->em->getRepository('App\Entity\Classe')->gruppi($cattedra->getClasse());
+        $aluCorrenteRitirato = false;
+        if (empty($gruppiClasse)) {
+          // nessun gruppo classe
+          if ($alunno->getFrequenzaEstero() || !$alunno->getClasse() ||
+              $alunno->getClasse()->getId() != $cattedra->getClasse()->getId()) {
+            // segnala che l'alunno corrente è ritirato/trasferito/estero
+            $aluCorrenteRitirato = true;
+          }
+        } else {
+          // ci sono gruppi classe
+          if ($alunno->getFrequenzaEstero() || !$alunno->getClasse() ||
+              ($alunno->getClasse()->getId() != $cattedra->getClasse()->getId() &&
+              (!in_array($alunno->getClasse()->getId(), array_map(fn($o) => $o->getId(), $gruppiClasse)) ||
+              !empty($cattedra->getClasse()->getGruppo())))) {
+            // segnala che l'alunno corrente è ritirato/trasferito/estero
+            $aluCorrenteRitirato = true;
+          }
+        }
         $html .= '<tr nobr="true" style="font-size:9pt">'.
-          '<td align="left"> '.
-          ((!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) ? '* ' : '').
-          $alunno_s.'</td>';
+          '<td align="left"> '.($aluCorrenteRitirato ? '* ' : '').$alunno_s.'</td>';
         // assenze
         for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
           $g = $giornilezione[$ng];
@@ -1065,7 +1086,7 @@ class ArchiviazioneUtil {
         if ($np == $numeropagine -1) {
           // ultima pagina
           $html = '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora';
-          if (!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) {
+          if ($aluCorrenteRitirato) {
             $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
           }
           $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
