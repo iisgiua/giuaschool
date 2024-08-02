@@ -430,7 +430,7 @@ class RegistroUtil {
         $ora = $s['ora'];
         $datiLezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
         $datiLezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
-        // legge lezione
+        // legge lezioni
         $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->join('l.classe', 'c')
           ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')

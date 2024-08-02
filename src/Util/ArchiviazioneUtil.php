@@ -1288,34 +1288,48 @@ class ArchiviazioneUtil {
         $ora = $so['ora'];
         $dati['lezioni'][$ora]['inizio'] = substr($so['inizio'], 0, 5);
         $dati['lezioni'][$ora]['fine'] = substr($so['fine'], 0, 5);
-        // legge lezione
-        $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->where('l.data=:data AND l.classe=:classe AND l.ora=:ora')
-          ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'ora' => $ora])
+        // legge lezioni
+        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+          ->join('l.classe', 'c')
+          ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora,
+            'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+          ->orderBy('l.gruppo')
           ->getQuery()
-          ->getOneOrNullResult();
-        if ($lezione) {
-          // esiste lezione
-          $dati['lezioni'][$ora]['materia'] = $lezione->getMateria()->getNome();
-          $testo1 = $this->ripulisceTesto($lezione->getArgomento());
-          $testo2 = $this->ripulisceTesto($lezione->getAttivita());
-          $dati['lezioni'][$ora]['argomenti'] = $testo1.(($testo1 && $testo2) ? ' - ' : '').$testo2;
-          // legge firme
-          $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
-            ->join('f.docente', 'd')
-            ->where('f.lezione=:lezione')
-            ->orderBy('d.cognome,d.nome', 'ASC')
-            ->setParameters(['lezione' => $lezione])
-            ->getQuery()
-            ->getResult();
-          foreach ($firme as $f) {
-            $dati['lezioni'][$ora]['docenti'][] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
-          }
-        } else {
+          ->getResult();
+        if (empty($lezioni)) {
           // nessuna lezione esistente
-          $dati['lezioni'][$ora]['materia'] = '';
-          $dati['lezioni'][$ora]['argomenti'] = '';
+          $dati['lezioni'][$ora]['materia'] = [];
+          $dati['lezioni'][$ora]['argomenti'] = [];
           $dati['lezioni'][$ora]['docenti'] = [];
+          $dati['lezioni'][$ora]['docentiId'] = [];
+        } else {
+          // esistono lezioni
+          foreach ($lezioni as $lezione) {
+            $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+            $dati['lezioni'][$ora]['materia'][$gruppo] = $lezione->getMateria()->getNome();
+            $testo1 = $this->ripulisceTesto($lezione->getArgomento());
+            $testo2 = $this->ripulisceTesto($lezione->getAttivita());
+            $separatore = (!empty($testo1) && !empty($testo2)) ? ' - ' : '';
+            $dati['lezioni'][$ora]['argomenti'][$gruppo] = $testo1.$separatore.$testo2;
+            // legge firme
+            $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
+              ->join('f.docente', 'd')
+              ->where('f.lezione=:lezione')
+              ->orderBy('d.cognome,d.nome', 'ASC')
+              ->setParameters(['lezione' => $lezione])
+              ->getQuery()
+              ->getResult();
+            // docenti
+            $docenti = [];
+            $docentiId = [];
+            foreach ($firme as $f) {
+              $docenti[] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
+              $docentiId[] = $f->getDocente()->getId();
+            }
+            $dati['lezioni'][$ora]['docenti'][$gruppo] = $docenti;
+            $dati['lezioni'][$ora]['docentiId'][$gruppo] = $docentiId;
+          }
         }
       }
       // scrive tabella lezioni
@@ -1326,13 +1340,44 @@ class ArchiviazioneUtil {
           <td style="width:20%"><b>Docenti</b></td>
           <td style="width:50%"><b>Argomenti/Attività</b></td>
         </tr>';
-      foreach ($dati['lezioni'] as $lez) {
+      foreach ($dati['lezioni'] as $ora => $lez) {
         $html .= '<tr nobr="true">'.
-            '<td>'.$lez['inizio'].'<br> - <br>'.$lez['fine'].'</td>'.
-            '<td align="left"><b>'.$lez['materia'].'</b></td>'.
-            '<td align="left"><i>'.implode('<br>', $lez['docenti']).'</i></td>'.
-            '<td align="left" style="font-size:9pt">'.$lez['argomenti'].'</td>'.
-          '</tr>';
+          '<td rowspan="'.count($lez['materia']).'">'.$lez['inizio'].'<br> - <br>'.$lez['fine'].'</td>';
+        $testo = '';
+        if (!empty($lez['materia'])) {
+          $testo = '<b>'.
+            (array_key_first($lez['materia']) == 'R:S' ? 'Gruppo: Religione<br>' :
+            (array_key_first($lez['materia']) == 'R:N' ? 'Gruppo: N.A.<br>' :
+            (array_key_first($lez['materia']) == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
+            (array_key_first($lez['materia']) && array_key_first($lez['materia'])[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
+            '</b>'.$lez['materia'][array_key_first($lez['materia'])];
+        }
+        $html .= '<td align="left">'.$testo.'</td>';
+        $html .= '<td align="left" style="font-size:9pt"><i>'.
+          (empty($lez['docenti']) ? '' : implode('<br>', $lez['docenti'][array_key_first($lez['docenti'])])).
+          '</i></td>';
+        $html .= '<td align="left" style="font-size:9pt">'.
+        (empty($lez['argomenti']) ? '' : $lez['argomenti'][array_key_first($lez['argomenti'])]).
+          '</td></tr>';
+        foreach ($lez['materia'] as $gruppo => $matGruppo) {
+          if ($gruppo == array_key_first($lez['materia'])) {
+            continue;
+          }
+          $html .= '<tr nobr="true">';
+          $testo = '<b>'.
+            ($gruppo == 'R:S' ? 'Gruppo: Religione<br>' :
+            ($gruppo == 'R:N' ? 'Gruppo: N.A.<br>' :
+            ($gruppo == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
+            ($gruppo[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr($gruppo, 2).'<br>') : '')))).
+            '</b>'.$matGruppo;
+          $html .= '<td align="left">'.$testo.'</td>';
+          $html .= '<td align="left" style="font-size:9pt"><i>'.
+            implode('<br>', $lez['docenti'][$gruppo]).
+            '</i></td>';
+          $html .= '<td align="left" style="font-size:9pt">'.
+            $lez['argomenti'][$gruppo].
+            '</td></tr>';
+        }
       }
       // chiude tabella lezioni
       $html .= '</table>';
@@ -1489,10 +1534,12 @@ class ArchiviazioneUtil {
       // legge note
       $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
         ->join('n.docente', 'd')
+        ->join('n.classe', 'c')
         ->leftJoin('n.docenteProvvedimento', 'dp')
-        ->where('n.data=:data AND n.classe=:classe')
+        ->where('n.data=:data AND c.anno=:anno AND c.sezione=:sezione')
         ->orderBy('n.modificato', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+        ->setParameters(['data' => $data->format('Y-m-d'), 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione()])
         ->getQuery()
         ->getResult();
       foreach ($note as $n) {
@@ -1502,8 +1549,10 @@ class ArchiviazioneUtil {
         }
         $dati['note'][] = array(
           'tipo' => $n->getTipo(),
+          'gruppo' => $n->getClasse()->getGruppo(),
           'testo' => $this->ripulisceTesto($n->getTesto()),
           'provvedimento' => $this->ripulisceTesto($n->getProvvedimento()),
+          'annullata' => $n->getAnnullata(),
           'docente' => $n->getDocente()->getNome().' '.$n->getDocente()->getCognome(),
           'docente_provvedimento' => ($n->getDocenteProvvedimento() ?
             $n->getDocenteProvvedimento()->getNome().' '.$n->getDocenteProvvedimento()->getCognome() : null),
@@ -1512,30 +1561,44 @@ class ArchiviazioneUtil {
       // legge annotazioni
       $annotazioni = $this->em->getRepository('App\Entity\Annotazione')->createQueryBuilder('a')
         ->join('a.docente', 'd')
-        ->where('a.data=:data AND a.classe=:classe')
+        ->join('a.classe', 'c')
+        ->where('a.data=:data AND c.anno=:anno AND c.sezione=:sezione')
         ->orderBy('a.modificato', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+        ->setParameters(['data' => $data->format('Y-m-d'), 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione()])
         ->getQuery()
         ->getResult();
       foreach ($annotazioni as $a) {
-        $alunni = array();
-        if ($a->getAvviso() && $a->getVisibile()) {
-          // legge alunni destinatari
-          $ann_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id')
-            ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
-            ->where('au.avviso=:avviso AND a.id IN (:lista)')
-            ->setParameters(['avviso' => $a->getAvviso(), 'lista' => $lista])
-            ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        $alunni = [];
+        $alunniAnnotazione = [];
+        if ($a->getAvviso() && in_array('A', $a->getAvviso()->getDestinatari())) {
+          // legge alunno destinatario
+          $alunniAnnotazione = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=a.id')
+            ->join('au.avviso', 'av')
+            ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+            ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'A', 'filtro' => 'U'])
             ->getQuery()
             ->getResult();
-          foreach ($ann_alunni as $alu) {
-            $alunni[] = $alu->getCognome().' '.$alu->getNome();
-          }
+        } elseif ($a->getAvviso() && in_array('G', $a->getAvviso()->getDestinatari())) {
+          // legge genitore destinatario
+          $alunniAnnotazione = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id')
+            ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
+            ->join('au.avviso', 'av')
+            ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+            ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'G', 'filtro' => 'U'])
+            ->getQuery()
+            ->getResult();
+        }
+        foreach ($alunniAnnotazione as $alu) {
+          $alunni[] = $alu->getCognome().' '.$alu->getNome();
         }
         $dati['annotazioni'][] = array(
           'testo' => $this->ripulisceTesto($a->getTesto()),
           'docente' => $a->getDocente()->getNome().' '.$a->getDocente()->getCognome(),
+          'gruppo' => $a->getClasse()->getGruppo(),
+          'avviso' => $a->getAvviso(),
           'alunni' => $alunni);
       }
       // scrive tabella note/annotazioni
@@ -1551,15 +1614,21 @@ class ArchiviazioneUtil {
           $html .= '<table border="1" cellspacing="0" cellpadding="4">';
           foreach ($dati['note'] as $nt) {
             $html .= '<tr><td align="left">';
+            if ($nt['gruppo']) {
+              $html .= '<b>Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.$nt['gruppo'].'</b><br>';
+            }
             if (count($nt['alunni']) > 0) {
               $html .= '<i>Alunni: <b>'.implode('</b>, <b>', $nt['alunni']).'</b></i><br>';
             }
             $html .= '<span style="font-size:9pt">'.$nt['testo'].'</span><br>'.
               '(<i>'.$nt['docente'].'</i>)';
-            if ($nt['provvedimento'] != '') {
+            if (!empty($nt['provvedimento'])) {
               $html .= '<br><br>Provvedimento disciplinare:<br>'.
                 '<b style="font-size:9pt">'.$nt['provvedimento'].'</b><br>'.
                 '(<i>'.$nt['docente_provvedimento'].'</i>)';
+            }
+            if ($nt['annullata']) {
+              $html .= '<br><b>*** ANNULLATA ***</b>';
             }
             $html .= '</td></tr>';
           }
@@ -1570,8 +1639,20 @@ class ArchiviazioneUtil {
           $html .= '<table border="1" cellspacing="0" cellpadding="4">';
           foreach ($dati['annotazioni'] as $an) {
             $html .= '<tr><td align="left">';
+            if ($an['gruppo']) {
+              $html .= '<b>Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.$an['gruppo'].'</b><br>';
+            }
             if (count($an['alunni']) > 0) {
-              $html .= '<i>Destinatari (genitori): <b>'.implode('</b>, <b>', $an['alunni']).'</b></i><br>';
+              $html .= '<i>Destinatari ';
+              foreach ($an['avviso']->getDestinatari() as $key => $dest) {
+                $html .= ($key > 0 ? ', ' : '').($dest == 'G' ? 'genitori' : 'alunni');
+              }
+              $html .= ': <b>'.implode('</b>, <b>', $an['alunni']).'</b></i><br>';
+            } elseif ($an['avviso'] and $an['avviso']->getFiltroTipo() == 'R' ) {
+              $html .= '<i>Destinatari ';
+              foreach ($an['avviso']->getFiltro() as $key => $dest) {
+                $html .= ($key > 0 ? ', ' : '').($dest == 'I' ? 'Rappresentante di Istituto' : 'Rappresentante di Classe');
+              }
             }
             $html .= '<span style="font-size:9pt">'.$an['testo'].'</span><br>'.
               '(<i>'.$an['docente'].'</i>)';
@@ -1606,8 +1687,13 @@ class ArchiviazioneUtil {
     $msg = array();
     $adesso = (new \DateTime())->format('Y-m-d H:i');
     // legge gli scrutini della classe
-    $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->findBy(['classe' => $classe, 'stato' => 'C'],
-      ['data' => 'ASC']);
+    $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+      ->join('s.classe', 'c')
+      ->where("s.stato='C' AND c.anno=:anno AND c.sezione=:sezione")
+      ->orderBy('s.data,c.gruppo', 'ASC')
+      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+      ->getQuery()
+      ->getResult();
     foreach ($scrutini as $scrut) {
       $periodo = $scrut->getPeriodo();
       $nomePeriodo = $this->trans->trans('label.periodo_'.$periodo);
@@ -1615,25 +1701,25 @@ class ArchiviazioneUtil {
         case 'P': // scrutinio primo periodo
         case 'S': // scrutinio secondo periodo (se trimestri)
           // riepilogo voti
-          if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
+          if (!($file = $this->pag->riepilogoVoti($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
-          if (!($file = $this->pag->verbale($classe, $periodo))) {
+          if (!($file = $this->pag->verbale($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // debiti
@@ -1650,9 +1736,9 @@ class ArchiviazioneUtil {
           $debiti_nuovi = 0;
           foreach ($alunni as $alu) {
             // comunicazione debiti
-            if (!($file = $this->pag->debiti($classe, $alu, $periodo))) {
+            if (!($file = $this->pag->debiti($scrut->getClasse(), $alu, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti '.
+              $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Debiti '.
                 $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                 'non creato per mancanza di dati.';
             } else {
@@ -1664,42 +1750,42 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti: '.
+          $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Debiti: '.
             $debiti_num.' ('.$debiti_nuovi.' NUOVI)';
           break;
         case 'F': // scrutinio finale
           // riepilogo voti
-          if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
+          if (!($file = $this->pag->riepilogoVoti($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
-          if (!($file = $this->pag->verbale($classe, $periodo))) {
+          if (!($file = $this->pag->verbale($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // certificazioni
           if ($classe->getAnno() == 2) {
-            if (!($file = $this->pag->certificazioni($classe, $periodo))) {
+            if (!($file = $this->pag->certificazioni($scrut->getClasse(), $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
+              $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
                 'non creato per mancanza di dati.';
             } else {
               $data_file = (new \DateTime('@'.filemtime($file)))
                 ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni'.
+              $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Certificazioni'.
                 ($data_file >= $adesso ? ' (NUOVO)': '');
             }
           }
@@ -1715,9 +1801,9 @@ class ArchiviazioneUtil {
           $debiti_nuovi = 0;
           foreach ($alunni as $alu) {
             // comunicazione debiti
-            if (!($file = $this->pag->debiti($classe, $alu, $periodo))) {
+            if (!($file = $this->pag->debiti($scrut->getClasse(), $alu, $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti '.
+              $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Debiti '.
                 $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                 'non creato per mancanza di dati.';
             } else {
@@ -1729,7 +1815,7 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Debiti: '.
+          $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Debiti: '.
             $debiti_num.' ('.$debiti_nuovi.' NUOVI)';
           // carenze
           $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
@@ -1745,9 +1831,9 @@ class ArchiviazioneUtil {
             // comunicazione carenze
             if (isset($e->getDati()['carenze']) && isset($e->getDati()['carenze_materie']) &&
                 $e->getDati()['carenze'] && count($e->getDati()['carenze_materie']) > 0) {
-              if (!($file = $this->pag->carenze($classe, $e->getAlunno(), $periodo))) {
+              if (!($file = $this->pag->carenze($scrut->getClasse(), $e->getAlunno(), $periodo))) {
                 // errore
-                $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Carenze '.
+                $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Carenze '.
                   $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
                   'non creato per mancanza di dati.';
               } else {
@@ -1760,44 +1846,44 @@ class ArchiviazioneUtil {
               }
             }
           }
-          $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Carenze: '.
+          $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Carenze: '.
             $carenze_num.' ('.$carenze_nuovi.' NUOVI)';
           break;
         case 'G': // esame sospesi
         case 'R': // scrutinio rinviato
         case 'X': // scrutinio rinviato da prec. A.S.
           // riepilogo voti
-          if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
+          if (!($file = $this->pag->riepilogoVoti($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Riepilogo'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // verbale
-          if (!($file = $this->pag->verbale($classe, $periodo))) {
+          if (!($file = $this->pag->verbale($scrut->getClasse(), $periodo))) {
             // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale: '.
+            $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale: '.
               'non creato per mancanza di dati.';
           } else {
             $data_file = (new \DateTime('@'.filemtime($file)))
               ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Verbale'.
+            $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Verbale'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
           // certificazioni
           if ($classe->getAnno() == 2) {
-            if (!($file = $this->pag->certificazioni($classe, $periodo))) {
+            if (!($file = $this->pag->certificazioni($scrut->getClasse(), $periodo))) {
               // errore
-              $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
+              $msg['warning'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Certificazioni: '.
                 'non creato per mancanza di dati.';
             } else {
               $data_file = (new \DateTime('@'.filemtime($file)))
                 ->setTimeZone(new \DateTimeZone('Europe/Rome'))->format('Y-m-d H:i');
-              $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$nomePeriodo.' - Certificazioni'.
+              $msg['success'][] = ''.$scrut->getClasse().' - Periodo '.$nomePeriodo.' - Certificazioni'.
                 ($data_file >= $adesso ? ' (NUOVO)': '');
             }
           }

@@ -1060,7 +1060,18 @@ class SistemaController extends BaseController {
         $docente->getUsername().')';
       $listaSostegno[$nome] = $docente;
     }
-    $listaClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+      ->join('c.sede', 's')
+      ->where("c.gruppo IS NULL OR c.gruppo=''")
+      ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo')
+      ->getQuery()
+      ->getResult();
+    $listaClassi = [];
+    foreach ($classi as $classe) {
+      $nome = $classe->getAnno().$classe->getSezione().' '.$classe->getCorso()->getNomeBreve().
+        ' - '.$classe->getSede()->getNomeBreve();
+      $listaClassi[$nome] = $classe;
+    }
     $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
       ->where('c.pubblicata=:si AND c.anno=:anno')
       ->orderBy('c.numero', 'ASC')
@@ -1144,10 +1155,10 @@ class SistemaController extends BaseController {
               // crea tutti i registri
               $arch->tuttiRegistriClasse($listaClassi);
             } else {
-              $id = $classe->getId();
-              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaClassi), true);
-              $lista = array_slice($listaClassi, $pos);
-              // crea sottoinsieme dei registri
+              $key = $classe->getAnno().$classe->getSezione().' '.$classe->getCorso()->getNomeBreve().
+                ' - '.$classe->getSede()->getNomeBreve();
+              $pos = array_search($key, array_keys($listaClassi));
+              $lista = array_slice($listaClassi, $pos, null, true);
               $arch->tuttiRegistriClasse($lista);
             }
             break;
@@ -1159,10 +1170,10 @@ class SistemaController extends BaseController {
               // crea tutti i documenti
               $arch->tuttiScrutiniClasse($listaClassi);
             } else {
-              $id = $classe->getId();
-              $pos = array_search($id, array_map(fn($o) => $o->getId(), $listaClassi), true);
-              $lista = array_slice($listaClassi, $pos);
-              // crea sottoinsieme dei documenti
+              $key = $classe->getAnno().$classe->getSezione().' '.$classe->getCorso()->getNomeBreve().
+                ' - '.$classe->getSede()->getNomeBreve();
+              $pos = array_search($key, array_keys($listaClassi));
+              $lista = array_slice($listaClassi, $pos, null, true);
               $arch->tuttiScrutiniClasse($lista);
             }
             break;
