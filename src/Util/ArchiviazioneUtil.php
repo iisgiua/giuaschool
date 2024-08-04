@@ -1964,7 +1964,6 @@ class ArchiviazioneUtil {
    */
   public function documentoCircolare(Circolare $circolare): int {
     // inizializza
-    $msg = array();
     $fs = new Filesystem();
     $num = 1;
     // percorso destinazione
