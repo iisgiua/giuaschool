@@ -1318,10 +1318,10 @@ message.nuovo_anno_2: "<strong>Verranno ora effettuate le seguenti operazioni:<b
   * recupero delle circolari.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
 message.nuovo_anno_3: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
-  * pulizia degli avvisi.</strong><br><br>
+  * recupero degli avvisi.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
 message.nuovo_anno_4: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
-  * pulizia dei documenti e recupero di quelli relativi ai BES.</strong><br><br>
+  * recupero dei documenti relativi ai BES.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
 message.nuovo_anno_5: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero dei documenti degli scrutini.</strong><br><br>

@@ -8,6 +8,7 @@ return [
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_esito CHANGE esito esito VARCHAR(1) DEFAULT NULL;", ""],
+    ["UPDATE gs_avviso SET anno=0;", ""],
   ],
   'envDelete' => [
   ]

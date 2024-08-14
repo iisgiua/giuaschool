@@ -388,6 +388,8 @@ class SistemaController extends BaseController {
             "TRUNCATE gs_presenza;",
             "TRUNCATE gs_proposta_voto;",
             "TRUNCATE gs_provisioning;",
+            "TRUNCATE gs_raggruppamento;",
+            "TRUNCATE gs_raggruppamento_alunno;",
             "TRUNCATE gs_richiesta;",
             "TRUNCATE gs_richiesta_colloquio;",
             "TRUNCATE gs_scansione_oraria;",
@@ -439,7 +441,8 @@ class SistemaController extends BaseController {
                 "FROM gs_utente a ".
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione().
+                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : ('-'.$scrutinio->getClasse()->getGruppo())),
                 'lista' => $noScrutinabili], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // anno all'estero
@@ -448,15 +451,16 @@ class SistemaController extends BaseController {
               $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
                 "SELECT NOW(), NOW(), a.id, :classe, 'E', 'F', 0, 0, 0, 'a:0:{}' ".
                 "FROM gs_utente a ".
-                "WHERE a.id IN (:lista) AND a.ruolo = 'ALU';";
+                "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
-                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione(),
+                'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione().
+                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : ('-'.$scrutinio->getClasse()->getGruppo())),
                 'lista' => $estero], ['lista' => \Doctrine\DBAL\ArrayParameterType::INTEGER]);
             }
             // alunni scrutinati
             $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
             $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
+              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
               "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
               "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
               "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -482,7 +486,7 @@ class SistemaController extends BaseController {
           }
           // scrutini sospesi
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
             "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -499,23 +503,23 @@ class SistemaController extends BaseController {
           $connection->executeStatement($sql);
           // esiti scrutini rinviati al nuovo A.S.
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF(c.gruppo IS NULL, '', CONCAT('-',c.gruppo))), e.esito, 'X', e.media, e.credito, ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'X', e.media, e.credito, ".
             "  e.credito_precedente, e.dati ".
-            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2 ".
-            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_scrutinio s2 ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id AND e2.scrutinio_id = s2.id AND s2.classe_id = c.id ".
             "AND a.ruolo = 'ALU' ".
-            "AND e.esito = 'S' AND e2.esito = 'X' AND s.periodo = 'F' ".
-            "AND NOT EXISTS (SELECT id FROM gs_esito WHERE alunno_id = e.alunno_id AND esito IN ('A', 'N'));";
+            "AND e.esito = 'S' AND s.periodo = 'F' AND e2.esito = 'X' AND s2.periodo = 'G' ".
+            "AND NOT EXISTS (SELECT ee.id FROM gs_esito ee, gs_scrutinio ss WHERE ee.alunno_id = e.alunno_id AND ee.scrutinio_id=ss.id AND ee.esito IN ('A', 'N') AND ss.periodo = 'R');";
           $connection->executeStatement($sql);
           $sql = "INSERT INTO gs_storico_voto (creato, modificato, storico_esito_id, materia_id, voto, carenze, dati) ".
             "SELECT NOW(), NOW(), (SELECT id FROM gs_storico_esito WHERE alunno_id=a.id), ".
             "  vs.materia_id, vs.unico, '', 'a:0:{}' ".
-            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_voto_scrutinio vs ".
-            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id ".
+            "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_scrutinio s2, gs_voto_scrutinio vs ".
+            "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id AND e2.scrutinio_id = s2.id AND s2.classe_id = c.id ".
             "AND vs.scrutinio_id = s.id AND vs.alunno_id = a.id ".
             "AND a.ruolo = 'ALU' ".
-            "AND e.esito = 'S' AND e2.esito = 'X' AND s.periodo = 'F' ".
-            "AND NOT EXISTS (SELECT id FROM gs_esito WHERE alunno_id = e.alunno_id AND esito IN ('A', 'N'));";
+            "AND e.esito = 'S' AND s.periodo = 'F' AND e2.esito = 'X' AND s2.periodo = 'G' ".
+            "AND NOT EXISTS (SELECT ee.id FROM gs_esito ee, gs_scrutinio ss WHERE ee.alunno_id = e.alunno_id AND ee.scrutinio_id=ss.id AND ee.esito IN ('A', 'N') AND ss.periodo = 'R');";
           $connection->executeStatement($sql);
           // aggiunge dati carenze/debiti per ammessi
           $sql = "UPDATE gs_storico_voto sv ".
@@ -527,7 +531,6 @@ class SistemaController extends BaseController {
             "SET sv.carenze = vs.debito, sv.dati= 'a:1:{s:7:\"carenza\";s:1:\"C\";}' ".
             "WHERE s.periodo = 'F' AND se.esito IN ('A', 'S') ".
             "AND e.dati LIKE CONCAT('%s:15:\"carenze_materie\";%\"', m.nome_breve, '\"%');";
-            // "AND REGEXP_INSTR(e.dati, CONCAT('s:15:\"carenze_materie\";[^{]*{[^}]*\"', m.nome_breve, '\"')) > 0;";
           $connection->executeStatement($sql);
           $sql = "UPDATE gs_storico_voto sv ".
             "INNER JOIN gs_storico_esito se ON sv.storico_esito_id = se.id ".
@@ -554,9 +557,12 @@ class SistemaController extends BaseController {
             $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
               ->select('DISTINCT m.id,m.ordinamento')
               ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
-              ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
+              ->join('c.classe', 'cl')
+              ->where("c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('m.ordinamento', 'ASC')
-              ->setParameters(['classe' => $scrutinio->getClasse(), 'attiva' => 1, 'tipo' => 'N'])
+              ->setParameters(['anno' => $scrutinio->getClasse()->getAnno(),
+                'sezione' => $scrutinio->getClasse()->getSezione(),
+                'gruppo' => $scrutinio->getClasse()->getGruppo()])
               ->getQuery()
               ->getArrayResult();
             $dati['materie'] = array_map(fn($m) => $m['id'], $materie);
@@ -591,9 +597,12 @@ class SistemaController extends BaseController {
               ->select('d.id,d.cognome,d.nome,d.sesso,c.tipo,m.id AS m_id')
               ->join('c.docente', 'd')
               ->join('c.materia', 'm')
-              ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
+              ->join('c.classe', 'cl')
+              ->where("c.attiva=1 AND c.tipo!='P' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('d.cognome,d.nome,m.ordinamento', 'ASC')
-              ->setParameters(['classe' => $scrutinio->getClasse(), 'attiva' => 1, 'tipo' => 'P'])
+              ->setParameters(['anno' => $scrutinio->getClasse()->getAnno(),
+                'sezione' => $scrutinio->getClasse()->getSezione(),
+                'gruppo' => $scrutinio->getClasse()->getGruppo()])
               ->getQuery()
               ->getArrayResult();
             foreach ($docenti as $docente) {
@@ -650,9 +659,40 @@ class SistemaController extends BaseController {
           $sql = "UPDATE gs_utente a ".
             "INNER JOIN gs_storico_esito se ON se.alunno_id = a.id ".
             "INNER JOIN gs_classe c ON c.id = a.classe_id ".
-            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione AND gruppo = c.gruppo) ".
+            "SET a.classe_id = (SELECT id FROM gs_classe WHERE anno = c.anno + 1 AND sezione = c.sezione AND ((c.gruppo IS NULL AND gruppo IS NULL) OR (c.gruppo IS NOT NULL AND c.gruppo = gruppo))) ".
             "WHERE a.ruolo = 'ALU' AND se.esito IN ('A', 'E');";
           $connection->executeStatement($sql);
+          // svuota directory temp
+          $finder->files()->in($path.'/tmp')->depth('== 0')->notName('.gitkeep');
+          $fs->remove($finder);
+          // elenco alunni in uscita
+          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->leftJoin('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+            ->where('a.abilitato=1 AND se.id IS NULL')
+            ->getQuery()
+            ->getResult();
+          // crea file CSV per info alunni in uscita
+          $fh = fopen($path.'/tmp/alunni_in_uscita.csv', 'w');
+          $dati = ['username', 'email', 'classe'];
+          fputcsv($fh, $dati);
+          foreach($alunni as $alunno) {
+            $dati = [$alunno->getUsername(), $alunno->getEmail(), $alunno->getClasse() ?? '--'];
+            fputcsv($fh, $dati);
+          }
+          fclose($fh);
+          // disabilita alunni/genitori in uscita
+          $sqlCommands = [
+            "UPDATE gs_utente a ".
+            "  SET a.abilitato = 0 ".
+            "  WHERE a.ruolo = 'ALU' AND a.abilitato = 1 ".
+            "  AND NOT EXISTS (SELECT id FROM gs_storico_esito WHERE alunno_id = a.id);",
+            "UPDATE gs_utente g ".
+            "  INNER JOIN gs_utente a ON a.id = g.alunno_id ".
+            "  SET g.abilitato = 0, g.alunno_id = null ".
+            "  WHERE g.ruolo = 'GEN' AND a.ruolo = 'ALU' AND a.abilitato = 0;"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
@@ -714,7 +754,8 @@ class SistemaController extends BaseController {
             // conserva dati utenti per nuove circolari
             $utenti = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
               ->select('(cu.circolare) AS circolare,(cu.utente) AS utente,cu.letta,cu.confermata')
-              ->where('cu.circolare=:circolare')
+              ->join('cu.utente', 'u')
+              ->where('cu.circolare=:circolare AND u.abilitato=1')
               ->setParameters(['circolare' => $circolare->getId()])
               ->getQuery()
               ->getScalarResult();
@@ -723,11 +764,11 @@ class SistemaController extends BaseController {
           $this->em->flush();
           // svuota tabelle dati destinatari
           $sqlCommands = [
+            "SET FOREIGN_KEY_CHECKS = 0;",
             "TRUNCATE gs_circolare_classe;",
             "TRUNCATE gs_circolare_sede;",
             "TRUNCATE gs_circolare_utente;",
-            // "TRUNCATE gs_firma_circolare;"
-            ];
+            "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
           }
@@ -750,7 +791,36 @@ class SistemaController extends BaseController {
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
         case 4: // gestione avvisi
-          // controlla presenza di avvisi dal 1/9 in poi
+          // crea nuova directory
+          $fs->mkdir($path.'/upload/avvisi/'.$info['vecchioAnno'], 0770);
+          // legge avvisi prima del 1/9 e non già modificati
+          $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            ->where("a.anno=0 AND a.data<:inizio AND a.tipo IN ('C', 'A')")
+            ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
+            ->getQuery()
+            ->getResult();
+          // modifica path e sposta file
+          foreach ($avvisi as $avviso) {
+            // modifica path allegati
+            $allegati = $avviso->getAllegati();
+            $nuoviAllegati = [];
+            foreach ($allegati as $allegato) {
+              $file = $path.'/upload/avvisi/'.$allegato;
+              $nuoviAllegati[] = $info['vecchioAnno'].'/'.$allegato;
+              $fs->rename($file, $path.'/upload/avvisi/'.$info['vecchioAnno'].'/'.$allegato);
+            }
+            // modifica path su db
+            $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+              ->update()
+              ->set('a.anno', ':anno')
+              ->set('a.allegati', ':allegati')
+              ->where('a.id=:id')
+              ->setParameters(['anno' => $info['vecchioAnno'],
+                'allegati' => serialize($nuoviAllegati), 'id' => $avviso->getId()])
+              ->getQuery()
+              ->execute();
+          }
+          // controlla presenza di avvisi dal 1/9 (esclusi quelli su cattedre che sono azzerate)
           $nuoviAvvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
             ->where('a.data>=:inizio AND a.cattedra IS NULL')
             ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
@@ -770,7 +840,8 @@ class SistemaController extends BaseController {
             // conserva dati utenti per nuovi avvisi
             $utenti = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
               ->select('(au.avviso) AS avviso,(au.utente) AS utente,au.letto')
-              ->where('au.avviso=:avviso')
+              ->join('au.utente', 'u')
+              ->where('au.avviso=:avviso AND u.abilitato=1')
               ->setParameters(['avviso' => $avviso->getId()])
               ->getQuery()
               ->getScalarResult();
@@ -778,16 +849,18 @@ class SistemaController extends BaseController {
           }
           // svuota tabelle dati destinatari
           $sqlCommands = [
+            "SET FOREIGN_KEY_CHECKS = 0;",
             "TRUNCATE gs_avviso_classe;",
             "TRUNCATE gs_avviso_sede;",
-            "TRUNCATE gs_avviso_utente;"];
+            "TRUNCATE gs_avviso_utente;",
+            "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
           }
           // cancella vecchi avvisi
           $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
             ->delete()
-            ->where('a.data<:data OR a.cattedra IS NOT NULL')
+            ->where('(a.data<:data AND a.anno=0) OR (a.data>=:data AND a.cattedra IS NOT NULL)')
             ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
             ->getQuery()
             ->execute();
@@ -820,11 +893,11 @@ class SistemaController extends BaseController {
           // directory da svuotare
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
-          // gestione documenti BES (alunni abilitati e con classe definita)
+          // gestione documenti BES (alunni abilitati)
           $documenti = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
             ->join('d.alunno', 'a')
             ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno = a.id')
-            ->where('d.tipo IN (:tipi) AND a.classe IS NOT NULL')
+            ->where('d.tipo IN (:tipi)')
             ->setParameters(['tipi' => ['B', 'D', 'H']])
             ->getQuery()
             ->getResult();
@@ -834,18 +907,15 @@ class SistemaController extends BaseController {
               $documento->getAllegati()[0]->getEstensione();
             $percorso1 = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().
               '/riservato/';
-            // nuova classe e nuovo percorso
-            $documento->setClasse($documento->getAlunno()->getClasse());
-            $documento->getListaDestinatari()->setFiltroDocenti([$documento->getClasse()->getId()]);
-            $documento->getListaDestinatari()->setSedi(
-              new ArrayCollection([$documento->getClasse()->getSede()]));
-            $percorso2 = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().
-              '/riservato/';
+            // rimuove dati della classe
+            $documento->setClasse(null);
+            $documento->getListaDestinatari()->setFiltroDocenti([0]);
             if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
               // sposta documento
-              $fs->mkdir($path.'/upload/documenti/'.$percorso2, 0770);
+              $nomefile = md5(uniqid()).'-'.rand(1,1000);
               $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/'.$percorso2.$file);
+                $path.'/upload/documenti/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
+              $documento->getAllegati()[0]->setFile($nomefile);
             } else {
               // segna per la cancellazione
               $documento->setAlunno(null);
@@ -856,19 +926,17 @@ class SistemaController extends BaseController {
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
             "TRUNCATE gs_lista_destinatari_classe;",
+            "TRUNCATE gs_lista_destinatari_sede;",
             "TRUNCATE gs_lista_destinatari_utente;",
             "SET FOREIGN_KEY_CHECKS = 1;",
             "DELETE df FROM gs_documento_file df ".
             "  INNER JOIN gs_documento d ON d.id = df.documento_id ".
-            "  LEFT JOIN gs_utente a ON a.id = d.alunno_id ".
-            "  WHERE d.tipo NOT IN ('B', 'D', 'H') OR a.classe_id IS NULL ".
+            "  WHERE d.tipo NOT IN ('B', 'D', 'H') OR d.alunno_id IS NULL ".
             "  OR NOT EXISTS (SELECT id FROM gs_storico_esito WHERE d.alunno_id = alunno_id);",
             "DELETE d FROM gs_documento d ".
             "  WHERE NOT EXISTS (SELECT file_id FROM gs_documento_file WHERE documento_id = d.id);",
             "DELETE f FROM gs_file f ".
             "  WHERE NOT EXISTS (SELECT documento_id FROM gs_documento_file WHERE file_id = f.id);",
-            "DELETE lds FROM gs_lista_destinatari_sede lds ".
-            "  WHERE NOT EXISTS (SELECT id FROM gs_documento WHERE lista_destinatari_id = lds.lista_destinatari_id);",
             "DELETE ld FROM gs_lista_destinatari ld ".
             "  WHERE NOT EXISTS (SELECT id FROM gs_documento WHERE lista_destinatari_id = ld.id);"];
           foreach ($sqlCommands as $sql) {
@@ -884,18 +952,6 @@ class SistemaController extends BaseController {
           // svuota archivio documenti
           $finder = new Finder();
           $finder->in($path.'/archivio/classi')->notName('.gitkeep');
-          $fs->remove($finder);
-          // ripristina documenti
-          $finder = new Finder();
-          $finder->files()->in($path.'/upload/documenti')->notName('.gitkeep');
-          foreach ($finder as $file) {
-            $percorso = substr($file->getPathname(), strpos($file->getPathname(), '/upload/documenti/') + 18);
-            $dir = substr($percorso, 0, - strlen($file->getBasename()) - 1);
-            $fs->mkdir($path.'/archivio/classi/'.$dir, 0770);
-            $fs->rename($file, $path.'/archivio/classi/'.$percorso);
-          }
-          $finder = new Finder();
-          $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
@@ -922,53 +978,21 @@ class SistemaController extends BaseController {
           $finder = new Finder();
           $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')->exclude('storico');
           foreach ($finder as $dir) {
-            $fs->remove($dir->getPathname());
+            $finder2 = new Finder();
+            $finder2->directories()->in($dir->getPathname())->depth('== 0');
+            foreach ($finder2 as $dir2) {
+              $fs->remove($dir2);
+            }
+            $fs->remove($dir);
           }
           // messaggio finale
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
         case 7: // rimozione utenti
-          // svuota directory temp
-          $finder->files()->in($path.'/tmp')->depth('== 0')->notName('.gitkeep');
-          $fs->remove($finder);
-          // elenco alunni in uscita
-          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->leftJoin('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
-            ->where('a.abilitato=:si AND se.id IS NULL')
-            ->setParameters(['si' => 1])
-            ->getQuery()
-            ->getResult();
-          // crea file CSV per info alunni disabilitati
-          $fh = fopen($path.'/tmp/alunni_disabilitati.csv', 'w');
-          $dati = ['email', 'classe'];
-          fputcsv($fh, $dati, ';');
-          foreach($alunni as $alunno) {
-            $dati = [$alunno->getEmail(), $alunno->getClasse() ?? '--'];
-            fputcsv($fh, $dati, ';');
-          }
-          fclose($fh);
-          // disabilita alunni/genitori e rimuove utenti disabilitati
+          // rimuove utenti disabilitati
           $sqlCommands = [
-            "UPDATE gs_utente a ".
-            "  SET a.abilitato = 0 ".
-            "  WHERE a.ruolo = 'ALU' AND a.abilitato = 1 ".
-            "  AND NOT EXISTS (SELECT id FROM gs_storico_esito WHERE alunno_id = a.id);",
-            "UPDATE gs_utente g ".
-            "  INNER JOIN gs_utente a ON a.id = g.alunno_id ".
-            "  SET g.abilitato = 0 ".
-            "  WHERE g.ruolo = 'GEN' AND g.abilitato = 1 AND a.ruolo = 'ALU' AND a.abilitato = 0;",
-            "DELETE cu FROM gs_circolare_utente cu ".
-            "  INNER JOIN gs_utente u ON u.id = cu.utente_id ".
-            "  WHERE u.abilitato = 0;",
-            "DELETE au FROM gs_avviso_utente au ".
-            "  INNER JOIN gs_utente u ON u.id = au.utente_id ".
-            "  WHERE u.abilitato = 0;",
-            "UPDATE gs_utente u ".
-            "  SET alunno_id = null ".
-            "  WHERE u.abilitato = 0;",
             "DELETE u FROM gs_utente u ".
-            "  WHERE u.abilitato = 0 ".
-            "  AND NOT EXISTS (SELECT id FROM gs_storico_esito WHERE alunno_id = u.id);"];
+            "  WHERE u.abilitato = 0;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
           }
