@@ -78,7 +78,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2024-05-23'
+releaseDate: '2024-08-15'
 softwareType: standalone/web
-softwareVersion: 1.5.8
+softwareVersion: 1.5.9
 url: 'https://github.com/iisgiua/giuaschool'
