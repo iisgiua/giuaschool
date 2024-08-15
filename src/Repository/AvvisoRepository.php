@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\Avviso;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -244,6 +245,103 @@ class AvvisoRepository extends BaseRepository {
     }
     // restituisce lista utenti
     return $utenti;
+  }
+
+  /**
+   * Restituisce la lista degli anni scolastici presenti nell'archivio degli avvisi
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function anniScolastici(): array {
+    // inizializza
+    $dati = [];
+    // legge anni
+    $anni = $this->createQueryBuilder('a')
+      ->select('DISTINCT a.anno')
+      ->where('a.anno > 0')
+      ->orderBy('a.anno', 'DESC')
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($anni as $val) {
+      $dati['A.S. '.$val['anno'].'/'.($val['anno'] + 1)] = $val['anno'];
+    }
+    // restituisce dati formattati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli autori di avvisi presenti nell'archivio
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function autori(): array {
+    // inizializza
+    $dati = [];
+    // legge docenti
+    $docenti = $this->createQueryBuilder('a')
+      ->select('DISTINCT (a.docente) AS id,d.cognome,d.nome')
+      ->join('a.docente', 'd')
+      ->where('a.anno > 0')
+      ->orderBy('d.cognome,d.nome', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($docenti as $val) {
+      $dati[$val['nome'].' '.$val['cognome']] = $val['id'];
+    }
+    // restituisce dati formattati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli avvisi in archivio che rispondono ai criteri di ricerca impostati
+   *
+   * @param array $ricerca Criteri di ricerca
+   * @param int $pagina Pagina corrente
+   * @param int $limite Numero di elementi per pagina
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function listaArchivio($ricerca, $pagina, $limite): Paginator {
+    // crea query base
+    $query = $this->createQueryBuilder('a')
+      ->where('a.anno > 0')
+      ->orderBy('a.data,a.ora', 'ASC');
+    if ($ricerca['anno'] > 0) {
+      // filtra per anno
+      $query->andWhere('a.anno = :anno')->setParameter('anno', $ricerca['anno']);
+    }
+    if ($ricerca['mese'] > 0) {
+      // filtra per mese
+      $query->andWhere('MONTH(a.data) = :mese')->setParameter('mese', $ricerca['mese']);
+    }
+    if ($ricerca['docente'] > 0) {
+      // filtra per autore
+      $query->andWhere('a.docente = :docente')->setParameter('docente', $ricerca['docente']);
+    }
+    if (!empty($ricerca['destinatari'])) {
+      // filtra per destinatari
+      if (in_array($ricerca['destinatari'], ['C', 'D', 'G', 'A', 'R', 'I', 'L', 'S', 'P'])) {
+        $query->andWhere('INSTR(a.destinatari, :destinatari)>0')
+          ->setParameter('destinatari', $ricerca['destinatari']);
+      } elseif ($ricerca['destinatari'] == 'E') {
+        $query->andWhere('INSTR(a.destinatariAta, :destinatari)>0')
+          ->setParameter('destinatari', 'D');
+      } elseif ($ricerca['destinatari'] == 'T') {
+        $query->andWhere('INSTR(a.destinatariAta, :destinatari)>0')
+          ->setParameter('destinatari', 'A');
+      } elseif ($ricerca['destinatari'] == 'Z') {
+        $query->andWhere('INSTR(a.destinatariSpeciali, :destinatari)>0')
+          ->setParameter('destinatari', 'S');
+      }
+    }
+    if (!empty($ricerca['oggetto'])) {
+      // filtra per oggetto
+      $query->andWhere('a.oggetto LIKE :oggetto')
+        ->setParameter('oggetto', '%'.$ricerca['oggetto'].'%');
+    }
+    // crea lista con pagine
+    $dati = $this->paginazione($query->getQuery(), $pagina);
+    return $dati['lista'];
   }
 
 }

@@ -237,9 +237,9 @@ class BachecaUtil {
    */
   public function listaAvvisi($ricerca, $pagina, $limite, Docente $docente, $tipo) {
     $dati = array();
-    // legge avvisi
+    // legge avvisi (solo anno corrente)
     $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
-      ->where('a.tipo=:tipo');
+      ->where('a.tipo=:tipo AND a.anno=0');
     if ($ricerca['docente']) {
       $avvisi = $avvisi->andWhere('a.docente=:docente')->setParameter('docente', $ricerca['docente']);
     }
@@ -388,7 +388,7 @@ class BachecaUtil {
     $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('a as avviso,au.letto')
       ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-      ->where('au.utente=:utente')
+      ->where('a.anno=0 AND au.utente=:utente')
       ->orderBy('a.data', 'DESC')
       ->setParameters(['utente' => $utente]);
     if ($search['visualizza'] == 'D') {
@@ -440,7 +440,7 @@ class BachecaUtil {
     // lista avvisi non letti
     $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->join('App\Entity\AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-      ->where('avc.classe=:classe AND avc.letto IS NULL')
+      ->where('a.anno=0 AND avc.classe=:classe AND avc.letto IS NULL')
       ->orderBy('a.data', 'ASC')
       ->setParameters(['classe' => $classe])
       ->getQuery()

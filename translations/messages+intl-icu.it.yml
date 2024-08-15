@@ -167,8 +167,11 @@ label.filtro_mese: Filtra per data
 label.filtro_nessuno: Nessuno
 label.filtro_nuovi: Solo nuovi
 label.filtro_sede: Filtra per sede
+label.filtro_autore: Filtra per autore
+label.filtro_destinatario: Filtra per destinatario
 label.filtro_tutti: Tutti
 label.filtro_utenti: Filtro per utente
+label.filtro_oggetto: Filtra per oggetto
 label.firma_circolare: Conferma lettura
 label.frequenza_estero: Anno all'estero
 label.genitori_classe: Genitori della classe
@@ -255,8 +258,12 @@ label.prof_F: "Prof.ssa"
 label.prof_M: "Prof."
 label.provvedimenti_disciplinari: Provvedimenti disciplinari
 label.provvedimento: Provvedimento disciplinare
+label.qualsiasi_anno: Qualsiasi anno
+label.qualsiasi_mese: Qualsiasi mese
 label.qualsiasi_classe: Qualsiasi classe
 label.qualsiasi_sede: Qualsiasi sede
+label.qualsiasi_autore: Qualsiasi autore
+label.qualsiasi_destinatario: Qualsiasi destinatario
 label.rappresentante: Rappresentante
 label.rappresentante_L: Rappresentante di classe
 label.rappresentante_S: Rappresentante di classe
@@ -820,7 +827,6 @@ title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
 page.docenti.rspp: Configura RSPP
 title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
 
-
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
 page.agenda_verifica: Agenda Verifiche
@@ -916,6 +922,7 @@ page.staff_avvisi_entrate: Avvisi Ingresso
 page.staff_avvisi_individuali: Avvisi Individuali
 page.staff_avvisi_uscite: Avvisi Uscita
 page.staff_avvisi: Avvisi Generici
+page.staff_avvisi_archivio: Archivio Avvisi
 page.staff_circolari: Gestione Circolari
 page.staff_colloqui: Ore Colloqui
 page.staff_deroghe: Deroghe Ingressi e Uscite
@@ -1070,6 +1077,7 @@ title.staff_avvisi_entrate: Avvisi per l'ingresso posticipato delle classi
 title.staff_avvisi_individuali: Avvisi individuali per i genitori
 title.staff_avvisi_uscite: Avvisi per l'uscita anticipata delle classi
 title.staff_avvisi: Avvisi di tipo generico
+title.staff_avvisi_archivio: Archivio degli avvisi degli anni precedenti
 title.staff_maggio: Inserimento dei documenti del 15 maggio
 title.staff_piani: Inserimento dei piani di lavoro
 title.staff_programmi: Inserimento dei programmi svolti

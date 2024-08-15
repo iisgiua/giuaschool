@@ -1487,6 +1487,142 @@ class StaffController extends BaseController {
   }
 
   /**
+   * Archivio degli avvisi degli anni precedenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/staff/avvisi/archivio/{pagina}", name="staff_avvisi_archivio",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function avvisiArchivioAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+    // inizializza
+    $dati = [];
+    $limite = 20;
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // recupera criteri dalla sessione
+    $cerca = [];
+    $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/anno');
+    $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/mese');
+    $cerca['docente'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/docente');
+    $cerca['destinatari'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/destinatari', '');
+    $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/oggetto', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_archivio/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
+    }
+    // crea lista anni
+    $listaAnni = $this->em->getRepository('App\Entity\Avviso')->anniScolastici();
+    // crea lista mesi
+    $listaMesi = [];
+    for ($i = 9; $i <= 12; $i++) {
+      $listaMesi[$mesi[$i]] = $i;
+    }
+    for ($i = 1; $i <= 8; $i++) {
+      $listaMesi[$mesi[$i]] = $i;
+    }
+    // crea lista docenti autori di avvisi
+    $listaDocenti = $this->em->getRepository('App\Entity\Avviso')->autori();
+    // crea lista destinatari
+    $listaDestinatari = ['label.coordinatori' => 'C', 'label.docenti' => 'D',
+      'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
+      'label.rappresentanti_I' => 'I', 'label.rappresentanti_L' => 'L',
+      'label.rappresentanti_S' => 'S', 'label.rappresentanti_P' => 'P',
+      'label.dsga' => 'E', 'label.ata' => 'T', 'label.RSPP' => 'Z'];
+    // form di ricerca
+    $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_archivio', FormType::class)
+      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+        'data' => $cerca['anno'],
+        'choices' => $listaAnni,
+        'choice_translation_domain' => false,
+        'placeholder' => 'label.qualsiasi_anno',
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_anno_scolastico'],
+        'required' => false))
+      ->add('mese', ChoiceType::class, array('label' => 'label.filtro_mese',
+        'data' => $cerca['mese'],
+        'choices' => $listaMesi,
+        'placeholder' => 'label.qualsiasi_mese',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_mese'],
+        'required' => false))
+      ->add('docente', ChoiceType::class, array('label' => 'label.filtro_autore',
+        'data' => $cerca['docente'],
+        'choices' => $listaDocenti,
+        'placeholder' => 'label.qualsiasi_autore',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_autore'],
+        'required' => false))
+      ->add('destinatari', ChoiceType::class, array('label' => 'label.filtro_destinatario',
+        'data' => $cerca['destinatari'],
+        'choices' => $listaDestinatari,
+        'placeholder' => 'label.qualsiasi_destinatario',
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_destinatario'],
+        'required' => false))
+      ->add('oggetto', TextType::class, array('label' => 'label.filtro_oggetto',
+        'data' => $cerca['oggetto'],
+        'attr' => ['placeholder' => 'label.filtro_oggetto', 'class' => 'gs-placeholder', 'title' => 'label.filtro_oggetto',],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $cerca['anno'] = $form->get('anno')->getData();
+      $cerca['mese'] = $form->get('mese')->getData();
+      $cerca['docente'] = (int) $form->get('docente')->getData();
+      $cerca['destinatari'] = ($form->get('destinatari')->getData() ? $form->get('destinatari')->getData() : '');
+      $cerca['oggetto'] = $form->get('oggetto')->getData();
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/anno', $cerca['anno']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/mese', $cerca['mese']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/docente', $cerca['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/destinatari', $cerca['destinatari']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/oggetto', $cerca['oggetto']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $this->em->getRepository('App\Entity\Avviso')->listaArchivio($cerca, $pagina, $limite);
+    // mostra la pagina di risposta
+    return $this->render('ruolo_staff/avvisi_archivio.html.twig', array(
+      'pagina_titolo' => 'page.staff_avvisi_archivio',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
+      'page' => $pagina,
+      'maxPages' => ceil($dati->count() / $limite),
+      'dati' => $dati,
+      'mesi' => $mesi,
+    ));
+  }
+
+  /**
    * Restituisce gli alunni della classe indicata
    *
    * @param int $id Identificativo della classe

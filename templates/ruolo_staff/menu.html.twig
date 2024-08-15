@@ -8,6 +8,7 @@
         <li{{ app.request.attributes.get('_route')[:19] == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'U' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'U'}) }}" title="Gestione degli avvisi per l'uscita anticipata delle classi">Uscita anticipata</a></li>
         <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_attivita' ? ' class="active"' }}><a href="{{ path('staff_avvisi_attivita') }}" title="Gestione degli avvisi per lo svolgimento di attività per le classi">Svolgimento attività</a></li>
         <li{{ app.request.attributes.get('_route')[:24] == 'staff_avvisi_individuali' ? ' class="active"' }}><a href="{{ path('staff_avvisi_individuali') }}" title="Gestione degli avvisi individuali per i genitori">Messaggio personale</a></li>
+        <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_archivio' ? ' class="active"' }}><a href="{{ path('staff_avvisi_archivio') }}" title="Archivio degli avvisi degli anni precedenti">Archivio</a></li>
       </ul>
     </li>
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' active' }}">
