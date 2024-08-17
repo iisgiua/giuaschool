@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78599d8cca48d907b8be3d7127cdcc9a",
+    "content-hash": "18cd6d9272ed4ed0cdd9efba4636658b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -3245,16 +3245,16 @@
         },
         {
             "name": "qipsius/tcpdf-bundle",
-            "version": "2.0.3",
+            "version": "dev-2.0-fix",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Qipsius/QipsiusTCPDFBundle.git",
-                "reference": "961f0bfd55442336b8a12d599eca078b26a4b853"
+                "url": "https://github.com/trinko/QipsiusTCPDFBundle.git",
+                "reference": "ed6bc0565b512a339095b8f030c990c44e819713"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Qipsius/QipsiusTCPDFBundle/zipball/961f0bfd55442336b8a12d599eca078b26a4b853",
-                "reference": "961f0bfd55442336b8a12d599eca078b26a4b853",
+                "url": "https://api.github.com/repos/trinko/QipsiusTCPDFBundle/zipball/ed6bc0565b512a339095b8f030c990c44e819713",
+                "reference": "ed6bc0565b512a339095b8f030c990c44e819713",
                 "shasum": ""
             },
             "require": {
@@ -3268,7 +3268,6 @@
                     "Qipsius\\TCPDFBundle\\": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -3281,14 +3280,13 @@
             "description": "A bundle to easily integrate TCPDF into Symfony",
             "homepage": "https://github.com/qipsius/QipsiusTCPDFBundle",
             "keywords": [
-                "TCPDF",
-                "pdf"
+                "pdf",
+                "tcpdf"
             ],
             "support": {
-                "issues": "https://github.com/Qipsius/QipsiusTCPDFBundle/issues",
-                "source": "https://github.com/Qipsius/QipsiusTCPDFBundle/tree/2.0.3"
+                "source": "https://github.com/trinko/QipsiusTCPDFBundle/tree/2.0-fix"
             },
-            "time": "2023-08-07T08:33:50+00:00"
+            "time": "2024-08-17T08:57:16+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -12895,7 +12893,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "qipsius/tcpdf-bundle": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

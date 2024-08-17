@@ -597,11 +597,13 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->riepilogoVotiDati($classe, $periodo);
+        $dati['tcpdf'] = [];
         foreach ($dati['materie'] as $id => $mat) {
-          $params = [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
-        $dati['tcpdf_params']['rotate'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([90]);
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_riepilogo_' . $periodo . '.html.twig',
@@ -644,17 +646,25 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->riepilogoVotiDati($classe, $periodo);
+        $dati['tcpdf'] = [];
         foreach ($dati['materie'] as $id => $mat) {
-          $params = [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
-        $dati['tcpdf_params']['rotate'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([90]);
-        $params = [30, 0, 'Credito', 0, 'L', false, 0];
-        $dati['tcpdf_params']['credito'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
-        $params = [30, 0, 'Credito Anni Prec.', 0, 'L', false, 0];
-        $dati['tcpdf_params']['creditoPrec'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
-        $params = [30, 0, 'Credito Totale', 0, 'L', false, 0];
-        $dati['tcpdf_params']['creditoTot'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito', 0, 'L', false, 0]);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito Anni Prec.', 0, 'L', false, 0]);
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito Totale', 0, 'L', false, 0]);
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_riepilogo_' . $periodo . '.html.twig',
@@ -698,17 +708,25 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->riepilogoVotiDati($classe, $periodo);
+        $dati['tcpdf'] = [];
         foreach ($dati['materie'] as $id => $mat) {
-          $params = [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
-        $dati['tcpdf_params']['rotate'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([90]);
-        $params = [30, 0, 'Credito', 0, 'L', false, 0];
-        $dati['tcpdf_params']['credito'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
-        $params = [30, 0, 'Credito Anni Prec.', 0, 'L', false, 0];
-        $dati['tcpdf_params']['creditoPrec'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
-        $params = [30, 0, 'Credito Totale', 0, 'L', false, 0];
-        $dati['tcpdf_params']['creditoTot'] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito', 0, 'L', false, 0]);
+        $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito Anni Prec.', 0, 'L', false, 0]);
+        $dati['tcpdf']['creditoPrec'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, 'Credito Totale', 0, 'L', false, 0]);
+        $dati['tcpdf']['creditoTot'][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         // crea il documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_riepilogo_G.html.twig',
@@ -2295,12 +2313,14 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->certificazioniDati($classe, $periodo);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         foreach ($dati['ammessi'] as $id => $alu) {
-          $params = ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         }
-        $dati['tcpdf_params']['true'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([true]);
-        $dati['tcpdf_params']['false'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([false]);
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_certificazioni.html.twig',
@@ -2345,12 +2365,14 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->certificazioniDati($classe, $periodo);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         foreach ($dati['ammessi'] as $id => $alu) {
-          $params = ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         }
-        $dati['tcpdf_params']['true'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([true]);
-        $dati['tcpdf_params']['false'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([false]);
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_certificazioni.html.twig',
@@ -3084,12 +3106,14 @@ class PagelleUtil {
             unset($dati['ammessi'][$id]);
           }
         }
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         foreach ($dati['ammessi'] as $id => $alu) {
-          $params = ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         }
-        $dati['tcpdf_params']['true'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([true]);
-        $dati['tcpdf_params']['false'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([false]);
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_certificazioni.html.twig',
@@ -3140,12 +3164,14 @@ class PagelleUtil {
             unset($dati['ammessi'][$id]);
           }
         }
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
+        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         foreach ($dati['ammessi'] as $id => $alu) {
-          $params = ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)];
-          $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', array(0, 0, 0), array(255, 255, 255)]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
         }
-        $dati['tcpdf_params']['true'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([true]);
-        $dati['tcpdf_params']['false'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([false]);
         // crea documento
         $html = $this->tpl->render(
           'coordinatore/documenti/scrutinio_certificazioni.html.twig',
