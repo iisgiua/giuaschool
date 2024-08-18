@@ -469,7 +469,7 @@ class BachecaUtil {
         ->setParameters(['classe' => $classe])
         ->getQuery()
         ->getResult();
-    } elseif ((int) $id) > 0) {
+    } elseif (((int) $id) > 0) {
       // solo avviso indicato
       $avc = $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('avc')
         ->where('avc.avviso=:avviso AND avc.classe=:classe AND avc.letto IS NULL')
