@@ -70,8 +70,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function editAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                             CircolariUtil $circ, LogHandler $dblogger, int $id): Response {
+  public function edit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                       CircolariUtil $circ, LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/circolari_edit/';
@@ -401,7 +401,6 @@ class CircolariController extends BaseController {
   /**
    * Cancella circolare
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param int $id Identificativo della circolare
@@ -414,8 +413,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function deleteAction(Request $request, LogHandler $dblogger, CircolariUtil $circ,
-                               int $id): Response {
+  public function delete(LogHandler $dblogger, CircolariUtil $circ,
+                         int $id): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     $fs = new Filesystem();
     // controllo circolare
@@ -486,7 +485,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, CircolariUtil $circ, int $pagina): Response {
+  public function gestione(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -567,7 +566,6 @@ class CircolariController extends BaseController {
   /**
    * Pubblica la circolare o ne rimuove la pubblicazione
    *
-   * @param Request $request Pagina richiesta
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
@@ -582,8 +580,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function publishAction(Request $request, MessageBusInterface $msg, LogHandler $dblogger,
-                                CircolariUtil $circ, int $pubblica, int $id): Response {
+  public function publish(MessageBusInterface $msg, LogHandler $dblogger,
+                          CircolariUtil $circ, int $pubblica, int $id): Response {
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
@@ -668,7 +666,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function dettagliGestioneAction(CircolariUtil $circ, int $id): Response {
+  public function dettagliGestione(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -705,7 +703,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(CircolariUtil $circ, int $id, int $doc, string $tipo): Response {
+  public function download(CircolariUtil $circ, int $id, int $doc, string $tipo): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->find($id);
@@ -766,7 +764,7 @@ class CircolariController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function genitoriAction(Request $request, int $pagina): Response {
+  public function genitori(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -862,7 +860,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function dettagliDestinatariAction(CircolariUtil $circ, int $id): Response {
+  public function dettagliDestinatari(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -897,7 +895,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function dettagliStaffAction(CircolariUtil $circ, int $id): Response {
+  public function dettagliStaff(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -935,7 +933,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function firmaAction(CircolariUtil $circ, int $id): Response {
+  public function firma(CircolariUtil $circ, int $id): Response {
     // controllo circolare
     $circolare = $this->em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
@@ -976,7 +974,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAction(Request $request, CircolariUtil $circ, int $pagina): Response {
+  public function docenti(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1097,7 +1095,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function ataAction(Request $request, int $pagina): Response {
+  public function ata(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1208,7 +1206,7 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classiAction(int $classe): Response {
+  public function classi(int $classe): Response {
     // inizializza
     $dati = null;
     // controllo classe
@@ -1229,7 +1227,6 @@ class CircolariController extends BaseController {
   /**
    * Conferma la lettura della circolare alla classe
    *
-   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe ID della classe
@@ -1243,8 +1240,8 @@ class CircolariController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function firmaClasseAction(Request $request, TranslatorInterface $trans, LogHandler $dblogger,
-                                    int $classe, int $id): Response {
+  public function firmaClasse(TranslatorInterface $trans, LogHandler $dblogger,
+                              int $classe, int $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {

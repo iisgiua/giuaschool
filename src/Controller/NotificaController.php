@@ -34,8 +34,8 @@ class NotificaController extends BaseController {
    * @Route("/notifica/telegram/", name="notifica_telegram",
    *    methods={"POST"})
    */
-  public function telegramAction(Request $request, TranslatorInterface $trans,
-                                 LoggerInterface $logger): JsonResponse {
+  public function telegram(Request $request, TranslatorInterface $trans,
+                           LoggerInterface $logger): JsonResponse {
     // init
     $risposta = [];
     // assicura che lo script non sia interrotto

@@ -19,7 +19,6 @@ use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
 use App\Util\LogHandler;
 use App\Util\TelegramManager;
-use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -58,7 +57,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function bannerAction(Request $request): Response {
+  public function banner(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -92,7 +91,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneAction(Request $request): Response {
+  public function manutenzione(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -157,7 +156,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function parametriAction(Request $request): Response {
+  public function parametri(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -191,9 +190,9 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 TranslatorInterface $trans, ValidatorInterface $validator,
-                                 LogHandler $dblogger): Response {
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           TranslatorInterface $trans, ValidatorInterface $validator,
+                           LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
@@ -255,8 +254,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, TranslatorInterface $trans,
-                              LogHandler $dblogger): Response {
+  public function alias(Request $request, TranslatorInterface $trans,
+                        LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
@@ -296,7 +295,6 @@ class SistemaController extends BaseController {
   /**
    * Disconnette l'alias in uso e ritorna all'utente iniziale
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -304,7 +302,7 @@ class SistemaController extends BaseController {
    * @Route("/sistema/alias/exit", name="sistema_alias_exit",
    *    methods={"GET"})
    */
-  public function aliasExitAction(Request $request, LogHandler $dblogger): Response  {
+  public function aliasExit(LogHandler $dblogger): Response  {
     // log azione
     $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
       'Username' => $this->getUser()->getUserIdentifier(),
@@ -344,8 +342,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function nuovoAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
-                              int $step): Response {
+  public function nuovo(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
+                        int $step): Response {
     // init
     $dati = [];
     $info = [];
@@ -1051,8 +1049,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function archiviaAction(Request $request, TranslatorInterface $trans,
-                                 ArchiviazioneUtil $arch): Response {
+  public function archivia(Request $request, TranslatorInterface $trans,
+                           ArchiviazioneUtil $arch): Response {
     // init
     $dati = [];
     $info = [];
@@ -1243,7 +1241,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneCacheAction(TranslatorInterface $trans, KernelInterface $kernel): Response {
+  public function manutenzioneCache(TranslatorInterface $trans, KernelInterface $kernel): Response {
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // comandi per la pulizia della cache del database
@@ -1281,7 +1279,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneLogoutAction(Request $request): Response {
+  public function manutenzioneLogout(Request $request): Response {
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
@@ -1311,7 +1309,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneLogAction(Request $request): Response {
+  public function manutenzioneLog(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -1375,8 +1373,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneDebugAction(Request $request, TranslatorInterface $trans,
-                                          KernelInterface $kernel): Response {
+  public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
+                                    KernelInterface $kernel): Response {
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // imposta nuovo livello di log
@@ -1417,7 +1415,6 @@ class SistemaController extends BaseController {
   /**
    * Esegue l'aggiornamento a una nuova versione
    *
-   * @param Request $request Pagina richiesta
    * @param int $step Passo della procedura
    *
    * @return Response Pagina di risposta
@@ -1429,7 +1426,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aggiornaAction(Request $request, int $step): Response {
+  public function aggiorna(int $step): Response {
     // inizializza
     $dati = [];
     $info = [];
@@ -1578,8 +1575,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function emailAction(Request $request, TranslatorInterface $trans, MailerInterface $mailer,
-                              KernelInterface $kernel): Response {
+  public function email(Request $request, TranslatorInterface $trans, MailerInterface $mailer,
+                        KernelInterface $kernel): Response {
     // inizializza
     $dati = [];
     $info = [];
@@ -1719,8 +1716,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function telegramAction(Request $request, TranslatorInterface $trans,
-                                 TelegramManager $telegram): Response {
+  public function telegram(Request $request, TranslatorInterface $trans,
+                           TelegramManager $telegram): Response {
     // inizializza
     $dati = [];
     $info = [];

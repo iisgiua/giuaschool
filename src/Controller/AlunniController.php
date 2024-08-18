@@ -57,7 +57,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer): Response {
+  public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -106,7 +106,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -164,7 +164,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(int $id, int $abilita): Response {
+  public function abilita(int $id, int $abilita): Response {
     // controllo alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->find($id);
     if (!$alunno) {
@@ -207,7 +207,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, int $id): Response {
+  public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -347,10 +347,10 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, string $tipo,
-                                 ?string $username): Response {
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                           LoggerInterface $logger, LogHandler $dblogger, string $tipo,
+                           ?string $username): Response {
     // controlla alunno
     $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
     if (!$utente) {
@@ -446,7 +446,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  public function classe(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -505,8 +505,8 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeEditAction(Request $request, TranslatorInterface $trans, int $id,
-                                   string $tipo): Response {
+  public function classeEdit(Request $request, TranslatorInterface $trans, int $id,
+                             string $tipo): Response {
     $form_help = 'message.required_fields';
     // controlla azione
     if ($id > 0) {
@@ -720,7 +720,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classeDeleteAction(int $id): Response {
+  public function classeDelete(int $id): Response {
     $cambio = $this->em->getRepository('App\Entity\CambioClasse')->find($id);
     if (!$cambio) {
       // errore
@@ -754,9 +754,9 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordFiltroAction(Request $request, UserPasswordHasherInterface $hasher,
-                                       PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
-                                       LogHandler $dblogger, int $genitore): Response {
+  public function passwordFiltro(UserPasswordHasherInterface $hasher,
+                                 PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
+                                 LogHandler $dblogger, int $genitore): Response {
     // recupera criteri dalla sessione
     $criteri = array();
     $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
@@ -842,7 +842,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiAction(Request $request, int $pagina): Response {
+  public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -897,7 +897,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiGenitoriAction(Request $request, int $pagina): Response {
+  public function rappresentantiGenitori(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -953,8 +953,8 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
-                                           string $ruolo, int $id): Response {
+  public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
+                                     string $ruolo, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1030,7 +1030,7 @@ class AlunniController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiDeleteAction(string $ruolo, int $id): Response {
+  public function rappresentantiDelete(string $ruolo, int $id): Response {
     // controlla utente
     $utente = ($ruolo == 'A') ?
       $this->em->getRepository('App\Entity\Alunno')->find($id) :

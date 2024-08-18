@@ -44,7 +44,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -116,7 +116,7 @@ class BachecaController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function avvisiDettagliAction(BachecaUtil $bac, int $id): Response {
+  public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -153,7 +153,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniAction(BachecaUtil $bac, int $classe): Response {
+  public function avvisiAlunni(BachecaUtil $bac, int $classe): Response {
     // inizializza
     $dati = null;
     // controllo classe
@@ -186,7 +186,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAlunniFirmaAction(BachecaUtil $bac, int $classe, $id): Response {
+  public function avvisiAlunniFirma(BachecaUtil $bac, int $classe, string $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -217,7 +217,7 @@ class BachecaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function avvisiATAAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisiATA(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;

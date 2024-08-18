@@ -66,8 +66,8 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function firmeAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                              int $cattedra, int $classe, string $data, string $vista): Response {
+  public function firme(Request $request, RegistroUtil $reg, BachecaUtil $bac,
+                        int $cattedra, int $classe, string $data, string $vista): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -224,8 +224,8 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function addAction(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $cattedra,
-                            int $classe, string $data, int $ora): Response {
+  public function add(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $cattedra,
+                      int $classe, string $data, int $ora): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -498,9 +498,9 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function editAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                             LogHandler $dblogger, int $cattedra, int $classe, string $data,
-                             int $ora): Response {
+  public function edit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                       LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                       int $ora): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -789,7 +789,6 @@ class RegistroController extends BaseController
   /**
    * Cancella firma e lezione dal registro
    *
-   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -805,8 +804,8 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, int $classe, string $data, int $ora): Response {
+  public function delete(TranslatorInterface $trans, RegistroUtil $reg,
+                         LogHandler $dblogger, int $classe, string $data, int $ora): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -1028,10 +1027,10 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function annotazioneEditAction(Request $request, TranslatorInterface $trans,
-                                        MessageBusInterface $msg, RegistroUtil $reg, BachecaUtil $bac,
-                                        LogHandler $dblogger, int $classe, string $data,
-                                        int $id): Response {
+  public function annotazioneEdit(Request $request, TranslatorInterface $trans,
+                                  MessageBusInterface $msg, RegistroUtil $reg, BachecaUtil $bac,
+                                  LogHandler $dblogger, int $classe, string $data,
+                                  int $id): Response {
     // inizializza
     $label = array();
     $dest_filtro = [];
@@ -1250,7 +1249,6 @@ class RegistroController extends BaseController
   /**
    * Cancella annotazione dal registro
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1264,8 +1262,8 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function annotazioneDeleteAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                                          LogHandler $dblogger, int $id): Response {
+  public function annotazioneDelete(RegistroUtil $reg, BachecaUtil $bac,
+                                    LogHandler $dblogger, int $id): Response {
     // controlla annotazione
     $annotazione = $this->em->getRepository('App\Entity\Annotazione')->find($id);
     if (!$annotazione) {
@@ -1351,9 +1349,9 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                 LogHandler $dblogger, int $cattedra, int $classe, string $data,
-                                 int $id, string $tipo): Response {
+  public function notaEdit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                           LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                           int $id, string $tipo): Response {
     // inizializza
     $label = array();
     // controlla cattedra
@@ -1546,7 +1544,6 @@ class RegistroController extends BaseController
   /**
    * Cancella nota disciplinare dal registro
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo della nota disciplinare
@@ -1559,8 +1556,7 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaDeleteAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $id): Response {
+  public function notaDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository('App\Entity\Nota')->find($id);
     if (!$nota) {
@@ -1601,7 +1597,6 @@ class RegistroController extends BaseController
   /**
    * Annulla formalmente una nota disciplinare dal registro
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo della nota disciplinare
@@ -1614,8 +1609,7 @@ class RegistroController extends BaseController
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaCancelAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $id): Response {
+  public function notaCancel(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository('App\Entity\Nota')->find($id);
     if (!$nota) {

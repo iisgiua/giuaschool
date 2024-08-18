@@ -41,7 +41,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function richiesteAction(): Response {
+  public function richieste(): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -71,7 +71,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function storicoAction(): Response {
+  public function storico(): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -96,7 +96,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function confermaAction(Request $request, LogHandler $dblogger, int $id): Response {
+  public function conferma(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -145,8 +145,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function rifiutaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
-                                int $id): Response {
+  public function rifiuta(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                          int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -200,8 +200,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function modificaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
-                                 int $id): Response {
+  public function modifica(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                           int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -240,8 +240,6 @@ class ColloquiController extends BaseController {
   /**
    * Gestione dell'inserimento dei giorni di colloquio
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/colloqui/gestione/", name="colloqui_gestione",
@@ -249,7 +247,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function gestioneAction(): Response {
+  public function gestione(): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -279,8 +277,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function editAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
-                             LogHandler $dblogger, int $id): Response {
+  public function edit(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                       LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -376,7 +374,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function enableAction(LogHandler $dblogger, int $id, int $stato): Response {
+  public function enable(LogHandler $dblogger, int $id, int $stato): Response {
     // controlla colloquio
     $oggi = new \DateTime('today');
     $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
@@ -415,8 +413,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function createAction(Request $request, ColloquiUtil $col, LogHandler $dblogger,
-                               TranslatorInterface $trans): Response {
+  public function create(Request $request, ColloquiUtil $col, LogHandler $dblogger,
+                         TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -495,7 +493,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function genitoriAction(ColloquiUtil $col, TranslatorInterface $trans): Response {
+  public function genitori(ColloquiUtil $col, TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -521,7 +519,6 @@ class ColloquiController extends BaseController {
   /**
    * Invia la disdetta del genitore alla richiesta di colloquio.
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -532,7 +529,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function disdettaAction(Request $request, LogHandler $dblogger, int $id): Response {
+  public function disdetta(LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -583,8 +580,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function prenotaAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
-                                LogHandler $dblogger, int $docente): Response {
+  public function prenota(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                          LogHandler $dblogger, int $docente): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -666,7 +663,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function cercaAction(Request $request, int $pagina): Response {
+  public function cerca(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -717,7 +714,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(LogHandler $dblogger, string $tipo): Response {
+  public function delete(LogHandler $dblogger, string $tipo): Response {
     // legge ricevimenti
     $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');

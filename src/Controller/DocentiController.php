@@ -56,7 +56,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer): Response {
+  public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -118,7 +118,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -174,7 +174,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(int $id, int $abilita): Response {
+  public function abilita(int $id, int $abilita): Response {
     // controllo docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -212,7 +212,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, int $id): Response {
+  public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -283,10 +283,10 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, int $id,
-                                 string $tipo): Response {
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                           LoggerInterface $logger, LogHandler $dblogger, int $id,
+                           string $tipo): Response {
     // controlla docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -357,7 +357,6 @@ class DocentiController extends BaseController {
   /**
    * Reset della funzione OTP per i docenti
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
    *
@@ -369,7 +368,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function resetAction(Request $request, LogHandler $dblogger, int $id): Response {
+  public function reset(LogHandler $dblogger, int $id): Response {
     // controlla docente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -405,7 +404,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffAction(Request $request, int $pagina): Response {
+  public function staff(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -455,7 +454,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffEditAction(Request $request, int $id): Response {
+  public function staffEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -512,7 +511,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffDeleteAction(int $id): Response {
+  public function staffDelete(int $id): Response {
     // controlla utente staff
     $staff = $this->em->getRepository('App\Entity\Staff')->find($id);
     if (!$staff) {
@@ -544,7 +543,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriAction(Request $request, int $pagina): Response {
+  public function coordinatori(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -600,7 +599,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriEditAction(Request $request, int $id): Response {
+  public function coordinatoriEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -668,7 +667,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriDeleteAction(int $id) {
+  public function coordinatoriDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -707,7 +706,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariAction(Request $request, int $pagina): Response {
+  public function segretari(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -763,7 +762,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariEditAction(Request $request, int $id): Response {
+  public function segretariEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -832,7 +831,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariDeleteAction(int $id) {
+  public function segretariDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -869,7 +868,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreAction(Request $request, int $pagina): Response {
+  public function cattedre(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -927,7 +926,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
+  public function cattedreEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1023,7 +1022,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreEnableAction(int $id, int $abilita): Response {
+  public function cattedreEnable(int $id, int $abilita): Response {
     // controllo cattedra
     $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($id);
     if (!$cattedra) {
@@ -1073,7 +1072,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  public function responsabiliBes(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -1130,7 +1129,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesEditAction(Request $request, int $id): Response {
+  public function responsabiliBesEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1187,7 +1186,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function responsabiliBesDeleteAction(int $id): Response {
+  public function responsabiliBesDelete(int $id): Response {
     // controlla utente
     $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
@@ -1220,7 +1219,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiAction(Request $request, int $pagina): Response {
+  public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -1275,8 +1274,8 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
-                                           int $id): Response {
+  public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
+                                     int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1340,7 +1339,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiDeleteAction(int $id): Response {
+  public function rappresentantiDelete(int $id): Response {
     // controlla utente
     $utente = $this->em->getRepository('App\Entity\Docente')->find($id);
     if (!$utente) {
@@ -1369,7 +1368,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rsppAction(Request $request): Response {
+  public function rspp(Request $request): Response {
     // init
     $dati = [];
     $info = [];

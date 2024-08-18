@@ -62,7 +62,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function scrutiniAction(Request $request, TranslatorInterface $trans, string $periodo): Response {
+  public function scrutini(Request $request, TranslatorInterface $trans, string $periodo): Response {
     // init
     $dati = [];
     $info = [];
@@ -150,7 +150,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function amministratoreAction(Request $request): Response {
+  public function amministratore(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -184,7 +184,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function dirigenteAction(Request $request): Response {
+  public function dirigente(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -222,7 +222,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function istitutoAction(Request $request): Response {
+  public function istituto(Request $request): Response {
     // init
     $dati = [];
     $info = [];
@@ -247,8 +247,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati delle sedi scolastiche
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/scuola/sedi", name="scuola_sedi",
@@ -256,14 +254,15 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediAction(Request $request): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Sede')->findBY([], ['ordinamento' => 'ASC']);
-    // mostra la pagina di risposta
-    return $this->renderHtml('scuola', 'sedi', $dati, $info);
+  public function sedi(): Response
+  {
+      // init
+      $dati = [];
+      $info = [];
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\Sede')->findBY([], ['ordinamento' => 'ASC']);
+      // mostra la pagina di risposta
+      return $this->renderHtml('scuola', 'sedi', $dati, $info);
   }
 
   /**
@@ -281,7 +280,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediEditAction(Request $request, int $id): Response {
+  public function sediEdit(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -316,7 +315,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella una sede scolastica
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo della sede
    *
    * @return Response Pagina di risposta
@@ -327,7 +325,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function sediDeleteAction(Request $request, int $id): Response {
+  public function sediDelete(int $id): Response {
     // controlla sede
     $sede = $this->em->getRepository('App\Entity\Sede')->find($id);
     if (!$sede) {
@@ -352,8 +350,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati dei corsi scolastici
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/scuola/corsi", name="scuola_corsi",
@@ -361,14 +357,15 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiAction(Request $request): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Corso')->findBY([], ['nome' => 'ASC']);
-    // mostra la pagina di risposta
-    return $this->renderHtml('scuola', 'corsi', $dati, $info);
+  public function corsi(): Response
+  {
+      // init
+      $dati = [];
+      $info = [];
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\Corso')->findBY([], ['nome' => 'ASC']);
+      // mostra la pagina di risposta
+      return $this->renderHtml('scuola', 'corsi', $dati, $info);
   }
 
   /**
@@ -386,7 +383,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiEditAction(Request $request, int $id): Response {
+  public function corsiEdit(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -421,7 +418,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella un corso scolastico
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo del corso
    *
    * @return Response Pagina di risposta
@@ -432,7 +428,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function corsiDeleteAction(Request $request, int $id): Response {
+  public function corsiDelete(int $id): Response {
     // controlla corso
     $corso = $this->em->getRepository('App\Entity\Corso')->find($id);
     if (!$corso) {
@@ -457,8 +453,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati delle materie scolastiche
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/scuola/materie", name="scuola_materie",
@@ -466,14 +460,15 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieAction(Request $request): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
-    // mostra la pagina di risposta
-    return $this->renderHtml('scuola', 'materie', $dati, $info);
+  public function materie(): Response
+  {
+      // init
+      $dati = [];
+      $info = [];
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
+      // mostra la pagina di risposta
+      return $this->renderHtml('scuola', 'materie', $dati, $info);
   }
 
   /**
@@ -491,7 +486,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieEditAction(Request $request, int $id): Response {
+  public function materieEdit(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -526,7 +521,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella una materia scolastica
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo della materia
    *
    * @return Response Pagina di risposta
@@ -537,7 +531,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function materieDeleteAction(Request $request, int $id): Response {
+  public function materieDelete(int $id): Response {
     // controlla materia
     $materia = $this->em->getRepository('App\Entity\Materia')->find($id);
     if (!$materia) {
@@ -562,7 +556,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati delle classi
    *
-   * @param Request $request Pagina richiesta
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -574,7 +567,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiAction(Request $request, int $pagina): Response {
+  public function classi(int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -608,7 +601,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiEditAction(Request $request, int $id): Response {
+  public function classiEdit(Request $request, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -648,7 +641,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella una classe
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -659,7 +651,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiDeleteAction(Request $request, int $id): Response {
+  public function classiDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
@@ -684,7 +676,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati delle festività
    *
-   * @param Request $request Pagina richiesta
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -696,7 +687,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaAction(Request $request, int $pagina): Response {
+  public function festivita(int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -731,7 +722,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
+  public function festivitaEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -788,7 +779,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella una festività
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo della festività
    *
    * @return Response Pagina di risposta
@@ -799,7 +789,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaDeleteAction(Request $request, int $id): Response {
+  public function festivitaDelete(int $id): Response {
     // controlla festività
     $festivita = $this->em->getRepository('App\Entity\Festivita')->find($id);
     if (!$festivita) {
@@ -824,8 +814,6 @@ class ScuolaController extends BaseController {
   /**
    * Modifica dei dati degli orari scolastici
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/scuola/orario", name="scuola_orario",
@@ -833,18 +821,19 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioAction(Request $request): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
-      ->join('o.sede', 's')
-      ->orderBy('o.inizio,s.ordinamento', 'ASC')
-      ->getQuery()
-      ->getResult();
-    // mostra la pagina di risposta
-    return $this->renderHtml('scuola', 'orario', $dati, $info);
+  public function orario(): Response
+  {
+      // init
+      $dati = [];
+      $info = [];
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
+        ->join('o.sede', 's')
+        ->orderBy('o.inizio,s.ordinamento', 'ASC')
+        ->getQuery()
+        ->getResult();
+      // mostra la pagina di risposta
+      return $this->renderHtml('scuola', 'orario', $dati, $info);
   }
 
   /**
@@ -863,7 +852,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
+  public function orarioEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -910,7 +899,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella un orario scolastico
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo dell'orario
    *
    * @return Response Pagina di risposta
@@ -921,7 +909,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioDeleteAction(Request $request, int $id): Response {
+  public function orarioDelete(int $id): Response {
     // controlla orario
     $orario = $this->em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
@@ -959,7 +947,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function orarioScansioneAction(Request $request, TranslatorInterface $trans, int $id): Response {
+  public function orarioScansione(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
     $info = [];
@@ -1030,8 +1018,6 @@ class ScuolaController extends BaseController {
   /**
    * Visualizza i moduli di richiesta definiti
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/scuola/moduli", name="scuola_moduli",
@@ -1039,14 +1025,15 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliAction(Request $request): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera dati
-    $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findBY([], ['nome' => 'ASC']);
-    // mostra la pagina di risposta
-    return $this->renderHtml('scuola', 'moduli', $dati, $info);
+  public function moduli(): Response
+  {
+      // init
+      $dati = [];
+      $info = [];
+      // recupera dati
+      $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findBY([], ['nome' => 'ASC']);
+      // mostra la pagina di risposta
+      return $this->renderHtml('scuola', 'moduli', $dati, $info);
   }
 
   /**
@@ -1065,7 +1052,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliEditAction(Request $request, TranslatorInterface $trans, int $id): Response {
+  public function moduliEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $fs = new Filesystem();
     $finder = new Finder();
@@ -1146,7 +1133,6 @@ class ScuolaController extends BaseController {
   /**
    * Cancella un modulo definito
    *
-   * @param Request $request Pagina richiesta
    * @param int $id Identificativo del modulo
    *
    * @return Response Pagina di risposta
@@ -1157,7 +1143,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliDeleteAction(Request $request, int $id): Response {
+  public function moduliDelete(int $id): Response {
     // controlla modulo
     $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
     if (!$modulo) {
@@ -1193,7 +1179,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function moduliAbilitaAction(int $id, int $abilita): Response {
+  public function moduliAbilita(int $id, int $abilita): Response {
     // controlla modulo
     $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
     if (!$modulo) {

@@ -46,7 +46,7 @@ class RichiesteController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function listaAction(): Response {
+  public function lista(): Response {
     // inizializza
     $info = [];
     // recupera dati
@@ -72,8 +72,8 @@ class RichiesteController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function addAction(Request $request, TranslatorInterface $trans,
-                            RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
+  public function add(Request $request, TranslatorInterface $trans,
+                      RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -215,7 +215,7 @@ class RichiesteController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function deleteAction(LogHandler $dblogger, int $id): Response {
+  public function delete(LogHandler $dblogger, int $id): Response {
     // inizializza
     $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla richiesta
@@ -263,7 +263,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(int $id, int $documento): Response {
+  public function download(int $id, int $documento): Response {
     // controlla richiesta
     $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
     if (!$richiesta) {
@@ -324,9 +324,9 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, string $data, int $alunno, int $richiesta,
-                               int $posizione): Response {
+  public function uscita(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                         LogHandler $dblogger, string $data, int $alunno, int $richiesta,
+                         int $posizione): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -523,7 +523,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, int $pagina): Response {
+  public function gestione(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
@@ -617,7 +617,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function removeAction(Request $request, LogHandler $dblogger, int $id): Response {
+  public function remove(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -675,7 +675,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function manageAction(Request $request, LogHandler $dblogger, int $id): Response {
+  public function manage(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -761,7 +761,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(Classe $classe): Response {
+  public function classe(Classe $classe): Response {
     // inizializza
     $info = [];
     // recupera dati
@@ -795,7 +795,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeDeleteAction(LogHandler $dblogger, Classe $classe, int $id): Response {
+  public function classeDelete(LogHandler $dblogger, Classe $classe, int $id): Response {
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
@@ -846,9 +846,9 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAddAction(Request $request, TranslatorInterface $trans,
-                                  RichiesteUtil $ric, LogHandler $dblogger,
-                                  Classe $classe, int $modulo): Response {
+  public function classeAdd(Request $request, TranslatorInterface $trans,
+                            RichiesteUtil $ric, LogHandler $dblogger,
+                            Classe $classe, int $modulo): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -995,7 +995,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function moduloEvacuazioneAction(Request $request, string $formato, int $pagina): Response {
+  public function moduloEvacuazione(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
@@ -1084,7 +1084,7 @@ class RichiesteController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function moduloListaAction(Request $request, string $formato, int $pagina): Response {
+  public function moduloLista(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];

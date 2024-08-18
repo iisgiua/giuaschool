@@ -49,8 +49,8 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
-                                     string $data): Response {
+  public function osservazioni(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
+                               string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -175,9 +175,9 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioneEditAction(Request $request, RegistroUtil $reg,
-                                         LogHandler $dblogger, int $cattedra, string $data,
-                                         int $id): Response {
+  public function osservazioneEdit(Request $request, RegistroUtil $reg,
+                                   LogHandler $dblogger, int $cattedra, string $data,
+                                   int $id): Response {
     // inizializza
     $label = array();
     // controlla cattedra
@@ -301,7 +301,6 @@ class OsservazioniController extends BaseController {
   /**
    * Cancella un'osservazione su un alunno
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo dell'osservazione
@@ -314,8 +313,7 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioneDeleteAction(Request $request, RegistroUtil $reg,
-                                           LogHandler $dblogger, int $id): Response {
+  public function osservazioneDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla osservazione
     $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($id);
     if (!$osservazione) {
@@ -363,8 +361,8 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniPersonaliAction(Request $request, RegistroUtil $reg,
-                                              int $cattedra, int $classe, string $data): Response {
+  public function osservazioniPersonali(Request $request, RegistroUtil $reg,
+                                        int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -478,9 +476,9 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazionePersonaleEditAction(Request $request, RegistroUtil $reg,
-                                                  LogHandler $dblogger, int $cattedra, string $data,
-                                                  int $id): Response {
+  public function osservazionePersonaleEdit(Request $request, RegistroUtil $reg,
+                                            LogHandler $dblogger, int $cattedra, string $data,
+                                            int $id): Response {
     // inizializza
     $label = array();
     // controlla cattedra
@@ -572,7 +570,6 @@ class OsservazioniController extends BaseController {
   /**
    * Cancella un'osservazione personale
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo dell'osservazione
@@ -585,8 +582,8 @@ class OsservazioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazionePersonaleDeleteAction(Request $request, RegistroUtil $reg,
-                                                    LogHandler $dblogger, int $id): Response {
+  public function osservazionePersonaleDelete(RegistroUtil $reg,
+                                              LogHandler $dblogger, int $id): Response {
     // controlla osservazione
     $osservazione = $this->em->getRepository('App\Entity\OsservazioneClasse')->find($id);
     if (!$osservazione) {

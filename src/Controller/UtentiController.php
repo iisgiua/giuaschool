@@ -44,7 +44,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction(): Response {
+  public function profilo(): Response {
     // mostra la pagina di risposta
     return $this->render('utenti/profilo.html.twig', array(
       'pagina_titolo' => 'page.utenti_profilo',
@@ -65,8 +65,8 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, ValidatorInterface $validator, 
-                              LogHandler $dblogger): Response {
+  public function email(Request $request, ValidatorInterface $validator,
+                        LogHandler $dblogger): Response {
     $success = null;
     // controlli
     $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
@@ -132,9 +132,9 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 TranslatorInterface $trans, ValidatorInterface $validator,
-                                 LogHandler $dblogger): Response {
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           TranslatorInterface $trans, ValidatorInterface $validator,
+                           LogHandler $dblogger): Response {
     $success = null;
     $errore = null;
     $form = null;
@@ -228,8 +228,8 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function otpAction(Request $request, TranslatorInterface $trans, OtpUtil $otp,
-                            LogHandler $dblogger): Response {
+  public function otp(Request $request, TranslatorInterface $trans, OtpUtil $otp,
+                      LogHandler $dblogger): Response {
     // inizializza
     $reset = false;
     $qrcode = null;
@@ -334,7 +334,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheAction(Request $request, LogHandler $dblogger): Response {
+  public function notifiche(Request $request, LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
@@ -398,7 +398,7 @@ class UtentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheConfiguraAction(): Response {
+  public function notificheConfigura(): Response {
     // init
     $dati = [];
     $info = [];

@@ -43,7 +43,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeAction(Request $request, int $pagina): Response {
+  public function assenze(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
@@ -127,7 +127,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeMostraAction(SegreteriaUtil $segr, int $alunno): Response {
+  public function assenzeMostra(SegreteriaUtil $segr, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -164,7 +164,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function assenzeStampaAction(SegreteriaUtil $segr, PdfManager $pdf, int $alunno) {
+  public function assenzeStampa(SegreteriaUtil $segr, PdfManager $pdf, int $alunno) {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -209,7 +209,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function scrutiniAction(Request $request, SegreteriaUtil $segr, int $pagina): Response {
+  public function scrutini(Request $request, SegreteriaUtil $segr, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
@@ -297,8 +297,8 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function scrutiniMostraAction(SegreteriaUtil $segr, int $alunno, string $periodo,
-                                       int $scrutinio): Response {
+  public function scrutiniMostra(SegreteriaUtil $segr, int $alunno, string $periodo,
+                                 int $scrutinio): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -357,7 +357,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function genitoriAction(Request $request, int $pagina): Response {
+  public function genitori(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
@@ -440,7 +440,7 @@ class SegreteriaController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function genitoriEditAction(Request $request, int $alunno): Response {
+  public function genitoriEdit(Request $request, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {

@@ -459,9 +459,9 @@ class BachecaUtil {
    * Segna come letti alla classe gli avvisi indicati
    *
    * @param Classe $classe Classe a cui sono indirizzati gli avvisi
-   * @param mixed $id ID dell'avviso o "ALL" per tutti gli avvisi della classe
+   * @param string $id ID dell'avviso o "ALL" per tutti gli avvisi della classe
    */
-  public function letturaAvvisoAlunni(Classe $classe, $id) {
+  public function letturaAvvisoAlunni(Classe $classe, string $id) {
     if ($id == 'ALL') {
       // tutti gli avvisi
       $avc = $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('avc')
@@ -469,11 +469,11 @@ class BachecaUtil {
         ->setParameters(['classe' => $classe])
         ->getQuery()
         ->getResult();
-    } elseif (intval($id) > 0) {
+    } elseif ((int) $id) > 0) {
       // solo avviso indicato
       $avc = $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('avc')
         ->where('avc.avviso=:avviso AND avc.classe=:classe AND avc.letto IS NULL')
-        ->setParameters(['avviso' => $id, 'classe' => $classe])
+        ->setParameters(['avviso' => (int) $id, 'classe' => $classe])
         ->getQuery()
         ->getResult();
     }

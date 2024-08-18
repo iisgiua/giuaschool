@@ -60,9 +60,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function quadroAction(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                               int $cattedra, int $classe, string $data, string $vista,
-                               int $posizione): Response {
+  public function quadro(Request $request, RegistroUtil $reg, BachecaUtil $bac,
+                         int $cattedra, int $classe, string $data, string $vista,
+                         int $posizione): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -191,7 +191,6 @@ class AssenzeController extends BaseController {
   /**
    * Inserisce o rimuove un'assenza
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -210,9 +209,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                int $cattedra, int $classe, string $data, int $alunno, int $id,
-                                int $posizione): Response {
+  public function assenza(RegistroUtil $reg, LogHandler $dblogger,
+                          int $cattedra, int $classe, string $data, int $alunno, int $id,
+                          int $posizione): Response {
     // controlla cattedra
     if ($cattedra > 0) {
       // cattedra definita
@@ -365,9 +364,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function entrataAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, int $cattedra, int $classe, string $data,
-                                int $alunno, int $posizione): Response {
+  public function entrata(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                          LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                          int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -575,9 +574,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, int $cattedra, int $classe, string $data,
-                               int $alunno, int $posizione): Response {
+  public function uscita(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                         LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                         int $alunno, int $posizione): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -772,9 +771,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function giustificaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $cattedra, int $classe, string $data, int $alunno,
-                                   int $posizione): Response {
+  public function giustifica(Request $request, RegistroUtil $reg, LogHandler $dblogger,
+                             int $cattedra, int $classe, string $data, int $alunno,
+                             int $posizione): Response {
     // inizializza
     $label = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -995,9 +994,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function appelloAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                LogHandler $dblogger, int $cattedra, int $classe,
-                                string $data): Response {
+  public function appello(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                          LogHandler $dblogger, int $cattedra, int $classe,
+                          string $data): Response {
     // inizializza
     $label = array();
     if ($cattedra > 0) {
@@ -1215,9 +1214,9 @@ class AssenzeController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function fuoriclasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                    LogHandler $dblogger, int $classe, string $data, int $alunno,
-                                    int $id, int $posizione): Response {
+  public function fuoriclasse(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                              LogHandler $dblogger, int $classe, string $data, int $alunno,
+                              int $id, int $posizione): Response {
     // init
     $dati = [];
     $info = [];

@@ -40,8 +40,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction(string $cognome, string $nome, string $sede,
-                                    string $pagina): JsonResponse {
+  public function docentiAjax(string $cognome, string $nome, string $sede,
+                              string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
     $dati = array();
@@ -94,8 +94,8 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction(string $cognome, string $nome, string $classe, string $sede,
-                                   string $pagina): JsonResponse {
+  public function alunniAjax(string $cognome, string $nome, string $classe, string $sede,
+                             string $pagina): JsonResponse {
     // inizializza
     $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
       'sede' => array());
@@ -143,7 +143,7 @@ class AjaxController extends BaseController {
    *    requirements={"id": "authenticate"},
    *    methods={"GET"})
    */
-  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
+  public function tokenAjax(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
     $dati = array();
     $dati[$id] = $tokenManager->getToken($id)->getValue();
@@ -161,7 +161,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function sessioneAjaxAction(): JsonResponse {
+  public function sessioneAjax(): JsonResponse {
     // restituisce dati
     return new JsonResponse(['ok']);
   }
@@ -180,7 +180,7 @@ class AjaxController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(Classe $classe): JsonResponse {
+  public function classeAjax(Classe $classe): JsonResponse {
     // legge alunni
     $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
     // restituisce dati

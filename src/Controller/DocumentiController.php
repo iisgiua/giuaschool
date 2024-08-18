@@ -47,7 +47,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmiAction(DocumentiUtil $doc): Response {
+  public function programmi(DocumentiUtil $doc): Response {
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     // recupera dati
     $dati = $doc->programmiDocente($this->getUser(), $programmiQuinte);
@@ -75,8 +75,8 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmiAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                     LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+  public function programmiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                               LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
@@ -155,7 +155,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
+  public function delete(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
     // controllo permessi
     if (!$doc->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
@@ -217,7 +217,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioniAction(DocumentiUtil $doc): Response {
+  public function relazioni(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->relazioniDocente($this->getUser());
     // mostra la pagina di risposta
@@ -246,9 +246,9 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioniAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                     LogHandler $dblogger, Classe $classe, Materia $materia,
-                                     Alunno $alunno=null): Response {
+  public function relazioniAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                               LogHandler $dblogger, Classe $classe, Materia $materia,
+                               Alunno $alunno=null): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_relazioni_add/files';
@@ -325,7 +325,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiAction(DocumentiUtil $doc): Response {
+  public function piani(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->pianiDocente($this->getUser());
     // mostra la pagina di risposta
@@ -352,8 +352,8 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                 LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+  public function pianiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                           LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_piani_add/files';
@@ -428,7 +428,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function maggioAction(DocumentiUtil $doc): Response {
+  public function maggio(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->maggioDocente($this->getUser());
     // mostra la pagina di risposta
@@ -454,8 +454,8 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function maggioAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                  LogHandler $dblogger, Classe $classe): Response {
+  public function maggioAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                            LogHandler $dblogger, Classe $classe): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_maggio_add/files';
@@ -532,8 +532,8 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(DocumentiUtil $doc, Documento $documento,
-                                 File $allegato = null): Response {
+  public function download(DocumentiUtil $doc, Documento $documento,
+                           File $allegato = null): Response {
     // controlla allegato
     if ($allegato && !$documento->getAllegati()->contains($allegato)) {
       // errore
@@ -572,7 +572,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function docentiAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function docenti(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = array();
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
@@ -636,7 +636,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function bes(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -710,8 +710,8 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                LogHandler $dblogger, Alunno $alunno = null): Response {
+  public function besAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                         LogHandler $dblogger, Alunno $alunno = null): Response {
     // inizializza
     $info = [];
     $classe = null;
@@ -867,7 +867,7 @@ class DocumentiController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function alunniAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function alunni(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = array();
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/tipo', '');
@@ -926,7 +926,7 @@ class DocumentiController extends BaseController {
     *
     * @IsGranted("ROLE_UTENTE")
     */
-   public function bachecaAction(Request $request, int $pagina): Response {
+   public function bacheca(Request $request, int $pagina): Response {
      // recupera criteri dalla sessione
      $criteri = array();
      $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/tipo', '');

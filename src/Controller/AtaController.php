@@ -53,7 +53,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer): Response {
+  public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -104,7 +104,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -160,7 +160,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(int $id, int $abilita): Response {
+  public function abilita(int $id, int $abilita): Response {
     // controlla ata
     $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
@@ -191,7 +191,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, int $id): Response {
+  public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -245,10 +245,10 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, int $id,
-                                 string $tipo): Response {
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                           LoggerInterface $logger, LogHandler $dblogger, int $id,
+                           string $tipo): Response {
     // controlla ata
     $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
@@ -326,7 +326,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiAction(Request $request, int $pagina): Response {
+  public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -381,8 +381,8 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
-                                           int $id): Response {
+  public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
+                                     int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -447,7 +447,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiDeleteAction(int $id): Response {
+  public function rappresentantiDelete(int $id): Response {
     // controlla utente
     $utente = $this->em->getRepository('App\Entity\Ata')->find($id);
     if (!$utente) {

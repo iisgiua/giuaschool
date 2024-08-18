@@ -16,7 +16,6 @@ use App\Entity\Genitore;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use App\Util\NotificheUtil;
-use App\Util\OtpUtil;
 use App\Util\StaffUtil;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -57,7 +56,7 @@ class LoginController extends BaseController {
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
    */
-  public function formAction(AuthenticationUtils $auth, ConfigLoader $config): Response {
+  public function form(AuthenticationUtils $auth, ConfigLoader $config): Response {
     if ($this->isGranted('ROLE_UTENTE')) {
       // reindirizza a pagina HOME
       return $this->redirectToRoute('login_home');
@@ -88,7 +87,7 @@ class LoginController extends BaseController {
    * @Route("/logout/", name="logout",
    *    methods={"GET"})
    */
-  public function logoutAction() {
+  public function logout() {
     // niente da fare
   }
 
@@ -106,7 +105,7 @@ class LoginController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
+  public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
     if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
       // redirezione alla scelta profilo
       return $this->redirectToRoute('login_profilo');
@@ -127,21 +126,18 @@ class LoginController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   * @param OtpUtil $otp Gestione del codice OTP
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
-   * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
    *
    * @Route("/login/recovery/", name="login_recovery",
    *    methods={"GET", "POST"})
    */
-  public function recoveryAction(Request $request, ConfigLoader $config,
-                                 UserPasswordHasherInterface $hasher, OtpUtil $otp, StaffUtil $staff,
-                                 MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger): Response {
+  public function recovery(Request $request, ConfigLoader $config,
+                           UserPasswordHasherInterface $hasher, StaffUtil $staff,
+                           MailerInterface $mailer, LoggerInterface $logger): Response {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
@@ -288,8 +284,8 @@ class LoginController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction(Request $request, EventDispatcherInterface $disp,
-                                TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {
+  public function profilo(Request $request, EventDispatcherInterface $disp,
+                          TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {
     // imposta profili
     $lista = [];
     foreach ($this->reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {

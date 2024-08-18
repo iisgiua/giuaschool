@@ -51,7 +51,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiAction(AgendaUtil $age, string $mese): Response {
+  public function eventi(AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
     // parametro data
@@ -114,7 +114,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiDettagliAction(AgendaUtil $age, string $data, string $tipo): Response {
+  public function eventiDettagli(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
     // data
@@ -149,9 +149,9 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verificaEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                     RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                     LogHandler $dblogger, int $id): Response {
+  public function verificaEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                               RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
+                               LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -395,7 +395,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function cattedraAjaxAction(int $id): JsonResponse {
+  public function cattedraAjax(int $id): JsonResponse {
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.classe=a.classe')
@@ -422,7 +422,7 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(int $id): JsonResponse {
+  public function classeAjax(int $id): JsonResponse {
     // solo cattedre attive e normali, no sostegno, no ed.civ.
     $classe = $this->em->getRepository('App\Entity\Classe')->find($id);
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
@@ -442,7 +442,6 @@ class AgendaController extends BaseController {
   /**
    * Cancella verifica
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -457,8 +456,8 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verificaDeleteAction(Request $request, LogHandler $dblogger, RegistroUtil $reg,
-                                       BachecaUtil $bac, AgendaUtil $age, int $id): Response {
+  public function verificaDelete(LogHandler $dblogger, RegistroUtil $reg,
+                                 BachecaUtil $bac, AgendaUtil $age, int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
     if (!$avviso) {
@@ -534,9 +533,9 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                    RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
-                                    LogHandler $dblogger, int $id): Response {
+  public function compitoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                              RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
+                              LogHandler $dblogger, int $id): Response {
     // inizializza
     $dati = array();
     $lista_festivi = null;
@@ -733,7 +732,6 @@ class AgendaController extends BaseController {
   /**
    * Cancella compiti per casa
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param int $id Identificativo dell'avviso
@@ -746,8 +744,8 @@ class AgendaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoDeleteAction(Request $request, LogHandler $dblogger, AgendaUtil $age,
-                                      int $id): Response {
+  public function compitoDelete(LogHandler $dblogger, AgendaUtil $age,
+                                int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
     if (!$avviso) {

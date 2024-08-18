@@ -64,7 +64,7 @@ class SpidController extends BaseController {
    * @Route("/metadata", name="spid_metadata",
    *    methods={"GET"})
    */
-  public function metadataAction(Request $request): Response {
+  public function metadata(Request $request): Response {
     if ($request->query->get('debug') == 'yes') {
       // rigenera metadata
       return $this->redirect('/spid/module.php/saml/sp/metadata.php/service');
@@ -87,7 +87,7 @@ class SpidController extends BaseController {
    * @Route("/spid/login/{idp}", name="spid_login",
    *    methods={"GET"})
    */
-  public function loginAction(string $idp): Response {
+  public function login(string $idp): Response {
     $code = isset($this->idp[$idp]) ? $this->idp[$idp] : $idp;
     return $this->redirect('/spid-login.php?idp='.urlencode($code));
   }
@@ -98,7 +98,7 @@ class SpidController extends BaseController {
    * @Route("/spid/acs/{responseId}", name="spid_acs",
    *    methods={"GET"})
    */
-  public function acsAction() {
+  public function acs() {
     // la procedura viene eseguita nella classe SpidAuthenticator
   }
 

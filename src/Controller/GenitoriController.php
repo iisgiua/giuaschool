@@ -18,7 +18,6 @@ use App\Util\AgendaUtil;
 use App\Util\BachecaUtil;
 use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
-use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -57,8 +56,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function lezioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
-                                string $data): Response {
+  public function lezioni(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
+                          string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -157,8 +156,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function argomentiAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                                  RegistroUtil $reg, int $idmateria): Response {
+  public function argomenti(TranslatorInterface $trans, GenitoriUtil $gen,
+                            RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
     $template = 'ruolo_genitore/argomenti.html.twig';
     $errore = null;
@@ -242,8 +241,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function votiAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                             RegistroUtil $reg, int $idmateria): Response {
+  public function voti(TranslatorInterface $trans, GenitoriUtil $gen,
+                       RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
     $errore = null;
     $materie = null;
@@ -324,8 +323,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
-                                int $posizione): Response {
+  public function assenze(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
+                          int $posizione): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -376,7 +375,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function noteAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg): Response {
+  public function note(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -425,8 +424,8 @@ class GenitoriController extends BaseController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                                     RegistroUtil $reg): Response {
+  public function osservazioni(TranslatorInterface $trans, GenitoriUtil $gen,
+                               RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
     $dati = null;
@@ -471,7 +470,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen, string $periodo): Response {
+  public function pagelle(TranslatorInterface $trans, GenitoriUtil $gen, string $periodo): Response {
     // inizializza variabili
     $errore = null;
     $dati = array();
@@ -586,7 +585,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -657,7 +656,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiDettagliAction(BachecaUtil $bac, int $id): Response {
+  public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -696,7 +695,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventiAction(GenitoriUtil $gen, AgendaUtil $age, string $mese): Response {
+  public function eventi(GenitoriUtil $gen, AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
     // parametro data
@@ -769,7 +768,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventiDettagliAction(AgendaUtil $age, string $data, string $tipo): Response {
+  public function eventiDettagli(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
     // data
@@ -793,8 +792,6 @@ class GenitoriController extends BaseController {
    * Giustificazione online di un'assenza
    *
    * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Assenza $assenza Assenza da giustificare
@@ -809,9 +806,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaAssenzaAction(Request $request, TranslatorInterface $trans,
-                                          PdfManager $pdf, GenitoriUtil $gen, LogHandler $dblogger,
-                                          Assenza $assenza, int $posizione): Response {
+  public function giustificaAssenza(Request $request, GenitoriUtil $gen, LogHandler $dblogger,
+                                    Assenza $assenza, int $posizione): Response {
     // inizializza
     $fs = new Filesystem();
     $info = array();
@@ -964,9 +960,9 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaRitardoAction(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                          LogHandler $dblogger, Entrata $entrata,
-                                          int $posizione): Response {
+  public function giustificaRitardo(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
+                                    LogHandler $dblogger, Entrata $entrata,
+                                    int $posizione): Response {
     // inizializza
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
@@ -1093,8 +1089,8 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaUscitaAction(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                         LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
+  public function giustificaUscita(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
+                                   LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
     // inizializza
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
@@ -1214,7 +1210,7 @@ class GenitoriController extends BaseController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function derogheAction(GenitoriUtil $gen, RegistroUtil $reg): Response {
+  public function deroghe(GenitoriUtil $gen, RegistroUtil $reg): Response {
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno

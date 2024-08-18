@@ -40,8 +40,8 @@ class SchedaController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiMateriaAction(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
-                                    int $alunno, string $periodo): Response {
+  public function votiMateria(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
+                              int $alunno, string $periodo): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -173,7 +173,7 @@ class SchedaController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function noteAction(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
+  public function note(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
     // inizializza variabili
     $info = null;
     $dati = null;

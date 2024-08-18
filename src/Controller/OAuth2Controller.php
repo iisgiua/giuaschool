@@ -30,7 +30,7 @@ class OAuth2Controller extends BaseController {
    *
    * @Route("/login/gsuite", name="login_gsuite")
    */
-  public function connectAction(ClientRegistry $clientRegistry): Response {
+  public function connect(ClientRegistry $clientRegistry): Response {
     // redirezione alla GSuite
     return $clientRegistry
       ->getClient('gsuite')
@@ -47,7 +47,7 @@ class OAuth2Controller extends BaseController {
    *
    * @Route("/login/gsuite/app/{email}", name="login_gsuite_app")
    */
-  public function connectAppAction(ClientRegistry $clientRegistry, string $email): Response {
+  public function connectApp(ClientRegistry $clientRegistry, string $email): Response {
     $options = array();
     $options['login_hint'] = $email;
     // redirezione alla GSuite
@@ -64,7 +64,7 @@ class OAuth2Controller extends BaseController {
    *
    * @Route("/login/gsuite/check", name="login_gsuite_check")
    */
-  public function checkAction(Request $request, ClientRegistry $clientRegistry) {
+  public function check(ClientRegistry $clientRegistry) {
   }
 
 }

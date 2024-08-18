@@ -30,7 +30,7 @@ class InfoController extends BaseController {
    * @Route("/info/note-legali/", name="info_noteLegali",
    *    methods={"GET"})
    */
-  public function noteLegaliAction(ConfigLoader $config): Response {
+  public function noteLegali(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'noteLegali');
@@ -46,7 +46,7 @@ class InfoController extends BaseController {
    * @Route("/info/privacy/", name="info_privacy",
    *    methods={"GET"})
    */
-  public function privacyAction(ConfigLoader $config): Response {
+  public function privacy(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'privacy');
@@ -62,7 +62,7 @@ class InfoController extends BaseController {
    * @Route("/info/cookie/", name="info_cookie",
    *    methods={"GET"})
    */
-  public function cookieAction(ConfigLoader $config): Response {
+  public function cookie(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'cookie');
@@ -78,7 +78,7 @@ class InfoController extends BaseController {
    * @Route("/info/credits/", name="info_credits",
    *    methods={"GET"})
    */
-  public function creditsAction(ConfigLoader $config): Response {
+  public function credits(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'credits');

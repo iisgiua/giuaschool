@@ -54,7 +54,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function coordinatoreAction(): Response {
+  public function coordinatore(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
       $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
@@ -85,7 +85,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(): Response {
+  public function classe(): Response {
     // lista classi coordinatore
     $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
@@ -146,7 +146,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
+  public function note(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -215,7 +215,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
+  public function assenze(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -285,8 +285,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
-                             int $periodo, string $tipo): Response {
+  public function voti(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
+                       int $periodo, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -373,7 +373,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAction(StaffUtil $staff, int $classe): Response {
+  public function situazione(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -428,8 +428,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
-                                         string $formato): Response {
+  public function situazioneAlunno(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
+                                   string $formato): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -509,7 +509,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(BachecaUtil $bac, int $classe, int $pagina): Response {
+  public function avvisi(BachecaUtil $bac, int $classe, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -581,9 +581,9 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $classe, int $id): Response {
+  public function avvisoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                             BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
+                             int $classe, int $id): Response {
     // controllo classe
     $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
@@ -796,7 +796,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDettagliAction(BachecaUtil $bac, int $classe, int $id): Response {
+  public function avvisoDettagli(BachecaUtil $bac, int $classe, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -835,7 +835,6 @@ class CoordinatoreController extends BaseController {
   /**
    * Cancella avviso
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -850,8 +849,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
-                                     RegistroUtil $reg, int $classe, int $id): Response {
+  public function avvisoDelete(LogHandler $dblogger, BachecaUtil $bac,
+                               RegistroUtil $reg, int $classe, int $id): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
@@ -943,7 +942,7 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeAction(Request $request, int $classe, int $pagina): Response {
+  public function presenze(Request $request, int $classe, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -1053,8 +1052,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                     LogHandler $dblogger, int $id, int $classe): Response {
+  public function presenzeEdit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                               LogHandler $dblogger, int $id, int $classe): Response {
     // init
     $dati = [];
     $info = [];
@@ -1153,8 +1152,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeDeleteAction(RegistroUtil $reg, LogHandler $dblogger, int $id,
-                                       int $classe): Response {
+  public function presenzeDelete(RegistroUtil $reg, LogHandler $dblogger, int $id,
+                                 int $classe): Response {
     // controlla presenza
     $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
     if (!$presenza) {
@@ -1215,8 +1214,8 @@ class CoordinatoreController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeAddAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                    LogHandler $dblogger, int $classe): Response {
+  public function presenzeAdd(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                              LogHandler $dblogger, int $classe): Response {
     // init
     $dati = [];
     $info = [];

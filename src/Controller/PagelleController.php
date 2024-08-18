@@ -43,8 +43,8 @@ class PagelleController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(PagelleUtil $pag, int $classe, string $tipo,
-                                        string $periodo): Response {
+  public function documentoClasse(PagelleUtil $pag, int $classe, string $tipo,
+                                  string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe
@@ -165,8 +165,8 @@ class PagelleController extends BaseController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
-  public function documentoAlunnoAction(PagelleUtil $pag, GenitoriUtil $gen,
-                                        int $classe, int $alunno, string $tipo, string $periodo): Response {
+  public function documentoAlunno(PagelleUtil $pag, GenitoriUtil $gen,
+                                  int $classe, int $alunno, string $tipo, string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe

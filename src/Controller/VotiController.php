@@ -56,7 +56,7 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
+  public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
                              int $periodo): Response {
     // inizializza variabili
     $dati = array();
@@ -176,9 +176,9 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiClasseAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, int $cattedra, string $tipo,
-                                   string $data): Response {
+  public function votiClasse(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                             LogHandler $dblogger, int $cattedra, string $tipo,
+                             string $data): Response {
     // inizializza
     $label = array();
     $visibile = true;
@@ -405,9 +405,9 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAlunnoAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                   LogHandler $dblogger, int $cattedra, int $alunno, string $tipo,
-                                   int $id): Response {
+  public function votiAlunno(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                             LogHandler $dblogger, int $cattedra, int $alunno, string $tipo,
+                             int $id): Response {
     // inizializza
     $label = array();
     if ($request->isMethod('GET')) {
@@ -631,9 +631,9 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiDettagliAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, int $cattedra, int $classe,
-                                     int $alunno): Response {
+  public function votiDettagli(Request $request, TranslatorInterface $trans,
+                               RegistroUtil $reg, int $cattedra, int $classe,
+                               int $alunno): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -723,7 +723,6 @@ class VotiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param int $cattedra Identificativo della cattedra
    * @param int $materia Identificativo della materia
@@ -737,9 +736,9 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiSostegnoAction(Request $request, TranslatorInterface $trans,
-                                     RegistroUtil $reg, GenitoriUtil $gen, int $cattedra,
-                                     int $materia): Response {
+  public function votiSostegno(Request $request, TranslatorInterface $trans,
+                               GenitoriUtil $gen, int $cattedra,
+                               int $materia): Response {
     // inizializza variabili
     $materie = null;
     $info = null;
@@ -825,8 +824,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiStampaAction(RegistroUtil $reg, PdfManager $pdf, int $cattedra, int $classe,
-                                   string $data): Response {
+  public function votiStampa(RegistroUtil $reg, PdfManager $pdf, int $cattedra, int $classe,
+                             string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -908,7 +907,7 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiEsportaAction(RegistroUtil $reg, int $cattedra, int $classe, string $data): Response {
+  public function votiEsporta(RegistroUtil $reg, int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -978,7 +977,6 @@ class VotiController extends BaseController {
   /**
    * Cancellazione di un voto
    *
-   * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo del voto
@@ -991,8 +989,8 @@ class VotiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiCancellaAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                     int $id): Response {
+  public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
+                               int $id): Response {
     // controllo voto
     $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);

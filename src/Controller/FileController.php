@@ -41,7 +41,7 @@ class FileController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function uploadAction(Request $request, string $pagina, string $param): Response {
+  public function upload(Request $request, string $pagina, string $param): Response {
     $risposta = array();
     // legge file
     $files = $request->files->get($param);
@@ -60,7 +60,7 @@ class FileController extends BaseController {
         $risposta[$k]['size'] = $fl->getSize();
       } else {
         // errore
-        $res = new Response('Errore nel caricamento del file', 500);
+        $res = new Response('Errore nel caricamento del file', Response::HTTP_INTERNAL_SERVER_ERROR);
         return $res;
       }
     }
@@ -86,7 +86,7 @@ class FileController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function removeAction(Request $request, string $pagina, string $param): Response {
+  public function remove(Request $request, string $pagina, string $param): Response {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
@@ -131,7 +131,7 @@ class FileController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function avvisoAction(BachecaUtil $bac, int $avviso, int $allegato): Response {
+  public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
     // controllo avviso
     $avviso = $this->em->getRepository('App\Entity\Avviso')->find($avviso);
     if (!$avviso) {
@@ -171,7 +171,7 @@ class FileController extends BaseController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function downloadSegreteriaAction(string $tipo, int $id): Response {
+  public function downloadSegreteria(string $tipo, int $id): Response {
     // controllo
     $storico = $this->em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
     if (!$storico) {
@@ -242,7 +242,7 @@ class FileController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function certificatoAction(string $tipo, int $id): Response {
+  public function certificato(string $tipo, int $id): Response {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {

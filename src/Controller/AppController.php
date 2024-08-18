@@ -55,8 +55,8 @@ class AppController extends BaseController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(AuthenticationUtils $auth, ConfigLoader $config,
-                              string $codice, int $lusr, int $lpsw, int $lapp): Response {
+  public function login(AuthenticationUtils $auth, ConfigLoader $config,
+                        string $codice, int $lusr, int $lpsw, int $lapp): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
@@ -89,7 +89,7 @@ class AppController extends BaseController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
+  public function prelogin(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
@@ -148,7 +148,7 @@ class AppController extends BaseController {
    * @Route("/app/info/", name="app_info",
    *    methods={"GET"})
    */
-  public function infoAction(ConfigLoader $config): Response {
+  public function info(ConfigLoader $config): Response {
     $applist = array();
     // carica configurazione di sistema
     $config->carica();
@@ -186,7 +186,7 @@ class AppController extends BaseController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    */
-  public function downloadAction(ConfigLoader $config, int $id): Response {
+  public function download(ConfigLoader $config, int $id): Response {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
@@ -221,7 +221,7 @@ class AppController extends BaseController {
    * @Route("/app/versione/", name="app_versione",
    *    methods={"POST"})
    */
-  public function versioneAction(Request $request): JsonResponse {
+  public function versione(Request $request): JsonResponse {
     $risposta = array();
     // legge dati
     $token = $request->request->get('token');
@@ -248,7 +248,7 @@ class AppController extends BaseController {
    * @Route("/app/info/studenti/", name="app_info_studenti",
    *    methods={"POST"})
    */
-  public function infoStudentiAction(Request $request, TranslatorInterface $trans): Response {
+  public function infoStudenti(Request $request, TranslatorInterface $trans): Response {
     // inizializza
     $dati = array();
     $token = $request->headers->get('X-Giuaschool-Token');
@@ -299,7 +299,7 @@ class AppController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function connectInitAction(Request $request): JsonResponse {
+  public function connectInit(Request $request): JsonResponse {
     $res = array();
     // legge dati
     $userId = $this->getUser()->getId();
@@ -330,8 +330,8 @@ class AppController extends BaseController {
    * @Route("/app/connect/{token}", name="app_connect",
    *    methods={"GET"})
    */
-  public function connectAction(Request $request, LogHandler $dblogger, LoggerInterface $logger,
-                                ConfigLoader $config, string $token): Response {
+  public function connect(Request $request, LogHandler $dblogger, LoggerInterface $logger,
+                          ConfigLoader $config, string $token): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();

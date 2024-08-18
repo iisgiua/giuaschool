@@ -33,7 +33,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function lezioniAction(): Response {
+  public function lezioni(): Response {
     if (!$this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
       // scelta classe
       return $this->redirectToRoute('lezioni_classe');
@@ -50,8 +50,6 @@ class LezioniController extends BaseController {
   /**
    * Gestione della scelta delle classi
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/classe/", name="lezioni_classe",
@@ -59,37 +57,38 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(Request $request): Response {
-    // lista cattedre
-    $lista = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.materia', 'm')
-      ->where('c.docente=:docente AND c.attiva=:attiva')
-      ->orderBy('cl.sede,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
-      ->setParameters(['docente' => $this->getUser(), 'attiva' => 1])
-      ->getQuery()
-      ->getResult();
-    // raggruppa per classi
-    $cattedre = array();
-    foreach ($lista as $c) {
-      $cattedre[$c->getClasse()->getId()][] = $c;
-    }
-    // lista tutte le classi
-    $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
-      ->orderBy('cl.sede,cl.sezione,cl.anno,cl.gruppo', 'ASC')
-      ->getQuery()
-      ->getResult();
-    // raggruppa per sezione
-    $classi = array();
-    foreach ($lista as $c) {
-      $classi[$c->getSezione()][] = $c;
-    }
-    // visualizza pagina
-    return $this->render('lezioni/classe.html.twig', array(
-      'pagina_titolo' => 'page.lezioni_classe',
-      'cattedre' => $cattedre,
-      'classi' => $classi,
-    ));
+  public function classe(): Response
+  {
+      // lista cattedre
+      $lista = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+        ->join('c.classe', 'cl')
+        ->join('c.materia', 'm')
+        ->where('c.docente=:docente AND c.attiva=:attiva')
+        ->orderBy('cl.sede,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
+        ->setParameters(['docente' => $this->getUser(), 'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      // raggruppa per classi
+      $cattedre = array();
+      foreach ($lista as $c) {
+        $cattedre[$c->getClasse()->getId()][] = $c;
+      }
+      // lista tutte le classi
+      $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
+        ->orderBy('cl.sede,cl.sezione,cl.anno,cl.gruppo', 'ASC')
+        ->getQuery()
+        ->getResult();
+      // raggruppa per sezione
+      $classi = array();
+      foreach ($lista as $c) {
+        $classi[$c->getSezione()][] = $c;
+      }
+      // visualizza pagina
+      return $this->render('lezioni/classe.html.twig', array(
+        'pagina_titolo' => 'page.lezioni_classe',
+        'cattedre' => $cattedre,
+        'classi' => $classi,
+      ));
   }
 
   /**
@@ -109,8 +108,8 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiAction(Request $request, RegistroUtil $reg, int $cattedra,
-                                  int $classe): Response {
+  public function argomenti(Request $request, RegistroUtil $reg, int $cattedra,
+                            int $classe): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
@@ -189,7 +188,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiRiepilogoAction(RegistroUtil $reg, int $cattedra, string $data): Response {
+  public function argomentiRiepilogo(RegistroUtil $reg, int $cattedra, string $data): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -265,7 +264,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(Request $request, StaffUtil $staff, int $cattedra, int $classe): Response {
+  public function note(Request $request, StaffUtil $staff, int $cattedra, int $classe): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -340,7 +339,7 @@ class LezioniController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiProgrammaAction(RegistroUtil $reg, int $cattedra): Response {
+  public function argomentiProgramma(RegistroUtil $reg, int $cattedra): Response {
     // inizializza
     $info = null;
     $dati = null;

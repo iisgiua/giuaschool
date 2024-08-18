@@ -58,7 +58,7 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function proposteAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
+  public function proposte(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                  LogHandler $dblogger, int $cattedra, int $classe,
                                  string $periodo): Response {
     // inizializza variabili
@@ -299,8 +299,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioAction(Request $request, ScrutinioUtil $scr, int $classe, string $stato,
-                                  int $posizione): Response {
+  public function scrutinio(Request $request, ScrutinioUtil $scr, int $classe, string $stato,
+                            int $posizione): Response {
     // inizializza variabili
     $dati = null;
     $form = null;
@@ -419,10 +419,10 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioProposteAction(Request $request, TranslatorInterface $trans,
-                                          ScrutinioUtil $scr, LogHandler $dblogger,
-                                          int $classe, int $materia, string $periodo,
-                                          int $posizione): Response {
+  public function scrutinioProposte(Request $request, TranslatorInterface $trans,
+                                    ScrutinioUtil $scr, LogHandler $dblogger,
+                                    int $classe, int $materia, string $periodo,
+                                    int $posizione): Response {
     // inizializza variabili
     $info = array();
     $elenco = array();
@@ -590,9 +590,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCondottaAction(Request $request, TranslatorInterface $trans,
-                                          ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
-                                          int $posizione): Response {
+  public function scrutinioCondotta(Request $request, TranslatorInterface $trans,
+                                    ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
+                                    int $posizione): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -719,9 +719,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioVotiAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                      int $classe, int $materia, string $periodo, int $alunno,
-                                      int $posizione) {
+  public function scrutinioVoti(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
+                                int $classe, int $materia, string $periodo, int $alunno,
+                                int $posizione) {
     // inizializza variabili
     $info = array();
     $dati = array();
@@ -873,8 +873,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioSvoltoAction(Request $request, ScrutinioUtil $scr, int $cattedra, int $classe,
-                                        string $periodo): Response {
+  public function scrutinioSvolto(Request $request, ScrutinioUtil $scr, int $cattedra, int $classe,
+                                  string $periodo): Response {
     // inizializza variabili
     $dati = array();
     $listaPeriodi = null;
@@ -979,9 +979,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-   public function scrutinioEsitoAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                        int $alunno, string $periodo, int $classe,
-                                        int $posizione): Response {
+   public function scrutinioEsito(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
+                                  int $alunno, string $periodo, int $classe,
+                                  int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1235,8 +1235,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCreditoAction(Request $request, ScrutinioUtil $scr, int $alunno,
-                                         string $periodo, int $classe, int $posizione): Response {
+  public function scrutinioCredito(Request $request, ScrutinioUtil $scr, int $alunno,
+                                   string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
     $credito = array();
     $credito[3] = [6 =>  7, 7 =>  8, 8 =>  9, 9 => 10, 10 => 11];
@@ -1369,7 +1369,6 @@ class ScrutinioController extends BaseController {
    * Compilazione della certificazione
    *
    * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $alunnno Identificativo dell'alunno
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1385,9 +1384,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCertificazioneAction(Request $request, TranslatorInterface $trans,
-                                                ScrutinioUtil $scr, int $alunno, string $periodo,
-                                                int $classe, int $posizione): Response {
+  public function scrutinioCertificazione(Request $request, ScrutinioUtil $scr, int $alunno,
+                                          string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1624,8 +1622,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioDebitiAction(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
-                                        int $alunno, string $periodo, int $posizione): Response {
+  public function scrutinioDebiti(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
+                                  int $alunno, string $periodo, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1734,8 +1732,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCarenzeAction(Request $request, ScrutinioUtil $scr, int $alunno,
-                                         string $periodo, int $posizione): Response {
+  public function scrutinioCarenze(Request $request, ScrutinioUtil $scr, int $alunno,
+                                   string $periodo, int $posizione): Response {
     // inizializza variabili
     $dati = array();
     // controllo alunno
@@ -1827,8 +1825,8 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verbaleAction(Request $request, ScrutinioUtil $scr, int $classe, string $periodo,
-                                int $step): Response {
+  public function verbale(Request $request, ScrutinioUtil $scr, int $classe, string $periodo,
+                          int $step): Response {
     // inizializza variabili
     $dati = null;
     $form = null;
@@ -1915,9 +1913,9 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioEdcivicaAction(Request $request, TranslatorInterface $trans,
-                                          ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
-                                          int $posizione): Response {
+  public function scrutinioEdcivica(Request $request, TranslatorInterface $trans,
+                                    ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
+                                    int $posizione): Response {
     // inizializza variabili
     $dati = array();
     $dati['alunni'] = array();
@@ -2044,7 +2042,7 @@ class ScrutinioController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioAggiornaAction(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
+  public function scrutinioAggiorna(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
     $risposta = ['status' => 'ok'];
     // controllo scrutinio
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->find($scrutinio);

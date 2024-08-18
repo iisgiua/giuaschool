@@ -79,7 +79,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -193,9 +193,9 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $id): Response {
+  public function avvisiEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                             BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
+                             int $id): Response {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
@@ -474,7 +474,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiDettagliAction(BachecaUtil $bac, int $id): Response {
+  public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -494,7 +494,6 @@ class StaffController extends BaseController {
   /**
    * Cancella avviso
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -509,8 +508,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
-                                     RegistroUtil $reg, string $tipo, int $id): Response {
+  public function avvisiDelete(LogHandler $dblogger, BachecaUtil $bac,
+                               RegistroUtil $reg, string $tipo, int $id): Response {
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new Filesystem();
     // controllo avviso
@@ -614,8 +613,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioAction(Request $request, BachecaUtil $bac, string $tipo,
-                                     int $pagina): Response {
+  public function avvisiOrario(Request $request, BachecaUtil $bac, string $tipo,
+                               int $pagina): Response {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -714,10 +713,10 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiOrarioEditAction(Request $request, TranslatorInterface $trans,
-                                         MessageBusInterface $msg, BachecaUtil $bac,
-                                         RegistroUtil $reg, LogHandler $dblogger, string $tipo,
-                                         int $id): Response {
+  public function avvisiOrarioEdit(Request $request, TranslatorInterface $trans,
+                                   MessageBusInterface $msg, BachecaUtil $bac,
+                                   RegistroUtil $reg, LogHandler $dblogger, string $tipo,
+                                   int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -960,7 +959,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAttivitaAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisiAttivita(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -1056,9 +1055,9 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiAttivitaEditAction(Request $request, TranslatorInterface $trans,
-                                           MessageBusInterface $msg, BachecaUtil $bac,
-                                           RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function avvisiAttivitaEdit(Request $request, TranslatorInterface $trans,
+                                     MessageBusInterface $msg, BachecaUtil $bac,
+                                     RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1273,7 +1272,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiIndividualiAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisiIndividuali(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -1340,7 +1339,6 @@ class StaffController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -1352,9 +1350,9 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiIndividualiEditAction(Request $request, TranslatorInterface $trans,
-                                              MessageBusInterface $msg, BachecaUtil $bac,
-                                              RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function avvisiIndividualiEdit(Request $request, TranslatorInterface $trans,
+                                        MessageBusInterface $msg, BachecaUtil $bac,
+                                        LogHandler $dblogger, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1490,7 +1488,6 @@ class StaffController extends BaseController {
    * Archivio degli avvisi degli anni precedenti
    *
    * @param Request $request Pagina richiesta
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
@@ -1502,7 +1499,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function avvisiArchivioAction(Request $request, BachecaUtil $bac, int $pagina): Response {
+  public function avvisiArchivio(Request $request, int $pagina): Response {
     // inizializza
     $dati = [];
     $limite = 20;
@@ -1636,7 +1633,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function classeAjaxAction(int $id): JsonResponse {
+  public function classeAjax(int $id): JsonResponse {
     $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->where('a.classe=:classe AND a.abilitato=:abilitato')
@@ -1666,8 +1663,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaAction(Request $request, RegistroUtil $reg, StaffUtil $staff,
-                                          string $data, int $pagina): Response {
+  public function studentiAutorizza(Request $request, RegistroUtil $reg, StaffUtil $staff,
+                                    string $data, int $pagina): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -1808,9 +1805,9 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaEntrataAction(Request $request, RegistroUtil $reg,
-                                                 TranslatorInterface $trans, LogHandler $dblogger,
-                                                 string $data, int $classe, int $alunno): Response {
+  public function studentiAutorizzaEntrata(Request $request, RegistroUtil $reg,
+                                           TranslatorInterface $trans, LogHandler $dblogger,
+                                           string $data, int $classe, int $alunno): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -1987,9 +1984,9 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAutorizzaUscitaAction(Request $request, RegistroUtil $reg,
-                                                TranslatorInterface $trans, LogHandler $dblogger,
-                                                string $data, int $classe, int $alunno): Response {
+  public function studentiAutorizzaUscita(Request $request, RegistroUtil $reg,
+                                          TranslatorInterface $trans, LogHandler $dblogger,
+                                          string $data, int $classe, int $alunno): Response {
     // inizializza
     $label = array();
     // controlla classe
@@ -2185,7 +2182,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiDerogheAction(Request $request, int $pagina): Response {
+  public function studentiDeroghe(Request $request, int $pagina): Response {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
@@ -2271,7 +2268,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiDerogheEditAction(Request $request, LogHandler $dblogger, int $alunno): Response {
+  public function studentiDerogheEdit(Request $request, LogHandler $dblogger, int $alunno): Response {
     // inizializza
     $label = null;
     // controlla alunno
@@ -2345,7 +2342,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiSituazioneAction(Request $request, int $pagina): Response {
+  public function studentiSituazione(Request $request, int $pagina): Response {
     $dati = array();
     // recupera criteri dalla sessione
     $search = array();
@@ -2442,8 +2439,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function docentiStatisticheAction(Request $request, TranslatorInterface $trans,
-                                           StaffUtil $staff, PdfManager $pdf, int $pagina): Response {
+  public function docentiStatistiche(Request $request, TranslatorInterface $trans,
+                                     StaffUtil $staff, PdfManager $pdf, int $pagina): Response {
     // recupera criteri dalla sessione
     $creaPdf = false;
     $search = array();
@@ -2562,7 +2559,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function passwordAction(Request $request, int $pagina): Response {
+  public function password(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = array();
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
@@ -2652,10 +2649,10 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function passwordCreateAction(Request $request, UserPasswordHasherInterface $hasher,
-                                       StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
-                                       PdfManager $pdf, MailerInterface $mailer, string $tipo,
-                                       string $username = null): Response {
+  public function passwordCreate(Request $request, UserPasswordHasherInterface $hasher,
+                                 StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
+                                 PdfManager $pdf, MailerInterface $mailer, string $tipo,
+                                 string $username = null): Response {
      // controlla alunno
      $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
      if (!$utente) {
@@ -2755,8 +2752,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiAssenzeAction(Request $request, RegistroUtil $reg, LogHandler $dblogger,
-                                        string $data, int $classe): Response {
+  public function studentiAssenze(Request $request, RegistroUtil $reg, LogHandler $dblogger,
+                                  string $data, int $classe): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -2967,8 +2964,8 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiStatisticheAction(Request $request, RegistroUtil $reg, StaffUtil $staff,
-                                            string $data): Response {
+  public function studentiStatistiche(Request $request, RegistroUtil $reg, StaffUtil $staff,
+                                      string $data): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -3084,7 +3081,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function studentiCondottaAction(Request $request, $pagina): Response {
+  public function studentiCondotta(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -3174,7 +3171,7 @@ class StaffController extends BaseController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function docentiCdcAction(Request $request): Response {
+  public function docentiCdc(Request $request): Response {
     // inizializza
     $dati = [];
     $info = [];
