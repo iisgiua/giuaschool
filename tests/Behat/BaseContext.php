@@ -25,7 +25,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
-use Faker\Factory;
+use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
 use Symfony\Component\Filesystem\Filesystem;
@@ -50,9 +50,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Generatore automatico di dati fittizi
    *
-   * @var Factory $faker Generatore automatico di dati fittizi
+   * @var Generator|null $faker Generatore automatico di dati fittizi
    */
-  protected $faker;
+  protected ?Generator $faker = null;
 
   /**
    * Generatore personalizzato di dati fittizi
@@ -187,19 +187,22 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param RouterInterface $router Gestore delle URL
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
+   * @param Generator $faker Generatore automatico di dati fittizi
+   * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
-                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger,
+                              Generator $faker, PurgerLoader $alice) {
     $this->kernel = $kernel;
     $this->em = $em;
     $this->router = $router;
     $this->hasher = $hasher;
     $this->slugger = $slugger;
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker = $faker;
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
+    $this->alice = $alice;
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
     // inizializza variabili
