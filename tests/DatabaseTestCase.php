@@ -8,7 +8,6 @@
 
 namespace App\Tests;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManager;
 use Faker\Generator;
@@ -100,7 +99,7 @@ class DatabaseTestCase extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->em = $kernel->getContainer()->get(Registry::class)->getManager();
+    $this->em = $kernel->getContainer()->get('doctrine')->getManager();
     $this->hasher = $kernel->getContainer()->get(UserPasswordHasher::class);
     $this->val = $kernel->getContainer()->get(TraceableValidator::class);
     $this->faker = $kernel->getContainer()->get(Generator::class);
