@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class DefinizioneConsiglio {
+class DefinizioneConsiglio implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -67,14 +67,14 @@ class DefinizioneConsiglio {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $argomenti = array();
+  private ?array $argomenti = [];
 
   /**
    * @var array|null $dati Lista di dati utili per la verbalizzazione
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
   //==================== EVENTI ORM ====================
 

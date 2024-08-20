@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Avviso {
+class Avviso implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -145,28 +145,28 @@ class Avviso {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $allegati = array();
+  private ?array $allegati = [];
 
   /**
    * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
    * @ORM\Column(name="destinatari_ata", type="simple_array", nullable=true)
    */
-   private ?array $destinatariAta = array();
+   private ?array $destinatariAta = [];
 
   /**
    * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
    *
    * @ORM\Column(name="destinatari_speciali", type="simple_array", nullable=true)
    */
-   private ?array $destinatariSpeciali = array();
+   private ?array $destinatariSpeciali = [];
 
   /**
    * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
-   private ?array $destinatari = array();
+   private ?array $destinatari = [];
 
   /**
    * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
@@ -182,7 +182,7 @@ class Avviso {
    *
    * @ORM\Column(name="filtro", type="simple_array", nullable=true)
    */
-  private ?array $filtro = array();
+  private ?array $filtro = [];
 
   /**
    * @var Docente|null $docente Docente che ha scritto l'avviso

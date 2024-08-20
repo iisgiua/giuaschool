@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Documento {
+class Documento implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -433,7 +433,7 @@ class Documento {
       'tipo' => $this->tipo,
       'docente' => $this->docente->getId(),
       'listaDestinatari' => $this->listaDestinatari->datiVersione(),
-      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $this->allegati->toArray()),
+      'allegati' => array_map(fn($ogg) => $ogg->datiVersione(), $this->allegati->toArray()),
       'materia' => $this->materia ? $this->materia->getId() : null,
       'classe' => $this->classe ? $this->classe->getId() : null,
       'alunno' => $this->alunno ? $this->alunno->getId() : null,

@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Assenza {
+class Assenza implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -86,14 +86,14 @@ class Assenza {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dichiarazione = array();
+  private ?array $dichiarazione = [];
 
   /**
    * @var array|null $certificati Lista di file allegati per i certificati medici
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $certificati = array();
+  private ?array $certificati = [];
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza

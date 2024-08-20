@@ -27,7 +27,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @author Antonello Dessì
  */
-class Firma {
+class Firma implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class MenuOpzione {
+class MenuOpzione implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -412,7 +412,7 @@ class MenuOpzione {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nome;
+    return (string) $this->nome;
   }
 
 }

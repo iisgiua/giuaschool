@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Cattedra {
+class Cattedra implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

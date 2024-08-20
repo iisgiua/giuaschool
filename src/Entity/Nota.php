@@ -23,7 +23,7 @@ use Doctrine\Common\Collections\Collection;
  *
  * @author Antonello Dessì
  */
-class Nota {
+class Nota implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

@@ -55,7 +55,7 @@ class AtaRepository extends BaseRepository {
       ->getQuery()
       ->getOneOrNullResult();
     // restituisce l'ID
-    return ($dsga ? array($dsga['id']) : array());
+    return ($dsga ? [$dsga['id']] : []);
   }
 
   /**

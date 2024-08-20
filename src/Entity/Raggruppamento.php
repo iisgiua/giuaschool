@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Raggruppamento {
+class Raggruppamento implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class PropostaVoto {
+class PropostaVoto implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -117,7 +117,7 @@ class PropostaVoto {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce la proposta di voto
@@ -501,10 +501,7 @@ class PropostaVoto {
    * @return mixed|null Valore del dato o null se non esiste
    */
   public function getDato(string $nome) {
-    if (isset($this->dati[$nome])) {
-      return $this->dati[$nome];
-    }
-    return null;
+    return $this->dati[$nome] ?? null;
   }
 
   /**
@@ -515,7 +512,7 @@ class PropostaVoto {
    *
    * @return self Oggetto modificato
    */
-  public function addDato(string $nome, $valore): self {
+  public function addDato(string $nome, mixed $valore): self {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
       // clona array per forzare update su doctrine
       $valore = unserialize(serialize($valore));

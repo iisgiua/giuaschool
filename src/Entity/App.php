@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class App {
+class App implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -114,7 +114,7 @@ class App {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================
@@ -351,7 +351,7 @@ class App {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nome;
+    return (string) $this->nome;
   }
 
 }

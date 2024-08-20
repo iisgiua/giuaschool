@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class StoricoEsito {
+class StoricoEsito implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -115,7 +115,7 @@ class StoricoEsito {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================

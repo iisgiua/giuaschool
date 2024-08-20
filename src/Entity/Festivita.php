@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Festivita {
+class Festivita implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

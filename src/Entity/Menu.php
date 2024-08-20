@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Menu {
+class Menu implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -300,7 +300,7 @@ class Menu {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->selettore;
+    return (string) $this->selettore;
   }
 
 }

@@ -24,7 +24,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @author Antonello Dessì
  */
-class Spid {
+class Spid implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -331,7 +331,7 @@ class Spid {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->responseId;
+    return (string) $this->responseId;
   }
 
 }

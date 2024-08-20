@@ -31,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable {
+class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable, \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -256,33 +256,33 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    *
    * @ORM\Column(name="numeri_telefono", type="array", nullable=true)
    */
-  private ?array $numeriTelefono = array();
+  private ?array $numeriTelefono = [];
 
   /**
    * @var array|null $notifica Lista di parametri di notifica per i servizi esterni
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $notifica = array('tipo' => 'email', 'abilitato' => ['circolare']);
+  private ?array $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
 
   /**
    * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
-  private ?array $rappresentante = array('');
+  private ?array $rappresentante = [''];
 
   /**
    * @var array|null $listaProfili Lista di profili per lo stesso utente (dato non persistente)
    *
    */
-  private ?array $listaProfili = array();
+  private ?array $listaProfili = [];
 
   /**
    * @var array|null $infoLogin Lista di dati utili in fase di autenticazione (dato non persistente)
    *
    */
-  private ?array $infoLogin = array();
+  private ?array $infoLogin = [];
 
 
   //==================== EVENTI ORM ====================
@@ -364,13 +364,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    * @return string Oggetto Utente serializzato
    */
   public function serialize(): string {
-    return serialize(array(
-      $this->id,
-      $this->username,
-      $this->password,
-      $this->email,
-      $this->abilitato
-    ));
+    return serialize([$this->id, $this->username, $this->password, $this->email, $this->abilitato]);
   }
 
   /**
@@ -378,14 +372,8 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    *
    * @param mixed $oggetto Oggetto Utente serializzato
    */
-  public function unserialize($oggetto): void {
-    list (
-      $this->id,
-      $this->username,
-      $this->password,
-      $this->email,
-      $this->abilitato
-    ) = unserialize($oggetto);
+  public function unserialize(mixed $oggetto): void {
+    [$this->id, $this->username, $this->password, $this->email, $this->abilitato] = unserialize($oggetto);
   }
 
 
@@ -1034,7 +1022,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
       return false;
     }
     // controlla i ruoli specificati
-    if (strpos($lista, $this->getCodiceRuolo()) !== false) {
+    if (str_contains($lista, $this->getCodiceRuolo())) {
       // ruolo ammesso trovato
       return true;
     }

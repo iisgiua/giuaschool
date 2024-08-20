@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class ListaDestinatari {
+class ListaDestinatari implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -91,7 +91,7 @@ class ListaDestinatari {
    *
    * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
-  private ?array $filtroDocenti = array();
+  private ?array $filtroDocenti = [];
 
   /**
    * @var string|null $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
@@ -107,7 +107,7 @@ class ListaDestinatari {
    *
    * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
-  private ?array $filtroCoordinatori = array();
+  private ?array $filtroCoordinatori = [];
 
   /**
    * @var bool $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
@@ -130,7 +130,7 @@ class ListaDestinatari {
    *
    * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
-  private ?array $filtroGenitori = array();
+  private ?array $filtroGenitori = [];
 
   /**
    * @var string|null $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
@@ -146,7 +146,7 @@ class ListaDestinatari {
    *
    * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
-  private ?array $filtroAlunni = array();
+  private ?array $filtroAlunni = [];
 
 
   //==================== EVENTI ORM ====================
@@ -512,7 +512,7 @@ class ListaDestinatari {
    */
   public function datiVersione(): array {
     $dati = [
-      'sedi' => array_map(function($ogg) { return $ogg->getId(); }, $this->sedi->toArray()),
+      'sedi' => array_map(fn($ogg) => $ogg->getId(), $this->sedi->toArray()),
       'dsga' => $this->dsga,
       'ata' => $this->ata,
       'docenti' => $this->docenti,

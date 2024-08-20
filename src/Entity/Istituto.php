@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Istituto {
+class Istituto implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -478,7 +478,7 @@ class Istituto {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nomeBreve;
+    return (string) $this->nomeBreve;
   }
 
 }

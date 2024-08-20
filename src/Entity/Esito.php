@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Esito {
+class Esito implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -87,7 +87,7 @@ class Esito {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
   /**
    * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce l'esito

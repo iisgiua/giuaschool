@@ -34,49 +34,6 @@ use Symfony\Component\Process\Process;
 class AliceLoadCommand extends Command {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * Servizio per l'utilizzo delle entità su database
-   *
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  protected $em;
-
-  /**
-   * Servizio per la codifica delle password
-   *
-   * @var UserPasswordHasherInterface|null $hasher Gestore della codifica delle password
-   */
-  protected ?UserPasswordHasherInterface $hasher;
-
-  /**
-   * Generatore automatico di dati fittizi
-   *
-   * @var Generator|null $faker Generatore automatico di dati fittizi
-   */
-  protected ?Generator $faker;
-
-  /**
-   * Generatore personalizzato di dati fittizi
-   *
-   * @var CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
-   */
-  protected ?CustomProvider $customProvider = null;
-
-  /**
-   * Generatore di fixtures con memmorizzazione su database
-   *
-   * @var PurgerLoader|null $alice Generatore di fixtures con memmorizzazione su database
-   */
-  protected ?PurgerLoader $alice;
-
-  /**
-  * @var string $projectPath Percorso per i file del progetto
-  */
-  private string $projectPath = '';
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -85,20 +42,20 @@ class AliceLoadCommand extends Command {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param Generator $faker Generatore automatico di dati fittizi
+   * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
    */
-  public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $hasher, Generator $faker,
-                              PurgerLoader $alice, string $dirProgetto) {
+  public function __construct(protected EntityManagerInterface $em,
+                              protected UserPasswordHasherInterface $hasher,
+                              protected Generator $faker,
+                              protected ?CustomProvider $customProvider = null,
+                              protected PurgerLoader $alice,
+                              private string $dirProgetto) {
     parent::__construct();
-    $this->em = $em;
-    $this->hasher = $hasher;
-    $this->faker = $faker;
-    $this->alice = $alice;
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->projectPath = $dirProgetto;
   }
 
   /**
@@ -139,8 +96,8 @@ class AliceLoadCommand extends Command {
   protected function interact(InputInterface $input, OutputInterface $output): void {
     // controlla anno
     $fixture = $input->getArgument('fixture');
-    $file1 = $this->projectPath.'/src/DataFixtures/'.$fixture.'Fixtures.yml';
-    $file2 = $this->projectPath.'/'.$fixture;
+    $file1 = $this->dirProgetto.'/src/DataFixtures/'.$fixture.'Fixtures.yml';
+    $file2 = $this->dirProgetto.'/'.$fixture;
     if ($fixture && !file_exists($file1) && !file_exists($file2)) {
       // errore
       throw new InvalidArgumentException('La fixture indicata non è stata trovata.');
@@ -171,7 +128,7 @@ class AliceLoadCommand extends Command {
       $purgeMode = PurgeMode::createTruncateMode();
     }
     // esegue per ogni fixture
-    $path = $this->projectPath.'/src/DataFixtures/';
+    $path = $this->dirProgetto.'/src/DataFixtures/';
     $fixtures = [];
     if (empty($fixture)) {
       // carica tutti i file della directory DataFixtures
@@ -189,7 +146,7 @@ class AliceLoadCommand extends Command {
       print("...fixture: $file\n");
     } else {
       // carica file specificato
-      $file = $this->projectPath.'/'.$fixture;
+      $file = $this->dirProgetto.'/'.$fixture;
       $fixtures[] = $file;
       print("...fixture: $file\n");
     }
@@ -204,7 +161,7 @@ class AliceLoadCommand extends Command {
       // legge configurazione db
       $dbParams = $this->em->getConnection()->getParams();
       // esegue dump
-      $path = $this->projectPath.'/'.$dump.'.sql';
+      $path = $this->dirProgetto.'/'.$dump.'.sql';
       file_put_contents($path, "SET FOREIGN_KEY_CHECKS = 0;\n");
       $process = Process::fromShellCommandline('mysqldump -u'.$dbParams['user'].' -p'.$dbParams['password'].
         ' '.$dbParams['dbname'].' -t -n --compact >> '.$path);
@@ -215,11 +172,11 @@ class AliceLoadCommand extends Command {
       }
       file_put_contents($path, "SET FOREIGN_KEY_CHECKS = 1;\n", FILE_APPEND);
       // crea mappa dei riferimenti agli oggetti
-      $mapPath = $this->projectPath.'/'.$dump.'.map';
+      $mapPath = $this->dirProgetto.'/'.$dump.'.map';
       $objectMap = [];
       foreach ($objects as $name => $object) {
         // determina classe e numero di istanza
-        $objectMap[$name] = [get_class($object), $object->getId()];
+        $objectMap[$name] = [$object::class, $object->getId()];
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));

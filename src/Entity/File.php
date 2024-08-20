@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class File {
+class File implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -266,7 +266,7 @@ class File {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->titolo;
+    return (string) $this->titolo;
   }
 
   /**

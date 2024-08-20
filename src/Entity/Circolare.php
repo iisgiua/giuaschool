@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Circolare {
+class Circolare implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -113,7 +113,7 @@ class Circolare {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $allegati = array();
+  private ?array $allegati = [];
 
   /**
    * @var bool $ata Indica se il personale ATA è destinatario della circolare o no
@@ -143,7 +143,7 @@ class Circolare {
    *
    * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
-  private ?array $filtroGenitori = array();
+  private ?array $filtroGenitori = [];
 
   /**
    * @var string|null $alunni Indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
@@ -159,7 +159,7 @@ class Circolare {
    *
    * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
-  private ?array $filtroAlunni = array();
+  private ?array $filtroAlunni = [];
 
   /**
    * @var string|null $coordinatori Indica quali coordinatori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
@@ -175,7 +175,7 @@ class Circolare {
    *
    * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
-  private ?array $filtroCoordinatori = array();
+  private ?array $filtroCoordinatori = [];
 
   /**
    * @var string|null $docenti Indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
@@ -191,14 +191,14 @@ class Circolare {
    *
    * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
-  private ?array $filtroDocenti = array();
+  private ?array $filtroDocenti = [];
 
   /**
    * @var array|null $altri Altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
-  private array $altri = array();
+  private array $altri = [];
 
   /**
    * @var bool $firma Indica se è richiesta la conferma esplicita di lettura della circolare o no
@@ -792,7 +792,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroGenitori($filtro): self {
+  public function addFiltroGenitori(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroGenitori)) {
       $this->filtroGenitori[] = $filtro->getId();
     }
@@ -806,7 +806,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroGenitori($filtro): self {
+  public function removeFiltroGenitori(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroGenitori)) {
       unset($this->filtroGenitori[array_search($filtro->getId(), $this->filtroGenitori)]);
     }
@@ -820,7 +820,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroAlunni($filtro): self {
+  public function addFiltroAlunni(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroAlunni)) {
       $this->filtroAlunni[] = $filtro->getId();
     }
@@ -834,7 +834,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroAlunni($filtro): self {
+  public function removeFiltroAlunni(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroAlunni)) {
       unset($this->filtroAlunni[array_search($filtro->getId(), $this->filtroAlunni)]);
     }
@@ -848,7 +848,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroCoordinatori($filtro): self {
+  public function addFiltroCoordinatori(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroCoordinatori)) {
       $this->filtroCoordinatori[] = $filtro->getId();
     }
@@ -862,7 +862,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroCoordinatori($filtro): self {
+  public function removeFiltroCoordinatori(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroCoordinatori)) {
       unset($this->filtroCoordinatori[array_search($filtro->getId(), $this->filtroCoordinatori)]);
     }
@@ -876,7 +876,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroDocenti($filtro): self {
+  public function addFiltroDocenti(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroDocenti)) {
       $this->filtroDocenti[] = $filtro->getId();
     }
@@ -890,7 +890,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroDocenti($filtro): self {
+  public function removeFiltroDocenti(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroDocenti)) {
       unset($this->filtroDocenti[array_search($filtro->getId(), $this->filtroDocenti)]);
     }

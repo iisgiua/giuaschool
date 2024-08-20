@@ -48,14 +48,14 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    *
    * @ORM\Column(type="array", nullable=false)
    */
-  private array $struttura = array();
+  private array $struttura = [];
 
   /**
   * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
   *
   * @ORM\Column(name="classi_visibili", type="array", nullable=false)
   */
-  private array $classiVisibili = array();
+  private array $classiVisibili = [];
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -160,7 +160,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    */
   public function __construct() {
     // valori predefiniti
-    $this->classiVisibili = array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null);
+    $this->classiVisibili = [1 => null, 2 => null, 3 => null, 4 => null, 5 => null];
   }
 
   /**

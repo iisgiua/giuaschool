@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class ListaDestinatariUtente {
+class ListaDestinatariUtente implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

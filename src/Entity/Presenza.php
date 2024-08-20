@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Presenza {
+class Presenza implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -297,7 +297,7 @@ class Presenza {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return 'Fuori classe '.$this->tipo.' del '.$this->data->format('d/m/Y').': '.$this->alunno;
   }
 

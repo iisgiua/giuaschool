@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Scrutinio {
+class Scrutinio implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -112,7 +112,7 @@ class Scrutinio {
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  private ?array $dati = [];
 
   /**
    * @var \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
@@ -390,10 +390,7 @@ class Scrutinio {
    * @return mixed|null Valore del dato o null se non esiste
    */
   public function getDato(string $nome) {
-    if (isset($this->dati[$nome])) {
-      return $this->dati[$nome];
-    }
-    return null;
+    return $this->dati[$nome] ?? null;
   }
 
   /**
@@ -404,7 +401,7 @@ class Scrutinio {
    *
    * @return self Oggetto modificato
    */
-  public function addDato(string $nome, $valore): self {
+  public function addDato(string $nome, mixed $valore): self {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
       // clona array per forzare update su doctrine
       $valore = unserialize(serialize($valore));

@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class OrarioDocente {
+class OrarioDocente implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

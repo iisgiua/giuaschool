@@ -32,7 +32,7 @@ class Alunno extends Utente {
   /**
    * @var int FOTO_MAXSIZE Dimensione massima della foto (in pixel)
    */
-  const FOTO_MAXSIZE = 100;
+  public const FOTO_MAXSIZE = 100;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

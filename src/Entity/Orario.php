@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Orario {
+class Orario implements \Stringable {
 
 
   /**
@@ -232,7 +232,7 @@ class Orario {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nome;
+    return (string) $this->nome;
   }
 
 }

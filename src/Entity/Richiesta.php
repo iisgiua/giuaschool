@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-class Richiesta {
+class Richiesta implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
