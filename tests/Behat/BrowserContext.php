@@ -376,14 +376,23 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la tabella abbia le intestazioni delle colonne specificate
+   *  $colonne: i campi dell'unica riga corrispondono alle intestazioni delle colonne della tabella
+   *
+   * @Then vedi nella tabella le colonne:
+   */
+  public function vediNellaTabellaLeColonne(TableNode $colonne): void {
+    $this->vediNellaTabellaLeColonneIndice(1, $colonne);
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni delle colonne specificate
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $colonne: i campi dell'unica riga corrispondono alle intestazioni delle colonne della tabella
    *
    * @Then vedi nella tabella :indice le colonne:
-   * @Then vedi nella tabella le colonne:
    */
-  public function vediNellaTabellaLeColonne($indice=1, TableNode $colonne): void {
+  public function vediNellaTabellaLeColonneIndice($indice, TableNode $colonne): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
@@ -396,13 +405,23 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che nella tabella e riga indicata i dati corrispondano a quelli specificati
    *  $numero: numero di riga dei dati della tabella (parte da 1)
+   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
+   *
+   * @Then vedi nella riga :numero della tabella i dati:
+   */
+  public function vediNellaRigaDellaTabellaIDati($numero, TableNode $dati): void {
+    $this->vediNellaRigaDellaTabellaIDatiIndice($numero, 1, $dati);
+  }
+
+  /**
+   * Controlla che nella tabella e riga indicata i dati corrispondano a quelli specificati
+   *  $numero: numero di riga dei dati della tabella (parte da 1)
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi nella riga :numero della tabella :indice i dati:
-   * @Then vedi nella riga :numero della tabella i dati:
    */
-  public function vediNellaRigaDellaTabellaIDati($numero, $indice=1, TableNode $dati): void {
+  public function vediNellaRigaDellaTabellaIDatiIndice($numero, $indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
@@ -427,10 +446,21 @@ class BrowserContext extends BaseContext {
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
-   * @Then vedi nella tabella :indice i dati:
    * @Then vedi nella tabella i dati:
    */
-  public function vediNellaTabellaIDati($indice=1, TableNode $dati): void {
+  public function vediNellaTabellaIDati(TableNode $dati): void {
+    $this->vediNellaTabellaIDatiIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che in una riga qualsiasi della tabella indicata i dati corrispondano a quelli specificati
+   * NB: non funziona se si usa nella tabella COLSPAN o ROWSPAN
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
+   *
+   * @Then vedi nella tabella :indice i dati:
+   */
+  public function vediNellaTabellaIDatiIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
@@ -942,14 +972,23 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la tabella abbia le intestazioni e i dati corrispondenti a quelli specificati
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella:
+   */
+  public function vediLaTabella(TableNode $dati): void {
+    $this->vediLaTabellaIndice(1, $dati);
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice:
-   * @Then vedi la tabella:
    */
-  public function vediLaTabella($indice=1, TableNode $dati): void {
+  public function vediLaTabellaIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
@@ -974,13 +1013,22 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella senza intestazioni:
+   */
+  public function vediLaTabellaSenzaIntestazioni(TableNode $dati): void {
+    $this->vediLaTabellaSenzaIntestazioniIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice senza intestazioni:
-   * @Then vedi la tabella senza intestazioni:
    */
-  public function vediLaTabellaSenzaIntestazioni($indice=1, TableNode $dati): void {
+  public function vediLaTabellaSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
@@ -1000,13 +1048,23 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati,
    * ma non considera l'ordine delle righe
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella non ordinata:
+   */
+  public function vediLaTabellaNonOrdinata(TableNode $dati): void {
+    $this->vediLaTabellaNonOrdinataIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice non ordinata:
-   * @Then vedi la tabella non ordinata:
    */
-  public function vediLaTabellaNonOrdinata($indice=1, TableNode $dati): void {
+  public function vediLaTabellaNonOrdinataIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
@@ -1046,13 +1104,23 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati,
    * ma non considera l'ordine delle righe
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella non ordinata senza intestazioni:
+   */
+  public function vediLaTabellaNonOrdinataSenzaIntestazioni(TableNode $dati): void {
+    $this->vediLaTabellaNonOrdinataSenzaIntestazioniIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice non ordinata senza intestazioni:
-   * @Then vedi la tabella non ordinata senza intestazioni:
    */
-  public function vediLaTabellaNonOrdinataSenzaIntestazioni($indice=1, TableNode $dati): void {
+  public function vediLaTabellaNonOrdinataSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
@@ -1143,15 +1211,24 @@ class BrowserContext extends BaseContext {
 
   /**
    * Clicca su link o pulsante per eseguire azione
-   *  $indice: indice progressivo dei cursori presenti nel contenuto della pagina (parte da 1)
    *  $pos: numero di posizioni di far scorrere il cursore (+ a destra, - a sinistra)
    *
    * @When scorri cursore di :pos posizione
    * @When scorri cursore di :pos posizioni
+   */
+  public function scorreCursore($pos): void {
+    $this->scorreCursoreIndice(1, $pos);
+  }
+
+  /**
+   * Clicca su link o pulsante per eseguire azione
+   *  $indice: indice progressivo dei cursori presenti nel contenuto della pagina (parte da 1)
+   *  $pos: numero di posizioni di far scorrere il cursore (+ a destra, - a sinistra)
+   *
    * @When scorri cursore :indice di :pos posizione
    * @When scorri cursore :indice di :pos posizioni
    */
-  public function scorreCursore($indice=1, $pos): void {
+  public function scorreCursoreIndice($indice, $pos): void {
     $sliders = $this->session->getPage()->findAll('css', 'form div.slider');
     $this->assertNotEmpty($sliders[$indice - 1]);
     $handle = $sliders[$indice - 1]->find('css', '.min-slider-handle');
