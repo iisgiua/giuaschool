@@ -41,12 +41,12 @@ class ColloquioRepository extends BaseRepository {
     }
     if (!$fine) {
       $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
-        $this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_fine').' 00:00:00');
+        $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_fine').' 00:00:00');
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')
       ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
-      ->leftJoin('App\Entity\RichiestaColloquio', 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
+      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
       ->where('c.docente=:docente AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,c.inizio', 'ASC')
       ->groupBy('c.id')
@@ -80,7 +80,7 @@ class ColloquioRepository extends BaseRepository {
     // conta richieste
     $numero = $this->createQueryBuilder('c')
       ->select('COUNT(rc.id)')
-      ->join('App\Entity\RichiestaColloquio', 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->join(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND rc.stato IN (:valide)')
       ->setParameters(['colloquio' => $colloquio, 'valide' => ['R', 'C']])
       ->getQuery()
@@ -148,7 +148,7 @@ class ColloquioRepository extends BaseRepository {
     // legge dati prenotazioni
     $prenotazioni = $this->createQueryBuilder('c')
       ->select('c.id,c.tipo,c.data,c.inizio,c.fine,c.luogo,c.numero,rc.id AS id_prenotazione,rc.appuntamento,rc.stato,rc.messaggio,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
-      ->leftJoin('App\Entity\RichiestaColloquio', 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->leftJoin('rc.alunno', 'a')
       ->leftJoin('a.classe', 'cl')
       ->where('c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :oggi AND :fine')
@@ -209,7 +209,7 @@ class ColloquioRepository extends BaseRepository {
     // legge prenotazioni esistenti
     $prenotazioni = $this->createQueryBuilder('c')
       ->select('rc.appuntamento')
-      ->leftJoin('App\Entity\RichiestaColloquio', 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND c.abilitato=:abilitato AND rc.stato IN (:validi)')
       ->orderBy('rc.appuntamento', 'ASC')
       ->setParameters(['colloquio' => $colloquio, 'abilitato' => 1, 'validi' => ['R', 'C']])
@@ -237,7 +237,7 @@ class ColloquioRepository extends BaseRepository {
    */
   public function cancellabili(Docente $docente, bool $abilitato=null): array {
     // subquery richieste
-    $subquery = $this->_em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
+    $subquery = $this->_em->getRepository(\App\Entity\RichiestaColloquio::class)->createQueryBuilder('rc')
       ->select('rc.id')
       ->where('rc.colloquio=c.id')
       ->getDQL();

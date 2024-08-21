@@ -26,7 +26,7 @@ class ConfigurazioneRepository extends EntityRepository {
    *
    * @return string Valore del parametro letto
    */
-  public function getParametro($nome, $default=null) {
+  public function getParametro($nome, mixed $default=null) {
     // legge valore parametro
     $parametro = $this->createQueryBuilder('c')
       ->select('c.valore')

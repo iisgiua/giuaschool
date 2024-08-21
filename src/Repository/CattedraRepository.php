@@ -63,7 +63,7 @@ class CattedraRepository extends BaseRepository {
    * @return array Dati formattati in un array associativo
    */
   public function cattedreDocente(Docente $docente, $tipo='A'): array {
-    $dati = array();
+    $dati = [];
     // lista cattedre
     $cattedre = $this->createQueryBuilder('c')
       ->join('c.classe', 'cl')
@@ -87,8 +87,8 @@ class CattedraRepository extends BaseRepository {
       }
     } else {
       // array associativo
-      $dati['choice'] = array();
-      $dati['lista'] = array();
+      $dati['choice'] = [];
+      $dati['lista'] = [];
       foreach ($cattedre as $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
@@ -122,7 +122,7 @@ class CattedraRepository extends BaseRepository {
       ->getQuery()
       ->getArrayResult();
     // elimina docenti in più
-    $mat = array();
+    $mat = [];
     foreach ($docenti as $k=>$doc) {
       if ($doc['tipo_materia'] == 'S' || $doc['tipo_materia'] == 'E') {
         // non modifica cattedre di SOSTEGNO/Ed.Civica
@@ -158,7 +158,7 @@ class CattedraRepository extends BaseRepository {
    */
 
   public function cattedreOrarioDocente(Docente $docente) {
-    $dati = array();
+    $dati = [];
     // lista cattedre
     $cattedre = $this->createQueryBuilder('c')
       ->join('c.classe', 'cl')
@@ -170,8 +170,8 @@ class CattedraRepository extends BaseRepository {
       ->getQuery()
       ->getResult();
     // array associativo
-    $dati['choice'] = array();
-    $dati['lista'] = array();
+    $dati['choice'] = [];
+    $dati['lista'] = [];
     foreach ($cattedre as $cat) {
       $label = ''.$cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
         ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
@@ -179,13 +179,13 @@ class CattedraRepository extends BaseRepository {
       $dati['lista'][$cat->getId()]['object'] = $cat;
       $dati['lista'][$cat->getId()]['label'] = $label;
       // legge orario
-      $dati['lista'][$cat->getId()]['orario'] = array();
+      $dati['lista'][$cat->getId()]['orario'] = [];
       if ($cat->getMateria()->getTipo() != 'S') {
         // cattedra curricolare
-        $orario = $this->_em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
+        $orario = $this->_em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
           ->select('od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join(\App\Entity\ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->where('od.cattedra=:cattedra AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('od.giorno,od.ora', 'ASC')
           ->setParameters(['cattedra' => $cat, 'sede' => $cat->getClasse()->getSede(),
@@ -197,10 +197,10 @@ class CattedraRepository extends BaseRepository {
         }
       } else {
         // cattedra di sostegno: imposta orari di tutte le materie della classe
-        $orari = $this->_em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
+        $orari = $this->_em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
           ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join(\App\Entity\ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->join('od.cattedra', 'c')
           ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('c.id,od.giorno,od.ora', 'ASC')
@@ -258,7 +258,7 @@ class CattedraRepository extends BaseRepository {
    * @return array Dati formattati in un array associativo
    */
   public function altreMaterie(Docente $docente, Classe $classe, Materia $materia, array $firme): array {
-    $dati = array();
+    $dati = [];
     // lista cattedre
     $cattedre = $this->createQueryBuilder('c')
       ->join('c.materia', 'm')
