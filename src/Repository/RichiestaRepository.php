@@ -59,7 +59,7 @@ class RichiestaRepository extends BaseRepository {
     // query base
     $richieste = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
+      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
       ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
@@ -142,7 +142,7 @@ class RichiestaRepository extends BaseRepository {
     $richieste = $this->createQueryBuilder('r')
       ->select('COUNT(r.id) AS totale, s.nomeBreve')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
+      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
       ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND dr.tipo!=:tipo AND r.stato=:stato')
@@ -234,7 +234,7 @@ class RichiestaRepository extends BaseRepository {
     // query base
     $moduli = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
+      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
       ->join('c.sede', 's')
       ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")

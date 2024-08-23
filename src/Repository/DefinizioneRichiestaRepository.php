@@ -39,7 +39,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
-      ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
+      ->leftJoin(\App\Entity\Richiesta::class, 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
       ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere($sql)
       ->setParameters(['utente' => $utente instanceOf Genitore ? $utente->getAlunno() : $utente,
@@ -93,7 +93,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio,(r.utente) AS utente_id')
-      ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
+      ->leftJoin(\App\Entity\Richiesta::class, 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
       ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere("FIND_IN_SET('DN', dr.richiedenti) > 0")
       ->setParameters(['classe' => $classe, 'sedi' => $sedi])

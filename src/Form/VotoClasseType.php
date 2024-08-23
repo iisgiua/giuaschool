@@ -37,15 +37,15 @@ class VotoClasseType extends AbstractType {
       ->add('bes', HiddenType::class)
       ->add('voto', HiddenType::class)
       ->add('votoTesto', HiddenType::class)
-      ->add('media', ChoiceType::class, array('label' => false,
+      ->add('media', ChoiceType::class, ['label' => false,
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('giudizio', TextType::class, array('label' => false,
+        'required' => true])
+      ->add('giudizio', TextType::class, ['label' => false,
         'trim' => true,
-        'required' => false));
+        'required' => false]);
   }
 
   /**
@@ -54,7 +54,8 @@ class VotoClasseType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => VotoClasse::class));
+    $resolver->setDefaults([
+      'data_class' => VotoClasse::class]);
   }
 
 }

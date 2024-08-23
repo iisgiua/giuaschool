@@ -14,7 +14,7 @@ namespace App\Form;
  *
  * @author Antonello Dessì
  */
-class Appello {
+class Appello implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

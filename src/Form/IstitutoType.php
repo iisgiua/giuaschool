@@ -35,44 +35,44 @@ class IstitutoType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('tipo', TextType::class, array('label' => 'label.tipo_istituto',
+      ->add('tipo', TextType::class, ['label' => 'label.tipo_istituto',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('tipoSigla', TextType::class, array('label' => 'label.sigla_tipo_istituto',
+        'required' => true])
+      ->add('tipoSigla', TextType::class, ['label' => 'label.sigla_tipo_istituto',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('nome', TextType::class, array('label' => 'label.nome_istituto',
+        'required' => true])
+      ->add('nome', TextType::class, ['label' => 'label.nome_istituto',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('nomeBreve', TextType::class, array('label' => 'label.nome_breve_istituto',
+        'required' => true])
+      ->add('nomeBreve', TextType::class, ['label' => 'label.nome_breve_istituto',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('email', EmailType::class, array('label' => 'label.email_istituto',
+        'required' => true])
+      ->add('email', EmailType::class, ['label' => 'label.email_istituto',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('pec', EmailType::class, array('label' => 'label.pec_istituto',
+        'required' => true])
+      ->add('pec', EmailType::class, ['label' => 'label.pec_istituto',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('urlSito', UrlType::class, array('label' => 'label.url_sito',
+        'required' => true])
+      ->add('urlSito', UrlType::class, ['label' => 'label.url_sito',
         'default_protocol' => 'https',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('urlRegistro', UrlType::class, array('label' => 'label.url_registro',
+        'required' => true])
+      ->add('urlRegistro', UrlType::class, ['label' => 'label.url_registro',
         'default_protocol' => 'https',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('firmaPreside', TextType::class, array('label' => 'label.firma_preside',
-        'required' => true))
-      ->add('emailAmministratore', EmailType::class, array('label' => 'label.email_amministratore',
+        'required' => true])
+      ->add('firmaPreside', TextType::class, ['label' => 'label.firma_preside',
+        'required' => true])
+      ->add('emailAmministratore', EmailType::class, ['label' => 'label.email_amministratore',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('emailNotifiche', EmailType::class, array('label' => 'label.email_notifiche',
+        'required' => true])
+      ->add('emailNotifiche', EmailType::class, ['label' => 'label.email_notifiche',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -82,9 +82,9 @@ class IstitutoType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
-      'data_class' => Istituto::class));
+      'data_class' => Istituto::class]);
   }
 
 }

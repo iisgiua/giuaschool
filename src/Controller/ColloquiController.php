@@ -55,7 +55,7 @@ class ColloquiController extends BaseController {
       $info['errore'] = 'exception.colloqui_sospesi';
     } else {
       // richieste valide
-      $dati = $this->em->getRepository('App\Entity\Colloquio')->richiesteValide($this->getUser());
+      $dati = $this->em->getRepository(\App\Entity\Colloquio::class)->richiesteValide($this->getUser());
     }
     // pagina di risposta
     return $this->renderHtml('colloqui', 'richieste', $dati, $info);
@@ -76,7 +76,7 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // storico richieste
-    $dati['storico'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->storico($this->getUser());
+    $dati['storico'] = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->storico($this->getUser());
     // pagina di risposta
     return $this->renderHtml('colloqui', 'storico', $dati, $info);
   }
@@ -101,7 +101,7 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
       // errore
@@ -151,7 +151,7 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
       // errore
@@ -206,7 +206,7 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || !in_array($richiesta->getStato(), ['C', 'N'], true)) {
       // errore
@@ -254,7 +254,7 @@ class ColloquiController extends BaseController {
     $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
     // legge dati
-    $dati = $this->em->getRepository('App\Entity\Colloquio')->ricevimenti($this->getUser(), $inizio);
+    $dati = $this->em->getRepository(\App\Entity\Colloquio::class)->ricevimenti($this->getUser(), $inizio);
     // pagina di risposta
     return $this->renderHtml('colloqui', 'gestione', $dati, $info);
   }
@@ -286,7 +286,7 @@ class ColloquiController extends BaseController {
     if ($id > 0) {
       // azione edit
       $oggi = new \DateTime('today');
-      $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+      $colloquio = $this->em->getRepository(\App\Entity\Colloquio::class)->findOneBy(['id' => $id,
         'docente' => $this->getUser()]);
       if (!$colloquio || $colloquio->getData() < $oggi) {
         // errore
@@ -310,9 +310,9 @@ class ColloquiController extends BaseController {
     $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
     $info['fine'] = $fine->modify('-30 days')->format('d/m/Y');
-    $info['festivi'] = $this->em->getRepository('App\Entity\Festivita')->listaFestivi();
+    $info['festivi'] = $this->em->getRepository(\App\Entity\Festivita::class)->listaFestivi();
     // lista sedi
-    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    $listaSedi = $this->em->getRepository(\App\Entity\Docente::class)->sedi($this->getUser());
     // form di inserimento
     $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'singolo',
       'values' => [$listaSedi]]);
@@ -320,13 +320,13 @@ class ColloquiController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla data
       $data = $form->get('data')->getData();
-      if ($this->em->getRepository('App\Entity\Festivita')->giornoFestivo($data) || $data < $oggi ||
+      if ($this->em->getRepository(\App\Entity\Festivita::class)->giornoFestivo($data) || $data < $oggi ||
           $data > $fine) {
         // errore: data non valida
         $form->addError(new FormError($trans->trans('exception.colloquio_data_invalida')));
       }
       // controlla se esite già
-      if ($this->em->getRepository('App\Entity\Colloquio')->sovrapposizione($this->getUser(), $data,
+      if ($this->em->getRepository(\App\Entity\Colloquio::class)->sovrapposizione($this->getUser(), $data,
           $form->get('inizio')->getData(), $form->get('fine')->getData(), $id)) {
         // errore: sovrapposizione
         $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
@@ -334,11 +334,11 @@ class ColloquiController extends BaseController {
       // controlla link
       if ($colloquio->getTipo() == 'D') {
         $link = $colloquio->getLuogo();
-        if (substr($link, -16) == 'meet.google.com/' || substr($link, -15) == 'meet.google.com') {
+        if (str_ends_with($link, 'meet.google.com/') || str_ends_with($link, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (substr($link, 0, 8) != 'https://' && substr($link, 0, 7) != 'http://') {
+        if (!str_starts_with($link, 'https://') && !str_starts_with($link, 'http://')) {
           $colloquio->setLuogo('https://'.$link);
         }
       }
@@ -377,14 +377,14 @@ class ColloquiController extends BaseController {
   public function enable(LogHandler $dblogger, int $id, int $stato): Response {
     // controlla colloquio
     $oggi = new \DateTime('today');
-    $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+    $colloquio = $this->em->getRepository(\App\Entity\Colloquio::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$colloquio || $colloquio->getData() < $oggi) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla se presenti richieste
-    if ($this->em->getRepository('App\Entity\Colloquio')->numeroRichieste($colloquio) > 0) {
+    if ($this->em->getRepository(\App\Entity\Colloquio::class)->numeroRichieste($colloquio) > 0) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -426,14 +426,14 @@ class ColloquiController extends BaseController {
       ->setFine(new \DateTime('09:30'))
       ->setDurata(10);
     // lista sedi
-    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    $listaSedi = $this->em->getRepository(\App\Entity\Docente::class)->sedi($this->getUser());
     if (isset($listaSedi[''])) {
       // elimina opzione vuota
       unset($listaSedi['']);
     }
     // informazioni per la visualizzazione
     foreach ($listaSedi as $idSede) {
-      $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
+      $info['orario'][$idSede] = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->orarioSede($idSede);
     }
     $listaOre = [];
     for ($i = 1; $i <= 10; $i++) {
@@ -456,11 +456,11 @@ class ColloquiController extends BaseController {
       $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
       // controlla link
       if ($form->get('tipo')->getData() == 'D') {
-        if (substr($luogo, -16) == 'meet.google.com/' || substr($luogo, -15) == 'meet.google.com') {
+        if (str_ends_with($luogo, 'meet.google.com/') || str_ends_with($luogo, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (substr($luogo, 0, 8) != 'https://' && substr($luogo, 0, 7) != 'http://') {
+        if (!str_starts_with($luogo, 'https://') && !str_starts_with($luogo, 'http://')) {
           $luogo = 'https://'.$luogo;
         }
     }
@@ -546,7 +546,7 @@ class ColloquiController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['id' => $id,
+    $richiesta = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->findOneBy(['id' => $id,
       'alunno' => $alunno, 'stato' => ['R', 'C']]);
     if (!$richiesta) {
       // errore
@@ -586,7 +586,7 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // controlla docente
-    $docente = $this->em->getRepository('App\Entity\Docente')->findOneBy(['id' => $docente, 'abilitato' => 1]);
+    $docente = $this->em->getRepository(\App\Entity\Docente::class)->findOneBy(['id' => $docente, 'abilitato' => 1]);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -607,7 +607,7 @@ class ColloquiController extends BaseController {
     $dati = $col->dateRicevimento($docente);
     // informazioni per la visualizzazione
     $info['docente'] = "".$docente;
-    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente, 'Q');
+    $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->cattedreDocente($docente, 'Q');
     $info['materie'] = [];
     foreach ($cattedre as $cattedra) {
       if ($cattedra->getClasse() == $classe) {
@@ -621,14 +621,14 @@ class ColloquiController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       $colloquioId = $form->get('data')->getData();
       // controlla duplicati
-      $prenotazione = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy([
+      $prenotazione = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->findOneBy([
         'colloquio' => $colloquioId, 'alunno' => $alunno, 'stato' => ['R', 'C']]);
       if (!empty($prenotazione)) {
         // esiste già richiesta
         $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
       } else {
         // nuova richiesta
-        $appuntamento = $this->em->getRepository('App\Entity\Colloquio')->
+        $appuntamento = $this->em->getRepository(\App\Entity\Colloquio::class)->
           nuovoAppuntamento($dati['validi'][$colloquioId]['ricevimento']);
         $richiesta = (new RichiestaColloquio)
           ->setColloquio($dati['validi'][$colloquioId]['ricevimento'])
@@ -668,8 +668,8 @@ class ColloquiController extends BaseController {
     $info = [];
     $dati = [];
     // criteri di ricerca
-    $criteri = array();
-    $docente = $this->em->getRepository('App\Entity\Docente')->find(
+    $criteri = [];
+    $docente = $this->em->getRepository(\App\Entity\Docente::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/colloqui_cerca/docente', 0));
     $criteri['docente'] = $docente ? $docente->getId() : 0;
     if ($pagina == 0) {
@@ -680,7 +680,7 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $opzioniDocenti = $this->em->getRepository(\App\Entity\Docente::class)->opzioni();
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'colloqui',
       'values' => [$docente, $opzioniDocenti]]);
     $form->handleRequest($request);
@@ -693,7 +693,7 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository(\App\Entity\Colloquio::class)->cerca($criteri, $pagina);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
@@ -718,7 +718,7 @@ class ColloquiController extends BaseController {
     // legge ricevimenti
     $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
-    $ricevimenti = $this->em->getRepository('App\Entity\Colloquio')->cancellabili($this->getUser(),
+    $ricevimenti = $this->em->getRepository(\App\Entity\Colloquio::class)->cancellabili($this->getUser(),
       ($tipo == 'D' ? false : null));
     // controlla richieste e li elimina
     foreach ($ricevimenti as $ricevimento) {

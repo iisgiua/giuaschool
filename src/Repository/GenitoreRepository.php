@@ -64,16 +64,16 @@ class GenitoreRepository extends BaseRepository {
    */
   public function datiGenitori(array $alunni) {
     // legge dati
-    $genitori = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+    $genitori = $this->_em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
       ->select('a.id,g.cognome,g.nome,g.codiceFiscale,g.numeriTelefono,g.spid,g.username,g.email,g.ultimoAccesso')
-      ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id')
+      ->join(\App\Entity\Genitore::class, 'g', 'WITH', 'g.alunno=a.id')
       ->where('a.id IN (:alunni)')
       ->setParameters(['alunni' => $alunni])
       ->orderBy('g.username')
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
-    $dati = array();
+    $dati = [];
     foreach ($genitori as $g) {
       $dati[$g['id']][] = $g;
     }

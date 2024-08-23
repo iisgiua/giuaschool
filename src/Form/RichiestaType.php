@@ -37,89 +37,89 @@ class RichiestaType extends AbstractType {
       // form inserimento richiesta
       if (!$options['values'][1]) {
         // richiesta multipla: aggiunge data
-        $builder->add('data', DateType::class, array('label' => false,
+        $builder->add('data', DateType::class, ['label' => false,
           'attr' => ['class' => 'gs-mb-2'],
           'widget' => 'single_text',
-          'required' => true));
+          'required' => true]);
       }
       foreach ($options['values'][0] as $nome => $campo) {
         switch ($campo[0]) {
           case 'string':
-            $builder->add($nome, TextType::class, array('label' => false,
+            $builder->add($nome, TextType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
           case 'text':
-            $builder->add($nome, MessageType::class, array('label' => false,
+            $builder->add($nome, MessageType::class, ['label' => false,
               'attr' => ['style' => 'width:96%; margin-left:2%; margin-right:2%;', 'class' => 'gs-mb-2', 'rows' => 3],
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
           case 'int':
-            $builder->add($nome, IntegerType::class, array('label' => false,
+            $builder->add($nome, IntegerType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
           case 'float':
-            $builder->add($nome, NumberType::class, array('label' => false,
+            $builder->add($nome, NumberType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
           case 'bool':
-            $builder->add($nome, ChoiceType::class, array('label' => false,
+            $builder->add($nome, ChoiceType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
-              'choices' => array('label.si' => true, 'label.no' => false),
-              'required' => $campo[1]));
+              'choices' => ['label.si' => true, 'label.no' => false],
+              'required' => $campo[1]]);
             break;
           case 'date':
-            $builder->add($nome, DateType::class, array('label' => false,
+            $builder->add($nome, DateType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
               'widget' => 'single_text',
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
           case 'time':
-            $builder->add($nome, TimeType::class, array('label' => false,
+            $builder->add($nome, TimeType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
               'widget' => 'single_text',
-              'required' => $campo[1]));
+              'required' => $campo[1]]);
             break;
         }
       }
     } elseif ($options['form_mode'] == 'remove') {
       // form rimozione richiesta
       $builder
-        ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
+        ->add('messaggio', MessageType::class, ['label' => 'label.richiesta_messaggio',
           'data' => $options['values'][0],
           'attr' => ['rows' => 3],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'manageEntrata') {
       // form gestione richiesta deroga entrata
       $builder
-        ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_entrata',
+        ->add('deroga', MessageType::class, ['label' => 'label.richiesta_deroga_entrata',
           'data' => $options['values'][0],
           'attr' => ['rows' => 3],
-          'required' => false))
-        ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
+          'required' => false])
+        ->add('messaggio', MessageType::class, ['label' => 'label.richiesta_messaggio',
           'data' => $options['values'][1],
           'attr' => ['rows' => 3],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'manageUscita') {
       // form gestione richiesta deroga uscita
       $builder
-        ->add('deroga', MessageType::class, array('label' => 'label.richiesta_deroga_uscita',
+        ->add('deroga', MessageType::class, ['label' => 'label.richiesta_deroga_uscita',
           'data' => $options['values'][0],
           'attr' => ['rows' => 3],
-          'required' => false))
-        ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
+          'required' => false])
+        ->add('messaggio', MessageType::class, ['label' => 'label.richiesta_messaggio',
           'data' => $options['values'][1],
           'attr' => ['rows' => 3],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'manage') {
       // form gestione richiesta generica
       $builder
-        ->add('messaggio', MessageType::class, array('label' => 'label.richiesta_messaggio',
+        ->add('messaggio', MessageType::class, ['label' => 'label.richiesta_messaggio',
           'data' => $options['values'][0],
           'attr' => ['rows' => 3],
-          'required' => false));
+          'required' => false]);
     }
   }
 
@@ -131,11 +131,11 @@ class RichiestaType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'add',
       'values' => [],
       'allow_extra_fields' => true,
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

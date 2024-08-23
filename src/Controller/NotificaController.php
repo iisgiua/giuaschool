@@ -43,8 +43,8 @@ class NotificaController extends BaseController {
     ini_set('max_execution_time', 0);
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $inizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio', '9999-99-99 99:99');
-    $fine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine', '0000-00-00 00:00');
+    $inizio = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_inizio', '9999-99-99 99:99');
+    $fine = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_fine', '0000-00-00 00:00');
     if ($ora >= $inizio && $ora <= $fine) {
       // errore: modalità manutenzione (evita che messaggio sia processato)
       throw $this->createNotFoundException('exception.id_notfound');
@@ -56,14 +56,14 @@ class NotificaController extends BaseController {
       $richiesta = json_decode($contenuto, true);
     }
     $secretHeader = $request->headers->get('X-Telegram-Bot-Api-Secret-Token');
-    $secret = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_secret');
+    $secret = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_secret');
     if ($secretHeader != $secret) {
       // errore: violazione di sicurezza
       $logger->error('Telegram webhook: violazione di sicurezza su codice X-Telegram-Bot-Api-Secret-Token.',
         [$secretHeader, $richiesta]);
       return new JsonResponse($risposta);
     }
-    if (isset($richiesta['message']) && substr($richiesta['message']['text'], 0, 7) == '/start ') {
+    if (isset($richiesta['message']) && str_starts_with($richiesta['message']['text'], '/start ')) {
       // registrazione utente
       $scadenza = (new \DateTime())->modify('-5 minute');
       $data = \DateTime::createFromFormat('U', $richiesta['message']['date']);
@@ -74,7 +74,7 @@ class NotificaController extends BaseController {
       }
       $token = base64_decode(trim(substr($richiesta['message']['text'], 7)));
       $tokenData = explode('#', $token);
-      $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $tokenData[1] ?? '',
+      $utente = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $tokenData[1] ?? '',
         'abilitato' => 1, 'token' => $tokenData[0]]);
       if (!$utente || $utente->getTokenCreato() < $scadenza) {
         // errore: token invalido o scaduto
@@ -105,7 +105,7 @@ class NotificaController extends BaseController {
               $richiesta['my_chat_member']['new_chat_member']['status'] == 'kicked') {
       // elimina chat utente
       $chat = $richiesta['my_chat_member']['chat']['id'];
-      $utente = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
+      $utente = $this->em->getRepository(\App\Entity\Utente::class)->createQueryBuilder('u')
         ->where('u.notifica LIKE :chat')
         ->setParameters(['chat' => '%s:13:"telegram\_chat";s:'.strlen($chat).':"'.$chat.'";%'])
         ->getQuery()

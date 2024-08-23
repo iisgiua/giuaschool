@@ -33,14 +33,15 @@ class CorsoType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('nome', TextType::class, array('label' => 'label.nome_corso',
-        'required' => true))
-      ->add('nomeBreve', TextType::class, array('label' => 'label.nome_breve_corso',
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+      ->add('nome', TextType::class, ['label' => 'label.nome_corso',
+        'required' => true])
+      ->add('nomeBreve', TextType::class, ['label' => 'label.nome_breve_corso',
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end',
+        'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -50,9 +51,9 @@ class CorsoType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
-      'data_class' => Corso::class));
+      'data_class' => Corso::class]);
   }
 
 }

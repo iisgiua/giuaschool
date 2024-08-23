@@ -35,36 +35,36 @@ class ClasseType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('anno', ChoiceType::class, array('label' => 'label.classe_anno',
-        'choices' => array('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5),
-        'choice_translation_domain' => false,
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('sezione', TextType::class, array('label' => 'label.classe_sezione',
-        'trim' => true,
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('gruppo', TextType::class, array('label' => 'label.classe_gruppo',
-        'trim' => true,
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => false))
-      ->add('oreSettimanali', IntegerType::class, array('label' => 'label.ore_classe',
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('corso', ChoiceType::class, array('label' => 'label.corso',
-        'choices' => $options['values'][0],
-        'choice_value' => 'id',
-        'placeholder' => 'label.choose_option',
-        'choice_translation_domain' => false,
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
-        'choices' => $options['values'][1],
-        'choice_value' => 'id',
-        'placeholder' => 'label.choose_option',
-        'choice_translation_domain' => false,
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => false))
+      ->add('anno', ChoiceType::class, ['label' => 'label.classe_anno',
+				'choices' => ['1' => 1, '2' => 2,  '3' => 3, '4' => 4,  '5' => 5],
+				'choice_translation_domain' => false,
+				'attr' => ['widget' => 'gs-row-start'],
+				'required' => true])
+      ->add('sezione', TextType::class, ['label' => 'label.classe_sezione',
+				'trim' => true,
+				'attr' => ['widget' => 'gs-row-end'],
+				'required' => true])
+      ->add('gruppo', TextType::class, ['label' => 'label.classe_gruppo',
+				'trim' => true,
+				'attr' => ['widget' => 'gs-row-start'],
+				'required' => false])
+      ->add('oreSettimanali', IntegerType::class, ['label' => 'label.ore_classe',
+				'attr' => ['widget' => 'gs-row-end'],
+				'required' => true])
+      ->add('corso', ChoiceType::class, ['label' => 'label.corso',
+				'choices' => $options['values'][0],
+				'choice_value' => 'id',
+				'placeholder' => 'label.choose_option',
+				'choice_translation_domain' => false,
+				'attr' => ['widget' => 'gs-row-start'],
+				'required' => true])
+      ->add('sede', ChoiceType::class, ['label' => 'label.sede',
+				'choices' => $options['values'][1],
+				'choice_value' => 'id',
+				'placeholder' => 'label.choose_option',
+				'choice_translation_domain' => false,
+				'attr' => ['widget' => 'gs-row-end'],
+				'required' => false])
       ->add('coordinatore', ChoiceType::class, ['label' => 'label.coordinatore',
         'choices' => $options['values'][2],
         'placeholder' => 'label.nessuno',
@@ -77,11 +77,11 @@ class ClasseType extends AbstractType {
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false])
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
-  }
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+				'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+				'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
+	}
 
   /**
    * Configura le opzioni usate nel form
@@ -91,10 +91,10 @@ class ClasseType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
-      'return_url' => null,
-      'values' => [],
-      'data_class' => Classe::class));
+    $resolver->setDefaults([
+			'return_url' => null,
+			'values' => [],
+			'data_class' => Classe::class]);
   }
 
 }

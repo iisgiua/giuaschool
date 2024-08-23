@@ -77,7 +77,7 @@ class DocenteRepository extends BaseRepository {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
       ->andWhere('cl.sede IN (:sedi) OR cl.id IS NULL')
@@ -123,7 +123,7 @@ class DocenteRepository extends BaseRepository {
   public function getIdCoordinatore($sedi, $filtro): array {
     $coordinatori = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App\Entity\Classe', 'c', 'WITH', 'd.id=c.coordinatore')
+      ->join(\App\Entity\Classe::class, 'c', 'WITH', 'd.id=c.coordinatore')
       ->where('d.abilitato=:abilitato AND c.sede IN (:sedi)')
       ->setParameters(['abilitato' => 1, 'sedi' => $sedi]);
     if ($filtro) {
@@ -150,7 +150,7 @@ class DocenteRepository extends BaseRepository {
     // docenti con cattedra
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->join('c.classe', 'cl')
       ->where('d.abilitato=:abilitato AND cl.sede IN (:sedi)')
       ->setParameters(['attiva' => 1, 'abilitato' => 1, 'sedi' => $sedi]);
@@ -174,7 +174,7 @@ class DocenteRepository extends BaseRepository {
     // docenti senza cattedra
     if ($tipo == 'T' || $tipo == 'M' || $tipo == 'U') {
       // aggiunge docenti senza cattedra
-      $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();
@@ -208,7 +208,7 @@ class DocenteRepository extends BaseRepository {
   public function cercaSede($cerca, $pagina, $limite): Paginator {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
       ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
@@ -238,11 +238,11 @@ class DocenteRepository extends BaseRepository {
       ->setParameter('cognome', $criteri['cognome'].'%');
     if ($criteri['classe'] > 0) {
       $query
-        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.attiva=:attiva')
+        ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.attiva=:attiva')
         ->setParameter('classe', $criteri['classe'])
         ->setParameter('attiva', 1);
     } elseif ($criteri['classe'] == -1) {
-      $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();
@@ -265,7 +265,7 @@ class DocenteRepository extends BaseRepository {
     // legge sedi
     $sedi = $this->createQueryBuilder('d')
       ->select('DISTINCT s.id,s.nomeBreve,s.ordinamento')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->join('c.classe', 'cl')
       ->join('cl.sede', 's')
       ->where('d.id=:docente')
@@ -275,7 +275,7 @@ class DocenteRepository extends BaseRepository {
       ->getArrayResult();
     if (count($sedi) == 0) {
       // nessuna cattedra: imposta tutte le sedi
-      $sedi = $this->_em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
+      $sedi = $this->_em->getRepository(\App\Entity\Sede::class)->createQueryBuilder('s')
         ->select('s.id,s.nomeBreve')
         ->orderBy('s.ordinamento', 'ASC')
         ->getQuery()

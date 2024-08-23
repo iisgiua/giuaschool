@@ -32,28 +32,27 @@ class NotificaType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // form notifiche
     $builder
-      ->add('tipo', ChoiceType::class, array('label' => 'label._ok',
+      ->add('tipo', ChoiceType::class, ['label' => 'label._ok',
         'data' => $options['values'][0],
         'choices' => ['label.tipo_notifica_email' => 'email',
           'label.tipo_notifica_telegram' => 'telegram'],
         'expanded' => true,
         'multiple' => false,
-        'choice_attr' => function($key, $val, $index) use ($options) {
-          return ($options['values'][1] && $key == 'telegram') ? ['disabled' => 'disabled'] : []; },
-        'required' => true))
-      ->add('abilitato', ChoiceType::class, array('label' => false,
+        'choice_attr' => fn($key, $val, $index) => ($options['values'][1] && $key == 'telegram') ? ['disabled' => 'disabled'] : [],
+        'required' => true])
+      ->add('abilitato', ChoiceType::class, ['label' => false,
         'data' => $options['values'][2],
         'choices' => ['label.abilitato_notifica_circolare' => 'circolare',
           'label.abilitato_notifica_avviso' => 'avviso', 'label.abilitato_notifica_verifica' => 'verifica',
           'label.abilitato_notifica_compito' => 'compito'],
         'expanded' => true,
         'multiple' => true,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['class' => 'btn-primary gs-mr-3 gs-strong']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary gs-mr-3 gs-strong']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['onclick' => "location.href='".$options['return_url']."'",
-          'class' => 'btn-default gs-strong']));
+          'class' => 'btn-default gs-strong']]);
   }
 
   /**
@@ -64,10 +63,10 @@ class NotificaType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'values' => [],
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

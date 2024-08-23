@@ -55,10 +55,7 @@ class EsitoRepository extends EntityRepository {
    */
   public function impostaSpeciale(Scrutinio $scrutinio, Alunno $alunno, string $codiceEsito = null): Esito {
     // init
-    $datiEsito = array(
-      'unanimita' => true,
-      'contrari' => null,
-      'giudizio' => null);
+    $datiEsito = ['unanimita' => true, 'contrari' => null, 'giudizio' => null];
     // trova esisto esitente
     $esito = $this->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
     if (!$esito) {

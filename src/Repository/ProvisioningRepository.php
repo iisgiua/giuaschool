@@ -59,27 +59,27 @@ class ProvisioningRepository extends EntityRepository {
    * @return array Lista dei dati necessari per eseguire il comando
    */
   public function comandoDaEseguire($id) {
-    $dati = array();
+    $dati = [];
     // legge comando
     $dati['provisioning'] = $this->find($id);
     if ($dati['provisioning']) {
       foreach ($dati['provisioning']->getDati() as $nm=>$dt) {
         switch ($nm) {
           case 'cattedra':
-            $dati[$nm] = $this->_em->getRepository('App\Entity\Cattedra')->find($dt);
+            $dati[$nm] = $this->_em->getRepository(\App\Entity\Cattedra::class)->find($dt);
             break;
           case 'docente':
           case 'docente_prec':
-            $dati[$nm] = $this->_em->getRepository('App\Entity\Docente')->find($dt);
+            $dati[$nm] = $this->_em->getRepository(\App\Entity\Docente::class)->find($dt);
             break;
           case 'classe':
           case 'classe_prec':
           case 'classe_origine':
           case 'classe_destinazione':
-            $dati[$nm] = $this->_em->getRepository('App\Entity\Classe')->find($dt);
+            $dati[$nm] = $this->_em->getRepository(\App\Entity\Classe::class)->find($dt);
             break;
           case 'materia':
-            $dati[$nm] = $this->_em->getRepository('App\Entity\Materia')->find($dt);
+            $dati[$nm] = $this->_em->getRepository(\App\Entity\Materia::class)->find($dt);
             break;
         }
       }

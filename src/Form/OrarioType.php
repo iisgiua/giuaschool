@@ -35,30 +35,30 @@ class OrarioType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('nome', TextType::class, array('label' => 'label.nome_orario',
-        'required' => true))
-      ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
+      ->add('nome', TextType::class, ['label' => 'label.nome_orario',
+        'required' => true])
+      ->add('inizio', DateType::class, ['label' => 'label.data_inizio',
         'widget' => 'single_text',
         'html5' => false,
         'format' => 'dd/MM/yyyy',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('fine', DateType::class, array('label' => 'label.data_fine',
+        'required' => true])
+      ->add('fine', DateType::class, ['label' => 'label.data_fine',
         'widget' => 'single_text',
         'html5' => false,
         'format' => 'dd/MM/yyyy',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'required' => true])
+      ->add('sede', ChoiceType::class, ['label' => 'label.sede',
         'choices' => $options['values'][0],
         'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -69,10 +69,10 @@ class OrarioType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'values' => [],
-      'data_class' => Orario::class));
+      'data_class' => Orario::class]);
   }
 
 }

@@ -21,18 +21,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 class TelegramManager {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var UrlGeneratorInterface $url Generatore delle URL
-   */
-  private UrlGeneratorInterface $url;
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
   /**
    * @var Client $client Client HTTP per la gestione delle comunicazioni
    */
@@ -47,10 +35,10 @@ class TelegramManager {
    * @param UrlGeneratorInterface $url Generatore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    */
-  public function __construct(UrlGeneratorInterface $url, EntityManagerInterface $em) {
-    $this->url = $url;
-    $this->em = $em;
-    $token = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+  public function __construct(
+      private UrlGeneratorInterface $url,
+      private EntityManagerInterface $em) {
+    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
     $this->client = new Client(['base_uri' => 'https://api.telegram.org/bot'.$token.'/',
       'timeout' => 60]);
   }
@@ -62,7 +50,7 @@ class TelegramManager {
    */
   public function setWebhook(): array {
     // crea client con parametri aggiornati
-    $token = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
     if (empty($token)) {
       // token vuoto: ignora
       return ['result' => 'ok'];
@@ -71,14 +59,14 @@ class TelegramManager {
       'timeout' => 60]);
     // configura
     $url = $this->url->generate('notifica_telegram', [], UrlGeneratorInterface::ABSOLUTE_URL);
-    if (substr($url, 0, 5) == 'http:') {
+    if (str_starts_with($url, 'http:')) {
       // deve essere https
       $url = 'https:'.substr($url, 5);
     }
     $connections = 5;
     $allowed = ['message', 'my_chat_member'];
     $secret = 'BOT-'.bin2hex(openssl_random_pseudo_bytes(8)).'-'.bin2hex(openssl_random_pseudo_bytes(8));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_secret', $secret);
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_secret', $secret);
     // installa webhook
     return $this->request('setWebhook', ['url' => $url, 'max_connections' => $connections,
       'allowed_updates' => $allowed, 'drop_pending_updates' => true, 'secret_token' => $secret]);
@@ -100,7 +88,7 @@ class TelegramManager {
    */
   public function deleteWebhook(): array {
     // crea client con parametri aggiornati
-    $token = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
     if (empty($token)) {
       // token vuoto: ignora
       return ['result' => 'ok'];

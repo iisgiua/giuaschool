@@ -22,19 +22,6 @@ use Symfony\Component\HttpFoundation\Response;
 class BaseController extends AbstractController {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface|null $em Gestore delle entità
-   */
-  protected ?EntityManagerInterface $em = null;
-
-  /**
-   * @var RequestStack|null $reqstack Gestore dello stack delle variabili globali
-   */
-  protected ?RequestStack $reqstack = null;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -43,9 +30,10 @@ class BaseController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  public function __construct(EntityManagerInterface $em, RequestStack $reqstack) {
-    $this->em = $em;
-    $this->reqstack = $reqstack;
+  public function __construct(
+    protected EntityManagerInterface $em,
+    protected RequestStack $reqstack)
+  {
   }
 
   /**
@@ -61,13 +49,13 @@ class BaseController extends AbstractController {
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[],
                                 array $info=[], array $form=[]): Response {
-    list($azionePrincipale) = explode('_', $azione);
+    [$azionePrincipale] = explode('_', $azione);
     $tema = $this->reqstack->getSession()->get('/APP/APP/tema', '');
     $breadcrumb = null;
     // legge breadcrumb (solo se nuovo tema)
     if ($tema) {
-      $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azionePrincipale,
-        $this->getUser(), $this->reqstack);
+      $breadcrumb = $this->em->getRepository(\App\Entity\MenuOpzione::class)->breadcrumb($categoria.'_'.$azionePrincipale,
+        $this->getUser());
     }
     // imposta template
     $template = ($tema ? $tema.'/' : '').$categoria.'/'.$azione.'.html.twig';

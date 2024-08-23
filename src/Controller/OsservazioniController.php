@@ -56,7 +56,7 @@ class OsservazioniController extends BaseController {
     $errore = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $info = array();
+    $info = [];
     $info['sostegno'] = false;
     $dati = null;
     $template = 'lezioni/osservazioni.html.twig';
@@ -94,7 +94,7 @@ class OsservazioniController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -106,7 +106,7 @@ class OsservazioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -125,9 +125,9 @@ class OsservazioniController extends BaseController {
       }
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -140,7 +140,7 @@ class OsservazioniController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.lezioni_osservazioni',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -152,8 +152,7 @@ class OsservazioniController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -179,9 +178,9 @@ class OsservazioniController extends BaseController {
                                    LogHandler $dblogger, int $cattedra, string $data,
                                    int $id): Response {
     // inizializza
-    $label = array();
+    $label = [];
     // controlla cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -196,7 +195,7 @@ class OsservazioniController extends BaseController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->findOneBy(['id' => $id,
+      $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->findOneBy(['id' => $id,
         'data' => $data_obj]);
       if (!$osservazione) {
         // errore
@@ -237,30 +236,26 @@ class OsservazioniController extends BaseController {
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_edit', FormType::class, $osservazione)
-      ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-        'class' => 'App\Entity\Alunno',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
-          },
-        'query_builder' => function (EntityRepository $er) use ($listaAlunni,$religione) {
-            return $er->createQueryBuilder('a')
-              ->where('a.id IN (:lista)'.
-                ($religione ? " and a.religione='".$religione."'" : ''))
-              ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-              ->setParameters(['lista' => $listaAlunni]);
-          },
+      ->add('alunno', EntityType::class, ['label' => 'label.alunno',
+        'class' => \App\Entity\Alunno::class,
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')',
+        'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
+          ->where('a.id IN (:lista)'.
+            ($religione ? " and a.religione='".$religione."'" : ''))
+          ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+          ->setParameters(['lista' => $listaAlunni]),
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
-        'required' => true))
-      ->add('testo', MessageType::class, array('label' => 'label.testo',
+        'required' => true])
+      ->add('testo', MessageType::class, ['label' => 'label.testo',
         'trim' => true,
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_osservazioni')."'"]))
+        'onclick' => "location.href='".$this->generateUrl('lezioni_osservazioni')."'"]])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -273,29 +268,26 @@ class OsservazioniController extends BaseController {
       // log azione
       if (!$id) {
         // nuovo
-        $dblogger->logAzione('REGISTRO', 'Crea osservazione', array(
-          'Id' => $osservazione->getId()
-          ));
+        $dblogger->logAzione('REGISTRO', 'Crea osservazione', [
+          'Id' => $osservazione->getId()]);
       } else {
         // modifica
-        $dblogger->logAzione('REGISTRO', 'Modifica osservazione', array(
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione', [
           'Id' => $osservazione->getId(),
           'Testo' => $osservazione_old['testo'],
           'Alunno' => $osservazione_old['alunno']->getId(),
-          'Cattedra' => $osservazione_old['cattedra']->getId()
-          ));
+          'Cattedra' => $osservazione_old['cattedra']->getId()]);
       }
       // redirezione
       return $this->redirectToRoute('lezioni_osservazioni');
     }
     // mostra la pagina di risposta
-    return $this->render('lezioni/osservazione_edit.html.twig', array(
+    return $this->render('lezioni/osservazione_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_osservazioni',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_osservazione' : 'title.nuova_osservazione'),
       'label' => $label,
-      'alunno' => $cattedra->getAlunno()
-    ));
+      'alunno' => $cattedra->getAlunno()]);
   }
 
   /**
@@ -315,7 +307,7 @@ class OsservazioniController extends BaseController {
    */
   public function osservazioneDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla osservazione
-    $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($id);
+    $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni');
@@ -332,13 +324,12 @@ class OsservazioniController extends BaseController {
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella osservazione', array(
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione', [
       'Osservazione' => $osservazione_id,
       'Cattedra' => $osservazione->getCattedra()->getId(),
       'Alunno' => $osservazione->getAlunno()->getId(),
       'Data' => $osservazione->getData()->format('Y-m-d'),
-      'Testo' => $osservazione->getTesto(),
-      ));
+      'Testo' => $osservazione->getTesto()]);
     // redirezione
     return $this->redirectToRoute('lezioni_osservazioni');
   }
@@ -402,7 +393,7 @@ class OsservazioniController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -414,7 +405,7 @@ class OsservazioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -425,9 +416,9 @@ class OsservazioniController extends BaseController {
     if ($cattedra) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -441,7 +432,7 @@ class OsservazioniController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/osservazioni_personali.html.twig', array(
+    return $this->render('lezioni/osservazioni_personali.html.twig', [
       'pagina_titolo' => 'page.lezioni_osservazioni_personali',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -453,8 +444,7 @@ class OsservazioniController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -480,9 +470,9 @@ class OsservazioniController extends BaseController {
                                             LogHandler $dblogger, int $cattedra, string $data,
                                             int $id): Response {
     // inizializza
-    $label = array();
+    $label = [];
     // controlla cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -497,7 +487,7 @@ class OsservazioniController extends BaseController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $this->em->getRepository('App\Entity\OsservazioneClasse')->findOneBy(['id' => $id,
+      $osservazione = $this->em->getRepository(\App\Entity\OsservazioneClasse::class)->findOneBy(['id' => $id,
         'data' => $data_obj, 'cattedra' => $cattedra]);
       if (!$osservazione) {
         // errore
@@ -524,14 +514,14 @@ class OsservazioniController extends BaseController {
     $label['classe'] = ''.$cattedra->getClasse();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_personale_edit', FormType::class, $osservazione)
-      ->add('testo', MessageType::class, array('label' => 'label.testo',
+      ->add('testo', MessageType::class, ['label' => 'label.testo',
         'trim' => true,
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_osservazioni_personali')."'"]))
+          'onclick' => "location.href='".$this->generateUrl('lezioni_osservazioni_personali')."'"]])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -544,27 +534,24 @@ class OsservazioniController extends BaseController {
       // log azione
       if (!$id) {
         // nuovo
-        $dblogger->logAzione('REGISTRO', 'Crea osservazione personale', array(
-          'Id' => $osservazione->getId()
-          ));
+        $dblogger->logAzione('REGISTRO', 'Crea osservazione personale', [
+          'Id' => $osservazione->getId()]);
       } else {
         // modifica
-        $dblogger->logAzione('REGISTRO', 'Modifica osservazione personale', array(
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione personale', [
           'Id' => $osservazione->getId(),
-          'Testo' => $osservazione_old['testo'],
-          ));
+          'Testo' => $osservazione_old['testo']]);
       }
       // redirezione
       return $this->redirectToRoute('lezioni_osservazioni_personali');
     }
     // mostra la pagina di risposta
-    return $this->render('lezioni/osservazione_edit.html.twig', array(
+    return $this->render('lezioni/osservazione_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_osservazioni_personali',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_osservazione_personale' : 'title.nuova_osservazione_personale'),
       'label' => $label,
-      'alunno' => null,
-    ));
+      'alunno' => null]);
   }
 
   /**
@@ -585,7 +572,7 @@ class OsservazioniController extends BaseController {
   public function osservazionePersonaleDelete(RegistroUtil $reg,
                                               LogHandler $dblogger, int $id): Response {
     // controlla osservazione
-    $osservazione = $this->em->getRepository('App\Entity\OsservazioneClasse')->find($id);
+    $osservazione = $this->em->getRepository(\App\Entity\OsservazioneClasse::class)->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni_personali');
@@ -602,12 +589,11 @@ class OsservazioniController extends BaseController {
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale', array(
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale', [
       'Osservazione' => $osservazione_id,
       'Cattedra' => $osservazione->getCattedra()->getId(),
       'Data' => $osservazione->getData()->format('Y-m-d'),
-      'Testo' => $osservazione->getTesto(),
-      ));
+      'Testo' => $osservazione->getTesto()]);
     // redirezione
     return $this->redirectToRoute('lezioni_osservazioni_personali');
   }

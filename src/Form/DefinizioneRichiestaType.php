@@ -37,34 +37,34 @@ class DefinizioneRichiestaType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('nome', TextType::class, array('label' => 'label.nome_modulo',
+      ->add('nome', TextType::class, ['label' => 'label.nome_modulo',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'required' => true])
+      ->add('sede', ChoiceType::class, ['label' => 'label.sede',
         'choices' => $options['values'][0],
         'choice_value' => 'id',
         'placeholder' => 'label.choose_option',
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => false))
-      ->add('richiedenti', ChoiceType::class, array('label' => 'label.richiedenti_modulo',
-        'choices' => array('label.ruolo_funzione_TN' => 'TN', 'label.ruolo_funzione_DN' => 'DN',
+        'required' => false])
+      ->add('richiedenti', ChoiceType::class, ['label' => 'label.richiedenti_modulo',
+        'choices' => ['label.ruolo_funzione_TN' => 'TN', 'label.ruolo_funzione_DN' => 'DN',
           'label.ruolo_funzione_GN' => 'GN', 'label.ruolo_funzione_AM' => 'AM',
-          'label.ruolo_funzione_AN' => 'AN'),
+          'label.ruolo_funzione_AN' => 'AN'],
         'expanded' => true,
         'multiple' => true,
         'label_attr' => ['class' => 'checkbox-inline'],
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari_modulo',
-        'choices' => array('label.ruolo_funzione_PN' => 'PN', 'label.ruolo_funzione_SN' => 'SN',
-          'label.ruolo_funzione_DN' => 'DN'),
+        'required' => true])
+      ->add('destinatari', ChoiceType::class, ['label' => 'label.destinatari_modulo',
+        'choices' => ['label.ruolo_funzione_PN' => 'PN', 'label.ruolo_funzione_SN' => 'SN',
+          'label.ruolo_funzione_DN' => 'DN'],
         'expanded' => true,
         'multiple' => true,
         'label_attr' => ['class' => 'checkbox-inline'],
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('campi', CollectionType::class, array('label' => 'label.campi_modulo',
+        'required' => true])
+      ->add('campi', CollectionType::class, ['label' => 'label.campi_modulo',
         'data' => $options['values'][1],
         'entry_type' => CampoType::class,
         'entry_options' => ['label' => false, 'row_attr' => ['class' => 'mb-0']],
@@ -74,44 +74,40 @@ class DefinizioneRichiestaType extends AbstractType {
         'by_reference' => false,
         'row_attr' => ['class' => 'gs-lista-campi'],
         'label_attr' => ['class' => 'position-relative text-uppercase text-primary font-weight-bold pb-3'],
-        'required' => false))
-      ->add('modulo', ChoiceType::class, array('label' => 'label.template_modulo',
+        'required' => false])
+      ->add('modulo', ChoiceType::class, ['label' => 'label.template_modulo',
         'choices' => $options['values'][2],
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('allegati', IntegerType::class, array('label' => 'label.allegati_modulo',
+        'required' => true])
+      ->add('allegati', IntegerType::class, ['label' => 'label.allegati_modulo',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('unica', ChoiceType::class, array('label' => 'label.richiesta_unica_modulo',
-        'choices' => array('label.si' => true, 'label.no' => false),
+        'required' => true])
+      ->add('unica', ChoiceType::class, ['label' => 'label.richiesta_unica_modulo',
+        'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'attr' => ['widget' => 'gs-row-start'],
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('gestione', ChoiceType::class, array('label' => 'label.gestione_modulo',
-        'choices' => array('label.si' => true, 'label.no' => false),
+        'required' => true])
+      ->add('gestione', ChoiceType::class, ['label' => 'label.gestione_modulo',
+        'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'attr' => ['widget' => 'gs-row-end'],
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('tipo', TextType::class, array('label' => 'label.tipo_richiesta',
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => true])
+      ->add('tipo', TextType::class, ['label' => 'label.tipo_richiesta',
+	      'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	      'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
     // aggiunge data transform
     $builder->get('richiedenti')->addModelTransformer(new CallbackTransformer(
-      function ($richiedenti) {
-        return explode(',', $richiedenti); },
-      function ($richiedenti) {
-        return implode(',', $richiedenti); }));
+      fn($richiedenti) => explode(',', $richiedenti),
+      fn($richiedenti) => implode(',', $richiedenti)));
     $builder->get('destinatari')->addModelTransformer(new CallbackTransformer(
-      function ($destinatari) {
-        return explode(',', $destinatari); },
-      function ($destinatari) {
-        return implode(',', $destinatari); }));
+      fn($destinatari) => explode(',', $destinatari),
+      fn($destinatari) => implode(',', $destinatari)));
   }
 
   /**
@@ -122,10 +118,10 @@ class DefinizioneRichiestaType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'values' => [],
-      'data_class' => DefinizioneRichiesta::class));
+      'data_class' => DefinizioneRichiesta::class]);
   }
 
 }

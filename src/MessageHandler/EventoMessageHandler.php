@@ -21,30 +21,17 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 class EventoMessageHandler implements MessageHandlerInterface {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-  /**
-   * @var MessageBusInterface $messageBus Gestore della coda dei messaggi
-   */
-  private MessageBusInterface $messageBus;
-
-
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
-   * @param LoggerInterface $msgLogger Gestore dei log su file
+   * @param LoggerInterface $logger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(LoggerInterface $msgLogger, MessageBusInterface $messageBus) {
-    $this->logger = $msgLogger;
-    $this->messageBus = $messageBus;
+  public function __construct(
+      private LoggerInterface $logger,
+      private MessageBusInterface $messageBus)
+  {
   }
 
   /**

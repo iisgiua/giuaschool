@@ -73,12 +73,11 @@ class LoginController extends BaseController {
     // conserva ultimo username inserito
     $username = $auth->getLastUsername();
     // mostra la pagina di risposta
-    return $this->render('login/form.html.twig', array(
+    return $this->render('login/form.html.twig', [
       'pagina_titolo' => 'page.login',
       'username' => $username,
       'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
+      'manutenzione' => $manutenzione]);
   }
 
   /**
@@ -149,31 +148,31 @@ class LoginController extends BaseController {
     $successo = null;
     // crea form inserimento email
     $form = $this->container->get('form.factory')->createNamedBuilder('login_recovery', FormType::class)
-      ->add('email', TextType::class, array('label' => 'label.email',
-        'required' => true,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.email')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => array('class' => 'btn-primary')))
+      ->add('email', TextType::class, ['label' => 'label.email',
+      'required' => true,
+      'trim' => true,
+      'attr' => ['placeholder' => 'label.email']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+      'attr' => ['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $email = $form->get('email')->getData();
-      $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $email, 'abilitato' => 1]);
+      $utente = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
       $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
       if (!$utente) {
         // utente non esiste
-        $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', array(
+        $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
           'email' => $email,
-          'ip' => $request->getClientIp()));
+          'ip' => $request->getClientIp()]);
         $errore = 'exception.invalid_recovery_email';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
         // errore: niente recupero password per utente su id provider
-        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', array(
+        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
-          'ip' => $request->getClientIp()));
+          'ip' => $request->getClientIp()]);
         $errore = 'exception.invalid_user_type_recovery';
       } else {
         // effettua il recupero password
@@ -221,52 +220,49 @@ class LoginController extends BaseController {
         // memorizza su db
         $this->em->flush();
         // log azione
-        $logger->warning('Richiesta di recupero Password', array(
+        $logger->warning('Richiesta di recupero Password', [
           'Username' => $utente->getUsername(),
           'Email' => $email,
-          'Ruolo' => $utente->getRoles()[0],
-          ));
+          'Ruolo' => $utente->getRoles()[0]]);
         // crea messaggio
         $message = (new Email())
           ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
           ->to($email)
           ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
-          ->text($this->renderView($template_txt,
-            array(
-              'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
-              'utente' => $utente_mail,
-              'username' => $utente->getUsername(),
-              'password' => $password,
-              'sesso' => $sesso)))
-          ->html($this->renderView($template_html,
-            array(
-              'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
-              'utente' => $utente_mail,
-              'username' => $utente->getUsername(),
-              'password' => $password,
-              'sesso' => $sesso)));
+          ->text($this->renderView($template_txt, [
+            'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
+            'utente' => $utente_mail,
+            'username' => $utente->getUsername(),
+            'password' => $password,
+            'sesso' => $sesso]))
+          ->html($this->renderView($template_html, [
+            'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
+            'utente' => $utente_mail,
+            'username' => $utente->getUsername(),
+            'password' => $password,
+            'sesso' => $sesso]));
         try {
           // invia email
           $mailer->send($message);
           $successo = 'message.recovery_ok';
         } catch (\Exception $err) {
           // errore di spedizione
-          $logger->error('Errore di spedizione email nella richiesta di recupero password.', array(
+          $logger->error('Errore di spedizione email nella richiesta di recupero password.', [
             'username' => $utente->getUsername(),
             'email' => $email,
             'ip' => $request->getClientIp(),
-            'errore' => $err->getMessage()));
+            'errore' => $err->getMessage()]);
           $errore = 'exception.error_recovery';
         }
       }
     }
     // mostra la pagina di risposta
-    return $this->render('login/recovery.html.twig', array(
+    return $this->render('login/recovery.html.twig', [
       'pagina_titolo' => 'page.recovery',
       'form' => $form->createView(),
       'errore' => $errore,
       'successo' => $successo,
-      'manutenzione' => $manutenzione));
+      'manutenzione' => $manutenzione]);
   }
 
   /**
@@ -290,7 +286,7 @@ class LoginController extends BaseController {
     $lista = [];
     foreach ($this->reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
-        $utente = $this->em->getRepository('App\Entity\Utente')->find($id);
+        $utente = $this->em->getRepository(\App\Entity\Utente::class)->find($id);
         $nome = $ruolo.' ';
         if ($ruolo == 'GENITORE') {
           // profilo genitore
@@ -305,16 +301,16 @@ class LoginController extends BaseController {
     }
     // crea form scelta profilo
     $form = $this->container->get('form.factory')->createNamedBuilder('login_profilo', FormType::class)
-      ->add('profilo', ChoiceType::class, array('label' => 'label.profilo',
+      ->add('profilo', ChoiceType::class, ['label' => 'label.profilo',
         'data' => $request->getSession()->get('/APP/UTENTE/profilo_usato'),
         'choices' => $lista,
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => array('class' => 'btn-primary')))
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -323,15 +319,15 @@ class LoginController extends BaseController {
       if ($profiloId && (!$this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
           $this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
-        $utente = $this->em->getRepository('App\Entity\Utente')->find($profiloId);
+        $utente = $this->em->getRepository(\App\Entity\Utente::class)->find($profiloId);
         // imposta ultimo accesso
         $accesso = $utente->getUltimoAccesso();
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
         $utente->setUltimoAccesso(new \DateTime());
         // log azione
-        $dblogger->logAzione('ACCESSO', 'Cambio profilo', array(
+        $dblogger->logAzione('ACCESSO', 'Cambio profilo', [
           'Username' => $utente->getUsername(),
-          'Ruolo' => $utente->getRoles()[0]));
+          'Ruolo' => $utente->getRoles()[0]]);
         // crea token di autenticazione
         $token = new UsernamePasswordToken($utente, 'main', $utente->getRoles());
         // autentica con nuovo token
@@ -345,10 +341,9 @@ class LoginController extends BaseController {
       return $this->redirectToRoute('login_home', ['reload' => 'yes']);
     }
     // visualizza pagina
-    return $this->render('login/profilo.html.twig', array(
+    return $this->render('login/profilo.html.twig', [
       'pagina_titolo' => 'page.login_profilo',
-      'form' => $form->createView(),
-      ));
+      'form' => $form->createView()]);
   }
 
 }

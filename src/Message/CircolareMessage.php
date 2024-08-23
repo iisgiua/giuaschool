@@ -16,13 +16,6 @@ namespace App\Message;
  */
 class CircolareMessage {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var int $id Identificativo della circolare da notificare
-   */
-  private int $id;
-
   /**
    * @var string $tag Testo usato per identificare la circolare
    */
@@ -35,9 +28,9 @@ class CircolareMessage {
    *
    * @param int $id Identificativo della circolare da notificare
    */
-  public function __construct(int $id) {
-    $this->id = $id;
-    $this->tag = '<!CIRCOLARE!><!'.$id.'!>';
+  public function __construct(
+      private int $id) {
+    $this->tag = '<!CIRCOLARE!><!'.$this->id.'!>';
   }
 
   /**

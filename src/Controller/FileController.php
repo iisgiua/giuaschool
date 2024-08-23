@@ -42,14 +42,14 @@ class FileController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function upload(Request $request, string $pagina, string $param): Response {
-    $risposta = array();
+    $risposta = [];
     // legge file
     $files = $request->files->get($param);
     // imposta directory temporanea
     $dir = $this->getParameter('dir_tmp');
     // controlla upload
     foreach ($files as $k=>$file) {
-      $nomefile = md5(uniqid()).'-'.rand(1,1000).'.'.$file->getClientOriginalExtension();
+      $nomefile = md5(uniqid()).'-'.random_int(1, 1000).'.'.$file->getClientOriginalExtension();
       if ($file->isValid() && $file->move($dir, $nomefile)) {
         // file caricato senza errori
         $risposta[$k]['type'] = 'uploaded';
@@ -133,7 +133,7 @@ class FileController extends BaseController {
    */
   public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($avviso);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -173,7 +173,7 @@ class FileController extends BaseController {
    */
   public function downloadSegreteria(string $tipo, int $id): Response {
     // controllo
-    $storico = $this->em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
+    $storico = $this->em->getRepository(\App\Entity\StoricoEsito::class)->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -246,7 +246,7 @@ class FileController extends BaseController {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $this->em->getRepository('App\Entity\Assenza')->find($id);
+      $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

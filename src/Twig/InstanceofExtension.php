@@ -38,7 +38,7 @@ class InstanceofExtension extends AbstractExtension {
    *
    * @return bool Risultato del test effettuato
    */
-  public function isInstanceOf($object, $class) {
+  public function isInstanceOf(mixed $object, mixed $class) {
     $reflectionClass = new \ReflectionClass($class);
     return $reflectionClass->isInstance($object);
   }

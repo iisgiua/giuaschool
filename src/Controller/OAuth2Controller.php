@@ -48,7 +48,7 @@ class OAuth2Controller extends BaseController {
    * @Route("/login/gsuite/app/{email}", name="login_gsuite_app")
    */
   public function connectApp(ClientRegistry $clientRegistry, string $email): Response {
-    $options = array();
+    $options = [];
     $options['login_hint'] = $email;
     // redirezione alla GSuite
     return $clientRegistry

@@ -14,7 +14,7 @@ namespace App\Form;
  *
  * @author Antonello Dessì
  */
-class VotoClasse {
+class VotoClasse implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

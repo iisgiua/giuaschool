@@ -25,19 +25,6 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  */
 class UtenteActionMessageHandler implements MessageHandlerInterface {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -46,9 +33,10 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $logger) {
-    $this->em = $em;
-    $this->logger = $logger;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private LoggerInterface $logger)
+  {
   }
 
   /**
@@ -130,17 +118,17 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    */
   public function docenteAdd(Docente $user) {
     // imposta circolari
-    $anno = substr($this->em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
-    $numSedi = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
+    $anno = substr($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $numSedi = $this->em->getRepository(\App\Entity\Sede::class)->createQueryBuilder('s')
       ->select('COUNT(s.id)')
       ->getQuery()
       ->getSingleScalarResult();
 
 
-    $esistenti = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $esistenti = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->select('cu.id')
       ->where("cu.circolare=c.id AND cu.utente=:utente");
-    $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+    $circolari = $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
       ->where("c.pubblicata=1 AND c.anno=:anno AND c.docenti='T' AND NOT EXISTS (".$esistenti.')')
       ->setParameters(['anno' => $anno, 'utente' => $user])
       ->getQuery()
@@ -156,7 +144,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
     // imposta utenti
     foreach ($listaId as $id) {
       $obj = (new CircolareUtente())
-        ->setCircolare($this->em->getReference('App\Entity\Circolare', $id))
+        ->setCircolare($this->em->getReference(\App\Entity\Circolare::class, $id))
         ->setUtente($user)
         ->setLetta($user->getCreato());
       $this->em->persist($obj);

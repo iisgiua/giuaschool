@@ -36,36 +36,36 @@ class FestivitaType extends AbstractType {
     if ($options['form_mode'] == 'singolo') {
       // modifica di una singola festività
       $builder
-        ->add('data', DateType::class, array('label' => 'label.data',
+        ->add('data', DateType::class, ['label' => 'label.data',
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
-          'required' => true));
+          'required' => true]);
     } else {
       // modifica di un intervallo di date singola festività
       $builder
-        ->add('dataInizio', DateType::class, array('label' => 'label.data_inizio',
+        ->add('dataInizio', DateType::class, ['label' => 'label.data_inizio',
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
           'attr' => ['widget' => 'gs-row-start'],
           'required' => true,
-          'mapped' => false))
-        ->add('dataFine', DateType::class, array('label' => 'label.data_fine',
+          'mapped' => false])
+        ->add('dataFine', DateType::class, ['label' => 'label.data_fine',
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
           'attr' => ['widget' => 'gs-row-end'],
           'required' => true,
-          'mapped' => false));
+          'mapped' => false]);
     }
     $builder
-      ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+      ->add('descrizione', TextType::class, ['label' => 'label.descrizione',
+          'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -76,10 +76,10 @@ class FestivitaType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('form_mode');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'form_mode' => 'singolo',
-      'data_class' => Festivita::class));
+      'data_class' => Festivita::class]);
   }
 
 }

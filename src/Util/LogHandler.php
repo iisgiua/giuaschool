@@ -22,24 +22,6 @@ use App\Entity\Log;
  */
 class LogHandler {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var RequestStack $request Coda delle pagine richieste
-   */
-  private $request;
-
-  /**
-   * @var TokenStorageInterface $token Gestore dei dati di autenticazione
-   */
-  private $token;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -49,11 +31,11 @@ class LogHandler {
    * @param RequestStack $request Coda delle pagine richieste
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
-  public function __construct(EntityManagerInterface $em, RequestStack $request,
-                              TokenStorageInterface $token) {
-    $this->em = $em;
-    $this->request = $request;
-    $this->token = $token;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private RequestStack $request,
+      private TokenStorageInterface $token)
+  {
   }
 
   /**
@@ -123,7 +105,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggetto);
+    $dati['classe'] = $oggetto::class;
     $dati['id'] = $oggetto->getId();
     $dati['dati'] = $oggetto->datiVersione();
     // scrive su db
@@ -173,7 +155,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggetto);
+    $dati['classe'] = $oggetto::class;
     $dati['id'] = $oggetto->getId();
     $dati['vecchi_dati'] = $oggetto->datiVersione();
     // scrive su db
@@ -217,7 +199,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggIniziale);
+    $dati['classe'] = $oggIniziale::class;
     $dati['id'] = $oggIniziale->getId();
     $dati['vecchi_dati'] = [];
     $dati['dati'] = [];

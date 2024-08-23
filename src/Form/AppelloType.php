@@ -33,12 +33,12 @@ class AppelloType extends AbstractType {
     $builder
       ->add('id', HiddenType::class)
       ->add('alunno', HiddenType::class)
-      ->add('presenza', ChoiceType::class, array('label' => false,
+      ->add('presenza', ChoiceType::class, ['label' => false,
         'choices' => [ 'label.appello_P' => 'P', 'label.appello_A' => 'A'],
         'label_attr' => ['class' => 'gs-radio-inline col-sm-2'],
         'expanded' => true,
         'multiple' => false,
-        'required' => true));
+        'required' => true]);
   }
 
   /**
@@ -47,7 +47,7 @@ class AppelloType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => Appello::class));
+    $resolver->setDefaults(['data_class' => Appello::class]);
   }
 
 }

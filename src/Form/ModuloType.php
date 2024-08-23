@@ -45,26 +45,26 @@ class ModuloType extends AbstractType {
         ->setAction($options['action_url']);
       if ($options['values'][0] <= 7) {
         $builder
-          ->add('submit', SubmitType::class, array('label' => $options['values'][0] == 0 ? 'label.start' : 'label.next'));
+          ->add('submit', SubmitType::class, ['label' => $options['values'][0] == 0 ? 'label.start' : 'label.next']);
       } else {
         $builder
-          ->add('submit', SubmitType::class, array('label' => 'label.submit',
-            'attr' => ['style' => 'visibility:hidden']));
+          ->add('submit', SubmitType::class, ['label' => 'label.submit',
+            'attr' => ['style' => 'visibility:hidden']]);
       }
     } elseif ($options['form_mode'] == 'archivia') {
       // form archivia
       $builder
-        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_archivio',
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo_archivio',
           'choices' => ['label.registro_docente' => 'D', 'label.registro_sostegno' => 'S',
             'label.registro_classe' => 'C', 'label.documenti_scrutinio' => 'U',
             'label.archivio_circolari' => 'R'],
-          'required' => true))
-        ->add('selezione', ChoiceType::class, array('label' => 'label.selezione_archivio',
+          'required' => true])
+        ->add('selezione', ChoiceType::class, ['label' => 'label.selezione_archivio',
           'choices' => ['label.tutti' => 'T', 'label.selezionato' => 'S', 'label.da_selezionato' => 'D'],
           'expanded' => true,
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline'],
-          'required' => true))
+          'required' => true])
         ->add('docente', ChoiceType::class, ['label' => 'label.docente_curricolare',
           'choices' => $options['values'][0],
           'choice_value' => 'id',
@@ -89,17 +89,15 @@ class ModuloType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'row_attr' => ['id' => 'row_modulo_classe'],
           'required' => false])
-        ->add('circolare', ChoiceType::class, array('label' => 'label.archivio_circolari',
+        ->add('circolare', ChoiceType::class, ['label' => 'label.archivio_circolari',
           'choices' => $options['values'][3],
-          'choice_label' => function ($obj) {
-            return $obj->getNumero().' - '.$obj->getOggetto(); },
-          'choice_value' => function ($obj) {
-            return $obj ? $obj->getId() : $obj; },
+          'choice_label' => fn($obj) => $obj->getNumero().' - '.$obj->getOggetto(),
+          'choice_value' => fn($obj) => $obj ? $obj->getId() : $obj,
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'row_attr' => ['id' => 'row_modulo_circolare'],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'staff') {
       // form staff
       $builder
@@ -112,17 +110,17 @@ class ModuloType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'disabled' => ($options['values'][0] != null),
           'required' => true])
-        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'choice_value' => 'id',
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'coordinatori') {
       // form coordinatori/segretari
       $builder
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'choice_value' => 'id',
@@ -130,7 +128,7 @@ class ModuloType extends AbstractType {
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'disabled' => ($options['values'][0] != null),
-          'required' => true))
+          'required' => true])
         ->add('docente', ChoiceType::class, ['label' => 'label.docente',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
@@ -142,72 +140,70 @@ class ModuloType extends AbstractType {
     } elseif ($options['form_mode'] == 'log') {
       // form log
       $builder
-        ->add('data', DateType::class, array('label' => 'label.data',
+        ->add('data', DateType::class, ['label' => 'label.data',
           'data' => $options['values'][0],
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
           'attr' => ['widget' => 'gs-row-start'],
-          'required' => true))
-        ->add('ora', TimeType::class, array('label' => 'label.ora_inizio',
+          'required' => true])
+        ->add('ora', TimeType::class, ['label' => 'label.ora_inizio',
           'data' => $options['values'][1],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
-          'required' => true));
+          'required' => true]);
     } elseif ($options['form_mode'] == 'email') {
       // form configurazione email
       $builder
-        ->add('server', ChoiceType::class, array('label' => 'label.mailserver_tipo',
+        ->add('server', ChoiceType::class, ['label' => 'label.mailserver_tipo',
           'data' => $options['values'][0],
           'choices' => ['label.mailserver_smtp' => 'smtp', 'label.mailserver_sendmail' => 'sendmail',
             'label.mailserver_gmail' => 'gmail+smtp', 'label.mailserver_php' => 'php'],
           'help' => 'message.mailserver_help_smtp',
-          'required' => true))
-        ->add('user', TextType::class, array('label' => 'label.mailserver_user',
+          'required' => true])
+        ->add('user', TextType::class, ['label' => 'label.mailserver_user',
           'data' => $options['values'][1],
           'attr' => ['widget' => 'gs-row-start'],
-          'required' => false))
-        ->add('password', PasswordType::class, array('label' => 'label.mailserver_password',
+          'required' => false])
+        ->add('password', PasswordType::class, ['label' => 'label.mailserver_password',
           'data' => $options['values'][2],
           'always_empty' => false,
           'attr' => ['widget' => 'gs-row-end'],
-          'required' => false))
-        ->add('host', TextType::class, array('label' => 'label.mailserver_host',
+          'required' => false])
+        ->add('host', TextType::class, ['label' => 'label.mailserver_host',
           'data' => $options['values'][3],
           'attr' => ['widget' => 'gs-row-start'],
-          'required' => false))
-        ->add('port', IntegerType::class, array('label' => 'label.mailserver_port',
+          'required' => false])
+        ->add('port', IntegerType::class, ['label' => 'label.mailserver_port',
           'data' => $options['values'][4],
           'attr' => ['widget' => 'gs-row-end'],
-          'required' => false))
-        ->add('email', EmailType::class, array('label' => 'label.mailserver_email',
-          'required' => true));
+          'required' => false])
+        ->add('email', EmailType::class, ['label' => 'label.mailserver_email',
+          'required' => true]);
     } elseif ($options['form_mode'] == 'rappresentanti') {
       // form rappresentanti
       $builder
-        ->add('utente', ChoiceType::class, array('label' => 'label.utente',
+        ->add('utente', ChoiceType::class, ['label' => 'label.utente',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
-          'choice_label' => function ($obj) {
-            return ($obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
-              ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
-              ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
-              $obj))); },
-          'choice_value' => function ($obj) {
-            return (is_object($obj) ? $obj->getId() : $obj); },
+          'choice_label' => fn($obj) => $obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
+            ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
+            ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
+            $obj)),
+          'choice_value' => fn($obj) => is_object($obj) ? $obj->getId() : $obj,
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
           'disabled' => count($options['values'][1]) == 1,
-          'required' => true))
-        ->add('tipi', ChoiceType::class, array('label' => 'label.tipo',
+          'required' => true])
+        ->add('tipi', ChoiceType::class, ['label' => 'label.tipo',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'placeholder' => 'label.choose_option',
           'expanded' => true,
           'multiple' => true,
-          'required' => true));
+          'required' => true]);
     } elseif ($options['form_mode'] == 'rspp') {
       // form rspp
       $builder
@@ -222,12 +218,12 @@ class ModuloType extends AbstractType {
     } elseif ($options['form_mode'] == 'telegram') {
       // form configurazione telegram
       $builder
-        ->add('bot', TextType::class, array('label' => 'label.telegram_bot',
+        ->add('bot', TextType::class, ['label' => 'label.telegram_bot',
           'data' => $options['values'][0],
-          'required' => false))
-        ->add('token', TextType::class, array('label' => 'label.telegram_token',
+          'required' => false])
+        ->add('token', TextType::class, ['label' => 'label.telegram_token',
           'data' => $options['values'][1],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'classe') {
       // form cerca classe
       $builder
@@ -238,22 +234,20 @@ class ModuloType extends AbstractType {
           'placeholder' => 'label.scegli_classe',
           'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false]);
     }
     // aggiunge pulsanti al form
     if ($options['return_url']) {
       $builder
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['widget' => 'gs-button-start']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['widget' => 'gs-button-start']])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
     } elseif ($options['form_mode'] != 'nuovo') {
       $builder
-        ->add('submit', SubmitType::class, array('label' => 'label.submit'));
+        ->add('submit', SubmitType::class, ['label' => 'label.submit']);
     }
 
   }

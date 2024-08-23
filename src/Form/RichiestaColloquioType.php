@@ -34,36 +34,36 @@ class RichiestaColloquioType extends AbstractType {
     if ($options['form_mode'] == 'conferma') {
       // form di conferma
       $builder
-        ->add('appuntamento', TimeType::class, array('label' => 'label.ora',
+        ->add('appuntamento', TimeType::class, ['label' => 'label.ora',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => true))
-        ->add('messaggio', MessageType::class, array('label' => 'label.messaggio_colloquio',
+          'required' => true])
+        ->add('messaggio', MessageType::class, ['label' => 'label.messaggio_colloquio',
           'trim' => true,
-          'attr' => array('rows' => '3'),
-          'required' => false));
+          'attr' => ['rows' => '3'],
+          'required' => false]);
     } elseif ($options['form_mode'] == 'rifiuta') {
       // ricevimento periodico
       $builder
-        ->add('messaggio', MessageType::class, array('label' => 'label.messaggio_colloquio',
+        ->add('messaggio', MessageType::class, ['label' => 'label.messaggio_colloquio',
           'trim' => true,
-          'attr' => array('rows' => '3'),
-          'required' => true));
+          'attr' => ['rows' => '3'],
+          'required' => true]);
     } elseif ($options['form_mode'] == 'modifica') {
       $builder
-        ->add('stato', ChoiceType::class, array('label' => 'label.stato_colloquio',
+        ->add('stato', ChoiceType::class, ['label' => 'label.stato_colloquio',
           'choices'  => ['label.stato_colloquio_C' => 'C', 'label.stato_colloquio_N' => 'N'],
-          'required' => true))
-        ->add('appuntamento', TimeType::class, array('label' => 'label.ora',
+          'required' => true])
+        ->add('appuntamento', TimeType::class, ['label' => 'label.ora',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => true))
-        ->add('messaggio', MessageType::class, array('label' => 'label.messaggio_colloquio',
+          'required' => true])
+        ->add('messaggio', MessageType::class, ['label' => 'label.messaggio_colloquio',
           'trim' => true,
-          'attr' => array('rows' => '3'),
-          'required' => true));
+          'attr' => ['rows' => '3'],
+          'required' => true]);
     }
   }
 
@@ -74,10 +74,10 @@ class RichiestaColloquioType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'conferma',
       'allow_extra_fields' => true,
-      'data_class' => RichiestaColloquio::class));
+      'data_class' => RichiestaColloquio::class]);
   }
 
 }

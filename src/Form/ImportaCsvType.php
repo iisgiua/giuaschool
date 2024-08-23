@@ -33,24 +33,24 @@ class ImportaCsvType extends AbstractType {
     // aggiunge campi al form
     if ($options['form_mode'] == 'docenti') {
       $builder
-        ->add('tipo', ChoiceType::class, array('label' => 'label.importazione_docenti_tipo',
-          'choices' => array('label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O'),
+        ->add('tipo', ChoiceType::class, ['label' => 'label.importazione_docenti_tipo',
+          'choices' => ['label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O'],
           'data' => 'U',
           'expanded' => true,
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline'],
-          'required' => true));
+          'required' => true]);
     }
     $builder
-      ->add('file', FileType::class, array('label' => 'label.csv_file'))
-      ->add('filtro', ChoiceType::class, array('label' => 'label.filtro_importazione',
-        'choices' => array('label.filtro_tutti' => 'T', 'label.filtro_nuovi' => 'N', 'label.filtro_esistenti' => 'E'),
+      ->add('file', FileType::class, ['label' => 'label.csv_file'])
+      ->add('filtro', ChoiceType::class, ['label' => 'label.filtro_importazione',
+        'choices' => ['label.filtro_tutti' => 'T', 'label.filtro_nuovi' => 'N', 'label.filtro_esistenti' => 'E'],
         'data' => 'T',
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'));
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit']);
   }
 
   /**
@@ -60,9 +60,9 @@ class ImportaCsvType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'ata',
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

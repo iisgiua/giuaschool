@@ -32,37 +32,37 @@ class AlunnoGenitoreType extends AbstractType {
     if ($options['form_mode'] == 'completo') {
       // form completo per l'amministratore
       $builder
-        ->add('alunno', AlunnoType::class, array('label' => false,
+        ->add('alunno', AlunnoType::class, ['label' => false,
           'data' => $options['values'][0],
           'row_attr' => ['class' => 'mb-0'],
           'values' => [$options['values'][1]],
-          'mapped' => false))
-        ->add('genitore1', GenitoreType::class, array('label' => false,
+          'mapped' => false])
+        ->add('genitore1', GenitoreType::class, ['label' => false,
           'data' => $options['values'][2],
           'row_attr' => ['class' => 'mb-0'],
-          'mapped' => false))
-        ->add('genitore2', GenitoreType::class, array('label' => false,
+          'mapped' => false])
+        ->add('genitore2', GenitoreType::class, ['label' => false,
           'data' => $options['values'][3],
           'row_attr' => ['class' => 'mb-0'],
-          'mapped' => false));
+          'mapped' => false]);
     } else {
       // form limitato per la segreteria
       $builder
-        ->add('genitore1', GenitoreType::class, array('label' => false,
+        ->add('genitore1', GenitoreType::class, ['label' => false,
           'data' => $options['values'][0],
           'mapped' => false,
-          'form_mode' => $options['form_mode']))
-        ->add('genitore2', GenitoreType::class, array('label' => false,
+          'form_mode' => $options['form_mode']])
+        ->add('genitore2', GenitoreType::class, ['label' => false,
           'data' => $options['values'][1],
           'mapped' => false,
-          'form_mode' => $options['form_mode']));
+          'form_mode' => $options['form_mode']]);
     }
     // pulsanti
     $builder
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -74,10 +74,10 @@ class AlunnoGenitoreType extends AbstractType {
     $resolver->setDefined('return_url');
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'form_mode' => 'completo',
-      'values' => []));
+      'values' => []]);
   }
 
 }

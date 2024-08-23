@@ -34,7 +34,7 @@ class VotoScrutinioRepository extends BaseRepository {
       ->getQuery()
       ->getArrayResult();
     // restituisce lista degli alunni e delle materie
-    $alunni = array();
+    $alunni = [];
     foreach ($lista as $l) {
       $alunni[$l['alunno']][] = $l['materia'];
     }

@@ -34,30 +34,30 @@ class FiltroType extends AbstractType {
     if ($options['form_mode'] == 'richieste') {
       // form gestione richieste
       $builder
-        ->add('tipo', ChoiceType::class, array('label' => 'label.richiesta_tipo',
+        ->add('tipo', ChoiceType::class, ['label' => 'label.richiesta_tipo',
           'data' => $options['values'][0],
           'choices' => ['label.richiesta_tipo_E' => 'E', 'label.richiesta_tipo_D' => 'D',
             'label.richiesta_tipo_altre' => '*', 'label.richiesta_tipo_tutte' => ''],
           'attr' => ['title' => 'label.richiesta_tipo'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => true))
-        ->add('stato', ChoiceType::class, array('label' => 'label.richiesta_stato',
+          'required' => true])
+        ->add('stato', ChoiceType::class, ['label' => 'label.richiesta_stato',
           'data' => $options['values'][1],
           'choices' => ['label.richiesta_stato_I' => 'I', 'label.richiesta_stato_G' => 'G',
             'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_A' => 'A',
             'label.richiesta_stato_tutte' => ''],
           'attr' => ['title' => 'label.richiesta_stato'],
           'label_attr' => ['class' => 'sr-only'],
-        'required' => true))
-        ->add('sede', ChoiceType::class, array('label' => 'label.richiesta_sede',
+          'required' => true])
+        ->add('sede', ChoiceType::class, ['label' => 'label.richiesta_sede',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'choice_translation_domain' => false,
           'choice_value' => 'id',
           'attr' => ['title' => 'label.richiesta_sede'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => true))
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'required' => true])
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][4],
           'choices' => $options['values'][5],
           'placeholder' => 'label.qualsiasi_classe',
@@ -65,25 +65,25 @@ class FiltroType extends AbstractType {
           'choice_value' => 'id',
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('residenza', TextType::class, array('label' => 'label.residenza',
+          'required' => false])
+        ->add('residenza', TextType::class, ['label' => 'label.residenza',
           'data' => $options['values'][6],
           'attr' => ['placeholder' => 'label.residenza', 'title' => 'label.residenza',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'required' => false])
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
           'data' => $options['values'][7],
           'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
           'data' => $options['values'][8],
           'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'colloqui') {
       // form cerca colloqui
       $builder
@@ -94,9 +94,7 @@ class FiltroType extends AbstractType {
           'placeholder' => 'label.scegli_docente',
           'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false]);
     } elseif ($options['form_mode'] == 'presenze') {
@@ -109,29 +107,27 @@ class FiltroType extends AbstractType {
           'placeholder' => 'label.tutti_alunni',
           'choice_translation_domain' => false,
           'label_attr' => ['class' => 'sr-only'],
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false])
-        ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
+        ->add('inizio', DateType::class, ['label' => 'label.data_inizio',
           'data' => $options['values'][2],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
-          'required' => false))
-        ->add('fine', DateType::class, array('label' => 'label.data_fine',
+          'required' => false])
+        ->add('fine', DateType::class, ['label' => 'label.data_fine',
           'data' => $options['values'][3],
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'evacuazione') {
       // form moduli evacuazione
       $builder
-        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'placeholder' => 'label.qualsiasi_sede',
@@ -139,8 +135,8 @@ class FiltroType extends AbstractType {
           'choice_value' => 'id',
           'attr' => ['title' => 'label.sede'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'required' => false])
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_classe',
@@ -148,19 +144,19 @@ class FiltroType extends AbstractType {
           'choice_value' => 'id',
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'moduli') {
       // form moduli evacuazione
       $builder
-        ->add('tipo', ChoiceType::class, array('label' => 'label.modulo_tipo',
+        ->add('tipo', ChoiceType::class, ['label' => 'label.modulo_tipo',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'choice_translation_domain' => false,
           'choice_value' => 'id',
           'attr' => ['title' => 'label.modulo_tipo'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => true))
-        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+          'required' => true])
+        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
           'data' => $options['values'][2],
           'choices' => $options['values'][3],
           'placeholder' => 'label.qualsiasi_sede',
@@ -168,8 +164,8 @@ class FiltroType extends AbstractType {
           'choice_value' => 'id',
           'attr' => ['title' => 'label.sede'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'required' => false])
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][4],
           'choices' => $options['values'][5],
           'placeholder' => 'label.qualsiasi_classe',
@@ -177,23 +173,23 @@ class FiltroType extends AbstractType {
           'choice_value' => 'id',
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'required' => false])
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
           'data' => $options['values'][6],
           'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
-            'style' => 'width:10em'],
+          'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
           'data' => $options['values'][7],
           'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
-          'required' => false));
+          'required' => false]);
     }
     // pulsante filtro
     $builder
-      ->add('submit', SubmitType::class, array('label' => 'label.filtra'));
+      ->add('submit', SubmitType::class, ['label' => 'label.filtra']);
   }
 
   /**
@@ -204,10 +200,10 @@ class FiltroType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'richieste',
       'values' => [],
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

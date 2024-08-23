@@ -16,29 +16,6 @@ namespace App\Message;
  */
 class NotificaMessage {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var int $utenteId Identificativo dell'utente destinatario della notifica
-   */
-  private int $utenteId;
-
-  /**
-   * @var string $tipo Tipo di notifica
-   */
-  private string $tipo;
-
-  /**
-   * @var string $tag Testo usato per identificare la notifica
-   */
-  private string $tag;
-
-  /**
-   * @var array $dati Dati necessari per creare la notifica
-   */
-  private array $dati;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -49,11 +26,12 @@ class NotificaMessage {
    * @param string $tag Testo usato per identificare la notifica
    * @param array $dati Dati necessari per creare la notifica
    */
-  public function __construct(int $utenteId, string $tipo, string $tag, array $dati) {
-    $this->utenteId = $utenteId;
-    $this->tipo = $tipo;
-    $this->tag = $tag;
-    $this->dati = $dati;
+  public function __construct(
+      private int $utenteId,
+      private string $tipo,
+      private string $tag,
+      private array $dati)
+  {
   }
 
   /**

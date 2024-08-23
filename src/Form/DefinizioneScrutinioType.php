@@ -34,92 +34,92 @@ class DefinizioneScrutinioType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // form di modifica
     $builder
-      ->add('data', DateType::class, array('label' => 'label.data_scrutinio',
+      ->add('data', DateType::class, ['label' => 'label.data_scrutinio',
         'widget' => 'single_text',
         'html5' => false,
         'format' => 'dd/MM/yyyy',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('dataProposte', DateType::class, array('label' => 'label.data_proposte',
+        'required' => true])
+      ->add('dataProposte', DateType::class, ['label' => 'label.data_proposte',
         'widget' => 'single_text',
         'html5' => false,
         'format' => 'dd/MM/yyyy',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('classiVisibiliData1', DateType::class, array('label' => 'label.scrutinio_visibile_classe_1',
+        'required' => true])
+      ->add('classiVisibiliData1', DateType::class, ['label' => 'label.scrutinio_visibile_classe_1',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'format' => 'dd/MM/yyyy',
         'required' => false,
-        'property_path' => 'classiVisibili[1]'))
-      ->add('classiVisibiliOra1', TimeType::class, array('label' => false,
+        'property_path' => 'classiVisibili[1]'])
+      ->add('classiVisibiliOra1', TimeType::class, ['label' => false,
         'data' => $options['values'][1],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false,
-        'mapped' => false))
-      ->add('classiVisibiliData2', DateType::class, array('label' => 'label.scrutinio_visibile_classe_2',
+        'mapped' => false])
+      ->add('classiVisibiliData2', DateType::class, ['label' => 'label.scrutinio_visibile_classe_2',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'format' => 'dd/MM/yyyy',
         'required' => false,
-        'property_path' => 'classiVisibili[2]'))
-      ->add('classiVisibiliOra2', TimeType::class, array('label' => false,
+        'property_path' => 'classiVisibili[2]'])
+      ->add('classiVisibiliOra2', TimeType::class, ['label' => false,
         'data' => $options['values'][2],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false,
-        'mapped' => false))
-      ->add('classiVisibiliData3', DateType::class, array('label' => 'label.scrutinio_visibile_classe_3',
+        'mapped' => false])
+      ->add('classiVisibiliData3', DateType::class, ['label' => 'label.scrutinio_visibile_classe_3',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'format' => 'dd/MM/yyyy',
         'required' => false,
-        'property_path' => 'classiVisibili[3]'))
-      ->add('classiVisibiliOra3', TimeType::class, array('label' => false,
+        'property_path' => 'classiVisibili[3]'])
+      ->add('classiVisibiliOra3', TimeType::class, ['label' => false,
         'data' => $options['values'][3],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false,
-        'mapped' => false))
-      ->add('classiVisibiliData4', DateType::class, array('label' => 'label.scrutinio_visibile_classe_4',
+        'mapped' => false])
+      ->add('classiVisibiliData4', DateType::class, ['label' => 'label.scrutinio_visibile_classe_4',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'format' => 'dd/MM/yyyy',
         'required' => false,
-        'property_path' => 'classiVisibili[4]'))
-      ->add('classiVisibiliOra4', TimeType::class, array('label' => false,
+        'property_path' => 'classiVisibili[4]'])
+      ->add('classiVisibiliOra4', TimeType::class, ['label' => false,
         'data' => $options['values'][4],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false,
-        'mapped' => false))
-      ->add('classiVisibiliData5', DateType::class, array('label' => 'label.scrutinio_visibile_classe_5',
+        'mapped' => false])
+      ->add('classiVisibiliData5', DateType::class, ['label' => 'label.scrutinio_visibile_classe_5',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-start'],
         'format' => 'dd/MM/yyyy',
         'required' => false,
-        'property_path' => 'classiVisibili[5]'))
-      ->add('classiVisibiliOra5', TimeType::class, array('label' => false,
+        'property_path' => 'classiVisibili[5]'])
+      ->add('classiVisibiliOra5', TimeType::class, ['label' => false,
         'data' => $options['values'][5],
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false,
-        'mapped' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'mapped' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	      'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -130,10 +130,10 @@ class DefinizioneScrutinioType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
-      'values' => array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null),
-      'data_class' => DefinizioneScrutinio::class));
+	    'values' => [1 => null,	2 => null, 3 => null, 4 => null, 5 => null],
+      'data_class' => DefinizioneScrutinio::class]);
   }
 
 }

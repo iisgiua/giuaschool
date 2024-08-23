@@ -19,19 +19,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 class LogProcessor {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RequestStack $request Coda delle pagine richieste
-   */
-  private $request;
-
-  /**
-   * @var TokenStorageInterface $token Gestore dei dati di autenticazione
-   */
-  private $token;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -40,9 +27,10 @@ class LogProcessor {
    * @param RequestStack $request Coda delle pagine richieste
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
-  public function __construct(RequestStack $request, TokenStorageInterface $token) {
-    $this->request = $request;
-    $this->token = $token;
+  public function __construct(
+      private RequestStack $request,
+      private TokenStorageInterface $token)
+  {
   }
 
   /**

@@ -16,13 +16,6 @@ namespace App\Message;
  */
 class AvvisoMessage {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var int $id Identificativo dell'avviso da notificare
-   */
-  private int $id;
-
   /**
    * @var string $tag Testo usato per identificare l'avviso
    */
@@ -36,9 +29,9 @@ class AvvisoMessage {
    *
    * @param int $id Identificativo dell'avviso da notificare
    */
-  public function __construct(int $id) {
-    $this->id = $id;
-    $this->tag = '<!AVVISO!><!'.$id.'!>';
+  public function __construct(
+      private int $id) {
+    $this->tag = '<!AVVISO!><!'.$this->id.'!>';
   }
 
   /**

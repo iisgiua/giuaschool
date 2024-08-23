@@ -54,17 +54,17 @@ class NotaRepository extends BaseRepository {
    */
   public function statisticaCondotta(array $search, int $pagina): array {
     $mode = $this->_em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
-    if (strpos($mode, 'ONLY_FULL_GROUP_BY') !== false) {
+    if (str_contains($mode, 'ONLY_FULL_GROUP_BY')) {
       $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
       $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
         str_replace(',,', ',', $mode));
       $this->_em->getConnection()->executeStatement("SET sql_mode='$mode'");
     }
     // query base
-    $note = $this->_em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $note = $this->_em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
       ->select("COUNT(n.id) AS tot,SUM(IF(n.tipo='C',1,0)) AS nc,SUM(IF(n.tipo='I',1,0)) AS ni,c AS classe")
-      ->join('App\Entity\Classe', 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
-      ->join('App\Entity\Nota', 'n', 'WITH', 'n.classe=c2.id')
+      ->join(\App\Entity\Classe::class, 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
+      ->join(\App\Entity\Nota::class, 'n', 'WITH', 'n.classe=c2.id')
       ->where("(c.gruppo IS NULL OR c.gruppo='') AND n.annullata IS NULL AND n.data BETWEEN :inizio AND :fine")
       ->groupBy('c.anno,c.sezione')
       ->orderBy('tot', 'DESC')

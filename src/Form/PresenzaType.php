@@ -28,14 +28,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class PresenzaType extends AbstractType {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -43,8 +35,9 @@ class PresenzaType extends AbstractType {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    */
-  public function __construct(EntityManagerInterface $em) {
-    $this->em = $em;
+  public function __construct(
+      private EntityManagerInterface $em)
+  {
   }
 
   /**
@@ -67,62 +60,58 @@ class PresenzaType extends AbstractType {
           'label_attr' => ['class' => 'checkbox-split-vertical'],
           'required' => true,
           'mapped' => false])
-        ->add('data', DateType::class, array('label' => 'label.data_inizio',
+        ->add('data', DateType::class, ['label' => 'label.data_inizio',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
-          'required' => true))
-        ->add('dataFine', DateType::class, array('label' => 'label.data_fine',
+          'required' => true])
+        ->add('dataFine', DateType::class, ['label' => 'label.data_fine',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
           'required' => true,
-          'mapped' => false))
-        ->add('settimana', ChoiceType::class, array('label' => false,
+          'mapped' => false])
+        ->add('settimana', ChoiceType::class, ['label' => false,
           'choices' => ['label.lunedi' => '1', 'label.martedi' => '2', 'label.mercoledi' => '3',
             'label.giovedi' => '4', 'label.venerdi' => '5', 'label.sabato' => '6'],
           'expanded' => true,
           'multiple' => true,
           'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
           'required' => true,
-          'mapped' => false))
-        ->add('oraTipo', ChoiceType::class, array('label' => false,
-          'choices' => array('label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
-            'label.presenza_ora_tipo_I' => 'I'),
+          'mapped' => false])
+        ->add('oraTipo', ChoiceType::class, ['label' => false,
+          'choices' => ['label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
+            'label.presenza_ora_tipo_I' => 'I'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['class' => 'gs-placeholder'],
           'required' => true,
-          'mapped' => false))
-        ->add('oraInizio', TimeType::class, array('label' => 'label.ora_inizio',
+          'mapped' => false])
+        ->add('oraInizio', TimeType::class, ['label' => 'label.ora_inizio',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('oraFine', TimeType::class, array('label' => 'label.ora_fine',
+          'required' => false])
+        ->add('oraFine', TimeType::class, ['label' => 'label.ora_fine',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
-            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
+          'required' => false])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
+          'choices' => ['label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['style' => 'width: auto'],
-          'required' => true))
-        ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
-          'required' => true));
+          'required' => true])
+        ->add('descrizione', TextType::class, ['label' => 'label.descrizione',
+          'required' => true]);
       // aggiunge data transform
       $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
-        function ($alunno) {
-          return 0;
-        },
-        function ($id) {
-          return $this->em->getRepository('App\Entity\Alunno')->find($id);
-        }));
+        fn($alunno) => 0,
+        fn($id) => $this->em->getRepository(\App\Entity\Alunno::class)->find($id)));
     } elseif ($options['form_mode'] == 'edit') {
       // form modifica
       $builder
@@ -131,69 +120,69 @@ class PresenzaType extends AbstractType {
           'choice_value' => 'id',
           'choice_translation_domain' => false,
           'required' => true])
-        ->add('data', DateType::class, array('label' => 'label.data',
+        ->add('data', DateType::class, ['label' => 'label.data',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
           'format' => 'dd/MM/yyyy',
-          'required' => true))
-        ->add('oraTipo', ChoiceType::class, array('label' => false,
-          'choices' => array('label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
-            'label.presenza_ora_tipo_I' => 'I'),
+          'required' => true])
+        ->add('oraTipo', ChoiceType::class, ['label' => false,
+          'choices' => ['label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
+            'label.presenza_ora_tipo_I' => 'I'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['class' => 'gs-placeholder'],
           'required' => true,
-          'mapped' => false))
-        ->add('oraInizio', TimeType::class, array('label' => 'label.ora_inizio',
+          'mapped' => false])
+        ->add('oraInizio', TimeType::class, ['label' => 'label.ora_inizio',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('oraFine', TimeType::class, array('label' => 'label.ora_fine',
+          'required' => false])
+        ->add('oraFine', TimeType::class, ['label' => 'label.ora_fine',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
-            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
+          'required' => false])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
+          'choices' => ['label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['style' => 'width: auto'],
-          'required' => true))
-        ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
-          'required' => true));
+          'required' => true])
+        ->add('descrizione', TextType::class, ['label' => 'label.descrizione',
+          'required' => true]);
     } elseif ($options['form_mode'] == 'registro') {
       // form modifica da registro assenze
       $builder
-        ->add('oraTipo', ChoiceType::class, array('label' => false,
-          'choices' => array('label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
-            'label.presenza_ora_tipo_I' => 'I'),
+        ->add('oraTipo', ChoiceType::class, ['label' => false,
+          'choices' => ['label.presenza_ora_tipo_G' => 'G', 'label.presenza_ora_tipo_F' => 'F',
+            'label.presenza_ora_tipo_I' => 'I'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['class' => 'gs-placeholder'],
           'required' => true,
-          'mapped' => false))
-        ->add('oraInizio', TimeType::class, array('label' => 'label.ora_inizio',
+          'mapped' => false])
+        ->add('oraInizio', TimeType::class, ['label' => 'label.ora_inizio',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('oraFine', TimeType::class, array('label' => 'label.ora_fine',
+          'required' => false])
+        ->add('oraFine', TimeType::class, ['label' => 'label.ora_fine',
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-picker'],
-          'required' => false))
-        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-          'choices' => array('label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
-            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'),
+          'required' => false])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
+          'choices' => ['label.presenza_tipo_P' => 'P', 'label.presenza_tipo_M' => 'M',
+            'label.presenza_tipo_S' => 'S', 'label.presenza_tipo_E' => 'E'],
           'expanded' => false,
           'multiple' => false,
           'attr' => ['style' => 'width: auto'],
-          'required' => true))
-        ->add('descrizione', TextType::class, array('label' => 'label.descrizione',
-          'required' => true));
+          'required' => true])
+        ->add('descrizione', TextType::class, ['label' => 'label.descrizione',
+          'required' => true]);
     }
   }
 
@@ -206,12 +195,12 @@ class PresenzaType extends AbstractType {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'edit',
       'return_url' => null,
       'values' => [],
       'allow_extra_fields' => true,
-      'data_class' => Presenza::class));
+      'data_class' => Presenza::class]);
   }
 
 }

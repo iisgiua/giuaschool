@@ -40,10 +40,10 @@ final class PhpTransport extends AbstractTransport {
       } elseif ($isHeader) {
         // parte dell'header
         foreach (explode("\r\n", $chunk) as $hdr) {
-          if (substr($hdr, 0, 9) === 'Subject: ') {
+          if (str_starts_with($hdr, 'Subject: ')) {
             // estrae oggetto
             $subject = substr($hdr, 9);
-          } elseif (substr($hdr, 0, 4) !== 'To: ') {
+          } elseif (!str_starts_with($hdr, 'To: ')) {
             // aggiunge agli header
             $headers .= $hdr ? ($hdr."\r\n") : '';
           }

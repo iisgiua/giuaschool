@@ -16,13 +16,6 @@ namespace App\Message;
  */
 class EventoMessage {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var int $id Identificativo dell'evento da notificare
-   */
-  private int $id;
-
   /**
    * @var string $tag Testo usato per identificare l'evento
    */
@@ -36,9 +29,9 @@ class EventoMessage {
    *
    * @param int $id Identificativo dell'evento da notificare
    */
-  public function __construct(int $id) {
-    $this->id = $id;
-    $this->tag = '<!EVENTO!><!'.$id.'!>';
+  public function __construct(
+      private int $id) {
+    $this->tag = '<!EVENTO!><!'.$this->id.'!>';
   }
 
   /**

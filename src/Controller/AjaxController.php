@@ -43,21 +43,21 @@ class AjaxController extends BaseController {
   public function docentiAjax(string $cognome, string $nome, string $sede,
                               string $pagina): JsonResponse {
     // inizializza
-    $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
-    $dati = array();
+    $search = ['cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => []];
+    $dati = [];
     // controlla sede
     if ($this->getUser()->getSede()) {
-      $search['sede'] = array($this->getUser()->getSede()->getId());
+      $search['sede'] = [$this->getUser()->getSede()->getId()];
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $docenti = $this->em->getRepository('App\Entity\Docente')->cercaSede($search, $pagina, 20);
+    $docenti = $this->em->getRepository(\App\Entity\Docente::class)->cercaSede($search, $pagina, 20);
     foreach ($docenti as $doc) {
-      $dati['lista'][] = array(
+      $dati['lista'][] = [
         'id' => $doc->getId(),
-        'nome' => $doc->getCognome().' '.$doc->getNome());
+        'nome' => $doc->getCognome().' '.$doc->getNome()];
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;
@@ -97,22 +97,21 @@ class AjaxController extends BaseController {
   public function alunniAjax(string $cognome, string $nome, string $classe, string $sede,
                              string $pagina): JsonResponse {
     // inizializza
-    $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
-      'sede' => array());
-    $dati = array();
+    $search = ['cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1), 'sede' => []];
+    $dati = [];
     // controlla sede
     if ($this->getUser() instanceOf Staff && $this->getUser()->getSede()) {
-      $search['sede'] = array($this->getUser()->getSede()->getId());
+      $search['sede'] = [$this->getUser()->getSede()->getId()];
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $alunni = $this->em->getRepository('App\Entity\Alunno')->iscritti($search, $pagina, 20);
+    $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->iscritti($search, $pagina, 20);
     foreach ($alunni as $alu) {
-      $dati['lista'][] = array(
+      $dati['lista'][] = [
         'id' => $alu->getId(),
-        'nome' => ''.$alu.' '.$alu->getClasse());
+        'nome' => ''.$alu.' '.$alu->getClasse()];
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;
@@ -145,7 +144,7 @@ class AjaxController extends BaseController {
    */
   public function tokenAjax(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
-    $dati = array();
+    $dati = [];
     $dati[$id] = $tokenManager->getToken($id)->getValue();
     // restituisce dati
     return new JsonResponse($dati);
@@ -182,7 +181,7 @@ class AjaxController extends BaseController {
    */
   public function classeAjax(Classe $classe): JsonResponse {
     // legge alunni
-    $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
+    $dati = $this->em->getRepository(\App\Entity\Alunno::class)->classe($classe->getId());
     // restituisce dati
     return new JsonResponse($dati);
   }

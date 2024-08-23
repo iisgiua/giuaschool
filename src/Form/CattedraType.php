@@ -62,21 +62,21 @@ class CattedraType extends AbstractType {
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'search'],
         'required' => true])
-      ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-        'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P',
-          'label.tipo_A' => 'A'),
+      ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
+        'choices' => ['label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P',
+          'label.tipo_A' => 'A'],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('supplenza', CheckboxType::class, array('label' => 'label.supplenza',
+        'required' => true])
+      ->add('supplenza', CheckboxType::class, ['label' => 'label.supplenza',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -87,10 +87,10 @@ class CattedraType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
       'values' => [],
-      'data_class' => Cattedra::class));
+      'data_class' => Cattedra::class]);
   }
 
 }
