@@ -38,7 +38,7 @@ class CommandController extends BaseController {
    */
   public function notify(KernelInterface $kernel, string $token, int $time): Response {
     // controlla token
-    $tok = $this->em->getRepository('App\Entity\Configurazione')->getParametro('comando_token');
+    $tok = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('comando_token');
     if (empty($tok) || $tok != $token) {
       // errore: codice di sicurezza errato
       throw $this->createNotFoundException('exception.not_allowed');

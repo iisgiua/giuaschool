@@ -34,13 +34,13 @@ trait AuthenticatorTrait {
   public function controllaManutenzione(UserInterface $user): void {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $inizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
-    $fine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
+    $inizio = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_inizio');
+    $fine = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_fine');
     if ($inizio && $fine && $ora >= $inizio && $ora <= $fine && !($user instanceOf Amministratore)) {
       // errore: modalità manutenzione
-      $this->logger->error('Tentativo di autenticazione durante la modalità manutenzione.', array(
+      $this->logger->error('Tentativo di autenticazione durante la modalità manutenzione.', [
         'username' => $user->getUserIdentifier(),
-        'ruolo' => $user->getCodiceRuolo()));
+        'ruolo' => $user->getCodiceRuolo()]);
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
   }
@@ -60,7 +60,7 @@ trait AuthenticatorTrait {
       return $user;
     }
     // trova profili attivi
-    $profilo = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($user->getNome(),
+    $profilo = $this->em->getRepository(\App\Entity\Utente::class)->profiliAttivi($user->getNome(),
       $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       if ($user instanceOf Genitore) {
@@ -100,8 +100,8 @@ trait AuthenticatorTrait {
       }
     }
     // errore: utente disabilitato
-    $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-      'username' => $user->getUserIdentifier()));
+    $this->logger->error('Utente disabilitato nella richiesta di login.', [
+      'username' => $user->getUserIdentifier()]);
     throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 

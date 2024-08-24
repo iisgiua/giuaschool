@@ -60,7 +60,7 @@ class LezioniController extends BaseController {
   public function classe(): Response
   {
       // lista cattedre
-      $lista = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      $lista = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
         ->join('c.classe', 'cl')
         ->join('c.materia', 'm')
         ->where('c.docente=:docente AND c.attiva=:attiva')
@@ -69,26 +69,25 @@ class LezioniController extends BaseController {
         ->getQuery()
         ->getResult();
       // raggruppa per classi
-      $cattedre = array();
+      $cattedre = [];
       foreach ($lista as $c) {
         $cattedre[$c->getClasse()->getId()][] = $c;
       }
       // lista tutte le classi
-      $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
+      $lista = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('cl')
         ->orderBy('cl.sede,cl.sezione,cl.anno,cl.gruppo', 'ASC')
         ->getQuery()
         ->getResult();
       // raggruppa per sezione
-      $classi = array();
+      $classi = [];
       foreach ($lista as $c) {
         $classi[$c->getSezione()][] = $c;
       }
       // visualizza pagina
-      return $this->render('lezioni/classe.html.twig', array(
+      return $this->render('lezioni/classe.html.twig', [
         'pagina_titolo' => 'page.lezioni_classe',
         'cattedre' => $cattedre,
-        'classi' => $classi,
-      ));
+        'classi' => $classi]);
   }
 
   /**
@@ -127,7 +126,7 @@ class LezioniController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -140,12 +139,12 @@ class LezioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -163,13 +162,12 @@ class LezioniController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.lezioni_argomenti',
       'cattedra' => $cattedra,
       'classe' => $classe,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -213,7 +211,7 @@ class LezioniController extends BaseController {
     $formatter->setPattern('MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // lezione in propria cattedra: controlla esistenza
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -229,12 +227,12 @@ class LezioniController extends BaseController {
     $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
-    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_fine);
-    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_inizio);
+    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_fine);
+    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_inizio);
     // recupera dati
     $dati = $reg->riepilogo($data_obj, $cattedra);
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.lezioni_riepilogo',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -243,8 +241,7 @@ class LezioniController extends BaseController {
       'data_prec' => $data_prec,
       'mesi' => $mesi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -281,7 +278,7 @@ class LezioniController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -293,12 +290,12 @@ class LezioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -316,13 +313,12 @@ class LezioniController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/note.html.twig', array(
+    return $this->render('lezioni/note.html.twig', [
       'pagina_titolo' => 'page.lezioni_note',
       'cattedra' => $cattedra,
       'classe' => $classe,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -344,9 +340,9 @@ class LezioniController extends BaseController {
     $info = null;
     $dati = null;
     $dir = $this->getParameter('dir_tmp').'/';
-    $nomefile = md5(uniqid()).'-'.rand(1,1000).'.docx';
+    $nomefile = md5(uniqid()).'-'.random_int(1, 1000).'.docx';
     // controlla cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra || $cattedra->getMateria()->getTipo() == 'S') {
       // errore
@@ -365,7 +361,7 @@ class LezioniController extends BaseController {
     }
     $info['docenti'] = substr($info['docenti'], 0, -2);
     $m = strtoupper(preg_replace('/\W+/','-', $cattedra->getMateria()->getNomeBreve()));
-    if (substr($m, -1) == '-') {
+    if (str_ends_with($m, '-')) {
       $m = substr($m, 0, -1);
     }
     $info['documento'] = 'PROGRAMMA-'.$cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().
@@ -382,17 +378,17 @@ class LezioniController extends BaseController {
     // stili predefiniti
     $phpWord->setDefaultFontName('Times New Roman');
     $phpWord->setDefaultFontSize(12);
-    $phpWord->setDefaultParagraphStyle(array(
+    $phpWord->setDefaultParagraphStyle([
       'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH,
-      'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.2)));
-    $lista_paragrafo = array('spaceAfter' => 0);
+      'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.2)]);
+    $lista_paragrafo = ['spaceAfter' => 0];
     $lista_stile = 'multilevel';
-    $phpWord->addNumberingStyle($lista_stile, array(
+    $phpWord->addNumberingStyle($lista_stile, [
       'type' => 'multilevel',
-      'levels' => array(
-        array('format' => 'decimal', 'text' => '%1)', 'left' => 720, 'hanging' => 360, 'tabPos' => 720))));
+      'levels' => [
+        ['format' => 'decimal', 'text' => '%1)', 'left' => 720, 'hanging' => 360, 'tabPos' => 720]]]);
     // imposta pagina
-    $section = $phpWord->addSection(array(
+    $section = $phpWord->addSection([
       'orientation' => 'portrait',
       'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
       'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
@@ -401,50 +397,48 @@ class LezioniController extends BaseController {
       'headerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0),
       'footerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1.5),
       'pageSizeH' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(29.70),
-      'pageSizeW' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21)
-      ));
+      'pageSizeW' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21)]);
     $footer = $section->addFooter();
     $footer->addPreserveText('- Pag. {PAGE}/{NUMPAGES} -',
-      array('name' => 'Arial', 'size' => 9),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['name' => 'Arial', 'size' => 9],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     // intestazione
-    $section->addImage($this->getParameter('kernel.project_dir').'/public/img/logo-italia.png', array(
+    $section->addImage($this->getParameter('kernel.project_dir').'/public/img/logo-italia.png', [
       'width' => 35,
       'height' => 35,
       'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE,
       'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
       'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_COLUMN,
       'posVertical' => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
-      'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE
-      ));
+      'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE]);
     $section->addTextBreak(1);
     $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addText($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/nome'),
-      array('bold' => true, 'italic' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true, 'italic' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addText($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/sede_0_citta'),
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addTextBreak(1);
     $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $section->addText('ANNO SCOLASTICO '.$as,
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addTextBreak(1);
     $section->addText('PROGRAMMA SVOLTO',
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addText('Classe: '.$info['classe_corso'],
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addText('Materia: '.$info['materia'],
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addText($info['docenti'],
-      array('bold' => true),
-      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+      ['bold' => true],
+      ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
     $section->addTextBreak(2);
     // programma
     foreach ($dati['argomenti'] as $arg) {

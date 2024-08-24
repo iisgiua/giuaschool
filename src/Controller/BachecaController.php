@@ -49,7 +49,7 @@ class BachecaController extends BaseController {
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
-    $cerca = array();
+    $cerca = [];
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
     if ($pagina == 0) {
@@ -61,22 +61,20 @@ class BachecaController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi', FormType::class)
-      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
+      ->add('visualizza', ChoiceType::class, ['label' => 'label.avvisi_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
+        'required' => true])
+      ->add('oggetto', TextType::class, ['label' => 'label.avvisi_filtro_oggetto',
         'data' => $cerca['oggetto'],
         'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.filtra',
-        'attr' => ['class' => 'btn-primary']))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.filtra',
+	      'attr' => ['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -91,15 +89,14 @@ class BachecaController extends BaseController {
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
-    return $this->render('bacheca/avvisi.html.twig', array(
-      'pagina_titolo' => 'page.bacheca_avvisi',
+    return $this->render(
+      'bacheca/avvisi.html.twig', ['pagina_titolo' => 'page.bacheca_avvisi',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -120,7 +117,7 @@ class BachecaController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -134,9 +131,8 @@ class BachecaController extends BaseController {
     // aggiorna lettura
     $bac->letturaAvviso($avviso, $this->getUser());
     // visualizza pagina
-    return $this->render('bacheca/scheda_avviso.html.twig', array(
-      'dati' => $dati,
-    ));
+    return $this->render('bacheca/scheda_avviso.html.twig', [
+      'dati' => $dati]);
   }
 
   /**
@@ -157,7 +153,7 @@ class BachecaController extends BaseController {
     // inizializza
     $dati = null;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -165,10 +161,8 @@ class BachecaController extends BaseController {
     // legge dati
     $dati = $bac->bachecaAvvisiAlunni($classe);
     // visualizza pagina
-    return $this->render('bacheca/scheda_avviso_alunni.html.twig', array(
-      'dati' => $dati,
-      'classe' => $classe,
-    ));
+    return $this->render('bacheca/scheda_avviso_alunni.html.twig', ['dati' => $dati,
+	'classe' => $classe]);
   }
 
   /**
@@ -188,7 +182,7 @@ class BachecaController extends BaseController {
    */
   public function avvisiAlunniFirma(BachecaUtil $bac, int $classe, string $id): Response {
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -222,7 +216,7 @@ class BachecaController extends BaseController {
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
-    $cerca = array();
+    $cerca = [];
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
     if ($pagina == 0) {
@@ -234,21 +228,22 @@ class BachecaController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_ata', FormType::class)
-      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
-        'data' => $cerca['visualizza'],
-        'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
-        'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
-        'data' => $cerca['oggetto'],
-        'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->add('visualizza', ChoiceType::class, ['label' => 'label.avvisi_filtro_visualizza',
+	'data' => $cerca['visualizza'],
+	'choices' => ['label.avvisi_da_leggere' => 'D',
+	'label.avvisi_tutti' => 'T'],
+	'label_attr' => ['class' => 'sr-only'],
+	'choice_attr' => fn($val,
+	$key, $index) => ['class' => 'gs-no-placeholder'],
+	'attr' => ['class' => 'gs-placeholder'],
+	'required' => true])
+      ->add('oggetto', TextType::class, ['label' => 'label.avvisi_filtro_oggetto',
+	'data' => $cerca['oggetto'],
+	'attr' => ['placeholder' => 'label.oggetto',
+	'class' => 'gs-placeholder'],
+	'label_attr' => ['class' => 'sr-only'],
+	'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -263,15 +258,13 @@ class BachecaController extends BaseController {
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
-    return $this->render('bacheca/avvisi_ata.html.twig', array(
-      'pagina_titolo' => 'page.bacheca_avvisi_ata',
-      'form' => $form->createView(),
-      'form_help' => null,
-      'form_success' => null,
-      'page' => $pagina,
-      'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+    return $this->render('bacheca/avvisi_ata.html.twig', ['pagina_titolo' => 'page.bacheca_avvisi_ata',
+	'form' => $form->createView(),
+	'form_help' => null,
+	'form_success' => null,
+	'page' => $pagina,
+	'maxPages' => ceil($dati['lista']->count() / $limite),
+	'dati' => $dati]);
   }
 
 }

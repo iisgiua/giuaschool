@@ -37,37 +37,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class CsvImporter {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var TranslatorInterface $trans Gestore delle traduzioni
-   */
-  private $trans;
-
-  /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private $reqstack;
-
-  /**
-   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   */
-  private $hasher;
-
   /**
    * @var ValidatorInterface $validator Gestore della validazione dei dati
    */
   private $validator;
-
-  /**
-   * @var StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
-   */
-  private $staff;
 
   /**
    * @var resource $fh Gestore del file
@@ -92,16 +65,16 @@ class CsvImporter {
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, RequestStack $reqstack,
-                              UserPasswordHasherInterface $hasher, ValidatorBuilder $valbuilder, StaffUtil $staff) {
-    $this->em = $em;
-    $this->trans = $trans;
-    $this->reqstack = $reqstack;
-    $this->hasher = $hasher;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private TranslatorInterface $trans,
+      private RequestStack $reqstack,
+      private UserPasswordHasherInterface $hasher,
+      private ValidatorBuilder $valbuilder,
+      private StaffUtil $staff) {
     $this->validator = $valbuilder->getValidator();
-    $this->staff = $staff;
     $this->fh = null;
-    $this->header = array();
+    $this->header = [];
   }
 
   /**
@@ -112,8 +85,8 @@ class CsvImporter {
    *
    * @return array|null Lista dei docenti importati
    */
-  public function importaDocenti(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email');
+  public function importaDocenti(Form $form, File $file=null) {
+    $header = ['cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);

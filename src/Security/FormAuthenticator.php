@@ -49,44 +49,6 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
   use AuthenticatorTrait;
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RouterInterface $router Gestore delle URL
-   */
-  private RouterInterface $router;
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   */
-  private UserPasswordHasherInterface $hasher;
-
-  /**
-   * @var OtpUtil $otp Gestione del codice OTP
-   */
-  private OtpUtil $otp;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private LogHandler $dblogger;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private ConfigLoader $config;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -100,16 +62,14 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
-                              OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
-                              ConfigLoader $config) {
-    $this->router = $router;
-    $this->em = $em;
-    $this->hasher = $hasher;
-    $this->otp = $otp;
-    $this->logger = $logger;
-    $this->dblogger = $dblogger;
-    $this->config = $config;
+  public function __construct(
+      private RouterInterface $router,
+      private EntityManagerInterface $em,
+      private UserPasswordHasherInterface $hasher,
+      private OtpUtil $otp,
+      private LoggerInterface $logger,
+      private LogHandler $dblogger,
+      private ConfigLoader $config) {
   }
 
   /**
@@ -161,12 +121,12 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    */
   public function getUser(string $username): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username,
+    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $username,
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
-      $this->logger->error('Utente non valido nella richiesta di login.', array(
-        'username' => $username));
+      $this->logger->error('Utente non valido nella richiesta di login.', [
+        'username' => $username]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // restituisce profilo attivo
@@ -185,25 +145,25 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    *
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function checkCredentials($credentials, UserInterface $user): bool {
+  public function checkCredentials(mixed $credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione: id_provider
-    $idProvider = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider');
-    $idProviderTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider_tipo');
+    $idProvider = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider_tipo');
     // se id_provider controlla ruolo utente
     if ($idProvider && $user->controllaRuolo($idProviderTipo)) {
       // errore: utente deve usare accesso con id provider
-      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', array(
+      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', [
         'username' => $user->getUserIdentifier(),
         'ruolo' => $user->getCodiceRuolo(),
-        'ip' => $credentials['ip']));
+        'ip' => $credentials['ip']]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
     }
     // controlla password
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok
-      $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
+      $otpTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('otp_tipo');
       if ($user->getOtp() && $user->controllaRuolo($otpTipo)) {
         // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
@@ -226,20 +186,20 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
           $otp_errore_messaggio = 'exception.invalid_credentials';
         }
         // validazione fallita
-        $this->logger->error($otp_errore_log, array(
+        $this->logger->error($otp_errore_log, [
           'username' => $user->getUserIdentifier(),
           'ruolo' => $user->getCodiceRuolo(),
-          'ip' => $credentials['ip']));
+          'ip' => $credentials['ip']]);
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
       }
       // validazione corretta
       return true;
     }
     // validazione fallita
-    $this->logger->error('Password errata nella richiesta di login.', array(
+    $this->logger->error('Password errata nella richiesta di login.', [
       'username' => $user->getUserIdentifier(),
       'ruolo' => $user->getCodiceRuolo(),
-      'ip' => $credentials['ip']));
+      'ip' => $credentials['ip']]);
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
 
@@ -256,7 +216,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
+    $otpTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('otp_tipo');
     $tipo_accesso = ($token->getUser()->getOtp() && $token->getUser()->controllaRuolo($otpTipo)) ?
       'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
@@ -275,11 +235,11 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
     }
     // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Login', array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', [
       'Login' => $tipo_accesso,
       'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
-      'Lista profili' => $token->getUser()->getListaProfili()));
+      'Lista profili' => $token->getUser()->getListaProfili()]);
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare
