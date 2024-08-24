@@ -87,18 +87,18 @@ class CoordinatoreController extends BaseController {
    */
   public function classe(): Response {
     // lista classi coordinatore
-    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $classi = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
       ->setParameters(['lista' => explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
       ->getQuery()
       ->getResult();
     // lista tutte le classi
-    $tutte = array();
+    $tutte = [];
     if ($this->getUser() instanceOf Staff) {
       if ($this->getUser()->getSede()) {
         // solo classi della sede
-        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
           ->where('c.sede=:sede')
           ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
           ->setParameters(['sede' => $this->getUser()->getSede()])
@@ -106,7 +106,7 @@ class CoordinatoreController extends BaseController {
           ->getResult();
       } else {
         // tutte le classi
-        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
           ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
           ->getQuery()
           ->getResult();
@@ -122,11 +122,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/classe.html.twig', array(
+    return $this->render('coordinatore/classe.html.twig', [
       'pagina_titolo' => 'page.coordinatore_classe',
       'classi' => $classi,
-      'tutte' => $tutte,
-    ));
+      'tutte' => $tutte]);
   }
 
   /**
@@ -159,7 +158,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -180,10 +179,9 @@ class CoordinatoreController extends BaseController {
         // crea documento PDF
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Note disciplinari della classe '.$classe);
-        $html = $this->renderView('pdf/note_classe.html.twig', array(
+        $html = $this->renderView('pdf/note_classe.html.twig', [
           'classe' => $classe,
-          'dati' => $dati,
-          ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'note-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -191,11 +189,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/note.html.twig', array(
+    return $this->render('coordinatore/note.html.twig', [
       'pagina_titolo' => 'page.coordinatore_note',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -228,7 +225,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -248,10 +245,9 @@ class CoordinatoreController extends BaseController {
         // crea documento PDF
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Assenze della classe '.$classe);
-        $html = $this->renderView('pdf/assenze_classe.html.twig', array(
+        $html = $this->renderView('pdf/assenze_classe.html.twig', [
           'classe' => $classe,
-          'dati' => $dati,
-          ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'assenze-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -259,11 +255,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/assenze.html.twig', array(
+    return $this->render('coordinatore/assenze.html.twig', [
       'pagina_titolo' => 'page.coordinatore_assenze',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -302,7 +297,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -340,10 +335,9 @@ class CoordinatoreController extends BaseController {
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Medie dei voti della classe '.$classe);
         $pdf->getHandler()->setPageOrientation('L', true, 20);
-        $html = $this->renderView('pdf/voti_classe.html.twig', array(
+        $html = $this->renderView('pdf/voti_classe.html.twig', [
           'info' => $info,
-          'dati' => $dati,
-        ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -351,11 +345,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/voti.html.twig', array(
+    return $this->render('coordinatore/voti.html.twig', [
       'pagina_titolo' => 'page.coordinatore_voti',
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -386,7 +379,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -404,11 +397,10 @@ class CoordinatoreController extends BaseController {
       $dati = $staff->alunni($classe);
     }
     // visualizza pagina
-    return $this->render('coordinatore/situazione.html.twig', array(
+    return $this->render('coordinatore/situazione.html.twig', [
       'pagina_titolo' => 'page.coordinatore_situazione',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -434,7 +426,7 @@ class CoordinatoreController extends BaseController {
     $dati = null;
     $info = null;
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -442,7 +434,7 @@ class CoordinatoreController extends BaseController {
     // controllo classe
     $classe = $alunno->getClasse();
     if (!$classe) {
-      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alunno]);
+      $cambio = $this->em->getRepository(\App\Entity\CambioClasse::class)->findOneBy(['alunno' => $alunno]);
       if (!$cambio) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -471,26 +463,24 @@ class CoordinatoreController extends BaseController {
       // crea documento PDF
       $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
-      $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
+      $html = $this->renderView('pdf/situazione_alunno.html.twig', [
         'classe' => $classe,
         'alunno' => $alunno,
         'dati' => $dati,
-        'info' => $info,
-        ));
+        'info' => $info]);
       $pdf->createFromHtml($html);
       // invia il documento
       $nomefile = 'situazione-alunno-'.$alunno->getCognome().'-'.$alunno->getNome();
       return $pdf->send($pdf->normalizzaNome($nomefile));
     }
     // visualizza pagina
-    return $this->render('coordinatore/situazione_alunno.html.twig', array(
+    return $this->render('coordinatore/situazione_alunno.html.twig', [
       'pagina_titolo' => 'page.coordinatore_situazione',
       'classe' => $classe,
       'alunno' => $alunno,
       'tipo' => $tipo,
       'dati' => $dati,
-      'info' => $info,
-    ));
+      'info' => $info]);
   }
 
   /**
@@ -532,7 +522,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -551,13 +541,12 @@ class CoordinatoreController extends BaseController {
       $maxPages = ceil($dati['lista']->count() / $limite);
     }
     // visualizza pagina
-    return $this->render('coordinatore/avvisi.html.twig', array(
+    return $this->render('coordinatore/avvisi.html.twig', [
       'pagina_titolo' => 'page.coordinatore_avvisi',
       'classe' => $classe,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => $maxPages,
-    ));
+      'maxPages' => $maxPages]);
   }
 
   /**
@@ -585,7 +574,7 @@ class CoordinatoreController extends BaseController {
                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                              int $classe, int $id): Response {
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -603,7 +592,7 @@ class CoordinatoreController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -618,7 +607,7 @@ class CoordinatoreController extends BaseController {
         ->addSedi($classe->getSede());
       $this->em->persist($avviso);
       // imposta classe tramite cattedra
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['attiva' => 1, 'classe' => $classe]);
       $avviso->setCattedra($cattedra);
     }
     // imposta autore dell'avviso
@@ -631,7 +620,7 @@ class CoordinatoreController extends BaseController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // controllo errori
@@ -644,10 +633,10 @@ class CoordinatoreController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
       }
       // controlla filtro
-      $lista = array();
+      $lista = [];
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $this->em->getRepository('App\Entity\Alunno')
+        $lista = $this->em->getRepository(\App\Entity\Alunno::class)
           ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -677,13 +666,13 @@ class CoordinatoreController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -703,18 +692,18 @@ class CoordinatoreController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classe
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
-        $log_annotazioni['delete'] = array();
+        $log_annotazioni['delete'] = [];
         if ($id) {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
@@ -747,15 +736,12 @@ class CoordinatoreController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', [
             'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-          ));
+            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', [
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
             'Destinatari' => $avviso_old->getDestinatari(),
@@ -763,22 +749,18 @@ class CoordinatoreController extends BaseController {
             'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-          ));
+            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         }
         // redirezione
         return $this->redirectToRoute('coordinatore_avvisi');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('coordinatore/avviso_edit.html.twig', array(
+    return $this->render('coordinatore/avviso_edit.html.twig', [
       'pagina_titolo' => 'page.coordinatore_avvisi',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso_coordinatore' : 'title.nuovo_avviso_coordinatore'),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -800,13 +782,13 @@ class CoordinatoreController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -827,9 +809,8 @@ class CoordinatoreController extends BaseController {
     // legge dati
     $dati = $bac->dettagliAvviso($avviso);
     // visualizza pagina
-    return $this->render('coordinatore/scheda_avviso.html.twig', array(
-      'dati' => $dati,
-    ));
+    return $this->render('coordinatore/scheda_avviso.html.twig', [
+      'dati' => $dati]);
   }
 
   /**
@@ -852,13 +833,13 @@ class CoordinatoreController extends BaseController {
   public function avvisoDelete(LogHandler $dblogger, BachecaUtil $bac,
                                RegistroUtil $reg, int $classe, int $id): Response {
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -885,19 +866,19 @@ class CoordinatoreController extends BaseController {
       }
     }
     // cancella annotazioni
-    $log_annotazioni = array();
+    $log_annotazioni = [];
     foreach ($avviso->getAnnotazioni() as $a) {
       $log_annotazioni[] = $a->getId();
       $this->em->remove($a);
     }
     // cancella destinatari
-    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+    $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -911,7 +892,7 @@ class CoordinatoreController extends BaseController {
     // rimuove notifica
     NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
-    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
+    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', [
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
@@ -920,8 +901,7 @@ class CoordinatoreController extends BaseController {
       'Filtro' => $avviso->getFiltro(),
       'Classe' => $avviso->getCattedra()->getCLasse()->getId(),
       'Docente' => $avviso->getDocente()->getId(),
-      'Annotazioni' => implode(', ', $log_annotazioni),
-      ));
+      'Annotazioni' => implode(', ', $log_annotazioni)]);
     // redirezione
     return $this->redirectToRoute('coordinatore_avvisi');
   }
@@ -958,12 +938,12 @@ class CoordinatoreController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['alunno'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/alunno', 0);
     $criteri['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/inizio', null);
     $criteri['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/fine', null);
     $alunno = ($criteri['alunno'] > 0 ?
-      $this->em->getRepository('App\Entity\Alunno')->find($criteri['alunno']) : null);
+      $this->em->getRepository(\App\Entity\Alunno::class)->find($criteri['alunno']) : null);
     if ($criteri['inizio']) {
       $inizio = \DateTime::createFromFormat('Y-m-d', $criteri['inizio']);
     } else {
@@ -986,7 +966,7 @@ class CoordinatoreController extends BaseController {
     }
     if ($classe > 0) {
       // controllo classe
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1001,7 +981,7 @@ class CoordinatoreController extends BaseController {
         }
       }
       // form di ricerca
-      $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+      $opzioniAlunni = $this->em->getRepository(\App\Entity\Alunno::class)->opzioni(true, true,
         $classe->getId());
       $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'presenze',
         'values' => [$alunno, $opzioniAlunni, $inizio, $fine]]);
@@ -1019,7 +999,7 @@ class CoordinatoreController extends BaseController {
         $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
       }
       // lista fuori classe
-      $dati = $this->em->getRepository('App\Entity\Presenza')->fuoriClasse($classe, $criteri, $pagina);
+      $dati = $this->em->getRepository(\App\Entity\Presenza::class)->fuoriClasse($classe, $criteri, $pagina);
       // imposta informazioni
       $info['classe'] = $classe;
       $info['pagina'] = $pagina;
@@ -1058,14 +1038,14 @@ class CoordinatoreController extends BaseController {
     $dati = [];
     $info = [];
     // controlla presenza
-    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->find($id);
     if (!$presenza) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     $vecchiaPresenza = clone $presenza;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1089,7 +1069,7 @@ class CoordinatoreController extends BaseController {
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
-    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+    $opzioniAlunni = $this->em->getRepository(\App\Entity\Alunno::class)->opzioni(true, true,
       $classe->getId());
     $form = $this->createForm(PresenzaType::class, $presenza, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'edit',
@@ -1155,14 +1135,14 @@ class CoordinatoreController extends BaseController {
   public function presenzeDelete(RegistroUtil $reg, LogHandler $dblogger, int $id,
                                  int $classe): Response {
     // controlla presenza
-    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->find($id);
     if (!$presenza) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     $vecchiaPresenza = clone $presenza;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1220,7 +1200,7 @@ class CoordinatoreController extends BaseController {
     $dati = [];
     $info = [];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1238,7 +1218,7 @@ class CoordinatoreController extends BaseController {
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
     // form
-    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+    $opzioniAlunni = $this->em->getRepository(\App\Entity\Alunno::class)->opzioni(true, true,
       $classe->getId());
     $form = $this->createForm(PresenzaType::class, null, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'add',
@@ -1309,7 +1289,7 @@ class CoordinatoreController extends BaseController {
         // ok: memorizzazione e log
         foreach ($alunni as $alunno) {
           foreach ($listaDate as $data) {
-            if ($this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+            if ($this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['alunno' => $alunno,
                 'data' => $data])) {
               // salta fuori classe esistente
               continue;

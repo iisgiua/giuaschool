@@ -100,7 +100,7 @@ class CsvImporter {
       return null;
     }
     // lettura dati
-    $imported = array();
+    $imported = [];
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -117,8 +117,8 @@ class CsvImporter {
         return $imported;
       }
       // lettura campi
-      $fields = array();
-      $empty_fields = array();
+      $fields = [];
+      $empty_fields = [];
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
       }
@@ -146,7 +146,7 @@ class CsvImporter {
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        if (strpos($fields['nome'], ' ') !== false) {
+        if (str_contains($fields['nome'], ' ')) {
           $nomi = explode(' ', $fields['nome']);
           $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
         } else {
@@ -167,7 +167,7 @@ class CsvImporter {
           $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di docente
-      $docente = $this->em->getRepository('App\Entity\Docente')->findOneByUsername($fields['username']);
+      $docente = $this->em->getRepository(\App\Entity\Docente::class)->findOneByUsername($fields['username']);
       if ($docente) {
         // docente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -279,7 +279,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['usernameDocente']);
+      $lista = $this->em->getRepository(\App\Entity\Docente::class)->findByUsername($fields['usernameDocente']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -302,7 +302,7 @@ class CsvImporter {
         $classeGruppo = substr($classeSezione, $pos + 1);
         $classeSezione = substr($classeSezione, 0, $pos);
       }
-      $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
         ->where('c.anno=:anno AND c.sezione=:sezione AND '.
           ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
         ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -318,7 +318,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di materia
-      $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
+      $lista = $this->em->getRepository(\App\Entity\Materia::class)->findByNomeNormalizzato($fields['materia']);
       if (count($lista) != 1) {
         // errore: materia
         fclose($this->fh);
@@ -329,7 +329,7 @@ class CsvImporter {
       $materia = $lista[0];
       // controlla esistenza di alunno
       if (!empty($fields['usernameAlunno']) && $fields['usernameAlunno'] != '---') {
-        $lista = $this->em->getRepository('App\Entity\Alunno')->findByUsername($fields['usernameAlunno']);
+        $lista = $this->em->getRepository(\App\Entity\Alunno::class)->findByUsername($fields['usernameAlunno']);
       } elseif ($fields['usernameAlunno'] == '---') {
         // alunno da rimuovere
         $lista = null;
@@ -386,7 +386,7 @@ class CsvImporter {
         $empty_fields['usernameAlunno'] = true;
       }
       // controlla esistenza di cattedra
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['docente' => $docente,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['docente' => $docente,
         'classe' => $classe, 'materia' => $materia]);
       if ($cattedra) {
         // cattedra esiste

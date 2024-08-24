@@ -62,18 +62,18 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $bannerLogin = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
-    $bannerHome = $this->em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
+    $bannerLogin = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('banner_login', '');
+    $bannerHome = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('banner_home', '');
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'banner',
       'values' => [$bannerLogin, $bannerHome]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
-      $this->em->getRepository('App\Entity\Configurazione')->setParametro('banner_login',
-        $form->get('banner_login')->getData() ? $form->get('banner_login')->getData() : '');
-      $this->em->getRepository('App\Entity\Configurazione')->setParametro('banner_home',
-        $form->get('banner_home')->getData() ? $form->get('banner_home')->getData() : '');
+      $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('banner_login',
+        $form->get('banner_login')->getData() ?: '');
+      $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('banner_home',
+        $form->get('banner_home')->getData() ?: '');
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'banner', $dati, $info, [$form->createView(), 'message.banner']);
@@ -98,8 +98,8 @@ class SistemaController extends BaseController {
     // informazioni passate alla pagina
     $info['logLevel'] = $request->server->get('LOG_LEVEL');
     // legge parametri
-    $manutenzione_inizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio', null);
-    $manutenzione_fine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine', null);
+    $manutenzione_inizio = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_inizio', null);
+    $manutenzione_fine = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_fine', null);
     if (!$manutenzione_inizio) {
       // non è impostata una manutenzione
       $manutenzione = false;
@@ -137,8 +137,8 @@ class SistemaController extends BaseController {
         $param_fine = '';
       }
       // memorizza i parametri
-      $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $param_inizio);
-      $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $param_fine);
+      $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', $param_inizio);
+      $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', $param_fine);
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'manutenzione', $dati, $info, [$form->createView(), 'message.manutenzione']);
@@ -161,7 +161,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $parametri = $this->em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
+    $parametri = $this->em->getRepository(\App\Entity\Configurazione::class)->parametriConfigurazione();
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['form_mode' => 'parametri',
       'values' => [$parametri]]);
@@ -202,7 +202,7 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($username);
+      $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
@@ -228,11 +228,10 @@ class SistemaController extends BaseController {
           // memorizza password
           $this->em->flush();
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array(
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password', [
             'Username' => $user->getUsername(),
             'Ruolo' => $user->getRoles()[0],
-            'ID' => $user->getId()
-            ));
+            'ID' => $user->getId()]);
         }
       }
     }
@@ -265,7 +264,7 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($username);
+      $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
@@ -280,12 +279,11 @@ class SistemaController extends BaseController {
           ($user->getUltimoAccesso() ? $user->getUltimoAccesso()->format('d/m/Y H:i:s') : null));
         $this->reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', 'alias');
         // log azione
-        $dblogger->logAzione('ACCESSO', 'Alias', array(
+        $dblogger->logAzione('ACCESSO', 'Alias', [
           'Username' => $user->getUsername(),
-          'Ruolo' => $user->getRoles()[0],
-          ));
+          'Ruolo' => $user->getRoles()[0]]);
         // impersona l'alias e fa il redirect alla home
-        return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => $username));
+        return $this->redirectToRoute('login_home', ['reload' => 'yes', '_alias' => $username]);
       }
     }
     // mostra la pagina di risposta
@@ -304,13 +302,12 @@ class SistemaController extends BaseController {
    */
   public function aliasExit(LogHandler $dblogger): Response  {
     // log azione
-    $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
+    $dblogger->logAzione('ACCESSO', 'Alias Exit', [
       'Username' => $this->getUser()->getUserIdentifier(),
       'Ruolo' => $this->getUser()->getRoles()[0],
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
-      'ID reale' => $this->reqstack->getSession()->get('/APP/UTENTE/id_reale')
-      ));
+      'ID reale' => $this->reqstack->getSession()->get('/APP/UTENTE/id_reale')]);
     // ricarica dati in sessione
     $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', $this->reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso_reale'));
     $this->reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso_reale'));
@@ -322,7 +319,7 @@ class SistemaController extends BaseController {
     $this->reqstack->getSession()->remove('/APP/UTENTE/ruolo_reale');
     $this->reqstack->getSession()->remove('/APP/UTENTE/id_reale');
     // disconnette l'alias in uso e redirect alla home
-    return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => '_exit'));
+    return $this->redirectToRoute('login_home', ['reload' => 'yes', '_alias' => '_exit']);
   }
 
   /**
@@ -401,7 +398,7 @@ class SistemaController extends BaseController {
             $connection->executeStatement($sql);
           }
           // pulisce classi da coordinatori e segretari
-          $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+          $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
             ->update()
             ->set('c.coordinatore', ':nessuno')
             ->set('c.segretario', ':nessuno')
@@ -409,7 +406,7 @@ class SistemaController extends BaseController {
             ->getQuery()
             ->execute();
           // cancella dati annuali alunni
-          $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+          $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
             ->update()
             ->set('a.autorizzaEntrata', ':no')
             ->set('a.autorizzaUscita', ':no')
@@ -422,7 +419,7 @@ class SistemaController extends BaseController {
           break;
         case 2: // gestione esiti
           // scrutini finali
-          $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+          $scrutini = $this->em->getRepository(\App\Entity\Scrutinio::class)->createQueryBuilder('s')
             ->where('s.periodo=:finale')
             ->setParameters(['finale' => 'F'])
             ->getQuery()
@@ -430,9 +427,7 @@ class SistemaController extends BaseController {
           foreach ($scrutini as $scrutinio) {
             // non ammessi per assenze
             $noScrutinabili = array_keys(array_filter($scrutinio->getDato('no_scrutinabili') ?? [],
-              function($v) {
-                return empty($v['deroga']);
-              }));
+              fn($v) => empty($v['deroga'])));
             if (!empty($noScrutinabili)) {
               $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
                 "SELECT NOW(), NOW(), a.id, :classe, 'L', 'F', 0, 0, 0, 'a:0:{}' ".
@@ -542,9 +537,9 @@ class SistemaController extends BaseController {
           $connection->executeStatement($sql);
           // dati scrutini rinviati al nuovo A.S.
           $datiScrutinio = [];
-          $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
-            ->join('App\Entity\Esito', 'e', 'WITH', 'e.scrutinio=s.id')
-            ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=e.alunno')
+          $scrutini = $this->em->getRepository(\App\Entity\Scrutinio::class)->createQueryBuilder('s')
+            ->join(\App\Entity\Esito::class, 'e', 'WITH', 'e.scrutinio=s.id')
+            ->join(\App\Entity\StoricoEsito::class, 'se', 'WITH', 'se.alunno=e.alunno')
             ->where('s.periodo=:periodo AND se.periodo=:rinviato')
             ->setParameters(['periodo' => 'F', 'rinviato' => 'X'])
             ->getQuery()
@@ -552,9 +547,9 @@ class SistemaController extends BaseController {
           foreach ($scrutini as $scrutinio) {
             $dati = [];
             // dati materie
-            $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
+            $materie = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
               ->select('DISTINCT m.id,m.ordinamento')
-              ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
+              ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
               ->join('c.classe', 'cl')
               ->where("c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('m.ordinamento', 'ASC')
@@ -564,11 +559,11 @@ class SistemaController extends BaseController {
               ->getQuery()
               ->getArrayResult();
             $dati['materie'] = array_map(fn($m) => $m['id'], $materie);
-            $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+            $condotta = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('C');
             $dati['materie'][] = $condotta->getId();
             // dati alunni
-            $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-              ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+            $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+              ->join(\App\Entity\StoricoEsito::class, 'se', 'WITH', 'se.alunno=a.id')
               ->where('se.periodo=:rinviato AND a.classe=:classe')
               ->setParameters(['rinviato' => 'X', 'classe' => $scrutinio->getClasse()])
               ->getQuery()
@@ -580,7 +575,7 @@ class SistemaController extends BaseController {
               $dati['credito3'][$alunno->getId()] = $alunno->getCredito3();
               $dati['scrutinabili'][$alunno->getId()] = $scrutinio->getDato('scrutinabili')[$alunno->getId()];
               // voti e assenze alunno
-              $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+              $voti = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->createQueryBuilder('vs')
                 ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
                 ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno])
                 ->getQuery()
@@ -591,7 +586,7 @@ class SistemaController extends BaseController {
               }
             }
             // dati docenti
-            $docenti = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+            $docenti = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
               ->select('d.id,d.cognome,d.nome,d.sesso,c.tipo,m.id AS m_id')
               ->join('c.docente', 'd')
               ->join('c.materia', 'm')
@@ -627,7 +622,7 @@ class SistemaController extends BaseController {
           }
           // aggiunge scrutini rinviati
           foreach ($datiScrutinio as $dati) {
-            $classe = $this->em->getRepository('App\Entity\Classe')->find($dati['classe']);
+            $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($dati['classe']);
             $scrutinioRinviato = (new Scrutinio())
               ->setClasse($classe)
               ->setPeriodo('X')
@@ -664,8 +659,8 @@ class SistemaController extends BaseController {
           $finder->files()->in($path.'/tmp')->depth('== 0')->notName('.gitkeep');
           $fs->remove($finder);
           // elenco alunni in uscita
-          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-            ->leftJoin('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+          $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+            ->leftJoin(\App\Entity\StoricoEsito::class, 'se', 'WITH', 'se.alunno=a.id')
             ->where('a.abilitato=1 AND se.id IS NULL')
             ->getQuery()
             ->getResult();
@@ -698,7 +693,7 @@ class SistemaController extends BaseController {
           // crea nuova directory
           $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
           // legge circolari pubblicate prima del 1/9 e non già modificate
-          $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+          $circolari = $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data<:inizio AND c.documento NOT LIKE :modificato')
             ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
             'inizio' => $info['nuovoAnno'].'-09-01', 'modificato' => $info['vecchioAnno'].'/%'])
@@ -719,7 +714,7 @@ class SistemaController extends BaseController {
               $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$allegato);
             }
             // modifica path su db
-            $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+            $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
             ->update()
             ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
             ->set('c.allegati', ':allegati')
@@ -730,7 +725,7 @@ class SistemaController extends BaseController {
             ->execute();
           }
           // controlla presenza di circolari dal 1/9 in poi
-          $nuoveCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+          $nuoveCircolari = $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data>=:inizio')
             ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
               'inizio' => $info['nuovoAnno'].'-09-01'])
@@ -750,7 +745,7 @@ class SistemaController extends BaseController {
               $dati['sede'][] = ['circolare' => $circolare->getId(), 'sede' => $sede->getId()];
             }
             // conserva dati utenti per nuove circolari
-            $utenti = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+            $utenti = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
               ->select('(cu.circolare) AS circolare,(cu.utente) AS utente,cu.letta,cu.confermata')
               ->join('cu.utente', 'u')
               ->where('cu.circolare=:circolare AND u.abilitato=1')
@@ -792,7 +787,7 @@ class SistemaController extends BaseController {
           // crea nuova directory
           $fs->mkdir($path.'/upload/avvisi/'.$info['vecchioAnno'], 0770);
           // legge avvisi prima del 1/9 e non già modificati
-          $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+          $avvisi = $this->em->getRepository(\App\Entity\Avviso::class)->createQueryBuilder('a')
             ->where("a.anno=0 AND a.data<:inizio AND a.tipo IN ('C', 'A')")
             ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
             ->getQuery()
@@ -808,7 +803,7 @@ class SistemaController extends BaseController {
               $fs->rename($file, $path.'/upload/avvisi/'.$info['vecchioAnno'].'/'.$allegato);
             }
             // modifica path su db
-            $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            $this->em->getRepository(\App\Entity\Avviso::class)->createQueryBuilder('a')
               ->update()
               ->set('a.anno', ':anno')
               ->set('a.allegati', ':allegati')
@@ -819,7 +814,7 @@ class SistemaController extends BaseController {
               ->execute();
           }
           // controlla presenza di avvisi dal 1/9 (esclusi quelli su cattedre che sono azzerate)
-          $nuoviAvvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+          $nuoviAvvisi = $this->em->getRepository(\App\Entity\Avviso::class)->createQueryBuilder('a')
             ->where('a.data>=:inizio AND a.cattedra IS NULL')
             ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
             ->getQuery()
@@ -836,7 +831,7 @@ class SistemaController extends BaseController {
               $dati['sede'][] = ['avviso' => $avviso->getId(), 'sede' => $sede->getId()];
             }
             // conserva dati utenti per nuovi avvisi
-            $utenti = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+            $utenti = $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
               ->select('(au.avviso) AS avviso,(au.utente) AS utente,au.letto')
               ->join('au.utente', 'u')
               ->where('au.avviso=:avviso AND u.abilitato=1')
@@ -856,7 +851,7 @@ class SistemaController extends BaseController {
             $connection->executeStatement($sql);
           }
           // cancella vecchi avvisi
-          $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+          $this->em->getRepository(\App\Entity\Avviso::class)->createQueryBuilder('a')
             ->delete()
             ->where('(a.data<:data AND a.anno=0) OR (a.data>=:data AND a.cattedra IS NOT NULL)')
             ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
@@ -878,7 +873,7 @@ class SistemaController extends BaseController {
           $finder->files()->in($path.'/upload/avvisi')->depth('== 0')->notName($nuoviFile);
           $fs->remove($finder);
           // sostituisce docente disabilitato
-          $preside = $this->em->getRepository('App\Entity\Preside')->findOneBy([]);
+          $preside = $this->em->getRepository(\App\Entity\Preside::class)->findOneBy([]);
           $sql = "UPDATE gs_avviso a ".
             "INNER JOIN gs_utente d ON d.id = a.docente_id ".
             "SET a.docente_id = :preside ".
@@ -892,9 +887,9 @@ class SistemaController extends BaseController {
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
           // gestione documenti BES (alunni abilitati)
-          $documenti = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
+          $documenti = $this->em->getRepository(\App\Entity\Documento::class)->createQueryBuilder('d')
             ->join('d.alunno', 'a')
-            ->join('App\Entity\StoricoEsito', 'se', 'WITH', 'se.alunno = a.id')
+            ->join(\App\Entity\StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
             ->where('d.tipo IN (:tipi)')
             ->setParameters(['tipi' => ['B', 'D', 'H']])
             ->getQuery()
@@ -910,7 +905,7 @@ class SistemaController extends BaseController {
             $documento->getListaDestinatari()->setFiltroDocenti([0]);
             if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
               // sposta documento
-              $nomefile = md5(uniqid()).'-'.rand(1,1000);
+              $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
               $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
                 $path.'/upload/documenti/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
               $documento->getAllegati()[0]->setFile($nomefile);
@@ -941,7 +936,7 @@ class SistemaController extends BaseController {
             $connection->executeStatement($sql);
           }
           // sostituisce docente disabilitato
-          $preside = $this->em->getRepository('App\Entity\Preside')->findOneBy([]);
+          $preside = $this->em->getRepository(\App\Entity\Preside::class)->findOneBy([]);
           $sql = "UPDATE gs_documento doc ".
             "INNER JOIN gs_utente d ON d.id = doc.docente_id ".
             "SET doc.docente_id = :preside ".
@@ -1002,7 +997,7 @@ class SistemaController extends BaseController {
           $fs->remove($path.'/archivio/registri');
           $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
           // parametro nuovo anno
-          $this->em->getRepository('App\Entity\Configurazione')->setParametro('anno_scolastico',
+          $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('anno_scolastico',
             $info['nuovoAnno'].'/'.(1 + $info['nuovoAnno']));
           // cancella cache
           $commands = [
@@ -1054,8 +1049,8 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
-    $docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $docenti = $this->em->getRepository(\App\Entity\Docente::class)->createQueryBuilder('d')
+      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1068,8 +1063,8 @@ class SistemaController extends BaseController {
         $docente->getUsername().')';
       $listaDocenti[$nome] = $docente;
     }
-    $sostegno = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $sostegno = $this->em->getRepository(\App\Entity\Docente::class)->createQueryBuilder('d')
+      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
       ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1082,7 +1077,7 @@ class SistemaController extends BaseController {
         $docente->getUsername().')';
       $listaSostegno[$nome] = $docente;
     }
-    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $classi = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
       ->join('c.sede', 's')
       ->where("c.gruppo IS NULL OR c.gruppo=''")
       ->orderBy('s.ordinamento,c.anno,c.sezione,c.gruppo')
@@ -1094,7 +1089,7 @@ class SistemaController extends BaseController {
         ' - '.$classe->getSede()->getNomeBreve();
       $listaClassi[$nome] = $classe;
     }
-    $listaCircolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+    $listaCircolari = $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
       ->where('c.pubblicata=:si AND c.anno=:anno')
       ->orderBy('c.numero', 'ASC')
       ->setParameters(['si' => 1,
@@ -1345,7 +1340,7 @@ class SistemaController extends BaseController {
           // sono presenti messaggi
           $logfile = $dt.'_'.str_replace(':', '-', $tm).'.log';
           $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $logfile);
-          $response = new Response(implode($msgs));
+          $response = new Response(implode('', $msgs));
           $response->headers->set('Content-Type', 'text/plain');
           $response->headers->set('Content-Disposition', $disposition);
           // invia il file
@@ -1384,7 +1379,7 @@ class SistemaController extends BaseController {
     $envData = file($envPath);
     // modifica impostazione
     foreach ($envData as $row=>$text) {
-      if (substr($text, 0 , 9) == 'LOG_LEVEL') {
+      if (str_starts_with($text, 'LOG_LEVEL')) {
         // modifica valore
         $envData[$row] = "LOG_LEVEL='".$logLevel."'\n";
         break;
@@ -1454,8 +1449,8 @@ class SistemaController extends BaseController {
         preg_match('/^tag:\s*(.*)$/m', $pagina, $trovati);
         $nuovaBuild = $trovati[1] ?? '0';
         // controlla versione
-        $versione = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione', '0');
-        $build = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione_build', '0');
+        $versione = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('versione', '0');
+        $build = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('versione_build', '0');
         if (version_compare($nuovaVersione, $versione, '<')) {
           // sistema già aggiornato
           $info['tipo'] = 'info';
@@ -1549,7 +1544,7 @@ class SistemaController extends BaseController {
         $contenuto = 'token="'.$token.'"'."\n".
           'version="'.$nuovaVersione.'"'."\n".
           'build="'.$nuovaBuild.'"'."\n";
-        file_put_contents(dirname(dirname(__DIR__)).'/.gs-updating', $contenuto);
+        file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
         // reindirizza a pagina di installazione
         $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
           '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -1591,8 +1586,8 @@ class SistemaController extends BaseController {
     $dsn = parse_url($envData['MAILER_DSN'] ?? '');
     $info['server'] = (in_array($dsn['scheme'] ?? '', ['smtp', 'sendmail', 'gmail+smtp', 'php'], true) ?
       $dsn['scheme'] : '');
-    $info['user'] = (substr($info['server'], -4) == 'smtp') ? ($dsn['user'] ?? '') : '';
-    $info['password'] = (substr($info['server'], -4) == 'smtp') ? ($dsn['pass'] ?? '') : '';
+    $info['user'] = (str_ends_with($info['server'], 'smtp')) ? ($dsn['user'] ?? '') : '';
+    $info['password'] = (str_ends_with($info['server'], 'smtp')) ? ($dsn['pass'] ?? '') : '';
     $info['host'] = $info['server'] == 'smtp' ? ($dsn['host'] ?? '') : '';
     $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
     $info['email'] = '';
@@ -1613,10 +1608,10 @@ class SistemaController extends BaseController {
         if (!$server || !in_array($server, ['smtp', 'sendmail', 'gmail+smtp', 'php'], true)) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_server')));
         }
-        if (substr($server, -4) == 'smtp' && !$user) {
+        if (str_ends_with($server, 'smtp') && !$user) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_user')));
         }
-        if (substr($server, -4) == 'smtp' && !$password) {
+        if (str_ends_with($server, 'smtp') && !$password) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_password')));
         }
         if ($server == 'smtp' && !$host) {
@@ -1722,8 +1717,8 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge configurazione
-    $info['bot'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
-    $info['token'] = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_token');
+    $info['bot'] = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_bot');
+    $info['token'] = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
     // form
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'telegram', 'values' => [
       $info['bot'], $info['token']]]);
@@ -1746,14 +1741,14 @@ class SistemaController extends BaseController {
             ['errore' => $ris['error']])));
         } else {
           // memorizza dati
-          $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_bot', $bot);
-          $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_token', $token);
+          $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_bot', $bot);
+          $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_token', $token);
           // nuovo webhook
           $ris = $telegram->setWebhook();
           if (isset($ris['error'])) {
             // errore
-            $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_bot', '');
-            $this->em->getRepository('App\Entity\Configurazione')->setParametro('telegram_token', '');
+            $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_bot', '');
+            $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_token', '');
             $form->addError(new FormError($trans->trans('exception.telegram_webhook',
               ['errore' => $ris['error']])));
           } else {

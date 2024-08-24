@@ -38,34 +38,6 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   use AuthenticatorTrait;
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RouterInterface $router Gestore delle URL
-   */
-  private $router;
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private $dblogger;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private $config;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -77,13 +49,12 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger,
-                              LogHandler $dblogger, ConfigLoader $config) {
-    $this->router = $router;
-    $this->em = $em;
-    $this->logger = $logger;
-    $this->dblogger = $dblogger;
-    $this->config = $config;
+  public function __construct(
+      private RouterInterface $router,
+      private EntityManagerInterface $em,
+      private LoggerInterface $logger,
+      private LogHandler $dblogger,
+      private ConfigLoader $config) {
   }
 
   /**
@@ -125,7 +96,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function getUser(string $responseId): ?UserInterface {
     $user = null;
     // trova utente SPID
-    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $responseId, 'state' => 'A']);
+    $spid = $this->em->getRepository(\App\Entity\Spid::class)->findOneBy(['responseId' => $responseId, 'state' => 'A']);
     if (!$spid) {
       // errore nei dati identificativi della risposta
       $this->logger->error('Autenticazione Spid non valida per mancanza di dati.', ['responseId' => $responseId]);
@@ -135,7 +106,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
     $nome = $spid->getAttrName();
     $cognome = $spid->getAttrFamilyName();
     $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
-    $user = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+    $user = $this->em->getRepository(\App\Entity\Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
     if (empty($user)) {
       // utente non esiste nel registro
       $spid->setState('E');
@@ -181,11 +152,11 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
     }
     // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Login', array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', [
       'Login' => 'SPID',
       'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
-      'Lista profili' => $token->getUser()->getListaProfili()));
+      'Lista profili' => $token->getUser()->getListaProfili()]);
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

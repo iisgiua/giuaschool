@@ -39,39 +39,6 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
   use AuthenticatorTrait;
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RouterInterface $router Gestore delle URL
-   */
-  private $router;
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private $dblogger;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private $config;
-
-  /**
-   * @var ClientRegistry $clientRegistry Gestore dei client OAuth2
-   */
-  private $clientRegistry;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -84,14 +51,13 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param ClientRegistry $clientRegistry Gestore dei client OAuth2
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger,
-                              LogHandler $dblogger, ConfigLoader $config, ClientRegistry $clientRegistry) {
-    $this->router = $router;
-    $this->em = $em;
-    $this->logger = $logger;
-    $this->dblogger = $dblogger;
-    $this->config = $config;
-    $this->clientRegistry = $clientRegistry;
+  public function __construct(
+      private RouterInterface $router,
+      private EntityManagerInterface $em,
+      private LoggerInterface $logger,
+      private LogHandler $dblogger,
+      private ConfigLoader $config,
+      private ClientRegistry $clientRegistry) {
   }
 
   /**
@@ -142,7 +108,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // autenticato su Google: controlla se esiste nel registro
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $userGoogle->getEmail(),
+    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['email' => $userGoogle->getEmail(),
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste nel registro
@@ -153,8 +119,8 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione: id_provider
-    $idProvider = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider');
-    $idProviderTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider_tipo');
+    $idProvider = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider_tipo');
     if (!$idProvider || !$user->controllaRuolo($idProviderTipo)) {
       // errore: utente non abilitato deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite Google.',
@@ -190,11 +156,11 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
     }
     // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Login', array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', [
       'Login' => 'Google',
       'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
-      'Lista profili' => $token->getUser()->getListaProfili()));
+      'Lista profili' => $token->getUser()->getListaProfili()]);
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare
