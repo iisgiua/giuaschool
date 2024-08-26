@@ -26,7 +26,7 @@ class ScrutinioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Scrutinio';
+    $this->entity = \App\Entity\Scrutinio::class;
     // campi da testare
     $this->fields = ['periodo', 'data', 'inizio', 'fine', 'stato', 'classe', 'dati', 'visibile', 'sincronizzazione'];
     $this->noStoredFields = [];
@@ -74,7 +74,7 @@ class ScrutinioTest extends EntityTestCase {
           ($field == 'fine' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'classe' ? $this->getReference("classe_".($i + 1)."A") :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'visibile' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'sincronizzazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1)) :
           null)))))))));
@@ -177,7 +177,7 @@ class ScrutinioTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Stato - VALID CHOICE');
     // classe
     $temp = $existent->getClasse();
-    $property = $this->getPrivateProperty('App\Entity\Scrutinio', 'classe');
+    $property = $this->getPrivateProperty(\App\Entity\Scrutinio::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');

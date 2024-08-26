@@ -26,7 +26,7 @@ class FirmaSostegnoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\FirmaSostegno';
+    $this->entity = \App\Entity\FirmaSostegno::class;
     // campi da testare
     $this->fields = ['argomento', 'attivita', 'alunno', 'lezione', 'docente'];
     $this->noStoredFields = [];

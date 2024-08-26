@@ -26,7 +26,7 @@ class DocumentoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Documento';
+    $this->entity = \App\Entity\Documento::class;
     // campi da testare
     $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma'];
     $this->noStoredFields = ['allegati'];
@@ -136,7 +136,7 @@ class DocumentoTest extends EntityTestCase {
       'tipo' => $existent->getTipo(),
       'docente' => $existent->getDocente()->getId(),
       'listaDestinatari' => $existent->getListaDestinatari()->datiVersione(),
-      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $existent->getAllegati()->toArray()),
+      'allegati' => array_map(fn($ogg) => $ogg->datiVersione(), $existent->getAllegati()->toArray()),
       'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
       'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
       'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
@@ -146,7 +146,7 @@ class DocumentoTest extends EntityTestCase {
     $dt['tipo'] = 'P';
     $existent->setTipo('P');
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $materia = $this->em->getRepository('App\Entity\Materia')->find(1);
+    $materia = $this->em->getRepository(\App\Entity\Materia::class)->find(1);
     $existent->setMateria($materia);
     $dt['materia'] = $materia->getId();
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -169,7 +169,7 @@ class DocumentoTest extends EntityTestCase {
     $existent->setTipo('L');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'docente');
+    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
@@ -177,14 +177,14 @@ class DocumentoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // listaDestinatari
     $temp = $existent->getListaDestinatari();
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'listaDestinatari');
+    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
     $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // allegati
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'allegati');
+    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'allegati');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Allegati - NOT BLANK');

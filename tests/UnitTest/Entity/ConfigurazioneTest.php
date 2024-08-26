@@ -26,7 +26,7 @@ class ConfigurazioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Configurazione';
+    $this->entity = \App\Entity\Configurazione::class;
     // campi da testare
     $this->fields = ['categoria', 'parametro', 'descrizione', 'valore', 'gestito'];
     $this->noStoredFields = [];
@@ -125,7 +125,7 @@ class ConfigurazioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // categoria
-    $property = $this->getPrivateProperty('App\Entity\Configurazione', 'categoria');
+    $property = $this->getPrivateProperty(\App\Entity\Configurazione::class, 'categoria');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Categoria - NOT BLANK');
@@ -137,7 +137,7 @@ class ConfigurazioneTest extends EntityTestCase {
     $existent->setCategoria(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Categoria - VALID MAX LENGTH');
     // parametro
-    $property = $this->getPrivateProperty('App\Entity\Configurazione', 'parametro');
+    $property = $this->getPrivateProperty(\App\Entity\Configurazione::class, 'parametro');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Parametro - NOT BLANK');

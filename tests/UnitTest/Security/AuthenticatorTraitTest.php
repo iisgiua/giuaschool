@@ -85,8 +85,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $utente = $this->getReference('docente_curricolare_1');
     $inizio = (new \DateTime())->modify('-1 min');
     $fine = (new \DateTime())->modify('+1 min');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     try {
       $exception = null;
@@ -109,8 +109,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     // periodo nullo
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', '');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', '');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', '');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', '');
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
@@ -118,8 +118,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     // periodo trascorso
     $inizio = (new \DateTime())->modify('-1 hour');
     $fine = (new \DateTime())->modify('-1 min');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
@@ -127,8 +127,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     // periodo futuro
     $inizio = (new \DateTime())->modify('+1 min');
     $fine = (new \DateTime())->modify('+1 hour');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
@@ -137,8 +137,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $utente = $this->getReference('amministratore');
     $inizio = (new \DateTime())->modify('-1 hour');
     $fine = (new \DateTime())->modify('+1 hour');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla

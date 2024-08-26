@@ -26,7 +26,7 @@ class ScansioneOrariaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\ScansioneOraria';
+    $this->entity = \App\Entity\ScansioneOraria::class;
     // campi da testare
     $this->fields = ['giorno', 'ora', 'inizio', 'fine', 'durata', 'orario'];
     $this->noStoredFields = [];
@@ -132,7 +132,7 @@ class ScansioneOrariaTest extends EntityTestCase {
     $existent->setGiorno(0);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giorno - VALID CHOICE');
     // inizio
-    $property = $this->getPrivateProperty('App\Entity\ScansioneOraria', 'inizio');
+    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'inizio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
@@ -141,7 +141,7 @@ class ScansioneOrariaTest extends EntityTestCase {
     $existent->setInizio(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
     // fine
-    $property = $this->getPrivateProperty('App\Entity\ScansioneOraria', 'fine');
+    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'fine');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
@@ -150,7 +150,7 @@ class ScansioneOrariaTest extends EntityTestCase {
     $existent->setFine(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
     // orario
-    $property = $this->getPrivateProperty('App\Entity\ScansioneOraria', 'orario');
+    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'orario');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Orario - NOT BLANK');

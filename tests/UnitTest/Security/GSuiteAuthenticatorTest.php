@@ -120,7 +120,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(
@@ -143,12 +143,12 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->mockedGoogleUser = null;
     $this->mockedOAuth2Client = $this->createMock(OAuth2ClientInterface::class);
     $this->mockedOAuth2Client->method('getAccessToken')->willReturnCallback(
-      function() { return new AccessToken(['access_token' => 'ACCTOK']); });
+      fn() => new AccessToken(['access_token' => 'ACCTOK']));
     $this->mockedOAuth2Client->method('fetchUserFromToken')->with('ACCTOK')->willReturnCallback(
-      function() { return $this->mockedGoogleUser; });
+      fn() => $this->mockedGoogleUser);
     $this->mockedOAuth2 = $this->createMock(ClientRegistry::class);
     $this->mockedOAuth2->method('getClient')->with('gsuite')->willReturnCallback(
-      function() { return $this->mockedOAuth2Client; });
+      fn() => $this->mockedOAuth2Client);
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
@@ -233,8 +233,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // utente Google inesistente
     $this->mockedGoogleUser = null;
     try {
@@ -288,7 +288,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente->setAbilitato(true);
     $this->em->flush();
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', '');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', '');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -305,8 +305,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'AG');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'AG');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -323,8 +323,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');

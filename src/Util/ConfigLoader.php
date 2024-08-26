@@ -28,24 +28,6 @@ use App\Entity\Sede;
 class ConfigLoader {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private $reqstack;
-
-  /**
-   * @var Security $security Gestore dell'autenticazione degli utenti
-   */
-  private $security;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -55,11 +37,11 @@ class ConfigLoader {
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param Security $security Gestore dell'autenticazione degli utenti
    */
-  public function __construct(EntityManagerInterface $em, RequestStack $reqstack,
-                              Security $security) {
-    $this->em = $em;
-    $this->reqstack = $reqstack;
-    $this->security = $security;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private RequestStack $reqstack,
+      private Security $security)
+  {
   }
 
   /**
@@ -68,13 +50,13 @@ class ConfigLoader {
   public function carica() {
     // rimuove i dati esistenti
     foreach ($this->reqstack->getSession()->all() as $k => $v) {
-      if (substr($k, 0, 8) == '/CONFIG/' ||
-          (substr($k, 0, 5) == '/APP/' && substr($k, 0, 12) != '/APP/UTENTE/')) {
+      if (str_starts_with($k, '/CONFIG/') ||
+          (str_starts_with($k, '/APP/') && !str_starts_with($k, '/APP/UTENTE/'))) {
         $this->reqstack->getSession()->remove($k);
       }
     }
     // carica dati dall'entità Configurazione (/CONFIG/SISTEMA/*, /CONFIG/SCUOLA/*, /CONFIG/ACCESSO/*)
-    $list = $this->em->getRepository('App\Entity\Configurazione')->load();
+    $list = $this->em->getRepository(\App\Entity\Configurazione::class)->load();
     foreach ($list as $item) {
       $this->reqstack->getSession()->set('/CONFIG/'.$item['categoria'].'/'.$item['parametro'], $item['valore']);
     }
@@ -96,7 +78,7 @@ class ConfigLoader {
    */
   private function caricaIstituto() {
     // carica istituto
-    $istituto = $this->em->getRepository('App\Entity\Istituto')->findAll();
+    $istituto = $this->em->getRepository(\App\Entity\Istituto::class)->findAll();
     if (count($istituto) > 0) {
       $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/tipo', $istituto[0]->getTipo());
       $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/tipo_sigla', $istituto[0]->getTipoSigla());
@@ -113,7 +95,7 @@ class ConfigLoader {
       $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
     }
     // carica sedi
-    $sedi = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
+    $sedi = $this->em->getRepository(\App\Entity\Sede::class)->createQueryBuilder('s')
       ->select('s.nome,s.nomeBreve,s.citta,s.indirizzo1,s.indirizzo2,s.telefono')
       ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
@@ -136,9 +118,9 @@ class ConfigLoader {
     // legge utente connesso (null se utente non autenticato)
     $utente = $this->security->getUser();
     // legge menu esistenti
-    $lista_menu = $this->em->getRepository('App\Entity\Menu')->listaMenu();
+    $lista_menu = $this->em->getRepository(\App\Entity\Menu::class)->listaMenu();
     foreach ($lista_menu as $m) {
-      $menu = $this->em->getRepository('App\Entity\Menu')->menu($m['selettore'], $utente, $this->reqstack);
+      $menu = $this->em->getRepository(\App\Entity\Menu::class)->menu($m['selettore'], $utente);
       $this->reqstack->getSession()->set('/CONFIG/MENU/'.$m['selettore'], $menu);
     }
   }
@@ -151,7 +133,7 @@ class ConfigLoader {
     $utente = $this->security->getUser();
     if ($utente instanceOf Docente) {
       // dati coordinatore
-      $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+      $classi = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.coordinatore=:docente')
         ->setParameters(['docente' => $utente])

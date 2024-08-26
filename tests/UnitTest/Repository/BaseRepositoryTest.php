@@ -39,11 +39,11 @@ class BaseRepositoryTest extends DatabaseTestCase {
    */
   public function testPaginazione(): void {
     // init
-    $count = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+    $count = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
       ->select("COUNT(a.id)")
       ->getQuery()
       ->getSingleScalarResult();
-    $repository = $this->em->getRepository('App\Entity\Alunno');
+    $repository = $this->em->getRepository(\App\Entity\Alunno::class);
     $query = new Query($this->em);
     // pagina iniziale
     $query->setDQL("SELECT a FROM App\Entity\Alunno AS a");

@@ -26,7 +26,7 @@ class OrarioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Orario';
+    $this->entity = \App\Entity\Orario::class;
     // campi da testare
     $this->fields = ['nome', 'inizio', 'fine', 'sede'];
     $this->noStoredFields = [];
@@ -124,7 +124,7 @@ class OrarioTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\Orario', 'nome');
+    $property = $this->getPrivateProperty(\App\Entity\Orario::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -136,21 +136,21 @@ class OrarioTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // inizio
-    $property = $this->getPrivateProperty('App\Entity\Orario', 'inizio');
+    $property = $this->getPrivateProperty(\App\Entity\Orario::class, 'inizio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
     $existent->setInizio(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
     // fine
-    $property = $this->getPrivateProperty('App\Entity\Orario', 'fine');
+    $property = $this->getPrivateProperty(\App\Entity\Orario::class, 'fine');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
     $existent->setFine(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
     // sede
-    $property = $this->getPrivateProperty('App\Entity\Orario', 'sede');
+    $property = $this->getPrivateProperty(\App\Entity\Orario::class, 'sede');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');

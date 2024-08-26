@@ -26,7 +26,7 @@ class OrarioDocenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\OrarioDocente';
+    $this->entity = \App\Entity\OrarioDocente::class;
     // campi da testare
     $this->fields = ['orario', 'giorno', 'ora', 'cattedra'];
     $this->noStoredFields = [];
@@ -127,7 +127,7 @@ class OrarioDocenteTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // orario
-    $property = $this->getPrivateProperty('App\Entity\OrarioDocente', 'orario');
+    $property = $this->getPrivateProperty(\App\Entity\OrarioDocente::class, 'orario');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Orario - NOT BLANK');
@@ -140,7 +140,7 @@ class OrarioDocenteTest extends EntityTestCase {
     $existent->setGiorno(0);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giorno - VALID CHOICE');
     // cattedra
-    $property = $this->getPrivateProperty('App\Entity\OrarioDocente', 'cattedra');
+    $property = $this->getPrivateProperty(\App\Entity\OrarioDocente::class, 'cattedra');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cattedra - NOT BLANK');

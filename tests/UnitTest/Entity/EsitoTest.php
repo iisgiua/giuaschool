@@ -26,7 +26,7 @@ class EsitoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Esito';
+    $this->entity = \App\Entity\Esito::class;
     // campi da testare
     $this->fields = ['esito', 'media', 'credito', 'creditoPrecedente', 'dati', 'scrutinio', 'alunno'];
     $this->noStoredFields = [];
@@ -74,7 +74,7 @@ class EsitoTest extends EntityTestCase {
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :
           ($field == 'credito' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'creditoPrecedente' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'scrutinio' ? $this->getReference("scrutinio_P") :
           ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."B_1") :
           null)))))));
@@ -136,7 +136,7 @@ class EsitoTest extends EntityTestCase {
     $existent->setEsito('A');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Esito - VALID CHOICE');
     // scrutinio
-    $property = $this->getPrivateProperty('App\Entity\Esito', 'scrutinio');
+    $property = $this->getPrivateProperty(\App\Entity\Esito::class, 'scrutinio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Scrutinio - NOT BLANK');
@@ -144,7 +144,7 @@ class EsitoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Scrutinio - VALID NOT BLANK');
     // alunno
     $temp = $existent->getAlunno();
-    $property = $this->getPrivateProperty('App\Entity\Esito', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\Esito::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');

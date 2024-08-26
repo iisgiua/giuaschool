@@ -27,7 +27,7 @@ class ClasseTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Classe';
+    $this->entity = \App\Entity\Classe::class;
     // campi da testare
     $this->fields = ['anno', 'sezione', 'gruppo', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
     $this->noStoredFields = [];
@@ -138,7 +138,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setAnno(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Anno - VALID CHOICE');
     // sezione
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'sezione');
+    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'sezione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sezione - NOT BLANK');
@@ -150,7 +150,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setSezione(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sezione - VALID MAX LENGTH');
     // gruppo
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'gruppo');
+    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'gruppo');
     $property->setValue($existent, '');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');
     $existent->setGruppo(str_repeat('*', 65));
@@ -168,14 +168,14 @@ class ClasseTest extends EntityTestCase {
     $existent->setOreSettimanali(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::OreSettimanali - VALID POSITIVE');
     // sede
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'sede');
+    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'sede');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');
     $existent->setSede($this->getReference("sede_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sede - VALID NOT BLANK');
     // corso
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'corso');
+    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'corso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Corso - NOT BLANK');

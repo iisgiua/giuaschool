@@ -26,7 +26,7 @@ class UtenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Utente';
+    $this->entity = \App\Entity\Utente::class;
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
@@ -89,9 +89,9 @@ class UtenteTest extends EntityTestCase {
           ($field == 'citta' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 32)) :
           ($field == 'provincia' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2)) :
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
-          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -153,12 +153,12 @@ class UtenteTest extends EntityTestCase {
     $existent->eraseCredentials();
     $this->assertSame('', $existent->getPasswordNonCifrata(), $this->entity.'::eraseCredentials');
     // serialize
-    $this->assertSame(serialize(array($existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato())), $existent->serialize(), $this->entity.'::serialize');
+    $this->assertSame(serialize([$existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato()]), $existent->serialize(), $this->entity.'::serialize');
     // unserialize
     $s = $existent->serialize();
     $o = new \App\Entity\Utente();
     $o->unserialize($s);
-    $this->assertSame(serialize(array($o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato())), $o->serialize(), $this->entity.'::serialize');
+    $this->assertSame(serialize([$o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato()]), $o->serialize(), $this->entity.'::serialize');
     // getCodiceRuolo
     $this->assertSame('U', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo
@@ -218,14 +218,14 @@ class UtenteTest extends EntityTestCase {
     $existent->setUsername($this->faker->unique()->regexify('^[a-zA-Z][a-zA-Z0-9\._\-]+[a-zA-Z0-9]$'));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID REGEX');
     // password
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'password');
+    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'password');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Password - NOT BLANK');
     $existent->setPassword($this->faker->randomLetter());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Password - VALID NOT BLANK');
     // email
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'email');
+    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'email');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Email - NOT BLANK');
@@ -254,7 +254,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setUltimoAccesso(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UltimoAccesso - VALID NULL');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'nome');
+    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -266,7 +266,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // cognome
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'cognome');
+    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'cognome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cognome - NOT BLANK');

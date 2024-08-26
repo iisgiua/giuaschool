@@ -102,7 +102,7 @@ class Updater {
     $this->projectPath = dirname($path);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-    if (strpos($_SERVER['REQUEST_URI'], '/install/update.php') !== false) {
+    if (str_contains($_SERVER['REQUEST_URI'], '/install/update.php')) {
       // installazione aggiornamenti
       $this->urlPath = preg_replace('|/install/update\.php.*$|', '', $url);
     } else {
@@ -416,7 +416,7 @@ class Updater {
       foreach (glob($this->projectPath.'/src/Install/update-v*') as $file) {
         preg_match('|/update-v([^/]+$)|', $file, $matches);
         $newVersion = $matches[1];
-        if (substr($newVersion, -6) != '-build' &&
+        if (!str_ends_with($newVersion, '-build') &&
             version_compare($newVersion, $oldVersion, '>') &&
             version_compare($newVersion, $this->sys['version'], '<=')) {
           $updates[] = [$file, $newVersion];
@@ -502,7 +502,7 @@ class Updater {
     // estrae file
     for($i = 0; $i < $zip->numFiles; $i++) {
       $success = true;
-      if (substr($zip->getNameIndex($i), -1) != '/' ||
+      if (!str_ends_with($zip->getNameIndex($i), '/') ||
           !is_dir($this->projectPath.'/'.$zip->getNameIndex($i))) {
         if ($zip->getNameIndex($i) == '.htaccess') {
           // non sovrascrive le impostazioni del server
@@ -545,11 +545,11 @@ class Updater {
     foreach ($updates['fileCopy'] as $copy) {
       foreach (glob($this->projectPath.'/'.$copy[0], GLOB_MARK) as $file) {
         $dest = $this->projectPath.'/'.$copy[1];
-        if (substr($file, -1) == '/') {
+        if (str_ends_with($file, '/')) {
           // directory: non fa nulla
         } else {
           // file: copia
-          if (substr($dest, -1) == '/') {
+          if (str_ends_with($dest, '/')) {
             // directory di destinazione
             $dest .= basename($file);
           }
@@ -570,9 +570,9 @@ class Updater {
     $success = true;
     foreach ($updates['fileDelete'] as $delete) {
       foreach (glob($this->projectPath.'/'.$delete, GLOB_MARK) as $file) {
-        if (substr($file, -1) == '/') {
+        if (str_ends_with($file, '/')) {
           // rimuove directory
-          if (substr($file, -3) != '/./' && substr($file, -4) != '/../') {
+          if (!str_ends_with($file, '/./') && !str_ends_with($file, '/../')) {
             $success = rmdir($file);
           }
         } else {
@@ -624,7 +624,7 @@ class Updater {
             // modifica già eseguita
             $toDo = false;
           }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
           // errore dovuto a campi o tabelle mancanti: modifica da eseguire
         }
       }
@@ -632,7 +632,7 @@ class Updater {
         // esegue comando SQL
         try {
           $this->pdo->exec($sql);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
           throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database<br>'.
             '['.$sql.']', $step);
         }
@@ -1020,7 +1020,7 @@ class Updater {
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
     $sqlCommands = file($this->projectPath.'/src/Install/drop-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($sqlCommands as $sql) {
-      if (substr($sql, 0, 10) == 'DROP TABLE') {
+      if (str_starts_with($sql, 'DROP TABLE')) {
         // cancella tabella
         $this->pdo->exec('DROP TABLE IF EXISTS '.substr($sql, 11));
       }
@@ -1166,7 +1166,7 @@ class Updater {
         // errore
         throw new \Exception('Non è stato indicato l\'identificativo del service provider', $step);
       }
-      if (substr($spid['entityID'], 0, 7) != 'http://' && substr($spid['entityID'], 0, 8) != 'https://') {
+      if (!str_starts_with($spid['entityID'], 'http://') && !str_starts_with($spid['entityID'], 'https://')) {
         // errore
         throw new \Exception('L\'identificativo del service provider deve essere un indirizzo internet', $step);
       }
@@ -1200,7 +1200,7 @@ class Updater {
         // errore
         throw new \Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $step);
       }
-      if (substr($spid['spOrganizationURL'], 0, 7) != 'http://' && substr($spid['spOrganizationURL'], 0, 8) != 'https://') {
+      if (!str_starts_with($spid['spOrganizationURL'], 'http://') && !str_starts_with($spid['spOrganizationURL'], 'https://')) {
         // errore
         throw new \Exception('L\'indirizzo internet dell\'ente non è valido', $step);
       }
@@ -1214,7 +1214,7 @@ class Updater {
         // errore
         throw new \Exception('Non è stato indicato l\'indirizzo email dell\'ente', $step);
       }
-      if (strpos($spid['spOrganizationEmailAddress'], '@') === false) {
+      if (!str_contains($spid['spOrganizationEmailAddress'], '@')) {
         // errore
         throw new \Exception('L\'indirizzo email dell\'ente non è valido', $step);
       }
@@ -1223,13 +1223,13 @@ class Updater {
         // errore
         throw new \Exception('Non è stato indicato il numero di telefono dell\'ente', $step);
       }
-      if ($spid['spOrganizationTelephoneNumber'][0] != '+' && substr($spid['spOrganizationTelephoneNumber'], 0, 2) != '00') {
+      if ($spid['spOrganizationTelephoneNumber'][0] != '+' && !str_starts_with($spid['spOrganizationTelephoneNumber'], '00')) {
         // aggiunge prefisso internazionale
         $spid['spOrganizationTelephoneNumber'] = '+39'.$spid['spOrganizationTelephoneNumber'];
       }
       // imposta dominio service provider
       $spid['spDomain'] = parse_url($spid['entityID'], PHP_URL_HOST);
-      if (substr($spid['spDomain'], 0, 4) == 'www.') {
+      if (str_starts_with($spid['spDomain'], 'www.')) {
         $spid['spDomain'] = substr($spid['spDomain'], 4);
       }
       // imposta identificatore ente
@@ -1381,9 +1381,9 @@ class Updater {
       fclose($sslFile);
       // crea certificato
       $errors = '';
-      $sslParams = array(
+      $sslParams = [
         'config' => $spid['installDir'].'/spid-php-openssl.cnf',
-        'x509_extensions' => 'req_ext');
+        'x509_extensions' => 'req_ext'];
   	 	if (($sslPkey = openssl_pkey_new($sslParams)) === false) {
         // errore di creazione del certificato
         while (($e = openssl_error_string()) !== false) {
@@ -1438,7 +1438,7 @@ class Updater {
       $this->projectPath.'/var/log/'.$spid['serviceName']);
     // personalizza configurazione SAML
     $db = parse_url($this->env['DATABASE_URL']);
-    $vars = array(
+    $vars = [
       '{{BASEURLPATH}}' => "'".$spid['serviceName']."/'",
       '{{ADMIN_PASSWORD}}' => "'".$spid['adminPassword']."'",
       '{{SECRETSALT}}' => "'".$spid['secretsalt']."'",
@@ -1449,7 +1449,7 @@ class Updater {
       '{{SP_DOMAIN}}' => "'".$spid['spDomain']."'",
       '{{DB_DSN}}' => "'".$db['scheme'].':host='.$db['host'].';port='.$db['port'].';dbname='.substr($db['path'], 1)."'",
       '{{DB_USER}}' => "'".$db['user']."'",
-      '{{DB_PASW}}' => "'".$db['pass']."'");
+      '{{DB_PASW}}' => "'".$db['pass']."'"];
     $template = file_get_contents($spid['installDir'].'/setup/config/config.tpl');
     $customized = str_replace(array_keys($vars), $vars, $template);
     $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/config.php';
@@ -1458,7 +1458,7 @@ class Updater {
       throw new \Exception('Impossibile creare il file di configurazione SAML (config.php).', $step);
     }
     // personalizza configurazione SP
-    $vars = array(
+    $vars = [
       '{{ENTITYID}}' => "'".$spid['entityID']."'",
       '{{NAME}}' => "'".$spid['spName']."'",
       '{{DESCRIPTION}}' => "'".$spid['spDescription']."'",
@@ -1470,7 +1470,7 @@ class Updater {
       '{{ORGANIZATIONCODETYPE}}' => "'".$spid['spOrganizationCodeType']."'",
       '{{ORGANIZATIONCODE}}' => "'".$spid['spOrganizationCode']."'",
       '{{ORGANIZATIONEMAILADDRESS}}' => "'".$spid['spOrganizationEmailAddress']."'",
-      '{{ORGANIZATIONTELEPHONENUMBER}}' => "'".$spid['spOrganizationTelephoneNumber']."'");
+      '{{ORGANIZATIONTELEPHONENUMBER}}' => "'".$spid['spOrganizationTelephoneNumber']."'"];
     $template = file_get_contents($spid['installDir'].'/setup/config/authsources_public.tpl');
     $customized = str_replace(array_keys($vars), $vars, $template);
     $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/authsources.php';

@@ -83,12 +83,12 @@ class StaffController extends BaseController {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente');
     $search['destinatari'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/destinatari', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/pagina', 1);
@@ -98,29 +98,23 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi', FormType::class)
-      ->add('docente', EntityType::class, array('label' => 'label.autore',
+      ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => 'App\Entity\Staff',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
+        'class' => \App\Entity\Staff::class,
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=:abilitato')
-              ->orderBy('d.cognome,d.nome', 'ASC')
-              ->setParameters(['abilitato' => 1]);
-          },
+        'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
+            ->where('d.abilitato=:abilitato')
+            ->orderBy('d.cognome,d.nome', 'ASC')
+            ->setParameters(['abilitato' => 1]),
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari',
-        'data' => $search['destinatari'] ? $search['destinatari'] : '',
+        'required' => false])
+      ->add('destinatari', ChoiceType::class, ['label' => 'label.destinatari',
+        'data' => $search['destinatari'] ?: '',
         'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D',
           'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
           'label.rappresentanti_I' => 'I', 'label.rappresentanti_L' => 'L',
@@ -128,30 +122,26 @@ class StaffController extends BaseController {
           'label.dsga' => 'E', 'label.ata' => 'T', 'label.RSPP' => 'Z'],
         'placeholder' => 'label.tutti_destinatari',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'required' => false])
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'placeholder' => 'label.qualsiasi_classe',
         'choice_value' => 'id',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'choice_translation_domain' => false,
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['docente'] = (is_object($form->get('docente')->getData()) ? $form->get('docente')->getData()->getId() : 0);
-      $search['destinatari'] = ($form->get('destinatari')->getData() ? $form->get('destinatari')->getData() : '');
+      $search['destinatari'] = ($form->get('destinatari')->getData() ?: '');
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi/docente', $search['docente']);
@@ -162,15 +152,14 @@ class StaffController extends BaseController {
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'C');
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi.html.twig', array(
+    return $this->render('ruolo_staff/avvisi.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -197,14 +186,14 @@ class StaffController extends BaseController {
                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                              int $id): Response {
     // inizializza
-    $dati = array();
+    $dati = [];
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new Filesystem();
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'C']);
+      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'C']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -223,7 +212,7 @@ class StaffController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
     // legge allegati
-    $allegati = array();
+    $allegati = [];
     if ($request->isMethod('POST')) {
       // pagina inviata
       foreach ($this->reqstack->getSession()->get($var_sessione, []) as $f) {
@@ -255,28 +244,28 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
-    $opzioniMaterie = $this->em->getRepository('App\Entity\Materia')->opzioni(true, false);
+    $opzioniMaterie = $this->em->getRepository(\App\Entity\Materia::class)->opzioni(true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'generico',
       'return_url' => $this->generateUrl('staff_avvisi'),
       'values' => [(count($avviso->getAnnotazioni()) > 0), $opzioniSedi, $opzioniClassi,
-      $opzioniMaterie, $opzioniClassi]]);
+        $opzioniMaterie, $opzioniClassi]]);
     $form->handleRequest($request);
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'C') {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'M') {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository(\App\Entity\Materia::class)->listaMaterie($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // lista sedi
-      $sedi = array();
+      $sedi = [];
       foreach ($avviso->getSedi() as $s) {
         if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
           // sede corretta
@@ -305,11 +294,11 @@ class StaffController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.annotazione_con_file')));
       }
       // controlla filtro
-      $lista = array();
+      $lista = [];
       $errore = false;
       if ($avviso->getFiltroTipo() == 'C') {
         // controlla classi
-        $lista = $this->em->getRepository('App\Entity\Classe')
+        $lista = $this->em->getRepository(\App\Entity\Classe::class)
           ->controllaClassi($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -317,14 +306,14 @@ class StaffController extends BaseController {
         }
       } elseif ($avviso->getFiltroTipo() == 'M') {
         // controlla materie
-        $lista = $this->em->getRepository('App\Entity\Materia')->controllaMaterie($form->get('filtro')->getData(), $errore);
+        $lista = $this->em->getRepository(\App\Entity\Materia::class)->controllaMaterie($form->get('filtro')->getData(), $errore);
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
         }
       } elseif ($avviso->getFiltroTipo() == 'U') {
         // controlla utenti
-        $lista = $this->em->getRepository('App\Entity\Alunno')
+        $lista = $this->em->getRepository(\App\Entity\Alunno::class)
           ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -366,13 +355,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -384,18 +373,18 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
-        $log_annotazioni['delete'] = array();
+        $log_annotazioni['delete'] = [];
         if ($id) {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
@@ -419,21 +408,18 @@ class StaffController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso generico', array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso generico', [
             'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso generico', array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso generico', [
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Oggetto' => $avviso_old->getOggetto(),
             'Testo' => $avviso_old->getTesto(),
             'Allegati' => $avviso_old->getAllegati(),
-            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $avviso_sedi_old)),
             'Destinatari ATA' => $avviso_old->getDestinatariAta(),
             'Destinatari Speciali' => $avviso_old->getDestinatariSpeciali(),
             'Destinatari' => $avviso_old->getDestinatari(),
@@ -441,23 +427,19 @@ class StaffController extends BaseController {
             'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         }
         // redirezione
         return $this->redirectToRoute('staff_avvisi');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_edit.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso' : 'title.nuovo_avviso'),
       'allegati' => $allegati,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -478,7 +460,7 @@ class StaffController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -486,9 +468,8 @@ class StaffController extends BaseController {
     // legge dati
     $dati = $bac->dettagliAvviso($avviso);
     // visualizza pagina
-    return $this->render('ruolo_staff/scheda_avviso.html.twig', array(
-      'dati' => $dati,
-    ));
+    return $this->render('ruolo_staff/scheda_avviso.html.twig', [
+      'dati' => $dati]);
   }
 
   /**
@@ -513,7 +494,7 @@ class StaffController extends BaseController {
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new Filesystem();
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -531,19 +512,19 @@ class StaffController extends BaseController {
       }
     }
     // cancella annotazioni
-    $log_annotazioni = array();
+    $log_annotazioni = [];
     foreach ($avviso->getAnnotazioni() as $a) {
       $log_annotazioni[] = $a->getId();
       $this->em->remove($a);
     }
     // cancella destinatari
-    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+    $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -563,7 +544,7 @@ class StaffController extends BaseController {
     // rimuove notifica
     NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
-    $dblogger->logAzione('AVVISI', 'Cancella avviso', array(
+    $dblogger->logAzione('AVVISI', 'Cancella avviso', [
       'Id' => $avviso_id,
       'Tipo' => $avviso->getTipo(),
       'Data' => $avviso->getData()->format('d/m/Y'),
@@ -572,14 +553,13 @@ class StaffController extends BaseController {
       'Oggetto' => $avviso->getOggetto(),
       'Testo' => $avviso->getTesto(),
       'Allegati' => $avviso->getAllegati(),
-      'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi)),
+      'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $avviso_sedi)),
       'Destinatari ATA' => $avviso->getDestinatariAta(),
       'Destinatari' => $avviso->getDestinatari(),
       'Filtro Tipo' => $avviso->getFiltroTipo(),
       'Filtro' => $avviso->getFiltro(),
       'Docente' => $avviso->getDocente()->getId(),
-      'Annotazioni' => implode(', ', $log_annotazioni),
-      ));
+      'Annotazioni' => implode(', ', $log_annotazioni)]);
     // redirezione
     if ($tipo == 'U' || $tipo == 'E') {
       // orario
@@ -618,11 +598,11 @@ class StaffController extends BaseController {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', 1);
@@ -632,40 +612,32 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_orario', FormType::class)
-      ->add('docente', EntityType::class, array('label' => 'label.autore',
+      ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => 'App\Entity\Staff',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
+        'class' => \App\Entity\Staff::class,
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=:abilitato')
-              ->orderBy('d.cognome,d.nome', 'ASC')
-              ->setParameters(['abilitato' => 1]);
-          },
+        'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
+            ->where('d.abilitato=:abilitato')
+            ->orderBy('d.cognome,d.nome', 'ASC')
+            ->setParameters(['abilitato' => 1]),
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'required' => false])
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'choice_value' => 'id',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -680,7 +652,7 @@ class StaffController extends BaseController {
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), $tipo);
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_orario.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_orario.html.twig', [
       'pagina_titolo' => ($tipo == 'E' ? 'page.staff_avvisi_entrate' : 'page.staff_avvisi_uscite'),
       'form' => $form->createView(),
       'form_help' => null,
@@ -688,8 +660,7 @@ class StaffController extends BaseController {
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
       'dati' => $dati,
-      'tipo' => $tipo,
-    ));
+      'tipo' => $tipo]);
   }
 
   /**
@@ -720,7 +691,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => $tipo]);
+      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -731,7 +702,7 @@ class StaffController extends BaseController {
       // legge ora predefinita
       if ($tipo == 'E') {
         // inizio seconda ora di lunedì su orario di oggi
-        $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
@@ -743,7 +714,7 @@ class StaffController extends BaseController {
           ->getSingleScalarResult();
       } else {
         // inizio ultima ora di lunedì su orario di oggi
-        $ora_predefinita = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
@@ -778,9 +749,9 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'orario',
       'return_url' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
@@ -788,7 +759,7 @@ class StaffController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // lista sedi
-      $sedi = array();
+      $sedi = [];
       foreach ($avviso->getSedi() as $s) {
         if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
           // sede corretta
@@ -814,19 +785,19 @@ class StaffController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (strpos($form->get('testo')->getData(), '{DATA}') === false) {
+      if (!str_contains($form->get('testo')->getData(), '{DATA}')) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
-      if (strpos($form->get('testo')->getData(), '{ORA}') === false) {
+      if (!str_contains($form->get('testo')->getData(), '{ORA}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_mancante')));
       }
       // controlla filtro
       $errore = false;
-      $lista_classi = array_map(function ($o) { return $o->getId(); },
+      $lista_classi = array_map(fn($o) => $o->getId(),
         $form->get('classi')->getData());
-      $lista = $this->em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository(\App\Entity\Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -853,13 +824,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -871,18 +842,18 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
-        $log_annotazioni['delete'] = array();
+        $log_annotazioni['delete'] = [];
         if ($id) {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
@@ -904,27 +875,21 @@ class StaffController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), [
             'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), [
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Ora' => $avviso_old->getOra()->format('H:i'),
             'Testo' => $avviso_old->getTesto(),
-            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $avviso_sedi_old)),
             'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         }
         // redirezione
         return $this->redirectToRoute('staff_avvisi_orario', ['tipo' => $tipo]);
@@ -936,11 +901,10 @@ class StaffController extends BaseController {
     } else {
       $title = ($tipo == 'E' ? 'title.nuovo_avviso_entrate' : 'title.nuovo_avviso_uscite');
     }
-    return $this->render('ruolo_staff/avvisi_orario_edit.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_orario_edit.html.twig', [
       'pagina_titolo' => ($tipo == 'E' ? 'page.staff_avvisi_entrate' : 'page.staff_avvisi_uscite'),
       'form' => $form->createView(),
-      'form_title' => $title,
-    ));
+      'form_title' => $title]);
   }
 
   /**
@@ -963,11 +927,11 @@ class StaffController extends BaseController {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/pagina', 1);
@@ -977,40 +941,32 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni();
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_attivita', FormType::class)
-      ->add('docente', EntityType::class, array('label' => 'label.autore',
+      ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => 'App\Entity\Staff',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
+        'class' => \App\Entity\Staff::class,
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=:abilitato')
-              ->orderBy('d.cognome,d.nome', 'ASC')
-              ->setParameters(['abilitato' => 1]);
-          },
+        'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
+          ->where('d.abilitato=:abilitato')
+          ->orderBy('d.cognome,d.nome', 'ASC')
+          ->setParameters(['abilitato' => 1]),
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'required' => false])
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'choice_value' => 'id',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1025,15 +981,14 @@ class StaffController extends BaseController {
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'A');
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_attivita.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_attivita.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_attivita',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -1061,7 +1016,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'A']);
+      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'A']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1091,9 +1046,9 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'attivita',
       'return_url' => $this->generateUrl('staff_avvisi_attivita'),
@@ -1101,7 +1056,7 @@ class StaffController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       // lista sedi
-      $sedi = array();
+      $sedi = [];
       foreach ($avviso->getSedi() as $s) {
         if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
           // sede corretta
@@ -1127,23 +1082,23 @@ class StaffController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (strpos($form->get('testo')->getData(), '{DATA}') === false) {
+      if (!str_contains($form->get('testo')->getData(), '{DATA}')) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
-      if (strpos($form->get('testo')->getData(), '{INIZIO}') === false) {
+      if (!str_contains($form->get('testo')->getData(), '{INIZIO}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_inizio_mancante')));
       }
-      if (strpos($form->get('testo')->getData(), '{FINE}') === false) {
+      if (!str_contains($form->get('testo')->getData(), '{FINE}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_fine_mancante')));
       }
       // controlla filtro
       $errore = false;
-      $lista_classi = array_map(function ($o) { return $o->getId(); },
+      $lista_classi = array_map(fn($o) => $o->getId(),
         $form->get('classi')->getData());
-      $lista = $this->em->getRepository('App\Entity\Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository(\App\Entity\Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -1170,13 +1125,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1188,18 +1143,18 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
-        $log_annotazioni['delete'] = array();
+        $log_annotazioni['delete'] = [];
         if ($id) {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
@@ -1221,39 +1176,32 @@ class StaffController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso attività', array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso attività', [
             'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso attività', array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso attività', [
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Ora inizio' => $avviso_old->getOra()->format('H:i'),
             'Ora fine' => $avviso_old->getOraFine()->format('H:i'),
             'Testo' => $avviso_old->getTesto(),
-            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $avviso_sedi_old)),
             'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-            ));
+            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         }
         // redirezione
         return $this->redirectToRoute('staff_avvisi_attivita');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_attivita_edit.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_attivita_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_attivita',
       'form' => $form->createView(),
-      'form_title' => ($id > 0 ? 'title.modifica_avviso_attivita' : 'title.nuovo_avviso_attivita'),
-    ));
+      'form_title' => ($id > 0 ? 'title.modifica_avviso_attivita' : 'title.nuovo_avviso_attivita')]);
   }
 
   /**
@@ -1276,9 +1224,9 @@ class StaffController extends BaseController {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
@@ -1289,26 +1237,20 @@ class StaffController extends BaseController {
     // form di ricerca
     $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_individuali', FormType::class)
-      ->add('docente', EntityType::class, array('label' => 'label.autore',
+      ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => 'App\Entity\Staff',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
+        'class' => \App\Entity\Staff::class,
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d.abilitato=:abilitato')
-              ->orderBy('d.cognome,d.nome', 'ASC')
-              ->setParameters(['abilitato' => 1]);
-          },
+        'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
+          ->where('d.abilitato=:abilitato')
+          ->orderBy('d.cognome,d.nome', 'ASC')
+          ->setParameters(['abilitato' => 1]),
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1321,15 +1263,14 @@ class StaffController extends BaseController {
     // recupera dati
     $dati = $bac->listaAvvisi($search, $pagina, $limite, $this->getUser(), 'I');
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_individuali.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_individuali.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_individuali',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -1356,7 +1297,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'I']);
+      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'I']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1384,18 +1325,18 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'individuale',
       'return_url' => $this->generateUrl('staff_avvisi_individuali'),
       'values' => [$opzioniSedi, $opzioniClassi]]);
     $form->handleRequest($request);
-    $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     if ($form->isSubmitted()) {
       // lista sedi
-      $sedi = array();
+      $sedi = [];
       foreach ($avviso->getSedi() as $s) {
         if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
           // sede corretta
@@ -1415,7 +1356,7 @@ class StaffController extends BaseController {
       }
       // controlla filtro
       $errore = false;
-      $lista = $this->em->getRepository('App\Entity\Alunno')
+      $lista = $this->em->getRepository(\App\Entity\Alunno::class)
         ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
       if ($errore) {
         // utente non valido
@@ -1432,7 +1373,7 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1444,7 +1385,7 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
           $this->em->persist($obj);
         }
         // ok: memorizza dati
@@ -1458,30 +1399,27 @@ class StaffController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso individuale', array(
-            'Avviso' => $avviso->getId(),
-            ));
+          $dblogger->logAzione('AVVISI', 'Crea avviso individuale', [
+            'Avviso' => $avviso->getId()]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso individuale', array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso individuale', [
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
-            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $avviso_sedi_old)),
             'Filtro' => $avviso_old->getFiltro(),
-            'Docente' => $avviso_old->getDocente()->getId(),
-            ));
+            'Docente' => $avviso_old->getDocente()->getId()]);
         }
         // redirezione
         return $this->redirectToRoute('staff_avvisi_individuali');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_individuali_edit.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_individuali_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_individuali',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso_individuale' : 'title.nuovo_avviso_individuale'),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -1519,7 +1457,7 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
     }
     // crea lista anni
-    $listaAnni = $this->em->getRepository('App\Entity\Avviso')->anniScolastici();
+    $listaAnni = $this->em->getRepository(\App\Entity\Avviso::class)->anniScolastici();
     // crea lista mesi
     $listaMesi = [];
     for ($i = 9; $i <= 12; $i++) {
@@ -1529,64 +1467,56 @@ class StaffController extends BaseController {
       $listaMesi[$mesi[$i]] = $i;
     }
     // crea lista docenti autori di avvisi
-    $listaDocenti = $this->em->getRepository('App\Entity\Avviso')->autori();
+    $listaDocenti = $this->em->getRepository(\App\Entity\Avviso::class)->autori();
     // crea lista destinatari
-    $listaDestinatari = ['label.coordinatori' => 'C', 'label.docenti' => 'D',
+    $listaDestinatari = ['label.coordinatori' => 'C',	'label.docenti' => 'D',
       'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
       'label.rappresentanti_I' => 'I', 'label.rappresentanti_L' => 'L',
       'label.rappresentanti_S' => 'S', 'label.rappresentanti_P' => 'P',
       'label.dsga' => 'E', 'label.ata' => 'T', 'label.RSPP' => 'Z'];
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_archivio', FormType::class)
-      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+      ->add('anno', ChoiceType::class, ['label' => 'label.filtro_anno_scolastico',
         'data' => $cerca['anno'],
         'choices' => $listaAnni,
         'choice_translation_domain' => false,
         'placeholder' => 'label.qualsiasi_anno',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_anno_scolastico'],
-        'required' => false))
-      ->add('mese', ChoiceType::class, array('label' => 'label.filtro_mese',
+        'required' => false])
+      ->add('mese', ChoiceType::class, ['label' => 'label.filtro_mese',
         'data' => $cerca['mese'],
         'choices' => $listaMesi,
         'placeholder' => 'label.qualsiasi_mese',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_mese'],
-        'required' => false))
-      ->add('docente', ChoiceType::class, array('label' => 'label.filtro_autore',
+        'required' => false])
+      ->add('docente', ChoiceType::class, ['label' => 'label.filtro_autore',
         'data' => $cerca['docente'],
         'choices' => $listaDocenti,
         'placeholder' => 'label.qualsiasi_autore',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_autore'],
-        'required' => false))
-      ->add('destinatari', ChoiceType::class, array('label' => 'label.filtro_destinatario',
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+        'attr' => ['class' => 'gs-placeholder',  'title' => 'label.filtro_autore'],
+        'required' => false])
+      ->add('destinatari', ChoiceType::class, ['label' => 'label.filtro_destinatario',
         'data' => $cerca['destinatari'],
         'choices' => $listaDestinatari,
         'placeholder' => 'label.qualsiasi_destinatario',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_destinatario'],
-        'required' => false))
-      ->add('oggetto', TextType::class, array('label' => 'label.filtro_oggetto',
+        'required' => false])
+      ->add('oggetto', TextType::class, ['label' => 'label.filtro_oggetto',
         'data' => $cerca['oggetto'],
         'attr' => ['placeholder' => 'label.filtro_oggetto', 'class' => 'gs-placeholder', 'title' => 'label.filtro_oggetto',],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1594,7 +1524,7 @@ class StaffController extends BaseController {
       $cerca['anno'] = $form->get('anno')->getData();
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['docente'] = (int) $form->get('docente')->getData();
-      $cerca['destinatari'] = ($form->get('destinatari')->getData() ? $form->get('destinatari')->getData() : '');
+      $cerca['destinatari'] = ($form->get('destinatari')->getData() ?: '');
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/anno', $cerca['anno']);
@@ -1605,9 +1535,9 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Avviso')->listaArchivio($cerca, $pagina, $limite);
+    $dati = $this->em->getRepository(\App\Entity\Avviso::class)->listaArchivio($cerca, $pagina, $limite);
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/avvisi_archivio.html.twig', array(
+    return $this->render('ruolo_staff/avvisi_archivio.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_archivio',
       'form' => $form->createView(),
       'form_help' => null,
@@ -1615,8 +1545,7 @@ class StaffController extends BaseController {
       'page' => $pagina,
       'maxPages' => ceil($dati->count() / $limite),
       'dati' => $dati,
-      'mesi' => $mesi,
-    ));
+      'mesi' => $mesi]);
   }
 
   /**
@@ -1634,7 +1563,7 @@ class StaffController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function classeAjax(int $id): JsonResponse {
-    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->where('a.classe=:classe AND a.abilitato=:abilitato')
       ->setParameters(['classe' => $id, 'abilitato' => 1])
@@ -1696,13 +1625,13 @@ class StaffController extends BaseController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
     if ($pagina == 0) {
@@ -1716,29 +1645,29 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_autorizza', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_autorizza', ['data' => $data]))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => false])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'required' => false])
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'data' => $search['nome'],
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1760,14 +1689,14 @@ class StaffController extends BaseController {
     $errore = $reg->controlloData($data_obj, null);
     if (!$errore) {
       // non festivo: recupera dati
-      $lista = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+      $lista = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
       $max_pagine = ceil($lista->count() / $limite);
-      $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista);
+      $dati['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_autorizza.html.twig', array(
+    return $this->render('ruolo_staff/studenti_autorizza.html.twig', [
       'pagina_titolo' => 'page.staff_autorizza',
       'form' => $form->createView(),
       'form_help' => null,
@@ -1782,8 +1711,7 @@ class StaffController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -1809,15 +1737,15 @@ class StaffController extends BaseController {
                                            TranslatorInterface $trans, LogHandler $dblogger,
                                            string $data, int $classe, int $alunno): Response {
     // inizializza
-    $label = array();
+    $label = [];
     // controlla classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1832,7 +1760,7 @@ class StaffController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla entrata
-    $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
       // edit
       $entrata_old = clone $entrata;
@@ -1870,7 +1798,7 @@ class StaffController extends BaseController {
     $label['classe'] = ''.$classe;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->createForm(EntrataType::class, $entrata, array('form_mode' => 'staff'));
+    $form = $this->createForm(EntrataType::class, $entrata, ['form_mode' => 'staff']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
@@ -1898,7 +1826,7 @@ class StaffController extends BaseController {
               ->setValido(false);
           }
           // controlla se risulta assente
-          $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -1912,7 +1840,7 @@ class StaffController extends BaseController {
         // log azione
         if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // log cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella entrata', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella entrata', [
             'Entrata' => $id_entrata,
             'Alunno' => $entrata->getAlunno()->getId(),
             'Data' => $entrata->getData()->format('Y-m-d'),
@@ -1921,48 +1849,43 @@ class StaffController extends BaseController {
             'Valido' => $entrata->getValido(),
             'Giustificato' => ($entrata->getGiustificato() ? $entrata->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $entrata->getDocente()->getId(),
-            'DocenteGiustifica' => ($entrata->getDocenteGiustifica() ? $entrata->getDocenteGiustifica()->getId() : null)
-            ));
+            'DocenteGiustifica' => ($entrata->getDocenteGiustifica() ? $entrata->getDocenteGiustifica()->getId() : null)]);
         } elseif (isset($entrata_old)) {
           // log modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica entrata', array(
+          $dblogger->logAzione('ASSENZE', 'Modifica entrata', [
             'Entrata' => $entrata->getId(),
             'Ora' => $entrata_old->getOra()->format('H:i'),
             'Note' => $entrata_old->getNote(),
             'Valido' => $entrata_old->getValido(),
             'Giustificato' => ($entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $entrata_old->getDocente()->getId(),
-            'DocenteGiustifica' => ($entrata_old->getDocenteGiustifica() ? $entrata_old->getDocenteGiustifica()->getId() : null)
-            ));
+            'DocenteGiustifica' => ($entrata_old->getDocenteGiustifica() ? $entrata_old->getDocenteGiustifica()->getId() : null)]);
         } else {
           // log nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea entrata', array(
-            'Entrata' => $entrata->getId()
-            ));
+          $dblogger->logAzione('ASSENZE', 'Crea entrata', [
+            'Entrata' => $entrata->getId()]);
         }
         if (isset($id_assenza)) {
           // log cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
             'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)
-            ));
+            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
         }
         // redirezione
         return $this->redirectToRoute('staff_studenti_autorizza');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_autorizza_entrata.html.twig', array(
+    return $this->render('ruolo_staff/studenti_autorizza_entrata.html.twig', [
       'pagina_titolo' => 'page.staff_autorizza',
       'form' => $form->createView(),
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
-      'btn_delete' => isset($entrata_old),
-    ));
+      'btn_delete' => isset($entrata_old)]);
   }
 
   /**
@@ -1988,15 +1911,15 @@ class StaffController extends BaseController {
                                           TranslatorInterface $trans, LogHandler $dblogger,
                                           string $data, int $classe, int $alunno): Response {
     // inizializza
-    $label = array();
+    $label = [];
     // controlla classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -2011,7 +1934,7 @@ class StaffController extends BaseController {
     // controlla richiesta
     if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
       // gestione uscita con autorizzazione
-      $richiesta = $this->em->getRepository('App\Entity\Richiesta')
+      $richiesta = $this->em->getRepository(\App\Entity\Richiesta::class)
         ->richiestaAlunno('U', $alunno->getId(), $data_obj);
       if ($richiesta && (!in_array($richiesta->getStato(), ['I', 'G'], true) ||
           $richiesta->getDefinizioneRichiesta()->getUnica() ||
@@ -2026,7 +1949,7 @@ class StaffController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
-    $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
       // edit
       $uscita_old = clone $uscita;
@@ -2075,9 +1998,9 @@ class StaffController extends BaseController {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     $label['richiesta'] = $richiesta;
     // form di inserimento
-    $form = $this->createForm(UscitaType::class, $uscita, array(
+    $form = $this->createForm(UscitaType::class, $uscita, [
       'form_mode' => $richiesta ? 'richiesta' : 'staff',
-      'values' => [$chiediGiustificazione]));
+      'values' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
@@ -2094,7 +2017,7 @@ class StaffController extends BaseController {
           $this->em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -2118,53 +2041,48 @@ class StaffController extends BaseController {
         // log azione
         if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
             'Uscita' => $id_uscita,
             'Alunno' => $uscita->getAlunno()->getId(),
             'Data' => $uscita->getData()->format('Y-m-d'),
             'Ora' => $uscita->getOra()->format('H:i'),
             'Note' => $uscita->getNote(),
             'Valido' => $uscita->getValido(),
-            'Docente' => $uscita->getDocente()->getId()
-            ));
+            'Docente' => $uscita->getDocente()->getId()]);
         } elseif (isset($uscita_old)) {
           // modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica uscita', array(
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita', [
             'Uscita' => $uscita->getId(),
             'Ora' => $uscita_old->getOra()->format('H:i'),
             'Note' => $uscita_old->getNote(),
             'Valido' => $uscita_old->getValido(),
-            'Docente' => $uscita_old->getDocente()->getId()
-            ));
+            'Docente' => $uscita_old->getDocente()->getId()]);
         } else {
           // nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea uscita', array(
-            'Uscita' => $uscita->getId()
-            ));
+          $dblogger->logAzione('ASSENZE', 'Crea uscita', [
+            'Uscita' => $uscita->getId()]);
         }
         if (isset($id_assenza)) {
           // cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
             'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)
-            ));
+            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
         }
         // redirezione
         return $this->redirectToRoute('staff_studenti_autorizza');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_autorizza_uscita.html.twig', array(
+    return $this->render('ruolo_staff/studenti_autorizza_uscita.html.twig', [
       'pagina_titolo' => 'page.staff_autorizza',
       'form' => $form->createView(),
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
-      'btn_delete' => isset($uscita_old),
-    ));
+      'btn_delete' => isset($uscita_old)]);
   }
 
   /**
@@ -2183,11 +2101,11 @@ class StaffController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function studentiDeroghe(Request $request, int $pagina): Response {
-    $dati = array();
+    $dati = [];
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
     if ($pagina == 0) {
@@ -2201,29 +2119,29 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_deroghe', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_deroghe'))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => false])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'required' => false])
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'data' => $search['nome'],
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -2238,10 +2156,10 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_deroghe.html.twig', array(
+    return $this->render('ruolo_staff/studenti_deroghe.html.twig', [
       'pagina_titolo' => 'page.staff_deroghe',
       'form' => $form->createView(),
       'form_help' => null,
@@ -2249,8 +2167,7 @@ class StaffController extends BaseController {
       'lista' => $lista,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => ceil($lista['lista']->count() / $limite),
-    ));
+      'maxPages' => ceil($lista['lista']->count() / $limite)]);
   }
 
   /**
@@ -2272,7 +2189,7 @@ class StaffController extends BaseController {
     // inizializza
     $label = null;
     // controlla alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -2290,41 +2207,39 @@ class StaffController extends BaseController {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('deroga_edit', FormType::class, $alunno)
-      ->add('autorizzaEntrata', MessageType::class, array('label' => 'label.autorizza_entrata',
-        'required' => false))
-      ->add('autorizzaUscita', MessageType::class, array('label' => 'label.autorizza_uscita',
-        'required' => false))
-      ->add('note', MessageType::class, array('label' => 'label.note',
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('staff_studenti_deroghe')."'"]))
+      ->add('autorizzaEntrata', MessageType::class, ['label' => 'label.autorizza_entrata',
+	      'required' => false])
+      ->add('autorizzaUscita', MessageType::class, ['label' => 'label.autorizza_uscita',
+        'required' => false])
+      ->add('note', MessageType::class, ['label' => 'label.note',
+	      'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	      'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+	      'attr' => ['widget' => 'gs-button-end',
+          'onclick' => "location.href='".$this->generateUrl('staff_studenti_deroghe')."'"]])
       ->getForm();
     $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // ok: memorizza dati
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
           'Username' => $alunno->getUsername(),
           'Ruolo' => $alunno->getRoles()[0],
           'ID' => $alunno->getId(),
           'Autorizza entrata' => $alunno_old['autorizzaEntrata'],
           'Autorizza uscita' => $alunno_old['autorizzaUscita'],
-          'Note' => $alunno_old['note']
-          ));
+          'Note' => $alunno_old['note']]);
       // redirezione
       return $this->redirectToRoute('staff_studenti_deroghe');
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_deroghe_edit.html.twig', array(
+    return $this->render('ruolo_staff/studenti_deroghe_edit.html.twig', [
       'pagina_titolo' => 'title.deroghe',
       'form' => $form->createView(),
       'form_title' => 'title.deroghe',
-      'label' => $label,
-    ));
+      'label' => $label]);
   }
 
   /**
@@ -2343,11 +2258,11 @@ class StaffController extends BaseController {
    * @IsGranted("ROLE_STAFF")
    */
   public function studentiSituazione(Request $request, int $pagina): Response {
-    $dati = array();
+    $dati = [];
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
     if ($pagina == 0) {
@@ -2361,29 +2276,29 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_situazione', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_situazione'))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => false])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'required' => false])
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'data' => $search['nome'],
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -2398,18 +2313,18 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->cercaClasse($search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->cercaClasse($search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // aggiunge dati cambio classe
     $lista['cambio'] = [];
     foreach ($lista['lista'] as $alunno) {
-      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alunno]);
+      $cambio = $this->em->getRepository(\App\Entity\CambioClasse::class)->findOneBy(['alunno' => $alunno]);
       if ($cambio) {
         $lista['cambio'][$alunno->getId()] = $cambio;
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
+    return $this->render('ruolo_staff/studenti_situazione.html.twig', [
       'pagina_titolo' => 'page.staff_situazione',
       'form' => $form->createView(),
       'form_help' => null,
@@ -2417,8 +2332,7 @@ class StaffController extends BaseController {
       'lista' => $lista,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => ceil($lista['lista']->count() / $limite),
-    ));
+      'maxPages' => ceil($lista['lista']->count() / $limite)]);
   }
 
   /**
@@ -2443,11 +2357,11 @@ class StaffController extends BaseController {
                                      StaffUtil $staff, PdfManager $pdf, int $pagina): Response {
     // recupera criteri dalla sessione
     $creaPdf = false;
-    $search = array();
+    $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/docente', null);
     $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/inizio', null);
     $search['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/fine', null);
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) :
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) :
       ($search['docente'] < 0 ? -1 : null));
     $inizio = ($search['inizio'] ? \DateTime::createFromFormat('Y-m-d', $search['inizio']) : new \DateTime());
     $fine = ($search['fine'] ? \DateTime::createFromFormat('Y-m-d', $search['fine']) : new \DateTime());
@@ -2460,39 +2374,37 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $opzioniDocenti = $this->em->getRepository(\App\Entity\Docente::class)->opzioni();
     $opzioniDocenti[$trans->trans('label.tutti_docenti')] = -1;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_docenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_docenti_statistiche'))
-      ->add('docente', ChoiceType::class, array('label' => 'label.docente',
+      ->add('docente', ChoiceType::class, ['label' => 'label.docente',
         'data' => $docente,
         'choices' => $opzioniDocenti,
         'choice_value' => 'id',
         'placeholder' => 'label.scegli_docente',
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
         'choice_translation_domain' => false,
-        'required' => false))
-      ->add('inizio', DateType::class, array('label' => 'label.data_inizio',
+        'required' => false])
+      ->add('inizio', DateType::class, ['label' => 'label.data_inizio',
         'data' => $inizio,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
-        'required' => false))
-      ->add('fine', DateType::class, array('label' => 'label.data_fine',
+        'required' => false])
+      ->add('fine', DateType::class, ['label' => 'label.data_fine',
         'data' => $fine,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
-      ->add('print', SubmitType::class, array('label' => 'label.stampa',
-        'attr' => ['class' => 'btn-success']))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
+      ->add('print', SubmitType::class, ['label' => 'label.stampa',
+	      'attr' => ['class' => 'btn-success']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -2501,10 +2413,10 @@ class StaffController extends BaseController {
         ($form->get('docente')->getData() < 0 ? -1 : null));
       $search['inizio'] = ($form->get('inizio')->getData() ? $form->get('inizio')->getData()->format('Y-m-d') : 0);
       $search['fine'] = ($form->get('fine')->getData() ? $form->get('fine')->getData()->format('Y-m-d') : 0);
-      $docente = ($search['docente'] > 0 ? $this->em->getRepository('App\Entity\Docente')->find($search['docente']) :
+      $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) :
         ($search['docente'] < 0 ? -1 : null));
-      $inizio = ($form->get('inizio')->getData() ? $form->get('inizio')->getData() : new \DateTime());
-      $fine = ($form->get('fine')->getData() ? $form->get('fine')->getData() : new \DateTime());
+      $inizio = ($form->get('inizio')->getData() ?: new \DateTime());
+      $fine = ($form->get('fine')->getData() ?: new \DateTime());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/docente', $search['docente']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/inizio', $search['inizio']);
@@ -2520,13 +2432,12 @@ class StaffController extends BaseController {
         'Statistiche sulle ore di lezione dei docenti');
       $pdf->getHandler()->SetAutoPageBreak(true, 15);
       $pdf->getHandler()->SetFooterMargin(15);
-      $pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
-      $pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+      $pdf->getHandler()->setFooterFont(['helvetica', '', 9]);
+      $pdf->getHandler()->setFooterData([0, 0, 0], [255, 255, 255]);
       $pdf->getHandler()->setPrintFooter(true);
-      $html = $this->renderView('pdf/statistiche_docenti.html.twig', array(
+      $html = $this->renderView('pdf/statistiche_docenti.html.twig', [
         'lista' => $lista,
-        'search' => $search,
-        ));
+	      'search' => $search]);
       $pdf->createFromHtml($html);
       // invia il documento
       $nomefile = 'statistiche-docenti.pdf';
@@ -2534,13 +2445,12 @@ class StaffController extends BaseController {
     } else {
       // mostra la pagina di risposta
       $lista = $staff->statistiche($docente, $inizio, $fine, $pagina, $limite);
-      return $this->render('ruolo_staff/docenti_statistiche.html.twig', array(
+      return $this->render('ruolo_staff/docenti_statistiche.html.twig', [
         'pagina_titolo' => 'page.staff_statistiche',
         'form' => $form->createView(),
         'lista' => $lista,
         'page' => $pagina,
-        'maxPages' => ceil($lista->count() / $limite),
-      ));
+        'maxPages' => ceil($lista->count() / $limite)]);
     }
   }
 
@@ -2561,9 +2471,9 @@ class StaffController extends BaseController {
    */
   public function password(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
     if ($pagina == 0) {
@@ -2577,29 +2487,29 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_password', FormType::class)
       ->setAction($this->generateUrl('staff_password'))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => false])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'data' => $search['cognome'],
         'attr' => ['placeholder' => 'label.cognome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'required' => false])
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'data' => $search['nome'],
         'attr' => ['placeholder' => 'label.nome'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -2614,18 +2524,17 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository('App\Entity\Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/password.html.twig', array(
+    return $this->render('ruolo_staff/password.html.twig', [
       'pagina_titolo' => 'page.staff_password',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'lista' => $lista,
       'page' => $pagina,
-      'maxPages' => ceil($lista['lista']->count() / $limite),
-    ));
+      'maxPages' => ceil($lista['lista']->count() / $limite)]);
   }
 
   /**
@@ -2654,10 +2563,10 @@ class StaffController extends BaseController {
                                  PdfManager $pdf, MailerInterface $mailer, string $tipo,
                                  string $username = null): Response {
      // controlla alunno
-     $utente = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($username);
+     $utente = $this->em->getRepository(\App\Entity\Alunno::class)->findOneByUsername($username);
      if (!$utente) {
        // controlla genitore
-       $utente = $this->em->getRepository('App\Entity\Genitore')->findOneByUsername($username);
+       $utente = $this->em->getRepository(\App\Entity\Genitore::class)->findOneByUsername($username);
        if (!$utente) {
          // errore
          throw $this->createNotFoundException('exception.id_notfound');
@@ -2679,27 +2588,27 @@ class StaffController extends BaseController {
     // memorizza su db
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', [
       'Username' => $utente->getUsername(),
       'Ruolo' => $utente->getRoles()[0],
-      'ID' => $utente->getId()));
+      'ID' => $utente->getId()]);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     if ($utente instanceOf Alunno) {
-      $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', array(
+      $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', [
         'alunno' => $utente,
         'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
         'username' => $utente->getUsername(),
-        'password' => $password));
+        'password' => $password]);
     } else {
-      $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', array(
+      $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', [
         'alunno' => $utente->getAlunno(),
         'genitore' => $utente,
         'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
         'username' => $utente->getUsername(),
-        'password' => $password));
+        'password' => $password]);
     }
     $pdf->createFromHtml($html);
     if ($tipo == 'E') {
@@ -2718,11 +2627,11 @@ class StaffController extends BaseController {
         $this->addFlash('success', 'message.credenziali_inviate');
       } catch (\Exception $err) {
         // errore di spedizione
-        $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', array(
+        $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', [
           'username' => $utente->getUsername(),
           'email' => $utente->getEmail(),
           'ip' => $request->getClientIp(),
-          'errore' => $err->getMessage()));
+          'errore' => $err->getMessage()]);
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
       }
       // redirezione
@@ -2782,9 +2691,9 @@ class StaffController extends BaseController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
@@ -2794,24 +2703,24 @@ class StaffController extends BaseController {
       // classe non specificata
       $classe = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/classe', 0);
     }
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze', FormType::class)
       ->setMethod('GET')
       ->setAction($this->generateUrl('staff_studenti_assenze', ['data' => $data]))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.visualizza'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.visualizza'])
       ->getForm();
     $form->handleRequest($request);
     if ($classe) {
@@ -2821,41 +2730,36 @@ class StaffController extends BaseController {
         // elenco alunni
         $elenco = $reg->alunniInData($data_obj, $classe);
         // elenco assenze
-        $assenti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-          ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+        $assenti = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+          ->join(\App\Entity\Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->where('a.id IN (:elenco)')
           ->setParameters(['elenco' => $elenco, 'data' => $data_obj->format('Y-m-d')])
           ->getQuery()
           ->getResult();
         // form di inserimento
         $form_assenze = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze_appello', FormType::class)
-          ->add('alunni', EntityType::class, array('label' => 'label.alunni_assenti',
+          ->add('alunni', EntityType::class, ['label' => 'label.alunni_assenti',
             'data' => $assenti,
-            'class' => 'App\Entity\Alunno',
-            'choice_label' => function ($obj) {
-                return $obj->getCognome().' '.$obj->getNome().' ('.
-                  $obj->getDataNascita()->format('d/m/Y').')';
-              },
-            'query_builder' => function (EntityRepository $er) use ($elenco) {
-                return $er->createQueryBuilder('a')
-                  ->where('a.id IN (:elenco)')
-                  ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-                  ->setParameters(['elenco' => $elenco]);
-              },
+            'class' => \App\Entity\Alunno::class,
+            'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.
+              $obj->getDataNascita()->format('d/m/Y').')',
+            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
+              ->where('a.id IN (:elenco)')
+              ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+              ->setParameters(['elenco' => $elenco]),
             'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
             'expanded' => true,
             'multiple' => true,
-            'required' => false))
-          ->add('submit', SubmitType::class, array('label' => 'label.submit',
-            'attr' => ['class' => 'btn-primary'],
-            ))
+            'required' => false])
+          ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	          'attr' => ['class' => 'btn-primary']])
           ->getForm();
         $form_assenze->handleRequest($request);
         if ($form_assenze->isSubmitted() && $form_assenze->isValid()) {
-          $log['assenza_create'] = array();
-          $log['assenza_delete'] = array();
-          $log['entrata_delete'] = array();
-          $log['uscita_delete'] = array();
+          $log['assenza_create'] = [];
+          $log['assenza_delete'] = [];
+          $log['entrata_delete'] = [];
+          $log['uscita_delete'] = [];
           // aggiunge assenti
           $nuovi_assenti = array_diff($form_assenze->get('alunni')->getData(), $assenti);
           foreach ($nuovi_assenti as $alu) {
@@ -2867,14 +2771,14 @@ class StaffController extends BaseController {
             $this->em->persist($assenza);
             $log['assenza_create'][] = $assenza;
             // controlla esistenza ritardo
-            $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][$entrata->getId()] = $entrata;
               $this->em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][$uscita->getId()] = $uscita;
@@ -2884,7 +2788,7 @@ class StaffController extends BaseController {
           // cancella assenti
           $cancella_assenti = array_diff($assenti, $form_assenze->get('alunni')->getData());
           foreach ($cancella_assenti as $alu) {
-            $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][$assenza->getId()] = $assenza;
@@ -2898,40 +2802,32 @@ class StaffController extends BaseController {
             $reg->ricalcolaOreAlunno($data_obj, $alu);
           }
           // log azione
-          $dblogger->logAzione('ASSENZE', 'Gestione assenti', array(
+          $dblogger->logAzione('ASSENZE', 'Gestione assenti', [
             'Data' => $data,
-            'Assenze create' => implode(', ', array_map(function ($e) {
-                return $e->getId();
-              }, $log['assenza_create'])),
-            'Assenze cancellate' => implode(', ', array_map(function ($k,$e) {
-                return '[Assenza: '.$k.
-                  ', Alunno: '.$e->getAlunno()->getId().
-                  ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
-                  ', Docente: '.$e->getDocente()->getId().
-                  ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']';
-              }, array_keys($log['assenza_delete']), $log['assenza_delete'])),
-            'Entrate cancellate' => implode(', ', array_map(function ($k,$e) {
-                return '[Entrata: '.$k.
-                  ', Alunno: '.$e->getAlunno()->getId().
-                  ', Ora: '.$e->getOra()->format('H:i').
-                  ', Note: "'.$e->getNote().'"'.
-                  ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
-                  ', Docente: '.$e->getDocente()->getId().
-                  ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']';
-              }, array_keys($log['entrata_delete']), $log['entrata_delete'])),
-            'Uscite cancellate' => implode(', ', array_map(function ($k,$e) {
-                return '[Uscita: '.$k.
-                  ', Alunno: '.$e->getAlunno()->getId().
-                  ', Ora: '.$e->getOra()->format('H:i').
-                  ', Note: "'.$e->getNote().'"'.
-                  ', Docente: '.$e->getDocente()->getId();
-              }, array_keys($log['uscita_delete']), $log['uscita_delete']))
-            ));
+            'Assenze create' => implode(', ', array_map(fn($e) => $e->getId(), $log['assenza_create'])),
+            'Assenze cancellate' => implode(', ', array_map(fn($k, $e) => '[Assenza: '.$k.
+              ', Alunno: '.$e->getAlunno()->getId().
+              ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
+              ', Docente: '.$e->getDocente()->getId().
+              ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']', array_keys($log['assenza_delete']), $log['assenza_delete'])),
+            'Entrate cancellate' => implode(', ', array_map(fn($k, $e) => '[Entrata: '.$k.
+              ', Alunno: '.$e->getAlunno()->getId().
+              ', Ora: '.$e->getOra()->format('H:i').
+              ', Note: "'.$e->getNote().'"'.
+              ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
+              ', Docente: '.$e->getDocente()->getId().
+              ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']',
+              array_keys($log['entrata_delete']), $log['entrata_delete'])),
+            'Uscite cancellate' => implode(', ', array_map(fn($k, $e) => '[Uscita: '.$k.
+              ', Alunno: '.$e->getAlunno()->getId().
+              ', Ora: '.$e->getOra()->format('H:i').
+              ', Note: "'.$e->getNote().'"'.
+              ', Docente: '.$e->getDocente()->getId(), array_keys($log['uscita_delete']), $log['uscita_delete']))]);
         }
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_assenze.html.twig', array(
+    return $this->render('ruolo_staff/studenti_assenze.html.twig', [
       'pagina_titolo' => 'page.staff_assenze',
       'form' => $form->createView(),
       'form_help' => null,
@@ -2943,8 +2839,7 @@ class StaffController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'form_assenze' => ($form_assenze ? $form_assenze->createView() : null),
-    ));
+      'form_assenze' => ($form_assenze ? $form_assenze->createView() : null)]);
   }
 
   /**
@@ -2994,51 +2889,51 @@ class StaffController extends BaseController {
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
     $errore = $reg->controlloData($data_obj, null);
     // recupera criteri dalla sessione
-    $search = array();
+    $search = [];
     $search['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede');
-    $sede = ($search['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository(\App\Entity\Sede::class)->find($search['sede']) : null);
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
     // legge sede
     $sede_staff = $this->getUser()->getSede();
     // form di ricerca
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_statistiche', ['data' => $data_obj->format('Y-m-d')]))
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+      ->add('sede', ChoiceType::class, ['label' => 'label.sede',
         'data' => $sede,
         'choices' => $opzioniSedi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_sede',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'required' => false])
+      ->add('classe', ChoiceType::class, ['label' => 'label.classe',
         'data' => $classe,
         'choices' => $opzioniClassi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_classe',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.visualizza'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.visualizza'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid() && !$errore) {
@@ -3051,7 +2946,7 @@ class StaffController extends BaseController {
       $dati = $staff->statisticheAlunni($data_obj, $search);
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_statistiche.html.twig', array(
+    return $this->render('ruolo_staff/studenti_statistiche.html.twig', [
       'pagina_titolo' => 'page.staff_statistiche',
       'form' => $form->createView(),
       'form_help' => null,
@@ -3062,8 +2957,7 @@ class StaffController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -3088,7 +2982,7 @@ class StaffController extends BaseController {
     $search = [];
     // recupera criteri dalla sessione
     $search['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/sede');
-    $sede = ($search['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository(\App\Entity\Sede::class)->find($search['sede']) : null);
     $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/inizio',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
     $inizio = \DateTime::createFromFormat('Y-m-d', $search['inizio']);
@@ -3108,35 +3002,35 @@ class StaffController extends BaseController {
     if ($sedeStaff) {
       $opzioniSedi[$sedeStaff->getNomeBreve()] = $sedeStaff;
     } else {
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
     }
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_condotta', FormType::class)
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+      ->add('sede', ChoiceType::class, ['label' => 'label.sede',
         'data' => $sede,
         'choices' => $opzioniSedi,
         'choice_value' => 'id',
         'placeholder' => 'label.qualsiasi_sede',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('inizio', DateType::class, array('label' => false,
+        'required' => false])
+      ->add('inizio', DateType::class, ['label' => false,
         'data' => $inizio,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker', 'title' => 'label.data_inizio'],
         'format' => 'dd/MM/yyyy',
-        'required' => false))
-      ->add('fine', DateType::class, array('label' => false,
+        'required' => false])
+      ->add('fine', DateType::class, ['label' => false,
         'data' => $fine,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker', 'title' => 'label.data_fine'],
         'format' => 'dd/MM/yyyy',
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.visualizza'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.visualizza'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -3151,7 +3045,7 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Nota')->statisticaCondotta($search, $pagina);
+    $dati = $this->em->getRepository(\App\Entity\Nota::class)->statisticaCondotta($search, $pagina);
     $info['pagina'] = $pagina;
     $info['inizio'] = $search['inizio'];
     $info['fine'] = $search['fine'];
@@ -3176,12 +3070,12 @@ class StaffController extends BaseController {
     $dati = [];
     $info = [];
     // criteri di ricerca
-    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_cdc/classe', 0));
     $classeId = $classe ? $classe->getId() : 0;
     // form di ricerca
     $sede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : 0;
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni($sede, false);
+    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni($sede, false);
     foreach ($opzioniClassi as $sede => $lista) {
       $prec = null;
       $precKey = null;
@@ -3208,16 +3102,15 @@ class StaffController extends BaseController {
       // informazioni
       $info['classe'] = $classe;
       // recupera dati
-      $dati = $this->em->getRepository('App\Entity\Cattedra')->cattedreClasse($classe);
+      $dati = $this->em->getRepository(\App\Entity\Cattedra::class)->cattedreClasse($classe);
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/docenti_cdc.html.twig', array(
+    return $this->render('ruolo_staff/docenti_cdc.html.twig', [
       'pagina_titolo' => 'page.staff.cdc',
       'titolo' => 'title.staff.cdc',
       'form' => [$form->createView()],
       'dati' => $dati,
-      'info' => $info,
-    ));
+      'info' => $info]);
   }
 
 }

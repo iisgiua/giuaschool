@@ -26,7 +26,7 @@ class MenuTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Menu';
+    $this->entity = \App\Entity\Menu::class;
     // campi da testare
     $this->fields = ['selettore', 'nome', 'descrizione', 'mega'];
     $this->noStoredFields = ['opzioni'];
@@ -143,7 +143,7 @@ class MenuTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // selettore
-    $property = $this->getPrivateProperty('App\Entity\Menu', 'selettore');
+    $property = $this->getPrivateProperty(\App\Entity\Menu::class, 'selettore');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Selettore - NOT BLANK');

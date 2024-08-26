@@ -26,7 +26,7 @@ class SedeTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Sede';
+    $this->entity = \App\Entity\Sede::class;
     // campi da testare
     $this->fields = ['nome', 'nomeBreve', 'citta', 'indirizzo1', 'indirizzo2', 'telefono', 'ordinamento'];
     $this->noStoredFields = [];
@@ -127,7 +127,7 @@ class SedeTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'nome');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -139,7 +139,7 @@ class SedeTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // nomeBreve
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'nomeBreve');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'nomeBreve');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
@@ -151,7 +151,7 @@ class SedeTest extends EntityTestCase {
     $existent->setNomeBreve(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::NomeBreve - VALID MAX LENGTH');
     // citta
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'citta');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'citta');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Citta - NOT BLANK');
@@ -163,7 +163,7 @@ class SedeTest extends EntityTestCase {
     $existent->setCitta(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Citta - VALID MAX LENGTH');
     // indirizzo1
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'indirizzo1');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'indirizzo1');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Indirizzo1 - NOT BLANK');
@@ -175,7 +175,7 @@ class SedeTest extends EntityTestCase {
     $existent->setIndirizzo1(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Indirizzo1 - VALID MAX LENGTH');
     // indirizzo2
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'indirizzo2');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'indirizzo2');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Indirizzo2 - NOT BLANK');
@@ -187,12 +187,12 @@ class SedeTest extends EntityTestCase {
     $existent->setIndirizzo2(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Indirizzo2 - VALID MAX LENGTH');
     // telefono
-    $property = $this->getPrivateProperty('App\Entity\Sede', 'telefono');
+    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'telefono');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Telefono - NOT BLANK');
     $existent->setTelefono($this->faker->regexify('/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/'));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Telefono - VALID NOT BLANK');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Telefono - VALID NOT BLANK ['.$err[0]->getMessageTemplate().']');
     $existent->setTelefono(str_repeat('1', 33));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Telefono - MAX LENGTH');

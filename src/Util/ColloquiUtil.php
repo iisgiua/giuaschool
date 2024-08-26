@@ -27,29 +27,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ColloquiUtil {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private RequestStack $reqstack;
-
-  /**
-   * @var TranslatorInterface $trans Gestore delle traduzioni
-   */
-  private TranslatorInterface $trans;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private LogHandler $dblogger;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -60,12 +37,12 @@ class ColloquiUtil {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    */
-  public function __construct(EntityManagerInterface $em, RequestStack $reqstack, TranslatorInterface $trans,
-                              LogHandler $dblogger) {
-    $this->em = $em;
-    $this->reqstack = $reqstack;
-    $this->trans = $trans;
-    $this->dblogger = $dblogger;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private RequestStack $reqstack,
+      private TranslatorInterface $trans,
+      private LogHandler $dblogger)
+  {
   }
 
   /**
@@ -103,7 +80,7 @@ class ColloquiUtil {
     $successivo = 'next '.$week[$giorno];
     for ($giorno = (new \DateTime('today'))->modify($successivo); $giorno <= $dataFine; $giorno->modify($successivo)) {
       if (in_array($giorno->format('n'), $mesiBloccati, true) ||
-          $this->em->getRepository('App\Entity\Festivita')->giornoFestivo($giorno)) {
+          $this->em->getRepository(\App\Entity\Festivita::class)->giornoFestivo($giorno)) {
         // salta data
         continue;
       }
@@ -124,7 +101,7 @@ class ColloquiUtil {
           while (isset($val[$i]) && $val[$i]->format('j') <= 7) {
             $i++;
           }
-          $date[$mese][] = isset($val[$i]) ? $val[$i] : $val[$i - 1];
+          $date[$mese][] = $val[$i] ?? $val[$i - 1];
         }
         break;
       case '3': // terza settimana
@@ -133,7 +110,7 @@ class ColloquiUtil {
           while (isset($val[$i]) && $val[$i]->format('j') <= 14) {
             $i++;
           }
-          $date[$mese][] = isset($val[$i]) ? $val[$i] : $val[$i - 1];
+          $date[$mese][] = $val[$i] ?? $val[$i - 1];
         }
         break;
       case '4': // ultima settimana
@@ -159,7 +136,7 @@ class ColloquiUtil {
         $colloquio->setNumero($this->numeroColloqui($colloquio));
         $this->em->persist($colloquio);
         // controlla se esite già
-        if ($this->em->getRepository('App\Entity\Colloquio')->sovrapposizione($docente, $data,
+        if ($this->em->getRepository(\App\Entity\Colloquio::class)->sovrapposizione($docente, $data,
             $inizio, $fine)) {
           // avviso: sovrapposizione
           $this->em->remove($colloquio);
@@ -204,7 +181,7 @@ class ColloquiUtil {
     $dati = [];
     $dati['docenti'] = [];
     // legge cattedre
-    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
@@ -225,7 +202,7 @@ class ColloquiUtil {
         $cattedra->getMateria()->getNome();
     }
     // legge richieste
-    $dati['richieste'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->richiesteAlunno($alunno,
+    $dati['richieste'] = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->richiesteAlunno($alunno,
       $genitore);
     // restituisce dati
     return $dati;
@@ -242,7 +219,7 @@ class ColloquiUtil {
     // legge date valide di ricevimento
     $inizio = new \DateTime('tomorrow');
     $fine = (clone $inizio)->modify('last day of next month');
-    $ricevimenti = $this->em->getRepository('App\Entity\Colloquio')->ricevimenti($docente, $inizio, $fine, true);
+    $ricevimenti = $this->em->getRepository(\App\Entity\Colloquio::class)->ricevimenti($docente, $inizio, $fine, true);
     $dati['validi'] = [];
     $dati['esauriti'] = [];
     foreach ($ricevimenti as $ricevimento) {
@@ -254,7 +231,7 @@ class ColloquiUtil {
     }
     // legge date prossimi ricevimenti
     $fine->modify('+1 day');
-    $dati['prossimi'] = $this->em->getRepository('App\Entity\Colloquio')->ricevimenti($docente, $fine, null, true);
+    $dati['prossimi'] = $this->em->getRepository(\App\Entity\Colloquio::class)->ricevimenti($docente, $fine, null, true);
     // crea lista per form
     $dati['lista'] = [];
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);

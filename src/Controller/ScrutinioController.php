@@ -66,14 +66,14 @@ class ScrutinioController extends BaseController {
     $listaPeriodi = null;
     $form = null;
     $formTitle = null;
-    $elenco = array();
-    $elenco['alunni'] = array();
+    $elenco = [];
+    $elenco['alunni'] = [];
     $title['N'] = in_array($periodo, ['P', 'S', 'F']) ? 'message.proposte' : 'message.proposte_sospesi';
     $title['E'] = $title['N'];
     $title['R'] = 'message.proposte_religione';
-    $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
+    $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -105,7 +105,7 @@ class ScrutinioController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -125,7 +125,7 @@ class ScrutinioController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -154,7 +154,7 @@ class ScrutinioController extends BaseController {
           $opzioni = ['label' => false,
             'data' => $elenco['proposte'],
             'entry_type' => PropostaVotoType::class,
-            'entry_options' => array('label' => false)];
+            'entry_options' => ['label' => false]];
           $formTitle = $title[$cattedra->getMateria()->getTipo()];
           if ($cattedra->getMateria()->getTipo() == 'R' || in_array($periodo, ['G', 'R', 'X'])) {
             // nessun recupero
@@ -171,22 +171,22 @@ class ScrutinioController extends BaseController {
               'cattedra' => $cattedra->getId(), 'classe' => $classe->getId(),
               'periodo' => $periodo]))
             ->add('lista', CollectionType::class, $opzioni)
-            ->add('submit', SubmitType::class, array('label' => 'label.submit',
-              'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
-            ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+            ->add('submit', SubmitType::class, ['label' => 'label.submit',
+              'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
+            ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
               'attr' => ['widget' => 'gs-button-end',
-              'onclick' => "location.href='".$this->generateUrl('lezioni_scrutinio_proposte',
-                ['cattedra' => $cattedra->getId(), 'classe' => $classe->getId()])."'"]))
+                'onclick' => "location.href='".$this->generateUrl('lezioni_scrutinio_proposte',
+                ['cattedra' => $cattedra->getId(), 'classe' => $classe->getId()])."'"]])
             ->getForm();
           $form->handleRequest($request);
           if ($form->isSubmitted() && $form->isValid()) {
             // controlla errori
             $errori = [];
-            $log['create'] = array();
-            $log['edit'] = array();
+            $log['create'] = [];
+            $log['edit'] = [];
             foreach ($form->get('lista')->getData() as $key=>$prop) {
               // controllo alunno
-              $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $prop->getAlunno()->getId(),
+              $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
                 'abilitato' => 1]);
               if (!$alunno) {
                 // alunno non esiste, salta
@@ -240,17 +240,13 @@ class ScrutinioController extends BaseController {
             // ok: memorizza dati
             $this->em->flush();
             // log azione
-            $dblogger->logAzione('SCRUTINIO', 'Proposte', array(
+            $dblogger->logAzione('SCRUTINIO', 'Proposte', [
               'Periodo' => $periodo,
-              'Proposte inserite' => implode(', ', array_map(function ($e) {
-                  return $e->getId();
-                }, $log['create'])),
-              'Proposte modificate' => implode(', ', array_map(function ($e) {
-                  return '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
-                    ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"'.
-                    ', Strategie: "'.$e->getDato('strategie').'"]';
-                }, $log['edit'])),
-              ));
+              'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
+              'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
+                ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"'.
+                ', Strategie: "'.$e->getDato('strategie').'"]',
+                $log['edit']))]);
             // segnala errori
             foreach ($errori as $err) {
               // aggiunge errore
@@ -268,7 +264,7 @@ class ScrutinioController extends BaseController {
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     $pagina = ($periodo ? (($periodo == 'R' || $periodo == 'X') ? 'G' : $periodo) : 'P');
-    return $this->render('lezioni/proposte_'.$pagina.'.html.twig', array(
+    return $this->render('lezioni/proposte_'.$pagina.'.html.twig', [
       'pagina_titolo' => 'page.lezioni_proposte',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -277,8 +273,7 @@ class ScrutinioController extends BaseController {
       'info' => $info,
       'proposte' => $elenco,
       'form' => ($form ? $form->createView() : null),
-      'form_title' => $formTitle,
-    ));
+      'form_title' => $formTitle]);
   }
 
   /**
@@ -315,7 +310,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -388,14 +383,13 @@ class ScrutinioController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.coordinatore_scrutinio',
       'classe' => $classe,
       'periodo' => $scrutinio['periodo'],
       'dati' => $dati,
       'form' => ($form ? $form->createView() : null),
-      'posizione' => $posizione,
-    ));
+      'posizione' => $posizione]);
   }
 
   /**
@@ -424,12 +418,12 @@ class ScrutinioController extends BaseController {
                                     int $classe, int $materia, string $periodo,
                                     int $posizione): Response {
     // inizializza variabili
-    $info = array();
-    $elenco = array();
-    $elenco['alunni'] = array();
-    $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
+    $info = [];
+    $elenco = [];
+    $elenco['alunni'] = [];
+    $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -449,7 +443,7 @@ class ScrutinioController extends BaseController {
     // valore predefinito
     $info['valutazioni'] = $valutazioni['N'];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -464,8 +458,8 @@ class ScrutinioController extends BaseController {
       }
     }
     // controllo materia
-    $materia = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
+    $materia = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
+      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
@@ -499,21 +493,21 @@ class ScrutinioController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('proposte', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_proposte', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $elenco['proposte'],
         'entry_type' => PropostaVotoType::class,
-        'entry_options' => array('label' => false)))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['class' => 'btn-primary']))
+        'entry_options' => ['label' => false]])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori e log
-      $log['create'] = array();
-      $log['edit'] = array();
+      $log['create'] = [];
+      $log['edit'] = [];
       foreach ($form->get('lista')->getData() as $key=>$prop) {
         // controllo alunno
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $prop->getAlunno()->getId(),
+        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
           'classe' => $classe->getId(), 'abilitato' => 1]);
         if (!$alunno) {
           // alunno non esiste, salta
@@ -547,27 +541,22 @@ class ScrutinioController extends BaseController {
       // ok: memorizza dati
       $this->em->flush();
       // log azione
-      $dblogger->logAzione('SCRUTINIO', 'Proposte', array(
+      $dblogger->logAzione('SCRUTINIO', 'Proposte', [
         'Periodo' => $periodo,
-        'Proposte inserite' => implode(', ', array_map(function ($e) {
-            return $e->getId();
-          }, $log['create'])),
-        'Proposte modificate' => implode(', ', array_map(function ($e) {
-            return '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
-              ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"]';
-          }, $log['edit'])),
-        ));
+        'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
+        'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
+          ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"]',
+           $log['edit']))]);
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     $pagina = ($periodo == 'R' || $periodo == 'X') ? 'G' : $periodo;
-    return $this->render('coordinatore/proposte_'.$pagina.'.html.twig', array(
+    return $this->render('coordinatore/proposte_'.$pagina.'.html.twig', [
       'classe' => $classe,
       'info' => $info,
       'proposte' => $elenco,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -594,10 +583,10 @@ class ScrutinioController extends BaseController {
                                     ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
                                     int $posizione): Response {
     // inizializza variabili
-    $dati = array();
-    $dati['alunni'] = array();
+    $dati = [];
+    $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -618,14 +607,14 @@ class ScrutinioController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // legge condotta
-    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('C');
     if (!$condotta) {
       // errore
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $condotta, $periodo);
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
+    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
     $dati['assenze'] = $scrutinio->getDato('scrutinabili');
     $dati['valutazioni'] = $scrutinio->getDato('valutazioni')['C'];
     if ($alunno > 0) {
@@ -641,19 +630,19 @@ class ScrutinioController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('condotta', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_condotta', ['classe' => $classe->getId(),
         'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'condotta')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'entry_options' => ['label' => false, 'form_mode' => 'condotta']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori
-      $errore = array();
+      $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -690,12 +679,11 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/condotta_'.$periodo.'.html.twig', array(
+    return $this->render('coordinatore/condotta_'.$periodo.'.html.twig', [
       'periodo' => $periodo,
       'classe' => $classe,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -723,11 +711,11 @@ class ScrutinioController extends BaseController {
                                 int $classe, int $materia, string $periodo, int $alunno,
                                 int $posizione) {
     // inizializza variabili
-    $info = array();
-    $dati = array();
-    $dati['alunni'] = array();
+    $info = [];
+    $dati = [];
+    $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -743,11 +731,11 @@ class ScrutinioController extends BaseController {
     }
     // controllo materia
     if ($periodo == 'X') {
-      $materia = $this->em->getRepository('App\Entity\Materia')->find($materia);
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($materia);
     } else {
       // scrutini altri periodi
-      $materia = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
-        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
+        ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
@@ -785,26 +773,26 @@ class ScrutinioController extends BaseController {
       }
     }
     // dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'esito')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'entry_options' => ['label' => false, 'form_mode' => 'esito']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori
-      $errore = array();
+      $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -817,7 +805,7 @@ class ScrutinioController extends BaseController {
         }
         if (in_array($periodo, ['G', 'R'])) {
           // legge voto dello scrutinio finale
-          $votoFinale = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+          $votoFinale = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
             ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno, 'materia' => $materia,
@@ -847,12 +835,11 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/voti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/voti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', [
       'classe' => $classe,
       'info' => $info,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -876,9 +863,9 @@ class ScrutinioController extends BaseController {
   public function scrutinioSvolto(Request $request, ScrutinioUtil $scr, int $cattedra, int $classe,
                                   string $periodo): Response {
     // inizializza variabili
-    $dati = array();
+    $dati = [];
     $listaPeriodi = null;
-    $info = array();
+    $info = [];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -892,7 +879,7 @@ class ScrutinioController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -906,7 +893,7 @@ class ScrutinioController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -948,15 +935,14 @@ class ScrutinioController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/tabellone.html.twig', array(
+    return $this->render('lezioni/tabellone.html.twig', [
       'pagina_titolo' => 'page.lezioni_tabellone',
       'cattedra' => $cattedra,
       'classe' => $classe,
       'periodo' => $periodo,
       'lista_periodi' => $listaPeriodi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -983,16 +969,16 @@ class ScrutinioController extends BaseController {
                                   int $alunno, string $periodo, int $classe,
                                   int $posizione): Response {
     // inizializza variabili
-    $dati = array();
+    $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -1023,65 +1009,63 @@ class ScrutinioController extends BaseController {
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     }
     // impedisce che condotta sia modificata
-    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('C');
     $dati['materia_condotta'] = $condotta->getNomeBreve();
     $dati['voto_condotta'] = !empty($dati['voti'][$condotta->getId()]) ?
       $dati['voti'][$condotta->getId()]->getUnico() : null;
     unset($dati['voti'][$condotta->getId()]);
     // esiti possibili
-    $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
+    $lista_esiti = ['label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S'];
     if ($periodo == 'G') {
       // esame alunni sospesi
-      $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
+      $lista_esiti = ['label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X'];
     } elseif ($periodo == 'R' || $periodo == 'X') {
       // rinvio esame alunni sospesi
-      $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N');
+      $lista_esiti = ['label.esito_A' => 'A', 'label.esito_N' => 'N'];
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('esito', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_esito', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione, 'classe' => $classe->getId()]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'esito')))
-      ->add('esito', ChoiceType::class, array('label' => false,
+        'entry_options' => ['label' => false, 'form_mode' => 'esito']])
+      ->add('esito', ChoiceType::class, ['label' => false,
         'data' => $dati['esito']->getEsito(),
         'choices' => $lista_esiti,
         'placeholder' => 'label.scegli_esito',
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('unanimita', ChoiceType::class, array('label' => false,
+        'required' => true])
+      ->add('unanimita', ChoiceType::class, ['label' => false,
         'data' => $dati['esito']->getDati()['unanimita'],
         'choices' => ['label.votazione_unanimita' => true, 'label.votazione_maggioranza' => false],
         'placeholder' => null,
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline gs-mr-4'],
-        'required' => true))
-      ->add('giudizio', MessageType::class, array('label' => false,
+        'required' => true])
+      ->add('giudizio', MessageType::class, ['label' => false,
         'data' => $dati['esito']->getDati()['giudizio'],
         'trim' => true,
-        'required' => false))
-      ->add('contrari', TextType::class, array('label' => false,
-        'data' => isset($dati['esito']->getDati()['contrari']) ? $dati['esito']->getDati()['contrari'] : null,
+        'required' => false])
+      ->add('contrari', TextType::class, ['label' => false,
+        'data' => $dati['esito']->getDati()['contrari'] ?? null,
         'trim' => true,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori
-      $errore = array();
+      $errore = [];
       $insuff_cont = 0;
       $insuff_religione = false;
       $insuff_condotta = false;
@@ -1106,7 +1090,7 @@ class ScrutinioController extends BaseController {
         }
         if (in_array($periodo, ['G', 'R'])) {
           // legge voto dello scrutinio finale
-          $votoFinale = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+          $votoFinale = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
             ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno,
@@ -1208,12 +1192,11 @@ class ScrutinioController extends BaseController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/esiti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/esiti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', [
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1238,20 +1221,20 @@ class ScrutinioController extends BaseController {
   public function scrutinioCredito(Request $request, ScrutinioUtil $scr, int $alunno,
                                    string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
-    $credito = array();
+    $credito = [];
     $credito[3] = [6 =>  7, 7 =>  8, 8 =>  9, 9 => 10, 10 => 11];
     $credito[4] = [6 =>  8, 7 =>  9, 8 => 10, 9 => 11, 10 => 12];
     $credito[5] = [5 =>  7, 6 =>  9, 7 => 10, 8 => 11,  9 => 13, 10 => 14];
-    $dati = array();
+    $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -1307,29 +1290,29 @@ class ScrutinioController extends BaseController {
       }
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('credito', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_credito', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione, 'classe' => $classe->getId()]))
-      ->add('creditoScolastico', ChoiceType::class, array('label' => 'label.credito_scolastico',
-        'data' => isset($valori['creditoScolastico']) ? $valori['creditoScolastico'] : null,
+      ->add('creditoScolastico', ChoiceType::class, ['label' => 'label.credito_scolastico',
+        'data' => $valori['creditoScolastico'] ?? null,
         'choices' => ['label.criterio_credito_desc_F' => 'F', 'label.criterio_credito_desc_I' => 'I',
           'label.criterio_credito_desc_P' => 'P', 'label.criterio_credito_desc_R' => 'R',
           'label.criterio_credito_desc_O' => 'O'],
         'placeholder' => null,
         'expanded' => true,
         'multiple' => true,
-        'required' => false))
-      ->add('creditoSospeso', HiddenType::class, array('label' => null,
+        'required' => false])
+      ->add('creditoSospeso', HiddenType::class, ['label' => null,
         'data' => $creditoSospeso,
-        'required' => false))
-      ->add('creditoQuinta', HiddenType::class, array('label' => null,
+        'required' => false])
+      ->add('creditoQuinta', HiddenType::class, ['label' => null,
         'data' => $creditoQuinta,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1356,13 +1339,12 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/crediti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/crediti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', [
       'alunno' => $alunno,
       'classe' => $classe,
       'credito3' => (($periodo == 'X' && $classe->getAnno() == 4) ? $dati['esito']->getCreditoPrecedente() : $alunno->getCredito3()),
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1387,16 +1369,16 @@ class ScrutinioController extends BaseController {
   public function scrutinioCertificazione(Request $request, ScrutinioUtil $scr, int $alunno,
                                           string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
-    $dati = array();
+    $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -1425,148 +1407,128 @@ class ScrutinioController extends BaseController {
     }
     $valori = $dati['esito']->getDati();
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('certificazione', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_certificazione', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione, 'classe' => $classe->getId()]))
-      ->add('competenza_alfabetica', ChoiceType::class, array('label' => 'label.competenza_alfabetica',
-        'data' => isset($valori['competenza_alfabetica']) ? $valori['competenza_alfabetica'] : 'C',
+      ->add('competenza_alfabetica', ChoiceType::class, ['label' => 'label.competenza_alfabetica',
+        'data' => $valori['competenza_alfabetica'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_linguistica1', ChoiceType::class, array('label' => 'label.competenza_linguistica',
-        'data' => isset($valori['competenza_linguistica1']) ? $valori['competenza_linguistica1'] : 'C',
+        'required' => true])
+      ->add('competenza_linguistica1', ChoiceType::class, ['label' => 'label.competenza_linguistica',
+        'data' => $valori['competenza_linguistica1'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true));
+        'required' => true]);
     if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua2'))) {
       // seconda lingua
       $form = $form
-        ->add('competenza_linguistica2', ChoiceType::class, array('label' => 'label.competenza_linguistica',
-          'data' => isset($valori['competenza_linguistica2']) ? $valori['competenza_linguistica2'] : 'C',
+        ->add('competenza_linguistica2', ChoiceType::class, ['label' => 'label.competenza_linguistica',
+          'data' => $valori['competenza_linguistica2'] ?? 'C',
           'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
             'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
           'placeholder' => null,
           'expanded' => false,
           'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => true));
+          'required' => true]);
     }
     if (!empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/competenze_lingua3'))) {
       // terza lingua
       $form = $form
-        ->add('competenza_linguistica3', ChoiceType::class, array('label' => 'label.competenza_linguistica',
-          'data' => isset($valori['competenza_linguistica3']) ? $valori['competenza_linguistica3'] : 'C',
-          'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
-            'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
-          'placeholder' => null,
-          'expanded' => false,
-          'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
-          'attr' => ['class' => 'gs-placeholder'],
-          'required' => true));
+        ->add('competenza_linguistica3', ChoiceType::class, ['label' => 'label.competenza_linguistica',
+        'data' => $valori['competenza_linguistica3'] ?? 'C',
+        'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
+          'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
+        'placeholder' => null,
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true]);
     }
     $form = $form
-      ->add('competenza_matematica', ChoiceType::class, array('label' => 'label.competenza_matematica',
-        'data' => isset($valori['competenza_matematica']) ? $valori['competenza_matematica'] : 'C',
+      ->add('competenza_matematica', ChoiceType::class, ['label' => 'label.competenza_matematica',
+        'data' => $valori['competenza_matematica'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_digitale', ChoiceType::class, array('label' => 'label.competenza_digitale',
-        'data' => isset($valori['competenza_digitale']) ? $valori['competenza_digitale'] : 'C',
+        'required' => true])
+      ->add('competenza_digitale', ChoiceType::class, ['label' => 'label.competenza_digitale',
+        'data' => $valori['competenza_digitale'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_personale', ChoiceType::class, array('label' => 'label.competenza_personale',
-        'data' => isset($valori['competenza_personale']) ? $valori['competenza_personale'] : 'C',
+        'required' => true])
+      ->add('competenza_personale', ChoiceType::class, ['label' => 'label.competenza_personale',
+        'data' => $valori['competenza_personale'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_cittadinanza', ChoiceType::class, array('label' => 'label.competenza_cittadinanza',
-        'data' => isset($valori['competenza_cittadinanza']) ? $valori['competenza_cittadinanza'] : 'C',
+        'required' => true])
+      ->add('competenza_cittadinanza', ChoiceType::class, ['label' => 'label.competenza_cittadinanza',
+        'data' => $valori['competenza_cittadinanza'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_imprenditoriale', ChoiceType::class, array('label' => 'label.competenza_imprenditoriale',
-        'data' => isset($valori['competenza_imprenditoriale']) ? $valori['competenza_imprenditoriale'] : 'C',
+        'required' => true])
+      ->add('competenza_imprenditoriale', ChoiceType::class, ['label' => 'label.competenza_imprenditoriale',
+        'data' => $valori['competenza_imprenditoriale'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_culturale', ChoiceType::class, array('label' => 'label.competenza_culturale',
-        'data' => isset($valori['competenza_culturale']) ? $valori['competenza_culturale'] : 'C',
+        'required' => true])
+      ->add('competenza_culturale', ChoiceType::class, ['label' => 'label.competenza_culturale',
+        'data' => $valori['competenza_culturale'] ?? 'C',
         'choices' => ['label.competenza_livello_A' => 'A', 'label.competenza_livello_B' => 'B',
           'label.competenza_livello_C' => 'C', 'label.competenza_livello_D' => 'D'],
         'placeholder' => null,
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('competenza_altro', MessageType::class, array('label' => false,
-        'data' => isset($valori['competenza_altro']) ? $valori['competenza_altro'] : 'Niente da segnalare.',
+        'required' => true])
+      ->add('competenza_altro', MessageType::class, ['label' => false,
+        'data' => $valori['competenza_altro'] ?? 'Niente da segnalare.',
         'trim' => true,
         'attr' => ['rows' => 4],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1595,12 +1557,11 @@ class ScrutinioController extends BaseController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/certificazioni_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/certificazioni_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', [
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1625,9 +1586,9 @@ class ScrutinioController extends BaseController {
   public function scrutinioDebiti(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                   int $alunno, string $periodo, int $posizione): Response {
     // inizializza variabili
-    $dati = array();
+    $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno || !$alunno->getClasse()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1650,23 +1611,23 @@ class ScrutinioController extends BaseController {
     // elenco debiti
     $dati = $scr->elencoDebitiAlunno($this->getUser(), $alunno, $periodo);
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('debiti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_debiti', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['debiti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'debiti')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'entry_options' => ['label' => false, 'form_mode' => 'debiti']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori
-      $errore = array();
+      $errore = [];
       foreach ($form->get('lista')->getData() as $voto) {
         if (!$voto->getRecupero()) {
           $errore['exception.no_recupero_esito'] = true;
@@ -1683,7 +1644,7 @@ class ScrutinioController extends BaseController {
       }
       if ($periodo != 'P' && $periodo != 'S') {
         // recupera esito
-        $esito = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
+        $esito = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
           ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
@@ -1707,11 +1668,10 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/debiti_'.$periodo.'.html.twig', array(
+    return $this->render('coordinatore/debiti_'.$periodo.'.html.twig', [
       'alunno' => $alunno,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1735,9 +1695,9 @@ class ScrutinioController extends BaseController {
   public function scrutinioCarenze(Request $request, ScrutinioUtil $scr, int $alunno,
                                    string $periodo, int $posizione): Response {
     // inizializza variabili
-    $dati = array();
+    $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno || !$alunno->getClasse()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1760,23 +1720,23 @@ class ScrutinioController extends BaseController {
     // elenco carenze
     $dati = $scr->elencoCarenzeAlunno($this->getUser(), $alunno, $periodo);
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('carenze', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_carenze', ['alunno' => $alunno->getId(),
         'periodo' => $periodo, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['carenze'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'carenze')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+        'entry_options' => ['label' => false, 'form_mode' => 'carenze']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // recupera esito
-      $esito = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
+      $esito = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
         ->join('e.scrutinio', 's')
         ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
         ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
@@ -1786,7 +1746,7 @@ class ScrutinioController extends BaseController {
       // legge valori
       $valori = $esito->getDati();
       // controlla carenze
-      $valori['carenze_materie'] = array();
+      $valori['carenze_materie'] = [];
       foreach ($form->get('lista')->getData() as $voto) {
         if ($voto->getDebito()) {
           $valori['carenze_materie'][] = $voto->getMateria()->getNomeBreve();
@@ -1801,11 +1761,10 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/carenze_'.$periodo.'.html.twig', array(
+    return $this->render('coordinatore/carenze_'.$periodo.'.html.twig', [
       'alunno' => $alunno,
       'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1831,14 +1790,14 @@ class ScrutinioController extends BaseController {
     $dati = null;
     $form = null;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge definizione scrutinio e scrutinio
-    $def = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => $periodo,
+    $def = $this->em->getRepository(\App\Entity\DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
+    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy(['periodo' => $periodo,
       'classe' => $classe]);
     if (!$def || !$scrutinio) {
       // errore
@@ -1865,7 +1824,7 @@ class ScrutinioController extends BaseController {
     $func_valida = 'verbaleValida'.$passo_verbale[0];
     $dati = $scr->$func_dati($classe, $periodo, $def, $scrutinio, $passo_verbale);
     $form = $this->container->get('form.factory')->createNamedBuilder('verbale', FormType::class,
-      null, array('allow_extra_fields' => true));
+      null, ['allow_extra_fields' => true]);
     $form = $scr->$func_form($classe, $periodo, $form, $dati, $step, $passo_verbale);
     // legge dati form
     $form->handleRequest($request);
@@ -1886,11 +1845,10 @@ class ScrutinioController extends BaseController {
         'stato' => $scrutinio->getStato()]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/verbale_'.strtolower($passo_verbale[0]).'.html.twig', array(
+    return $this->render('coordinatore/verbale_'.strtolower($passo_verbale[0]).'.html.twig', [
       'classe' => $classe,
-      'dati' => $dati,
-      'form' => ($form ? $form->createView() : null),
-    ));
+	    'dati' => $dati,
+      'form' => ($form ? $form->createView() : null)]);
   }
 
   /**
@@ -1917,10 +1875,10 @@ class ScrutinioController extends BaseController {
                                     ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
                                     int $posizione): Response {
     // inizializza variabili
-    $dati = array();
-    $dati['alunni'] = array();
+    $dati = [];
+    $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1941,7 +1899,7 @@ class ScrutinioController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // legge ed civica
-    $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('E');
     if (!$edcivica) {
       // errore
       throw $this->createNotFoundException('exception.invalid_params');
@@ -1958,34 +1916,34 @@ class ScrutinioController extends BaseController {
       }
     }
     // legge proposte di voto
-    $dati['proposte'] = $this->em->getRepository('App\Entity\PropostaVoto')->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
+    $dati['proposte'] = $this->em->getRepository(\App\Entity\PropostaVoto::class)->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
     foreach ($dati['proposte'] as $alu=>$prop) {
       if (!empty($prop['debito']) && $dati['voti'][$alu]->getUnico() !== null) {
         $dati['proposte'][$alu]['debito'] = null;
       }
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni')['E'];
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('edcivica', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_edcivica', ['classe' => $classe->getId(),
         'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
-      ->add('lista', CollectionType::class, array('label' => false,
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'form_mode' => 'edcivica')))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' =>['class' => 'btn-primary']))
+        'entry_options' => ['label' => false, 'form_mode' => 'edcivica']])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	      'attr' =>['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla errori
-      $errore = array();
+      $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -2020,11 +1978,10 @@ class ScrutinioController extends BaseController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/edcivica_'.$periodo.'.html.twig', array(
+    return $this->render('coordinatore/edcivica_'.$periodo.'.html.twig', [
       'classe' => $classe,
-      'dati' => $dati,
-      'form' => $form->createView(),
-    ));
+	    'dati' => $dati,
+      'form' => $form->createView()]);
   }
 
   /**
@@ -2045,7 +2002,7 @@ class ScrutinioController extends BaseController {
   public function scrutinioAggiorna(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
     $risposta = ['status' => 'ok'];
     // controllo scrutinio
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->find($scrutinio);
+    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->find($scrutinio);
     if (!$scrutinio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

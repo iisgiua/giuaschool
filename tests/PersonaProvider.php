@@ -202,13 +202,6 @@ class PersonaProvider extends Person {
    */
   protected static array $datiUtente = [];
 
-  /**
-   * Servizio per la codifica delle password
-   *
-   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
-   */
-  protected UserPasswordHasherInterface $hasher;
-
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -218,9 +211,9 @@ class PersonaProvider extends Person {
    * @var Generator $generator Generatore automatico di dati fittizi
    * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(Generator $generator, UserPasswordHasherInterface $hasher) {
+  public function __construct(Generator $generator,
+      protected UserPasswordHasherInterface $hasher) {
     parent::__construct($generator);
-    $this->hasher = $hasher;
     static::$datiUtente = ['nome' => '', 'cognome' => '', 'username' => '', 'password' => ''];
   }
 

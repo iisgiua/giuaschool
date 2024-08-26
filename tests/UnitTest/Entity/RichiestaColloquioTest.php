@@ -26,7 +26,7 @@ class RichiestaColloquioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\RichiestaColloquio';
+    $this->entity = \App\Entity\RichiestaColloquio::class;
     // campi da testare
     $this->fields = ['appuntamento', 'colloquio', 'alunno', 'genitore', 'genitoreAnnulla', 'stato', 'messaggio'];
     $this->noStoredFields = [];
@@ -138,7 +138,7 @@ class RichiestaColloquioTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // appuntamento
-    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'appuntamento');
+    $property = $this->getPrivateProperty(\App\Entity\RichiestaColloquio::class, 'appuntamento');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Appuntamento - NOT BLANK');
@@ -147,21 +147,21 @@ class RichiestaColloquioTest extends EntityTestCase {
     $existent->setAppuntamento(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Appuntamento - VALID TYPE');
     // colloquio
-    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'colloquio');
+    $property = $this->getPrivateProperty(\App\Entity\RichiestaColloquio::class, 'colloquio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Colloquio - NOT BLANK');
     $existent->setColloquio($this->getReference("colloquio_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Colloquio - VALID NOT BLANK');
     // alunno
-    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\RichiestaColloquio::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // genitore
-    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'genitore');
+    $property = $this->getPrivateProperty(\App\Entity\RichiestaColloquio::class, 'genitore');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Genitore - NOT BLANK');

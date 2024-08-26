@@ -29,7 +29,7 @@ class RichiestaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Richiesta';
+    $this->entity = \App\Entity\Richiesta::class;
     // campi da testare
     $this->fields = ['inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente', 'classe', 'definizioneRichiesta', 'data'];
     $this->noStoredFields = [];
@@ -148,7 +148,7 @@ class RichiestaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // inviata
-    $property = $this->getPrivateProperty('App\Entity\Richiesta', 'inviata');
+    $property = $this->getPrivateProperty(\App\Entity\Richiesta::class, 'inviata');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inviata - NOT BLANK');
@@ -164,14 +164,14 @@ class RichiestaTest extends EntityTestCase {
     $existent->setStato('I');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Stato - VALID CHOICE');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\Richiesta', 'utente');
+    $property = $this->getPrivateProperty(\App\Entity\Richiesta::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
     $existent->setUtente($this->getReference("utente_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
     // definizioneRichiesta
-    $property = $this->getPrivateProperty('App\Entity\Richiesta', 'definizioneRichiesta');
+    $property = $this->getPrivateProperty(\App\Entity\Richiesta::class, 'definizioneRichiesta');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::DefinizioneRichiesta - NOT BLANK');

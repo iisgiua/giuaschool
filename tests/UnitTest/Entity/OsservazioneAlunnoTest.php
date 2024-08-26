@@ -26,7 +26,7 @@ class OsservazioneAlunnoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\OsservazioneAlunno';
+    $this->entity = \App\Entity\OsservazioneAlunno::class;
     // campi da testare
     $this->fields = ['alunno', 'data', 'testo', 'cattedra'];
     $this->noStoredFields = [];
@@ -129,7 +129,7 @@ class OsservazioneAlunnoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
     $temp = $existent->getAlunno();
-    $property = $this->getPrivateProperty('App\Entity\OsservazioneAlunno', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\OsservazioneAlunno::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');

@@ -26,7 +26,7 @@ class VotoScrutinioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\VotoScrutinio';
+    $this->entity = \App\Entity\VotoScrutinio::class;
     // campi da testare
     $this->fields = ['orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'scrutinio', 'alunno', 'materia'];
     $this->noStoredFields = [];
@@ -78,7 +78,7 @@ class VotoScrutinioTest extends EntityTestCase {
           ($field == 'debito' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'recupero' ? $this->faker->randomElement(["A", "C", "S", "P", "I", "R", "N"]) :
           ($field == 'assenze' ? $this->faker->randomNumber(4, false) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'scrutinio' ? $this->getReference("scrutinio_P") :
           ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)."A_2") :
           ($field == 'materia' ? $this->getReference("materia_curricolare_2") :
@@ -160,21 +160,21 @@ class VotoScrutinioTest extends EntityTestCase {
     $existent->setRecupero('A');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Recupero - VALID CHOICE');
     // scrutinio
-    $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'scrutinio');
+    $property = $this->getPrivateProperty(\App\Entity\VotoScrutinio::class, 'scrutinio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Scrutinio - NOT BLANK');
     $existent->setScrutinio($this->getReference("scrutinio_F"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Scrutinio - VALID NOT BLANK');
     // alunno
-    $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\VotoScrutinio::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_5B_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // materia
-    $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'materia');
+    $property = $this->getPrivateProperty(\App\Entity\VotoScrutinio::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');

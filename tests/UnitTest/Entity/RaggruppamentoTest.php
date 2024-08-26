@@ -26,7 +26,7 @@ class RaggruppamentoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Raggruppamento';
+    $this->entity = \App\Entity\Raggruppamento::class;
     // campi da testare
     $this->fields = ['nome'];
     $this->noStoredFields = ['alunni'];
@@ -137,7 +137,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\Raggruppamento', 'nome');
+    $property = $this->getPrivateProperty(\App\Entity\Raggruppamento::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
@@ -149,7 +149,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
     // alunni
-    $property = $this->getPrivateProperty('\App\Entity\Raggruppamento', 'alunni');
+    $property = $this->getPrivateProperty(\App\Entity\Raggruppamento::class, 'alunni');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunni - NOT BLANK');

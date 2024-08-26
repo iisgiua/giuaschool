@@ -26,7 +26,7 @@ class AvvisoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Avviso';
+    $this->entity = \App\Entity\Avviso::class;
     // campi da testare
     $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatariSpeciali', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
     $this->noStoredFields = ['annotazioni', 'sedi'];
@@ -79,12 +79,12 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
           ($field == 'oggetto' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'testo' ? $this->faker->text() :
-          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'destinatariSpeciali' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'destinatariSpeciali' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           null))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -226,14 +226,14 @@ class AvvisoTest extends EntityTestCase {
     $existent->setTipo('U');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // sedi
-    $property = $this->getPrivateProperty('\App\Entity\Avviso', 'sedi');
+    $property = $this->getPrivateProperty(\App\Entity\Avviso::class, 'sedi');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
     $existent->setSedi(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Avviso', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\Avviso::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
@@ -270,7 +270,7 @@ class AvvisoTest extends EntityTestCase {
     $existent->setFiltroTipo('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::FiltroTipo - VALID CHOICE');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\Avviso', 'docente');
+    $property = $this->getPrivateProperty(\App\Entity\Avviso::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

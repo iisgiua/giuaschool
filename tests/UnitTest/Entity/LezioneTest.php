@@ -26,7 +26,7 @@ class LezioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Lezione';
+    $this->entity = \App\Entity\Lezione::class;
     // campi da testare
     $this->fields = ['data', 'ora', 'classe','gruppo', 'tipoGruppo', 'materia', 'argomento', 'attivita'];
     $this->noStoredFields = [];
@@ -141,7 +141,7 @@ class LezioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Lezione', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\Lezione::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
@@ -150,7 +150,7 @@ class LezioneTest extends EntityTestCase {
     $existent->setData(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // classe
-    $property = $this->getPrivateProperty('App\Entity\Lezione', 'classe');
+    $property = $this->getPrivateProperty(\App\Entity\Lezione::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
@@ -169,7 +169,7 @@ class LezioneTest extends EntityTestCase {
     $existent->setTipoGruppo('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::TipoGruppo - VALID CHOICE');
     // materia
-    $property = $this->getPrivateProperty('App\Entity\Lezione', 'materia');
+    $property = $this->getPrivateProperty(\App\Entity\Lezione::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');

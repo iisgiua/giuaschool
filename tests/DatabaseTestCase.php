@@ -100,7 +100,7 @@ class DatabaseTestCase extends KernelTestCase {
     $this->em = $kernel->getContainer()->get('doctrine')->getManager();
     $this->hasher = $kernel->getContainer()->get('security.user_password_hasher');
     $this->val = $kernel->getContainer()->get('validator');
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker = $kernel->getContainer()->get(\Faker\Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
@@ -186,7 +186,7 @@ class DatabaseTestCase extends KernelTestCase {
       $objectMap = [];
       foreach ($this->objects as $name => $object) {
         // determina classe e numero di istanza
-        $objectMap[$name] = [get_class($object), $object->getId()];
+        $objectMap[$name] = [$object::class, $object->getId()];
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));
@@ -201,12 +201,8 @@ class DatabaseTestCase extends KernelTestCase {
    * @return mixed|null Oggetto relativo al riferimento indicato o null se riferimento non definito
    */
   protected function getReference(string $name): ?object {
-    // carica fixture alice
-    if (isset($this->objects[$name])) {
-      return $this->objects[$name];
-    }
     // riferimento non definito
-    return null;
+    return $this->objects[$name] ?? null;
   }
 
   /**

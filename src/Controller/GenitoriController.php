@@ -103,12 +103,12 @@ class GenitoriController extends BaseController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
       if ($data_succ && $data_succ->format('Y-m-d') > (new \DateTime())->format('Y-m-d')) {
         $data_succ = null;
       }
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -123,7 +123,7 @@ class GenitoriController extends BaseController {
       $lista_festivi = '[]';
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/lezioni.html.twig', array(
+    return $this->render('ruolo_genitore/lezioni.html.twig', [
       'pagina_titolo' => 'page.genitori_lezioni',
       'alunno' => $alunno,
       'classe' => $classe,
@@ -135,8 +135,7 @@ class GenitoriController extends BaseController {
       'errore' => $errore,
       'lista_festivi' => $lista_festivi,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -166,7 +165,7 @@ class GenitoriController extends BaseController {
     $dati = null;
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $this->em->getRepository('App\Entity\Materia')->find($idmateria);
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -212,7 +211,7 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.genitori_argomenti',
       'idmateria' => $idmateria,
       'alunno' => $alunno,
@@ -220,8 +219,7 @@ class GenitoriController extends BaseController {
       'errore' => $errore,
       'materie' => $materie,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -251,7 +249,7 @@ class GenitoriController extends BaseController {
     $template = 'ruolo_genitore/voti.html.twig';
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $this->em->getRepository('App\Entity\Materia')->find($idmateria);
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -277,7 +275,7 @@ class GenitoriController extends BaseController {
       // lista materie
       $materie = $gen->materie($classe, false);
       $materie = array_merge(
-        [array('id' => 0, 'nomeBreve' => $trans->trans('label.ogni_materia'))],
+        [['id' => 0, 'nomeBreve' => $trans->trans('label.ogni_materia')]],
         $materie);
       if ($materia && array_search($idmateria, array_column($materie, 'id')) !== false) {
         // materia indicate e presente in cattedre di classe
@@ -294,7 +292,7 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
-    return $this->render($template, array(
+    return $this->render($template, [
       'pagina_titolo' => 'page.genitori_voti',
       'idmateria' => $idmateria,
       'alunno' => $alunno,
@@ -302,8 +300,7 @@ class GenitoriController extends BaseController {
       'errore' => $errore,
       'materie' => $materie,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -351,14 +348,13 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/assenze.html.twig', array(
+    return $this->render('ruolo_genitore/assenze.html.twig', [
       'pagina_titolo' => 'page.genitori_assenze',
       'alunno' => $alunno,
       'classe' => $classe,
       'errore' => $errore,
       'dati' => $dati,
-      'posizione' => $posizione,
-    ));
+      'posizione' => $posizione]);
   }
 
   /**
@@ -401,13 +397,12 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/note.html.twig', array(
+    return $this->render('ruolo_genitore/note.html.twig', [
       'pagina_titolo' => 'page.genitori_note',
       'alunno' => $alunno,
       'classe' => $classe,
       'errore' => $errore,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -445,13 +440,12 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/osservazioni.html.twig', array(
+    return $this->render('ruolo_genitore/osservazioni.html.twig', [
       'pagina_titolo' => 'page.genitori_osservazioni',
       'alunno' => $alunno,
       'classe' => $classe,
       'errore' => $errore,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -473,9 +467,9 @@ class GenitoriController extends BaseController {
   public function pagelle(TranslatorInterface $trans, GenitoriUtil $gen, string $periodo): Response {
     // inizializza variabili
     $errore = null;
-    $dati = array();
+    $dati = [];
     $lista_periodi = null;
-    $info = array();
+    $info = [];
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -516,10 +510,10 @@ class GenitoriController extends BaseController {
           // precedente A.S.
           $dati = $gen->pagellePrecedenti($alunno);
           // legge valutazioni da configurazione
-          $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
-          $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
-          $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-          $valutazioni['C'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
+          $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
+          $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
+          $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
+          $valutazioni['C'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_C'));
           $listaValori = explode(',', $valutazioni['R']['valori']);
           $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
@@ -545,11 +539,11 @@ class GenitoriController extends BaseController {
           // altri periodi
           $dati = $gen->pagelle($classe, $alunno, $periodo);
           // legge valutazioni da scrutinio
-          $dati['valutazioni'] = $this->em->getRepository('App\Entity\Scrutinio')
+          $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
           // imposta presa visione
-          $this->em->getRepository('App\Entity\Esito')->presaVisione($dati['esito'], $this->getUser());
+          $this->em->getRepository(\App\Entity\Esito::class)->presaVisione($dati['esito'], $this->getUser());
         }
       }
     } else {
@@ -557,7 +551,7 @@ class GenitoriController extends BaseController {
       $errore = $trans->trans('exception.dati_non_presenti');
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/pagelle.html.twig', array(
+    return $this->render('ruolo_genitore/pagelle.html.twig', [
       'pagina_titolo' => 'page.genitori_pagelle',
       'alunno' => $alunno,
       'classe' => $classe,
@@ -565,8 +559,7 @@ class GenitoriController extends BaseController {
       'dati' => $dati,
       'info' => $info,
       'periodo' => $periodo,
-      'lista_periodi' => $lista_periodi,
-    ));
+      'lista_periodi' => $lista_periodi]);
   }
 
   /**
@@ -590,7 +583,7 @@ class GenitoriController extends BaseController {
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
-    $cerca = array();
+    $cerca = [];
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/genitori_avvisi/visualizza', 'T');
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/genitori_avvisi/oggetto', '');
     if ($pagina == 0) {
@@ -602,21 +595,19 @@ class GenitoriController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_genitori', FormType::class)
-      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
+      ->add('visualizza', ChoiceType::class, ['label' => 'label.avvisi_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
+        'required' => true])
+      ->add('oggetto', TextType::class, ['label' => 'label.avvisi_filtro_oggetto',
         'data' => $cerca['oggetto'],
         'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.search'])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -631,15 +622,14 @@ class GenitoriController extends BaseController {
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
-    return $this->render('bacheca/avvisi_genitori.html.twig', array(
+    return $this->render('bacheca/avvisi_genitori.html.twig', [
       'pagina_titolo' => 'page.genitori_avvisi',
       'form' => $form->createView(),
       'form_help' => null,
       'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -660,7 +650,7 @@ class GenitoriController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -674,9 +664,8 @@ class GenitoriController extends BaseController {
     // aggiorna lettura
     $bac->letturaAvviso($avviso, $this->getUser());
     // visualizza pagina
-    return $this->render('bacheca/scheda_avviso_genitori.html.twig', array(
-      'dati' => $dati,
-    ));
+    return $this->render('bacheca/scheda_avviso_genitori.html.twig', [
+      'dati' => $dati]);
   }
 
   /**
@@ -722,10 +711,10 @@ class GenitoriController extends BaseController {
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
     $data_succ = (clone $data_fine);
-    $data_succ = $this->em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
     $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
     $data_prec = (clone $data_inizio);
-    $data_prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
@@ -745,12 +734,11 @@ class GenitoriController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('agenda/eventi_genitori.html.twig', array(
+    return $this->render('agenda/eventi_genitori.html.twig', [
       'pagina_titolo' => 'page.genitori_eventi',
       'mese' => $mese,
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -782,10 +770,9 @@ class GenitoriController extends BaseController {
       $dati = $age->dettagliEventoGenitore($this->getUser(), $this->getUser()->getAlunno(), $data, $tipo);
     }
     // visualizza pagina
-    return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
+    return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', [
       'dati' => $dati,
-      'data' => $data,
-    ));
+      'data' => $data]);
   }
 
   /**
@@ -810,9 +797,9 @@ class GenitoriController extends BaseController {
                                     Assenza $assenza, int $posizione): Response {
     // inizializza
     $fs = new Filesystem();
-    $info = array();
-    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3,
-      'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    $info = [];
+    $lista_motivazioni = ['label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3,
+      'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9];
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -858,25 +845,23 @@ class GenitoriController extends BaseController {
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class)
       ->setAction($this->generateUrl('genitori_giustifica_assenza', ['assenza' => $assenza->getId(), 'posizione' => $posizione]))
-      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_assenza',
+      ->add('tipo', ChoiceType::class, ['label' => 'label.motivazione_assenza',
         'choices' => $lista_motivazioni,
         'placeholder' => 'label.scelta_giustifica',
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('motivazione', MessageType::class, array('label' => null,
+        'required' => false])
+      ->add('motivazione', MessageType::class, ['label' => null,
         'data' => $info['assenza']['motivazione'],
         'trim' => true,
-        'attr' => array('rows' => '3'),
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['class' => 'btn-primary']))
-      ->add('delete', SubmitType::class, array('label' => 'label.delete',
-        'attr' => ['class' => 'btn-danger']))
+        'attr' => ['rows' => '3'],
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']])
+      ->add('delete', SubmitType::class, ['label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -886,16 +871,16 @@ class GenitoriController extends BaseController {
         // cancella dati
         $giustificato = null;
         $motivazione = null;
-        $dichiarazione = array();
-        $certificati = array();
+        $dichiarazione = [];
+        $certificati = [];
       } else {
         // no autodichiarazione
         $giustificato = new \DateTime();
-        $dichiarazione = array();
-        $certificati = array();
+        $dichiarazione = [];
+        $certificati = [];
       }
       // aggiorna dati
-      $risultato = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
+      $risultato = $this->em->getRepository(\App\Entity\Assenza::class)->createQueryBuilder('ass')
         ->update()
         ->set('ass.modificato', ':modificato')
         ->set('ass.giustificato', ':giustificato')
@@ -915,30 +900,29 @@ class GenitoriController extends BaseController {
       // log azione
       if ($form->get('delete')->isClicked()) {
         // eliminazione
-        $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
+        $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
           'ID' => $info['assenza']['ids'],
           'Giustificato' => $info['assenza']['giustificato'],
           'Motivazione' => $info['assenza']['motivazione'],
           'Dichiarazione' => $info['assenza']['dichiarazione'],
-          'Certificati' => $info['assenza']['certificati']));
+          'Certificati' => $info['assenza']['certificati']]);
       } elseif (!$errore) {
         // inserimento o modifica
-        $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
+        $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
           'ID' => $info['assenza']['ids'],
           'Giustificato' => $info['assenza']['giustificato'],
           'Motivazione' => $info['assenza']['motivazione'],
           'Dichiarazione' => $info['assenza']['dichiarazione'],
-          'Certificati' => $info['assenza']['certificati']));
+          'Certificati' => $info['assenza']['certificati']]);
       }
       // redirezione
       return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/giustifica_assenza.html.twig', array(
+    return $this->render('ruolo_genitore/giustifica_assenza.html.twig', [
       'info' => $info,
       'alunno' => $alunno,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -964,8 +948,8 @@ class GenitoriController extends BaseController {
                                     LogHandler $dblogger, Entrata $entrata,
                                     int $posizione): Response {
     // inizializza
-    $info = array();
-    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    $info = [];
+    $lista_motivazioni = ['label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9];
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -1002,25 +986,23 @@ class GenitoriController extends BaseController {
     $entrata_old = clone $entrata;
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_ritardo', FormType::class, $entrata)
       ->setAction($this->generateUrl('genitori_giustifica_ritardo', ['entrata' => $entrata->getId(), 'posizione' => $posizione]))
-      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_ritardo',
+      ->add('tipo', ChoiceType::class, ['label' => 'label.motivazione_ritardo',
         'choices' => $lista_motivazioni,
         'placeholder' => 'label.scelta_giustifica',
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
         'mapped' => false,
-        'required' => false))
-      ->add('motivazione', MessageType::class, array('label' => null,
+        'required' => false])
+      ->add('motivazione', MessageType::class, ['label' => null,
         'trim' => true,
-        'attr' => array('rows' => '3'),
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['class' => 'btn-primary']))
-      ->add('delete', SubmitType::class, array('label' => 'label.delete',
-        'attr' => ['class' => 'btn-danger']))
+        'attr' => ['rows' => '3'],
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']])
+      ->add('delete', SubmitType::class, ['label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1046,28 +1028,25 @@ class GenitoriController extends BaseController {
         // log azione
         if ($form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
             'Ritardo' => $entrata->getId(),
             'Motivazione' => $entrata_old->getMotivazione(),
-            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,
-            ));
+            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null]);
         } else {
           // inserisce o modifica
-          $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
             'Ritardo' => $entrata->getId(),
             'Motivazione' => $entrata_old->getMotivazione(),
-            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,
-            ));
+            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null]);
         }
       }
       // redirezione
       return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/giustifica_ritardo.html.twig', array(
+    return $this->render('ruolo_genitore/giustifica_ritardo.html.twig', [
       'info' => $info,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1092,8 +1071,8 @@ class GenitoriController extends BaseController {
   public function giustificaUscita(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
                                    LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
     // inizializza
-    $info = array();
-    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    $info = [];
+    $lista_motivazioni = ['label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9];
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -1129,25 +1108,23 @@ class GenitoriController extends BaseController {
     $uscita_old = clone $uscita;
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_uscita', FormType::class, $uscita)
       ->setAction($this->generateUrl('genitori_giustifica_uscita', ['uscita' => $uscita->getId(), 'posizione' => $posizione]))
-      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_ritardo',
+      ->add('tipo', ChoiceType::class, ['label' => 'label.motivazione_ritardo',
         'choices' => $lista_motivazioni,
         'placeholder' => 'label.scelta_giustifica',
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
         'mapped' => false,
-        'required' => false))
-      ->add('motivazione', MessageType::class, array('label' => null,
+        'required' => false])
+      ->add('motivazione', MessageType::class, ['label' => null,
         'trim' => true,
-        'attr' => array('rows' => '3'),
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['class' => 'btn-primary']))
-      ->add('delete', SubmitType::class, array('label' => 'label.delete',
-        'attr' => ['class' => 'btn-danger']))
+        'attr' => ['rows' => '3'],
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']])
+      ->add('delete', SubmitType::class, ['label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1173,28 +1150,25 @@ class GenitoriController extends BaseController {
         // log azione
         if ($form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
             'Uscita' => $uscita->getId(),
             'Motivazione' => $uscita_old->getMotivazione(),
-            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null,
-            ));
+            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null]);
         } else {
           // inserisce o modifica
-          $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
             'Uscita' => $uscita->getId(),
             'Motivazione' => $uscita_old->getMotivazione(),
-            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null,
-          ));
+            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null]);
         }
       }
       // redirezione
       return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('ruolo_genitore/giustifica_uscita.html.twig', array(
+    return $this->render('ruolo_genitore/giustifica_uscita.html.twig', [
       'info' => $info,
-      'form' => $form->createView(),
-    ));
+      'form' => $form->createView()]);
   }
 
   /**
@@ -1226,11 +1200,10 @@ class GenitoriController extends BaseController {
     // legge la classe (può essere null)
     $classe = $reg->classeInData(new \DateTime(), $alunno);
     // visualizza pagina
-    return $this->render('ruolo_genitore/deroghe.html.twig', array(
+    return $this->render('ruolo_genitore/deroghe.html.twig', [
       'pagina_titolo' => 'page.genitori_deroghe',
       'alunno' => $alunno,
-      'classe' => $classe,
-    ));
+      'classe' => $classe]);
   }
 
 }

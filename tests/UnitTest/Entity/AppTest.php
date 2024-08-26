@@ -26,7 +26,7 @@ class AppTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\App';
+    $this->entity = \App\Entity\App::class;
     // campi da testare
     $this->fields = ['nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati'];
     $this->noStoredFields = [];
@@ -74,7 +74,7 @@ class AppTest extends EntityTestCase {
           ($field == 'notifica' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'download' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'abilitati' ? $this->faker->passthrough(substr($this->faker->text(), 0, 4)) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -156,7 +156,7 @@ class AppTest extends EntityTestCase {
     $existent->setNotifica('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Notifica - VALID CHOICE');
     // abilitati
-    $property = $this->getPrivateProperty('App\Entity\App', 'abilitati');
+    $property = $this->getPrivateProperty(\App\Entity\App::class, 'abilitati');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Abilitati - NOT BLANK');

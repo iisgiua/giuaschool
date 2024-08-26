@@ -80,16 +80,16 @@ class CsvImporter {
   /**
    * Importa i docenti da file CSV
    *
-   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
+   * @param File|null $file File da importare
    *
    * @return array|null Lista dei docenti importati
    */
-  public function importaDocenti(Form $form, File $file=null) {
+  public function importaDocenti(Form $form, ?File $file) {
     $header = ['cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
-    $error = $this->checkFile($file, $header);
+    $error = $this->checkFile($header, $file);
     if ($error) {
       // errore
       if ($this->fh) {
@@ -220,16 +220,16 @@ class CsvImporter {
   /**
    * Importa i docenti da file CSV
    *
-   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
+   * @param File|null $file File da importare
    *
    * @return array|null Lista delle cattedtre importate
    */
-  public function importaCattedre(File $file=null, Form $form) {
-    $header = array('usernameDocente','classe','materia','usernameAlunno','tipo','supplenza');
+  public function importaCattedre(Form $form, ?File $file) {
+    $header = ['usernameDocente', 'classe', 'materia', 'usernameAlunno', 'tipo', 'supplenza'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
-    $error = $this->checkFile($file, $header);
+    $error = $this->checkFile($header, $file);
     if ($error) {
       // errore
       if ($this->fh) {
@@ -240,7 +240,7 @@ class CsvImporter {
       return null;
     }
     // lettura dati
-    $imported = array();
+    $imported = [];
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -257,8 +257,8 @@ class CsvImporter {
         return $imported;
       }
       // lettura campi
-      $fields = array();
-      $empty_fields = array();
+      $fields = [];
+      $empty_fields = [];
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
       }
@@ -392,7 +392,7 @@ class CsvImporter {
         // cattedra esiste
         if ($filtro == 'T' || $filtro == 'E') {
           // modifica cattedra
-          $error = $this->modificaCattedra($cattedra, $alunno, $fields, $empty_fields);
+          $error = $this->modificaCattedra($cattedra, $fields, $empty_fields, $alunno);
           if ($error) {
             // errore
             fclose($this->fh);
@@ -433,22 +433,22 @@ class CsvImporter {
   /**
    * Importa gli alunni da file CSV
    *
-   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
+   * @param File|null $file File da importare
    *
    * @return array|null Lista degli alunni importati
    */
-  public function importaAlunni(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
+  public function importaAlunni(Form $form, ?File $file=null) {
+    $header = ['cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
       'citta', 'indirizzo', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
       'classe', 'username', 'password', 'email',
       'genitore1Cognome', 'genitore1Nome', 'genitore1CodiceFiscale', 'genitore1Telefono',
       'genitore1Username', 'genitore1Password', 'genitore1Email',
       'genitore2Cognome', 'genitore2Nome', 'genitore2CodiceFiscale', 'genitore2Telefono',
-      'genitore2Username', 'genitore2Password', 'genitore2Email');
+      'genitore2Username', 'genitore2Password', 'genitore2Email'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
-    $error = $this->checkFile($file, $header);
+    $error = $this->checkFile($header, $file);
     if ($error) {
       // errore
       if ($this->fh) {
@@ -459,7 +459,7 @@ class CsvImporter {
       return null;
     }
     // lettura dati
-    $imported = array();
+    $imported = [];
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -476,8 +476,8 @@ class CsvImporter {
         return $imported;
       }
       // lettura campi
-      $fields = array();
-      $empty_fields = array();
+      $fields = [];
+      $empty_fields = [];
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
         $empty_fields[$this->header[$key]] = false;
@@ -504,10 +504,10 @@ class CsvImporter {
       $fields['genitore1Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Cognome']))));
       $fields['genitore1Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Nome']))));
       $fields['genitore1CodiceFiscale'] = strtoupper(trim($fields['genitore1CodiceFiscale']));
-      $telefono = array();
+      $telefono = [];
       foreach (explode(',', $fields['genitore1Telefono']) as $tel) {
         $tel = preg_replace('/\s/', '', $tel);
-        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
         if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
           $telefono[] = $tel;
         }
@@ -519,10 +519,10 @@ class CsvImporter {
       $fields['genitore2Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Cognome']))));
       $fields['genitore2Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Nome']))));
       $fields['genitore2CodiceFiscale'] = strtoupper(trim($fields['genitore2CodiceFiscale']));
-      $telefono = array();
+      $telefono = [];
       foreach (explode(',', $fields['genitore2Telefono']) as $tel) {
         $tel = preg_replace('/\s/', '', $tel);
-        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
         if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
           $telefono[] = $tel;
         }
@@ -554,8 +554,8 @@ class CsvImporter {
           // errore data
           fclose($this->fh);
           $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_date', array(
-            'data' => $fields['dataNascita'], 'num' => $count))));
+          $form->addError(new FormError($this->trans->trans('exception.file_date', [
+            'data' => $fields['dataNascita'], 'num' => $count])));
           return $imported;
         }
         $fields['dataNascita'] = $date;
@@ -629,7 +629,7 @@ class CsvImporter {
             $classeGruppo = substr($classeSezione, $pos + 1);
             $classeSezione = substr($classeSezione, 0, $pos);
           }
-          $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+          $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.sezione=:sezione AND '.
               ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
             ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -650,7 +650,7 @@ class CsvImporter {
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        if (strpos($fields['nome'], ' ') !== false) {
+        if (str_contains($fields['nome'], ' ')) {
           $nomi = explode(' ', $fields['nome']);
           $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
         } else {
@@ -658,7 +658,7 @@ class CsvImporter {
         }
         $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
         $username = preg_replace('/[^a-z\.]+/', '', $username);
-        $result = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        $result = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
           ->where('a.username LIKE :username')
           ->setParameter(':username', $username.'.s%')
           ->orderBy('a.username', 'DESC')
@@ -756,10 +756,10 @@ class CsvImporter {
       $genitore2 = null;
       if (!$empty_fields['username'] && !$empty_fields['genitore1Username'] && !$empty_fields['genitore2Username']) {
         // controlla esistenza di alunno
-        $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($fields['username']);
-        $genitore1 = $this->em->getRepository('App\Entity\Genitore')->findOneBy(['username' => $fields['genitore1Username'],
+        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneByUsername($fields['username']);
+        $genitore1 = $this->em->getRepository(\App\Entity\Genitore::class)->findOneBy(['username' => $fields['genitore1Username'],
           'alunno' => $alunno]);
-        $genitore2 = $this->em->getRepository('App\Entity\Genitore')->findOneBy(['username' => $fields['genitore2Username'],
+        $genitore2 = $this->em->getRepository(\App\Entity\Genitore::class)->findOneBy(['username' => $fields['genitore2Username'],
           'alunno' => $alunno]);
       }
       $modifica = $alunno && $genitore1 && $genitore2;
@@ -788,7 +788,7 @@ class CsvImporter {
           }
           // dati per la visualizzazione
           $fields['dataNascita'] = $fields['dataNascita'] ? $fields['dataNascita']->format('d/m/Y') : '';
-          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['classe'] = ($fields['classe'] ?: '');
           $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
           $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
@@ -800,7 +800,7 @@ class CsvImporter {
         } else {
           // nessuna modifica
           $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['classe'] = ($fields['classe'] ?: '');
           $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
           $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
@@ -813,7 +813,7 @@ class CsvImporter {
       } else {
         // utente non esiste
         if ($filtro == 'T' || ($filtro == 'N' &&
-            !$this->em->getRepository('App\Entity\Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']))) {
+            !$this->em->getRepository(\App\Entity\Alunno::class)->findOneByCodiceFiscale($fields['codiceFiscale']))) {
           // crea nuovo alunno
           $error = $this->nuovoAlunno($fields);
           if ($error) {
@@ -825,14 +825,14 @@ class CsvImporter {
           }
           // dati per la visualizzazione
           $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['classe'] = ($fields['classe'] ?: '');
           $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
           $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           $imported['NEW'][$count] = $fields;
         } else {
           // nessuna modifica
           $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['classe'] = ($fields['classe'] ?: '');
           $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
           $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
@@ -853,16 +853,16 @@ class CsvImporter {
   /**
    * Importa i dati del personale ATA da file CSV
    *
-   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
+   * @param File|null $file File da importare
    *
    * @return array|null Lista degli ATA importati
    */
-  public function importaAta(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email', 'tipo', 'segreteria', 'sede');
+  public function importaAta(Form $form, ?File $file) {
+    $header = ['cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email', 'tipo', 'segreteria', 'sede'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
-    $error = $this->checkFile($file, $header);
+    $error = $this->checkFile($header, $file);
     if ($error) {
       // errore
       if ($this->fh) {
@@ -873,7 +873,7 @@ class CsvImporter {
       return null;
     }
     // lettura dati
-    $imported = array();
+    $imported = [];
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -890,8 +890,8 @@ class CsvImporter {
         return $imported;
       }
       // lettura campi
-      $fields = array();
-      $empty_fields = array();
+      $fields = [];
+      $empty_fields = [];
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
       }
@@ -922,7 +922,7 @@ class CsvImporter {
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        if (strpos($fields['nome'], ' ') !== false) {
+        if (str_contains($fields['nome'], ' ')) {
           $nomi = explode(' ', $fields['nome']);
           $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
         } else {
@@ -961,7 +961,7 @@ class CsvImporter {
         $fields['sede'] = null;
       }
       // controlla esistenza
-      $ata = $this->em->getRepository('App\Entity\Ata')->findOneByUsername($fields['username']);
+      $ata = $this->em->getRepository(\App\Entity\Ata::class)->findOneByUsername($fields['username']);
       if ($ata) {
         // utente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -1014,16 +1014,16 @@ class CsvImporter {
   /**
    * Importa l'orario dei docenti da file CSV
    *
-   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
+   * @param File|null $file File da importare
    *
    * @return array|null Lista degli orari importati
    */
-  public function importaOrario(File $file=null, Form $form) {
-    $header = array('username', 'sede', 'giorno', 'ora', 'classe', 'materia');
+  public function importaOrario(Form $form, ?File $file) {
+    $header = ['username', 'sede', 'giorno', 'ora', 'classe', 'materia'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
-    $error = $this->checkFile($file, $header);
+    $error = $this->checkFile($header, $file);
     if ($error) {
       // errore
       if ($this->fh) {
@@ -1034,7 +1034,7 @@ class CsvImporter {
       return null;
     }
     // lettura dati
-    $imported = array();
+    $imported = [];
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -1051,8 +1051,8 @@ class CsvImporter {
         return $imported;
       }
       // lettura campi
-      $fields = array();
-      $empty_fields = array();
+      $fields = [];
+      $empty_fields = [];
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
       }
@@ -1074,7 +1074,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['username']);
+      $lista = $this->em->getRepository(\App\Entity\Docente::class)->findByUsername($fields['username']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -1090,7 +1090,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository('App\Entity\Sede')->findByNomeBreve($fields['sede']);
+      $lista = $this->em->getRepository(\App\Entity\Sede::class)->findByNomeBreve($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -1100,12 +1100,12 @@ class CsvImporter {
       }
       $sede = $lista[0];
       // legge orario
-      $definizione_orario = $this->em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
+      $definizione_orario = $this->em->getRepository(\App\Entity\Orario::class)->createQueryBuilder('o')
         ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
         ->getQuery()
         ->getResult();
-      $scansione_oraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
+      $scansione_oraria = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
         ->join('so.orario', 'o')
         ->where('o.id=:orario')
         ->setParameters(['orario' => ($definizione_orario ? $definizione_orario[0] : null)])
@@ -1118,7 +1118,7 @@ class CsvImporter {
         $form->addError(new FormError($this->trans->trans('exception.file_orario', ['num' => $count])));
         return $imported;
       }
-      $ore = array();
+      $ore = [];
       foreach ($scansione_oraria as $so) {
         $ore[$so->getGiorno()][$so->getOra()] = [$so->getInizio()->format('H:i'),
           $so->getFine()->format('H:i'), $so->getDurata()];
@@ -1152,7 +1152,7 @@ class CsvImporter {
           $classeGruppo = substr($classeSezione, $pos + 1);
           $classeSezione = substr($classeSezione, 0, $pos);
         }
-        $classe = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
           ->where('c.anno=:anno AND c.sezione=:sezione AND '.
             ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
           ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -1171,7 +1171,7 @@ class CsvImporter {
       // controlla esistenza di materia
       $materia = null;
       if ($fields['materia'] != '---') {
-        $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
+        $lista = $this->em->getRepository(\App\Entity\Materia::class)->findByNomeNormalizzato($fields['materia']);
         if (count($lista) != 1) {
           // errore: materia
           fclose($this->fh);
@@ -1183,7 +1183,7 @@ class CsvImporter {
       }
       // controlla esistenza cattedra
       if ($classe && $materia) {
-        $lista = $this->em->getRepository('App\Entity\Cattedra')->findBy(['docente' => $docente,
+        $lista = $this->em->getRepository(\App\Entity\Cattedra::class)->findBy(['docente' => $docente,
           'classe' => $classe, 'materia' => $materia]);
         if (count($lista) != 1) {
           // errore: cattedra
@@ -1200,7 +1200,7 @@ class CsvImporter {
         $cattedra = null;
       }
       // controlla esistenza di orario
-      $orario = $this->em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
+      $orario = $this->em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
         ->join('od.orario', 'o')
         ->join('od.cattedra', 'c')
         ->where('o.id=:orario AND c.docente=:docente AND od.giorno=:giorno AND od.ora=:ora')
@@ -1256,14 +1256,14 @@ class CsvImporter {
   /**
    * Controlla il file caricato
    *
-   * @param File $file File da importare
    * @param array $header Lista dei campi da importare
+   * @param File|null $file File da importare
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function checkFile(File $file=null, $header) {
+  private function checkFile(array $header, ?File $file) {
     $this->fh = null;
-    $this->header = array();
+    $this->header = [];
     if (!$file) {
       // errore file mancante
       return 'exception.file_mancante';
@@ -1288,7 +1288,7 @@ class CsvImporter {
     foreach ($header as $field) {
       if (($pos = array_search(strtolower($field), $row)) === false) {
         // campo mancante
-        $this->header = array();
+        $this->header = [];
         return 'exception.file_field';
       }
       $this->header[$pos] = $field;
@@ -1720,7 +1720,7 @@ class CsvImporter {
    */
   private function nuovoAta($fields) {
     // legge sede
-    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByNomeBreve($fields['sede']);
+    $sede = $this->em->getRepository(\App\Entity\Sede::class)->findOneByNomeBreve($fields['sede']);
     if ($fields['sede'] && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');
@@ -1799,7 +1799,7 @@ class CsvImporter {
       unset($fields['segreteria']);
     }
     // legge sede
-    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByNomeBreve($fields['sede']);
+    $sede = $this->em->getRepository(\App\Entity\Sede::class)->findOneByNomeBreve($fields['sede']);
     if (!isset($empty_fields['sede']) && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');
@@ -1827,13 +1827,13 @@ class CsvImporter {
    * NB: non viene effettuato provisioning
    *
    * @param Cattedra $cattedra Cattedra da modificare
-   * @param Alunno $alunno Alunno da modificare
    * @param array $fields Lista dei dati dell'utente
    * @param array $empty_fields Lista dei dati nulli
+   * @param Alunno|null $alunno Alunno da modificare
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function modificaCattedra(Cattedra $cattedra, Alunno $alunno=null, &$fields, $empty_fields) {
+  private function modificaCattedra(Cattedra $cattedra, array &$fields, array $empty_fields, ?Alunno $alunno=null) {
     // modifica dati opzionali solo se specificati
     if (!isset($empty_fields['usernameAlunno'])) {
       $cattedra->setAlunno($alunno);

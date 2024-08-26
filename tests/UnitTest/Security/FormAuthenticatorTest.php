@@ -109,11 +109,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // otp: restituisce TRUE se i codici sono uguali
     $this->mockedOtp = $this->createMock(OtpUtil::class);
     $this->mockedOtp->method('controllaOtp')->willReturnCallback(
-      function($o1, $o2) { return $o1 === $o2 && !empty($o1); });
+      fn($o1, $o2) => $o1 === $o2 && !empty($o1));
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(
@@ -288,8 +288,8 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente con id provider attivo
     $utente = $this->getReference('docente_curricolare_1');
     $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $fa->checkCredentials($credenziali, $utente);
@@ -322,7 +322,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore1_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', '');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', '');
     $utente->setOtp('otp1234');
     $this->em->flush();
     try {
@@ -340,7 +340,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore2_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     try {
@@ -449,7 +449,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
@@ -474,7 +474,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otpALTRO');
     $this->em->flush();
@@ -501,7 +501,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $utente->setListaProfili(['GENITORE' => [1], 'DOCENTE' => [2]]);
     $this->em->flush();

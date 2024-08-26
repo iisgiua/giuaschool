@@ -26,7 +26,7 @@ class AssenzaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Assenza';
+    $this->entity = \App\Entity\Assenza::class;
     // campi da testare
     $this->fields = ['data', 'giustificato', 'motivazione', 'dichiarazione', 'certificati', 'alunno', 'docente', 'docenteGiustifica', 'utenteGiustifica'];
     $this->noStoredFields = [];
@@ -71,8 +71,8 @@ class AssenzaTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'giustificato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'motivazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1024)) :
-          ($field == 'dichiarazione' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'certificati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dichiarazione' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'certificati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'docenteGiustifica' ? $this->getReference("docente_curricolare_2") :
@@ -130,7 +130,7 @@ class AssenzaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Assenza', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\Assenza::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
@@ -150,14 +150,14 @@ class AssenzaTest extends EntityTestCase {
     $existent->setMotivazione(str_repeat('*', 1024));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Motivazione - VALID MAX LENGTH');
     // alunno
-    $property = $this->getPrivateProperty('App\Entity\Assenza', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\Assenza::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\Assenza', 'docente');
+    $property = $this->getPrivateProperty(\App\Entity\Assenza::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

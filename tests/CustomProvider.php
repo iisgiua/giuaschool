@@ -59,7 +59,7 @@ class CustomProvider extends Base {
    *
    * @return ArrayCollection La collezione di oggetti creata
    */
-  public function collection($args=null): ArrayCollection {
+  public function collection(mixed $args=null): ArrayCollection {
     $objects = func_get_args();
     return new ArrayCollection($objects);
   }
@@ -73,7 +73,7 @@ class CustomProvider extends Base {
    *
    * @return mixed Il valore indicato dalla condizione
    */
-  public function ife($test, $ifTrue, $ifFalse) {
+  public function ife(mixed $test, mixed $ifTrue, mixed $ifFalse) {
     return eval('return '.$test.';') ? $ifTrue :  $ifFalse;
   }
 
@@ -87,7 +87,7 @@ class CustomProvider extends Base {
    *
    * @return mixed Il valore indicato dalla condizione
    */
-  public function ifand($test1, $test2, $ifTrue, $ifFalse) {
+  public function ifand(mixed $test1, mixed $test2, mixed $ifTrue, mixed $ifFalse) {
     return (eval('return '.$test1.';') && eval('return '.$test2.';')) ? $ifTrue : $ifFalse;
   }
 
@@ -101,7 +101,7 @@ class CustomProvider extends Base {
    *
    * @return mixed Il valore relativo al caso indicato
    */
-  public function case($test, $cases, $values, $default) {
+  public function case(mixed $test, $cases, $values, mixed $default) {
     $index = array_search(eval('return '.$test.';'), $cases);
     if ($index === false) {
       return $default;
@@ -137,11 +137,11 @@ class CustomProvider extends Base {
    *
    * @return array Restituisce una lista vuota
    */
-  public function arrayId($name, $property, $obj, $args): array {
+  public function arrayId($name, $property, mixed $obj, mixed $args): array {
     // memorizza informazioni
     static::$postPersistProperty[$name][$property] = [$obj, array_slice(func_get_args(), 3)];
     // restituisce lista vuota
-    return array();
+    return [];
   }
 
   /**
@@ -157,11 +157,11 @@ class CustomProvider extends Base {
    *
    * @return array Restituisce una lista vuota
    */
-  public function arrayDataId($name, $property, $field, $obj, $args): array {
+  public function arrayDataId($name, $property, $field, mixed $obj, mixed $args): array {
     // memorizza informazioni
     static::$postPersistData[$name][$property]['A:'.$field] = [$obj, array_slice(func_get_args(), 4)];
     // restituisce lista vuota
-    return array();
+    return [];
   }
 
   /**
@@ -178,11 +178,11 @@ class CustomProvider extends Base {
    *
    * @return array Restituisce una lista vuota
    */
-  public function arrayMultiDataId($name, $property, $field, $obj, $keys, $values): array {
+  public function arrayMultiDataId($name, $property, $field, mixed $obj, $keys, $values): array {
     // memorizza informazioni
     static::$postPersistData[$name][$property]['M:'.$field] = [$obj, $keys, $values];
     // restituisce lista vuota
-    return array();
+    return [];
   }
 
   /**
@@ -199,11 +199,11 @@ class CustomProvider extends Base {
    *
    * @return array Restituisce una lista vuota
    */
-  public function arrayMulti2DataId($name, $property, $field, $obj, $keys, $args): array {
+  public function arrayMulti2DataId($name, $property, $field, mixed $obj, $keys, $args): array {
     // memorizza informazioni
     static::$postPersistData[$name][$property]['2:'.$field] = [$obj, $keys, array_slice(func_get_args(), 5)];
     // restituisce lista vuota
-    return array();
+    return [];
   }
 
   /**
@@ -221,11 +221,11 @@ class CustomProvider extends Base {
    *
    * @return array Restituisce una lista vuota
    */
-  public function arrayObjDataId($name, $property, $field, $obj, $class, $keys, $args): array {
+  public function arrayObjDataId($name, $property, $field, mixed $obj, $class, $keys, mixed $args): array {
     // memorizza informazioni
     static::$postPersistData[$name][$property]['O:'.$field] = [$obj, $class, $keys, array_slice(func_get_args(), 6)];
     // restituisce lista vuota
-    return array();
+    return [];
   }
 
 
@@ -242,7 +242,7 @@ class CustomProvider extends Base {
    *
    * @return null Restituisce un valore nullo
    */
-  public function dataId($name, $property, $field, $obj, $arg) {
+  public function dataId($name, $property, $field, mixed $obj, mixed $arg) {
     // memorizza informazioni
     static::$postPersistData[$name][$property]['S:'.$field] = [$obj, [$arg]];
     // restituisce un valore vuoto
@@ -256,7 +256,7 @@ class CustomProvider extends Base {
   public function postPersistArrayId(): void {
     foreach (static::$postPersistProperty as $name => $attrs) {
       foreach ($attrs as $property => $list) {
-        $list[0]->{'set'.ucfirst($property)}(array_map(function($o) { return $o->getId(); }, $list[1]));
+        $list[0]->{'set'.ucfirst($property)}(array_map(fn($o) => $o->getId(), $list[1]));
       }
     }
     foreach (static::$postPersistData as $name => $attrs) {
@@ -264,20 +264,20 @@ class CustomProvider extends Base {
         foreach ($fields as $field => $list) {
           $values = $list[0]->{'get'.ucfirst($property)}();
           $fieldName = substr($field, 2);
-          if (substr($field, 0, 2) == 'A:') {
+          if (str_starts_with($field, 'A:')) {
             // lista
-            $values[$fieldName] = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
-          } elseif (substr($field, 0, 2) == 'M:') {
+            $values[$fieldName] = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
+          } elseif (str_starts_with($field, 'M:')) {
             // vettore associativo
-            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
-            $arrayValues = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[2]);
+            $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
+            $arrayValues = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[2]);
             $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
-          } elseif (substr($field, 0, 2) == '2:') {
+          } elseif (str_starts_with($field, '2:')) {
             // vettore multidimensionale associativo
-            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[1]);
+            $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
             $arrayValues = [];
             foreach ($list[2] as $arrayList) {
-              $arrayList = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $arrayList);
+              $arrayList = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $arrayList);
               $index = 0;
               $temp = [];
               foreach ($arrayList as $arrayValue) {
@@ -289,13 +289,13 @@ class CustomProvider extends Base {
               $arrayValues[] = $temp;
             }
             $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
-          } elseif (substr($field, 0, 2) == 'O:') {
+          } elseif (str_starts_with($field, 'O:')) {
             // vettore di oggetti
             $class = $list[1];
-            $arrayKeys = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $list[2]);
+            $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[2]);
             $arrayValues = [];
             foreach ($list[3] as $arrayList) {
-              $arrayList = array_map(fn($o) => (is_object($o) && get_class($o) != 'DateTime') ? $o->getId() : $o, $arrayList);
+              $arrayList = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $arrayList);
               $index = 0;
               $object = new $class();
               foreach ($arrayList as $arrayValue) {
@@ -309,7 +309,7 @@ class CustomProvider extends Base {
             $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
           } else {
             // valore
-            $values[$fieldName] = (is_object($list[1][0]) && get_class($list[1][0]) != 'DateTime') ? $list[1][0]->getId() : $list[1][0];
+            $values[$fieldName] = (is_object($list[1][0]) && $list[1][0]::class != 'DateTime') ? $list[1][0]->getId() : $list[1][0];
           }
           $list[0]->{'set'.ucfirst($property)}($values);
         }

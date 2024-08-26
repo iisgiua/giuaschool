@@ -26,7 +26,7 @@ class StoricoVotoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\StoricoVoto';
+    $this->entity = \App\Entity\StoricoVoto::class;
     // campi da testare
     $this->fields = ['voto', 'carenze', 'dati', 'storicoEsito', 'materia'];
     $this->noStoredFields = [];
@@ -71,7 +71,7 @@ class StoricoVotoTest extends EntityTestCase {
         $data[$i][$field] =
           ($field == 'voto' ? $this->faker->randomNumber(4, false) :
           ($field == 'carenze' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'storicoEsito' ? $this->getReference("storico_esito_G") :
           ($field == 'materia' ? $this->getReference("materia_curricolare_".($i + 1)) :
           null)))));
@@ -128,7 +128,7 @@ class StoricoVotoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // storicoEsito
     $temp = $existent->getStoricoEsito();
-    $property = $this->getPrivateProperty('App\Entity\StoricoVoto', 'storicoEsito');
+    $property = $this->getPrivateProperty(\App\Entity\StoricoVoto::class, 'storicoEsito');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::StoricoEsito - NOT BLANK');
@@ -136,7 +136,7 @@ class StoricoVotoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::StoricoEsito - VALID NOT BLANK');
     // materia
     $temp = $existent->getMateria();
-    $property = $this->getPrivateProperty('App\Entity\StoricoVoto', 'materia');
+    $property = $this->getPrivateProperty(\App\Entity\StoricoVoto::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');

@@ -26,7 +26,7 @@ class AssenzaLezioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\AssenzaLezione';
+    $this->entity = \App\Entity\AssenzaLezione::class;
     // campi da testare
     $this->fields = ['alunno', 'lezione', 'ore'];
     $this->noStoredFields = [];
@@ -128,7 +128,7 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
     $temp = $existent->getAlunno();
-    $property = $this->getPrivateProperty('App\Entity\AssenzaLezione', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\AssenzaLezione::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
@@ -136,7 +136,7 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // lezione
     $temp = $existent->getLezione();
-    $property = $this->getPrivateProperty('App\Entity\AssenzaLezione', 'lezione');
+    $property = $this->getPrivateProperty(\App\Entity\AssenzaLezione::class, 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');

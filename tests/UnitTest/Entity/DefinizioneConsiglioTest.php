@@ -26,7 +26,7 @@ class DefinizioneConsiglioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\DefinizioneConsiglio';
+    $this->entity = \App\Entity\DefinizioneConsiglio::class;
     // campi da testare
     $this->fields = ['data', 'argomenti', 'dati'];
     $this->noStoredFields = [];
@@ -68,8 +68,8 @@ class DefinizioneConsiglioTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'data' ? $this->faker->dateTime() :
-          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -139,7 +139,7 @@ class DefinizioneConsiglioTest extends EntityTestCase {
     // data
     $existent->setData(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
-    $property = $this->getPrivateProperty('App\Entity\DefinizioneConsiglio', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\DefinizioneConsiglio::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');

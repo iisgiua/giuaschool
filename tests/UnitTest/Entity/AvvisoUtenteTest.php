@@ -26,7 +26,7 @@ class AvvisoUtenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\AvvisoUtente';
+    $this->entity = \App\Entity\AvvisoUtente::class;
     // campi da testare
     $this->fields = ['avviso', 'utente', 'letto'];
     $this->noStoredFields = [];
@@ -125,14 +125,14 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // avviso
     $temp = $existent->getAvviso();
-    $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'avviso');
+    $property = $this->getPrivateProperty(\App\Entity\AvvisoUtente::class, 'avviso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
     $existent->setAvviso($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'utente');
+    $property = $this->getPrivateProperty(\App\Entity\AvvisoUtente::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');

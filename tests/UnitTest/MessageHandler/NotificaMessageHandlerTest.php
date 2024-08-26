@@ -96,7 +96,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // translator: restituisce tag richiesta
     $this->mockedTranslator = $this->createMock(TranslatorInterface::class);
     $this->mockedTranslator->method('trans')->willReturnCallback(
-      function($tag) { return $tag; });
+      fn($tag) => $tag);
     // environment: inserisce dati in coda template
     $this->mockedEnvironment = $this->createMock(Environment::class);
     $this->mockedEnvironment->method('render')->willReturnCallback(

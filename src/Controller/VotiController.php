@@ -59,8 +59,8 @@ class VotiController extends BaseController {
   public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
                              int $periodo): Response {
     // inizializza variabili
-    $dati = array();
-    $dati['alunni'] = array();
+    $dati = [];
+    $dati['alunni'] = [];
     $info = null;
     $azione_edit = false;
     $lista_periodi = null;
@@ -73,7 +73,7 @@ class VotiController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -93,12 +93,12 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -132,7 +132,7 @@ class VotiController extends BaseController {
         $inizio = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['inizio']);
         $fine = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['fine']);
         // controlla permessi
-        if ($reg->azioneVoti($inizio, $this->getUser(), null, $classe, $cattedra->getMateria())) {
+        if ($reg->azioneVoti($inizio, $this->getUser(), $classe, $cattedra->getMateria(), null)) {
           // edit permesso
           $azione_edit = true;
         }
@@ -144,7 +144,7 @@ class VotiController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/voti_quadro.html.twig', array(
+    return $this->render('lezioni/voti_quadro.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -152,8 +152,7 @@ class VotiController extends BaseController {
       'dati' => $dati,
       'edit' => $azione_edit,
       'lista_periodi' => $lista_periodi,
-      'periodo' => $periodo,
-    ));
+      'periodo' => $periodo]);
   }
 
   /**
@@ -180,7 +179,7 @@ class VotiController extends BaseController {
                              LogHandler $dblogger, int $cattedra, string $tipo,
                              string $data): Response {
     // inizializza
-    $label = array();
+    $label = [];
     $visibile = true;
     $argomento = null;
     $elenco = null;
@@ -190,7 +189,7 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($cattedra);
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -220,35 +219,34 @@ class VotiController extends BaseController {
     $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
-      ->add('data', DateType::class, array('label' => 'label.data',
+      ->add('data', DateType::class, ['label' => 'label.data',
         'data' => $data,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
         'mapped' => false,
-        'required' => true))
-      ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
+        'required' => true])
+      ->add('visibile', ChoiceType::class, ['label' => 'label.visibile_genitori',
         'data' => $visibile,
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('argomento', MessageType::class, array('label' => 'label.voto_argomento',
+        'required' => true])
+      ->add('argomento', MessageType::class, ['label' => 'label.voto_argomento',
         'data' => $argomento,
         'trim' => true,
-        'required' => false))
-      ->add('lista', CollectionType::class, array('label' => false,
+        'required' => false])
+      ->add('lista', CollectionType::class, ['label' => false,
         'data' => $elenco,
         'entry_type' => VotoClasseType::class,
-        'entry_options' => array('label' => false),
-        ))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'entry_options' => ['label' => false]])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]))
+      '   onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -259,7 +257,7 @@ class VotiController extends BaseController {
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
-      $lezione = $this->em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
+      $lezione = $this->em->getRepository(\App\Entity\Lezione::class)->lezioneVoto($form->get('data')->getData(),
         $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
@@ -267,7 +265,7 @@ class VotiController extends BaseController {
           ['materia' => $cattedra->getMateria()->getNomeBreve()])));
       }
       // controlla permessi
-      if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), null, $classe, $cattedra->getMateria())) {
+      if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria(), null)) {
         // errore: azione non permessa
         $form->addError(new FormError($trans->trans('exception.non_permesso_in_data')));
       }
@@ -283,9 +281,9 @@ class VotiController extends BaseController {
         }
       }
       if ($form->isValid()) {
-        $log['create'] = array();
-        $log['edit'] = array();
-        $log['delete'] = array();
+        $log['create'] = [];
+        $log['edit'] = [];
+        $log['delete'] = [];
         // controlla presenza alunni con voto
         $alunniVoto = [];
         foreach ($form->get('lista')->getData() as $valutazione) {
@@ -295,7 +293,7 @@ class VotiController extends BaseController {
           }
         }
         $conferma = 1;
-        $assenti = $this->em->getRepository('App\Entity\Lezione')->alunniAssenti($lezione, $alunniVoto);
+        $assenti = $this->em->getRepository(\App\Entity\Lezione::class)->alunniAssenti($lezione, $alunniVoto);
         if (!empty($assenti) && $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
           // alunni assenti: richiede conferma
           $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
@@ -309,10 +307,10 @@ class VotiController extends BaseController {
               $valutazione->setVoto(10);
             }
             // legge alunno
-            $alunno = $this->em->getRepository('App\Entity\Alunno')->find($valutazione->getId());
+            $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($valutazione->getId());
             // legge vecchio voto
             $voto = ($elenco_precedente[$key]->getVotoId() ?
-              $this->em->getRepository('App\Entity\Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
+              $this->em->getRepository(\App\Entity\Valutazione::class)->find($elenco_precedente[$key]->getVotoId()) : null);
             if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
               // valutazione aggiunta
               $voto = (new Valutazione())
@@ -330,15 +328,15 @@ class VotiController extends BaseController {
               $log['create'][] = $voto;
             } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
               // valutazione cancellata
-              $log['delete'][] = array($voto->getId(), $voto);
+              $log['delete'][] = [$voto->getId(), $voto];
               $this->em->remove($voto);
             } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
                       $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
                       $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
                       $voto->getLezione()->getId() != $lezione->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
               // valutazione modificata
-              $log['edit'][] = array($voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
-                $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia());
+              $log['edit'][] = [$voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
+                $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia()];
               $voto
                 ->setVisibile($form->get('visibile')->getData())
                 ->setMedia($valutazione->getMedia())
@@ -351,37 +349,31 @@ class VotiController extends BaseController {
           // ok: memorizza dati
           $this->em->flush();
           // log azione
-          $dblogger->logAzione('VOTI', 'Voti della classe', array(
+          $dblogger->logAzione('VOTI', 'Voti della classe', [
             'Tipo' => $tipo,
-            'Voti creati' => implode(', ', array_map(function ($e) {
-                return $e->getId();
-              }, $log['create'])),
-            'Voti modificati' => implode(', ', array_map(function ($e) {
-                return '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
-                  ', Lezione: '.$e[3].
-                  ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']';
-              }, $log['edit'])),
-            'Voti cancellati' => implode(', ', array_map(function ($e) {
-                return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
-                  ', Media: '.$e[1]->getMedia().
-                  ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
-                  ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
-                  ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
-              }, $log['delete']))
-            ));
+            'Voti creati' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
+            'Voti modificati' => implode(', ', array_map(fn($e) => '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
+              ', Lezione: '.$e[3].
+              ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']',
+              $log['edit'])),
+            'Voti cancellati' => implode(', ', array_map(fn($e) => '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
+              ', Media: '.$e[1]->getMedia().
+              ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
+              ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
+              ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']',
+              $log['delete']))]);
           // redirezione
           return $this->redirectToRoute('lezioni_voti_quadro');
         }
       }
     }
     // mostra la pagina di risposta
-    return $this->render('lezioni/voti_classe_edit.html.twig', array(
+    return $this->render('lezioni/voti_classe_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti',
       'form' => $form->createView(),
       'form_title' => 'title.voti_classe',
       'label' => $label,
-      'assenti' => $assenti,
-    ));
+      'assenti' => $assenti]);
   }
 
   /**
@@ -409,13 +401,13 @@ class VotiController extends BaseController {
                              LogHandler $dblogger, int $cattedra, int $alunno, string $tipo,
                              int $id): Response {
     // inizializza
-    $label = array();
+    $label = [];
     if ($request->isMethod('GET')) {
       // inizializza sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->find($cattedra);
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -423,7 +415,7 @@ class VotiController extends BaseController {
     // recupera classe
     $classe = $cattedra->getClasse();
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
+    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -431,12 +423,12 @@ class VotiController extends BaseController {
     // controllo voto
     if ($id) {
       // legge voto
-      $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id, 'alunno' => $alunno,
+      $valutazione = $this->em->getRepository(\App\Entity\Valutazione::class)->findOneBy(['id' => $id, 'alunno' => $alunno,
         'docente' => $this->getUser(), 'tipo' => $tipo]);
       if ($valutazione) {
-        $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
+        $valutazione_precedente = [$valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
           $valutazione->getVoto(), $valutazione->getGiudizio(), $valutazione->getLezione()->getId(),
-          $valutazione->getMedia(), $valutazione->getMateria());
+          $valutazione->getMedia(), $valutazione->getMateria()];
         $data = $valutazione->getLezione()->getData();
       }
     }
@@ -464,44 +456,44 @@ class VotiController extends BaseController {
     $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
-      ->add('data', DateType::class, array('label' => 'label.data',
+      ->add('data', DateType::class, ['label' => 'label.data',
         'data' => $data,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
         'mapped' => false,
-        'required' => true))
-      ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
+        'required' => true])
+      ->add('visibile', ChoiceType::class, ['label' => 'label.visibile_genitori',
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('media', ChoiceType::class, array('label' => 'label.voto_in_media',
+        'required' => true])
+      ->add('media', ChoiceType::class, ['label' => 'label.voto_in_media',
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('argomento', MessageType::class, array('label' => 'label.voto_argomento',
+        'required' => true])
+      ->add('argomento', MessageType::class, ['label' => 'label.voto_argomento',
         'trim' => true,
-        'required' => false))
+        'required' => false])
       ->add('voto', HiddenType::class)
-      ->add('giudizio', MessageType::class, array('label' => 'label.voto_giudizio',
+      ->add('giudizio', MessageType::class, ['label' => 'label.voto_giudizio',
         'trim' => true,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']));
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']]);
     if ($valutazione_precedente) {
       $form = $form
-        ->add('delete', SubmitType::class, array('label' => 'label.delete',
-          'attr' => ['widget' => 'gs-button-inline', 'class' => 'btn-danger']));
+        ->add('delete', SubmitType::class, ['label' => 'label.delete',
+          'attr' => ['widget' => 'gs-button-inline', 'class' => 'btn-danger']]);
     }
     $form = $form
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]))
+          'onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -523,7 +515,7 @@ class VotiController extends BaseController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
-        $lezione = $this->em->getRepository('App\Entity\Lezione')->lezioneVoto($form->get('data')->getData(),
+        $lezione = $this->em->getRepository(\App\Entity\Lezione::class)->lezioneVoto($form->get('data')->getData(),
           $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
@@ -534,7 +526,7 @@ class VotiController extends BaseController {
           $valutazione->setLezione($lezione);
         }
         // controlla permessi
-        if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $alunno, $classe, $cattedra->getMateria())) {
+        if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria(), $alunno)) {
           // errore: azione non permessa
           $form->addError(new FormError($trans->trans('exception.non_permesso_in_data')));
         }
@@ -547,7 +539,7 @@ class VotiController extends BaseController {
       if ($form->isValid()) {
         // controlla presenza alunno
         $conferma = 1;
-        $assente = $this->em->getRepository('App\Entity\Lezione')->alunnoAssente($valutazione->getLezione(),
+        $assente = $this->em->getRepository(\App\Entity\Lezione::class)->alunnoAssente($valutazione->getLezione(),
           $valutazione->getAlunno());
         if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
             $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
@@ -564,7 +556,7 @@ class VotiController extends BaseController {
           // log azione
           if ($valutazione_precedente && $form->get('delete')->isClicked()) {
             // cancellazione
-            $dblogger->logAzione('VOTI', 'Cancella voto', array(
+            $dblogger->logAzione('VOTI', 'Cancella voto', [
               'Id' => $valutazione_precedente[0],
               'Tipo' => $tipo,
               'Visibile' => $valutazione_precedente[1],
@@ -575,28 +567,25 @@ class VotiController extends BaseController {
               'Docente' => $valutazione->getDocente()->getId(),
               'Alunno' => $valutazione->getAlunno()->getId(),
               'Lezione' => $valutazione_precedente[5],
-              'Materia' => $valutazione_precedente[6]
-              ));
+              'Materia' => $valutazione_precedente[6]]);
           } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
                     $valutazione_precedente[4] != $valutazione->getGiudizio() ||
                     $valutazione_precedente[2] != $valutazione->getArgomento() ||
                     $valutazione_precedente[1] != $valutazione->getVisibile() ||
                     $valutazione_precedente[6] != $valutazione->getMedia())) {
             // modifica
-            $dblogger->logAzione('VOTI', 'Modifica voto', array(
+            $dblogger->logAzione('VOTI', 'Modifica voto', [
               'Id' => $valutazione_precedente[0],
               'Visibile' => $valutazione_precedente[1],
               'Media' => $valutazione_precedente[6],
               'Argomento' => $valutazione_precedente[2],
               'Voto' => $valutazione_precedente[3],
               'Giudizio' => $valutazione_precedente[4],
-              'Lezione' => $valutazione_precedente[5]
-              ));
+              'Lezione' => $valutazione_precedente[5]]);
           } elseif (!$valutazione_precedente) {
             // creazione
-            $dblogger->logAzione('VOTI', 'Crea voto', array(
-              'Id' => $valutazione->getId()
-              ));
+            $dblogger->logAzione('VOTI', 'Crea voto', [
+              'Id' => $valutazione->getId()]);
           }
           // redirezione
           return $this->redirectToRoute('lezioni_voti_quadro');
@@ -604,12 +593,11 @@ class VotiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('lezioni/voti_alunno_edit.html.twig', array(
+    return $this->render('lezioni/voti_alunno_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti',
       'form' => $form->createView(),
       'form_title' => 'title.voti_alunno',
-      'label' => $label,
-    ));
+      'label' => $label]);
   }
 
   /**
@@ -649,7 +637,7 @@ class VotiController extends BaseController {
     }
     // parametro alunno
     if ($alunno > 0) {
-      $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
+      $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
       if (!$alunno) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -658,7 +646,7 @@ class VotiController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -671,7 +659,7 @@ class VotiController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -680,7 +668,7 @@ class VotiController extends BaseController {
     if ($cattedra) {
       // lista alunni
       $listaAlunni = $reg->alunniInData(new \DateTime(), $classe);
-      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.id IN (:lista)')
         ->setParameters(['lista' => $listaAlunni])
@@ -707,15 +695,14 @@ class VotiController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/voti_dettagli.html.twig', array(
+    return $this->render('lezioni/voti_dettagli.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti_dettagli',
       'cattedra' => $cattedra,
       'classe' => $classe,
       'alunni' => $alunni,
       'idalunno' => ($alunno ? $alunno->getId() : 0),
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -751,7 +738,7 @@ class VotiController extends BaseController {
     // controllo cattedra
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -768,7 +755,7 @@ class VotiController extends BaseController {
     }
     // parametro materia
     if ($materia > 0) {
-      $materia = $this->em->getRepository('App\Entity\Materia')->find($materia);
+      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($materia);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -794,7 +781,7 @@ class VotiController extends BaseController {
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
     $this->reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
-    return $this->render('lezioni/voti_sostegno.html.twig', array(
+    return $this->render('lezioni/voti_sostegno.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti_dettagli',
       'cattedra' => $cattedra,
       'classe' => $classe,
@@ -802,8 +789,7 @@ class VotiController extends BaseController {
       'materie' => $materie,
       'idmateria' => ($materia ? $materia->getId() : 0),
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -857,7 +843,7 @@ class VotiController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -878,11 +864,10 @@ class VotiController extends BaseController {
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Voti della classe '.$classe.' - '.$info['materia']);
-    $html = $this->renderView('pdf/voti_quadro.html.twig', array(
+    $html = $this->renderView('pdf/voti_quadro.html.twig', [
       'classe' => $classe,
       'info' => $info,
-      'dati' => $dati,
-      ));
+      'dati' => $dati]);
     $pdf->createFromHtml($html);
     // invia il documento
     $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
@@ -939,7 +924,7 @@ class VotiController extends BaseController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -958,10 +943,10 @@ class VotiController extends BaseController {
     $info['periodo'] = $reg->periodo($data_obj);
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento CSV
-    $csv = $this->renderView('lezioni/voti_quadro.csv.twig', array(
+    $csv = $this->renderView('lezioni/voti_quadro.csv.twig', [
       'classe' => $classe,
       'info' => $info,
-      'dati' => $dati));
+      'dati' => $dati]);
     // invia il documento
     $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
       strtoupper(str_replace(' ', '-', $info['materia'])).'.csv';
@@ -992,15 +977,15 @@ class VotiController extends BaseController {
   public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
                                int $id): Response {
     // controllo voto
-    $valutazione = $this->em->getRepository('App\Entity\Valutazione')->findOneBy(['id' => $id,
+    $valutazione = $this->em->getRepository(\App\Entity\Valutazione::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$valutazione) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla permessi
-    if (!$reg->azioneVoti($valutazione->getLezione()->getData(), $this->getUser(), $valutazione->getAlunno(),
-        $valutazione->getAlunno()->getClasse(), $valutazione->getMateria())) {
+    if (!$reg->azioneVoti($valutazione->getLezione()->getData(), $this->getUser(),
+        $valutazione->getAlunno()->getClasse(), $valutazione->getMateria(), $valutazione->getAlunno())) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -1009,7 +994,7 @@ class VotiController extends BaseController {
     // cancella voto
     $this->em->remove($valutazione);
     // memorizzazione e log
-    $dblogger->logAzione('VOTI', 'Cancella voto', array(
+    $dblogger->logAzione('VOTI', 'Cancella voto', [
       'Id' => $vecchiaValutazione->getId(),
       'Tipo' => $vecchiaValutazione->getTipo(),
       'Visibile' => $vecchiaValutazione->getVisibile(),
@@ -1020,8 +1005,7 @@ class VotiController extends BaseController {
       'Docente' => $vecchiaValutazione->getDocente()->getId(),
       'Alunno' => $vecchiaValutazione->getAlunno()->getId(),
       'Lezione' => $vecchiaValutazione->getLezione()->getId(),
-      'Materia' => $vecchiaValutazione->getMateria()->getId()
-      ));
+      'Materia' => $vecchiaValutazione->getMateria()->getId()]);
     // redirezione
     return $this->redirectToRoute('lezioni_voti_quadro');
   }

@@ -137,7 +137,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $cmh = new CircolareMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $circolare = $this->getReference('circolare_perdocenti');
     $msg = new CircolareMessage($circolare->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':ora')
       ->set('cu.confermata', ':ora')
@@ -164,7 +164,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $cmh = new CircolareMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $circolare = $this->getReference('circolare_perclasse');
     $msg = new CircolareMessage($circolare->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
@@ -203,7 +203,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $circolare1 = $this->getReference('circolare_perclasse');
     $listaCircolari[$circolare1->getId()] = $circolare1;
     $msg = new CircolareMessage($circolare1->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
@@ -220,7 +220,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $circolare2 = $this->getReference('circolare_perdocenti');
     $listaCircolari[$circolare2->getId()] = $circolare2;
     $msg = new CircolareMessage($circolare2->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
@@ -237,7 +237,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $circolare3 = $this->getReference('circolare_conallegato');
     $listaCircolari[$circolare3->getId()] = $circolare3;
     $msg = new CircolareMessage($circolare3->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
@@ -248,7 +248,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     // esegue: invia tutta la coda
     $cmh->__invoke($msg);
     // controlla
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->select('(cu.utente) AS utente,(cu.circolare) AS circolare')
       ->where('cu.circolare IN (:circolari)')
       ->setParameters(['circolari' => [$circolare1->getId(), $circolare2->getId(), $circolare3->getId()]])
@@ -287,7 +287,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     // prima circolare
     $circolare = $this->getReference('circolare_perclasse');
     $msg = new CircolareMessage($circolare->getId());
-    $risultato = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $risultato = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
       ->update()
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')

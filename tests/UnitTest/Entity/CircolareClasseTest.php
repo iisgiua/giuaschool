@@ -26,7 +26,7 @@ class CircolareClasseTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\CircolareClasse';
+    $this->entity = \App\Entity\CircolareClasse::class;
     // campi da testare
     $this->fields = ['circolare', 'classe', 'letta'];
     $this->noStoredFields = [];
@@ -124,14 +124,14 @@ class CircolareClasseTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // circolare
     $temp = $existent->getCircolare();
-    $property = $this->getPrivateProperty('App\Entity\CircolareClasse', 'circolare');
+    $property = $this->getPrivateProperty(\App\Entity\CircolareClasse::class, 'circolare');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Circolare - NOT BLANK');
     $existent->setCircolare($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Circolare - VALID NOT BLANK');
     // classe
-    $property = $this->getPrivateProperty('App\Entity\CircolareClasse', 'classe');
+    $property = $this->getPrivateProperty(\App\Entity\CircolareClasse::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');

@@ -26,7 +26,7 @@ class CircolareTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Circolare';
+    $this->entity = \App\Entity\Circolare::class;
     // campi da testare
     $this->fields = ['anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni', 'coordinatori', 'filtroCoordinatori', 'docenti', 'filtroDocenti', 'altri', 'firma', 'notifica', 'pubblicata'];
     $this->noStoredFields = ['sedi'];
@@ -73,18 +73,18 @@ class CircolareTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'oggetto' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'documento' ? $this->faker->fileObj() :
-          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'ata' ? $this->faker->boolean() :
           ($field == 'dsga' ? $this->faker->boolean() :
           ($field == 'genitori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'alunni' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtroAlunni' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtroAlunni' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'coordinatori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtroCoordinatori' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtroCoordinatori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'docenti' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtroDocenti' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'altri' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtroDocenti' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'altri' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'firma' ? $this->faker->boolean() :
           ($field == 'notifica' ? $this->faker->boolean() :
           ($field == 'pubblicata' ? $this->faker->boolean() :
@@ -235,14 +235,14 @@ class CircolareTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // sedi
     $savedProperty = $existent->getSedi();
-    $property = $this->getPrivateProperty('App\Entity\Circolare', 'sedi');
+    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'sedi');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
     $existent->setSedi($savedProperty);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Circolare', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
@@ -251,7 +251,7 @@ class CircolareTest extends EntityTestCase {
     $existent->setData(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // oggetto
-    $property = $this->getPrivateProperty('App\Entity\Circolare', 'oggetto');
+    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'oggetto');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Oggetto - NOT BLANK');
@@ -302,7 +302,7 @@ class CircolareTest extends EntityTestCase {
     $newObject = new \App\Entity\Circolare();
     foreach ($this->fields as $field) {
       if ($field == 'documento') {
-        $newObject->setDocumento(new \Symfony\Component\HttpFoundation\File\File(dirname(dirname(__DIR__)).'/data/'.$objects[0]->getDocumento()));
+        $newObject->setDocumento(new \Symfony\Component\HttpFoundation\File\File(dirname(__DIR__, 2).'/data/'.$objects[0]->getDocumento()));
       } else {
         $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
       }

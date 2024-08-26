@@ -26,7 +26,7 @@ class FestivitaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Festivita';
+    $this->entity = \App\Entity\Festivita::class;
     // campi da testare
     $this->fields = ['data', 'descrizione', 'tipo', 'sede'];
     $this->noStoredFields = [];
@@ -124,14 +124,14 @@ class FestivitaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Festivita', 'data');
+    $property = $this->getPrivateProperty(\App\Entity\Festivita::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
     $existent->setData(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
     // descrizione
-    $property = $this->getPrivateProperty('App\Entity\Festivita', 'descrizione');
+    $property = $this->getPrivateProperty(\App\Entity\Festivita::class, 'descrizione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Descrizione - NOT BLANK');

@@ -102,7 +102,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(

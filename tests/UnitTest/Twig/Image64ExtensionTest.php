@@ -47,7 +47,7 @@ class Image64ExtensionTest extends KernelTestCase {
    */
   public function testGetFunctions(): void {
     // init
-    $ext = new Image64Extension(dirname(dirname(dirname(__DIR__))));
+    $ext = new Image64Extension(dirname(__DIR__, 3));
     // nome funzione
     $res = $ext->getFunctions();
     $func = new TwigFunction('image64', [$ext, 'getImage64']);
@@ -61,18 +61,18 @@ class Image64ExtensionTest extends KernelTestCase {
    */
   public function testGetImage64(): void {
     // init
-    $ext = new Image64Extension(dirname(dirname(dirname(__DIR__))));
+    $ext = new Image64Extension(dirname(__DIR__, 3));
     // file personale e predefinito inesistente
     $res = $ext->getImage64('NESSUN-FILE.NON.ESISTE');
     $this->assertSame('', $res);
     // file personale inesistente
     $res = $ext->getImage64('android.png');
-    $path = dirname(dirname(dirname(__DIR__))).'/public/img/android.png';
+    $path = dirname(__DIR__, 3).'/public/img/android.png';
     $img = base64_encode(file_get_contents($path));
     $this->assertSame($img, $res);
     // file personale esistente
-    $path = dirname(dirname(dirname(__DIR__))).'/public/img/test.png';
-    copy(dirname(dirname(dirname(__DIR__))).'/public/img/android.png', $path);
+    $path = dirname(__DIR__, 3).'/public/img/test.png';
+    copy(dirname(__DIR__, 3).'/public/img/android.png', $path);
     $res = $ext->getImage64('test.png');
     $img = base64_encode(file_get_contents($path));
     $this->assertSame($img, $res);

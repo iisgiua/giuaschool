@@ -26,7 +26,7 @@ class DefinizioneScrutinioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\DefinizioneScrutinio';
+    $this->entity = \App\Entity\DefinizioneScrutinio::class;
     // campi da testare
     $this->fields = ['periodo', 'dataProposte', 'struttura', 'classiVisibili', 'data', 'argomenti', 'dati'];
     $this->noStoredFields = [];
@@ -72,8 +72,8 @@ class DefinizioneScrutinioTest extends EntityTestCase {
           ($field == 'struttura' ? $this->faker->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'classiVisibili' ? $this->faker->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'data' ? $this->faker->dateTime() :
-          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -135,7 +135,7 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     // dataProposte
     $existent->setDataProposte(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataProposte - VALID TYPE');
-    $property = $this->getPrivateProperty('App\Entity\DefinizioneScrutinio', 'dataProposte');
+    $property = $this->getPrivateProperty(\App\Entity\DefinizioneScrutinio::class, 'dataProposte');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::DataProposte - NOT BLANK');

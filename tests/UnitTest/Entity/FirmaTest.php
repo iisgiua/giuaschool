@@ -26,7 +26,7 @@ class FirmaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Firma';
+    $this->entity = \App\Entity\Firma::class;
     // campi da testare
     $this->fields = ['lezione', 'docente'];
     $this->noStoredFields = [];
@@ -145,7 +145,7 @@ class FirmaTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // lezione
     $temp = $existent->getLezione();
-    $property = $this->getPrivateProperty('App\Entity\Firma', 'lezione');
+    $property = $this->getPrivateProperty(\App\Entity\Firma::class, 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
@@ -153,7 +153,7 @@ class FirmaTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // docente
     $temp = $existent->getDocente();
-    $property = $this->getPrivateProperty('App\Entity\Firma', 'docente');
+    $property = $this->getPrivateProperty(\App\Entity\Firma::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

@@ -26,7 +26,7 @@ class ProvisioningTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Provisioning';
+    $this->entity = \App\Entity\Provisioning::class;
     // campi da testare
     $this->fields = ['utente', 'dati', 'funzione', 'stato'];
     $this->noStoredFields = [];
@@ -68,7 +68,7 @@ class ProvisioningTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'utente' ? $this->getReference("utente_1") :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'funzione' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           null))));
@@ -124,7 +124,7 @@ class ProvisioningTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\Provisioning', 'utente');
+    $property = $this->getPrivateProperty(\App\Entity\Provisioning::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');

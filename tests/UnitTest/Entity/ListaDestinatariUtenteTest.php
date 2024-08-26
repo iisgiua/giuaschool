@@ -26,7 +26,7 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\ListaDestinatariUtente';
+    $this->entity = \App\Entity\ListaDestinatariUtente::class;
     // campi da testare
     $this->fields = ['listaDestinatari', 'utente', 'letto', 'firmato'];
     $this->noStoredFields = [];
@@ -128,14 +128,14 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // listaDestinatari
     $temp = $existent->getListaDestinatari();
-    $property = $this->getPrivateProperty('App\Entity\ListaDestinatariUtente', 'listaDestinatari');
+    $property = $this->getPrivateProperty(\App\Entity\ListaDestinatariUtente::class, 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
     $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\ListaDestinatariUtente', 'utente');
+    $property = $this->getPrivateProperty(\App\Entity\ListaDestinatariUtente::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');

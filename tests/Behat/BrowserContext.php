@@ -103,11 +103,11 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtente($valore, $password=null): void {
     $this->assertEmpty($this->vars['sys']['logged']);
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($valore);
+    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneByUsername($valore);
     $this->paginaAttiva('login_form');
     $this->assertTrue($user && $user->getUsername() == $valore);
     $this->session->getPage()->fillField('username', $valore);
-    $this->session->getPage()->fillField('password', $password ? $password : $valore);
+    $this->session->getPage()->fillField('password', $password ?: $valore);
     $this->session->getPage()->pressButton('login');
     $this->waitForPage();
     $this->assertPageStatus(200);
@@ -118,14 +118,14 @@ class BrowserContext extends BaseContext {
     }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
-    $others = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
-      ->where('u.username!=:username AND u INSTANCE OF '.get_class($user))
+    $others = $this->em->getRepository(\App\Entity\Utente::class)->createQueryBuilder('u')
+      ->where('u.username!=:username AND u INSTANCE OF '.$user::class)
       ->setParameters(['username' => $user->getUsername()])
       ->getQuery()
       ->getResult();
     $other = null;
     foreach ($others as $val) {
-      if (get_class($val) == get_class($user)) {
+      if ($val::class == $user::class) {
         $other = $val;
         break;
       }
@@ -160,8 +160,8 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($users);
     do {
       $user = $this->faker->randomElement($users);
-    } while (get_class($user) != 'App\Entity\\'.$class_name  &&
-             get_class($user) != 'Proxies\__CG__\App\Entity\\'.$class_name);
+    } while ($user::class != 'App\Entity\\'.$class_name  &&
+             $user::class != 'Proxies\__CG__\App\Entity\\'.$class_name);
     $this->loginUtente($user->getUsername());
   }
 
@@ -426,7 +426,7 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertNotEmpty($intestazioni);
-    $intestazioni_nomi = array_map(function($v){ return strtolower(trim($v->getText())); }, $intestazioni);
+    $intestazioni_nomi = array_map(fn($v) => strtolower(trim($v->getText())), $intestazioni);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
     $this->assertNotEmpty($righe[$numero - 1]);
     $colonne = $righe[$numero - 1]->findAll('css', 'td');
@@ -463,7 +463,7 @@ class BrowserContext extends BaseContext {
   public function vediNellaTabellaIDatiIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertNotEmpty($datiIntestazioni);
     $colonne = [];
@@ -513,7 +513,7 @@ class BrowserContext extends BaseContext {
    * @When click su :testo con indice :indice
    */
   public function clickSu($testo, $indice=1): void {
-    $links = $this->session->getPage()->findAll('named', array('link_or_button', $testo));
+    $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
     $this->assertNotEmpty($links[$indice - 1]);
     $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
@@ -543,7 +543,7 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato, 'Selector not found');
-    $links = $sezione->findAll('named', array('link_or_button', $testoParam));
+    $links = $sezione->findAll('named', ['link_or_button', $testoParam]);
     $this->assertNotEmpty($links[$indice - 1]);
     $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
@@ -652,7 +652,7 @@ class BrowserContext extends BaseContext {
         // conversione ok
         $testo = file_get_contents($convertito);
       }
-    } catch (\Exception $err) {
+    } catch (\Exception) {
       // errore: evita eccezione
     }
     $this->assertTrue($testo && preg_match($ricerca, $testo));
@@ -991,7 +991,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
@@ -1031,7 +1031,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $datiValori = $dati->getHash();
     $this->assertEquals(count($datiValori), count($valori), 'Table row count is different');
@@ -1067,7 +1067,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaNonOrdinataIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
@@ -1123,7 +1123,7 @@ class BrowserContext extends BaseContext {
   public function vediLaTabellaNonOrdinataSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
     $righeTrovate = [];
@@ -1161,7 +1161,7 @@ class BrowserContext extends BaseContext {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     if (!empty($tabelle)) {
       foreach ($tabelle as $tabella) {
-        list($intestazione, $valori) = $this->parseTable($tabella);
+        [$intestazione, $valori] = $this->parseTable($tabella);
         $trovato = true;
         foreach ($dati->getRows()[0] as $i=>$nome) {
           if (strtolower($nome) != strtolower($intestazione[$i])) {
@@ -1303,12 +1303,12 @@ class BrowserContext extends BaseContext {
    */
   protected function assertPageUrl($url, $message=null): void {
     $current = $this->session->getCurrentUrl();
-    if (strpos($current, '?') !== false) {
+    if (str_contains($current, '?')) {
       $current = substr($current, 0, strpos($current, '?'));
     }
     if ($url != $current) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that URL is the address of the current page').$info."\n".
+      $msg = ($message ?: 'Failed asserting that URL is the address of the current page').$info."\n".
         '+++ Expected: '.var_export($url, true)."\n".
         '+++ Actual: '.var_export($this->session->getCurrentUrl(), true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -1324,7 +1324,7 @@ class BrowserContext extends BaseContext {
   protected function assertPageStatus($status, $message=null): void {
     if ($status != $this->session->getStatusCode()) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that value is the status code of the current page').$info."\n".
+      $msg = ($message ?: 'Failed asserting that value is the status code of the current page').$info."\n".
         '+++ Expected: '.var_export($status, true)."\n".
         '+++ Actual: '.var_export($this->session->getStatusCode(), true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -1366,7 +1366,7 @@ class BrowserContext extends BaseContext {
       }
       $body[] = $row;
     }
-    return array($header, $body);
+    return [$header, $body];
   }
 
   /**

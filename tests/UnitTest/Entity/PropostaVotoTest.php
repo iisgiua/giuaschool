@@ -26,7 +26,7 @@ class PropostaVotoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\PropostaVoto';
+    $this->entity = \App\Entity\PropostaVoto::class;
     // campi da testare
     $this->fields = ['periodo', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'alunno', 'classe', 'materia', 'docente'];
     $this->noStoredFields = [];
@@ -77,7 +77,7 @@ class PropostaVotoTest extends EntityTestCase {
           ($field == 'debito' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'recupero' ? $this->faker->randomElement(["A", "C", "S", "P", "I", "R", "N"]) :
           ($field == 'assenze' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'alunno' ? $this->getReference("alunno_".($i +1)."A_1") :
           ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
@@ -166,28 +166,28 @@ class PropostaVotoTest extends EntityTestCase {
     $existent->setRecupero('A');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Recupero - VALID CHOICE');
     // alunno
-    $property = $this->getPrivateProperty('App\Entity\PropostaVoto', 'alunno');
+    $property = $this->getPrivateProperty(\App\Entity\PropostaVoto::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // classe
-    $property = $this->getPrivateProperty('App\Entity\PropostaVoto', 'classe');
+    $property = $this->getPrivateProperty(\App\Entity\PropostaVoto::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
     $existent->setClasse($this->getReference("classe_1A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // materia
-    $property = $this->getPrivateProperty('App\Entity\PropostaVoto', 'materia');
+    $property = $this->getPrivateProperty(\App\Entity\PropostaVoto::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
     $existent->setMateria($this->getReference("materia_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\PropostaVoto', 'docente');
+    $property = $this->getPrivateProperty(\App\Entity\PropostaVoto::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
