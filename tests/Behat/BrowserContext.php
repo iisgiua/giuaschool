@@ -106,7 +106,6 @@ class BrowserContext extends BaseContext {
     $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneByUsername($valore);
     $this->paginaAttiva('login_form');
     $this->assertTrue($user && $user->getUsername() == $valore);
-dump($valore, $this->session->getPage()->getContent());
     $this->session->getPage()->fillField('username', $valore);
     $this->session->getPage()->fillField('password', $password ?: $valore);
     $this->session->getPage()->pressButton('login');
