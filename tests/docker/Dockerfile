@@ -158,6 +158,7 @@ RUN \
   rm -rf /var/lib/apt/lists/* && \
 # Set TEST environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
+  mkdir var/sessions/test
   service mariadb start && \
   php bin/console app:alice:load tests/features/_testFixtures.yml --dump tests/temp/_testFixtures && \
   chown -R www-data:www-data .
