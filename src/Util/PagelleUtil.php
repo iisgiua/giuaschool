@@ -76,8 +76,7 @@ class PagelleUtil {
       $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['scrutinio'] = $scrutinio;
       // legge alunni
       $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
@@ -191,8 +190,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // alunni scrutinati
       $dati['scrutinati'] = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
@@ -314,8 +312,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
       $sospesi = $dati['scrutinio']->getDato('sospesi');
@@ -421,8 +418,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
       $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
@@ -712,8 +708,7 @@ class PagelleUtil {
       $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['scrutinio'] = $scrutinio;
       $dati['classe'] = $classe;
       // legge materie
@@ -764,8 +759,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
       $dati_materie = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
@@ -809,8 +803,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
       $dati_materie = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
@@ -856,8 +849,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
       $materie = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
@@ -1051,8 +1043,7 @@ class PagelleUtil {
     $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
       'classe' => $classe,
       'periodo' => $periodo,
-      'stato' => 'C'
-    ]);
+      'stato' => 'C']);
     // definizione scrutinio
     $dati['definizione'] = $this->em->getRepository(\App\Entity\DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
     // legge classe
@@ -1083,9 +1074,9 @@ class PagelleUtil {
             $dati['docenti'][$doc['id']]['cognome'] = $doc['cognome'];
             $dati['docenti'][$doc['id']]['nome'] = $doc['nome'];
             $dati['docenti'][$doc['id']]['sesso'] = $doc['sesso'];
-            $dati['docenti'][$doc['id']]['materie'][$mat['id']] = ['
-            nome_materia' => $mat['nome'],
-            'tipo_cattedra' => $docenti[$doc['id']][$mat['id']]];
+            $dati['docenti'][$doc['id']]['materie'][$mat['id']] = [
+              'nome_materia' => $mat['nome'],
+              'tipo_cattedra' => $docenti[$doc['id']][$mat['id']]];
           }
         }
       }
@@ -1248,8 +1239,7 @@ class PagelleUtil {
         ->setParameters([
           'scrutinio' => $dati['scrutinio'],
           'lista' => $dati['scrutinio']->getDato('alunni'),
-          'tipo' => 'C'
-        ])
+          'tipo' => 'C'])
         ->getQuery()
         ->getResult();
       foreach ($voti as $v) {
@@ -1307,8 +1297,7 @@ class PagelleUtil {
             'suff' => 6,
             'religione' => 'R',
             'suffrel' => $dati['scrutinio']->getDato('valutazioni')['R']['suff'],
-            'ammesso' => 'A'
-          ])
+            'ammesso' => 'A'])
           ->getQuery()
           ->getArrayResult();
         foreach ($insuff as $ins) {
@@ -1556,8 +1545,7 @@ class PagelleUtil {
     $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
       'classe' => $classe,
       'periodo' => $periodo,
-      'stato' => 'C'
-    ]);
+      'stato' => 'C']);
     // legge valutazioni
     $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
     // legge materie
@@ -1834,8 +1822,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge materie
       $materie = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
@@ -1877,8 +1864,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
@@ -2313,8 +2299,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // alunni ammessi
       $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
@@ -2325,8 +2310,7 @@ class PagelleUtil {
         ->setParameters([
           'lista' => array_keys($dati['scrutinio']->getDato('scrutinabili')),
           'scrutinio' => $dati['scrutinio'],
-          'esito' => 'A'
-        ])
+          'esito' => 'A'])
         ->getQuery()
         ->getResult();
       foreach ($alunni as $alu) {
@@ -2339,8 +2323,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
       $sospesi = (($periodo == 'G' || $periodo == 'R') ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('alunni'));
@@ -2489,8 +2472,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
@@ -2553,8 +2535,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
@@ -2569,8 +2550,7 @@ class PagelleUtil {
       // controllo tipo di non ammissione
       $dati['tipo'] = null;
       if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('sospesi')) && $dati['esito'] &&
-        $dati['esito']->getEsito() == 'N'
-      ) {
+          $dati['esito']->getEsito() == 'N' ) {
         // non ammesso durante lo scrutinio
         $dati['tipo'] = 'N';
       }
@@ -2614,8 +2594,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
@@ -2631,8 +2610,7 @@ class PagelleUtil {
       // controllo tipo di non ammissione
       $dati['tipo'] = null;
       if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni')) && $dati['esito'] &&
-        $dati['esito']->getEsito() == 'N'
-      ) {
+          $dati['esito']->getEsito() == 'N' ) {
         // non ammesso durante lo scrutinio
         $dati['tipo'] = 'N';
       }
@@ -2746,8 +2724,7 @@ class PagelleUtil {
       $dati['scrutinio'] = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy([
         'classe' => $classe,
         'periodo' => $periodo,
-        'stato' => 'C'
-      ]);
+        'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');

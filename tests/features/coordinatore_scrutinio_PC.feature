@@ -87,7 +87,7 @@ Scenario: visualizzazione classe articolata
 
 ################################################################################
 # Bisogna controllare documenti generati
-@debug
+
 Scenario: controllo riepilogo dei voti
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
