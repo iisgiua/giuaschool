@@ -217,7 +217,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', [$ga, 'getUser']));
+    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', $ga->getUser(...)));
     $this->assertEquals($passport, $res);
   }
 

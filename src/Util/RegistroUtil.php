@@ -49,10 +49,10 @@ class RegistroUtil {
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack)
   {
   }
 
@@ -91,7 +91,7 @@ class RegistroUtil {
     }
     // controllo riposo settimanale (domenica e altri)
     $weekdays = $this->em->getRepository(\App\Entity\Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
-    if ($weekdays && in_array($data->format('w'), explode(',', $weekdays->getValore()))) {
+    if ($weekdays && in_array($data->format('w'), explode(',', (string) $weekdays->getValore()))) {
       // domenica
       return $this->trans->trans('exception.giorno_riposo_settimanale');
     }
@@ -405,8 +405,8 @@ class RegistroUtil {
       $datiLezioni = [];
       foreach ($scansioneOraria as $s) {
         $ora = $s['ora'];
-        $datiLezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
-        $datiLezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
+        $datiLezioni[$ora]['inizio'] = substr((string) $s['inizio'], 0, 5);
+        $datiLezioni[$ora]['fine'] = substr((string) $s['fine'], 0, 5);
         // legge lezioni
         $lezioni = $this->em->getRepository(\App\Entity\Lezione::class)->createQueryBuilder('l')
           ->join('l.classe', 'c')
@@ -1149,7 +1149,7 @@ class RegistroUtil {
     foreach ($assenze as $a) {
       $data_assenza = $a['data']->format('Y-m-d');
       $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $dataStr = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
+      $dataStr = intval(substr((string) $data_assenza, 8)).' '.$mesi[intval(substr((string) $data_assenza, 5, 2))].' '.substr((string) $data_assenza, 0, 4);
       $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
       $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;
       $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
@@ -1439,7 +1439,7 @@ class RegistroUtil {
         ->setVotoId($voto['id']);
       // argomento globale
       if (!$argomento && !empty($voto['argomento'])) {
-        $argomento = trim($voto['argomento']);
+        $argomento = trim((string) $voto['argomento']);
       }
       // visibilità globale
       if ($visibile === null && $voto['visibile'] !== null) {
@@ -1862,7 +1862,7 @@ class RegistroUtil {
           // nessun argomento in data precedente
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $dataStr = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
           $dati[$periodo][$data_prec][$num]['data'] = $dataStr;
           $dati[$periodo][$data_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$num]['attivita'] = '';
@@ -1875,12 +1875,12 @@ class RegistroUtil {
       if (trim($l['argomento'].$l['attivita']) != '' || $firme != '') {
         // argomento presente o altro docente
         if ($num == 0 || $firme != '' ||
-            strcasecmp($l['argomento'], $dati[$periodo][$data][$num-1]['argomento']) ||
-            strcasecmp($l['attivita'], $dati[$periodo][$data][$num-1]['attivita'])) {
+            strcasecmp((string) $l['argomento'], (string) $dati[$periodo][$data][$num-1]['argomento']) ||
+            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$num-1]['attivita'])) {
           // evita ripetizioni identiche degli argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $dataStr = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $dataStr = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
           $dati[$periodo][$data][$num]['data'] = $dataStr;
           $dati[$periodo][$data][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$num]['attivita'] = $l['attivita'];
@@ -1897,7 +1897,7 @@ class RegistroUtil {
       // nessun argomento in data precedente
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $dataStr = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
       $dati[$periodo][$data_prec][$num]['data'] = $dataStr;
       $dati[$periodo][$data_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$num]['attivita'] = '';
@@ -1948,7 +1948,7 @@ class RegistroUtil {
           // nessun argomento
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $dataStr = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
           $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $dataStr;
           $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
@@ -1961,14 +1961,14 @@ class RegistroUtil {
       }
       if (trim($l['argomento'].$l['attivita'].$l['argomento_sost'].$l['attivita_sost']) != '') {
         // argomento presente
-        if ($num == 0 || strcasecmp($l['argomento'], $dati[$periodo][$data][$materia][$num-1]['argomento']) ||
-            strcasecmp($l['attivita'], $dati[$periodo][$data][$materia][$num-1]['attivita']) ||
-            strcasecmp($l['argomento_sost'], $dati[$periodo][$data][$materia][$num-1]['argomento_sost']) ||
-            strcasecmp($l['attivita_sost'], $dati[$periodo][$data][$materia][$num-1]['attivita_sost'])) {
+        if ($num == 0 || strcasecmp((string) $l['argomento'], (string) $dati[$periodo][$data][$materia][$num-1]['argomento']) ||
+            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$materia][$num-1]['attivita']) ||
+            strcasecmp((string) $l['argomento_sost'], (string) $dati[$periodo][$data][$materia][$num-1]['argomento_sost']) ||
+            strcasecmp((string) $l['attivita_sost'], (string) $dati[$periodo][$data][$materia][$num-1]['attivita_sost'])) {
           // evita ripetizioni identiche di argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $dataStr = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $dataStr = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
           $dati[$periodo][$data][$materia][$num]['data'] = $dataStr;
           $dati[$periodo][$data][$materia][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$materia][$num]['attivita'] = $l['attivita'];
@@ -1984,7 +1984,7 @@ class RegistroUtil {
       // nessun argomento
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $dataStr = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $dataStr = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
       $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $dataStr;
       $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
@@ -2302,7 +2302,7 @@ class RegistroUtil {
       $data_oss = $o['data']->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr((string) $data_oss, 8)).' '.$mesi[intval(substr((string) $data_oss, 5, 2))];
       $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
@@ -2374,7 +2374,7 @@ class RegistroUtil {
       $data_oss = $o['data']->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr((string) $data_oss, 8)).' '.$mesi[intval(substr((string) $data_oss, 5, 2))];
       $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
@@ -2433,7 +2433,7 @@ class RegistroUtil {
       $data_oss = $o->getData()->format('Y-m-d');
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $dataStr = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
+      $dataStr = intval(substr((string) $data_oss, 8)).' '.$mesi[intval(substr((string) $data_oss, 5, 2))];
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $o)) {
         $edit = $this->router->generate('lezioni_osservazioni_personali_edit', [
@@ -2491,14 +2491,14 @@ class RegistroUtil {
     $parole = preg_split('/[^a-zàèéìòù]+/', mb_strtolower($testo), -1, PREG_SPLIT_NO_EMPTY);
     $parole = array_diff($parole, $evitare);
     foreach ($alunni as $a) {
-      $nomi = preg_split('/[^a-zàèéìòù]+/', mb_strtolower($a['nome']), -1, PREG_SPLIT_NO_EMPTY);
+      $nomi = preg_split('/[^a-zàèéìòù]+/', mb_strtolower((string) $a['nome']), -1, PREG_SPLIT_NO_EMPTY);
       foreach ($nomi as $n) {
         if (in_array($n, $parole)) {
           // trovato nome
           return mb_strtoupper($n);
         }
       }
-      $nomi = preg_split('/[^a-zàèéìòù]+/', mb_strtolower($a['cognome']), -1, PREG_SPLIT_NO_EMPTY);
+      $nomi = preg_split('/[^a-zàèéìòù]+/', mb_strtolower((string) $a['cognome']), -1, PREG_SPLIT_NO_EMPTY);
       foreach ($nomi as $n) {
         if (in_array($n, $parole)) {
           // trovato cognome
@@ -2555,7 +2555,7 @@ class RegistroUtil {
     foreach ($voti as $v) {
       $data = $v['data']->format('Y-m-d');
       $periodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $v['data_str'] = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $v['data_str'] = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       if ($v['voto'] > 0) {
         $voto_int = intval($v['voto'] + 0.25);
         $voto_dec = $v['voto'] - intval($v['voto']);
@@ -2759,13 +2759,13 @@ class RegistroUtil {
       ->getArrayResult();
     // imposta programma (elimina ripetizioni)
     foreach ($lezioni as $l) {
-      $argomento = strip_tags($l['argomento']);
+      $argomento = strip_tags((string) $l['argomento']);
       $argomento = trim(str_replace(["\n", "\r"], ' ',  $argomento));
       if ($argomento == '') {
         // riga vuota
         continue;
       }
-      $key = sha1(preg_replace('/[\W_]+/', '', mb_strtolower($argomento)));
+      $key = sha1((string) preg_replace('/[\W_]+/', '', mb_strtolower($argomento)));
       if (!isset($dati['argomenti'][$key])) {
         // memorizza argomento
         $argomento = ucfirst($argomento);
@@ -2953,7 +2953,7 @@ class RegistroUtil {
     foreach ($assenze as $a) {
       $data_assenza = $a['data']->format('Y-m-d');
       $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $dataStr = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
+      $dataStr = intval(substr((string) $data_assenza, 8)).' '.$mesi[intval(substr((string) $data_assenza, 5, 2))].' '.substr((string) $data_assenza, 0, 4);
       $dati_periodo[$numperiodo][$data_assenza]['data_obj'] = $a['data'];
       $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
       $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;

@@ -75,18 +75,18 @@ class ScrutinioController extends BaseController {
     $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
-    $listaValori = explode(',', $valutazioni['R']['valori']);
-    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['E']['valori']);
-    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['N']['valori']);
-    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
@@ -318,7 +318,7 @@ class ScrutinioController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -425,18 +425,18 @@ class ScrutinioController extends BaseController {
     $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
-    $listaValori = explode(',', $valutazioni['R']['valori']);
-    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['E']['valori']);
-    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['N']['valori']);
-    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
@@ -451,7 +451,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -594,7 +594,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -723,7 +723,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -985,7 +985,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1241,7 +1241,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1385,7 +1385,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1596,7 +1596,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($alunno->getClasse()->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1705,7 +1705,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($alunno->getClasse()->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1812,7 +1812,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1845,7 +1845,7 @@ class ScrutinioController extends BaseController {
         'stato' => $scrutinio->getStato()]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/verbale_'.strtolower($passo_verbale[0]).'.html.twig', [
+    return $this->render('coordinatore/verbale_'.strtolower((string) $passo_verbale[0]).'.html.twig', [
       'classe' => $classe,
 	    'dati' => $dati,
       'form' => ($form ? $form->createView() : null)]);
@@ -1886,7 +1886,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -2015,7 +2015,7 @@ class ScrutinioController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore', []));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore', []));
       if (!in_array($scrutinio->getClasse()->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');

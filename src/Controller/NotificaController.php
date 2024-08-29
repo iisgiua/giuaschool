@@ -63,7 +63,7 @@ class NotificaController extends BaseController {
         [$secretHeader, $richiesta]);
       return new JsonResponse($risposta);
     }
-    if (isset($richiesta['message']) && str_starts_with($richiesta['message']['text'], '/start ')) {
+    if (isset($richiesta['message']) && str_starts_with((string) $richiesta['message']['text'], '/start ')) {
       // registrazione utente
       $scadenza = (new \DateTime())->modify('-5 minute');
       $data = \DateTime::createFromFormat('U', $richiesta['message']['date']);
@@ -72,7 +72,7 @@ class NotificaController extends BaseController {
         $logger->error('Telegram webhook: scarta messaggio scaduto.', [$richiesta]);
         return new JsonResponse($risposta);
       }
-      $token = base64_decode(trim(substr($richiesta['message']['text'], 7)));
+      $token = base64_decode(trim(substr((string) $richiesta['message']['text'], 7)));
       $tokenData = explode('#', $token);
       $utente = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $tokenData[1] ?? '',
         'abilitato' => 1, 'token' => $tokenData[0]]);
@@ -107,7 +107,7 @@ class NotificaController extends BaseController {
       $chat = $richiesta['my_chat_member']['chat']['id'];
       $utente = $this->em->getRepository(\App\Entity\Utente::class)->createQueryBuilder('u')
         ->where('u.notifica LIKE :chat')
-        ->setParameters(['chat' => '%s:13:"telegram\_chat";s:'.strlen($chat).':"'.$chat.'";%'])
+        ->setParameters(['chat' => '%s:13:"telegram\_chat";s:'.strlen((string) $chat).':"'.$chat.'";%'])
         ->getQuery()
         ->setMaxResults(1)
         ->getOneOrNullResult();

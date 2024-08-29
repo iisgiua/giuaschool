@@ -35,7 +35,7 @@ class VotoScrutinioType extends AbstractType {
    * @param EntityManagerInterface $em Gestore delle entità
    */
   public function __construct(
-      private EntityManagerInterface $em)
+      private readonly EntityManagerInterface $em)
   {
   }
 

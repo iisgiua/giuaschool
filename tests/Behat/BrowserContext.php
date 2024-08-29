@@ -142,7 +142,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo :ruolo
    */
   public function loginUtenteConRuolo($ruolo): void {
-    $class_name = ucfirst($ruolo);
+    $class_name = ucfirst((string) $ruolo);
     $user = $this->faker->randomElement($this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
@@ -155,7 +155,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo esatto :ruolo
    */
   public function loginUtenteConRuoloEsatto($ruolo): void {
-    $class_name = ucfirst($ruolo);
+    $class_name = ucfirst((string) $ruolo);
     $users = $this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]);
     $this->assertNotEmpty($users);
     do {
@@ -176,7 +176,7 @@ class BrowserContext extends BaseContext {
     foreach ($tabella->getHash() as $row) {
       foreach ($row as $key=>$val) {
         $value = $this->convertText($val);
-        $this->vars['sys']['logged']->{'set'.ucfirst($key)}($value);
+        $this->vars['sys']['logged']->{'set'.ucfirst((string) $key)}($value);
       }
     }
     $this->em->flush();
@@ -398,7 +398,7 @@ class BrowserContext extends BaseContext {
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertEquals(count($intestazioni), count($colonne->getRow(0)));
     foreach ($colonne->getRow(0) as $key=>$val) {
-      $this->assertEquals(strtolower(trim($val)), strtolower(trim($intestazioni[$key]->getText())));
+      $this->assertEquals(strtolower(trim((string) $val)), strtolower(trim($intestazioni[$key]->getText())));
     }
   }
 
@@ -432,8 +432,8 @@ class BrowserContext extends BaseContext {
     $colonne = $righe[$numero - 1]->findAll('css', 'td');
     $this->assertNotEmpty($colonne);
     foreach ($dati->getHash()[0] as $key=>$val) {
-      $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
-      $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
+      $this->assertArrayContains(strtolower((string) $key), $intestazioni_nomi);
+      $cella = $colonne[array_search(strtolower((string) $key), $intestazioni_nomi)]->getText();
       $cerca = $this->convertSearch($val);
       $this->logDebug('vediNellaRigaDellaTabellaIDati -> '.$cerca.' | '.$cella);
       $this->assertTrue(preg_match($cerca, $cella));
@@ -470,7 +470,7 @@ class BrowserContext extends BaseContext {
     foreach ($datiIntestazioni as $nome) {
       $trovato = false;
       foreach ($intestazione as $col=>$val) {
-        if (strtolower($nome) == strtolower($val)) {
+        if (strtolower($nome) == strtolower((string) $val)) {
           $colonne[$nome] = $col;
           $trovato = true;
           break;
@@ -487,7 +487,7 @@ class BrowserContext extends BaseContext {
         foreach ($rdati as $nome=>$val) {
           $cerca = $this->convertSearch($val);
           $this->logDebug('vediNellaTabellaIDati ['.$idx.','.$nome.'] -> '.$cerca.' | '.$valori[$ri][$colonne[$nome]]);
-          if (!preg_match($cerca, $valori[$ri][$colonne[$nome]])) {
+          if (!preg_match($cerca, (string) $valori[$ri][$colonne[$nome]])) {
             $trovato = false;
             break;
           }
@@ -562,7 +562,7 @@ class BrowserContext extends BaseContext {
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
-    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", $headers['Content-Disposition'], $data));
+    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", (string) $headers['Content-Disposition'], $data));
     $this->assertTrue($data[1] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
     $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
   }
@@ -657,7 +657,7 @@ class BrowserContext extends BaseContext {
     }
     $this->assertTrue($testo && preg_match($ricerca, $testo));
     $this->files[] = 'FILES/'.$testoParam;
-    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+    $this->files[] = 'FILES/'.substr((string) $testoParam, 0, -3).'txt';
   }
 
   /**
@@ -697,7 +697,7 @@ class BrowserContext extends BaseContext {
     $this->vars['sys']['pdfRiga'] = -1;
     $this->vars['sys']['pdfSegnalibro'] = -1;
     $this->files[] = 'FILES/'.$testoParam;
-    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+    $this->files[] = 'FILES/'.substr((string) $testoParam, 0, -3).'txt';
   }
 
   /**
@@ -735,7 +735,7 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($this->vars['sys']['pdf']);
     $this->assertNotEmpty($this->vars['sys']['pdf'][$valore - 1]);
     $testo = $this->vars['sys']['pdf'][$valore - 1];
-    $this->assertTrue(preg_match($ricerca, $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
+    $this->assertTrue(preg_match($ricerca, (string) $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
     $this->vars['sys']['pdfRiga'] = $valore - 1;
   }
 
@@ -862,7 +862,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -888,7 +888,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -941,7 +941,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -963,7 +963,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -996,7 +996,7 @@ class BrowserContext extends BaseContext {
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
     foreach ($datiIntestazioni as $i=>$nome) {
-      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+      $this->assertEquals(strtolower($nome), strtolower((string) $intestazione[$i]), 'Table header is different');
     }
     // controlla dati
     $datiValori = $dati->getHash();
@@ -1005,7 +1005,7 @@ class BrowserContext extends BaseContext {
       foreach (array_values($riga) as $co=>$val) {
         $cerca = $this->convertSearch($val);
         $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
-        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+        $this->assertTrue(preg_match($cerca, (string) $valori[$ri][$co]),
           'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
       }
     }
@@ -1039,7 +1039,7 @@ class BrowserContext extends BaseContext {
       foreach (array_values($riga) as $co=>$val) {
         $cerca = $this->convertSearch($val);
         $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
-        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+        $this->assertTrue(preg_match($cerca, (string) $valori[$ri][$co]),
           'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
       }
     }
@@ -1072,7 +1072,7 @@ class BrowserContext extends BaseContext {
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
     foreach ($datiIntestazioni as $i=>$nome) {
-      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+      $this->assertEquals(strtolower($nome), strtolower((string) $intestazione[$i]), 'Table header is different');
     }
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
@@ -1085,7 +1085,7 @@ class BrowserContext extends BaseContext {
         }
         $trovato = true;
         foreach (array_values($riga) as $co=>$val) {
-          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+          if (!preg_match($this->convertSearch($val), (string) $valori[$ri][$co])) {
             $trovato = false;
             break;
           }
@@ -1135,7 +1135,7 @@ class BrowserContext extends BaseContext {
         }
         $trovato = true;
         foreach (array_values($riga) as $co=>$val) {
-          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+          if (!preg_match($this->convertSearch($val), (string) $valori[$ri][$co])) {
             $trovato = false;
             break;
           }
@@ -1164,7 +1164,7 @@ class BrowserContext extends BaseContext {
         [$intestazione, $valori] = $this->parseTable($tabella);
         $trovato = true;
         foreach ($dati->getRows()[0] as $i=>$nome) {
-          if (strtolower($nome) != strtolower($intestazione[$i])) {
+          if (strtolower((string) $nome) != strtolower((string) $intestazione[$i])) {
             $trovato = false;
             break;
           }
@@ -1264,7 +1264,7 @@ class BrowserContext extends BaseContext {
         }
       }
     }
-    $this->assertTrue($field && strtolower($field->getValue()) == strtolower($valore));
+    $this->assertTrue($field && strtolower($field->getValue()) == strtolower((string) $valore));
   }
 
   /**
@@ -1289,7 +1289,7 @@ class BrowserContext extends BaseContext {
         }
       }
     }
-    $this->assertTrue($field && strtolower($field->getValue()) != strtolower($valore));
+    $this->assertTrue($field && strtolower($field->getValue()) != strtolower((string) $valore));
   }
 
 

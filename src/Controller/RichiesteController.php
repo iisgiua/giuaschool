@@ -157,7 +157,7 @@ class RichiesteController extends BaseController {
             // controlla scadenza
             $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
             $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr($oraScadenza, 0, 2).' hour +'.substr($oraScadenza, 3, 2).' minute');
+            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
             if ($invio > $scadenza) {
               // richiesta inviata oltre i termini
               $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
@@ -932,7 +932,7 @@ class RichiesteController extends BaseController {
             // controlla scadenza
             $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
             $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr($oraScadenza, 0, 2).' hour +'.substr($oraScadenza, 3, 2).' minute');
+            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
             if ($invio > $scadenza) {
               // richiesta inviata oltre i termini
               $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [

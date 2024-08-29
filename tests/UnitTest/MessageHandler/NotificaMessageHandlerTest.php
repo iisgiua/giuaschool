@@ -384,7 +384,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -425,7 +425,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -466,7 +466,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -843,7 +843,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $rset = $result->fetchAllAssociative();
     $this->assertTrue($aggiornato);
     $this->assertCount(3, $rset);
-    $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr($rset[0]['available_at'], 0, 16)]);
+    $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr((string) $rset[0]['available_at'], 0, 16)]);
     $this->assertSame(['[2]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
     $this->assertSame(['[3]', '2023-01-01 00:00:00'], [$rset[2]['headers'], $rset[2]['available_at']]);
   }

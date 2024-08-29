@@ -19,7 +19,7 @@ class GenericActionMessage {
   /**
    * @var string $tag Testo usato per identificare l'azione
    */
-  private string $tag;
+  private readonly string $tag;
 
   /**
    * @var array $list Lista delle azioni permesse: $list[nomeClasse][nomeAzione] = null|nomeAltraClasse
@@ -38,9 +38,9 @@ class GenericActionMessage {
    * @param array $data Dati aggiuntivi
    */
   public function __construct(
-      private int $id,
-      private string $class,
-      private string $action,
+      private readonly int $id,
+      private readonly string $class,
+      private readonly string $action,
       private array $data) {
     $this->tag = '<!AZIONE!><!'.$this->class.'.'.$this->action.'.'.$this->id.'!>';
     if (!$this->check()) {

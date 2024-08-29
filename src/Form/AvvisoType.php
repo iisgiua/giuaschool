@@ -311,7 +311,7 @@ class AvvisoType extends AbstractType {
     // aggiunge data transform
     $builder->get('filtro')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
-      fn($filtro) => explode(',', $filtro)));
+      fn($filtro) => explode(',', (string) $filtro)));
     if (!in_array($options['form_mode'], ['coordinatore', 'verifica', 'compito'])) {
       $builder->get('sedi')->addModelTransformer(new CallbackTransformer(
         function ($sedi) {

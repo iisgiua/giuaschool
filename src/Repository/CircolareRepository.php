@@ -30,7 +30,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function prossimoNumero() {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // legge l'ultima circolare dell'A.S. in corso
     $numero = $this->createQueryBuilder('c')
       ->select('MAX(c.numero)')
@@ -78,7 +78,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function pubblicate($search, $page, $limit) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->where('c.data BETWEEN :inizio AND :fine AND c.oggetto LIKE :oggetto AND c.pubblicata=:pubblicata AND c.anno=:anno')
@@ -134,7 +134,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function numeroCircolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
@@ -156,7 +156,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function numeroCircolariUtente(Utente $utente) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
   // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
@@ -178,7 +178,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function circolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->join(\App\Entity\CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
@@ -496,7 +496,7 @@ class CircolareRepository extends EntityRepository {
       $anno = $cerca['anno'];
     } else {
       // A.S. in corso
-      $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     }
     // legge circolari
     $query = $this->createQueryBuilder('c')
@@ -547,7 +547,7 @@ class CircolareRepository extends EntityRepository {
    */
   public function listaCircolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->join(\App\Entity\CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')

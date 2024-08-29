@@ -36,8 +36,8 @@ class TelegramManager {
    * @param EntityManagerInterface $em Gestore delle entità
    */
   public function __construct(
-      private UrlGeneratorInterface $url,
-      private EntityManagerInterface $em) {
+      private readonly UrlGeneratorInterface $url,
+      private readonly EntityManagerInterface $em) {
     $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
     $this->client = new Client(['base_uri' => 'https://api.telegram.org/bot'.$token.'/',
       'timeout' => 60]);

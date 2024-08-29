@@ -206,8 +206,8 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(1, $this->session);
     $this->assertSame('user', $this->session[Security::LAST_USERNAME]);
     $passport = new Passport(
-      new UserBadge('user', [$fa, 'getUser']),
-      new CustomCredentials([$fa, 'checkCredentials'], ['password' => 'pass', 'otp' => 'otp', 'ip' => '1.2.3.4']),
+      new UserBadge('user', $fa->getUser(...)),
+      new CustomCredentials($fa->checkCredentials(...), ['password' => 'pass', 'otp' => 'otp', 'ip' => '1.2.3.4']),
       [new CsrfTokenBadge('authenticate', 'TOKEN')]);
     $this->assertEquals($passport, $res);
   }

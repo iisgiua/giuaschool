@@ -38,10 +38,10 @@ class ColloquiUtil {
    * @param LogHandler $dblogger Gestore dei log su database
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private RequestStack $reqstack,
-      private TranslatorInterface $trans,
-      private LogHandler $dblogger)
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $reqstack,
+      private readonly TranslatorInterface $trans,
+      private readonly LogHandler $dblogger)
   {
   }
 
@@ -74,7 +74,7 @@ class ColloquiUtil {
     }
     // mesi colloqui bloccati
     $mesiBloccati = explode(',',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/mesi_colloqui'));
+      (string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/mesi_colloqui'));
     // lista date possibili
     $lista = [];
     $successivo = 'next '.$week[$giorno];

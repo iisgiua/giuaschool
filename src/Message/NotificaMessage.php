@@ -27,10 +27,10 @@ class NotificaMessage {
    * @param array $dati Dati necessari per creare la notifica
    */
   public function __construct(
-      private int $utenteId,
-      private string $tipo,
-      private string $tag,
-      private array $dati)
+      private readonly int $utenteId,
+      private readonly string $tipo,
+      private readonly string $tag,
+      private readonly array $dati)
   {
   }
 

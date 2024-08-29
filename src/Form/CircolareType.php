@@ -153,17 +153,17 @@ class CircolareType extends AbstractType {
     // aggiunge data transform
     $builder->get('filtroCoordinatori')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
-      fn($filtro) => explode(',', $filtro)
+      fn($filtro) => explode(',', (string) $filtro)
       ));
     $builder->get('filtroDocenti')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
-      fn($filtro) => explode(',', $filtro)));
+      fn($filtro) => explode(',', (string) $filtro)));
     $builder->get('filtroGenitori')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
-      fn($filtro) => explode(',', $filtro)));
+      fn($filtro) => explode(',', (string) $filtro)));
     $builder->get('filtroAlunni')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
-      fn($filtro) => explode(',', $filtro)));
+      fn($filtro) => explode(',', (string) $filtro)));
     $builder->get('altri')->addModelTransformer(new CallbackTransformer(
       fn($filtro) => implode(',', $filtro),
       function ($filtro) {

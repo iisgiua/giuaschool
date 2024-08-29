@@ -42,16 +42,17 @@ class AliceLoadCommand extends Command {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param Generator $faker Generatore automatico di dati fittizi
-   * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
+   * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
    */
-  public function __construct(protected EntityManagerInterface $em,
-                              protected UserPasswordHasherInterface $hasher,
-                              protected Generator $faker,
-                              protected ?CustomProvider $customProvider = null,
-                              protected PurgerLoader $alice,
-                              private string $dirProgetto) {
+  public function __construct(
+      protected EntityManagerInterface $em,
+      protected UserPasswordHasherInterface $hasher,
+      protected Generator $faker,
+      protected PurgerLoader $alice,
+      private readonly string $dirProgetto,
+      protected ?CustomProvider $customProvider = null) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);

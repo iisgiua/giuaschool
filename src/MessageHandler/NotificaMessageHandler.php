@@ -40,12 +40,12 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * @param LoggerInterface $logger Gestore dei log su file
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private Environment $tpl,
-      private MailerInterface $mailer,
-      private TelegramManager $telegram,
-      private LoggerInterface $logger)
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly Environment $tpl,
+      private readonly MailerInterface $mailer,
+      private readonly TelegramManager $telegram,
+      private readonly LoggerInterface $logger)
   {
   }
 

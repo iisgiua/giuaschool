@@ -91,8 +91,8 @@ class SegreteriaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/cognome', $search['cognome']);
@@ -254,8 +254,8 @@ class SegreteriaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/cognome', $search['cognome']);
@@ -398,8 +398,8 @@ class SegreteriaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_genitori/cognome', $search['cognome']);
@@ -447,7 +447,7 @@ class SegreteriaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // legge genitori nell'ordine corretto
-    $username = substr($alunno->getUsername(), 0, -2).'f'.substr($alunno->getUsername(), -1);
+    $username = substr((string) $alunno->getUsername(), 0, -2).'f'.substr((string) $alunno->getUsername(), -1);
     if ($alunno->getGenitori()[0]->getUsername() == $username) {
       $genitore1 = $alunno->getGenitori()[0];
       $genitore2 = $alunno->getGenitori()[1] ?? null;

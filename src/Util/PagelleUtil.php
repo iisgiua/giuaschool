@@ -44,12 +44,12 @@ class PagelleUtil {
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private \Twig\Environment $tpl,
-      private PdfManager $pdf,
-      private string $root) {
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly \Twig\Environment $tpl,
+      private readonly PdfManager $pdf,
+      private readonly string $root) {
     // imposta directory per gli scrutini
     $this->directory = [
       'P' => 'primo',
@@ -163,7 +163,7 @@ class PagelleUtil {
         } else {
           // dati sostituto
           $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
       // ordina docenti
@@ -182,7 +182,7 @@ class PagelleUtil {
           $dati['presidente_nome'] = $d;
         } else {
           $s = $scrutinio->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         }
       }
     } elseif ( $periodo == 'F' ) {
@@ -285,7 +285,7 @@ class PagelleUtil {
         } else {
           // dati sostituto
           $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
       // ordina docenti
@@ -304,7 +304,7 @@ class PagelleUtil {
           $dati['presidente_nome'] = $d;
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         }
       }
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {
@@ -389,7 +389,7 @@ class PagelleUtil {
         } else {
           // dati sostituto
           $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
         }
       }
       // ordina docenti
@@ -408,7 +408,7 @@ class PagelleUtil {
           $dati['presidente_nome'] = $d;
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         }
       }
       // anno scolastico
@@ -479,7 +479,7 @@ class PagelleUtil {
         } else {
           // dati sostituto
           $dati['docenti'][$iddoc] = ($docenti_presenti[$iddoc]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower($docenti_presenti[$iddoc]->getSostituto()));
+            ucwords(strtolower((string) $docenti_presenti[$iddoc]->getSostituto()));
         }
       }
       // presidente
@@ -492,11 +492,11 @@ class PagelleUtil {
           $dati['presidente_nome'] = $d;
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         }
       }
       // anno scolastico
-      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
       $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
     }
     // restituisce dati
@@ -557,7 +557,7 @@ class PagelleUtil {
         foreach ($dati['materie'] as $id => $mat) {
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper((string) $mat['nomeBreve'])), 0, 'L', false, 0]);
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
         // crea documento
@@ -603,7 +603,7 @@ class PagelleUtil {
         foreach ($dati['materie'] as $id => $mat) {
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper((string) $mat['nomeBreve'])), 0, 'L', false, 0]);
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
         $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
@@ -662,7 +662,7 @@ class PagelleUtil {
         foreach ($dati['materie'] as $id => $mat) {
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('Rotate', [90]);
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0]);
+          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('MultiCell', [30, 0, str_replace('/ ', "/\n", strtoupper((string) $mat['nomeBreve'])), 0, 'L', false, 0]);
           $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('StopTransform');
         }
         $dati['tcpdf']['credito'][] = $this->pdf->getHandler()->serializeTCPDFtag('StartTransform');
@@ -748,7 +748,7 @@ class PagelleUtil {
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
             }
           }
         }
@@ -792,7 +792,7 @@ class PagelleUtil {
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
             }
           }
         }
@@ -836,7 +836,7 @@ class PagelleUtil {
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
             }
           }
         }
@@ -882,14 +882,14 @@ class PagelleUtil {
               } else {
                 // dati sostituto
                 $dati['materie'][$mat['id']]['docenti'][$iddoc] =
-                  ucwords(strtolower($docenti_presenti[$iddoc]->getSostituto()));
+                  ucwords(strtolower((string) $docenti_presenti[$iddoc]->getSostituto()));
               }
             }
           }
         }
       }
       // anno scolastico
-      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
       $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
     }
     // restituisce dati
@@ -1119,7 +1119,7 @@ class PagelleUtil {
             'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
           $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
             'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
@@ -1132,7 +1132,7 @@ class PagelleUtil {
         $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
         $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
     } elseif ( $periodo == 'F' ) {
@@ -1179,7 +1179,7 @@ class PagelleUtil {
             'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
           $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
             'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
@@ -1192,7 +1192,7 @@ class PagelleUtil {
         $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
         $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // alunni scrutinati
@@ -1348,7 +1348,7 @@ class PagelleUtil {
             'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
           $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
             'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
@@ -1361,7 +1361,7 @@ class PagelleUtil {
         $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
         $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // legge dati di alunni
@@ -1452,7 +1452,7 @@ class PagelleUtil {
             'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
           $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
           $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
             'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
@@ -1465,7 +1465,7 @@ class PagelleUtil {
         $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
         $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower($s->getSostituto()));
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // legge dati di alunni
@@ -1519,7 +1519,7 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
       $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
     }
     // restituisce dati
@@ -1653,7 +1653,7 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // anno scolastico
-      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
       $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
     }
     // restituisce dati
@@ -2342,7 +2342,7 @@ class PagelleUtil {
       // anno scolastico
       $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
       if ( $periodo == 'X' ) {
-        $anno = (int) substr($dati['annoScolastico'], 0, 4);
+        $anno = (int) substr((string) $dati['annoScolastico'], 0, 4);
         $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
       }
     }
@@ -2638,7 +2638,7 @@ class PagelleUtil {
           'unico' => $v->getUnico(),
           'assenze' => $v->getAssenze()];
       }
-      $anno = (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
       $dati['annoScolastico'] = ($anno - 1) . '/' . $anno;
     }
     // restituisce dati

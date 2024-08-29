@@ -1093,7 +1093,7 @@ class SistemaController extends BaseController {
       ->where('c.pubblicata=:si AND c.anno=:anno')
       ->orderBy('c.numero', 'ASC')
       ->setParameters(['si' => 1,
-        'anno' => (int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4)])
+        'anno' => (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4)])
       ->getQuery()
       ->getResult();
     // form
@@ -1324,7 +1324,7 @@ class SistemaController extends BaseController {
       $fine = '['.$dt.'T'.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00';
       // nome file
       $nomefile = $this->getParameter('kernel.project_dir').'/var/log/app_'.
-        mb_strtolower($request->server->get('APP_ENV')).'-'.$dt.'.log';
+        mb_strtolower((string) $request->server->get('APP_ENV')).'-'.$dt.'.log';
       if (file_exists($nomefile)) {
         $fl = fopen($nomefile, "r");
         while (($riga = fgets($fl)) !== false) {
@@ -1608,10 +1608,10 @@ class SistemaController extends BaseController {
         if (!$server || !in_array($server, ['smtp', 'sendmail', 'gmail+smtp', 'php'], true)) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_server')));
         }
-        if (str_ends_with($server, 'smtp') && !$user) {
+        if (str_ends_with((string) $server, 'smtp') && !$user) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_user')));
         }
-        if (str_ends_with($server, 'smtp') && !$password) {
+        if (str_ends_with((string) $server, 'smtp') && !$password) {
           $form->addError(new FormError($trans->trans('exception.mailserver_no_password')));
         }
         if ($server == 'smtp' && !$host) {

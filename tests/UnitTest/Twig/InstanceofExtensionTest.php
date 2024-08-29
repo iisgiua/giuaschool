@@ -53,7 +53,7 @@ class InstanceofExtensionTest extends KernelTestCase {
     $ext = new InstanceofExtension();
     // nome test
     $res = $ext->getTests();
-    $test = new TwigTest('instanceOf', [$ext, 'isInstanceOf']);
+    $test = new TwigTest('instanceOf', $ext->isInstanceOf(...));
     $this->assertCount(1, $res);
     $this->assertEquals($test, $res[0]);
   }

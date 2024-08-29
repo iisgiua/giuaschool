@@ -785,11 +785,11 @@ class StaffController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (!str_contains($form->get('testo')->getData(), '{DATA}')) {
+      if (!str_contains((string) $form->get('testo')->getData(), '{DATA}')) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
-      if (!str_contains($form->get('testo')->getData(), '{ORA}')) {
+      if (!str_contains((string) $form->get('testo')->getData(), '{ORA}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_mancante')));
       }
@@ -1082,15 +1082,15 @@ class StaffController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (!str_contains($form->get('testo')->getData(), '{DATA}')) {
+      if (!str_contains((string) $form->get('testo')->getData(), '{DATA}')) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
-      if (!str_contains($form->get('testo')->getData(), '{INIZIO}')) {
+      if (!str_contains((string) $form->get('testo')->getData(), '{INIZIO}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_inizio_mancante')));
       }
-      if (!str_contains($form->get('testo')->getData(), '{FINE}')) {
+      if (!str_contains((string) $form->get('testo')->getData(), '{FINE}')) {
         // errore: testo senza campo ora
         $form->addError(new FormError($trans->trans('exception.campo_ora_fine_mancante')));
       }
@@ -1673,8 +1673,8 @@ class StaffController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/cognome', $search['cognome']);
@@ -2147,8 +2147,8 @@ class StaffController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/cognome', $search['cognome']);
@@ -2304,8 +2304,8 @@ class StaffController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/cognome', $search['cognome']);
@@ -2515,8 +2515,8 @@ class StaffController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      $search['cognome'] = trim($form->get('cognome')->getData());
-      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim((string) $form->get('cognome')->getData());
+      $search['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/classe', $search['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/cognome', $search['cognome']);

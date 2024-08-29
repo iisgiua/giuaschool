@@ -66,12 +66,12 @@ class CsvImporter {
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private UserPasswordHasherInterface $hasher,
-      private ValidatorBuilder $valbuilder,
-      private StaffUtil $staff) {
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly UserPasswordHasherInterface $hasher,
+      private readonly ValidatorBuilder $valbuilder,
+      private readonly StaffUtil $staff) {
     $this->validator = $valbuilder->getValidator();
     $this->fh = null;
     $this->header = [];
@@ -123,13 +123,13 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
-      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
-      $fields['sesso'] = strtoupper(trim($fields['sesso']));
-      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
-      $fields['username'] = strtolower(trim($fields['username']));
-      $fields['password'] = trim($fields['password']);
-      $fields['email'] = strtolower(trim($fields['email']));
+      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['cognome']))));
+      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['nome']))));
+      $fields['sesso'] = strtoupper(trim((string) $fields['sesso']));
+      $fields['codiceFiscale'] = strtoupper(trim((string) $fields['codiceFiscale']));
+      $fields['username'] = strtolower(trim((string) $fields['username']));
+      $fields['password'] = trim((string) $fields['password']);
+      $fields['email'] = strtolower(trim((string) $fields['email']));
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -263,13 +263,13 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['usernameDocente'] = strtolower(trim($fields['usernameDocente']));
-      $fields['classe'] = trim($fields['classe']);
+      $fields['usernameDocente'] = strtolower(trim((string) $fields['usernameDocente']));
+      $fields['classe'] = trim((string) $fields['classe']);
       $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
-        iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
-      $fields['usernameAlunno'] = strtolower(trim($fields['usernameAlunno']));
-      $fields['tipo'] = strtoupper(trim($fields['tipo']));
-      $fields['supplenza'] = strtoupper(trim($fields['supplenza']));
+        iconv('UTF-8', 'ASCII//TRANSLIT', (string) $fields['materia'])));
+      $fields['usernameAlunno'] = strtolower(trim((string) $fields['usernameAlunno']));
+      $fields['tipo'] = strtoupper(trim((string) $fields['tipo']));
+      $fields['supplenza'] = strtoupper(trim((string) $fields['supplenza']));
       // controlla campi obbligatori
       if (empty($fields['usernameDocente']) || empty($fields['classe']) || empty($fields['materia'])) {
         // errore
@@ -483,54 +483,54 @@ class CsvImporter {
         $empty_fields[$this->header[$key]] = false;
       }
       // formattazione campi
-      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
-      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
-      $fields['sesso'] = strtoupper(trim($fields['sesso']));
-      $fields['dataNascita'] = trim($fields['dataNascita']);
-      $fields['comuneNascita'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['comuneNascita']))));
-      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
-      $fields['citta'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['citta']))));
-      $fields['indirizzo'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['indirizzo']))));
-      $fields['bes'] = strtoupper(trim($fields['bes']));
+      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['cognome']))));
+      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['nome']))));
+      $fields['sesso'] = strtoupper(trim((string) $fields['sesso']));
+      $fields['dataNascita'] = trim((string) $fields['dataNascita']);
+      $fields['comuneNascita'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['comuneNascita']))));
+      $fields['codiceFiscale'] = strtoupper(trim((string) $fields['codiceFiscale']));
+      $fields['citta'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['citta']))));
+      $fields['indirizzo'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['indirizzo']))));
+      $fields['bes'] = strtoupper(trim((string) $fields['bes']));
       $fields['noteBes'] = trim(str_replace(["\t","\r","\n",'  '], ['','','',' ',],$fields['noteBes']));
-      $fields['frequenzaEstero'] = strtoupper(trim($fields['frequenzaEstero']));
-      $fields['religione'] = strtoupper(trim($fields['religione']));
-      $fields['credito3'] = trim($fields['credito3']);
-      $fields['credito4'] = trim($fields['credito4']);
-      $fields['classe'] = trim($fields['classe']);
-      $fields['username'] = strtolower(trim($fields['username']));
-      $fields['password'] = trim($fields['password']);
-      $fields['email'] = strtolower(trim($fields['email']));
-      $fields['genitore1Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Cognome']))));
-      $fields['genitore1Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Nome']))));
-      $fields['genitore1CodiceFiscale'] = strtoupper(trim($fields['genitore1CodiceFiscale']));
+      $fields['frequenzaEstero'] = strtoupper(trim((string) $fields['frequenzaEstero']));
+      $fields['religione'] = strtoupper(trim((string) $fields['religione']));
+      $fields['credito3'] = trim((string) $fields['credito3']);
+      $fields['credito4'] = trim((string) $fields['credito4']);
+      $fields['classe'] = trim((string) $fields['classe']);
+      $fields['username'] = strtolower(trim((string) $fields['username']));
+      $fields['password'] = trim((string) $fields['password']);
+      $fields['email'] = strtolower(trim((string) $fields['email']));
+      $fields['genitore1Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['genitore1Cognome']))));
+      $fields['genitore1Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['genitore1Nome']))));
+      $fields['genitore1CodiceFiscale'] = strtoupper(trim((string) $fields['genitore1CodiceFiscale']));
       $telefono = [];
-      foreach (explode(',', $fields['genitore1Telefono']) as $tel) {
+      foreach (explode(',', (string) $fields['genitore1Telefono']) as $tel) {
         $tel = preg_replace('/\s/', '', $tel);
-        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
           $telefono[] = $tel;
         }
       }
       $fields['genitore1Telefono'] = $telefono;
-      $fields['genitore1Username'] = strtolower(trim($fields['genitore1Username']));
-      $fields['genitore1Password'] = trim($fields['genitore1Password']);
-      $fields['genitore1Email'] = strtolower(trim($fields['genitore1Email']));
-      $fields['genitore2Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Cognome']))));
-      $fields['genitore2Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Nome']))));
-      $fields['genitore2CodiceFiscale'] = strtoupper(trim($fields['genitore2CodiceFiscale']));
+      $fields['genitore1Username'] = strtolower(trim((string) $fields['genitore1Username']));
+      $fields['genitore1Password'] = trim((string) $fields['genitore1Password']);
+      $fields['genitore1Email'] = strtolower(trim((string) $fields['genitore1Email']));
+      $fields['genitore2Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['genitore2Cognome']))));
+      $fields['genitore2Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['genitore2Nome']))));
+      $fields['genitore2CodiceFiscale'] = strtoupper(trim((string) $fields['genitore2CodiceFiscale']));
       $telefono = [];
-      foreach (explode(',', $fields['genitore2Telefono']) as $tel) {
+      foreach (explode(',', (string) $fields['genitore2Telefono']) as $tel) {
         $tel = preg_replace('/\s/', '', $tel);
-        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
           $telefono[] = $tel;
         }
       }
       $fields['genitore2Telefono'] = $telefono;
-      $fields['genitore2Username'] = strtolower(trim($fields['genitore2Username']));
-      $fields['genitore2Password'] = trim($fields['genitore2Password']);
-      $fields['genitore2Email'] = strtolower(trim($fields['genitore2Email']));
+      $fields['genitore2Username'] = strtolower(trim((string) $fields['genitore2Username']));
+      $fields['genitore2Password'] = trim((string) $fields['genitore2Password']);
+      $fields['genitore2Email'] = strtolower(trim((string) $fields['genitore2Email']));
       // controlla campi
       if (empty($fields['cognome'])) {
         // cognome può essere vuoto in modifica
@@ -623,7 +623,7 @@ class CsvImporter {
         } else {
           // classe esistente
           $classeAnno = (int) $fields['classe'][0];
-          $classeSezione = trim(substr($fields['classe'], 1));
+          $classeSezione = trim(substr((string) $fields['classe'], 1));
           $classeGruppo = '';
           if (($pos = strpos($classeSezione, '-')) !== false) {
             $classeGruppo = substr($classeSezione, $pos + 1);
@@ -650,8 +650,8 @@ class CsvImporter {
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        if (str_contains($fields['nome'], ' ')) {
-          $nomi = explode(' ', $fields['nome']);
+        if (str_contains((string) $fields['nome'], ' ')) {
+          $nomi = explode(' ', (string) $fields['nome']);
           $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
         } else {
           $username = $fields['nome'].'.'.$fields['cognome'];
@@ -665,7 +665,7 @@ class CsvImporter {
           ->setMaxResults(1)
           ->getQuery()
           ->getOneOrNullResult();
-        $suffix = $result ? (1 + substr($result->getUsername(), -1)) : 1;
+        $suffix = $result ? (1 + substr((string) $result->getUsername(), -1)) : 1;
         $fields['username'] = $username.'.s'.$suffix;
       }
       if (empty($fields['password'])) {
@@ -702,7 +702,7 @@ class CsvImporter {
       if (empty($fields['genitore1Username'])) {
         // crea genitore1Username
         $empty_fields['genitore1Username'] = true;
-        $fields['genitore1Username'] = substr($fields['username'], 0, -2).'f'.substr($fields['username'], -1);
+        $fields['genitore1Username'] = substr((string) $fields['username'], 0, -2).'f'.substr((string) $fields['username'], -1);
       }
       if (empty($fields['genitore1Password'])) {
         // crea genitore1Password
@@ -737,7 +737,7 @@ class CsvImporter {
       if (empty($fields['genitore2Username'])) {
         // crea genitore2Username
         $empty_fields['genitore2Username'] = true;
-        $fields['genitore2Username'] = substr($fields['username'], 0, -2).'g'.substr($fields['username'], -1);
+        $fields['genitore2Username'] = substr((string) $fields['username'], 0, -2).'g'.substr((string) $fields['username'], -1);
       }
       if (empty($fields['genitore2Password'])) {
         // crea genitore2Password
@@ -896,16 +896,16 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
-      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
-      $fields['sesso'] = strtoupper(trim($fields['sesso']));
-      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
-      $fields['username'] = strtolower(trim($fields['username']));
-      $fields['password'] = trim($fields['password']);
-      $fields['email'] = strtolower(trim($fields['email']));
-      $fields['tipo'] = strtoupper(trim($fields['tipo']));
-      $fields['segreteria'] = strtoupper(trim($fields['segreteria']));
-      $fields['sede'] = trim($fields['sede']);
+      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['cognome']))));
+      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['nome']))));
+      $fields['sesso'] = strtoupper(trim((string) $fields['sesso']));
+      $fields['codiceFiscale'] = strtoupper(trim((string) $fields['codiceFiscale']));
+      $fields['username'] = strtolower(trim((string) $fields['username']));
+      $fields['password'] = trim((string) $fields['password']);
+      $fields['email'] = strtolower(trim((string) $fields['email']));
+      $fields['tipo'] = strtoupper(trim((string) $fields['tipo']));
+      $fields['segreteria'] = strtoupper(trim((string) $fields['segreteria']));
+      $fields['sede'] = trim((string) $fields['sede']);
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -1057,13 +1057,13 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['username'] = strtolower(trim($fields['username']));
-      $fields['sede'] = trim($fields['sede']);
+      $fields['username'] = strtolower(trim((string) $fields['username']));
+      $fields['sede'] = trim((string) $fields['sede']);
       $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
-      $fields['ora'] = trim($fields['ora']);
-      $fields['classe'] = trim($fields['classe']);
+      $fields['ora'] = trim((string) $fields['ora']);
+      $fields['classe'] = trim((string) $fields['classe']);
       $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
-        iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
+        iconv('UTF-8', 'ASCII//TRANSLIT', (string) $fields['materia'])));
       // controlla campi obbligatori
       if (empty($fields['username']) || empty($fields['sede']) || empty($fields['giorno']) || empty($fields['ora']) ||
           empty($fields['classe']) || empty($fields['materia'])) {
@@ -1286,7 +1286,7 @@ class CsvImporter {
       return 'exception.file_field';
     }
     foreach ($header as $field) {
-      if (($pos = array_search(strtolower($field), $row)) === false) {
+      if (($pos = array_search(strtolower((string) $field), $row)) === false) {
         // campo mancante
         $this->header = [];
         return 'exception.file_field';

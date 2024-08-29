@@ -84,7 +84,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
   public function authenticate(Request $request): Passport {
       // crea e restituisce il passaporto
     return new SelfValidatingPassport(
-      new UserBadge($request->getClientIp(), [$this, 'getUser']));
+      new UserBadge($request->getClientIp(), $this->getUser(...)));
   }
 
   /**

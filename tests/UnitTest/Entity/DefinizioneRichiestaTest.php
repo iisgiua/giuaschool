@@ -54,7 +54,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -82,17 +82,17 @@ class DefinizioneRichiestaTest extends EntityTestCase {
           ($field == 'gestione' ? $this->faker->boolean() :
           ($field == 'tipo' ? substr($this->faker->text(), 0, 1) :
           null)))))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -105,14 +105,14 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -227,7 +227,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     // unique
     $newObject = new \App\Entity\DefinizioneRichiesta();
     foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+      $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }
     $err = $this->val->validate($newObject);
     $msgs = [];

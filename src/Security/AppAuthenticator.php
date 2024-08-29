@@ -103,8 +103,8 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
       'ip' => $request->getClientIp()];
     // crea e restituisce il passaporto
     return new Passport(
-      new UserBadge($credentials['username'], [$this, 'getUser']),
-      new CustomCredentials([$this, 'checkCredentials'], $credentials));
+      new UserBadge($credentials['username'], $this->getUser(...)),
+      new CustomCredentials($this->checkCredentials(...), $credentials));
   }
 
   /**
@@ -180,10 +180,10 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
       }
       // controllo tipo di utente
-      if ((($user instanceOf Alunno) && str_contains($app->getAbilitati(), 'A') && $credentials['profilo'] == 'A') ||
-          (($user instanceOf Genitore) && str_contains($app->getAbilitati(), 'G') && $credentials['profilo'] == 'G') ||
-          (($user instanceOf Docente) && str_contains($app->getAbilitati(), 'D') && $credentials['profilo'] == 'D') ||
-          (($user instanceOf Ata) && str_contains($app->getAbilitati(), 'T') && $credentials['profilo'] == 'T')) {
+      if ((($user instanceOf Alunno) && str_contains((string) $app->getAbilitati(), 'A') && $credentials['profilo'] == 'A') ||
+          (($user instanceOf Genitore) && str_contains((string) $app->getAbilitati(), 'G') && $credentials['profilo'] == 'G') ||
+          (($user instanceOf Docente) && str_contains((string) $app->getAbilitati(), 'D') && $credentials['profilo'] == 'D') ||
+          (($user instanceOf Ata) && str_contains((string) $app->getAbilitati(), 'T') && $credentials['profilo'] == 'T')) {
         // validazione corretta
         return true;
       } else {

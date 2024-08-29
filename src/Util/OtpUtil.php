@@ -98,7 +98,7 @@ class OtpUtil {
     for ($i = 0; $i < count($base32); $i += 8) {
       $binario = '';
       for ($j = 0; $j < 8; $j++) {
-        $binario .= str_pad(base_convert($this->mappa_inversa_base32[$base32[$i + $j]], 10, 2), 5, '0', STR_PAD_LEFT);
+        $binario .= str_pad(base_convert((string) $this->mappa_inversa_base32[$base32[$i + $j]], 10, 2), 5, '0', STR_PAD_LEFT);
       }
       $binario8 = str_split($binario, 8);
       for ($z = 0; $z < count($binario8); $z++) {

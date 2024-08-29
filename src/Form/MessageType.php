@@ -31,7 +31,7 @@ class MessageType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options) {
       $builder->addModelTransformer(new CallbackTransformer(
           // converte nel formato testo semplice per l'editing
-          fn($messaggio) => strip_tags($messaggio),
+          fn($messaggio) => strip_tags((string) $messaggio),
           // converte nel formato messaggio (testo con HTML) per la memorizzazione
           function ($testo) {
             // sanifica input

@@ -36,10 +36,10 @@ class RichiesteUtil {
    * @param string $dirProgetto Percorso della directory di progetto
    */
   public function __construct(
-      private PdfManager $pdf,
-      private RequestStack $reqstack,
-      private Environment $tpl,
-      private string $dirProgetto)
+      private readonly PdfManager $pdf,
+      private readonly RequestStack $reqstack,
+      private readonly Environment $tpl,
+      private readonly string $dirProgetto)
   {
   }
 

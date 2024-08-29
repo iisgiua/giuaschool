@@ -514,23 +514,23 @@ class GenitoriController extends BaseController {
           $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
           $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
           $valutazioni['C'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_C'));
-          $listaValori = explode(',', $valutazioni['R']['valori']);
-          $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+          $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+          $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
             $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
           }
-          $listaValori = explode(',', $valutazioni['E']['valori']);
-          $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+          $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+          $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
             $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
           }
-          $listaValori = explode(',', $valutazioni['N']['valori']);
-          $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+          $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+          $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
             $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
           }
-          $listaValori = explode(',', $valutazioni['C']['valori']);
-          $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
+          $listaValori = explode(',', (string) $valutazioni['C']['valori']);
+          $listaVoti = explode(',', (string) $valutazioni['C']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
             $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
           }
@@ -866,7 +866,7 @@ class GenitoriController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $errore = false;
-      $motivazione = substr($form->get('motivazione')->getData(), 0, 255);
+      $motivazione = substr((string) $form->get('motivazione')->getData(), 0, 255);
       if ($form->get('delete')->isClicked()) {
         // cancella dati
         $giustificato = null;
@@ -892,7 +892,7 @@ class GenitoriController extends BaseController {
         ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $giustificato,
           'motivazione' => $motivazione, 'dichiarazione' => serialize($dichiarazione),
           'certificati' => serialize($certificati), 'utente' => $this->getUser(),
-          'ids' => explode(',', $info['assenza']['ids'])])
+          'ids' => explode(',', (string) $info['assenza']['ids'])])
         ->getQuery()
         ->getResult();
       // memorizza dati
@@ -1019,7 +1019,7 @@ class GenitoriController extends BaseController {
         } else {
           // aggiorna dati
           $entrata
-            ->setMotivazione(substr($form->get('motivazione')->getData(), 0, 255))
+            ->setMotivazione(substr((string) $form->get('motivazione')->getData(), 0, 255))
             ->setGiustificato(new \DateTime())
             ->setUtenteGiustifica($this->getUser());
         }
@@ -1141,7 +1141,7 @@ class GenitoriController extends BaseController {
         } else {
           // aggiorna dati
           $uscita
-            ->setMotivazione(substr($form->get('motivazione')->getData(), 0, 255))
+            ->setMotivazione(substr((string) $form->get('motivazione')->getData(), 0, 255))
             ->setGiustificato(new \DateTime())
             ->setUtenteGiustifica($this->getUser());
         }

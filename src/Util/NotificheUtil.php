@@ -44,10 +44,10 @@ class NotificheUtil {
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack)
   {
   }
 

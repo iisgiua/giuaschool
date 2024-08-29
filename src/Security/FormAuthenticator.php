@@ -105,8 +105,8 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     $request->getSession()->set(Security::LAST_USERNAME, $username);
     // crea e restituisce il passaporto
     return new Passport(
-      new UserBadge($username, [$this, 'getUser']),
-      new CustomCredentials([$this, 'checkCredentials'], $credentials),
+      new UserBadge($username, $this->getUser(...)),
+      new CustomCredentials($this->checkCredentials(...), $credentials),
       [ new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')) ]);
   }
 

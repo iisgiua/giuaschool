@@ -189,7 +189,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    $passport = new SelfValidatingPassport(new UserBadge('1234', [$sa, 'getUser']));
+    $passport = new SelfValidatingPassport(new UserBadge('1234', $sa->getUser(...)));
     $this->assertEquals($passport, $res);
   }
 

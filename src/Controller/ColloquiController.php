@@ -334,11 +334,11 @@ class ColloquiController extends BaseController {
       // controlla link
       if ($colloquio->getTipo() == 'D') {
         $link = $colloquio->getLuogo();
-        if (str_ends_with($link, 'meet.google.com/') || str_ends_with($link, 'meet.google.com')) {
+        if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (!str_starts_with($link, 'https://') && !str_starts_with($link, 'http://')) {
+        if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
           $colloquio->setLuogo('https://'.$link);
         }
       }
@@ -456,11 +456,11 @@ class ColloquiController extends BaseController {
       $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
       // controlla link
       if ($form->get('tipo')->getData() == 'D') {
-        if (str_ends_with($luogo, 'meet.google.com/') || str_ends_with($luogo, 'meet.google.com')) {
+        if (str_ends_with((string) $luogo, 'meet.google.com/') || str_ends_with((string) $luogo, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (!str_starts_with($luogo, 'https://') && !str_starts_with($luogo, 'http://')) {
+        if (!str_starts_with((string) $luogo, 'https://') && !str_starts_with((string) $luogo, 'http://')) {
           $luogo = 'https://'.$luogo;
         }
     }

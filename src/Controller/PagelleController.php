@@ -59,7 +59,7 @@ class PagelleController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // docente non abilitato
         throw $this->createNotFoundException('exception.invalid_params');

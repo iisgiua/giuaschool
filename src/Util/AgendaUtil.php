@@ -43,10 +43,10 @@ class AgendaUtil {
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private BachecaUtil $bac)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly BachecaUtil $bac)
   {
   }
 

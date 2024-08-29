@@ -307,7 +307,7 @@ class AppController extends BaseController {
     // crea token
     $res['token'] = $token.'-'.$userId;
     // memorizza token
-    $this->getUser()->setPrelogin($token.'-'.sha1($ip).'-'.$sessionId);
+    $this->getUser()->setPrelogin($token.'-'.sha1((string) $ip).'-'.$sessionId);
     $this->getUser()->setPreloginCreato(new \DateTime());
     $this->em->flush();
     // restituisce risposta
@@ -351,15 +351,15 @@ class AppController extends BaseController {
             'token' => $token]);
           throw new \Exception('exception.invalid_user');
         }
-        if (substr_count($user->getPrelogin(), '-') != 2) {
+        if (substr_count((string) $user->getPrelogin(), '-') != 2) {
           // errore formato prelogin
           $logger->error('Formato prelogin errato nella richiesta di connessione da app.', [
             'id' => $userId,
             'token' => $token]);
           throw new \Exception('exception.invalid_user');
         }
-        [$tokenCheck, $hashCheck, $sessionId] = explode('-', $user->getPrelogin());
-        if ($tokenCheck != $tokenId || $hashCheck != sha1($ip)) {
+        [$tokenCheck, $hashCheck, $sessionId] = explode('-', (string) $user->getPrelogin());
+        if ($tokenCheck != $tokenId || $hashCheck != sha1((string) $ip)) {
           // errore token o hash
           $logger->error('Token o hash errato nella richiesta di connessione da app.', [
             'id' => $userId,

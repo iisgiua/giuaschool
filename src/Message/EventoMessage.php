@@ -19,7 +19,7 @@ class EventoMessage {
   /**
    * @var string $tag Testo usato per identificare l'evento
    */
-  private string $tag;
+  private readonly string $tag;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -30,7 +30,7 @@ class EventoMessage {
    * @param int $id Identificativo dell'evento da notificare
    */
   public function __construct(
-      private int $id) {
+      private readonly int $id) {
     $this->tag = '<!EVENTO!><!'.$this->id.'!>';
   }
 

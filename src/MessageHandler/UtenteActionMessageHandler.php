@@ -34,8 +34,8 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    * @param LoggerInterface $logger Gestore dei log su file
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private LoggerInterface $logger)
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger)
   {
   }
 
@@ -118,7 +118,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    */
   public function docenteAdd(Docente $user) {
     // imposta circolari
-    $anno = substr($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $anno = substr((string) $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     $numSedi = $this->em->getRepository(\App\Entity\Sede::class)->createQueryBuilder('s')
       ->select('COUNT(s.id)')
       ->getQuery()

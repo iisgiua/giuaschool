@@ -26,7 +26,7 @@ class InstanceofExtension extends AbstractExtension {
    */
   public function getTests() {
     return [
-      new TwigTest('instanceOf', [$this, 'isInstanceOf']),
+      new TwigTest('instanceOf', $this->isInstanceOf(...)),
     ];
   }
 

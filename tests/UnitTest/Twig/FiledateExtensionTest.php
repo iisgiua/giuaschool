@@ -50,7 +50,7 @@ class FiledateExtensionTest extends KernelTestCase {
     $ext = new FiledateExtension();
     // nome funzione
     $res = $ext->getFunctions();
-    $func = new TwigFunction('filedate', [$ext, 'getFileDate']);
+    $func = new TwigFunction('filedate', $ext->getFileDate(...));
     $this->assertCount(1, $res);
     $this->assertEquals($func, $res[0]);
   }

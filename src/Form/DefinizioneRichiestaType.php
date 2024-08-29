@@ -103,10 +103,10 @@ class DefinizioneRichiestaType extends AbstractType {
         'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
     // aggiunge data transform
     $builder->get('richiedenti')->addModelTransformer(new CallbackTransformer(
-      fn($richiedenti) => explode(',', $richiedenti),
+      fn($richiedenti) => explode(',', (string) $richiedenti),
       fn($richiedenti) => implode(',', $richiedenti)));
     $builder->get('destinatari')->addModelTransformer(new CallbackTransformer(
-      fn($destinatari) => explode(',', $destinatari),
+      fn($destinatari) => explode(',', (string) $destinatari),
       fn($destinatari) => implode(',', $destinatari)));
   }
 

@@ -42,8 +42,8 @@ class BachecaUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em)
   {
   }
 

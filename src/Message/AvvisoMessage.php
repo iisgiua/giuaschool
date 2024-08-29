@@ -19,7 +19,7 @@ class AvvisoMessage {
   /**
    * @var string $tag Testo usato per identificare l'avviso
    */
-  private string $tag;
+  private readonly string $tag;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -30,7 +30,7 @@ class AvvisoMessage {
    * @param int $id Identificativo dell'avviso da notificare
    */
   public function __construct(
-      private int $id) {
+      private readonly int $id) {
     $this->tag = '<!AVVISO!><!'.$this->id.'!>';
   }
 

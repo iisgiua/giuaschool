@@ -133,8 +133,8 @@ class AlunniController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = is_object($form->get('classe')->getData()) ?
         $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/classe', $criteri['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_modifica/cognome', $criteri['cognome']);
@@ -220,7 +220,7 @@ class AlunniController extends BaseController {
       $alunno_old = ['cognome' => $alunno->getCognome(), 'nome' => $alunno->getNome(),
         'sesso' => $alunno->getSesso()];
       // legge genitori nell'ordine corretto
-      $username = substr($alunno->getUsername(), 0, -2).'f'.substr($alunno->getUsername(), -1);
+      $username = substr((string) $alunno->getUsername(), 0, -2).'f'.substr((string) $alunno->getUsername(), -1);
       if ($alunno->getGenitori()[0]->getUsername() == $username) {
         $genitore1 = $alunno->getGenitori()[0];
         $genitore2 = $alunno->getGenitori()[1] ?? null;
@@ -473,8 +473,8 @@ class AlunniController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = is_object($form->get('classe')->getData()) ?
         $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/classe', $criteri['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/alunni_classe/cognome', $criteri['cognome']);

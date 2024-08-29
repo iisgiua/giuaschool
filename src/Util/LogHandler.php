@@ -32,9 +32,9 @@ class LogHandler {
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private RequestStack $request,
-      private TokenStorageInterface $token)
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $request,
+      private readonly TokenStorageInterface $token)
   {
   }
 

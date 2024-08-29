@@ -60,12 +60,12 @@ class GenitoriUtil {
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private RegistroUtil $regUtil,
-      private string $dirProgetto)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly RegistroUtil $regUtil,
+      private readonly string $dirProgetto)
   {
   }
 
@@ -104,8 +104,8 @@ class GenitoriUtil {
     $dati_lezioni = [];
     foreach ($scansioneoraria as $s) {
       $ora = $s['ora'];
-      $dati_lezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
-      $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
+      $dati_lezioni[$ora]['inizio'] = substr((string) $s['inizio'], 0, 5);
+      $dati_lezioni[$ora]['fine'] = substr((string) $s['fine'], 0, 5);
       // legge lezione
       $lezioni = $this->em->getRepository(\App\Entity\Lezione::class)->createQueryBuilder('l')
         ->join('l.classe', 'c')
@@ -120,8 +120,8 @@ class GenitoriUtil {
         foreach ($lezioni as $lezione) {
           $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
           $dati_lezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve();
-          $dati_lezioni[$ora]['argomenti'][$gruppo] = trim($lezione->getArgomento());
-          $dati_lezioni[$ora]['attivita'][$gruppo] = trim($lezione->getAttivita());
+          $dati_lezioni[$ora]['argomenti'][$gruppo] = trim((string) $lezione->getArgomento());
+          $dati_lezioni[$ora]['attivita'][$gruppo] = trim((string) $lezione->getAttivita());
           $argSostegno = '';
           if ($alunno->getBes() == 'H') {
             // legge sostegno
@@ -233,7 +233,7 @@ class GenitoriUtil {
           // nessun argomento in data precedente
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $data_str = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
           $dati[$periodo][$data_prec][$num]['data'] = $data_str;
           $dati[$periodo][$data_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$num]['attivita'] = '';
@@ -246,14 +246,14 @@ class GenitoriUtil {
       }
       if (trim($l['argomento'].$l['attivita'].$l['argomento_sost'].$l['attivita_sost']) != '') {
         // argomento presente
-        if ($num == 0 || strcasecmp($l['argomento'], $dati[$periodo][$data][$num-1]['argomento']) ||
-            strcasecmp($l['attivita'], $dati[$periodo][$data][$num-1]['attivita']) ||
-            strcasecmp($l['argomento_sost'], $dati[$periodo][$data][$num-1]['argomento_sost']) ||
-            strcasecmp($l['attivita_sost'], $dati[$periodo][$data][$num-1]['attivita_sost'])) {
+        if ($num == 0 || strcasecmp((string) $l['argomento'], (string) $dati[$periodo][$data][$num-1]['argomento']) ||
+            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$num-1]['attivita']) ||
+            strcasecmp((string) $l['argomento_sost'], (string) $dati[$periodo][$data][$num-1]['argomento_sost']) ||
+            strcasecmp((string) $l['attivita_sost'], (string) $dati[$periodo][$data][$num-1]['attivita_sost'])) {
           // evita ripetizioni identiche delgi argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
           $dati[$periodo][$data][$num]['data'] = $data_str;
           $dati[$periodo][$data][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$num]['attivita'] = $l['attivita'];
@@ -268,7 +268,7 @@ class GenitoriUtil {
       // nessun argomento in data precedente
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $data_str = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
       $dati[$periodo][$data_prec][$num]['data'] = $data_str;
       $dati[$periodo][$data_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$num]['attivita'] = '';
@@ -315,7 +315,7 @@ class GenitoriUtil {
           // nessun argomento
           $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+          $data_str = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
           $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $data_str;
           $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
@@ -328,14 +328,14 @@ class GenitoriUtil {
       }
       if (trim($l['argomento'].$l['attivita'].$l['argomento_sost'].$l['attivita_sost']) != '') {
         // argomento presente
-        if ($num == 0 || strcasecmp($l['argomento'], $dati[$periodo][$data][$materia][$num-1]['argomento']) ||
-            strcasecmp($l['attivita'], $dati[$periodo][$data][$materia][$num-1]['attivita']) ||
-            strcasecmp($l['argomento_sost'], $dati[$periodo][$data][$materia][$num-1]['argomento_sost']) ||
-            strcasecmp($l['attivita_sost'], $dati[$periodo][$data][$materia][$num-1]['attivita_sost'])) {
+        if ($num == 0 || strcasecmp((string) $l['argomento'], (string) $dati[$periodo][$data][$materia][$num-1]['argomento']) ||
+            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$materia][$num-1]['attivita']) ||
+            strcasecmp((string) $l['argomento_sost'], (string) $dati[$periodo][$data][$materia][$num-1]['argomento_sost']) ||
+            strcasecmp((string) $l['attivita_sost'], (string) $dati[$periodo][$data][$materia][$num-1]['attivita_sost'])) {
           // evita ripetizioni identiche di argomenti
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-          $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+          $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
           $dati[$periodo][$data][$materia][$num]['data'] = $data_str;
           $dati[$periodo][$data][$materia][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$materia][$num]['attivita'] = $l['attivita'];
@@ -351,7 +351,7 @@ class GenitoriUtil {
       // nessun argomento
       $periodo = ($data_prec <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_prec <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data_prec, 8)).' '.$mesi[intval(substr($data_prec, 5, 2))];
+      $data_str = intval(substr((string) $data_prec, 8)).' '.$mesi[intval(substr((string) $data_prec, 5, 2))];
       $dati[$periodo][$data_prec][$materia_prec][$num]['data'] = $data_str;
       $dati[$periodo][$data_prec][$materia_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$materia_prec][$num]['attivita'] = '';
@@ -398,7 +398,7 @@ class GenitoriUtil {
     foreach ($voti as $v) {
       $data = $v['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $voto_str = '';
       if ($v['voto'] > 0) {
         $voto_int = intval($v['voto'] + 0.25);
@@ -462,7 +462,7 @@ class GenitoriUtil {
     foreach ($ritardi as $r) {
       $data = $r['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       if ($r['ritardoBreve']) {
         $num_brevi++;
       } else {
@@ -501,7 +501,7 @@ class GenitoriUtil {
     foreach ($uscite as $u) {
       $data = $u['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['uscita']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['uscita']['ora'] = $u['ora'];
       $dati_periodo[$numperiodo][$data]['uscita']['note'] = $u['note'];
@@ -611,7 +611,7 @@ class GenitoriUtil {
     foreach ($note as $n) {
       $data = $n['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['classe'][] = [
         'data' => $data_str,
         'nota' => $n['testo'],
@@ -636,7 +636,7 @@ class GenitoriUtil {
     foreach ($individuali as $i) {
       $data = $i['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['individuale'][] = [
         'data' => $data_str,
         'nota' => $i['testo'],
@@ -682,7 +682,7 @@ class GenitoriUtil {
       $data = $o['data']->format('Y-m-d');
       $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $dati[$periodo][$data][] = [
         'data' => $data_str,
         'materia' => $o['nomeBreve'],
@@ -1013,11 +1013,11 @@ class GenitoriUtil {
     }
     // scrutinio rinviato svolto nel corrente A.S.
     $classeAnno = $dati['esito']->getClasse()[0];
-    $classeSezione = !str_contains($dati['esito']->getClasse(), '-') ?
-      substr($dati['esito']->getClasse(), 1) :
-      substr($dati['esito']->getClasse(), 1, strpos($dati['esito']->getClasse(), '-') - 1);
-    $classeGruppo = !str_contains($dati['esito']->getClasse(), '-') ? '' :
-      substr($dati['esito']->getClasse(), strpos($dati['esito']->getClasse(), '-') + 1);
+    $classeSezione = !str_contains((string) $dati['esito']->getClasse(), '-') ?
+      substr((string) $dati['esito']->getClasse(), 1) :
+      substr((string) $dati['esito']->getClasse(), 1, strpos((string) $dati['esito']->getClasse(), '-') - 1);
+    $classeGruppo = !str_contains((string) $dati['esito']->getClasse(), '-') ? '' :
+      substr((string) $dati['esito']->getClasse(), strpos((string) $dati['esito']->getClasse(), '-') + 1);
     $dati['esitoRinviato'] = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
@@ -1068,7 +1068,7 @@ class GenitoriUtil {
     foreach ($assenze as $a) {
       $data = $a['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;
@@ -1187,7 +1187,7 @@ class GenitoriUtil {
     foreach ($assenze as $a) {
       $data = $a['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))].' '.substr($data, 0, 4);
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))].' '.substr((string) $data, 0, 4);
       $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
       $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;

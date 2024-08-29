@@ -28,8 +28,8 @@ class LogProcessor {
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
   public function __construct(
-      private RequestStack $request,
-      private TokenStorageInterface $token)
+      private readonly RequestStack $request,
+      private readonly TokenStorageInterface $token)
   {
   }
 

@@ -44,15 +44,15 @@ class ArchiviazioneUtil {
    * @param string $dirCircolari Directory delle circolari
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private Environment $tpl,
-      private PdfManager $pdf,
-      private RegistroUtil $regUtil,
-      private PagelleUtil $pag,
-      private string $root,
-      private string $dirCircolari)
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly Environment $tpl,
+      private readonly PdfManager $pdf,
+      private readonly RegistroUtil $regUtil,
+      private readonly PagelleUtil $pag,
+      private readonly string $root,
+      private readonly string $dirCircolari)
   {
   }
 
@@ -71,8 +71,8 @@ class ArchiviazioneUtil {
       $fs->mkdir($percorso, 0775);
     }
     // nome documento
-    $nomefile = 'registro-docente-'.mb_strtoupper($docente->getCognome(), 'UTF-8').'-'.
-      mb_strtoupper($docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
+    $nomefile = 'registro-docente-'.mb_strtoupper((string) $docente->getCognome(), 'UTF-8').'-'.
+      mb_strtoupper((string) $docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
     $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                             ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
     // lista cattedre (escluso sostegno)
@@ -160,8 +160,8 @@ class ArchiviazioneUtil {
       $fs->mkdir($percorso, 0775);
     }
     // nome documento
-    $nomefile = 'registro-sostegno-'.mb_strtoupper($docente->getCognome(), 'UTF-8').'-'.
-      mb_strtoupper($docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
+    $nomefile = 'registro-sostegno-'.mb_strtoupper((string) $docente->getCognome(), 'UTF-8').'-'.
+      mb_strtoupper((string) $docente->getNome(), 'UTF-8').'-'.$docente->getId().'.pdf';
     $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                             ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
     // lista cattedre
@@ -353,18 +353,18 @@ class ArchiviazioneUtil {
     $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
-    $listaValori = explode(',', $valutazioni['R']['valori']);
-    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['E']['valori']);
-    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['N']['valori']);
-    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
@@ -1236,8 +1236,8 @@ class ArchiviazioneUtil {
       $scansioneoraria = $this->regUtil->orarioInData($data, $classe->getSede());
       foreach ($scansioneoraria as $so) {
         $ora = $so['ora'];
-        $dati['lezioni'][$ora]['inizio'] = substr($so['inizio'], 0, 5);
-        $dati['lezioni'][$ora]['fine'] = substr($so['fine'], 0, 5);
+        $dati['lezioni'][$ora]['inizio'] = substr((string) $so['inizio'], 0, 5);
+        $dati['lezioni'][$ora]['fine'] = substr((string) $so['fine'], 0, 5);
         // legge lezioni
         $lezioni = $this->em->getRepository(\App\Entity\Lezione::class)->createQueryBuilder('l')
           ->join('l.classe', 'c')

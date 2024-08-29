@@ -360,7 +360,7 @@ class LezioniController extends BaseController {
       $info['docenti'] .= $doc['nome'].' '. $doc['cognome'].', ';
     }
     $info['docenti'] = substr($info['docenti'], 0, -2);
-    $m = strtoupper(preg_replace('/\W+/','-', $cattedra->getMateria()->getNomeBreve()));
+    $m = strtoupper((string) preg_replace('/\W+/','-', $cattedra->getMateria()->getNomeBreve()));
     if (str_ends_with($m, '-')) {
       $m = substr($m, 0, -1);
     }

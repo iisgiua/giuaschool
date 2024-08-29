@@ -36,9 +36,9 @@ class CircolariUtil {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans)
   {
   }
 

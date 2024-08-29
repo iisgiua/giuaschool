@@ -89,7 +89,7 @@ class SpidController extends BaseController {
    */
   public function login(string $idp): Response {
     $code = $this->idp[$idp] ?? $idp;
-    return $this->redirect('/spid-login.php?idp='.urlencode($code));
+    return $this->redirect('/spid-login.php?idp='.urlencode((string) $code));
   }
 
   /**

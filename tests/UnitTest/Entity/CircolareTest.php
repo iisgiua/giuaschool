@@ -52,7 +52,7 @@ class CircolareTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -89,17 +89,17 @@ class CircolareTest extends EntityTestCase {
           ($field == 'notifica' ? $this->faker->boolean() :
           ($field == 'pubblicata' ? $this->faker->boolean() :
           null))))))))))))))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -113,18 +113,18 @@ class CircolareTest extends EntityTestCase {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
         if ($field == 'documento') {
-          $this->assertSame($data[$i][$field]->getBasename(), $created->{'get'.ucfirst($field)}(),
-            $this->entity.'::get'.ucfirst($field));
+          $this->assertSame($data[$i][$field]->getBasename(), $created->{'get'.ucfirst((string) $field)}(),
+            $this->entity.'::get'.ucfirst((string) $field));
         } else {
-          $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-            $this->entity.'::get'.ucfirst($field));
+          $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+            $this->entity.'::get'.ucfirst((string) $field));
         }
       }
     }
     // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -304,7 +304,7 @@ class CircolareTest extends EntityTestCase {
       if ($field == 'documento') {
         $newObject->setDocumento(new \Symfony\Component\HttpFoundation\File\File(dirname(__DIR__, 2).'/data/'.$objects[0]->getDocumento()));
       } else {
-        $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+        $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
       }
     }
     $err = $this->val->validate($newObject);

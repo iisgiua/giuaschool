@@ -57,7 +57,7 @@ class CoordinatoreController extends BaseController {
   public function coordinatore(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (count($classi) == 1) {
         // coordinatore di una sola classe: vai
         $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classi[0]);
@@ -90,7 +90,7 @@ class CoordinatoreController extends BaseController {
     $classi = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
-      ->setParameters(['lista' => explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
+      ->setParameters(['lista' => explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
       ->getQuery()
       ->getResult();
     // lista tutte le classi
@@ -166,7 +166,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -233,7 +233,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -305,7 +305,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -387,7 +387,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -444,7 +444,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -530,7 +530,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -583,7 +583,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -796,7 +796,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -847,7 +847,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -974,7 +974,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -1005,9 +1005,9 @@ class CoordinatoreController extends BaseController {
       $info['pagina'] = $pagina;
       $info['oggi'] = new \DateTime('today');
       $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
-      $info['annoInizio'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+      $info['annoInizio'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
       $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-      $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+      $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     }
     // mostra la pagina di risposta
     return $this->renderHtml('coordinatore', 'presenze', $dati, $info, [
@@ -1059,7 +1059,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1067,7 +1067,7 @@ class CoordinatoreController extends BaseController {
     }
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     // form
     $opzioniAlunni = $this->em->getRepository(\App\Entity\Alunno::class)->opzioni(true, true,
       $classe->getId());
@@ -1156,7 +1156,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1208,7 +1208,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1216,7 +1216,7 @@ class CoordinatoreController extends BaseController {
     }
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     // form
     $opzioniAlunni = $this->em->getRepository(\App\Entity\Alunno::class)->opzioni(true, true,
       $classe->getId());

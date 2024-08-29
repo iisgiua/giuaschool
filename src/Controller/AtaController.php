@@ -131,8 +131,8 @@ class AtaController extends BaseController {
       // imposta criteri di ricerca
       $criteri['sede'] = is_object($form->get('sede')->getData()) ?
         $form->get('sede')->getData()->getId() : ((int) $form->get('sede')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);

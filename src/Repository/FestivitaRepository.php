@@ -47,7 +47,7 @@ class FestivitaRepository extends BaseRepository {
     }
     // controlla giorni festivi settimanali
     $giorni = explode(',',
-      $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('giorni_festivi_istituto', '0'));
+      (string) $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('giorni_festivi_istituto', '0'));
     if (in_array($data->format('w'), $giorni, true)) {
       // giorno festivo
       return true;
@@ -83,7 +83,7 @@ class FestivitaRepository extends BaseRepository {
       $succ->modify('+1 day');
       // controllo riposo settimanale (domenica e altri)
       $weekdays = $this->_em->getRepository(\App\Entity\Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
-      if ($weekdays && in_array($succ->format('w'), explode(',', $weekdays->getValore()))) {
+      if ($weekdays && in_array($succ->format('w'), explode(',', (string) $weekdays->getValore()))) {
         // festivo
         continue;
       }
@@ -159,7 +159,7 @@ class FestivitaRepository extends BaseRepository {
       $prec->modify('-1 day');
       // controllo riposo settimanale (domenica e altri)
       $weekdays = $this->_em->getRepository(\App\Entity\Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
-      if ($weekdays && in_array($prec->format('w'), explode(',', $weekdays->getValore()))) {
+      if ($weekdays && in_array($prec->format('w'), explode(',', (string) $weekdays->getValore()))) {
         // festivo
         continue;
       }

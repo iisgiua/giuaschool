@@ -67,7 +67,7 @@ class AccountProvisioning {
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
-      private EntityManagerInterface $em,
+      private readonly EntityManagerInterface $em,
       private $dirProgetto) {
     $this->serviceGsuite = null;
     $this->serviceMoodle = null;
@@ -101,7 +101,7 @@ class AccountProvisioning {
     // inizializza parametri configurazione
     $this->conf['dominio'] = $this->em->getRepository(\App\Entity\Configurazione::class)
       ->getParametro('id_provider_dominio');
-    $this->conf['anno'] = substr($this->em->getRepository(\App\Entity\Configurazione::class)
+    $this->conf['anno'] = substr((string) $this->em->getRepository(\App\Entity\Configurazione::class)
       ->getParametro('anno_inizio'), 0, 4);
     $this->conf['citta']  = ($this->em->getRepository(\App\Entity\Sede::class)->findOneBy([], ['ordinamento' => 'ASC']))
       ->getCitta();
@@ -441,7 +441,7 @@ class AccountProvisioning {
           '&moodlewsrestformat=json';
         $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
           'value' => $corso]]);
-        $msg = json_decode($ris->getBody());
+        $msg = json_decode((string) $ris->getBody());
         if (isset($msg->exception)) {
           // errore
           $errore = '[aggiungeCattedra] '.$msg->message;
@@ -1252,7 +1252,7 @@ class AccountProvisioning {
     $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
       '&moodlewsrestformat=json';
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'username', 'values' => [$utente]]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
       throw new \Exception('[idUtenteMoodle] '.$msg->message);
@@ -1275,7 +1275,7 @@ class AccountProvisioning {
     $context = [
       'contextlevel' => 'system'];
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['query' => $gruppo, 'context' => $context]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
       throw new \Exception('[idGruppoMoodle] '.$msg->message);
@@ -1310,7 +1310,7 @@ class AccountProvisioning {
       'key' => 'idnumber',
       'value' => $categoria];
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['criteria' => [$criteria]]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
       throw new \Exception('[idCategoriaMoodle] '.$msg->message);
@@ -1342,7 +1342,7 @@ class AccountProvisioning {
           'type' => 'username',
           'value' => $utente]];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['members' => [$member]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeUtenteGruppoMoodle] '.$msg->message;
@@ -1374,7 +1374,7 @@ class AccountProvisioning {
         'cohortid' => $idgruppo,
         'userid' => $idutente];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['members' => [$member]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[rimuoveUtenteGruppoMoodle] '.$msg->message;
@@ -1424,7 +1424,7 @@ class AccountProvisioning {
         'city' => $this->conf['citta'],
         'country' => 'IT'];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaUtenteMoodle] '.$msg->message;
@@ -1461,7 +1461,7 @@ class AccountProvisioning {
         'firstname' => $nome,
         'lastname' => $cognome];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[modificaUtenteMoodle] '.$msg->message;
@@ -1493,7 +1493,7 @@ class AccountProvisioning {
         'id' => $idutente,
         'password' => $password];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[passwordUtenteMoodle] '.$msg->message;
@@ -1536,7 +1536,7 @@ class AccountProvisioning {
         'id' => $idutente,
         'suspended' => $sospeso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[sospendeUtenteMoodle] '.$msg->message;
@@ -1583,7 +1583,7 @@ class AccountProvisioning {
         '&moodlewsrestformat=json';
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
         'value' => $corso]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaCorsoMoodle] '.$msg->message;
@@ -1600,7 +1600,7 @@ class AccountProvisioning {
           'shortname' => $corso,
           'categoryid' => $idcategoria];
         $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['courses' => [$course]]]);
-        $msg = json_decode($ris->getBody());
+        $msg = json_decode((string) $ris->getBody());
         if (isset($msg->exception)) {
           // errore
           $errore = '[creaCorsoMoodle] '.$msg->message;
@@ -1622,7 +1622,7 @@ class AccountProvisioning {
           'userid' => $iddocente,
           'courseid' => $idcorso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['enrolments' => [$enrolment]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaCorsoMoodle] '.$msg->message;
@@ -1654,7 +1654,7 @@ class AccountProvisioning {
         '&moodlewsrestformat=json';
       $context = ['contextlevel' => 'system'];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['query' => $classe, 'context' => $context]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeClasseCorsoMoodle] '.$msg->message;
@@ -1670,7 +1670,7 @@ class AccountProvisioning {
           'courseid' => $idcorso,
           'cohortid' => $idgruppo];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['instance' => $instance]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeClasseCorsoMoodle] '.$msg->message;
@@ -1703,7 +1703,7 @@ class AccountProvisioning {
         'userid' => $idutente,
         'courseid' => $idcorso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['enrolments' => [$enrolment]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[rimuoveDocenteCorsoMoodle] '.$msg->message;
@@ -1730,7 +1730,7 @@ class AccountProvisioning {
       '&moodlewsrestformat=json';
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
       'value' => $corso]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
       throw new \Exception('[idCorsoMoodle] '.$msg->message);

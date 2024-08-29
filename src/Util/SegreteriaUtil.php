@@ -37,9 +37,9 @@ class SegreteriaUtil {
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private RequestStack $reqstack,
-      private RegistroUtil $regUtil,
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $reqstack,
+      private readonly RegistroUtil $regUtil,
       private $dirProgetto)
   {
   }
@@ -295,11 +295,11 @@ class SegreteriaUtil {
     $fs = new Filesystem();
     // scrutinio rinviato svolto nel corrente A.S.
     $classeAnno = $storico->getClasse()[0];
-    $classeSezione = !str_contains($storico->getClasse(), '-') ?
-      substr($storico->getClasse(), 1) :
-      substr($storico->getClasse(), 1, strpos($storico->getClasse(), '-') - 1);
-    $classeGruppo = !str_contains($storico->getClasse(), '-') ? '' :
-      substr($storico->getClasse(), strpos($storico->getClasse(), '-') + 1);
+    $classeSezione = !str_contains((string) $storico->getClasse(), '-') ?
+      substr((string) $storico->getClasse(), 1) :
+      substr((string) $storico->getClasse(), 1, strpos((string) $storico->getClasse(), '-') - 1);
+    $classeGruppo = !str_contains((string) $storico->getClasse(), '-') ? '' :
+      substr((string) $storico->getClasse(), strpos((string) $storico->getClasse(), '-') + 1);
     $dati['esitoRinviato'] = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')

@@ -35,9 +35,9 @@ class ProvisioningCommand extends Command {
    * @param AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private LoggerInterface $logger,
-      private AccountProvisioning $prov) {
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger,
+      private readonly AccountProvisioning $prov) {
     parent::__construct();
   }
 

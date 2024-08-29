@@ -81,7 +81,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function authenticate(Request $request): Passport {
     // crea e restituisce il passaporto
     return new SelfValidatingPassport(
-      new UserBadge($request->attributes->get('responseId'), [$this, 'getUser']));
+      new UserBadge($request->attributes->get('responseId'), $this->getUser(...)));
   }
 
   /**
@@ -105,7 +105,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // autenticato su SPID: controlla se esiste nel registro ed abilitato all'accesso SPID
     $nome = $spid->getAttrName();
     $cognome = $spid->getAttrFamilyName();
-    $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
+    $codiceFiscale = substr((string) $spid->getAttrFiscalNumber(), 6);
     $user = $this->em->getRepository(\App\Entity\Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
     if (empty($user)) {
       // utente non esiste nel registro

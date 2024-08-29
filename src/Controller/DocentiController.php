@@ -145,8 +145,8 @@ class DocentiController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = is_object($form->get('classe')->getData()) ?
         $form->get('classe')->getData()->getId() : ((int) $form->get('classe')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
@@ -425,8 +425,8 @@ class DocentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
@@ -569,8 +569,8 @@ class DocentiController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
@@ -732,8 +732,8 @@ class DocentiController extends BaseController {
       // imposta criteri di ricerca
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/cognome', $criteri['cognome']);
@@ -1099,8 +1099,8 @@ class DocentiController extends BaseController {
       // imposta criteri di ricerca
       $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
         intval($form->get('sede')->getData()));
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/sede', $criteri['sede']);
       $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/cognome', $criteri['cognome']);

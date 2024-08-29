@@ -26,7 +26,7 @@ class FiledateExtension extends AbstractExtension {
    */
   public function getFunctions() {
     return [
-      new TwigFunction('filedate', [$this, 'getFileDate']),
+      new TwigFunction('filedate', $this->getFileDate(...)),
     ];
   }
 

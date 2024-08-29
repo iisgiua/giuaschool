@@ -32,9 +32,9 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private LoggerInterface $logger,
-      private MessageBusInterface $messageBus)
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger,
+      private readonly MessageBusInterface $messageBus)
   {
   }
 

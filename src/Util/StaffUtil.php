@@ -51,12 +51,12 @@ class StaffUtil {
    * @param GenitoriUtil $genUtil Funzioni di utilità per i genitori
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private RegistroUtil $regUtil,
-      private GenitoriUtil $genUtil)
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly RegistroUtil $regUtil,
+      private readonly GenitoriUtil $genUtil)
   {
   }
 
@@ -142,7 +142,7 @@ class StaffUtil {
     foreach ($note as $n) {
       $data = $n['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $alunni = $this->em->getRepository(\App\Entity\Assenza::class)->assentiInData($classe, $n['data']);
       $dati_periodo[$numperiodo][$data]['classe'][] = [
         'data' => $data_str,
@@ -174,7 +174,7 @@ class StaffUtil {
     foreach ($individuali as $n) {
       $data = $n->getData()->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
       $alunni = [];
       foreach ($n->getAlunni() as $alu) {
         $alunni[] = ''.$alu;
@@ -621,7 +621,7 @@ class StaffUtil {
   public function statistiche(mixed $docente, $inizio, $fine, $page=1, $limit=10) {
     // compatibilità MySQL >= 5.7
     $mode = $this->em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
-    if (str_contains($mode, 'ONLY_FULL_GROUP_BY')) {
+    if (str_contains((string) $mode, 'ONLY_FULL_GROUP_BY')) {
       $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
       $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
         str_replace(',,', ',', $mode));

@@ -38,9 +38,9 @@ class ConfigLoader {
    * @param Security $security Gestore dell'autenticazione degli utenti
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private RequestStack $reqstack,
-      private Security $security)
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $reqstack,
+      private readonly Security $security)
   {
   }
 

@@ -190,7 +190,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   public static function beforeFeature(BeforeFeatureScope $scope) {
     self::$fixtures = '';
     $descrizione = $scope->getFeature()->getDescription();
-    if (preg_match('/^\s*Utilizzando\s+"([^"]+)"\s*$/im', $descrizione, $matches) === 1) {
+    if (preg_match('/^\s*Utilizzando\s+"([^"]+)"\s*$/im', (string) $descrizione, $matches) === 1) {
       // usa i dati del file indicato
       self::$fixtures = $matches[1];
     }
@@ -280,7 +280,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     if ($this->session->getDriver()->isStarted() &&
         ($this->debug || !$scope->getTestResult()->isPassed())) {
       // url relativa
-      $url = substr($this->session->getCurrentUrl(), strlen($this->getMinkParameter('base_url')));
+      $url = substr($this->session->getCurrentUrl(), strlen((string) $this->getMinkParameter('base_url')));
       // crea nome file da url
       $filename = str_replace('/', '_', trim($url, '/'));
       $filename = ($filename ?: 'error');
@@ -389,10 +389,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       $this->assertNotEmpty($istanza);
       $listaId[] = $istanza->getId();
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
+          $istanza->{'set'.ucfirst((string) $key)}($this->convertText($val));
         }
       }
     }
@@ -430,7 +430,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       $this->assertNotEmpty($istanza);
       $listaId[] = $istanza->getId();
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
     }
   }
 
@@ -452,11 +452,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->em->persist($istanza);
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
+          $istanza->{'set'.ucfirst((string) $key)}($this->convertText($val));
         }
       }
       $this->assertNotEmpty($istanza);
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
     }
     $this->em->flush();
   }
@@ -478,7 +478,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
         if ($key[0] != '#' && !empty($val)) {
           $cerca[$key] = $this->convertText($val);
         } elseif ($key[0] == '#' && !empty($val)) {
-          $modifica[trim(substr($key, 1))] = $this->convertText($val);
+          $modifica[trim(substr((string) $key, 1))] = $this->convertText($val);
         }
       }
       $oggetti = $this->em->getRepository("App\\Entity\\".$classe)->findBy($cerca);
@@ -522,7 +522,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     foreach ($tabella->getHash() as $row) {
       foreach ($row as $key=>$val) {
         $var = $this->convertText($val);
-        $valore->{'set'.ucfirst($key)}($var);
+        $valore->{'set'.ucfirst((string) $key)}($var);
       }
     }
     $this->em->flush();
@@ -1005,7 +1005,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione strtoupper
       if ($fn[1] == 'upr') {
         $var = substr(substr($var, 5), 0 , -1);
-        return strtoupper($this->getVar($var));
+        return strtoupper((string) $this->getVar($var));
       }
       // controlla funzione upper slug
       if ($fn[1] == 'slg') {
@@ -1202,7 +1202,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $first = '';
         $init = true;
         foreach ($value as $val) {
-          $first .= (!$init ? '.*' : '').preg_quote($val, '/');
+          $first .= (!$init ? '.*' : '').preg_quote((string) $val, '/');
           $init = false;
         }
       }
@@ -1210,9 +1210,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($varList as $var) {
         $value = $this->getVars($var);
         if (is_array($value)) {
-          $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
+          $value = implode('.*', array_map(fn($v) => preg_quote((string) $v, '/'), $value));
         } else {
-          $value = preg_quote($value, '/');
+          $value = preg_quote((string) $value, '/');
         }
         $values[] = $value;
       }
@@ -1237,7 +1237,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
             $regex .= '(?!.*\d)';
           }
         } else {
-          $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
+          $regex .= (!$first ? '.*' : '').preg_quote((string) $val, '/');
         }
         $first = false;
       }

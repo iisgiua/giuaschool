@@ -102,7 +102,7 @@ class Updater {
     $this->projectPath = dirname($path);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-    if (str_contains($_SERVER['REQUEST_URI'], '/install/update.php')) {
+    if (str_contains((string) $_SERVER['REQUEST_URI'], '/install/update.php')) {
       // installazione aggiornamenti
       $this->urlPath = preg_replace('|/install/update\.php.*$|', '', $url);
     } else {
@@ -321,7 +321,7 @@ class Updater {
    */
   private function connectDb(bool $noSchema=false) {
     // connessione al database
-    $db = parse_url($this->env['DATABASE_URL']);
+    $db = parse_url((string) $this->env['DATABASE_URL']);
     $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
       ($noSchema ? '' : (';dbname='.substr($db['path'], 1)));
     $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
@@ -994,7 +994,7 @@ class Updater {
       $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
     } else {
       // legge configurazione
-      $db = parse_url($this->env['DATABASE_URL']);
+      $db = parse_url((string) $this->env['DATABASE_URL']);
       // imposta dati della pagina
       $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
       $page['database'] = $db;
@@ -1055,12 +1055,12 @@ class Updater {
   private function admin(int $step) {
     if (isset($_POST['install']['submit'])) {
       // controllo credenziali
-      $username = trim($_POST['install']['username']);
+      $username = trim((string) $_POST['install']['username']);
       if (strlen($username) < 4) {
         // username troppo corto
         throw new \Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $step);
       }
-      $password = trim($_POST['install']['password']);
+      $password = trim((string) $_POST['install']['password']);
       if (strlen($password) < 8) {
         // password troppo corta
         throw new \Exception('La password deve avere una lunghezza di almeno 8 caratteri', $step);
@@ -1161,7 +1161,7 @@ class Updater {
     // controlla pagina
     if (isset($_POST['install']['submit'])) {
       // controlla i dati
-      $spid['entityID'] = strtolower(trim($_POST['install']['entityID']));
+      $spid['entityID'] = strtolower(trim((string) $_POST['install']['entityID']));
       if (empty($spid['entityID'])) {
         // errore
         throw new \Exception('Non è stato indicato l\'identificativo del service provider', $step);
@@ -1170,32 +1170,32 @@ class Updater {
         // errore
         throw new \Exception('L\'identificativo del service provider deve essere un indirizzo internet', $step);
       }
-      $spid['spLocalityName'] = str_replace("'", "\\'", trim($_POST['install']['spLocalityName']));
+      $spid['spLocalityName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spLocalityName']));
       if (empty($spid['spLocalityName'])) {
         // errore
         throw new \Exception('Non è stata indicata la sede legale del service provider', $step);
       }
-      $spid['spName'] = str_replace("'", "\\'", trim($_POST['install']['spName']));
+      $spid['spName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spName']));
       if (empty($spid['spName'])) {
         // errore
         throw new \Exception('Non è stato indicato il nome del service provider', $step);
       }
-      $spid['spDescription'] = str_replace("'", "\\'", trim($_POST['install']['spDescription']));
+      $spid['spDescription'] = str_replace("'", "\\'", trim((string) $_POST['install']['spDescription']));
       if (empty($spid['spDescription'])) {
         // errore
         throw new \Exception('Non è stata indicata la descrizione del service provider', $step);
       }
-      $spid['spOrganizationName'] = str_replace("'", "\\'", trim($_POST['install']['spOrganizationName']));
+      $spid['spOrganizationName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationName']));
       if (empty($spid['spOrganizationName'])) {
         // errore
         throw new \Exception('Non è stato indicato il nome completo dell\'ente', $step);
       }
-      $spid['spOrganizationDisplayName'] = str_replace("'", "\\'", trim($_POST['install']['spOrganizationDisplayName']));
+      $spid['spOrganizationDisplayName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationDisplayName']));
       if (empty($spid['spOrganizationDisplayName'])) {
         // errore
         throw new \Exception('Non è stato indicato il nome abbreviato dell\'ente', $step);
       }
-      $spid['spOrganizationURL'] = trim($_POST['install']['spOrganizationURL']);
+      $spid['spOrganizationURL'] = trim((string) $_POST['install']['spOrganizationURL']);
       if (empty($spid['spOrganizationURL'])) {
         // errore
         throw new \Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $step);
@@ -1204,12 +1204,12 @@ class Updater {
         // errore
         throw new \Exception('L\'indirizzo internet dell\'ente non è valido', $step);
       }
-      $spid['spOrganizationCode'] = trim($_POST['install']['spOrganizationCode']);
+      $spid['spOrganizationCode'] = trim((string) $_POST['install']['spOrganizationCode']);
       if (empty($spid['spOrganizationCode'])) {
         // errore
         throw new \Exception('Non è stato indicato il codice IPA dell\'ente', $step);
       }
-      $spid['spOrganizationEmailAddress'] = trim($_POST['install']['spOrganizationEmailAddress']);
+      $spid['spOrganizationEmailAddress'] = trim((string) $_POST['install']['spOrganizationEmailAddress']);
       if (empty($spid['spOrganizationEmailAddress'])) {
         // errore
         throw new \Exception('Non è stato indicato l\'indirizzo email dell\'ente', $step);
@@ -1218,7 +1218,7 @@ class Updater {
         // errore
         throw new \Exception('L\'indirizzo email dell\'ente non è valido', $step);
       }
-      $spid['spOrganizationTelephoneNumber'] = str_replace(' ', '', trim($_POST['install']['spOrganizationTelephoneNumber']));
+      $spid['spOrganizationTelephoneNumber'] = str_replace(' ', '', trim((string) $_POST['install']['spOrganizationTelephoneNumber']));
       if (empty($spid['spOrganizationTelephoneNumber'])) {
         // errore
         throw new \Exception('Non è stato indicato il numero di telefono dell\'ente', $step);
@@ -1228,7 +1228,7 @@ class Updater {
         $spid['spOrganizationTelephoneNumber'] = '+39'.$spid['spOrganizationTelephoneNumber'];
       }
       // imposta dominio service provider
-      $spid['spDomain'] = parse_url($spid['entityID'], PHP_URL_HOST);
+      $spid['spDomain'] = parse_url((string) $spid['entityID'], PHP_URL_HOST);
       if (str_starts_with($spid['spDomain'], 'www.')) {
         $spid['spDomain'] = substr($spid['spDomain'], 4);
       }
@@ -1294,7 +1294,7 @@ class Updater {
     // controlla pagina
     if (isset($_POST['install']['submit'])) {
       // legge metadata
-      $xml = base64_decode($_POST['install']['xml']);
+      $xml = base64_decode((string) $_POST['install']['xml']);
       // scrive metadata
       if (file_put_contents($this->projectPath.'/config/metadata/registro-spid.xml', $xml) === false) {
         // errore di creazione del file
@@ -1437,7 +1437,7 @@ class Updater {
     $fs->symlink($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/log',
       $this->projectPath.'/var/log/'.$spid['serviceName']);
     // personalizza configurazione SAML
-    $db = parse_url($this->env['DATABASE_URL']);
+    $db = parse_url((string) $this->env['DATABASE_URL']);
     $vars = [
       '{{BASEURLPATH}}' => "'".$spid['serviceName']."/'",
       '{{ADMIN_PASSWORD}}' => "'".$spid['adminPassword']."'",

@@ -19,7 +19,7 @@ class CircolareMessage {
   /**
    * @var string $tag Testo usato per identificare la circolare
    */
-  private string $tag;
+  private readonly string $tag;
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -29,7 +29,7 @@ class CircolareMessage {
    * @param int $id Identificativo della circolare da notificare
    */
   public function __construct(
-      private int $id) {
+      private readonly int $id) {
     $this->tag = '<!CIRCOLARE!><!'.$this->id.'!>';
   }
 

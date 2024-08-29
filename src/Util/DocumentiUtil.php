@@ -49,8 +49,8 @@ class DocumentiUtil {
    * @param string $dirUpload Percorso della directory per i file di upload
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private PdfManager $pdf,
+      private readonly EntityManagerInterface $em,
+      private readonly PdfManager $pdf,
       private $dirTemp,
       $dirArchivio,
       private $dirUpload) {
@@ -764,8 +764,8 @@ class DocumentiUtil {
     $testo = mb_strtoupper($nome, 'UTF-8');
     $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
     $testo = preg_replace('/\W+/','-', $testo);
-    if (str_ends_with($testo, '-')) {
-      $testo = substr($testo, 0, -1);
+    if (str_ends_with((string) $testo, '-')) {
+      $testo = substr((string) $testo, 0, -1);
     }
     return $testo;
   }

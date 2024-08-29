@@ -143,7 +143,7 @@ class DocumentoRepository extends BaseRepository {
   public function docenti($criteri, $pagina, Sede $sede=null) {
     // compatibilità MySQL >= 5.7
     $mode = $this->_em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
-    if (str_contains($mode, 'ONLY_FULL_GROUP_BY')) {
+    if (str_contains((string) $mode, 'ONLY_FULL_GROUP_BY')) {
       $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
       $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
         str_replace(',,', ',', $mode));

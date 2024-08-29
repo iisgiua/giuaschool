@@ -39,7 +39,7 @@ final class PhpTransport extends AbstractTransport {
         $isHeader = false;
       } elseif ($isHeader) {
         // parte dell'header
-        foreach (explode("\r\n", $chunk) as $hdr) {
+        foreach (explode("\r\n", (string) $chunk) as $hdr) {
           if (str_starts_with($hdr, 'Subject: ')) {
             // estrae oggetto
             $subject = substr($hdr, 9);

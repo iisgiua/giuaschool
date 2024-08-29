@@ -77,7 +77,7 @@ class UtentiController extends BaseController {
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
       ->add('email', TextType::class, ['label' => 'label.email',
-	      'data' => str_ends_with($this->getUser()->getEmail(), '.local') ? '' : $this->getUser()->getEmail(),
+	      'data' => str_ends_with((string) $this->getUser()->getEmail(), '.local') ? '' : $this->getUser()->getEmail(),
         'required' => true])
       ->add('submit', SubmitType::class, ['label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
@@ -142,7 +142,7 @@ class UtentiController extends BaseController {
     if ($idProvider && $this->getUser()->controllaRuolo($idProviderTipo)) {
       // cambio password su Google
       $errore = 'exception.cambio_password_google';
-    } elseif (str_ends_with($this->getUser()->getEmail(), '.local')) {
+    } elseif (str_ends_with((string) $this->getUser()->getEmail(), '.local')) {
       // utente senza email
       $errore = 'exception.cambio_password_noemail';
     } else {
@@ -172,9 +172,9 @@ class UtentiController extends BaseController {
         }
         // validazione nuova password
         $psw = $form->get('password')->getData();
-        $minuscole = preg_match('/[a-z]+/', $psw);
-        $maiuscole = preg_match('/[A-Z]+/', $psw);
-        $cifre = preg_match('/\d+/', $psw);
+        $minuscole = preg_match('/[a-z]+/', (string) $psw);
+        $maiuscole = preg_match('/[A-Z]+/', (string) $psw);
+        $cifre = preg_match('/\d+/', (string) $psw);
         $this->getUser()->setPasswordNonCifrata($psw);
         $errors = $validator->validate($this->getUser());
         if (count($errors) > 0) {
@@ -365,7 +365,7 @@ class UtentiController extends BaseController {
       $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$nuovaNotifica]);
       // controlla configurazione
       if (($nuovaNotifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
-           str_ends_with($this->getUser()->getEmail(), '.local'))) ||
+           str_ends_with((string) $this->getUser()->getEmail(), '.local'))) ||
           ($nuovaNotifica['tipo'] == 'telegram' && empty($nuovaNotifica['telegram_chat']))) {
         // redirect alla configurazione
         return $this->redirectToRoute('utenti_notifiche_configura');
@@ -401,7 +401,7 @@ class UtentiController extends BaseController {
     // legge dati
     $notifica = $this->getUser()->getNotifica();
     if ($notifica['tipo'] == 'email' &&
-        (empty($this->getUser()->getEmail()) || str_ends_with($this->getUser()->getEmail(), '.local'))) {
+        (empty($this->getUser()->getEmail()) || str_ends_with((string) $this->getUser()->getEmail(), '.local'))) {
       // imposta email
       $info['messaggio'] = 'message.notifiche_configura_email';
       $info['url'] = $this->generateUrl('utenti_email');

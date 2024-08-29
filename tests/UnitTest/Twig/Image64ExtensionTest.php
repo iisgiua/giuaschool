@@ -50,7 +50,7 @@ class Image64ExtensionTest extends KernelTestCase {
     $ext = new Image64Extension(dirname(__DIR__, 3));
     // nome funzione
     $res = $ext->getFunctions();
-    $func = new TwigFunction('image64', [$ext, 'getImage64']);
+    $func = new TwigFunction('image64', $ext->getImage64(...));
     $this->assertCount(1, $res);
     $this->assertEquals($func, $res[0]);
   }

@@ -41,7 +41,7 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->setMaxResults(1)
       ->getQuery()
       ->getScalarResult();
-    return (!empty($ora) ? substr($ora[0]['inizio'], 0, 5) : '00:00');
+    return (!empty($ora) ? substr((string) $ora[0]['inizio'], 0, 5) : '00:00');
   }
 
   /**
@@ -63,7 +63,7 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->setMaxResults(1)
       ->getQuery()
       ->getScalarResult();
-    return (!empty($ora) ? substr($ora[0]['fine'], 0, 5) : '23:59');
+    return (!empty($ora) ? substr((string) $ora[0]['fine'], 0, 5) : '23:59');
   }
 
   /**
@@ -87,7 +87,7 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->setMaxResults(1)
       ->getQuery()
       ->getScalarResult();
-    return (!empty($ora) ? substr($ora[0]['fine'], 0, 5) : '23:59');
+    return (!empty($ora) ? substr((string) $ora[0]['fine'], 0, 5) : '23:59');
   }
 
   /**

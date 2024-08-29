@@ -32,7 +32,7 @@ class PdfManager {
    * @param \TCPDF|null $pdf Gestore dei documenti in formato PDF
    */
   public function __construct(
-      private TCPDFController $pdfcontroller,
+      private readonly TCPDFController $pdfcontroller,
       private ?\TCPDF $pdf = null) {
   }
 
@@ -198,8 +198,8 @@ class PdfManager {
     $testo = mb_strtoupper($nome, 'UTF-8');
     $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
     $testo = preg_replace('/\W+/','-', $testo);
-    if (str_ends_with($testo, '-')) {
-      $testo = substr($testo, 0, -1);
+    if (str_ends_with((string) $testo, '-')) {
+      $testo = substr((string) $testo, 0, -1);
     }
     return $testo;
   }

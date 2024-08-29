@@ -72,13 +72,13 @@ class ScrutinioUtil {
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(
-      private RouterInterface $router,
-      private EntityManagerInterface $em,
-      private TranslatorInterface $trans,
-      private RequestStack $reqstack,
-      private LogHandler $dblogger,
-      private RegistroUtil $reg,
-      private string $root) {
+      private readonly RouterInterface $router,
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly RequestStack $reqstack,
+      private readonly LogHandler $dblogger,
+      private readonly RegistroUtil $reg,
+      private readonly string $root) {
     // imposta directory per gli scrutini
     $this->directory = [
       'P' => 'primo',
@@ -718,23 +718,23 @@ class ScrutinioUtil {
     $valutazioni['C'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_C'));
     $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
-    $listaValori = explode(',', $valutazioni['R']['valori']);
-    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['E']['valori']);
-    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['C']['valori']);
-    $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['C']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['C']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['N']['valori']);
-    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
@@ -2689,7 +2689,7 @@ class ScrutinioUtil {
   public function lezioniDal15Marzo(Classe $classe) {
     // inizio e fine del periodo
     $inizio = \DateTime::createFromFormat('!Y-m-d',
-      substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15');
+      substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15');
     $fine = \DateTime::createFromFormat('!Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
     // festivi
     $festivi = $this->em->getRepository(\App\Entity\Festivita::class)->createQueryBuilder('f')
@@ -2702,7 +2702,7 @@ class ScrutinioUtil {
       ->getScalarResult();
     $giorni_festivi = array_column($festivi, 'data');
     $giorni_settimana = [$this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_istituto')];
-    $altri_festivi = explode(',', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_classi'));
+    $altri_festivi = explode(',', (string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_classi'));
     foreach($altri_festivi  as $f) {
       // formato <settimana>:<classe_anno><classe_sezione>
       if (strlen($f) > 0 && $classe->getAnno() == $f[2] && $classe->getSezione() == $f[3]) {
@@ -2734,7 +2734,7 @@ class ScrutinioUtil {
   public function presenzeDal15Marzo($alunno_id, $lezioni) {
     $dati = [];
     // inizio e fine del periodo
-    $inizio = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15';
+    $inizio = substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15';
     $fine = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     // assenze
     $giorni_assenza = $this->em->getRepository(\App\Entity\Assenza::class)->createQueryBuilder('a')
@@ -4136,23 +4136,23 @@ class ScrutinioUtil {
     $valutazioni['C'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_C'));
     $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
-    $listaValori = explode(',', $valutazioni['R']['valori']);
-    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['R']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['E']['valori']);
-    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['E']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['E']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['C']['valori']);
-    $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['C']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['C']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
     }
-    $listaValori = explode(',', $valutazioni['N']['valori']);
-    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    $listaValori = explode(',', (string) $valutazioni['N']['valori']);
+    $listaVoti = explode(',', (string) $valutazioni['N']['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
     }
@@ -5125,10 +5125,10 @@ class ScrutinioUtil {
     foreach ($alunni as $alu) {
       if ($alu['periodo'] == 'X') {
         $classeAnno = $alu['classe'][0];
-        $classeSezione = !str_contains($alu['classe'], '-') ? substr($alu['classe'], 1) :
-          substr($alu['classe'], 1, strpos($alu['classe'], '-') - 1);
-        $classeGruppo = !str_contains($alu['classe'], '-') ? '' :
-          substr($alu['classe'], strpos($alu['classe'], '-') + 1);
+        $classeSezione = !str_contains((string) $alu['classe'], '-') ? substr((string) $alu['classe'], 1) :
+          substr((string) $alu['classe'], 1, strpos((string) $alu['classe'], '-') - 1);
+        $classeGruppo = !str_contains((string) $alu['classe'], '-') ? '' :
+          substr((string) $alu['classe'], strpos((string) $alu['classe'], '-') + 1);
         $esitoRinviato = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->join('s.classe', 'cl')

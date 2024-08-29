@@ -91,7 +91,7 @@ class CircolariController extends BaseController {
       $numero = $this->em->getRepository(\App\Entity\Circolare::class)->prossimoNumero();
       $circolare = (new Circolare())
         ->setData(new \DateTime('today'))
-        ->setAnno((int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
+        ->setAnno((int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
         ->setNumero($numero);
       if ($this->getUser()->getSede()) {
         $circolare->addSedi($this->getUser()->getSede());
@@ -307,7 +307,7 @@ class CircolariController extends BaseController {
       // controlla altri
       $lista_altri = $circolare->getAltri();
       foreach ($lista_altri as $k=>$v) {
-        $v = strtoupper(trim($v));
+        $v = strtoupper(trim((string) $v));
         if (empty($v)) {
           unset($lista_altri[$k]);
         } else {
@@ -627,7 +627,7 @@ class CircolariController extends BaseController {
     // log azione e notifica
     if ($pubblica) {
       // pubblicazione
-      $oraNotifica = explode(':', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/notifica_circolari'));
+      $oraNotifica = explode(':', (string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/notifica_circolari'));
       $tm = (new \DateTime('today'))->setTime($oraNotifica[0], $oraNotifica[1]);
       if ($tm < new \DateTime()) {
         // ora invio è già passata: inserisce in coda per domani
@@ -763,7 +763,7 @@ class CircolariController extends BaseController {
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // crea lista mesi
-    $anno_inizio = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
+    $anno_inizio = substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
     $anno_fine = $anno_inizio + 1;
     $lista_mesi = [];
     for ($i=9; $i<=12; $i++) {
@@ -968,7 +968,7 @@ class CircolariController extends BaseController {
     // recupera criteri dalla sessione
     $cerca = [];
     $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/anno',
-      substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
+      substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza',
       ($this->getUser() instanceOf Staff ? 'T' : 'P'));
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
@@ -1082,7 +1082,7 @@ class CircolariController extends BaseController {
     // recupera criteri dalla sessione
     $cerca = [];
     $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/anno',
-      substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
+      substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/oggetto', '');

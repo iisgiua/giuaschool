@@ -35,10 +35,10 @@ class LogoutListener {
    * @param LogHandler $dblogger Gestore dei log su database
    */
   public function __construct(
-      private RouterInterface $router,
-      private Security $security,
-      private RequestStack $reqstack,
-      private LogHandler $dblogger)
+      private readonly RouterInterface $router,
+      private readonly Security $security,
+      private readonly RequestStack $reqstack,
+      private readonly LogHandler $dblogger)
   {
   }
 

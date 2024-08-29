@@ -256,23 +256,23 @@ class CustomProvider extends Base {
   public function postPersistArrayId(): void {
     foreach (static::$postPersistProperty as $name => $attrs) {
       foreach ($attrs as $property => $list) {
-        $list[0]->{'set'.ucfirst($property)}(array_map(fn($o) => $o->getId(), $list[1]));
+        $list[0]->{'set'.ucfirst((string) $property)}(array_map(fn($o) => $o->getId(), $list[1]));
       }
     }
     foreach (static::$postPersistData as $name => $attrs) {
       foreach ($attrs as $property => $fields) {
         foreach ($fields as $field => $list) {
-          $values = $list[0]->{'get'.ucfirst($property)}();
-          $fieldName = substr($field, 2);
-          if (str_starts_with($field, 'A:')) {
+          $values = $list[0]->{'get'.ucfirst((string) $property)}();
+          $fieldName = substr((string) $field, 2);
+          if (str_starts_with((string) $field, 'A:')) {
             // lista
             $values[$fieldName] = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
-          } elseif (str_starts_with($field, 'M:')) {
+          } elseif (str_starts_with((string) $field, 'M:')) {
             // vettore associativo
             $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
             $arrayValues = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[2]);
             $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
-          } elseif (str_starts_with($field, '2:')) {
+          } elseif (str_starts_with((string) $field, '2:')) {
             // vettore multidimensionale associativo
             $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[1]);
             $arrayValues = [];
@@ -289,7 +289,7 @@ class CustomProvider extends Base {
               $arrayValues[] = $temp;
             }
             $values[$fieldName] = array_combine($arrayKeys, $arrayValues);
-          } elseif (str_starts_with($field, 'O:')) {
+          } elseif (str_starts_with((string) $field, 'O:')) {
             // vettore di oggetti
             $class = $list[1];
             $arrayKeys = array_map(fn($o) => (is_object($o) && $o::class != 'DateTime') ? $o->getId() : $o, $list[2]);
@@ -300,7 +300,7 @@ class CustomProvider extends Base {
               $object = new $class();
               foreach ($arrayList as $arrayValue) {
                 if ($index % 2 == 0) {
-                  $object->{'set'.ucfirst($arrayValue)}($arrayList[$index + 1]);
+                  $object->{'set'.ucfirst((string) $arrayValue)}($arrayList[$index + 1]);
                 }
                 $index++;
               }
@@ -311,7 +311,7 @@ class CustomProvider extends Base {
             // valore
             $values[$fieldName] = (is_object($list[1][0]) && $list[1][0]::class != 'DateTime') ? $list[1][0]->getId() : $list[1][0];
           }
-          $list[0]->{'set'.ucfirst($property)}($values);
+          $list[0]->{'set'.ucfirst((string) $property)}($values);
         }
       }
     }
