@@ -1,6 +1,6 @@
 <?php
 
-require dirname(dirname(__DIR__)).'/src/Install/Updater.php';
+require dirname(__DIR__, 2).'/src/Install/Updater.php';
 use App\Install\Updater;
 
 
