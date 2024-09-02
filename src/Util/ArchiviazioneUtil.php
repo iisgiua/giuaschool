@@ -802,7 +802,7 @@ class ArchiviazioneUtil {
       $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     }
     // scrive proposta per giudizio sospeso
-    if ($periodo['scrutinio'] == 'F') {
+    if ($periodo['scrutinio'] == 'F' && !empty($dati['alunni'])) {
       // legge le proposte di voto
       $proposte = $this->em->getRepository('App\Entity\PropostaVoto')->createQueryBuilder('pv')
         ->select('(pv.alunno) AS idalunno,pv.unico,pv.debito,pv.periodo')
