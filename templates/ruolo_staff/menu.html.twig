@@ -11,10 +11,11 @@
         <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_archivio' ? ' class="active"' }}><a href="{{ path('staff_avvisi_archivio') }}" title="Archivio degli avvisi degli anni precedenti">Archivio</a></li>
       </ul>
     </li>
-    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' active' }}">
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route') in ['circolari_gestione', 'circolari_archivio'] ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione delle circolari">Circolari<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
-        <li{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' class="active"' }}><a href="{{ path('circolari_gestione') }}" title="Gestione delle circolari">Gestione circolari</a></li>
+        <li{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' class="active"' }}><a href="{{ path('circolari_gestione') }}" title="Gestione delle circolari">Gestione</a></li>
+        <li{{ app.request.attributes.get('_route') == 'circolari_archivio' ? ' class="active"' }}><a href="{{ path('circolari_archivio') }}" title="Archivio delle circolari degli anni passati">Archivio</a></li>
       </ul>
     </li>
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] in ['staff_studenti', 'richieste_gest', 'documenti_alun', 'staff_password'] ? ' active' }}">

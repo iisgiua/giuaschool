@@ -982,8 +982,6 @@ class CircolariController extends BaseController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/anno',
-      substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza',
       ($this->getUser() instanceOf Staff ? 'T' : 'P'));
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
@@ -995,8 +993,6 @@ class CircolariController extends BaseController {
       // pagina specificata: la conserva in sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
-    // crea lista anni
-    $lista_anni = $this->em->getRepository('App\Entity\Circolare')->anniScolastici();
     // crea lista mesi
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
@@ -1007,16 +1003,6 @@ class CircolariController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_docenti', FormType::class)
-      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
-        'data' => $cerca['anno'],
-        'choices' => $lista_anni,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
       ->add('visualizza', ChoiceType::class, array('label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
@@ -1049,12 +1035,10 @@ class CircolariController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $cerca['anno'] = $form->get('anno')->getData();
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/anno', $cerca['anno']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/visualizza', $cerca['visualizza']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/mese', $cerca['mese']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/oggetto', $cerca['oggetto']);
@@ -1062,7 +1046,6 @@ class CircolariController extends BaseController {
     }
     // legge le circolari
     $dati = $this->em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
-    $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     if ($this->getUser() instanceOf Staff) {
       // legge dettagli su circolari
       foreach ($dati['lista'] as $c) {
@@ -1070,7 +1053,7 @@ class CircolariController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render(($this->getUser() instanceOf Staff ? 'circolari/staff.html.twig' : 'circolari/docenti.html.twig'), array(
+    return $this->render('circolari/docenti.html.twig', array(
       'pagina_titolo' => 'page.circolari_docenti',
       'form' => $form->createView(),
       'form_help' => null,
@@ -1103,8 +1086,6 @@ class CircolariController extends BaseController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/anno',
-      substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/oggetto', '');
@@ -1115,8 +1096,6 @@ class CircolariController extends BaseController {
       // pagina specificata: la conserva in sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
-    // crea lista anni
-    $lista_anni = $this->em->getRepository('App\Entity\Circolare')->anniScolastici();
     // crea lista mesi
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
@@ -1127,16 +1106,6 @@ class CircolariController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_ata', FormType::class)
-      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
-        'data' => $cerca['anno'],
-        'choices' => $lista_anni,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
       ->add('visualizza', ChoiceType::class, array('label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
@@ -1168,12 +1137,10 @@ class CircolariController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $cerca['anno'] = $form->get('anno')->getData();
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_ata/anno', $cerca['anno']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_ata/visualizza', $cerca['visualizza']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_ata/mese', $cerca['mese']);
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_ata/oggetto', $cerca['oggetto']);
@@ -1181,7 +1148,6 @@ class CircolariController extends BaseController {
     }
     // legge le circolari
     $dati = $this->em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
-    $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     // mostra la pagina di risposta
     return $this->render('circolari/ata.html.twig', array(
       'pagina_titolo' => 'page.circolari_ata',
@@ -1276,6 +1242,114 @@ class CircolariController extends BaseController {
     }
     // redirect
     return $this->redirectToRoute('lezioni');
+  }
+
+  /**
+   * Visualizza le circolari dell'archivio degli anni passati.
+   *
+   * @param Request $request Pagina richiesta
+   * @param CircolariUtil $circ Funzioni di utilità per le circolari
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/circolari/archivio/{pagina}", name="circolari_archivio",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function archivioAction(Request $request, CircolariUtil $circ, int $pagina): Response {
+    // inizializza
+    $limite = 20;
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // recupera criteri dalla sessione
+    $cerca = array();
+    $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/anno', null);
+    $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
+    $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/oggetto', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_archivio/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_archivio/pagina', $pagina);
+    }
+    // crea lista anni
+    $lista_anni = $this->em->getRepository('App\Entity\Circolare')->anniScolastici();
+    if (empty($cerca['anno']) && count($lista_anni) > 0) {
+      $cerca['anno'] = array_values($lista_anni)[0];
+    }
+    // crea lista mesi
+    $lista_mesi = array();
+    for ($i=9; $i<=12; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
+    for ($i=1; $i<=8; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
+    // form di ricerca
+    $form = $this->container->get('form.factory')->createNamedBuilder('circolari_docenti', FormType::class)
+      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+        'data' => $cerca['anno'],
+        'choices' => $lista_anni,
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
+      ->add('mese', ChoiceType::class, array('label' => 'label.filtro_mese',
+        'data' => $cerca['mese'],
+        'choices' => $lista_mesi,
+        'placeholder' => 'label.circolari_tutte',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => false))
+      ->add('oggetto', TextType::class, array('label' => 'label.circolari_filtro_oggetto',
+        'data' => $cerca['oggetto'],
+        'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.filtra',
+        'attr' => ['class' => 'btn-primary']))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $cerca['anno'] = $form->get('anno')->getData();
+      $cerca['mese'] = $form->get('mese')->getData();
+      $cerca['oggetto'] = $form->get('oggetto')->getData();
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/anno', $cerca['anno']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/mese', $cerca['mese']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/oggetto', $cerca['oggetto']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
+    }
+    // legge le circolari
+    $cerca['visualizza'] = 'T';
+    $dati = $this->em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
+    // legge dettagli su circolari
+    foreach ($dati['lista'] as $c) {
+      $dati['info'][$c->getId()] = $circ->dettagli($c);
+    }
+    // mostra la pagina di risposta
+    return $this->render('circolari/archivio.html.twig', array(
+      'pagina_titolo' => 'page.circolari_archivio',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
+      'page' => $pagina,
+      'maxPages' => ceil($dati['lista']->count() / $limite),
+      'dati' => $dati,
+      'mesi' => $mesi,
+    ));
   }
 
 }

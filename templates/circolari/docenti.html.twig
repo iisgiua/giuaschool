@@ -5,13 +5,9 @@
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_docenti'|trans }}</h1>
   <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
     <div id="{{ form.vars.id }}">
-      <div class="form-group" title="{{ form.anno.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolari_docenti_anno">{{ form.anno.vars.label|trans }}</label>
-        {{ form_widget(form.anno) }}
-      </div>
       <div class="form-group" title="{{ form.visualizza.vars.label|trans }}">
         <label class="sr-only control-label" for="circolari_docenti_visualizza">{{ form.visualizza.vars.label|trans }}</label>
-        {{ form_widget(form.visualizza, {choices: (form.anno.vars.value != dati.annoCorrente ? [form.visualizza.vars.choices[2]] : form.visualizza.vars.choices)}) }}
+        {{ form_widget(form.visualizza) }}
       </div>
       <div class="form-group" title="{{ form.mese.vars.label|trans }}">
         <label class="sr-only control-label" for="circolari_docenti_mese">{{ form.mese.vars.label|trans }}</label>
@@ -31,10 +27,10 @@
   <table class="table table-bordered table-hover table-striped gs-mb-4">
     <thead class="bg-success">
       <tr>
-        {% if form.anno.vars.value == dati.annoCorrente %}<th class="">{{ 'label.stato'|trans }}</th>{% endif %}
+        <th class="">{{ 'label.stato'|trans }}</th>
         <th class="">{{ 'label.numero'|trans }}</th>
         <th class="">{{ 'label.data'|trans }}</th>
-        {% if form.anno.vars.value == dati.annoCorrente %}<th class="">{{ 'label.sede'|trans }}</th>{% endif %}
+        <th class="">{{ 'label.sede'|trans }}</th>
         <th class="">{{ 'label.oggetto'|trans }}</th>
         <th class="">{{ 'label.action'|trans }}</th>
       </tr>
@@ -42,20 +38,16 @@
     <tbody>
     {% for k,a in dati.lista %}
       <tr>
-      {% if form.anno.vars.value == dati.annoCorrente %}
         <td>
-        {% if dati.stato[a.id] and dati.stato[a.id].letta %}
+      {% if dati.stato[a.id] and dati.stato[a.id].letta %}
           <span class="label label-default">LETTA</span>
-        {% elseif dati.stato[a.id] and not dati.stato[a.id].letta %}
+      {% elseif dati.stato[a.id] and not dati.stato[a.id].letta %}
           <span class="label label-warning">DA LEGGERE</span>
-        {% endif %}
       {% endif %}
         </td>
         <td>{{ a.numero }}</td>
         <td>{{ a.data|date('d/m/Y') }}</td>
-      {% if form.anno.vars.value == dati.annoCorrente %}
         <td><small>{% for s in a.sedi %}{{ s.citta|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-      {% endif %}
         <td><small>{{ a.oggetto }}</small></td>
         <td>
           <button type="button" class="btn btn-xs btn-primary" title="Visualizza la circolare" data-toggle="modal" data-target="#gs-modal-info" data-info-num="{{ a.numero }}" data-info-date="{{ a.data|date('j') }} {{ mesi[a.data|date('n')] }} {{ a.data|date('Y') }}" data-info-title="{{ a.oggetto }}" data-body="circolare-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
@@ -99,7 +91,7 @@
                   <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {'id': a.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
                 </div>
         {% endif %}
-      {% elseif form.anno.vars.value == dati.annoCorrente %}
+      {% else %}
                 <div><em>La circolare non è destinata all'utente.</em></div>
       {% endif %}
               </div>
@@ -125,13 +117,6 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('#circolari_docenti_anno').change(function (e) {
-    if ($(this).val() != {{ dati.annoCorrente }}) {
-      $('#circolari_docenti_visualizza').val('T');
-    }
-    $('form[name="{{ form.vars.name }}"]').submit();
-    $('#gs-modal-waiting').modal('show');
-  });
   $('#circolari_docenti_visualizza').change(function (e) {
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');

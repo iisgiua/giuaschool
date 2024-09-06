@@ -826,6 +826,9 @@ page.ruolo_staff.studenti: Gestione Alunni
 title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
 page.docenti.rspp: Configura RSPP
 title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
+page.circolari_archivio: Archivio Circolari
+title.circolari_archivio: Archivio delle circolari degli anni passati
+
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
