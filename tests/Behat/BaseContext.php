@@ -270,6 +270,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
     foreach ($finder as $fl) {
       $fs->remove($fl);
     }
+    // cancella sesssioni
+    $finder = new Finder();
+    $finder->in(dirname(__DIR__, 2).'/var/sessions/test')->files();
     // log scenario
     $this->logDebug('Scenario inizio ['.$scope->getScenario()->getLine().']: '.$scope->getScenario()->getTitle());
   }
