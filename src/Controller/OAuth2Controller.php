@@ -27,9 +27,8 @@ class OAuth2Controller extends BaseController {
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
    *
    * @return Response Redirezione al servizio richiesto
-   *
-   * @Route("/login/gsuite", name="login_gsuite")
    */
+  #[Route(path: '/login/gsuite', name: 'login_gsuite')]
   public function connect(ClientRegistry $clientRegistry): Response {
     // redirezione alla GSuite
     return $clientRegistry
@@ -44,9 +43,8 @@ class OAuth2Controller extends BaseController {
    * @param string $email Email dell'utente di cui effettuare il login
    *
    * @return Response Redirezione al servizio richiesto
-   *
-   * @Route("/login/gsuite/app/{email}", name="login_gsuite_app")
    */
+  #[Route(path: '/login/gsuite/app/{email}', name: 'login_gsuite_app')]
   public function connectApp(ClientRegistry $clientRegistry, string $email): Response {
     $options = [];
     $options['login_hint'] = $email;
@@ -61,9 +59,8 @@ class OAuth2Controller extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
-   *
-   * @Route("/login/gsuite/check", name="login_gsuite_check")
    */
+  #[Route(path: '/login/gsuite/check', name: 'login_gsuite_check')]
   public function check(ClientRegistry $clientRegistry) {
   }
 

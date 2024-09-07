@@ -64,56 +64,56 @@ class Documento implements \Stringable {
    * @var Docente|null $docente Docente che carica il documento
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**
    * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari del documento
    *
    * @ORM\OneToOne(targetEntity="ListaDestinatari")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?ListaDestinatari $listaDestinatari = null;
 
   /**
    * @var Collection $allegati Lista dei file allegati al documento
    *
    * @ORM\ManyToMany(targetEntity="File")
-   * @ORM\JoinTable(name="gs_documento_file",
-   *    joinColumns={@ORM\JoinColumn(name="documento_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="file_id", nullable=false, unique=true)})
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinTable(name: 'gs_documento_file')]
+  #[ORM\JoinColumn(name: 'documento_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'file_id', nullable: false, unique: true)]
   private ?Collection $allegati = null;
 
   /**
    * @var Materia|null $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Materia $materia = null;
 
   /**
    * @var Classe|null $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Classe $classe = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Alunno $alunno = null;
 
   /**

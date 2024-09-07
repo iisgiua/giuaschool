@@ -67,15 +67,15 @@ class Raggruppamento implements \Stringable {
   private string $nome = '';
 
  /**
-   * @var Collection|null $alunni Alunni da cui è composto il raggruppamento 
+   * @var Collection|null $alunni Alunni da cui è composto il raggruppamento
    *
    * @ORM\ManyToMany(targetEntity="Alunno")
-   * @ORM\JoinTable(name="gs_raggruppamento_alunno",
-   *    joinColumns={@ORM\JoinColumn(name="raggruppamento_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="alunno_id", nullable=false)})
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinTable(name: 'gs_raggruppamento_alunno')]
+  #[ORM\JoinColumn(name: 'raggruppamento_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
   private ?Collection $alunni = null;
 
 

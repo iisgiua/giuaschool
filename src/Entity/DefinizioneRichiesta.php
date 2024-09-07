@@ -66,8 +66,8 @@ class DefinizioneRichiesta implements \Stringable {
    * @var Sede|null $sede Sede del modulo, null per tutte le sedi
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Sede $sede = null;
 
   /**

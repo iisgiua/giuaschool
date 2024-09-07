@@ -33,13 +33,10 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/docenti/{cognome}/{nome}/{sede}/{pagina}", name="ajax_docenti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"cognome": "-", "nome": "-", "sede": "-", "pagina": "1"},
-   *    methods={"POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/ajax/docenti/{cognome}/{nome}/{sede}/{pagina}', name: 'ajax_docenti', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
   public function docentiAjax(string $cognome, string $nome, string $sede,
                               string $pagina): JsonResponse {
     // inizializza
@@ -87,13 +84,10 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/alunni/{cognome}/{nome}/{classe}/{sede}/{pagina}", name="ajax_alunni",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"cognome": "-", "nome": "-", "classe": "-", "sede": "-", "pagina": "1"},
-   *    methods={"POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/ajax/alunni/{cognome}/{nome}/{classe}/{sede}/{pagina}', name: 'ajax_alunni', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'classe' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
   public function alunniAjax(string $cognome, string $nome, string $classe, string $sede,
                              string $pagina): JsonResponse {
     // inizializza
@@ -137,11 +131,8 @@ class AjaxController extends BaseController {
    * @param string $id Identificativo per il token da generare
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/ajax/token/{id}", name="ajax_token",
-   *    requirements={"id": "authenticate"},
-   *    methods={"GET"})
    */
+  #[Route(path: '/ajax/token/{id}', name: 'ajax_token', requirements: ['id' => 'authenticate'], methods: ['GET'])]
   public function tokenAjax(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
     $dati = [];
@@ -155,11 +146,10 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/sessione", name="ajax_sessione",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/ajax/sessione', name: 'ajax_sessione', methods: ['GET'])]
   public function sessioneAjax(): JsonResponse {
     // restituisce dati
     return new JsonResponse(['ok']);
@@ -172,13 +162,10 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/classe/{classe}", name="ajax_classe",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
-   *    methods={"POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/ajax/classe/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['POST'])]
   public function classeAjax(Classe $classe): JsonResponse {
     // legge alunni
     $dati = $this->em->getRepository(\App\Entity\Alunno::class)->classe($classe->getId());

@@ -56,20 +56,20 @@ class CircolareClasse {
    * @var Circolare|null $circolare Circolare a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Circolare")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Circolare $circolare = null;
 
   /**
    * @var Classe|null $classe Classe in cui deve essere letta la circolare
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**

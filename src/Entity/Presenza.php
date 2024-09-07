@@ -100,10 +100,10 @@ class Presenza implements \Stringable {
    * @var Alunno|null $alunno Alunno con presenza fuori classe
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
 

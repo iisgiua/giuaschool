@@ -53,10 +53,10 @@ class Log implements \Stringable {
    * @var Utente|null $utente Utente connesso
    *
    * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Utente $utente = null;
 
   /**

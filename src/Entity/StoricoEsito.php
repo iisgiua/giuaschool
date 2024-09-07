@@ -104,10 +104,10 @@ class StoricoEsito implements \Stringable {
    * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
    * @ORM\OneToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**

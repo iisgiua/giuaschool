@@ -76,38 +76,38 @@ class Cattedra implements \Stringable {
    * @var Materia|null $materia Materia della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Materia $materia = null;
 
   /**
    * @var Docente|null $docente Docente della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**
    * @var Classe|null $classe Classe della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**
    * @var Alunno|null $alunno Alunno di una cattedra di sostegno
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Alunno $alunno = null;
 
 

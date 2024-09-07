@@ -37,8 +37,8 @@ class Docente extends Utente {
    * @var Sede|null $responsabileBesSede Sede di riferimento per il responsabile BES (se definita)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Sede $responsabileBesSede = null;
 
   /**

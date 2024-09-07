@@ -79,28 +79,28 @@ class Annotazione implements \Stringable {
    * @var Avviso|null $avviso Avviso a cui è associata l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Avviso", inversedBy="annotazioni")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Avviso $avviso = null;
 
   /**
    * @var Classe|null $classe Classe a cui è riferita l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**
    * @var Docente|null $docente Docente che ha scritto l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
 

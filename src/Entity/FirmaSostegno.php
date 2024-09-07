@@ -41,8 +41,8 @@ class FirmaSostegno extends Firma {
    * @var Alunno|null $alunno Alunno della cattedra di sostegno (importante quando più alunni con stesso docente in stessa classe)
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Alunno $alunno = null;
 
 

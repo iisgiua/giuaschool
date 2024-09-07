@@ -48,11 +48,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/importa/", name="ata_importa",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/importa/', name: 'ata_importa', methods: ['GET', 'POST'])]
   public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
@@ -97,13 +96,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/modifica/{pagina}", name="ata_modifica",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/modifica/{pagina}', name: 'ata_modifica', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
@@ -154,12 +150,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/abilita/{id}/{abilita}", name="ata_abilita",
-   *    requirements={"id": "\d+", "abilita": "0|1"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/abilita/{id}/{abilita}', name: 'ata_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   public function abilita(int $id, int $abilita): Response {
     // controlla ata
     $ata = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
@@ -184,13 +178,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/edit/{id}", name="ata_modifica_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/edit/{id}', name: 'ata_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -239,12 +230,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/password/{id}/{tipo}", name="ata_password",
-   *    requirements={"id": "\d+", "tipo": "E|P"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/password/{id}/{tipo}', name: 'ata_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, int $id,
@@ -318,13 +307,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/{pagina}", name="ata_rappresentanti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/rappresentanti/{pagina}', name: 'ata_rappresentanti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -373,13 +359,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/edit/{id}", name="ata_rappresentanti_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/rappresentanti/edit/{id}', name: 'ata_rappresentanti_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
                                      int $id): Response {
     // controlla azione
@@ -440,12 +423,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/delete/{id}", name="ata_rappresentanti_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/ata/rappresentanti/delete/{id}', name: 'ata_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function rappresentantiDelete(int $id): Response {
     // controlla utente
     $utente = $this->em->getRepository(\App\Entity\Ata::class)->find($id);

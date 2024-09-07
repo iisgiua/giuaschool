@@ -63,38 +63,38 @@ class RichiestaColloquio implements \Stringable {
    * @var Colloquio|null $colloquio Colloquio richiesto
    *
    * @ORM\ManyToOne(targetEntity="Colloquio")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Colloquio $colloquio = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**
    * @var Genitore|null $genitore Genitore che effettua la richiesta del colloquio
    *
    * @ORM\ManyToOne(targetEntity="Genitore")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Genitore $genitore = null;
 
   /**
    * @var Genitore!null $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
    *
    * @ORM\ManyToOne(targetEntity="Genitore")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Genitore $genitoreAnnulla = null;
 
   /**

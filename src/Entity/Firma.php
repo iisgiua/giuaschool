@@ -59,20 +59,20 @@ class Firma implements \Stringable {
    * @var Lezione|null $lezione Lezione firmata dal docente
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Lezione $lezione = null;
 
   /**
    * @var Docente|null $docente Docente che firma la lezione
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
 

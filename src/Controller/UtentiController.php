@@ -39,11 +39,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/profilo/", name="utenti_profilo",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/profilo/', name: 'utenti_profilo', methods: ['GET'])]
   public function profilo(): Response {
     // mostra la pagina di risposta
     return $this->render('utenti/profilo.html.twig', [
@@ -59,11 +58,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/email/", name="utenti_email",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/email/', name: 'utenti_email', methods: ['GET', 'POST'])]
   public function email(Request $request, ValidatorInterface $validator,
                         LogHandler $dblogger): Response {
     $success = null;
@@ -125,11 +123,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/password/", name="utenti_password",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/password/', name: 'utenti_password', methods: ['GET', 'POST'])]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            TranslatorInterface $trans, ValidatorInterface $validator,
                            LogHandler $dblogger): Response {
@@ -220,11 +217,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/otp/", name="utenti_otp",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/otp/', name: 'utenti_otp', methods: ['GET', 'POST'])]
   public function otp(Request $request, TranslatorInterface $trans, OtpUtil $otp,
                       LogHandler $dblogger): Response {
     // inizializza
@@ -325,11 +321,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/notifiche/", name="utenti_notifiche",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/notifiche/', name: 'utenti_notifiche', methods: ['GET', 'POST'])]
   public function notifiche(Request $request, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -389,11 +384,10 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/notifiche/configura/", name="utenti_notifiche_configura",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/utenti/notifiche/configura/', name: 'utenti_notifiche_configura', methods: ['GET'])]
   public function notificheConfigura(): Response {
     // init
     $dati = [];

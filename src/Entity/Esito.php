@@ -93,20 +93,20 @@ class Esito implements \Stringable {
    * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce l'esito
    *
    * @ORM\ManyToOne(targetEntity="Scrutinio")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Scrutinio $scrutinio = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
 

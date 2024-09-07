@@ -36,11 +36,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/richieste", name="colloqui_richieste",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/richieste', name: 'colloqui_richieste', methods: ['GET'])]
   public function richieste(): Response {
     // inizializza
     $info = [];
@@ -66,11 +65,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/storico", name="colloqui_storico",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/storico', name: 'colloqui_storico', methods: ['GET'])]
   public function storico(): Response {
     // inizializza
     $info = [];
@@ -90,12 +88,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/conferma/{id}", name="colloqui_conferma",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/conferma/{id}', name: 'colloqui_conferma', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   public function conferma(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
@@ -139,12 +135,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/rifiuta/{id}", name="colloqui_rifiuta",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/rifiuta/{id}', name: 'colloqui_rifiuta', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   public function rifiuta(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
                           int $id): Response {
     // inizializza
@@ -194,12 +188,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/modifica/{id}", name="colloqui_modifica",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/modifica/{id}', name: 'colloqui_modifica', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   public function modifica(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
                            int $id): Response {
     // inizializza
@@ -242,11 +234,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/gestione/", name="colloqui_gestione",
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/gestione/', name: 'colloqui_gestione', methods: ['GET', 'POST'])]
   public function gestione(): Response {
     // inizializza
     $info = [];
@@ -270,13 +261,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/edit/{id}", name="colloqui_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/edit/{id}', name: 'colloqui_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function edit(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
                        LogHandler $dblogger, int $id): Response {
     // inizializza
@@ -368,12 +356,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/enable/{id}/{stato}", name="colloqui_enable",
-   *    requirements={"id": "\d+", "stato": "0|1"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['GET'])]
   public function enable(LogHandler $dblogger, int $id, int $stato): Response {
     // controlla colloquio
     $oggi = new \DateTime('today');
@@ -408,11 +394,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/create", name="colloqui_create",
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/create', name: 'colloqui_create', methods: ['GET', 'POST'])]
   public function create(Request $request, ColloquiUtil $col, LogHandler $dblogger,
                          TranslatorInterface $trans): Response {
     // inizializza
@@ -488,11 +473,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/genitori", name="colloqui_genitori",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_GENITORE")
    */
+  #[Route(path: '/colloqui/genitori', name: 'colloqui_genitori', methods: ['GET'])]
   public function genitori(ColloquiUtil $col, TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
@@ -523,12 +507,9 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/disdetta/{id}", name="colloqui_disdetta")
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
    * @IsGranted("ROLE_GENITORE")
    */
+  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta')] // requirements={"id": "\d+"},
   public function disdetta(LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
@@ -574,12 +555,9 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/prenota/{docente}", name="colloqui_prenota")
-   *    requirements={"docente": "\d+"},
-   *    methods={"GET","POST"})
-   *
    * @IsGranted("ROLE_GENITORE")
    */
+  #[Route(path: '/colloqui/prenota/{docente}', name: 'colloqui_prenota')] // requirements={"docente": "\d+"},
   public function prenota(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
                           LogHandler $dblogger, int $docente): Response {
     // inizializza
@@ -656,13 +634,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/cerca/{pagina}", name="colloqui_cerca",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/colloqui/cerca/{pagina}', name: 'colloqui_cerca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function cerca(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
@@ -708,12 +683,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/delete/{tipo}", name="colloqui_delete",
-   *    requirements={"tipo": "D|T"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/colloqui/delete/{tipo}', name: 'colloqui_delete', requirements: ['tipo' => 'D|T'], methods: ['GET'])]
   public function delete(LogHandler $dblogger, string $tipo): Response {
     // legge ricevimenti
     $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',

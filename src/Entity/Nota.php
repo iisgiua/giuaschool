@@ -97,38 +97,38 @@ class Nota implements \Stringable {
    * @var Classe|null $classe Classe della nota
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**
    * @var Docente|null $docente Docente che ha messo la nota
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteProvvedimento Docente che ha preso il provvedimento disciplinare
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Docente $docenteProvvedimento = null;
 
   /**
    * @var Collection|null $alunni Alunni ai quali viene data la nota
    *
    * @ORM\ManyToMany(targetEntity="Alunno")
-   * @ORM\JoinTable(name="gs_nota_alunno",
-   *    joinColumns={@ORM\JoinColumn(name="nota_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="alunno_id", nullable=false)})
    */
+  #[ORM\JoinTable(name: 'gs_nota_alunno')]
+  #[ORM\JoinColumn(name: 'nota_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
   private ?Collection $alunni = null;
 
 

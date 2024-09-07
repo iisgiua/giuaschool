@@ -34,8 +34,8 @@ class Genitore extends Utente {
    * @var Alunno|null $alunno Alunno figlio o di cui si è tutori
    *
    * @ORM\ManyToOne(targetEntity="Alunno", inversedBy="genitori")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Alunno $alunno = null;
 
 

@@ -56,20 +56,20 @@ class ListaDestinatariClasse implements \Stringable {
    * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="listaDestinatari")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?ListaDestinatari $listaDestinatari = null;
 
   /**
    * @var Classe|null $classe Classe in cui deve essere letto l'avviso/circolare/documento
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**

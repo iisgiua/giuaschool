@@ -22,13 +22,12 @@ class Staff extends Docente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var Sede|null $sede La sede di riferimento per il ruolo di staff (se definita)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Sede $sede = null;
 
 

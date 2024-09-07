@@ -73,10 +73,10 @@ class OsservazioneClasse implements \Stringable {
    * @var Cattedra $cattedra Cattedra del docente che inserisce l'osservazione
    *
    * @ORM\ManyToOne(targetEntity="Cattedra")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Cattedra $cattedra = null;
 
 

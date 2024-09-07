@@ -63,10 +63,10 @@ class DerogaAssenza implements \Stringable {
    * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**

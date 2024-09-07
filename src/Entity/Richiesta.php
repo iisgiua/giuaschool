@@ -114,28 +114,28 @@ class Richiesta implements \Stringable {
    * @var Utente|null $utente Utente che invia la richiesta
    *
    * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Utente $utente = null;
 
   /**
    * @var Classe $classe Classe di riferimento della richiesta
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Classe $classe = null;
 
   /**
    * @var DefinizioneRichiesta|null $definizioneRichiesta Definizione del modulo a cui appartiene la richiesta
    *
    * @ORM\ManyToOne(targetEntity="DefinizioneRichiesta")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?DefinizioneRichiesta $definizioneRichiesta = null;
 
 

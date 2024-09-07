@@ -101,10 +101,10 @@ class Scrutinio implements \Stringable {
    * @var Classe|null $classe Classe dello scrutinio
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**

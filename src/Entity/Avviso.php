@@ -65,12 +65,12 @@ class Avviso implements \Stringable {
    * @var Collection|null $sedi Sedi a cui è destinato l'avviso
    *
    * @ORM\ManyToMany(targetEntity="Sede")
-   * @ORM\JoinTable(name="gs_avviso_sede",
-   *    joinColumns={@ORM\JoinColumn(name="avviso_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinTable(name: 'gs_avviso_sede')]
+  #[ORM\JoinColumn(name: 'avviso_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
   private ?Collection $sedi = null;
 
   /**
@@ -112,16 +112,16 @@ class Avviso implements \Stringable {
    * @var Cattedra|null $cattedra Cattedra associata ad una verifica (o per altri usi)
    *
    * @ORM\ManyToOne(targetEntity="Cattedra")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Cattedra $cattedra = null;
 
   /**
    * @var Materia $materia Materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Materia $materia = null;
 
   /**
@@ -188,10 +188,10 @@ class Avviso implements \Stringable {
    * @var Docente|null $docente Docente che ha scritto l'avviso
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**

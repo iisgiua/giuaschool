@@ -60,10 +60,8 @@ class SpidController extends BaseController {
    * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/metadata", name="spid_metadata",
-   *    methods={"GET"})
    */
+  #[Route(path: '/metadata', name: 'spid_metadata', methods: ['GET'])]
   public function metadata(Request $request): Response {
     if ($request->query->get('debug') == 'yes') {
       // rigenera metadata
@@ -83,10 +81,8 @@ class SpidController extends BaseController {
    * Inizia la procedura di login tramite SPID
    *
    * @param string $idp Nome idendificativo dell'Identity Provider
-   *
-   * @Route("/spid/login/{idp}", name="spid_login",
-   *    methods={"GET"})
    */
+  #[Route(path: '/spid/login/{idp}', name: 'spid_login', methods: ['GET'])]
   public function login(string $idp): Response {
     $code = $this->idp[$idp] ?? $idp;
     return $this->redirect('/spid-login.php?idp='.urlencode((string) $code));
@@ -94,10 +90,8 @@ class SpidController extends BaseController {
 
   /**
    * Esegue il login sull'applicazione al termine dell'autenticazione SPID
-   *
-   * @Route("/spid/acs/{responseId}", name="spid_acs",
-   *    methods={"GET"})
    */
+  #[Route(path: '/spid/acs/{responseId}', name: 'spid_acs', methods: ['GET'])]
   public function acs() {
     // la procedura viene eseguita nella classe SpidAuthenticator
   }

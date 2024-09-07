@@ -52,10 +52,8 @@ class LoginController extends BaseController {
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/login/form/", name="login_form",
-   *    methods={"GET", "POST"})
    */
+  #[Route(path: '/login/form/', name: 'login_form', methods: ['GET', 'POST'])]
   public function form(AuthenticationUtils $auth, ConfigLoader $config): Response {
     if ($this->isGranted('ROLE_UTENTE')) {
       // reindirizza a pagina HOME
@@ -82,10 +80,8 @@ class LoginController extends BaseController {
 
   /**
    * Disconnessione dell'utente
-   *
-   * @Route("/logout/", name="logout",
-   *    methods={"GET"})
    */
+  #[Route(path: '/logout/', name: 'logout', methods: ['GET'])]
   public function logout() {
     // niente da fare
   }
@@ -99,11 +95,10 @@ class LoginController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/", name="login_home",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/', name: 'login_home', methods: ['GET'])]
   public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
     if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
       // redirezione alla scelta profilo
@@ -130,10 +125,8 @@ class LoginController extends BaseController {
    * @param LoggerInterface $logger Gestore dei log su file
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/login/recovery/", name="login_recovery",
-   *    methods={"GET", "POST"})
    */
+  #[Route(path: '/login/recovery/', name: 'login_recovery', methods: ['GET', 'POST'])]
   public function recovery(Request $request, ConfigLoader $config,
                            UserPasswordHasherInterface $hasher, StaffUtil $staff,
                            MailerInterface $mailer, LoggerInterface $logger): Response {
@@ -275,11 +268,10 @@ class LoginController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/login/profilo", name="login_profilo",
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/login/profilo', name: 'login_profilo', methods: ['GET', 'POST'])]
   public function profilo(Request $request, EventDispatcherInterface $disp,
                           TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {
     // imposta profili

@@ -42,13 +42,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/{cattedra}/{classe}/{data}", name="lezioni_osservazioni",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/{cattedra}/{classe}/{data}', name: 'lezioni_osservazioni', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
   public function osservazioni(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
                                string $data): Response {
     // inizializza variabili
@@ -167,13 +164,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/edit/{cattedra}/{data}/{id}", name="lezioni_osservazioni_edit",
-   *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/edit/{cattedra}/{data}/{id}', name: 'lezioni_osservazioni_edit', requirements: ['cattedra' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'id' => '\d+'], defaults: ['id' => 0], methods: ['GET', 'POST'])]
   public function osservazioneEdit(Request $request, RegistroUtil $reg,
                                    LogHandler $dblogger, int $cattedra, string $data,
                                    int $id): Response {
@@ -299,12 +293,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/delete/{id}", name="lezioni_osservazioni_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/delete/{id}', name: 'lezioni_osservazioni_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function osservazioneDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla osservazione
     $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->find($id);
@@ -345,13 +337,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/personali/{cattedra}/{classe}/{data}", name="lezioni_osservazioni_personali",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/personali/{cattedra}/{classe}/{data}', name: 'lezioni_osservazioni_personali', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
   public function osservazioniPersonali(Request $request, RegistroUtil $reg,
                                         int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
@@ -459,13 +448,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/personali/edit/{cattedra}/{data}/{id}", name="lezioni_osservazioni_personali_edit",
-   *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/personali/edit/{cattedra}/{data}/{id}', name: 'lezioni_osservazioni_personali_edit', requirements: ['cattedra' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'id' => '\d+'], defaults: ['id' => 0], methods: ['GET', 'POST'])]
   public function osservazionePersonaleEdit(Request $request, RegistroUtil $reg,
                                             LogHandler $dblogger, int $cattedra, string $data,
                                             int $id): Response {
@@ -563,12 +549,10 @@ class OsservazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/osservazioni/personali/delete/{id}", name="lezioni_osservazioni_personali_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/lezioni/osservazioni/personali/delete/{id}', name: 'lezioni_osservazioni_personali_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function osservazionePersonaleDelete(RegistroUtil $reg,
                                               LogHandler $dblogger, int $id): Response {
     // controlla osservazione

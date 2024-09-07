@@ -81,8 +81,8 @@ class Festivita implements \Stringable {
    * @var Sede|null $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Sede $sede = null;
 
 

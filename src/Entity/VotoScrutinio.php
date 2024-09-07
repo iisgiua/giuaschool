@@ -114,30 +114,30 @@ class VotoScrutinio implements \Stringable {
    * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce il voto
    *
    * @ORM\ManyToOne(targetEntity="Scrutinio")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Scrutinio $scrutinio = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce il voto
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**
    * @var Materia|null $materia Materia del voto
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Materia $materia = null;
 
 

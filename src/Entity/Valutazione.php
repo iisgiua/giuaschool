@@ -97,38 +97,38 @@ class Valutazione implements \Stringable {
    * @var Docente|null $docente Docente che inserisce la valutazione
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce la valutazione
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**
    * @var Lezione|null $lezione Lezione a cui si riferisce la valutazione
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
-   * @ORM\JoinColumn(nullable=false)
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Lezione $lezione = null;
 
   /**
    * @var Materia|null $materia Materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Materia $materia = null;
 
 

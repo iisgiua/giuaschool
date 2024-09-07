@@ -49,12 +49,8 @@ class AppController extends BaseController {
    * @param int $lapp Lunghezza del token identificativo dell'app
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/login/{codice}/{lusr}/{lpsw}/{lapp}", name="app_login",
-   *    requirements={"codice": "[\w\-=]+", "lusr": "\d+", "lpsw": "\d+", "lapp": "\d+"},
-   *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
-   *    methods={"GET"})
    */
+  #[Route(path: '/app/login/{codice}/{lusr}/{lpsw}/{lapp}', name: 'app_login', requirements: ['codice' => '[\w\-=]+', 'lusr' => '\d+', 'lpsw' => '\d+', 'lapp' => '\d+'], defaults: ['codice' => '0', 'lusr' => 0, 'lpsw' => 0, 'lapp' => 0], methods: ['GET'])]
   public function login(AuthenticationUtils $auth, ConfigLoader $config,
                         string $codice, int $lusr, int $lpsw, int $lapp): Response {
     $errore = null;
@@ -84,10 +80,8 @@ class AppController extends BaseController {
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/app/prelogin/", name="app_prelogin",
-   *    methods={"POST"})
    */
+  #[Route(path: '/app/prelogin/', name: 'app_prelogin', methods: ['POST'])]
   public function prelogin(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
     $risposta = [];
     $risposta['errore'] = 0;
@@ -143,10 +137,8 @@ class AppController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/info/", name="app_info",
-   *    methods={"GET"})
    */
+  #[Route(path: '/app/info/', name: 'app_info', methods: ['GET'])]
   public function info(ConfigLoader $config): Response {
     $applist = [];
     // carica configurazione di sistema
@@ -179,11 +171,8 @@ class AppController extends BaseController {
    * @param int $id ID dell'app da scaricare
    *
    * @return Response File inviato in risposta
-   *
-   * @Route("/app/download/{id}", name="app_download",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    */
+  #[Route(path: '/app/download/{id}', name: 'app_download', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function download(ConfigLoader $config, int $id): Response {
     // carica configurazione di sistema
     $config->carica();
@@ -215,10 +204,8 @@ class AppController extends BaseController {
    * @param Request $request Pagina richiesta
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/app/versione/", name="app_versione",
-   *    methods={"POST"})
    */
+  #[Route(path: '/app/versione/', name: 'app_versione', methods: ['POST'])]
   public function versione(Request $request): JsonResponse {
     $risposta = [];
     // legge dati
@@ -242,10 +229,8 @@ class AppController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/info/studenti/", name="app_info_studenti",
-   *    methods={"POST"})
    */
+  #[Route(path: '/app/info/studenti/', name: 'app_info_studenti', methods: ['POST'])]
   public function infoStudenti(Request $request, TranslatorInterface $trans): Response {
     // inizializza
     $dati = [];
@@ -292,11 +277,10 @@ class AppController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/app/connect/init", name="app_connectInit",
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/app/connect/init', name: 'app_connectInit', methods: ['GET'])]
   public function connectInit(Request $request): JsonResponse {
     $res = [];
     // legge dati
@@ -324,10 +308,8 @@ class AppController extends BaseController {
    * @param string $token Token con le informazioni per la connessione
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/connect/{token}", name="app_connect",
-   *    methods={"GET"})
    */
+  #[Route(path: '/app/connect/{token}', name: 'app_connect', methods: ['GET'])]
   public function connect(Request $request, LogHandler $dblogger, LoggerInterface $logger,
                           ConfigLoader $config, string $token): Response {
     $errore = null;

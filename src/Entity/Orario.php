@@ -79,10 +79,10 @@ class Orario implements \Stringable {
    * @var Sede|null $sede Sede a cui appartiene l'orario
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Sede $sede = null;
 
 

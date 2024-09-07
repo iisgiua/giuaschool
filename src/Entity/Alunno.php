@@ -139,8 +139,8 @@ class Alunno extends Utente {
    * @var Classe $classe Classe attuale dell'alunno (se esiste)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Classe $classe = null;
 
   /**

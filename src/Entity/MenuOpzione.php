@@ -125,18 +125,18 @@ class MenuOpzione implements \Stringable {
    * @var Menu|null $menu Menu a cui appartiene l'opzione
    *
    * @ORM\ManyToOne(targetEntity="Menu", inversedBy="opzioni")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Menu $menu = null;
 
   /**
    * @var Menu|null $sottoMenu Eventuale sottomenu collegato all'opzione
    *
    * @ORM\ManyToOne(targetEntity="Menu")
-   * @ORM\JoinColumn(nullable=true, name="sotto_menu_id")
    */
+  #[ORM\JoinColumn(nullable: true, name: 'sotto_menu_id')]
   private ?Menu $sottoMenu = null;
 
 

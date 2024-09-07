@@ -77,20 +77,20 @@ class StoricoVoto implements \Stringable {
    * @var StoricoEsito|null $storicoEsito Esito dello storico a cui si riferisce il voto
    *
    * @ORM\ManyToOne(targetEntity="StoricoEsito")
-   * @ORM\JoinColumn(name="storico_esito_id", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(name: 'storico_esito_id', nullable: false)]
   private ?StoricoEsito $storicoEsito = null;
 
   /**
    * @var Materia|null $materia Materia della valutazione
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Materia $materia = null;
 
 

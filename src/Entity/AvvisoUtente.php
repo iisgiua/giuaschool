@@ -56,20 +56,20 @@ class AvvisoUtente {
    * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Avviso")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Avviso $avviso = null;
 
   /**
    * @var Utente|null $utente Utente destinatario della circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Utente $utente = null;
 
   /**

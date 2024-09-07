@@ -53,10 +53,10 @@ class CambioClasse implements \Stringable {
    * @var Alunno|null $alunno Alunno che ha effettuato il cambio classe
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**
@@ -83,8 +83,8 @@ class CambioClasse implements \Stringable {
    * @var Classe|null $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Classe $classe = null;
 
   /**

@@ -35,12 +35,10 @@ class FileController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/file/upload/{pagina}/{param}", name="file_upload",
-   *    requirements={"pagina": "\w+", "param": "\w+"},
-   *    methods={"POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/file/upload/{pagina}/{param}', name: 'file_upload', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
   public function upload(Request $request, string $pagina, string $param): Response {
     $risposta = [];
     // legge file
@@ -80,12 +78,10 @@ class FileController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/file/remove/{pagina}/{param}", name="file_remove",
-   *    requirements={"pagina": "\w+", "param": "\w+"},
-   *    methods={"POST"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/file/remove/{pagina}/{param}', name: 'file_remove', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
   public function remove(Request $request, string $pagina, string $param): Response {
     // legge file
     $file = $request->request->get($param);
@@ -125,12 +121,10 @@ class FileController extends BaseController {
    *
    * @return Response Documento inviato in risposta
    *
-   * @Route("/file/avviso/{avviso}/{allegato}", name="file_avviso",
-   *    requirements={"avviso": "\d+", "allegato": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/file/avviso/{avviso}/{allegato}', name: 'file_avviso', requirements: ['avviso' => '\d+', 'allegato' => '\d+'], methods: ['GET'])]
   public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
     // controllo avviso
     $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($avviso);
@@ -165,12 +159,10 @@ class FileController extends BaseController {
    *
    * @return Response Documento inviato in risposta
    *
-   * @Route("/file/download/segreteria/{tipo}/{id}", name="file_download_segreteria",
-   *    requirements={"tipo": "V|VS|VX|R|RS|RX|C|CS|CX", "id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_ATA")
    */
+  #[Route(path: '/file/download/segreteria/{tipo}/{id}', name: 'file_download_segreteria', requirements: ['tipo' => 'V|VS|VX|R|RS|RX|C|CS|CX', 'id' => '\d+'], methods: ['GET'])]
   public function downloadSegreteria(string $tipo, int $id): Response {
     // controllo
     $storico = $this->em->getRepository(\App\Entity\StoricoEsito::class)->findOneByAlunno($id);
@@ -236,12 +228,10 @@ class FileController extends BaseController {
    *
    * @return Response Certificato inviato in risposta
    *
-   * @Route("/file/certificato/{tipo}/{id}", name="file_certificato",
-   *    requirements={"tipo": "D", "id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/file/certificato/{tipo}/{id}', name: 'file_certificato', requirements: ['tipo' => 'D', 'id' => '\d+'], methods: ['GET'])]
   public function certificato(string $tipo, int $id): Response {
     // init
     $fs = new Filesystem();

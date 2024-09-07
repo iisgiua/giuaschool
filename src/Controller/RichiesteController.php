@@ -41,11 +41,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/lista", name="richieste_lista",
-   *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
+  #[Route(path: '/richieste/lista', name: 'richieste_lista', methods: ['GET'])]
   public function lista(): Response {
     // inizializza
     $info = [];
@@ -66,12 +65,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/add/{modulo}", name="richieste_add",
-   *    requirements={"modulo": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
+  #[Route(path: '/richieste/add/{modulo}', name: 'richieste_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   public function add(Request $request, TranslatorInterface $trans,
                       RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
     // inizializza
@@ -209,12 +206,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/delete/{id}", name="richieste_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
+  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function delete(LogHandler $dblogger, int $id): Response {
     // inizializza
     $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
@@ -256,13 +251,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/download/{id}/{documento}", name="richieste_download",
-   *    requirements={"id": "\d+", "documento": "\d+"},
-   *    defaults={"documento": "0"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
+  #[Route(path: '/richieste/download/{id}/{documento}', name: 'richieste_download', requirements: ['id' => '\d+', 'documento' => '\d+'], defaults: ['documento' => '0'], methods: ['GET'])]
   public function download(int $id, int $documento): Response {
     // controlla richiesta
     $richiesta = $this->em->getRepository(\App\Entity\Richiesta::class)->find($id);
@@ -317,13 +309,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}", name="richieste_uscita",
-   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "richiesta": "\d+", "posizione": "\d+"},
-   *    defaults={"posizione": "0"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}', name: 'richieste_uscita', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'richiesta' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET', 'POST'])]
   public function uscita(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                          LogHandler $dblogger, string $data, int $alunno, int $richiesta,
                          int $posizione): Response {
@@ -512,13 +501,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/gestione/{pagina}", name="richieste_gestione",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/richieste/gestione/{pagina}', name: 'richieste_gestione', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
   public function gestione(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
@@ -607,12 +593,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/remove/{id}", name="richieste_remove",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/richieste/remove/{id}', name: 'richieste_remove', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   public function remove(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
@@ -665,12 +649,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/manage/{id}", name="richieste_manage",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/richieste/manage/{id}', name: 'richieste_manage', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   public function manage(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
@@ -751,12 +733,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/{classe}", name="richieste_classe",
-   *   requirements={"classe": "\d+"},
-   *   methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/richieste/classe/{classe}', name: 'richieste_classe', requirements: ['classe' => '\d+'], methods: ['GET'])]
   public function classe(Classe $classe): Response {
     // inizializza
     $info = [];
@@ -785,12 +765,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/delete/{classe}/{id}", name="richieste_classe_delete",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
   public function classeDelete(LogHandler $dblogger, Classe $classe, int $id): Response {
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
@@ -836,12 +814,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/add/{classe}/{modulo}", name="richieste_classe_add",
-   *    requirements={"modulo": "\d+"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/richieste/classe/add/{classe}/{modulo}', name: 'richieste_classe_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   public function classeAdd(Request $request, TranslatorInterface $trans,
                             RichiesteUtil $ric, LogHandler $dblogger,
                             Classe $classe, int $modulo): Response {
@@ -984,13 +960,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/modulo/evacuazione/{formato}/{pagina}", name="richieste_modulo_evacuazione",
-   *    requirements={"formato": "H|C", "pagina": "\d+"},
-   *    defaults={"formato": "H", "pagina": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/richieste/modulo/evacuazione/{formato}/{pagina}', name: 'richieste_modulo_evacuazione', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
   public function moduloEvacuazione(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];
@@ -1073,13 +1046,10 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/modulo/lista/{formato}/{pagina}", name="richieste_modulo_lista",
-   *    requirements={"formato": "H|C", "pagina": "\d+"},
-   *    defaults={"formato": "H", "pagina": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_STAFF")
    */
+  #[Route(path: '/richieste/modulo/lista/{formato}/{pagina}', name: 'richieste_modulo_lista', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
   public function moduloLista(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];

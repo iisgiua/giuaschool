@@ -44,13 +44,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/eventi/{mese}", name="agenda_eventi",
-   *    requirements={"mese": "\d\d\d\d-\d\d"},
-   *    defaults={"mese": "0000-00"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/eventi/{mese}', name: 'agenda_eventi', requirements: ['mese' => '\d\d\d\d-\d\d'], defaults: ['mese' => '0000-00'], methods: ['GET'])]
   public function eventi(AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
@@ -107,12 +104,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/eventi/dettagli/{data}/{tipo}", name="agenda_eventi_dettagli",
-   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V|P"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/eventi/dettagli/{data}/{tipo}', name: 'agenda_eventi_dettagli', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'tipo' => 'C|A|V|P'], methods: ['GET'])]
   public function eventiDettagli(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
@@ -140,13 +135,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/verifica/edit/{id}", name="agenda_verifica_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/verifica/edit/{id}', name: 'agenda_verifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function verificaEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
                                LogHandler $dblogger, int $id): Response {
@@ -379,13 +371,10 @@ class AgendaController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/agenda/cattedra/{id}", name="agenda_cattedra",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": 0},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/cattedra/{id}', name: 'agenda_cattedra', requirements: ['id' => '\d+'], defaults: ['id' => 0], methods: ['GET'])]
   public function cattedraAjax(int $id): JsonResponse {
     $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
@@ -406,13 +395,10 @@ class AgendaController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/agenda/classe/{id}", name="agenda_classe",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": 0},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/classe/{id}', name: 'agenda_classe', requirements: ['id' => '\d+'], defaults: ['id' => 0], methods: ['GET'])]
   public function classeAjax(int $id): JsonResponse {
     // solo cattedre attive e normali, no sostegno, no ed.civ.
     $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($id);
@@ -441,12 +427,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/verifica/delete/{id}", name="agenda_verifica_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/verifica/delete/{id}', name: 'agenda_verifica_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function verificaDelete(LogHandler $dblogger, RegistroUtil $reg,
                                  BachecaUtil $bac, AgendaUtil $age, int $id): Response {
     // controllo avviso
@@ -516,13 +500,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/compito/edit/{id}", name="agenda_compito_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/compito/edit/{id}', name: 'agenda_compito_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function compitoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                               RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age,
                               LogHandler $dblogger, int $id): Response {
@@ -725,12 +706,10 @@ class AgendaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/agenda/compito/delete/{id}", name="agenda_compito_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
+  #[Route(path: '/agenda/compito/delete/{id}', name: 'agenda_compito_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function compitoDelete(LogHandler $dblogger, AgendaUtil $age,
                                 int $id): Response {
     // controllo avviso

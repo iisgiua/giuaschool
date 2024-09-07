@@ -51,11 +51,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/importa/", name="docenti_importa",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/importa/', name: 'docenti_importa', methods: ['GET', 'POST'])]
   public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
@@ -111,13 +110,10 @@ class DocentiController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
-   * @Route("/docenti/modifica/{pagina}", name="docenti_modifica",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/modifica/{pagina}', name: 'docenti_modifica', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
@@ -168,12 +164,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/abilita/{id}/{abilita}", name="docenti_abilita",
-   *    requirements={"id": "\d+", "abilita": "0|1"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/abilita/{id}/{abilita}', name: 'docenti_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   public function abilita(int $id, int $abilita): Response {
     // controllo docente
     $docente = $this->em->getRepository(\App\Entity\Docente::class)->find($id);
@@ -205,13 +199,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/modifica/edit/{id}", name="docenti_modifica_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/modifica/edit/{id}', name: 'docenti_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -277,12 +268,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/password/{id}/{tipo}", name="docenti_password",
-   *    requirements={"id": "\d+", "tipo": "E|P"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, int $id,
@@ -362,12 +351,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/otp/{id}", name="docenti_reset",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/otp/{id}', name: 'docenti_reset', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function reset(LogHandler $dblogger, int $id): Response {
     // controlla docente
     $docente = $this->em->getRepository(\App\Entity\Docente::class)->find($id);
@@ -397,13 +384,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/staff/{pagina}", name="docenti_staff",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/staff/{pagina}', name: 'docenti_staff', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function staff(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -447,13 +431,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/staff/edit/{id}", name="docenti_staff_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/staff/edit/{id}', name: 'docenti_staff_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function staffEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -506,11 +487,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/staff/delete/{id}", name="docenti_staff_delete", requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/staff/delete/{id}', name: 'docenti_staff_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function staffDelete(int $id): Response {
     // controlla utente staff
     $staff = $this->em->getRepository(\App\Entity\Staff::class)->find($id);
@@ -536,13 +516,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/coordinatori/{pagina}", name="docenti_coordinatori",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/coordinatori/{pagina}', name: 'docenti_coordinatori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function coordinatori(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -592,13 +569,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/coordinatori/edit/{id}", name="docenti_coordinatori_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/coordinatori/edit/{id}', name: 'docenti_coordinatori_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function coordinatoriEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -662,11 +636,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/coordinatori/delete/{id}", name="docenti_coordinatori_delete", requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/coordinatori/delete/{id}', name: 'docenti_coordinatori_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function coordinatoriDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($id);
@@ -699,13 +672,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/segretari/{pagina}", name="docenti_segretari",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/segretari/{pagina}', name: 'docenti_segretari', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function segretari(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -755,13 +725,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/segretari/edit/{id}", name="docenti_segretari_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/segretari/edit/{id}', name: 'docenti_segretari_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function segretariEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -825,12 +792,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/segretari/delete/{id}", name="docenti_segretari_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/segretari/delete/{id}', name: 'docenti_segretari_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function segretariDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($id);
@@ -861,13 +826,10 @@ class DocentiController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
-   * @Route("/docenti/cattedre/{pagina}", name="docenti_cattedre",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/cattedre/{pagina}', name: 'docenti_cattedre', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function cattedre(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -919,13 +881,10 @@ class DocentiController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $id ID della cattedra
    *
-   * @Route("/docenti/cattedre/edit/{id}", name="docenti_cattedre_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/cattedre/edit/{id}', name: 'docenti_cattedre_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function cattedreEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -1016,12 +975,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/cattedre/abilita/{id}/{abilita}", name="docenti_cattedre_abilita",
-   *    requirements={"id": "\d+", "abilita": "0|1"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/cattedre/abilita/{id}/{abilita}', name: 'docenti_cattedre_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   public function cattedreEnable(int $id, int $abilita): Response {
     // controllo cattedra
     $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($id);
@@ -1065,13 +1022,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/responsabiliBes/{pagina}", name="docenti_responsabiliBes",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/responsabiliBes/{pagina}', name: 'docenti_responsabiliBes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function responsabiliBes(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
@@ -1122,13 +1076,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/responsabiliBes/edit/{id}", name="docenti_responsabiliBes_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/responsabiliBes/edit/{id}', name: 'docenti_responsabiliBes_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function responsabiliBesEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -1180,12 +1131,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/responsabiliBes/delete/{id}", name="docenti_responsabiliBes_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/responsabiliBes/delete/{id}', name: 'docenti_responsabiliBes_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function responsabiliBesDelete(int $id): Response {
     // controlla utente
     $docente = $this->em->getRepository(\App\Entity\Docente::class)->find($id);
@@ -1212,13 +1161,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/rappresentanti/{pagina}", name="docenti_rappresentanti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/rappresentanti/{pagina}', name: 'docenti_rappresentanti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -1267,13 +1213,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/rappresentanti/edit/{id}", name="docenti_rappresentanti_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/rappresentanti/edit/{id}', name: 'docenti_rappresentanti_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
                                      int $id): Response {
     // controlla azione
@@ -1333,12 +1276,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/rappresentanti/delete/{id}", name="docenti_rappresentanti_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/rappresentanti/delete/{id}', name: 'docenti_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function rappresentantiDelete(int $id): Response {
     // controlla utente
     $utente = $this->em->getRepository(\App\Entity\Docente::class)->find($id);
@@ -1363,11 +1304,10 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/rspp", name="docenti_rspp",
-   *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
+  #[Route(path: '/docenti/rspp', name: 'docenti_rspp', methods: ['GET', 'POST'])]
   public function rspp(Request $request): Response {
     // init
     $dati = [];

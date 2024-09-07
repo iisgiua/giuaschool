@@ -56,20 +56,20 @@ class AvvisoClasse {
    * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Avviso")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Avviso $avviso = null;
 
   /**
    * @var Classe|null $classe Classe a cui è indirizzato l'avviso
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**

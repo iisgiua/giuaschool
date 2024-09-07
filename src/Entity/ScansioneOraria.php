@@ -96,10 +96,10 @@ class ScansioneOraria implements \Stringable {
    * @var Orario|null $orario Orario a cui appartiene la scansione oraria
    *
    * @ORM\ManyToOne(targetEntity="Orario")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Orario $orario = null;
 
 

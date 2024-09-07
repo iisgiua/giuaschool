@@ -59,12 +59,12 @@ class Circolare implements \Stringable {
    * @var Collection|null $sedi Sedi a cui è destinata la circolare
    *
    * @ORM\ManyToMany(targetEntity="Sede")
-   * @ORM\JoinTable(name="gs_circolare_sede",
-   *    joinColumns={@ORM\JoinColumn(name="circolare_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinTable(name: 'gs_circolare_sede')]
+  #[ORM\JoinColumn(name: 'circolare_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
   private ?Collection $sedi = null;
 
   /**

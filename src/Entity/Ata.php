@@ -47,8 +47,8 @@ class Ata extends Utente {
    * @var Sede|null $sede La sede di riferimento del dipendente ATA (se definita)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Sede $sede = null;
 
 

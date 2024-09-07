@@ -93,36 +93,36 @@ class Classe implements \Stringable {
    * @var Sede|null $sede Sede a cui appartiene la classe
    *
    * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Sede $sede = null;
 
   /**
    * @var Corso|null $corso Corso a cui appartiene classe
    *
    * @ORM\ManyToOne(targetEntity="Corso")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Corso $corso = null;
 
   /**
    * @var Docente $coordinatore Coordinatore di classe
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Docente $coordinatore = null;
 
   /**
    * @var Docente $segretario Segretario del consiglio di classe
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Docente $segretario = null;
 
 

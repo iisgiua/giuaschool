@@ -115,36 +115,36 @@ class Entrata implements \Stringable {
    * @var Alunno|null $alunno Alunno al quale si riferisce l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Alunno $alunno = null;
 
   /**
    * @var Docente|null $docente Docente che autorizza l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteGiustifica Docente che giustifica l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Docente $docenteGiustifica = null;
 
   /**
    * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
    *
    * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Utente $utenteGiustifica = null;
 
 

@@ -53,10 +53,10 @@ class OrarioDocente implements \Stringable {
    * @var Orario|null $orario Orario a cui appartiene l'orario del docente
    *
    * @ORM\ManyToOne(targetEntity="Orario")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Orario $orario = null;
 
   /**
@@ -79,10 +79,10 @@ class OrarioDocente implements \Stringable {
    * @var Cattedra|null $cattedra Cattedra relativa all'orario indicato
    *
    * @ORM\ManyToOne(targetEntity="Cattedra")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Cattedra $cattedra = null;
 
 

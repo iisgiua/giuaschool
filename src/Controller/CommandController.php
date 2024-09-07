@@ -31,11 +31,8 @@ class CommandController extends BaseController {
    * @param int $time Tempo massimo di esecuzione dello script (in secondi)
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/command/notify/{token}/{time}", name="command_notify",
-   *    requirements={"token": "[\w\-\+=]+", "time": "\d+"},
-   *    methods={"GET"})
    */
+  #[Route(path: '/command/notify/{token}/{time}', name: 'command_notify', requirements: ['token' => '[\w\-\+=]+', 'time' => '\d+'], methods: ['GET'])]
   public function notify(KernelInterface $kernel, string $token, int $time): Response {
     // controlla token
     $tok = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('comando_token');

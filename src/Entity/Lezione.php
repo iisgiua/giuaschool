@@ -73,10 +73,10 @@ class Lezione implements \Stringable {
    * @var Classe|null $classe Classe della lezione
    *
    * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Classe $classe = null;
 
   /**
@@ -101,10 +101,10 @@ class Lezione implements \Stringable {
    * @var Materia|null $materia Materia della lezione
    *
    * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Materia $materia = null;
 
   /**

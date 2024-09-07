@@ -53,10 +53,10 @@ class Colloquio implements \Stringable {
    * @var Docente|null $docente Docente che deve fare il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
   private ?Docente $docente = null;
 
   /**

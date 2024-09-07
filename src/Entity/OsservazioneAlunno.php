@@ -23,15 +23,14 @@ class OsservazioneAlunno extends OsservazioneClasse {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var Alunno $alunno Alunno a cui si riferisce l'osservazione
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: true)]
   private ?Alunno $alunno = null;
 
 
