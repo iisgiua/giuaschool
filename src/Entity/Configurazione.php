@@ -16,93 +16,85 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Configurazione - dati per la configurazione dei parametri dell'applicazione
  *
- * @ORM\Entity(repositoryClass="App\Repository\ConfigurazioneRepository")
- * @ORM\Table(name="gs_configurazione")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="parametro", message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_configurazione')]
+#[ORM\Entity(repositoryClass: \App\Repository\ConfigurazioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'parametro', message: 'field.unique')]
 class Configurazione implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la configurazione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $categoria Categoria a cui appartiene la configurazione
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $categoria = '';
 
   /**
    * @var string|null $parametro Parametro della configurazione
    *
-   * @ORM\Column(type="string", length=64, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $parametro = '';
 
   /**
-  * @var string|null $descrizione Descrizione dell'utilizzo del parametro
+   * @var string|null $descrizione Descrizione dell'utilizzo del parametro
    *
-   * @ORM\Column(type="string", length=1024, nullable=false)
    *
-   * @Assert\Length(max=1024,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 1024, nullable: false)]
+  #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $descrizione = '';
 
   /**
    * @var string|null $valore Valore della configurazione
-   *
-   * @ORM\Column(type="text", nullable=false)
    */
+  #[ORM\Column(type: 'text', nullable: false)]
   private ?string $valore = '';
 
   /**
-  * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
-   *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $gestito = false;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -111,9 +103,8 @@ class Configurazione implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

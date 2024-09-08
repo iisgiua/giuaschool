@@ -42,10 +42,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/programmi', name: 'documenti_programmi', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function programmi(DocumentiUtil $doc): Response {
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     // recupera dati
@@ -68,10 +67,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/programmi/add/{classe}/{materia}', name: 'documenti_programmi_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function programmiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
                                LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
@@ -146,10 +144,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function delete(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
     // controllo permessi
     if (!$doc->azioneDocumento('delete', $this->getUser(), $documento)) {
@@ -191,10 +188,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/relazioni', name: 'documenti_relazioni', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function relazioni(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->relazioniDocente($this->getUser());
@@ -217,10 +213,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/relazioni/add/{classe}/{materia}/{alunno}', name: 'documenti_relazioni_add', requirements: ['classe' => '\d+', 'materia' => '\d+', 'alunno' => '\d+'], defaults: ['alunno' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function relazioniAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
                                LogHandler $dblogger, Classe $classe, Materia $materia,
                                Alunno $alunno=null): Response {
@@ -295,10 +290,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/piani', name: 'documenti_piani', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function piani(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->pianiDocente($this->getUser());
@@ -320,10 +314,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/piani/add/{classe}/{materia}', name: 'documenti_piani_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function pianiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
                            LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
@@ -395,10 +388,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/maggio', name: 'documenti_maggio', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function maggio(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->maggioDocente($this->getUser());
@@ -419,10 +411,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/maggio/add/{classe}', name: 'documenti_maggio_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function maggioAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
                             LogHandler $dblogger, Classe $classe): Response {
     // inizializza
@@ -494,10 +485,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/documenti/download/{documento}/{allegato}', name: 'documenti_download', requirements: ['documento' => '\d+', 'allegato' => '\d+'], defaults: ['allegato' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function download(DocumentiUtil $doc, Documento $documento,
                            File $allegato = null): Response {
     // controlla allegato
@@ -531,10 +521,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/documenti/docenti/{pagina}', name: 'documenti_docenti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function docenti(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = [];
@@ -592,10 +581,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/bes/{pagina}', name: 'documenti_bes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function bes(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
@@ -663,10 +651,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/documenti/bes/add/{alunno}', name: 'documenti_bes_add', requirements: ['alunno' => '\d+'], defaults: ['alunno' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function besAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
                          LogHandler $dblogger, Alunno $alunno = null): Response {
     // inizializza
@@ -817,10 +804,9 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/documenti/alunni/{pagina}', name: 'documenti_alunni', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function alunni(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = [];
@@ -873,10 +859,9 @@ class DocumentiController extends BaseController {
     *
     * @return Response Pagina di risposta
     *
-    *
-    * @IsGranted("ROLE_UTENTE")
     */
    #[Route(path: '/documenti/bacheca/{pagina}', name: 'documenti_bacheca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+   #[IsGranted('ROLE_UTENTE')]
    public function bacheca(Request $request, int $pagina): Response {
      // recupera criteri dalla sessione
      $criteri = [];

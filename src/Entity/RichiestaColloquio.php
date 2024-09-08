@@ -15,112 +15,104 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * RichiestaColloquio - dati per la richiesta di un colloquio da parte del genitore
  *
- * @ORM\Entity(repositoryClass="App\Repository\RichiestaColloquioRepository")
- * @ORM\Table(name="gs_richiesta_colloquio")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_richiesta_colloquio')]
+#[ORM\Entity(repositoryClass: \App\Repository\RichiestaColloquioRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class RichiestaColloquio implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la richiesta del colloquio
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime|null $appuntamento Ora di inizio del colloquio
    *
-   * @ORM\Column(type="time", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'time', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $appuntamento = null;
 
   /**
    * @var Colloquio|null $colloquio Colloquio richiesto
    *
-   * @ORM\ManyToOne(targetEntity="Colloquio")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Colloquio::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Colloquio $colloquio = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce il colloquio
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Genitore|null $genitore Genitore che effettua la richiesta del colloquio
    *
-   * @ORM\ManyToOne(targetEntity="Genitore")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Genitore::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Genitore $genitore = null;
 
   /**
    * @var Genitore!null $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
-   *
-   * @ORM\ManyToOne(targetEntity="Genitore")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Genitore::class)]
   private ?Genitore $genitoreAnnulla = null;
 
   /**
    * @var string|null $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"R","A","C","N"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['R', 'A', 'C', 'N'], strict: true, message: 'field.choice')]
   private ?string $stato = 'R';
 
   /**
    * @var string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $messaggio = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -129,9 +121,8 @@ class RichiestaColloquio implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

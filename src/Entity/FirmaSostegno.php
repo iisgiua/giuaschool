@@ -14,35 +14,31 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * FirmaSostegno - dati per la firma di una lezione di sostegno
  *
- * @ORM\Entity(repositoryClass="App\Repository\FirmaSostegnoRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: \App\Repository\FirmaSostegnoRepository::class)]
 class FirmaSostegno extends Firma {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var string|null $argomento Argomento della lezione di sostegno
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $argomento = '';
 
   /**
    * @var string|null $attivita Attività della lezione di sostegno
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $attivita = '';
 
   /**
    * @var Alunno|null $alunno Alunno della cattedra di sostegno (importante quando più alunni con stesso docente in stessa classe)
-   *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
   private ?Alunno $alunno = null;
 
 

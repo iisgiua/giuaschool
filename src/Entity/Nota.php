@@ -17,128 +17,118 @@ use Doctrine\Common\Collections\Collection;
 /**
  * Nota - dati per la gestione delle note disciplinari sul registro
  *
- * @ORM\Entity(repositoryClass="App\Repository\NotaRepository")
- * @ORM\Table(name="gs_nota")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_nota')]
+#[ORM\Entity(repositoryClass: \App\Repository\NotaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Nota implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la nota
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo della nota [C=di classe, I=individuale]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"C","I"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['C', 'I'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'C';
 
   /**
    * @var \DateTime|null $data Data della nota
    *
-   * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'date', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $data = null;
 
   /**
    * @var string|null $testo Testo della nota
    *
-   * @ORM\Column(type="text", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: 'text', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $testo = '';
 
   /**
    * @var string|null $provvedimento Provvedimento disciplinare preso per la nota
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $provvedimento = '';
 
   /**
    * @var \DateTime|null $annullata Data di annullamento della nota (null se è valida)
-   *
-   * @ORM\Column(type="date", nullable=true)
    */
+  #[ORM\Column(type: 'date', nullable: true)]
   private ?\DateTime $annullata = null;
 
   /**
    * @var Classe|null $classe Classe della nota
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var Docente|null $docente Docente che ha messo la nota
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteProvvedimento Docente che ha preso il provvedimento disciplinare
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $docenteProvvedimento = null;
 
   /**
    * @var Collection|null $alunni Alunni ai quali viene data la nota
-   *
-   * @ORM\ManyToMany(targetEntity="Alunno")
    */
   #[ORM\JoinTable(name: 'gs_nota_alunno')]
   #[ORM\JoinColumn(name: 'nota_id', nullable: false)]
   #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Alunno::class)]
   private ?Collection $alunni = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -147,9 +137,8 @@ class Nota implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

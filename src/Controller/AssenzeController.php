@@ -53,10 +53,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}/{posizione}', name: 'lezioni_assenze_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M', 'posizione' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G', 'posizione' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function quadro(Request $request, RegistroUtil $reg, BachecaUtil $bac,
                          int $cattedra, int $classe, string $data, string $vista,
                          int $posizione): Response {
@@ -198,10 +197,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/assenza/{cattedra}/{classe}/{data}/{alunno}/{id}/{posizione}', name: 'lezioni_assenze_assenza', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'id' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function assenza(RegistroUtil $reg, LogHandler $dblogger,
                           int $cattedra, int $classe, string $data, int $alunno, int $id,
                           int $posizione): Response {
@@ -348,10 +346,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/entrata/{cattedra}/{classe}/{data}/{alunno}/{posizione}', name: 'lezioni_assenze_entrata', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function entrata(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                           LogHandler $dblogger, int $cattedra, int $classe, string $data,
                           int $alunno, int $posizione): Response {
@@ -550,10 +547,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/uscita/{cattedra}/{classe}/{data}/{alunno}/{posizione}', name: 'lezioni_assenze_uscita', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function uscita(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                          LogHandler $dblogger, int $cattedra, int $classe, string $data,
                          int $alunno, int $posizione): Response {
@@ -739,10 +735,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/giustifica/{cattedra}/{classe}/{data}/{alunno}/{posizione}', name: 'lezioni_assenze_giustifica', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function giustifica(Request $request, RegistroUtil $reg, LogHandler $dblogger,
                              int $cattedra, int $classe, string $data, int $alunno,
                              int $posizione): Response {
@@ -949,10 +944,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/appello/{cattedra}/{classe}/{data}', name: 'lezioni_assenze_appello', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function appello(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                           LogHandler $dblogger, int $cattedra, int $classe,
                           string $data): Response {
@@ -1151,10 +1145,9 @@ class AssenzeController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/assenze/fuoriclasse/{classe}/{data}/{alunno}/{id}/{posizione}', name: 'lezioni_assenze_fuoriclasse', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'id' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function fuoriclasse(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                               LogHandler $dblogger, int $classe, string $data, int $alunno,
                               int $id, int $posizione): Response {

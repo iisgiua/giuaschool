@@ -15,165 +15,159 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Istituto - dati per le informazioni sull'istituto scolastico
  *
- * @ORM\Entity(repositoryClass="App\Repository\IstitutoRepository")
- * @ORM\Table(name="gs_istituto")
  *
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_istituto')]
+#[ORM\Entity(repositoryClass: \App\Repository\IstitutoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Istituto implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'istituto scolastico
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo di istituto (es. Istituto di Istruzione Superiore)
    *
-   * @ORM\Column(type="string", length=128, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $tipo = '';
 
   /**
    * @var string|null $tipoSigla Tipo di istituto come sigla (es. I.I.S.)
    *
-   * @ORM\Column(name="tipo_sigla", type="string", length=16, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=16, maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'tipo_sigla', type: 'string', length: 16, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private ?string $tipoSigla = '';
 
   /**
-  * @var string|null $nome Nome dell'istituto scolastico
+   * @var string|null $nome Nome dell'istituto scolastico
    *
-   * @ORM\Column(type="string", length=128, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $nomeBreve Nome breve dell'istituto scolastico
    *
-   * @ORM\Column(name="nome_breve", type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'nome_breve', type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
 
   /**
    * @var string|null $email Indirizzo email dell'istituto scolastico
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Email(message: 'field.email')]
   private ?string $email = '';
 
   /**
    * @var string|null $pec Indirizzo PEC dell'istituto scolastico
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Email(message: 'field.email')]
   private ?string $pec = '';
 
   /**
    * @var string|null $urlSito Indirizzo web del sito istituzionale dell'istituto
    *
-   * @ORM\Column(name="url_sito", type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Url(message="field.url")
    */
+  #[ORM\Column(name: 'url_sito', type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Url(message: 'field.url')]
   private ?string $urlSito = '';
 
   /**
    * @var string|null $urlRegistro Indirizzo web del registro elettronico
    *
-   * @ORM\Column(name="url_registro", type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Url(message="field.url")
    */
+  #[ORM\Column(name: 'url_registro', type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Url(message: 'field.url')]
   private ?string $urlRegistro = '';
 
   /**
    * @var string|null $firmaPreside Testo per la firma sui documenti
    *
-   * @ORM\Column(name="firma_preside", type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'firma_preside', type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $firmaPreside = '';
 
   /**
    * @var string|null $emailAmministratore Indirizzo email dell'amministratore di sistema
    *
-   * @ORM\Column(name="email_amministratore", type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
    */
+  #[ORM\Column(name: 'email_amministratore', type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Email(message: 'field.email')]
   private ?string $emailAmministratore = '';
 
   /**
    * @var string|null $emailNotifiche Indirizzo email del mittente delle notifiche inviate dal sistema
    *
-   * @ORM\Column(name="email_notifiche", type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
    */
+  #[ORM\Column(name: 'email_notifiche', type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Email(message: 'field.email')]
   private ?string $emailNotifiche = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -182,9 +176,8 @@ class Istituto implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

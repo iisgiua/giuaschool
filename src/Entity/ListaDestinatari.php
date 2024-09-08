@@ -17,145 +17,132 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ListaDestinatari - dati per la gestione dei destinatari di un qualsiasi documento
  *
- * @ORM\Entity(repositoryClass="App\Repository\ListaDestinatariRepository")
- * @ORM\Table(name="gs_lista_destinatari")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_lista_destinatari')]
+#[ORM\Entity(repositoryClass: \App\Repository\ListaDestinatariRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class ListaDestinatari implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var Collection|null $sedi Sedi scolastiche di destinazione (usato come filtro principale)
    *
-   * @ORM\ManyToMany(targetEntity="Sede")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinTable(name: 'gs_lista_destinatari_sede')]
   #[ORM\JoinColumn(name: 'lista_destinatari_id', nullable: false)]
   #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Sede::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Collection $sedi = null;
 
   /**
    * @var bool $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $dsga = false;
 
   /**
    * @var bool $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $ata = false;
 
   /**
    * @var string|null $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
   private ?string $docenti = 'N';
 
   /**
    * @var array|null $filtroDocenti Lista dei filtri per i docenti
-   *
-   * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
+  #[ORM\Column(name: 'filtro_docenti', type: 'simple_array', nullable: true)]
   private ?array $filtroDocenti = [];
 
   /**
    * @var string|null $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C'], strict: true, message: 'field.choice')]
   private ?string $coordinatori = 'N';
 
   /**
    * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
-   *
-   * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
+  #[ORM\Column(name: 'filtro_coordinatori', type: 'simple_array', nullable: true)]
   private ?array $filtroCoordinatori = [];
 
   /**
    * @var bool $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $staff = false;
 
   /**
    * @var string|null $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $genitori = 'N';
 
   /**
    * @var array $filtroGenitori Lista dei filtri per i genitori
-   *
-   * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
+  #[ORM\Column(name: 'filtro_genitori', type: 'simple_array', nullable: true)]
   private ?array $filtroGenitori = [];
 
   /**
    * @var string|null $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $alunni = 'N';
 
   /**
    * @var array $filtroAlunni Lista dei filtri per gli alunni
-   *
-   * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
+  #[ORM\Column(name: 'filtro_alunni', type: 'simple_array', nullable: true)]
   private ?array $filtroAlunni = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -164,9 +151,8 @@ class ListaDestinatari implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

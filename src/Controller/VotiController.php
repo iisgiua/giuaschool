@@ -49,10 +49,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/quadro/{cattedra}/{classe}/{periodo}', name: 'lezioni_voti_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => '1|2|3|0'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
                              int $periodo): Response {
     // inizializza variabili
@@ -165,10 +164,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/classe/{cattedra}/{tipo}/{data}', name: 'lezioni_voti_classe', requirements: ['cattedra' => '\d+', 'tipo' => 'S|O|P', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['data' => '0000-00-00'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiClasse(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                              LogHandler $dblogger, int $cattedra, string $tipo,
                              string $data): Response {
@@ -384,10 +382,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/alunno/{cattedra}/{alunno}/{tipo}/{id}', name: 'lezioni_voti_alunno', requirements: ['cattedra' => '\d+', 'alunno' => '\d+', 'tipo' => 'S|O|P', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiAlunno(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                              LogHandler $dblogger, int $cattedra, int $alunno, string $tipo,
                              int $id): Response {
@@ -603,10 +600,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/dettagli/{cattedra}/{classe}/{alunno}', name: 'lezioni_voti_dettagli', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'alunno' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0, 'alunno' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiDettagli(Request $request, TranslatorInterface $trans,
                                RegistroUtil $reg, int $cattedra, int $classe,
                                int $alunno): Response {
@@ -704,10 +700,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/sostegno/{cattedra}/{materia}', name: 'lezioni_voti_sostegno', requirements: ['cattedra' => '\d+', 'materia' => '\d+'], defaults: ['cattedra' => 0, 'materia' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiSostegno(Request $request, TranslatorInterface $trans,
                                GenitoriUtil $gen, int $cattedra,
                                int $materia): Response {
@@ -788,10 +783,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/stampa/{cattedra}/{classe}/{data}', name: 'lezioni_voti_stampa', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiStampa(RegistroUtil $reg, PdfManager $pdf, int $cattedra, int $classe,
                              string $data): Response {
     // inizializza variabili
@@ -867,10 +861,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/esporta/{cattedra}/{classe}/{data}', name: 'lezioni_voti_esporta', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiEsporta(RegistroUtil $reg, int $cattedra, int $classe, string $data): Response {
     // inizializza variabili
     $dati = null;
@@ -947,10 +940,9 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
                                int $id): Response {
     // controllo voto

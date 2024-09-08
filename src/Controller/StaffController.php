@@ -72,10 +72,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/{pagina}', name: 'staff_avvisi', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -172,10 +171,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/edit/{id}', name: 'staff_avvisi_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                              int $id): Response {
@@ -444,10 +442,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/dettagli/{id}', name: 'staff_avvisi_dettagli', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
@@ -475,10 +472,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/delete/{tipo}/{id}', name: 'staff_avvisi_delete', requirements: ['tipo' => 'U|E|V|A|I|C', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiDelete(LogHandler $dblogger, BachecaUtil $bac,
                                RegistroUtil $reg, string $tipo, int $id): Response {
     $dir = $this->getParameter('dir_avvisi').'/';
@@ -576,10 +572,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/orario/{tipo}/{pagina}', name: 'staff_avvisi_orario', requirements: ['tipo' => 'E|U', 'pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiOrario(Request $request, BachecaUtil $bac, string $tipo,
                                int $pagina): Response {
     // inizializza variabili
@@ -664,10 +659,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/orario/edit/{tipo}/{id}', name: 'staff_avvisi_orario_edit', requirements: ['tipo' => 'E|U', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiOrarioEdit(Request $request, TranslatorInterface $trans,
                                    MessageBusInterface $msg, BachecaUtil $bac,
                                    RegistroUtil $reg, LogHandler $dblogger, string $tipo,
@@ -900,10 +894,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/attivita/{pagina}', name: 'staff_avvisi_attivita', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiAttivita(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -984,10 +977,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/attivita/edit/{id}', name: 'staff_avvisi_attivita_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiAttivitaEdit(Request $request, TranslatorInterface $trans,
                                      MessageBusInterface $msg, BachecaUtil $bac,
                                      RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
@@ -1191,10 +1183,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/individuali/{pagina}', name: 'staff_avvisi_individuali', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiIndividuali(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -1259,10 +1250,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/individuali/edit/{id}', name: 'staff_avvisi_individuali_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiIndividualiEdit(Request $request, TranslatorInterface $trans,
                                         MessageBusInterface $msg, BachecaUtil $bac,
                                         LogHandler $dblogger, int $id): Response {
@@ -1402,10 +1392,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/avvisi/archivio/{pagina}', name: 'staff_avvisi_archivio', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function avvisiArchivio(Request $request, int $pagina): Response {
     // inizializza
     $dati = [];
@@ -1524,10 +1513,9 @@ class StaffController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/classe/{id}', name: 'staff_classe', requirements: ['id' => '\d+'], defaults: ['id' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function classeAjax(int $id): JsonResponse {
     $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
@@ -1551,10 +1539,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/autorizza/{data}/{pagina}', name: 'staff_studenti_autorizza', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'pagina' => '\d+'], defaults: ['data' => '0000-00-00', 'pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiAutorizza(Request $request, RegistroUtil $reg, StaffUtil $staff,
                                     string $data, int $pagina): Response {
     // inizializza variabili
@@ -1690,10 +1677,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/autorizza/entrata/{data}/{classe}/{alunno}', name: 'staff_studenti_autorizza_entrata', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'classe' => '\d+', 'alunno' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiAutorizzaEntrata(Request $request, RegistroUtil $reg,
                                            TranslatorInterface $trans, LogHandler $dblogger,
                                            string $data, int $classe, int $alunno): Response {
@@ -1862,10 +1848,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/autorizza/uscita/{data}/{classe}/{alunno}', name: 'staff_studenti_autorizza_uscita', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'classe' => '\d+', 'alunno' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiAutorizzaUscita(Request $request, RegistroUtil $reg,
                                           TranslatorInterface $trans, LogHandler $dblogger,
                                           string $data, int $classe, int $alunno): Response {
@@ -2052,10 +2037,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/deroghe/{pagina}', name: 'staff_studenti_deroghe', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiDeroghe(Request $request, int $pagina): Response {
     $dati = [];
     // recupera criteri dalla sessione
@@ -2135,10 +2119,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/deroghe/edit/{alunno}', name: 'staff_studenti_deroghe_edit', requirements: ['alunno' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiDerogheEdit(Request $request, LogHandler $dblogger, int $alunno): Response {
     // inizializza
     $label = null;
@@ -2204,10 +2187,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/situazione/{pagina}', name: 'staff_studenti_situazione', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiSituazione(Request $request, int $pagina): Response {
     $dati = [];
     // recupera criteri dalla sessione
@@ -2297,10 +2279,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/docenti/statistiche/{pagina}', name: 'staff_docenti_statistiche', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function docentiStatistiche(Request $request, TranslatorInterface $trans,
                                      StaffUtil $staff, PdfManager $pdf, int $pagina): Response {
     // recupera criteri dalla sessione
@@ -2410,10 +2391,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/password/{pagina}', name: 'staff_password', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function password(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = [];
@@ -2497,10 +2477,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/password/create/{tipo}/{username}', name: 'staff_password_create', requirements: ['tipo' => 'E|P'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function passwordCreate(Request $request, UserPasswordHasherInterface $hasher,
                                  StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
                                  PdfManager $pdf, MailerInterface $mailer, string $tipo,
@@ -2597,10 +2576,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/assenze/{data}/{classe}', name: 'staff_studenti_assenze', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'classe' => '\d+'], defaults: ['data' => '0000-00-00', 'classe' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiAssenze(Request $request, RegistroUtil $reg, LogHandler $dblogger,
                                   string $data, int $classe): Response {
     // inizializza variabili
@@ -2792,10 +2770,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/statistiche/{data}', name: 'staff_studenti_statistiche', requirements: ['data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['data' => '0000-00-00'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiStatistiche(Request $request, RegistroUtil $reg, StaffUtil $staff,
                                       string $data): Response {
     // inizializza variabili
@@ -2905,10 +2882,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/studenti/condotta/{pagina}', name: 'staff_studenti_condotta', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function studentiCondotta(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -2994,10 +2970,9 @@ class StaffController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/staff/docenti/cdc', name: 'staff_docenti_cdc', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function docentiCdc(Request $request): Response {
     // inizializza
     $dati = [];

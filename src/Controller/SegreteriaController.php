@@ -36,10 +36,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/assenze/{pagina}', name: 'segreteria_assenze', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function assenze(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = [];
@@ -117,10 +116,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/assenze/mostra/{alunno}', name: 'segreteria_assenze_mostra', requirements: ['alunno' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_ATA')]
   public function assenzeMostra(SegreteriaUtil $segr, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
@@ -151,10 +149,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/assenze/stampa/{alunno}', name: 'segreteria_assenze_stampa', requirements: ['alunno' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_ATA')]
   public function assenzeStampa(SegreteriaUtil $segr, PdfManager $pdf, int $alunno) {
     // controlla alunno
     $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
@@ -192,10 +189,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/scrutini/{pagina}', name: 'segreteria_scrutini', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function scrutini(Request $request, SegreteriaUtil $segr, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = [];
@@ -277,10 +273,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/scrutini/mostra/{alunno}/{periodo}/{scrutinio}', name: 'segreteria_scrutini_mostra', requirements: ['alunno' => '\d+', 'periodo' => 'A|P|S|F|G|R|X', 'scrutinio' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_ATA')]
   public function scrutiniMostra(SegreteriaUtil $segr, int $alunno, string $periodo,
                                  int $scrutinio): Response {
     // controlla alunno
@@ -333,10 +328,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/genitori/{pagina}', name: 'segreteria_genitori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function genitori(Request $request, int $pagina): Response {
     // recupera criteri dalla sessione
     $search = [];
@@ -413,10 +407,9 @@ class SegreteriaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/segreteria/genitori/edit/{alunno}', name: 'segreteria_genitori_edit', requirements: ['alunno' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function genitoriEdit(Request $request, int $alunno): Response {
     // controlla alunno
     $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);

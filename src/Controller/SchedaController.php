@@ -34,10 +34,9 @@ class SchedaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/scheda/voti/materia/{cattedra}/{alunno}/{periodo}', name: 'scheda_voti_materia', requirements: ['cattedra' => '\d+', 'alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function votiMateria(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
                               int $alunno, string $periodo): Response {
     // inizializza variabili
@@ -164,10 +163,9 @@ class SchedaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/scheda/note/{classe}/{inizio}/{fine}', name: 'scheda_note', requirements: ['classe' => '\d+', 'inizio' => '\d\d\d\d-\d\d-\d\d', 'fine' => '\d\d\d\d-\d\d-\d\d'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function note(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
     // inizializza variabili
     $info = null;

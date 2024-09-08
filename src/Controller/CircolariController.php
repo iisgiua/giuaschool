@@ -63,10 +63,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/edit/{id}', name: 'circolari_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function edit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                        CircolariUtil $circ, LogHandler $dblogger, int $id): Response {
     // inizializza
@@ -401,10 +400,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/delete/{id}', name: 'circolari_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function delete(LogHandler $dblogger, CircolariUtil $circ,
                          int $id): Response {
     $dir = $this->getParameter('dir_circolari').'/';
@@ -469,10 +467,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/gestione/{pagina}', name: 'circolari_gestione', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
   public function gestione(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -561,10 +558,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/publish/{pubblica}/{id}', name: 'circolari_publish', requirements: ['pubblica' => '0|1', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function publish(MessageBusInterface $msg, LogHandler $dblogger,
                           CircolariUtil $circ, int $pubblica, int $id): Response {
     // controllo circolare
@@ -645,10 +641,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/dettagli/gestione/{id}', name: 'circolari_dettagli_gestione', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function dettagliGestione(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -678,10 +673,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Documento inviato in risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/circolari/download/{id}/{doc}/{tipo}', name: 'circolari_download', requirements: ['id' => '\d+', 'doc' => '\d+', 'tipo' => 'V|D'], defaults: ['tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function download(CircolariUtil $circ, int $id, int $doc, string $tipo): Response {
     $dir = $this->getParameter('dir_circolari').'/';
     // controllo circolare
@@ -736,10 +730,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/circolari/genitori/{pagina}', name: 'circolari_genitori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function genitori(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
@@ -825,10 +818,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/circolari/dettagli/destinatari/{id}', name: 'circolari_dettagli_destinatari', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function dettagliDestinatari(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -857,10 +849,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_STAFF")
    */
   #[Route(path: '/circolari/dettagli/staff/{id}', name: 'circolari_dettagli_staff', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
   public function dettagliStaff(CircolariUtil $circ, int $id): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -892,10 +883,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/circolari/firma/{id}', name: 'circolari_firma', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function firma(CircolariUtil $circ, int $id): Response {
     // controllo circolare
     $circolare = $this->em->getRepository(\App\Entity\Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
@@ -930,10 +920,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/circolari/docenti/{pagina}', name: 'circolari_docenti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function docenti(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza
     $limite = 20;
@@ -1041,10 +1030,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/circolari/ata/{pagina}', name: 'circolari_ata', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function ata(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;
@@ -1143,10 +1131,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/circolari/classi/{classe}', name: 'circolari_classi', requirements: ['classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function classi(int $classe): Response {
     // inizializza
     $dati = null;
@@ -1174,10 +1161,9 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/circolari/firma/classe/{classe}/{id}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function firmaClasse(TranslatorInterface $trans, LogHandler $dblogger,
                               int $classe, int $id): Response {
     // controllo classe

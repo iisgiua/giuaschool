@@ -16,114 +16,104 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * App - dati per gestire l'uso di app o altri servizi esterni
  *
- * @ORM\Entity(repositoryClass="App\Repository\AppRepository")
- * @ORM\Table(name="gs_app")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="token", message="field.unique", entityClass="App\Entity\App")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_app')]
+#[ORM\Entity(repositoryClass: \App\Repository\AppRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'token', message: 'field.unique', entityClass: 'App\Entity\App')]
 class App implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per le istanze della classe
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $nome Nome dell'app
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\Length(min=3,max=255,minMessage="field.minlength",maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\Length(min: 3, max: 255, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $token Token univoco per l'app
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\Length(min=16,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[Assert\Length(min: 16, max: 128, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   private ?string $token = '';
 
   /**
    * @var bool $attiva Indica se l'app è attiva o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $attiva = false;
 
   /**
    * @var bool $css Indica se l'app deve caricare un proprio CSS o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $css = false;
 
   /**
    * @var string|null $notifica Tipo di notifica utilizzata dall'app [N=nessuna, E=email, G=Google, T=Telegram]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","E","G","T"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'E', 'G', 'T'], strict: true, message: 'field.choice')]
   private ?string $notifica = '';
 
   /**
    * @var string|null $download Estensione del file da scaricare, o null se nessun file è previsto
-   *
-   * @ORM\Column(type="string", length=64, nullable=true)
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: true)]
   private ?string $download = '';
 
   /**
    * @var string|null $abilitati Indica gli utenti abilitati all'uso dell'app [A=alunni,G=genitori,D=docenti,T=ata,N=nessuno]
    *
-   * @ORM\Column(type="string", length=4, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: 'string', length: 4, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $abilitati = '';
 
   /**
    * @var array|null $dati Lista di dati aggiuntivi necessari per le funzionalità dell'app
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
+  #[ORM\Column(type: 'array', nullable: true)]
   private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
    $this->creato = new \DateTime();
@@ -132,9 +122,8 @@ class App implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

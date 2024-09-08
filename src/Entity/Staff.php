@@ -14,20 +14,19 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Staff - entità
  *
- * @ORM\Entity(repositoryClass="App\Repository\StaffRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: \App\Repository\StaffRepository::class)]
 class Staff extends Docente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
   /**
    * @var Sede|null $sede La sede di riferimento per il ruolo di staff (se definita)
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $sede = null;
 
 

@@ -15,109 +15,100 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Cattedra - dati delle cattedre dei docenti
  *
- * @ORM\Entity(repositoryClass="App\Repository\CattedraRepository")
- * @ORM\Table(name="gs_cattedra")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_cattedra')]
+#[ORM\Entity(repositoryClass: \App\Repository\CattedraRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Cattedra implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la cattedra
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var bool $attiva Indica se la cattedra è attiva o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $attiva = true;
 
   /**
    * @var bool $supplenza Indica se la cattedra è una supplenza temporanea o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $supplenza = false;
 
   /**
    * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa (religione)]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","I","P","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'I', 'P', 'A'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'N';
 
   /**
    * @var Materia|null $materia Materia della cattedra
    *
-   * @ORM\ManyToOne(targetEntity="Materia")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Materia $materia = null;
 
   /**
    * @var Docente|null $docente Docente della cattedra
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Classe|null $classe Classe della cattedra
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var Alunno|null $alunno Alunno di una cattedra di sostegno
-   *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
   private ?Alunno $alunno = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -126,9 +117,8 @@ class Cattedra implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

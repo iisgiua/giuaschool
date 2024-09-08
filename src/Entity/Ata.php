@@ -16,39 +16,36 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Ata - Dati del personale ATA
  *
- * @ORM\Entity(repositoryClass="App\Repository\AtaRepository")
  *
- * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Ata")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: \App\Repository\AtaRepository::class)]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: 'App\Entity\Ata')]
 class Ata extends Utente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var string|null $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"A","T","C","U","D"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['A', 'T', 'C', 'U', 'D'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'A';
 
   /**
    * @var bool $segreteria Indica se il dipendente ATA ha accesso alle funzioni della segreteria
-   *
-   * @ORM\Column(name="segreteria", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'segreteria', type: 'boolean', nullable: false)]
   private bool $segreteria = false;
 
   /**
    * @var Sede|null $sede La sede di riferimento del dipendente ATA (se definita)
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $sede = null;
 
 

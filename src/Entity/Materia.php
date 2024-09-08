@@ -16,102 +16,94 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Materia - dati per le materie scolastiche
  *
- * @ORM\Entity(repositoryClass="App\Repository\MateriaRepository")
- * @ORM\Table(name="gs_materia")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="nome", message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_materia')]
+#[ORM\Entity(repositoryClass: \App\Repository\MateriaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'nome', message: 'field.unique')]
 class Materia implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la materia
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $nome Nome della materia
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $nomeBreve Nome breve della materia (non univoco)
    *
-   * @ORM\Column(name="nome_breve", type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'nome_breve', type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
 
   /**
    * @var string|null $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","R","S","C","E","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'R', 'S', 'C', 'E', 'U'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'N';
 
   /**
    * @var string|null $valutazione Tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","G","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'G', 'A'], strict: true, message: 'field.choice')]
   private ?string $valutazione = 'N';
 
   /**
    * @var bool $media Indica se la materia entra nel calcolo della media dei voti o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $media = true;
 
   /**
    * @var int $ordinamento Numero d'ordine per la visualizzazione della materia
-   *
-   * @ORM\Column(type="smallint", nullable=false)
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
   private int $ordinamento = 0;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -120,9 +112,8 @@ class Materia implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

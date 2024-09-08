@@ -18,92 +18,85 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Menu - dati per i menu dell'applicazione
  *
- * @ORM\Entity(repositoryClass="App\Repository\MenuRepository")
- * @ORM\Table(name="gs_menu", uniqueConstraints={@ORM\UniqueConstraint(columns={"selettore"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"selettore"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_menu')]
+#[ORM\UniqueConstraint(columns: ['selettore'])]
+#[ORM\Entity(repositoryClass: \App\Repository\MenuRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['selettore'], message: 'field.unique')]
 class Menu implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $selettore Nome identificativo usato per selezionare il menu
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $selettore = '';
 
   /**
    * @var string|null $nome Nome del menu (vuoto se sottomenu)
    *
-   * @ORM\Column(type="string", length=64, nullable=true)
    *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
-   * @var string|null $descrizione Descrizione del menu (vuota se sottomenu)
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
-   */
+    * @var string|null $descrizione Descrizione del menu (vuota se sottomenu)
+    *
+    *
+    */
+   #[ORM\Column(type: 'string', length: 255, nullable: true)]
+   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $descrizione = '';
 
   /**
-   * @var bool $mega Indica se utilizza la modalità mega menu
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   */
+    * @var bool $mega Indica se utilizza la modalità mega menu
+    */
+   #[ORM\Column(type: 'boolean', nullable: false)]
    private bool $mega = false;
 
   /**
-   * @var Collection|null $opzioni Lista delle opzioni del menu
-   *
-   * @ORM\OneToMany(targetEntity="MenuOpzione", mappedBy="menu")
-   */
+    * @var Collection|null $opzioni Lista delle opzioni del menu
+    */
+   #[ORM\OneToMany(targetEntity: \MenuOpzione::class, mappedBy: 'menu')]
    private ?Collection $opzioni = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -112,9 +105,8 @@ class Menu implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

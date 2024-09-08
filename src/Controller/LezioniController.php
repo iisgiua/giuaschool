@@ -28,10 +28,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/', name: 'lezioni', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function lezioni(): Response {
     if (!$this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
       // scelta classe
@@ -51,10 +50,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/classe/', name: 'lezioni_classe', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function classe(): Response
   {
       // lista cattedre
@@ -98,10 +96,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/argomenti/{cattedra}/{classe}', name: 'lezioni_argomenti', requirements: ['cattedra' => '\d+', 'classe' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function argomenti(Request $request, RegistroUtil $reg, int $cattedra,
                             int $classe): Response {
     // inizializza variabili
@@ -174,10 +171,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/argomenti/riepilogo/{cattedra}/{data}', name: 'lezioni_argomenti_riepilogo', requirements: ['cattedra' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['data' => '0000-00-00'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function argomentiRiepilogo(RegistroUtil $reg, int $cattedra, string $data): Response {
     // inizializza variabili
     $dati = null;
@@ -246,10 +242,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/note/{cattedra}/{classe}', name: 'lezioni_note', requirements: ['cattedra' => '\d+', 'classe' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function note(Request $request, StaffUtil $staff, int $cattedra, int $classe): Response {
     // inizializza variabili
     $dati = null;
@@ -318,10 +313,9 @@ class LezioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/argomenti/programma/{cattedra}', name: 'lezioni_argomenti_programma', requirements: ['cattedra' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function argomentiProgramma(RegistroUtil $reg, int $cattedra): Response {
     // inizializza
     $info = null;

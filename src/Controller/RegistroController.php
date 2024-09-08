@@ -59,10 +59,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}', name: 'lezioni_registro_firme', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function firme(Request $request, RegistroUtil $reg, BachecaUtil $bac,
                         int $cattedra, int $classe, string $data, string $vista): Response {
     // inizializza variabili
@@ -214,10 +213,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/add/{cattedra}/{classe}/{data}/{ora}', name: 'lezioni_registro_add', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function add(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $cattedra,
                       int $classe, string $data, int $ora): Response {
     // inizializza
@@ -483,10 +481,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/edit/{cattedra}/{classe}/{data}/{ora}', name: 'lezioni_registro_edit', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function edit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                        LogHandler $dblogger, int $cattedra, int $classe, string $data,
                        int $ora): Response {
@@ -784,10 +781,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/delete/{classe}/{data}/{ora}', name: 'lezioni_registro_delete', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function delete(TranslatorInterface $trans, RegistroUtil $reg,
                          LogHandler $dblogger, int $classe, string $data, int $ora): Response {
     // controlla classe
@@ -1004,10 +1000,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/annotazione/edit/{classe}/{data}/{id}', name: 'lezioni_registro_annotazione_edit', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'id' => '\d+'], defaults: ['id' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function annotazioneEdit(Request $request, TranslatorInterface $trans,
                                   MessageBusInterface $msg, RegistroUtil $reg, BachecaUtil $bac,
                                   LogHandler $dblogger, int $classe, string $data,
@@ -1229,10 +1224,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function annotazioneDelete(RegistroUtil $reg, BachecaUtil $bac,
                                     LogHandler $dblogger, int $id): Response {
     // controlla annotazione
@@ -1313,10 +1307,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/nota/edit/{cattedra}/{classe}/{data}/{id}/{tipo}', name: 'lezioni_registro_nota_edit', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'id' => '\d+', 'tipo' => 'N|P'], defaults: ['id' => 0, 'tipo' => 'N'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function notaEdit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                            LogHandler $dblogger, int $cattedra, int $classe, string $data,
                            int $id, string $tipo): Response {
@@ -1513,10 +1506,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/nota/delete/{id}', name: 'lezioni_registro_nota_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function notaDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository(\App\Entity\Nota::class)->find($id);
@@ -1563,10 +1555,9 @@ class RegistroController extends BaseController
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/registro/nota/cancel/{id}', name: 'lezioni_registro_nota_cancel', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function notaCancel(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla nota
     $nota = $this->em->getRepository(\App\Entity\Nota::class)->find($id);

@@ -16,138 +16,129 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Uscita - dati per la gestione delle uscite anticipate degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\UscitaRepository")
- * @ORM\Table(name="gs_uscita", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_uscita')]
+#[ORM\UniqueConstraint(columns: ['data', 'alunno_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\UscitaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['data', 'alunno'], message: 'field.unique')]
 class Uscita implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'uscita anticipata
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime|null $data Data dell'uscita anticipata
    *
-   * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'date', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $data = null;
 
   /**
    * @var \DateTime|null $ora Ora dell'uscita anticipata
    *
-   * @ORM\Column(type="time", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'time', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $ora = null;
 
   /**
    * @var string|null $note Note informative sull'uscita anticipata
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $note = '';
 
   /**
    * @var bool $valido Indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
-   *
-   * @ORM\Column(name="valido", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'valido', type: 'boolean', nullable: false)]
   private bool $valido = false;
 
   /**
    * @var string|null $motivazione Motivazione dell'assenza
    *
-   * @ORM\Column(type="string", length=1024, nullable=true)
    *
-   * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 1024, nullable: true)]
+  #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $motivazione = '';
 
   /**
    * @var \DateTime|null $giustificato Data della giustificazione
    *
-   * @ORM\Column(type="date", nullable=true)
    *
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'date', nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $giustificato = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'uscita anticipata
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Docente|null $docente Docente che autorizza l'uscita anticipata
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteGiustifica Docente che giustifica/autorizza l'uscita anticipata
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $docenteGiustifica = null;
 
   /**
    * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'uscita anticipata
-   *
-   * @ORM\ManyToOne(targetEntity="Utente")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
   private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -156,9 +147,8 @@ class Uscita implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

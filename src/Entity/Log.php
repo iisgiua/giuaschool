@@ -15,143 +15,136 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Log - dati per il log degli eventi
  *
- * @ORM\Entity(repositoryClass="App\Repository\LogRepository")
- * @ORM\Table(name="gs_log")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_log')]
+#[ORM\Entity(repositoryClass: \App\Repository\LogRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Log implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per il log
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var Utente|null $utente Utente connesso
    *
-   * @ORM\ManyToOne(targetEntity="Utente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Utente $utente = null;
 
   /**
    * @var string|null $username Username dell'utente connesso
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $username = '';
 
   /**
    * @var string|null $ruolo Ruolo dell'utente connesso
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $ruolo = '';
 
   /**
    * @var string|null $alias Username dell'utente reale se l'utente è un alias, altrimenti null
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $alias = '';
 
   /**
    * @var string|null $ip Indirizzo IP dell'utente connesso
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $ip = '';
 
   /**
    * @var string|null $origine Controller che ha generato il log
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $origine = '';
 
   /**
    * @var string|null $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"A","C","U","D"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['A', 'C', 'U', 'D'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'A';
 
   /**
    * @var string|null $categoria Categoria dell'azione registrata nel log
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $categoria = '';
 
   /**
    * @var string|null $azione Azione registrata nel log
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $azione = '';
 
   /**
    * @var array|null $dati Lista di dati da memorizzare nel log
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
+  #[ORM\Column(type: 'array', nullable: true)]
   private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -160,9 +153,8 @@ class Log implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

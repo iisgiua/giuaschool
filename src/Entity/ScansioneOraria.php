@@ -15,101 +15,93 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ScansioneOraria - dati della scansione oraria
  *
- * @ORM\Entity(repositoryClass="App\Repository\ScansioneOrariaRepository")
- * @ORM\Table(name="gs_scansione_oraria")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_scansione_oraria')]
+#[ORM\Entity(repositoryClass: \App\Repository\ScansioneOrariaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class ScansioneOraria implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la scansione oraria
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\Choice(choices={0,1,2,3,4,5,6}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[Assert\Choice(choices: [0, 1, 2, 3, 4, 5, 6], strict: true, message: 'field.choice')]
   private int $giorno = 0;
 
   /**
    * @var int $ora Numero dell'ora di lezione [1,2,...]
-   *
-   * @ORM\Column(type="smallint", nullable=false)
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
   private int $ora = 1;
 
   /**
    * @var \DateTime|null $inizio Inizio dell'ora di lezione
    *
-   * @ORM\Column(type="time", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'time', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $inizio = null;
 
   /**
    * @var \DateTime|null $fine Fine dell'ora di lezione
    *
-   * @ORM\Column(type="time", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'time', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $fine = null;
 
   /**
    * @var float $durata Durata dell'ora di lezione (intesa come unità oraria)
-   *
-   * @ORM\Column(type="float", nullable=false)
    */
+  #[ORM\Column(type: 'float', nullable: false)]
   private float $durata = 1.0;
 
   /**
    * @var Orario|null $orario Orario a cui appartiene la scansione oraria
    *
-   * @ORM\ManyToOne(targetEntity="Orario")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Orario::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Orario $orario = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -118,9 +110,8 @@ class ScansioneOraria implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

@@ -18,258 +18,240 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Utente - dati degli utenti
  *
- * @ORM\Entity(repositoryClass="App\Repository\UtenteRepository")
- * @ORM\Table(name="gs_utente")
- * @ORM\HasLifecycleCallbacks
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="ruolo", type="string", length=3)
- * @ORM\DiscriminatorMap({"UTE"="Utente","AMM"="Amministratore","ATA"="Ata",
- *    "DOC"="Docente","STA"="Staff","PRE"="Preside","ALU"="Alunno","GEN"="Genitore"})
  *
- * @UniqueEntity(fields="username", message="field.unique", entityClass="App\Entity\Utente")
- * @UniqueEntity(fields="email", message="field.unique", entityClass="App\Entity\Utente")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_utente')]
+#[ORM\Entity(repositoryClass: \App\Repository\UtenteRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'ruolo', type: 'string', length: 3)]
+#[ORM\DiscriminatorMap(['UTE' => 'Utente', 'AMM' => 'Amministratore', 'ATA' => 'Ata', 'DOC' => 'Docente', 'STA' => 'Staff', 'PRE' => 'Preside', 'ALU' => 'Alunno', 'GEN' => 'Genitore'])]
+#[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: 'App\Entity\Utente')]
+#[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: 'App\Entity\Utente')]
 class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable, \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per il generico utente
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $username Nome utente univoco
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\Length(min=3,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
-   * @Assert\Regex(pattern="/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/",message="field.regex")
    */
+  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[Assert\Length(min: 3, max: 128, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
+  #[Assert\Regex(pattern: '/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/', message: 'field.regex')]
   private ?string $username = '';
 
   /**
    * @var string|null $password Password cifrata dell'utente
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $password = '';
 
   /**
    * @var string|null $passwordNonCifrata Password in chiaro dell'utente (dato non persistente)
-   *
-   * @Assert\Length(min=8,max=72,minMessage="field.minlength",maxMessage="field.maxlength")
    */
+  #[Assert\Length(min: 8, max: 72, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   private ?string $passwordNonCifrata = '###NOPASSWORD###';
 
   /**
    * @var string|null $email Indirizzo email dell'utente
    *
-   * @ORM\Column(type="string", length=255, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
    */
+  #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
+  #[Assert\Email(message: 'field.email')]
   private ?string $email = '';
 
   /**
    * @var string|null $token Token generato per la procedura di attivazione o di recupero password
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: true)]
   private ?string $token = '';
 
   /**
    * @var \DateTime|null $tokenCreato Data/ora di creazione del token
-   *
-   * @ORM\Column(name="token_creato", type="datetime", nullable=true)
    */
+  #[ORM\Column(name: 'token_creato', type: 'datetime', nullable: true)]
   private ?\DateTime $tokenCreato = null;
 
   /**
    * @var string|null $prelogin Codice di pre-login
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: true)]
   private ?string $prelogin = '';
 
   /**
    * @var \DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
-   *
-   * @ORM\Column(name="prelogin_creato", type="datetime", nullable=true)
    */
+  #[ORM\Column(name: 'prelogin_creato', type: 'datetime', nullable: true)]
   private ?\DateTime $preloginCreato = null;
 
   /**
    * @var bool $abilitato Indica se l'utente è abilitato al login o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $abilitato = false;
 
   /**
    * @var bool $spid Indica se l'utente è abilitato all'accesso SPID
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $spid = false;
 
   /**
    * @var \DateTime|null $ultimoAccesso Data/ora dell'ultimo accesso
-   *
-   * @ORM\Column(name="ultimo_accesso", type="datetime", nullable=true)
    */
+  #[ORM\Column(name: 'ultimo_accesso', type: 'datetime', nullable: true)]
   private ?\DateTime $ultimoAccesso = null;
 
   /**
    * @var string|null $otp Codice segreto per accesso con OTP (se vuoto non è attivato)
-   *
-   * @ORM\Column(type="string", length=128, nullable=true)
    */
+  #[ORM\Column(type: 'string', length: 128, nullable: true)]
   private ?string $otp = '';
 
   /**
    * @var string|null $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
-   *
-   * @ORM\Column(name="ultimo_otp", type="string", length=128, nullable=true)
    */
+  #[ORM\Column(name: 'ultimo_otp', type: 'string', length: 128, nullable: true)]
   private ?string $ultimoOtp = '';
 
   /**
    * @var string|null $nome Nome dell'utente
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $cognome Cognome dell'utente
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $cognome = '';
 
   /**
    * @var string|null $sesso Sesso dell'utente [M,F]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"M","F"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['M', 'F'], strict: true, message: 'field.choice')]
   private ?string $sesso = 'M';
 
   /**
    * @var \DateTime|null $dataNascita Data di nascita dell'utente
    *
-   * @ORM\Column(name="data_nascita", type="date", nullable=true)
    *
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(name: 'data_nascita', type: 'date', nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $dataNascita = null;
 
   /**
    * @var string|null $comuneNascita Comune di nascita dell'utente
    *
-   * @ORM\Column(name="comune_nascita", type="string", length=64, nullable=true)
    *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'comune_nascita', type: 'string', length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $comuneNascita = '';
 
   /**
    * @var string|null $provinciaNascita Provincia del comune di nascita dell'utente
    *
-   * @ORM\Column(name="provincia_nascita", type="string", length=2, nullable=true)
    *
-   * @Assert\Length(max=2,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'provincia_nascita', type: 'string', length: 2, nullable: true)]
+  #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
   private ?string $provinciaNascita = '';
 
   /**
    * @var string|null $codiceFiscale Codice fiscale dell'utente
    *
-   * @ORM\Column(name="codice_fiscale", type="string", length=16, nullable=true)
    *
-   * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'codice_fiscale', type: 'string', length: 16, nullable: true)]
+  #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private ?string $codiceFiscale = '';
 
   /**
    * @var string|null $citta Città di residenza dell'utente
    *
-   * @ORM\Column(type="string", length=32, nullable=true)
    *
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: true)]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $citta = '';
 
   /**
    * @var string|null $provincia Provincia della città di residenza dell'utente
    *
-   * @ORM\Column(type="string", length=2, nullable=true)
    *
-   * @Assert\Length(max=2,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 2, nullable: true)]
+  #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
   private ?string $provincia = '';
 
   /**
    * @var string|null $indirizzo Indirizzo di residenza dell'utente
    *
-   * @ORM\Column(type="string", length=64, nullable=true)
    *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $indirizzo = '';
 
   /**
    * @var array|null $numeriTelefono Lista di numeri di telefono dell'utente
-   *
-   * @ORM\Column(name="numeri_telefono", type="array", nullable=true)
    */
+  #[ORM\Column(name: 'numeri_telefono', type: 'array', nullable: true)]
   private ?array $numeriTelefono = [];
 
   /**
    * @var array|null $notifica Lista di parametri di notifica per i servizi esterni
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
+  #[ORM\Column(type: 'array', nullable: true)]
   private ?array $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
 
   /**
    * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
-   *
-   * @ORM\Column(type="simple_array", nullable=true)
    */
+  #[ORM\Column(type: 'simple_array', nullable: true)]
   private ?array $rappresentante = [''];
 
   /**
@@ -286,12 +268,10 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -300,9 +280,8 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

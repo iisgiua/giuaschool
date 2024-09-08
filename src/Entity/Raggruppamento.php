@@ -19,73 +19,68 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Raggruppamento - dati di un raggruppamento di alunni di varie classi (gruppo interclasse)
- * 
- * @ORM\Entity(repositoryClass="App\Repository\RaggruppamentoRepository")
- * @ORM\Table(name="gs_raggruppamento", uniqueConstraints={@ORM\UniqueConstraint(columns={"nome"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"nome"}, message="field.unique")
+ *
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_raggruppamento')]
+#[ORM\UniqueConstraint(columns: ['nome'])]
+#[ORM\Entity(repositoryClass: \App\Repository\RaggruppamentoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['nome'], message: 'field.unique')]
 class Raggruppamento implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
- 
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome del raggruppamento di alunni 
+   * @var string $nome Nome del raggruppamento di alunni
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private string $nome = '';
 
  /**
    * @var Collection|null $alunni Alunni da cui è composto il raggruppamento
    *
-   * @ORM\ManyToMany(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinTable(name: 'gs_raggruppamento_alunno')]
   #[ORM\JoinColumn(name: 'raggruppamento_id', nullable: false)]
   #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Collection $alunni = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -94,9 +89,8 @@ class Raggruppamento implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

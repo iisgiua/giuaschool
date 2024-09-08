@@ -51,10 +51,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/scrutinio/proposte/{cattedra}/{classe}/{periodo}', name: 'lezioni_scrutinio_proposte', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => 'P|S|F|G|R|X'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function proposte(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                  LogHandler $dblogger, int $cattedra, int $classe,
                                  string $periodo): Response {
@@ -284,10 +283,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/{classe}/{stato}/{posizione}', name: 'coordinatore_scrutinio', requirements: ['classe' => '\d+', 'stato' => 'N|C|\d', 'posizione' => '\d+'], defaults: ['classe' => 0, 'stato' => 0, 'posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinio(Request $request, ScrutinioUtil $scr, int $classe, string $stato,
                             int $posizione): Response {
     // inizializza variabili
@@ -400,10 +398,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/proposte/{classe}/{materia}/{periodo}/{posizione}', name: 'coordinatore_scrutinio_proposte', requirements: ['classe' => '\d+', 'materia' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioProposte(Request $request, TranslatorInterface $trans,
                                     ScrutinioUtil $scr, LogHandler $dblogger,
                                     int $classe, int $materia, string $periodo,
@@ -563,10 +560,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/condotta/{classe}/{periodo}/{alunno}/{posizione}', name: 'coordinatore_scrutinio_condotta', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioCondotta(Request $request, TranslatorInterface $trans,
                                     ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
                                     int $posizione): Response {
@@ -688,10 +684,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/voti/{classe}/{materia}/{periodo}/{alunno}/{posizione}', name: 'coordinatore_scrutinio_voti', requirements: ['classe' => '\d+', 'materia' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioVoti(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                 int $classe, int $materia, string $periodo, int $alunno,
                                 int $posizione) {
@@ -838,10 +833,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/lezioni/scrutinio/svolto/{cattedra}/{classe}/{periodo}', name: 'lezioni_scrutinio_svolto', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => 'P|S|F|G|R|X|A'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => '0'], methods: 'GET')]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioSvolto(Request $request, ScrutinioUtil $scr, int $cattedra, int $classe,
                                   string $periodo): Response {
     // inizializza variabili
@@ -940,10 +934,9 @@ class ScrutinioController extends BaseController {
     *
     * @return Response Pagina di risposta
     *
-    *
-    * @IsGranted("ROLE_DOCENTE")
     */
    #[Route(path: '/coordinatore/scrutinio/esito/{alunno}/{periodo}/{classe}/{posizione}', name: 'coordinatore_scrutinio_esito', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'posizione' => '\d+', 'classe' => '\d+'], defaults: ['posizione' => 0, 'classe' => 0], methods: ['GET', 'POST'])]
+   #[IsGranted('ROLE_DOCENTE')]
    public function scrutinioEsito(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                   int $alunno, string $periodo, int $classe,
                                   int $posizione): Response {
@@ -1190,10 +1183,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/credito/{alunno}/{periodo}/{classe}/{posizione}', name: 'coordinatore_scrutinio_credito', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'posizione' => '\d+', 'classe' => '\d+'], defaults: ['posizione' => 0, 'classe' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioCredito(Request $request, ScrutinioUtil $scr, int $alunno,
                                    string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
@@ -1335,10 +1327,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/certificazione/{alunno}/{periodo}/{classe}/{posizione}', name: 'coordinatore_scrutinio_certificazione', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'posizione' => '\d+', 'classe' => '\d+'], defaults: ['posizione' => 0, 'classe' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioCertificazione(Request $request, ScrutinioUtil $scr, int $alunno,
                                           string $periodo, int $classe, int $posizione): Response {
     // inizializza variabili
@@ -1549,10 +1540,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/debiti/{alunno}/{periodo}/{posizione}', name: 'coordinatore_scrutinio_debiti', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioDebiti(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr,
                                   int $alunno, string $periodo, int $posizione): Response {
     // inizializza variabili
@@ -1655,10 +1645,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/carenze/{alunno}/{periodo}/{posizione}', name: 'coordinatore_scrutinio_carenze', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioCarenze(Request $request, ScrutinioUtil $scr, int $alunno,
                                    string $periodo, int $posizione): Response {
     // inizializza variabili
@@ -1745,10 +1734,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/verbale/{classe}/{periodo}/{step}', name: 'coordinatore_scrutinio_verbale', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'step' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function verbale(Request $request, ScrutinioUtil $scr, int $classe, string $periodo,
                           int $step): Response {
     // inizializza variabili
@@ -1829,10 +1817,9 @@ class ScrutinioController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/edcivica/{classe}/{periodo}/{alunno}/{posizione}', name: 'coordinatore_scrutinio_edcivica', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F|G|R|X', 'alunno' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioEdcivica(Request $request, TranslatorInterface $trans,
                                     ScrutinioUtil $scr, int $classe, string $periodo, int $alunno,
                                     int $posizione): Response {
@@ -1955,10 +1942,9 @@ class ScrutinioController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/scrutinio/aggiorna/{scrutinio}', name: 'coordinatore_scrutinio_aggiorna', requirements: ['scrutinio' => '\d+'], methods: ['POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function scrutinioAggiorna(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
     $risposta = ['status' => 'ok'];
     // controllo scrutinio

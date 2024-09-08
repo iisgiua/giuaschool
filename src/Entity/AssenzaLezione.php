@@ -16,77 +16,71 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * AssenzaLezione - dati per gestire le ore di assenza degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\AssenzaLezioneRepository")
- * @ORM\Table(name="gs_assenza_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"alunno_id","lezione_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"alunno","lezione"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_assenza_lezione')]
+#[ORM\UniqueConstraint(columns: ['alunno_id', 'lezione_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\AssenzaLezioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['alunno', 'lezione'], message: 'field.unique')]
 class AssenzaLezione implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'assenza della lezione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Lezione|null $lezione Lezione a cui si riferisce l'assenza
    *
-   * @ORM\ManyToOne(targetEntity="Lezione")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Lezione::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Lezione $lezione = null;
 
   /**
    * @var float $ore Ore di assenza dell'alunno alla lezione
-   *
-   * @ORM\Column(type="float", nullable=false)
    */
+  #[ORM\Column(type: 'float', nullable: false)]
   private float $ore = 0;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -95,9 +89,8 @@ class AssenzaLezione implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

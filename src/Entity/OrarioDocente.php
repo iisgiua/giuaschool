@@ -15,84 +15,77 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * OrarioDocente - dati per l'orario personale dei docenti
  *
- * @ORM\Entity(repositoryClass="App\Repository\OrarioDocenteRepository")
- * @ORM\Table(name="gs_orario_docente")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_orario_docente')]
+#[ORM\Entity(repositoryClass: \App\Repository\OrarioDocenteRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class OrarioDocente implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'orario del docente
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var Orario|null $orario Orario a cui appartiene l'orario del docente
    *
-   * @ORM\ManyToOne(targetEntity="Orario")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Orario::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Orario $orario = null;
 
   /**
    * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\Choice(choices={0,1,2,3,4,5,6}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[Assert\Choice(choices: [0, 1, 2, 3, 4, 5, 6], strict: true, message: 'field.choice')]
   private int $giorno = 0;
 
   /**
    * @var int $ora Numero dell'ora di lezione [1,2,...]
-   *
-   * @ORM\Column(type="smallint", nullable=false)
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
   private int $ora = 0;
 
   /**
    * @var Cattedra|null $cattedra Cattedra relativa all'orario indicato
    *
-   * @ORM\ManyToOne(targetEntity="Cattedra")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Cattedra::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Cattedra $cattedra = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -101,9 +94,8 @@ class OrarioDocente implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

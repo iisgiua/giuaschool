@@ -49,10 +49,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore', name: 'coordinatore', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function coordinatore(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
@@ -79,10 +78,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/classe/', name: 'coordinatore_classe', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function classe(): Response {
     // lista classi coordinatore
     $classi = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
@@ -136,10 +134,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/note/{classe}/{tipo}', name: 'coordinatore_note', requirements: ['classe' => '\d+', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function note(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
@@ -200,10 +197,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/assenze/{classe}/{tipo}', name: 'coordinatore_assenze', requirements: ['classe' => '\d+', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function assenze(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
@@ -265,10 +261,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/voti/{classe}/{periodo}/{tipo}', name: 'coordinatore_voti', requirements: ['classe' => '\d+', 'periodo' => '1|2|3|0', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'periodo' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function voti(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
                        int $periodo, string $tipo): Response {
     // inizializza variabili
@@ -348,10 +343,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/situazione/{classe}', name: 'coordinatore_situazione', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function situazione(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
@@ -400,10 +394,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/situazione/alunno/{alunno}/{tipo}/{formato}', name: 'coordinatore_situazione_alunno', requirements: ['alunno' => '\d+', 'tipo' => 'V|S|A|N|O|T', 'formato' => 'H|P'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function situazioneAlunno(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
                                    string $formato): Response {
     // inizializza variabili
@@ -476,10 +469,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/avvisi/{classe}/{pagina}', name: 'coordinatore_avvisi', requirements: ['classe' => '\d+', 'pagina' => '\d+'], defaults: ['classe' => 0, 'pagina' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisi(BachecaUtil $bac, int $classe, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -544,10 +536,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/avvisi/edit/{classe}/{id}', name: 'coordinatore_avviso_edit', requirements: ['classe' => '\d+', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                              BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
                              int $classe, int $id): Response {
@@ -750,10 +741,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/avvisi/dettagli/{classe}/{id}', name: 'coordinatore_avviso_dettagli', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisoDettagli(BachecaUtil $bac, int $classe, int $id): Response {
     // inizializza
     $dati = null;
@@ -800,10 +790,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/avvisi/delete/{classe}/{id}', name: 'coordinatore_avviso_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisoDelete(LogHandler $dblogger, BachecaUtil $bac,
                                RegistroUtil $reg, int $classe, int $id): Response {
     // controllo avviso
@@ -889,10 +878,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/presenze/{classe}/{pagina}', name: 'coordinatore_presenze', requirements: ['classe' => '\d+', 'pagina' => '\d+'], defaults: ['classe' => 0, 'pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function presenze(Request $request, int $classe, int $pagina): Response {
     // init
     $dati = [];
@@ -997,10 +985,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/presenze/edit/{id}/{classe}', name: 'coordinatore_presenze_edit', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function presenzeEdit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                                LogHandler $dblogger, int $id, int $classe): Response {
     // init
@@ -1095,10 +1082,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/presenze/delete/{id}/{classe}', name: 'coordinatore_presenze_delete', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function presenzeDelete(RegistroUtil $reg, LogHandler $dblogger, int $id,
                                  int $classe): Response {
     // controlla presenza
@@ -1155,10 +1141,9 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/coordinatore/presenze/add/{classe}', name: 'coordinatore_presenze_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function presenzeAdd(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                               LogHandler $dblogger, int $classe): Response {
     // init

@@ -15,78 +15,71 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * OsservazioneClasse - dati per le osservazioni sulla classe riportate sul registro
  *
- * @ORM\Entity(repositoryClass="App\Repository\OsservazioneClasseRepository")
- * @ORM\Table(name="gs_osservazione")
- * @ORM\HasLifecycleCallbacks
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="tipo", type="string", length=1)
- * @ORM\DiscriminatorMap({"C"="OsservazioneClasse", "A"="OsservazioneAlunno"})
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_osservazione')]
+#[ORM\Entity(repositoryClass: \App\Repository\OsservazioneClasseRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'tipo', type: 'string', length: 1)]
+#[ORM\DiscriminatorMap(['C' => 'OsservazioneClasse', 'A' => 'OsservazioneAlunno'])]
 class OsservazioneClasse implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'osservazione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime $data Data dell'osservazione
    *
-   * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'date', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $data = null;
 
   /**
    * @var string|null $testo Testo dell'osservazione
-   *
-   * @ORM\Column(type="text", nullable=false)
    */
+  #[ORM\Column(type: 'text', nullable: false)]
   private ?string $testo = '';
 
   /**
    * @var Cattedra $cattedra Cattedra del docente che inserisce l'osservazione
    *
-   * @ORM\ManyToOne(targetEntity="Cattedra")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Cattedra::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Cattedra $cattedra = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -95,9 +88,8 @@ class OsservazioneClasse implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

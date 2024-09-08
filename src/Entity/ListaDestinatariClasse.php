@@ -16,84 +16,77 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ListaDestinatariClasse - dati per la gestione dell'associazione tra documento e classe
  *
- * @ORM\Entity(repositoryClass="App\Repository\ListaDestinatariClasseRepository")
- * @ORM\Table(name="gs_lista_destinatari_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"lista_destinatari_id","classe_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"listaDestinatari","classe"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_lista_destinatari_classe')]
+#[ORM\UniqueConstraint(columns: ['lista_destinatari_id', 'classe_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\ListaDestinatariClasseRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['listaDestinatari', 'classe'], message: 'field.unique')]
 class ListaDestinatariClasse implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari a cui ci si riferisce
    *
-   * @ORM\ManyToOne(targetEntity="listaDestinatari")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \listaDestinatari::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?ListaDestinatari $listaDestinatari = null;
 
   /**
    * @var Classe|null $classe Classe in cui deve essere letto l'avviso/circolare/documento
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var \DateTime|null $letto Data e ora di lettura dell'avviso/circolare/documento
-   *
-   * @ORM\Column(type="datetime", nullable=true)
    */
+  #[ORM\Column(type: 'datetime', nullable: true)]
   private ?\DateTime $letto = null;
 
   /**
    * @var \DateTime|null $firmato Data e ora di firma per presa visione dell'avviso/circolare/documento
-   *
-   * @ORM\Column(type="datetime", nullable=true)
    */
+  #[ORM\Column(type: 'datetime', nullable: true)]
   private ?\DateTime $firmato = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -102,9 +95,8 @@ class ListaDestinatariClasse implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

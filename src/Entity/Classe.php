@@ -14,125 +14,118 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Classe - dati delle classi o di gruppi interni alla classe 
+ * Classe - dati delle classi o di gruppi interni alla classe
  *
- * @ORM\Entity(repositoryClass="App\Repository\ClasseRepository")
- * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione","gruppo"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"anno","sezione","gruppo"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_classe')]
+#[ORM\UniqueConstraint(columns: ['anno', 'sezione', 'gruppo'])]
+#[ORM\Entity(repositoryClass: \App\Repository\ClasseRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['anno', 'sezione', 'gruppo'], message: 'field.unique')]
 class Classe implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la classe
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var int $anno Anno della classe
    *
-   * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\Choice(choices={1,2,3,4,5}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[Assert\Choice(choices: [1, 2, 3, 4, 5], strict: true, message: 'field.choice')]
   private int $anno = 1;
 
   /**
    * @var string|null $sezione Sezione della classe
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $sezione = 'A';
 
    /**
    * @var string|null $gruppo Nome del gruppo classe; stringa vuota per l'intera classe o nome per un sottinsiemi di alunni
    *
-   * @ORM\Column(type="string", length=64, nullable=true)
    *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $gruppo = '';
 
   /**
    * @var int $oreSettimanali Numero di ore settimanali della classe
    *
-   * @ORM\Column(name="ore_settimanali", type="smallint", nullable=false)
    *
-   * @Assert\Positive(message="field.positive")
    */
+  #[ORM\Column(name: 'ore_settimanali', type: 'smallint', nullable: false)]
+  #[Assert\Positive(message: 'field.positive')]
   private int $oreSettimanali = 0;
 
   /**
    * @var Sede|null $sede Sede a cui appartiene la classe
    *
-   * @ORM\ManyToOne(targetEntity="Sede")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Sede $sede = null;
 
   /**
    * @var Corso|null $corso Corso a cui appartiene classe
    *
-   * @ORM\ManyToOne(targetEntity="Corso")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Corso::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Corso $corso = null;
 
   /**
    * @var Docente $coordinatore Coordinatore di classe
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $coordinatore = null;
 
   /**
    * @var Docente $segretario Segretario del consiglio di classe
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $segretario = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -141,9 +134,8 @@ class Classe implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

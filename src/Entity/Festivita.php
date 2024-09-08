@@ -15,84 +15,77 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Festivita - entità
  *
- * @ORM\Entity(repositoryClass="App\Repository\FestivitaRepository")
- * @ORM\Table(name="gs_festivita")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_festivita')]
+#[ORM\Entity(repositoryClass: \App\Repository\FestivitaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Festivita implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la festività
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime|null $data Data della festività
    *
-   * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: 'date', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?\DateTime $data = null;
 
   /**
    * @var string|null $descrizione Descrizione della festività
    *
-   * @ORM\Column(type="string", length=128, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $descrizione = '';
 
   /**
    * @var string|null $tipo Tipo di festività [F=festivo, A=assemblea di Istituto]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"F","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['F', 'A'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'F';
 
   /**
    * @var Sede|null $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $sede = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -101,9 +94,8 @@ class Festivita implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

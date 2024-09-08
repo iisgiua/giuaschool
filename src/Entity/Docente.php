@@ -15,36 +15,33 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Docente - dati dei docenti
  *
- * @ORM\Entity(repositoryClass="App\Repository\DocenteRepository")
  *
- * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Docente")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: \App\Repository\DocenteRepository::class)]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: 'App\Entity\Docente')]
 class Docente extends Utente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var bool $responsabileBes Indica se il docente ha accesso alle funzioni di responsabile BES
-   *
-   * @ORM\Column(name="responsabile_bes", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'responsabile_bes', type: 'boolean', nullable: false)]
   private bool $responsabileBes = false;
 
   /**
    * @var Sede|null $responsabileBesSede Sede di riferimento per il responsabile BES (se definita)
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $responsabileBesSede = null;
 
   /**
    * @var bool $rspp Indica se il docente è il responsabile della sicurezza
-   * @ORM\Column(name="rspp", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'rspp', type: 'boolean', nullable: false)]
   private bool $rspp = false;
 
 

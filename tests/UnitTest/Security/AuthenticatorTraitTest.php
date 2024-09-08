@@ -192,9 +192,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
 
   /**
    * Test di utente con profilo unico.
-   *
-   * @dataProvider profiliProvider
    */
+  #[\PHPUnit\Framework\Attributes\DataProvider('profiliProvider')]
   public function testProfili(array $utenti, string $risposta, array $lista): void {
     // init
     $this->logs = [];

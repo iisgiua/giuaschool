@@ -16,107 +16,98 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Esito - dati per l'esito degli scrutini di un alunno
  *
- * @ORM\Entity(repositoryClass="App\Repository\EsitoRepository")
- * @ORM\Table(name="gs_esito", uniqueConstraints={@ORM\UniqueConstraint(columns={"scrutinio_id","alunno_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"scrutinio","alunno"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_esito')]
+#[ORM\UniqueConstraint(columns: ['scrutinio_id', 'alunno_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\EsitoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['scrutinio', 'alunno'], message: 'field.unique')]
 class Esito implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'esito
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
-   * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","N","S","R","L","E","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: true)]
+  #[Assert\Choice(choices: ['A', 'N', 'S', 'R', 'L', 'E', 'X'], strict: true, message: 'field.choice')]
   private ?string $esito = null;
 
   /**
    * @var float|null $media Media dei voti
-   *
-   * @ORM\Column(type="float", nullable=true)
    */
+  #[ORM\Column(type: 'float', nullable: true)]
   private ?float $media = 0;
 
   /**
    * @var int|null $credito Punteggio di credito
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $credito = 0;
 
   /**
    * @var int|null $creditoPrecedente Punteggio di credito degli anni precedenti
-   *
-   * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
    */
+  #[ORM\Column(name: 'credito_precedente', type: 'integer', nullable: true)]
   private ?int $creditoPrecedente = 0;
 
   /**
    * @var array|null $dati Lista dei dati sull'esito (giudizio ammissione e delibera)
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
+  #[ORM\Column(type: 'array', nullable: true)]
   private ?array $dati = [];
 
   /**
    * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce l'esito
    *
-   * @ORM\ManyToOne(targetEntity="Scrutinio")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Scrutinio::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Scrutinio $scrutinio = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -125,9 +116,8 @@ class Esito implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

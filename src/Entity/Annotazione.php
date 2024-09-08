@@ -15,102 +15,94 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Annotazione - dati per le annotazioni sul registro
  *
- * @ORM\Entity(repositoryClass="App\Repository\AnnotazioneRepository")
- * @ORM\Table(name="gs_annotazione")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_annotazione')]
+#[ORM\Entity(repositoryClass: \App\Repository\AnnotazioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Annotazione implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'annotazione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime $data Data della annotazione
    *
-   * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
+  #[ORM\Column(type: 'date', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?\DateTime $data = null;
 
   /**
    * @var string|null $testo Testo della annotazione
    *
-   * @ORM\Column(type="text", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: 'text', nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $testo = '';
 
   /**
    * @var bool $visibile Indica se l'annotazione è visibile ai genitori o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $visibile = false;
 
   /**
    * @var Avviso|null $avviso Avviso a cui è associata l'annotazione
-   *
-   * @ORM\ManyToOne(targetEntity="Avviso", inversedBy="annotazioni")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Avviso::class, inversedBy: 'annotazioni')]
   private ?Avviso $avviso = null;
 
   /**
    * @var Classe|null $classe Classe a cui è riferita l'annotazione
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var Docente|null $docente Docente che ha scritto l'annotazione
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -119,9 +111,8 @@ class Annotazione implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

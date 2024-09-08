@@ -55,10 +55,9 @@ class ScuolaController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param string $periodo Periodo dello scrutinio
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/scrutini/{periodo}', name: 'scuola_scrutini', requirements: ['periodo' => 'P|S|F|G|R|X'], defaults: ['periodo' => ''], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function scrutini(Request $request, TranslatorInterface $trans, string $periodo): Response {
     // init
     $dati = [];
@@ -142,10 +141,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/amministratore', name: 'scuola_amministratore', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function amministratore(Request $request): Response {
     // init
     $dati = [];
@@ -175,10 +173,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/dirigente', name: 'scuola_dirigente', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function dirigente(Request $request): Response {
     // init
     $dati = [];
@@ -212,10 +209,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/istituto', name: 'scuola_istituto', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function istituto(Request $request): Response {
     // init
     $dati = [];
@@ -243,10 +239,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/sedi', name: 'scuola_sedi', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function sedi(): Response
   {
       // init
@@ -266,10 +261,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/sedi/edit/{id}', name: 'scuola_sedi_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function sediEdit(Request $request, int $id): Response {
     // init
     $dati = [];
@@ -309,10 +303,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/sedi/delete/{id}', name: 'scuola_sedi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function sediDelete(int $id): Response {
     // controlla sede
     $sede = $this->em->getRepository(\App\Entity\Sede::class)->find($id);
@@ -340,10 +333,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/corsi', name: 'scuola_corsi', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function corsi(): Response
   {
       // init
@@ -363,10 +355,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/corsi/edit/{id}', name: 'scuola_corsi_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function corsiEdit(Request $request, int $id): Response {
     // init
     $dati = [];
@@ -406,10 +397,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/corsi/delete/{id}', name: 'scuola_corsi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function corsiDelete(int $id): Response {
     // controlla corso
     $corso = $this->em->getRepository(\App\Entity\Corso::class)->find($id);
@@ -437,10 +427,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/materie', name: 'scuola_materie', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function materie(): Response
   {
       // init
@@ -460,10 +449,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/materie/edit/{id}', name: 'scuola_materie_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function materieEdit(Request $request, int $id): Response {
     // init
     $dati = [];
@@ -503,10 +491,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/materie/delete/{id}', name: 'scuola_materie_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function materieDelete(int $id): Response {
     // controlla materia
     $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($id);
@@ -536,10 +523,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/classi/{pagina}', name: 'scuola_classi', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classi(int $pagina): Response {
     // init
     $dati = [];
@@ -567,10 +553,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/classi/edit/{id}', name: 'scuola_classi_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classiEdit(Request $request, int $id): Response {
     // init
     $dati = [];
@@ -615,10 +600,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/classi/delete/{id}', name: 'scuola_classi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classiDelete(int $id): Response {
     // controlla classe
     $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($id);
@@ -648,10 +632,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/festivita/{pagina}', name: 'scuola_festivita', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function festivita(int $pagina): Response {
     // init
     $dati = [];
@@ -680,10 +663,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/festivita/edit/{id}', name: 'scuola_festivita_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function festivitaEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
@@ -745,10 +727,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/festivita/delete/{id}', name: 'scuola_festivita_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function festivitaDelete(int $id): Response {
     // controlla festività
     $festivita = $this->em->getRepository(\App\Entity\Festivita::class)->find($id);
@@ -776,10 +757,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/orario', name: 'scuola_orario', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function orario(): Response
   {
       // init
@@ -804,10 +784,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/orario/edit/{id}', name: 'scuola_orario_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function orarioEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
@@ -859,10 +838,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/orario/delete/{id}', name: 'scuola_orario_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function orarioDelete(int $id): Response {
     // controlla orario
     $orario = $this->em->getRepository(\App\Entity\Orario::class)->find($id);
@@ -894,10 +872,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/orario/scansione/{id}', name: 'scuola_orario_scansione', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function orarioScansione(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $dati = [];
@@ -971,10 +948,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/moduli', name: 'scuola_moduli', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function moduli(): Response
   {
       // init
@@ -995,10 +971,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/moduli/edit/{id}', name: 'scuola_moduli_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function moduliEdit(Request $request, TranslatorInterface $trans, int $id): Response {
     // init
     $fs = new Filesystem();
@@ -1084,10 +1059,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/moduli/delete/{id}', name: 'scuola_moduli_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function moduliDelete(int $id): Response {
     // controlla modulo
     $modulo = $this->em->getRepository(\App\Entity\DefinizioneRichiesta::class)->find($id);
@@ -1118,10 +1092,9 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/scuola/moduli/abilita/{id}/{abilita}', name: 'scuola_moduli_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function moduliAbilita(int $id, int $abilita): Response {
     // controlla modulo
     $modulo = $this->em->getRepository(\App\Entity\DefinizioneRichiesta::class)->find($id);

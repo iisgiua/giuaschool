@@ -49,10 +49,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/lezioni/{data}', name: 'genitori_lezioni', requirements: ['data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['data' => '0000-00-00'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function lezioni(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
                           string $data): Response {
     // inizializza variabili
@@ -145,10 +144,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/argomenti/{idmateria}', name: 'genitori_argomenti', requirements: ['idmateria' => '\d+'], defaults: ['idmateria' => 0], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function argomenti(TranslatorInterface $trans, GenitoriUtil $gen,
                             RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
@@ -226,10 +224,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/voti/{idmateria}', name: 'genitori_voti', requirements: ['idmateria' => '\d+'], defaults: ['idmateria' => 0], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function voti(TranslatorInterface $trans, GenitoriUtil $gen,
                        RegistroUtil $reg, int $idmateria): Response {
     // inizializza variabili
@@ -304,10 +301,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/assenze/{posizione}', name: 'genitori_assenze', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function assenze(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg,
                           int $posizione): Response {
     // inizializza variabili
@@ -354,10 +350,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/note/', name: 'genitori_note', methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function note(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg): Response {
     // inizializza variabili
     $errore = null;
@@ -401,10 +396,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_GENITORE")
    */
   #[Route(path: '/genitori/osservazioni/', name: 'genitori_osservazioni', methods: ['GET'])]
+  #[IsGranted('ROLE_GENITORE')]
   public function osservazioni(TranslatorInterface $trans, GenitoriUtil $gen,
                                RegistroUtil $reg): Response {
     // inizializza variabili
@@ -443,10 +437,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/pagelle/{periodo}', name: 'genitori_pagelle', requirements: ['periodo' => 'A|P|S|F|G|R|X'], defaults: ['periodo' => '0'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function pagelle(TranslatorInterface $trans, GenitoriUtil $gen, string $periodo): Response {
     // inizializza variabili
     $errore = null;
@@ -554,10 +547,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/avvisi/{pagina}', name: 'genitori_avvisi', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -620,10 +612,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/avvisi/dettagli/{id}', name: 'genitori_avvisi_dettagli', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
@@ -655,10 +646,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/eventi/{mese}', name: 'genitori_eventi', requirements: ['mese' => '\d\d\d\d-\d\d'], defaults: ['mese' => '0000-00'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function eventi(GenitoriUtil $gen, AgendaUtil $age, string $mese): Response {
     $dati = null;
     $info = null;
@@ -725,10 +715,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/eventi/dettagli/{data}/{tipo}', name: 'genitori_eventi_dettagli', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'tipo' => 'C|A|V|P'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function eventiDettagli(AgendaUtil $age, string $data, string $tipo): Response {
     // inizializza
     $dati = null;
@@ -759,10 +748,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/giustifica/assenza/{assenza}/{posizione}', name: 'genitori_giustifica_assenza', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function giustificaAssenza(Request $request, GenitoriUtil $gen, LogHandler $dblogger,
                                     Assenza $assenza, int $posizione): Response {
     // inizializza
@@ -907,10 +895,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/giustifica/ritardo/{entrata}/{posizione}', name: 'genitori_giustifica_ritardo', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function giustificaRitardo(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
                                     LogHandler $dblogger, Entrata $entrata,
                                     int $posizione): Response {
@@ -1028,10 +1015,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/giustifica/uscita/{uscita}/{posizione}', name: 'genitori_giustifica_uscita', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function giustificaUscita(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
                                    LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
     // inizializza
@@ -1143,10 +1129,9 @@ class GenitoriController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   #[Route(path: '/genitori/deroghe/', name: 'genitori_deroghe', methods: ['GET'])]
+  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
   public function deroghe(GenitoriUtil $gen, RegistroUtil $reg): Response {
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {

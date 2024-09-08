@@ -17,84 +17,77 @@ use Symfony\Component\Validator\Constraints as Assert;
  * CircolareUtente - entità
  * Utente a cui è indirizzata la circolare
  *
- * @ORM\Entity(repositoryClass="App\Repository\CircolareUtenteRepository")
- * @ORM\Table(name="gs_circolare_utente", uniqueConstraints={@ORM\UniqueConstraint(columns={"circolare_id","utente_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"circolare","utente"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_circolare_utente')]
+#[ORM\UniqueConstraint(columns: ['circolare_id', 'utente_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\CircolareUtenteRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['circolare', 'utente'], message: 'field.unique')]
 class CircolareUtente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var Circolare|null $circolare Circolare a cui ci si riferisce
    *
-   * @ORM\ManyToOne(targetEntity="Circolare")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Circolare::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Circolare $circolare = null;
 
   /**
    * @var Utente|null $utente Utente destinatario della circolare
    *
-   * @ORM\ManyToOne(targetEntity="Utente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Utente $utente = null;
 
   /**
    * @var \DateTime|null $letta Data e ora di lettura implicita della circolare da parte dell'utente
-   *
-   * @ORM\Column(type="datetime", nullable=true)
    */
+  #[ORM\Column(type: 'datetime', nullable: true)]
   private ?\DateTime $letta = null;
 
   /**
    * @var \DateTime|null $confermata Data e ora di conferma esplicita della lettura della circolare da parte dell'utente
-   *
-   * @ORM\Column(type="datetime", nullable=true)
    */
+  #[ORM\Column(type: 'datetime', nullable: true)]
   private ?\DateTime $confermata = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -103,9 +96,8 @@ class CircolareUtente {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

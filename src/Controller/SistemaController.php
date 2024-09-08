@@ -52,10 +52,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/banner/', name: 'sistema_banner', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function banner(Request $request): Response {
     // init
     $dati = [];
@@ -85,10 +84,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/manutenzione/', name: 'sistema_manutenzione', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzione(Request $request): Response {
     // init
     $dati = [];
@@ -149,10 +147,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/parametri/', name: 'sistema_parametri', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function parametri(Request $request): Response {
     // init
     $dati = [];
@@ -182,10 +179,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/password/', name: 'sistema_password', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            TranslatorInterface $trans, ValidatorInterface $validator,
                            LogHandler $dblogger): Response {
@@ -244,10 +240,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/alias/', name: 'sistema_alias', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function alias(Request $request, TranslatorInterface $trans,
                         LogHandler $dblogger): Response {
     // init
@@ -325,10 +320,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/nuovo/{step}', name: 'sistema_nuovo', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function nuovo(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
                         int $step): Response {
     // init
@@ -1029,10 +1023,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/archivia/', name: 'sistema_archivia', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function archivia(Request $request, TranslatorInterface $trans,
                            ArchiviazioneUtil $arch): Response {
     // init
@@ -1220,10 +1213,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneCache(TranslatorInterface $trans, KernelInterface $kernel): Response {
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
@@ -1257,10 +1249,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLogout(Request $request): Response {
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
@@ -1286,10 +1277,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/manutenzione/log/', name: 'sistema_manutenzione_log', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLog(Request $request): Response {
     // init
     $dati = [];
@@ -1349,10 +1339,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
     // assicura che lo script non sia interrotto
@@ -1399,10 +1388,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function aggiorna(int $step): Response {
     // inizializza
     $dati = [];
@@ -1547,10 +1535,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/email', name: 'sistema_email', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function email(Request $request, TranslatorInterface $trans, MailerInterface $mailer,
                         KernelInterface $kernel): Response {
     // inizializza
@@ -1687,10 +1674,9 @@ class SistemaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/sistema/telegram', name: 'sistema_telegram', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function telegram(Request $request, TranslatorInterface $trans,
                            TelegramManager $telegram): Response {
     // inizializza

@@ -52,10 +52,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/importa/', name: 'alunni_importa', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
@@ -98,10 +97,9 @@ class AlunniController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/modifica/{pagina}', name: 'alunni_modifica', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
@@ -154,10 +152,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/abilita/{id}/{abilita}', name: 'alunni_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function abilita(int $id, int $abilita): Response {
     // controllo alunno
     $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($id);
@@ -194,10 +191,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/modifica/edit/{id}', name: 'alunni_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
@@ -332,10 +328,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/password/{tipo}/{username}', name: 'alunni_password', requirements: ['tipo' => 'E|P'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, string $tipo,
@@ -428,10 +423,9 @@ class AlunniController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/classe/{pagina}', name: 'alunni_classe', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classe(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
@@ -484,10 +478,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/classe/edit/{id}/{tipo}', name: 'alunni_classe_edit', requirements: ['id' => '\d+', 'tipo' => 'I|T|S|A'], defaults: ['id' => '0', 'tipo' => 'A'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classeEdit(Request $request, TranslatorInterface $trans, int $id,
                              string $tipo): Response {
     $form_help = 'message.required_fields';
@@ -697,10 +690,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/classe/delete/{id}', name: 'alunni_classe_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function classeDelete(int $id): Response {
     $cambio = $this->em->getRepository(\App\Entity\CambioClasse::class)->find($id);
     if (!$cambio) {
@@ -729,10 +721,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function passwordFiltro(UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
                                  LogHandler $dblogger, int $genitore): Response {
@@ -814,10 +805,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/rappresentanti/{pagina}', name: 'alunni_rappresentanti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -866,10 +856,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/rappresentantiGenitori/{pagina}', name: 'alunni_rappresentantiGenitori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function rappresentantiGenitori(Request $request, int $pagina): Response {
     // init
     $dati = [];
@@ -919,10 +908,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/rappresentanti/edit/{ruolo}/{id}', name: 'alunni_rappresentanti_edit', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
                                      string $ruolo, int $id): Response {
     // controlla azione
@@ -994,10 +982,9 @@ class AlunniController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   #[Route(path: '/alunni/rappresentanti/delete/{ruolo}/{id}', name: 'alunni_rappresentanti_delete', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
   public function rappresentantiDelete(string $ruolo, int $id): Response {
     // controlla utente
     $utente = ($ruolo == 'A') ?

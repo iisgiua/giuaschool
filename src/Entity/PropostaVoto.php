@@ -16,157 +16,145 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * PropostaVoto - dati per le proposte di voto dei docenti agli scrutini
  *
- * @ORM\Entity(repositoryClass="App\Repository\PropostaVotoRepository")
- * @ORM\Table(name="gs_proposta_voto", uniqueConstraints={@ORM\UniqueConstraint(columns={"periodo","alunno_id","materia_id","docente_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"periodo","alunno","materia","docente"}, repositoryMethod="uniqueEntity", message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_proposta_voto')]
+#[ORM\UniqueConstraint(columns: ['periodo', 'alunno_id', 'materia_id', 'docente_id'])]
+#[ORM\Entity(repositoryClass: \App\Repository\PropostaVotoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['periodo', 'alunno', 'materia', 'docente'], repositoryMethod: 'uniqueEntity', message: 'field.unique')]
 class PropostaVoto implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la proposta di voto
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'P';
 
   /**
    * @var int|null $orale Proposta di voto per la valutazione orale
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $orale = null;
 
   /**
    * @var int|null $scritto Proposta di voto per la valutazione scritta
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $scritto = null;
 
   /**
    * @var int|null $pratico Proposta di voto per la valutazione pratica
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $pratico = null;
 
   /**
    * @var int|null $unico Proposta di voto per la valutazione unica
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $unico = null;
 
   /**
    * @var string|null $debito Argomenti per il recupero del debito
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: 'text', nullable: true)]
   private ?string $debito = null;
 
   /**
    * @var string|null $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola]
    *
-   * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","C","S","P","I"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: true)]
+  #[Assert\Choice(choices: ['A', 'C', 'S', 'P', 'I'], strict: true, message: 'field.choice')]
   private ?string $recupero = null;
 
   /**
    * @var int|null $assenze Numero di ore di assenza nel periodo
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: 'integer', nullable: true)]
   private ?int $assenze = 0;
 
   /**
    * @var array|null $dati Lista dei dati aggiuntivi
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
+  #[ORM\Column(type: 'array', nullable: true)]
   private ?array $dati = [];
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce la proposta di voto
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Classe|null $classe Classe dell'alunno a cui si attribuisce la proposta di voto
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var Materia|null $materia Materia della proposta di voto
    *
-   * @ORM\ManyToOne(targetEntity="Materia")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Materia $materia = null;
 
   /**
    * @var Docente|null $docente Docente che inserisce la proposta di voto
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -175,9 +163,8 @@ class PropostaVoto implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

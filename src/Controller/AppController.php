@@ -277,10 +277,9 @@ class AppController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/app/connect/init', name: 'app_connectInit', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function connectInit(Request $request): JsonResponse {
     $res = [];
     // legge dati

@@ -95,10 +95,9 @@ class LoginController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/', name: 'login_home', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
     if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
       // redirezione alla scelta profilo
@@ -268,10 +267,9 @@ class LoginController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
   #[Route(path: '/login/profilo', name: 'login_profilo', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function profilo(Request $request, EventDispatcherInterface $disp,
                           TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {
     // imposta profili

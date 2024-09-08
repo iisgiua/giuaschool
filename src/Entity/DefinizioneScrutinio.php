@@ -15,46 +15,43 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DefinizioneScrutinio - dati per lo svolgimento degli scrutini
  *
- * @ORM\Entity(repositoryClass="App\Repository\DefinizioneScrutinioRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: \App\Repository\DefinizioneScrutinioRepository::class)]
 class DefinizioneScrutinio extends DefinizioneConsiglio {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'P';
 
   /**
    * @var \DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
    *
-   * @ORM\Column(name="data_proposte", type="date", nullable=false)
    *
-   * @Assert\Type(type="\DateTime", message="field.type")
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(name: 'data_proposte', type: 'date', nullable: false)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?\DateTime $dataProposte = null;
 
   /**
    * @var array $struttura Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
-   *
-   * @ORM\Column(type="array", nullable=false)
    */
+  #[ORM\Column(type: 'array', nullable: false)]
   private array $struttura = [];
 
   /**
-  * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
-  *
-  * @ORM\Column(name="classi_visibili", type="array", nullable=false)
-  */
+   * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   */
+  #[ORM\Column(name: 'classi_visibili', type: 'array', nullable: false)]
   private array $classiVisibili = [];
 
 

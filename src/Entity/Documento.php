@@ -17,129 +17,119 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Documento - dati per la gestione di un documento generico
  *
- * @ORM\Entity(repositoryClass="App\Repository\DocumentoRepository")
- * @ORM\Table(name="gs_documento")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_documento')]
+#[ORM\Entity(repositoryClass: \App\Repository\DocumentoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Documento implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"L","P","R","M","H","D","C","G"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['L', 'P', 'R', 'M', 'H', 'D', 'C', 'G'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'G';
 
   /**
    * @var Docente|null $docente Docente che carica il documento
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari del documento
    *
-   * @ORM\OneToOne(targetEntity="ListaDestinatari")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\OneToOne(targetEntity: \ListaDestinatari::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?ListaDestinatari $listaDestinatari = null;
 
   /**
    * @var Collection $allegati Lista dei file allegati al documento
    *
-   * @ORM\ManyToMany(targetEntity="File")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinTable(name: 'gs_documento_file')]
   #[ORM\JoinColumn(name: 'documento_id', nullable: false)]
   #[ORM\InverseJoinColumn(name: 'file_id', nullable: false, unique: true)]
+  #[ORM\ManyToMany(targetEntity: \File::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Collection $allegati = null;
 
   /**
    * @var Materia|null $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Materia")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
   private ?Materia $materia = null;
 
   /**
    * @var Classe|null $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Classe")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
   private ?Classe $classe = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Alunno")
    */
   #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
   private ?Alunno $alunno = null;
 
   /**
    * @var string|null $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $cifrato = '';
 
   /**
    * @var bool $firma Indica se è richiesta la firma di presa visione
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: 'boolean', nullable: false)]
   private bool $firma = false;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -148,9 +138,8 @@ class Documento implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

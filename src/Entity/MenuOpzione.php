@@ -16,137 +16,128 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * MenuOpzione - dati delle singole opzioni di un menu
  *
- * @ORM\Entity(repositoryClass="App\Repository\MenuOpzioneRepository")
- * @ORM\Table(name="gs_menu_opzione")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_menu_opzione')]
+#[ORM\Entity(repositoryClass: \App\Repository\MenuOpzioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class MenuOpzione implements \Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: 'integer')]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
    * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $creato = null;
 
   /**
    * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
    */
+  #[ORM\Column(type: 'datetime', nullable: false)]
   private ?\DateTime $modificato = null;
 
   /**
    * @var string|null $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $ruolo = '';
 
   /**
    * @var string|null $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $funzione = '';
 
   /**
    * @var string|null $nome Nome dell'opzione
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
-   * @var string|null $descrizione Descrizione dell'opzione
-   *
-   * @ORM\Column(type="string", length=255, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   */
+    * @var string|null $descrizione Descrizione dell'opzione
+    *
+    *
+    */
+   #[ORM\Column(type: 'string', length: 255, nullable: false)]
+   #[Assert\NotBlank(message: 'field.notblank')]
+   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $descrizione = '';
 
   /**
-   * @var string|null $url Indirizzo pagina (codificato come route)
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   */
+    * @var string|null $url Indirizzo pagina (codificato come route)
+    *
+    *
+    */
+   #[ORM\Column(type: 'string', length: 255, nullable: true)]
+   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $url = '';
 
   /**
    * @var int $ordinamento Numero d'ordine per la visualizzazione dell'opzione
-   *
-   * @ORM\Column(type="smallint", nullable=false)
    */
+  #[ORM\Column(type: 'smallint', nullable: false)]
   private int $ordinamento = 0;
 
   /**
-   * @var bool $abilitato Indica se l'opzione è abilitata o meno
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   */
+    * @var bool $abilitato Indica se l'opzione è abilitata o meno
+    */
+   #[ORM\Column(type: 'boolean', nullable: false)]
    private bool $abilitato = true;
 
   /**
-   * @var string!null $icona Nome dell'eventuale icona dell'opzione
-   *
-   * @ORM\Column(type="string", length=64, nullable=true)
-   *
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
-   */
+    * @var string!null $icona Nome dell'eventuale icona dell'opzione
+    *
+    *
+    */
+   #[ORM\Column(type: 'string', length: 64, nullable: true)]
+   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $icona = '';
 
   /**
    * @var Menu|null $menu Menu a cui appartiene l'opzione
    *
-   * @ORM\ManyToOne(targetEntity="Menu", inversedBy="opzioni")
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
   #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Menu::class, inversedBy: 'opzioni')]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Menu $menu = null;
 
   /**
    * @var Menu|null $sottoMenu Eventuale sottomenu collegato all'opzione
-   *
-   * @ORM\ManyToOne(targetEntity="Menu")
    */
   #[ORM\JoinColumn(nullable: true, name: 'sotto_menu_id')]
+  #[ORM\ManyToOne(targetEntity: \Menu::class)]
   private ?Menu $sottoMenu = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
@@ -155,9 +146,8 @@ class MenuOpzione implements \Stringable {
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();

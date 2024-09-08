@@ -37,10 +37,9 @@ class BachecaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/bacheca/avvisi/{pagina}', name: 'bacheca_avvisi', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisi(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;
@@ -104,10 +103,9 @@ class BachecaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
   #[Route(path: '/bacheca/avvisi/dettagli/{id}', name: 'bacheca_avvisi_dettagli', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")]
   public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;
@@ -138,10 +136,9 @@ class BachecaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/bacheca/avvisi/alunni/{classe}', name: 'bacheca_avvisi_alunni', requirements: ['classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisiAlunni(BachecaUtil $bac, int $classe): Response {
     // inizializza
     $dati = null;
@@ -167,10 +164,9 @@ class BachecaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
   #[Route(path: '/bacheca/avvisi/alunni/firma/{classe}/{id}', name: 'bacheca_avvisi_alunni_firma', requirements: ['classe' => '\d+', 'id' => '\d+|ALL'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
   public function avvisiAlunniFirma(BachecaUtil $bac, int $classe, string $id): Response {
     // controllo classe
     $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
@@ -195,10 +191,9 @@ class BachecaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @IsGranted("ROLE_ATA")
    */
   #[Route(path: '/bacheca/avvisi/ata/{pagina}', name: 'bacheca_avvisi_ata', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_ATA')]
   public function avvisiATA(Request $request, BachecaUtil $bac, int $pagina): Response {
     // inizializza variabili
     $dati = null;

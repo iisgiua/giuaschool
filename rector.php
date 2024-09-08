@@ -3,12 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Symfony\Set\SymfonySetList;
-use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
-use Rector\Php80\ValueObject\AnnotationToAttribute;
-use Rector\Php80\Rector\Property\NestedAnnotationToAttributeRector;
-use Rector\Php80\ValueObject\AnnotationPropertyToAttributeClass;
-use Rector\Php80\ValueObject\NestedAnnotationToAttribute;
+// use Rector\Symfony\Set\SymfonySetList;
 
 
 
@@ -21,17 +16,19 @@ return RectorConfig::configure()
     // ->withPhpSets(php82: true)
 
     //--- Attributes
-    ->withConfiguredRule(AnnotationToAttributeRector::class, [
-        new AnnotationToAttribute('Symfony\\Component\\Routing\\Annotation\\Route'),
-    ])
-    ->withConfiguredRule(NestedAnnotationToAttributeRector::class, [
-        new NestedAnnotationToAttribute('Doctrine\\ORM\\Mapping\\JoinTable', [
-        new AnnotationPropertyToAttributeClass('Doctrine\\ORM\\Mapping\\JoinColumn', 'joinColumns'),
-        new AnnotationPropertyToAttributeClass('Doctrine\\ORM\\Mapping\\InverseJoinColumn', 'inverseJoinColumns'),
-        ]),
-    ])
+    ->withAttributesSets(doctrine: true)
+    ->withAttributesSets(sensiolabs: true)
+    ->withAttributesSets(symfony: true)
+    ->withAttributesSets(phpunit: true)
 
 
+
+    // ->withConfiguredRule(AnnotationToAttributeRector::class, [
+    //     new AnnotationToAttribute('Symfony\\Component\\Routing\\Annotation\\Route'),
+    // ])
+
+
+// core... symfony doctrine... twig
     // ->withSets([
         // SymfonySetList::SYMFONY_54,
         // SymfonySetList::SYMFONY_CODE_QUALITY,

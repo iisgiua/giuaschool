@@ -37,10 +37,9 @@ class PagelleController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
   #[Route(path: '/pagelle/classe/{classe}/{tipo}/{periodo}', name: 'pagelle_classe', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")]
   public function documentoClasse(PagelleUtil $pag, int $classe, string $tipo,
                                   string $periodo): Response {
     // inizializza
@@ -157,10 +156,9 @@ class PagelleController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   *
-   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
   #[Route(path: '/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}', name: 'pagelle_alunno', requirements: ['classe' => '\d+', 'alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")]
   public function documentoAlunno(PagelleUtil $pag, GenitoriUtil $gen,
                                   int $classe, int $alunno, string $tipo, string $periodo): Response {
     // inizializza
