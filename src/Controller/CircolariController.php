@@ -982,8 +982,7 @@ class CircolariController extends BaseController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza',
-      ($this->getUser() instanceOf Staff ? 'T' : 'P'));
+    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza', 'T');
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/oggetto', '');
     if ($pagina == 0) {
