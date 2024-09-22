@@ -243,7 +243,7 @@ class DocumentoRepository extends BaseRepository {
     $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->join('App\Entity\Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
+      ->where('a.abilitato=:abilitato AND d.tipo IN (:tipi)')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'tipi' => ['B', 'H', 'D']]);
     // vincolo di sede
@@ -261,7 +261,7 @@ class DocumentoRepository extends BaseRepository {
     // vincolo su classe
     if ($criteri['classe']) {
       $alunni
-        ->andWhere('d.classe=:classe')
+        ->andWhere('a.classe=:classe')
         ->setParameter('classe', $criteri['classe']);
     }
     // paginazione
@@ -284,7 +284,7 @@ class DocumentoRepository extends BaseRepository {
     $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->join('App\Entity\Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
+      ->where('a.abilitato=:abilitato AND d.tipo IN (:tipi)')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'tipi' => ['B', 'H', 'D']]);
     // vincolo su sede
@@ -302,7 +302,7 @@ class DocumentoRepository extends BaseRepository {
     // vincolo su classe
     if ($criteri['classe']) {
       $alunni
-        ->andWhere('d.classe=:classe')
+        ->andWhere('a.classe=:classe')
         ->setParameter('classe', $criteri['classe']);
     }
     // paginazione
@@ -329,8 +329,9 @@ class DocumentoRepository extends BaseRepository {
       ->leftJoin('d.classe', 'cl')
       ->leftJoin('d.materia', 'm')
       ->leftJoin('d.alunno', 'a')
+      ->leftJoin('a.classe', 'cl2')
       ->where('ldu.utente=:utente')
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,cl2.anno,cl2.sezione,cl2.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
       ->setParameters(['utente' => $utente]);
     // vincolo di tipo
     if ($criteri['tipo'] == 'X') {

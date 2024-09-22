@@ -38,11 +38,11 @@ class Alunno extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","H","D","B"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","H","D","B","A"}, strict=true, message="field.choice")
    */
   private ?string $bes = 'N';
 
@@ -154,7 +154,7 @@ class Alunno extends Utente {
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    *
    * @return string|null Bisogni educativi speciali dell'alunno
    */
@@ -163,7 +163,7 @@ class Alunno extends Utente {
   }
 
   /**
-   * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    *
    * @param string|null $bes Bisogni educativi speciali dell'alunno
    *

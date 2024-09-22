@@ -805,19 +805,19 @@ class AccountProvisioning {
         'orgUnitPath' => $uo]);
       $ris = $this->serviceGsuite['directory']->users->insert($user);
       // pausa per essere sicuri che creazione utente sia completa
-      sleep(1);
-      // aggiunge avatar
-      $hash = sha1($email);
-      $url = 'https://www.gravatar.com/avatar/'.$hash.'?s=96&d='.$gravatar_type;
-      $image = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(file_get_contents($url)));
-      $photo = new GPhoto([
-        'photoData' => $image,
-        'mimeType' => 'JPEG',
-        'height' => 96,
-        'width' => 96]);
-      $ris = $this->serviceGsuite['directory']->users_photos->update($email, $photo);
-      // pausa per essere sicuri che creazione utente sia completa
-      sleep(3);
+      sleep(5);
+      // // aggiunge avatar
+      // $hash = hash('sha256',   $email);
+      // $url = 'https://www.gravatar.com/avatar/'.$hash.'?s=96&d='.$gravatar_type;
+      // $image = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(file_get_contents($url)));
+      // $photo = new GPhoto([
+      //   'photoData' => $image,
+      //   'mimeType' => 'PNG',
+      //   'height' => 96,
+      //   'width' => 96]);
+      // $ris = $this->serviceGsuite['directory']->users_photos->update($email, $photo);
+      // // pausa per essere sicuri che creazione utente sia completa
+      // sleep(5);
       // aggiunge a gruppo
       $errore = $this->aggiungeUtenteGruppoGsuite($email, $gruppo);
       if (!$errore && $tipo == 'D') {

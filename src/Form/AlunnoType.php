@@ -69,7 +69,7 @@ class AlunnoType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('bes', ChoiceType::class, array('label' => 'label.bes',
-        'choices' => array('label.bes_B' => 'B', 'label.bes_D' => 'D', 'label.bes_H' => 'H', 'label.bes_N' => 'N'),
+        'choices' => array('label.bes_B' => 'B', 'label.bes_D' => 'D', 'label.bes_H' => 'H', 'label.bes_A' => 'A', 'label.bes_N' => 'N'),
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('noteBes', MessageType::class, array('label' => 'label.note_bes',

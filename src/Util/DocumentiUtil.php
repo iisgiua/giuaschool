@@ -250,8 +250,9 @@ class DocumentiUtil {
             case 'B':   // diagnosi BES
             case 'H':   // PEI
             case 'D':   // PDP
-              if ($docente->getResponsabileBes() && (!$docente->getResponsabileBesSede() ||
-                  $docente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
+              if ($docente->getResponsabileBes() && $documento->getAlunno() && $documento->getAlunno()->getClasse() &&
+                  (!$docente->getResponsabileBesSede() ||
+                  $docente->getResponsabileBesSede()->getId() == $documento->getAlunno()->getClasse()->getSede()->getId())) {
                 // utente responsabile BES di scuola o di stessa sede di alunno: ok
                 return true;
               }
@@ -456,17 +457,23 @@ class DocumentiUtil {
       $this->em->persist($destinatari);
       // destinatari predeterminati
       switch ($documento->getTipo()) {
-        case 'L':   // piani di lavoro
         case 'B':   // diagnosi alunno BES
         case 'H':   // PEI
         case 'D':   // PDP
+          // crea destinatari: CdC
+          $destinatari
+            ->setSedi(new ArrayCollection([$documento->getAlunno()->getClasse()->getSede()]))
+            ->setDocenti('C')
+            ->setFiltroDocenti([$documento->getAlunno()->getClasse()->getId()]);
+          break;
+        case 'L':   // piani di lavoro
           // crea destinatari: CdC
           $destinatari
             ->setSedi(new ArrayCollection([$documento->getClasse()->getSede()]))
             ->setDocenti('C')
             ->setFiltroDocenti([$documento->getClasse()->getId()]);
           break;
-        case 'P':   // programmi finali
+          case 'P':   // programmi finali
         case 'M':   // documento 15 maggio
           // crea destinatari: CdC, genitori/alunni di classe
           $destinatari
@@ -610,7 +617,9 @@ class DocumentiUtil {
       $dir = $this->dirUpload;
     } else {
       // altri documenti in archivio classi
-      $dir = $this->dirClassi.'/'.$documento->getClasse()->getAnno().$documento->getClasse()->getSezione();
+      $classe = ($documento->getAlunno() && $documento->getAlunno()->getClasse()) ?
+        $documento->getAlunno()->getClasse() : $documento->getClasse();
+      $dir = $this->dirClassi.'/'.$classe->getAnno().$classe->getSezione().$classe->getGruppo();
       if (in_array($documento->getTipo(), ['B', 'H', 'D'])) {
         // documenti riservati
         $dir .= '/riservato';
@@ -656,8 +665,9 @@ class DocumentiUtil {
     }
     if (in_array($documento->getTipo(), ['B', 'H', 'D']) && ($utente instanceOf Docente)) {
       // documento PEI/PDP/diagnosi e utente docente
-      if ($utente->getResponsabileBes() && (!$utente->getResponsabileBesSede() ||
-          $utente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
+      if ($utente->getResponsabileBes() && $documento->getAlunno() && $documento->getAlunno()->getClasse() &&
+          (!$utente->getResponsabileBesSede() ||
+          $utente->getResponsabileBesSede()->getId() == $documento->getAlunno()->getClasse()->getSede()->getId())) {
         // utente responsabile BES di scuola o di stessa sede di alunno: ok
         return true;
       }
@@ -750,7 +760,7 @@ class DocumentiUtil {
       // dati documenti
       $dati['documenti'][$i]['lista'] = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
         ->join('d.alunno', 'a')
-        ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
+        ->where('d.tipo IN (:tipi) AND d.alunno=:alunno')
         ->orderBy('d.tipo', 'ASC')
         ->setParameters(['tipi' => ['B', 'H', 'D'], 'alunno' => $alunno])
         ->getQuery()
@@ -806,7 +816,7 @@ class DocumentiUtil {
     // query base
     $query = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
       ->join('d.alunno', 'a')
-      ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
+      ->where('d.tipo IN (:tipi) AND d.alunno=:alunno')
       ->orderBy('d.tipo', 'ASC');
     if ($criteri['tipo']) {
       $query

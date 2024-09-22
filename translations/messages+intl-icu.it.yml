@@ -38,6 +38,7 @@ label.autorizza_uscita: Autorizzazione uscita
 label.bes_B: Alunno con bisogni educativi speciali
 label.bes_D: Alunno con certificazione DSA
 label.bes_H: Alunno con sostegno
+label.bes_A: Alunno con altre problematiche
 label.bes_N: No
 label.bes: BES
 label.cancel: Annulla

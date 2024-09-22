@@ -757,7 +757,6 @@ class DocumentiController extends BaseController {
     $documento = (new Documento())
       ->setTipo(array_values($listaTipi)[0])
       ->setDocente($this->getUser())
-      ->setClasse($classe)
       ->setAlunno($alunno)
       ->setListaDestinatari(new ListaDestinatari());
     $this->em->persist($documento);
@@ -819,8 +818,7 @@ class DocumentiController extends BaseController {
         $documento->setTipo($tipo);
         if (!$alunno) {
           $documento
-          ->setAlunno($alunnoIndividuale)
-          ->setClasse($alunnoIndividuale->getClasse());
+          ->setAlunno($alunnoIndividuale);
         }
         // imposta destinatari
         $doc->impostaDestinatari($documento);
