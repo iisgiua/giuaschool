@@ -45,13 +45,16 @@
         }
     },
     "google/apiclient": {
-        "version": "2.12",
+        "version": "2.17",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
-            "version": "2.0",
-            "ref": "49c5d7a66d863d28513979bf0666dc77599100c0"
-        }
+            "version": "2.10",
+            "ref": "07a97ec434d43b7903c78069a04c92adb6442e52"
+        },
+        "files": [
+            "config/packages/google_apiclient.yaml"
+        ]
     },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.10",
