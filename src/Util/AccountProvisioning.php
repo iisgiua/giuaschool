@@ -370,7 +370,7 @@ class AccountProvisioning {
     $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().$cattedra->getClasse()->getGruppo();
     $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
       ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
-    $docente_username = $cattedra->getDocente()->getUsername();
+    $docente_username = $cattedra->getDocente()->getUserIdentifier();
     $sede = $cattedra->getClasse()->getSede()->getNomeBreve();
     $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
     // gestione cattedra di sostegno

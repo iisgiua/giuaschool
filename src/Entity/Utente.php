@@ -293,9 +293,9 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce l'identificativo dell'utente
    *
-   * @return string|null Identificativo dell'utente
+   * @return string Identificativo dell'utente
    */
-  public function getUserIdentifier(): ?string {
+  public function getUserIdentifier(): string {
     return $this->username;
   }
 

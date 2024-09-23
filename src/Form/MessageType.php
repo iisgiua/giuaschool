@@ -55,7 +55,7 @@ class MessageType extends AbstractType {
      *
      * @return string Classe padre
      */
-    public function getParent() {
+    public function getParent(): ?string {
       return TextareaType::class;
     }
 

@@ -82,7 +82,7 @@ class ProvisioningCommand extends Command {
    *
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     // inizio
     $this->logger->notice('provisioning-esegue: Inizio procedura di esecuzione del provisioning');
     // esegue provisioning

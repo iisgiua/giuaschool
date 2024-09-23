@@ -285,7 +285,7 @@ class LoginController extends BaseController {
           // altri profili
           $nome .= $utente->getNome().' '.$utente->getCognome();
         }
-        $nome .= ' ('.$utente->getUsername().')';
+        $nome .= ' ('.$utente->getUserIdentifier().')';
         $lista[] = [$nome => $utente->getId()];
       }
     }
@@ -316,7 +316,7 @@ class LoginController extends BaseController {
         $utente->setUltimoAccesso(new \DateTime());
         // log azione
         $dblogger->logAzione('ACCESSO', 'Cambio profilo', [
-          'Username' => $utente->getUsername(),
+          'Username' => $utente->getUserIdentifier(),
           'Ruolo' => $utente->getRoles()[0]]);
         // crea token di autenticazione
         $token = new UsernamePasswordToken($utente, 'main', $utente->getRoles());

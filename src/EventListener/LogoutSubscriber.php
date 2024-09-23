@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
  *
  * @author Antonello Dessì
  */
-class LogoutListener {
+class LogoutSubscriber implements \Symfony\Component\EventDispatcher\EventSubscriberInterface {
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -73,6 +73,13 @@ class LogoutListener {
     }
     // reindirizza a nuova pagina
     $logoutEvent->setResponse($response);
+  }
+  /**
+   * @return array<string, mixed>
+   */
+  public static function getSubscribedEvents(): array
+  {
+    return [\Symfony\Component\Security\Http\Event\LogoutEvent::class => 'onLogoutEvent'];
   }
 
 }

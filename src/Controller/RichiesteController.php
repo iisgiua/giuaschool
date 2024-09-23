@@ -696,7 +696,7 @@ class RichiesteController extends BaseController {
       $dblogger->logModifica('RICHIESTE', 'Gestisce richiesta', $richiestaVecchia, $richiesta);
       if (isset($derogaVecchia)) {
         $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
-          'Username' => $richiesta->getUtente()->getUsername(),
+          'Username' => $richiesta->getUtente()->getUserIdentifier(),
             ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia]);
       }
       // controlla unicità
