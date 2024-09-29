@@ -75,6 +75,7 @@ label.circolari_proprie: Destinate a me
 label.circolari_tutte: Tutte
 label.avvisi_tutti: Tutti
 label.citta: Città
+label.provincia: Provincia
 label.classe: Classe
 label.classi: Classi
 label.close: Chiudi
@@ -83,6 +84,7 @@ label.cognome: Cognome
 label.colloquio: Colloquio
 label.colloqui: Colloqui
 label.comune_nascita: Comune di nascita
+label.provincia_nascita: Provincia di nascita
 label.conteggio_entrate: Valido per il conteggio dei ritardi?
 label.conteggio_uscite: Valido per il conteggio delle uscite?
 label.continua: Continua
@@ -1288,7 +1290,7 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
 message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
-  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, **Username, Password, Email, Genitore1Cognome, Genitore1Nome, Genitore1CodiceFiscale, Genitore1Telefono, **Genitore1Username, Genitore1Password, Genitore1Email, Genitore2Cognome, Genitore2Nome, Genitore2CodiceFiscale, Genitore2Telefono, **Genitore2Username, Genitore2Password, Genitore2Email\"</span><br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, ProvinciaNascita, *CodiceFiscale, Citta, Provincia, Indirizzo, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, **Username, Password, Email, Genitore1Cognome, Genitore1Nome, Genitore1CodiceFiscale, Genitore1Telefono, **Genitore1Username, Genitore1Password, Genitore1Email, Genitore2Cognome, Genitore2Nome, Genitore2CodiceFiscale, Genitore2Telefono, **Genitore2Username, Genitore2Password, Genitore2Email\"</span><br>
   <small>
     <span class=\"ml-5\">* campi obbligatori per l'inserimento di un nuovo utente</span><br>
     <span class=\"ml-5\">** campi obbligatori per la modifica di un utente esistente</span><br>

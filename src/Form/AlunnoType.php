@@ -54,10 +54,16 @@ class AlunnoType extends AbstractType {
       ->add('comuneNascita', TextType::class, array('label' => 'label.comune_nascita',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
-      ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
+      ->add('provinciaNascita', TextType::class, array('label' => 'label.provincia_nascita',
         'attr' => ['widget' => 'gs-row-end'],
+        'required' => false))
+      ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('citta', TextType::class, array('label' => 'label.citta',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false))
+      ->add('provincia', TextType::class, array('label' => 'label.provincia',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => false))
       ->add('indirizzo', TextType::class, array('label' => 'label.indirizzo',

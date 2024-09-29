@@ -125,10 +125,14 @@
                           <dd class="col-sm-4">{{ a.dataNascita|date('d/m/Y') }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.comune_nascita'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.comuneNascita }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.provincia_nascita'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.provinciaNascita }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.codiceFiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.citta'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.citta }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.provincia'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.provincia }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.indirizzo'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.indirizzo }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.religione'|trans }}</dt>
@@ -145,14 +149,14 @@
                           <dd class="col-sm-4">{{ a.classe }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.frequenza_estero'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.frequenzaEstero ? 'Si' : 'No' }}</dd>
-                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
-                          <dd class="col-sm-10">{{ a.spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
                           <dd class="col-sm-4">{{ a.email }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
-                          <dd class="col-sm-10">{{ a.ultimoAccesso ? (a.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                          <dd class="col-sm-4">{{ a.ultimoAccesso ? (a.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
                         </dl>
                       </div>
                       <div class="tab-pane fade" id="gs-genitore1-{{ a.id }}" role="tabpanel" aria-labelledby="gs-genitore1-{{ a.id }}-tab">

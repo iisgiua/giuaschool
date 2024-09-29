@@ -466,8 +466,8 @@ class CsvImporter {
    * @return array|null Lista degli alunni importati
    */
   public function importaAlunni(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
-      'citta', 'indirizzo', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
+    $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita',  'codiceFiscale',
+      'citta', 'provincia', 'indirizzo', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
       'classe', 'username', 'password', 'email',
       'genitore1Cognome', 'genitore1Nome', 'genitore1CodiceFiscale', 'genitore1Telefono',
       'genitore1Username', 'genitore1Password', 'genitore1Email',
@@ -515,8 +515,10 @@ class CsvImporter {
       $fields['sesso'] = strtoupper(trim($fields['sesso']));
       $fields['dataNascita'] = trim($fields['dataNascita']);
       $fields['comuneNascita'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['comuneNascita']))));
+      $fields['provinciaNascita'] = substr(strtoupper(trim($fields['provinciaNascita'])), 0, 2);
       $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
       $fields['citta'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['citta']))));
+      $fields['provincia'] = substr(strtoupper(trim($fields['provincia'])), 0, 2);
       $fields['indirizzo'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['indirizzo']))));
       $fields['bes'] = strtoupper(trim($fields['bes']));
       $fields['noteBes'] = trim(str_replace(["\t","\r","\n",'  '], ['','','',' ',],$fields['noteBes']));
@@ -591,6 +593,10 @@ class CsvImporter {
         // comuneNascita può essere vuoto in modifica
         $empty_fields['comuneNascita'] = true;
       }
+      if (empty($fields['provinciaNascita'])) {
+        // provinciaNascita può essere vuoto
+        $empty_fields['provinciaNascita'] = true;
+      }
       if (empty($fields['codiceFiscale'])) {
         // codiceFiscale può essere vuoto in modifica
         $empty_fields['codiceFiscale'] = true;
@@ -598,6 +604,10 @@ class CsvImporter {
       if (empty($fields['citta'])) {
         // citta può essere vuoto
         $empty_fields['citta'] = true;
+      }
+      if (empty($fields['provincia'])) {
+        // provincia può essere vuoto
+        $empty_fields['provincia'] = true;
       }
       if (empty($fields['indirizzo'])) {
         // indirizzo può essere vuoto
@@ -1483,8 +1493,10 @@ class CsvImporter {
       ->setSesso($fields['sesso'])
       ->setDataNascita($fields['dataNascita'])
       ->setComuneNascita($fields['comuneNascita'])
+      ->setProvinciaNascita($fields['provinciaNascita'])
       ->setCodiceFiscale($fields['codiceFiscale'])
       ->setCitta($fields['citta'])
+      ->setProvincia($fields['provincia'])
       ->setIndirizzo($fields['indirizzo'])
       ->setBes($fields['bes'])
       ->setNoteBes($fields['noteBes'])
@@ -1605,11 +1617,17 @@ class CsvImporter {
     if (!$empty_fields['comuneNascita']) {
       $alunno->setComuneNascita($fields['comuneNascita']);
     }
+    if (!$empty_fields['provinciaNascita']) {
+      $alunno->setProvinciaNascita($fields['provinciaNascita']);
+    }
     if (!$empty_fields['codiceFiscale']) {
       $alunno->setCodiceFiscale($fields['codiceFiscale']);
     }
     if (!$empty_fields['citta']) {
       $alunno->setCitta($fields['citta']);
+    }
+    if (!$empty_fields['provincia']) {
+      $alunno->setProvincia($fields['provincia']);
     }
     if (!$empty_fields['indirizzo']) {
       $alunno->setIndirizzo($fields['indirizzo']);
