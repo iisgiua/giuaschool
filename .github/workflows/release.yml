@@ -31,7 +31,7 @@ jobs:
       - name: Get latest release tag
         id: previous-release
         uses: rez0n/actions-github-release@main
-        env:
+        with:
           token: ${{ github.token }}
           repository: "iisgiua/giuaschool"
           type: "stable"
