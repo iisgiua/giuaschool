@@ -159,4 +159,6 @@ RUN \
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   service mariadb start && \
   php bin/console app:alice:load tests/features/_testFixtures.yml --dump tests/temp/_testFixtures && \
+  mkdir -p var/sessions/test && \
+  mkdir -p var/cache/test && \
   chown -R www-data:www-data .
