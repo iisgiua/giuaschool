@@ -89,7 +89,7 @@ class RichiesteUtil {
         case 'text':
           // aggiunge formattazione
           $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-            '<em><strong>{{ valori.'.$nome.' ?? "---" }}</strong></em>', $template);
+            '<em><strong>{{ (valori.'.$nome.'|trim) ? (valori.'.$nome.'|trim) : "---" }}</strong></em>', $template);
           break;
         case 'bool':
           // converte booleano in testo
@@ -109,7 +109,7 @@ class RichiesteUtil {
         default:
         // sostituzione con il valore
           $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-            '<strong>{{ valori.'.$nome.' ?? "---" }}</strong>', $template);
+            '<strong>{{ (valori.'.$nome.'|trim) ? (valori.'.$nome.'|trim) : "---" }}</strong>', $template);
       }
     }
     if (!$definizioneRichiesta->getUnica()) {
