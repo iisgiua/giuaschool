@@ -240,8 +240,7 @@ class RichiesteController extends BaseController {
     $richiesta
       ->setInviata(new \DateTime())
       ->setGestita(null)
-      ->setStato('A')
-      ->setMessaggio('');
+      ->setStato('A');
     // memorizzazione e log
     $dblogger->logModifica('RICHIESTE', 'Annulla richiesta', $richiestaVecchia, $richiesta);
     // redirezione
