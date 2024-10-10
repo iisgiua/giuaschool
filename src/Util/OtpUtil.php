@@ -8,6 +8,9 @@
 
 namespace App\Util;
 
+use Exception;
+use TCPDF2DBarcode;
+use DateTime;
 
 /**
  * OtpUtil - classe di utilità per la gestione del codice OTP
@@ -120,7 +123,7 @@ class OtpUtil {
     $rnd = openssl_random_pseudo_bytes(20, $crypto);
     if (!$crypto) {
        // errore: generatore casuale non sicuro
-       throw new \Exception('exception.id_notfound');
+       throw new Exception('exception.id_notfound');
     }
     $prefisso = substr(str_pad($utente, 20, 'X'), 0, 20);
     return $this->codificaBase32($prefisso.$rnd);
@@ -140,7 +143,7 @@ class OtpUtil {
     $contenuto = sprintf('otpauth://totp/%s:%s?secret=%s&issuer=%s',
       rawurlencode($titolo), rawurlencode($utente), $token, rawurlencode($titolo));
     // crea il QRcode
-    $qrcode_obj = new \TCPDF2DBarcode($contenuto, 'QRCODE,M');
+    $qrcode_obj = new TCPDF2DBarcode($contenuto, 'QRCODE,M');
     $qrcode_img = 'data:image/PNG;base64,'.
       base64_encode($qrcode_obj->getBarcodePngData(4, 4, [0, 0, 0]));
     // restituisce l'immagine codificata inline
@@ -175,7 +178,7 @@ class OtpUtil {
   public function controllaOtp($token, $otp) {
     // inizializza
     $risposta = 0;
-    $timestamp = (new \DateTime())->getTimestamp();
+    $timestamp = (new DateTime())->getTimestamp();
     // controlla periodi di [-30; +30] secondi
     for ($i = -1; $i <= 1; $i++) {
       // controlla otp di periodo

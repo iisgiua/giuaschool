@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use \Doctrine\ORM\EntityRepository;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
@@ -44,7 +45,7 @@ class ProvisioningRepository extends EntityRepository {
       ->set('p.modificato', ':ora')
       ->set('p.stato', ':processato')
       ->where('p.id IN (:lista) AND p.stato=:attesa')
-      ->setParameters(['ora' => new \DateTime(), 'processato' => 'P', 'lista' => $ids, 'attesa' => 'A'])
+      ->setParameters(['ora' => new DateTime(), 'processato' => 'P', 'lista' => $ids, 'attesa' => 'A'])
       ->getQuery()
       ->getResult();
     // restituisce lista id comandi
@@ -66,20 +67,20 @@ class ProvisioningRepository extends EntityRepository {
       foreach ($dati['provisioning']->getDati() as $nm=>$dt) {
         switch ($nm) {
           case 'cattedra':
-            $dati[$nm] = $this->_em->getRepository(\App\Entity\Cattedra::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository(Cattedra::class)->find($dt);
             break;
           case 'docente':
           case 'docente_prec':
-            $dati[$nm] = $this->_em->getRepository(\App\Entity\Docente::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository(Docente::class)->find($dt);
             break;
           case 'classe':
           case 'classe_prec':
           case 'classe_origine':
           case 'classe_destinazione':
-            $dati[$nm] = $this->_em->getRepository(\App\Entity\Classe::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository(Classe::class)->find($dt);
             break;
           case 'materia':
-            $dati[$nm] = $this->_em->getRepository(\App\Entity\Materia::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository(Materia::class)->find($dt);
             break;
         }
       }
@@ -100,7 +101,7 @@ class ProvisioningRepository extends EntityRepository {
       ->set('p.modificato', ':ora')
       ->set('p.stato', ':attesa')
       ->where('p.id IN (:lista) AND p.stato=:processato')
-      ->setParameters(['ora' => new \DateTime(), 'attesa' => 'A', 'lista' => $ids, 'processato' => 'P'])
+      ->setParameters(['ora' => new DateTime(), 'attesa' => 'A', 'lista' => $ids, 'processato' => 'P'])
       ->getQuery()
       ->getResult();
   }
@@ -122,7 +123,7 @@ class ProvisioningRepository extends EntityRepository {
       ->set('p.stato', ':cancellare')
       ->set('p.dati', ':dati')
       ->where('p.id=:id AND p.stato=:processato')
-      ->setParameters(['ora' => new \DateTime(), 'cancellare' => 'C', 'dati' => serialize($dati),
+      ->setParameters(['ora' => new DateTime(), 'cancellare' => 'C', 'dati' => serialize($dati),
         'id' => $id, 'processato' => 'P'])
       ->getQuery()
       ->getResult();
@@ -147,7 +148,7 @@ class ProvisioningRepository extends EntityRepository {
       ->set('p.stato', ':errore')
       ->set('p.dati', ':dati')
       ->where('p.id=:id AND p.stato=:processato')
-      ->setParameters(['ora' => new \DateTime(), 'errore' => 'E', 'dati' => serialize($dati),
+      ->setParameters(['ora' => new DateTime(), 'errore' => 'E', 'dati' => serialize($dati),
         'id' => $id, 'processato' => 'P'])
       ->getQuery()
       ->getResult();
@@ -158,7 +159,7 @@ class ProvisioningRepository extends EntityRepository {
    *
    */
   public function cancellaComandi() {
-    $limite = new \DateTime();
+    $limite = new DateTime();
     $limite->modify('-1 day');
     // cambia stato ai comandi
     $this->createQueryBuilder('p')

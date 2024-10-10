@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 use App\Entity\OrarioDocente;
 //-- use App\Entity\Teacher;
 
@@ -17,7 +18,7 @@ use App\Entity\OrarioDocente;
  *
  * @author Antonello Dessì
  */
-class OrarioDocenteRepository extends \Doctrine\ORM\EntityRepository {
+class OrarioDocenteRepository extends EntityRepository {
 
 }
 

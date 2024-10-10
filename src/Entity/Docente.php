@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\DocenteRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -19,7 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\DocenteRepository::class)]
+#[ORM\Entity(repositoryClass: DocenteRepository::class)]
 #[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Docente::class)]
 class Docente extends Utente {
 

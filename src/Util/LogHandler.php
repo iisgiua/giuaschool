@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -124,7 +125,7 @@ class LogHandler {
       $this->em->persist($log);
       $this->em->flush();
       $conn->commit();
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore: evita scrittura di tutto quanto
       $conn->rollBack();
       throw $e;

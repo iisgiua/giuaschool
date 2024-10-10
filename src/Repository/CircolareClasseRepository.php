@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * CircolareClasse - repository
  *
  * @author Antonello Dessì
  */
-class CircolareClasseRepository extends \Doctrine\ORM\EntityRepository {
+class CircolareClasseRepository extends EntityRepository {
 
 }
 

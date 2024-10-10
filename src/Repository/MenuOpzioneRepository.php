@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use App\Entity\MenuOpzione;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Utente;
@@ -37,8 +38,8 @@ class MenuOpzioneRepository extends EntityRepository {
       // legge dati
       $dati = $this->createQueryBuilder('o')
         ->select('o.nome,o.descrizione,o.url,(o.sottoMenu) AS sottomenu,o2.nome AS nome2,o2.descrizione AS descrizione2,o2.url AS url2,o3.nome AS nome3,o3.descrizione AS descrizione3,o3.url AS url3')
-        ->leftJoin(\App\Entity\MenuOpzione::class, 'o2', 'WITH', 'o.menu=o2.sottoMenu AND INSTR(o2.ruolo, :ruolo) > 0')
-        ->leftJoin(\App\Entity\MenuOpzione::class, 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND INSTR(o3.ruolo, :ruolo) > 0')
+        ->leftJoin(MenuOpzione::class, 'o2', 'WITH', 'o.menu=o2.sottoMenu AND INSTR(o2.ruolo, :ruolo) > 0')
+        ->leftJoin(MenuOpzione::class, 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND INSTR(o3.ruolo, :ruolo) > 0')
         ->where('o.url=:url AND INSTR(o.ruolo, :ruolo) > 0')
         ->setParameters(['url' => $url, 'ruolo' => $ruolo])
         ->setMaxResults(1)

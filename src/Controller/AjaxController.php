@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Docente;
+use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Staff;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -49,7 +51,7 @@ class AjaxController extends BaseController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $docenti = $this->em->getRepository(\App\Entity\Docente::class)->cercaSede($search, $pagina, 20);
+    $docenti = $this->em->getRepository(Docente::class)->cercaSede($search, $pagina, 20);
     foreach ($docenti as $doc) {
       $dati['lista'][] = [
         'id' => $doc->getId(),
@@ -99,7 +101,7 @@ class AjaxController extends BaseController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->iscritti($search, $pagina, 20);
+    $alunni = $this->em->getRepository(Alunno::class)->iscritti($search, $pagina, 20);
     foreach ($alunni as $alu) {
       $dati['lista'][] = [
         'id' => $alu->getId(),
@@ -164,7 +166,7 @@ class AjaxController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function classeAjax(Classe $classe): JsonResponse {
     // legge alunni
-    $dati = $this->em->getRepository(\App\Entity\Alunno::class)->classe($classe->getId());
+    $dati = $this->em->getRepository(Alunno::class)->classe($classe->getId());
     // restituisce dati
     return new JsonResponse($dati);
   }

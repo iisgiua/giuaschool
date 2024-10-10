@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Sede;
+use Exception;
 use App\Entity\Ata;
 use App\Form\AtaType;
 use App\Form\ImportaCsvType;
@@ -105,7 +107,7 @@ class AtaController extends BaseController {
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
-    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository(\App\Entity\Sede::class)->find($criteri['sede']) : $criteri['sede']);
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository(Sede::class)->find($criteri['sede']) : $criteri['sede']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
     if ($pagina == 0) {
@@ -116,7 +118,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+    $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     $opzioniSedi[$trans->trans('label.nessuna_sede')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'ata',
       'values' => [$sede, $opzioniSedi, $criteri['cognome'], $criteri['nome']]]);
@@ -134,7 +136,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository(\App\Entity\Ata::class)->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository(Ata::class)->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);
@@ -153,7 +155,7 @@ class AtaController extends BaseController {
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function abilita(int $id, int $abilita): Response {
     // controlla ata
-    $ata = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
+    $ata = $this->em->getRepository(Ata::class)->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -182,7 +184,7 @@ class AtaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $ata = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
+      $ata = $this->em->getRepository(Ata::class)->find($id);
       if (!$ata) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -195,7 +197,7 @@ class AtaController extends BaseController {
       $this->em->persist($ata);
     }
     // form
-    $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+    $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     $form = $this->createForm(AtaType::class, $ata, ['return_url' => $this->generateUrl('ata_modifica'),
       'values' => [$opzioniSedi]]);
     $form->handleRequest($request);
@@ -234,7 +236,7 @@ class AtaController extends BaseController {
                            LoggerInterface $logger, LogHandler $dblogger, int $id,
                            string $tipo): Response {
     // controlla ata
-    $ata = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
+    $ata = $this->em->getRepository(Ata::class)->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -276,7 +278,7 @@ class AtaController extends BaseController {
         // invia email
         $mailer->send($message);
         $this->addFlash('success', 'message.credenziali_inviate');
-      } catch (\Exception $err) {
+      } catch (Exception $err) {
         // errore di spedizione
         $logger->error('Errore di spedizione email delle credenziali ata.', [
           'username' => $ata->getUsername(),
@@ -338,7 +340,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/pagina', $pagina);
     }
     // lista rappresentanti
-    $dati = $this->em->getRepository(\App\Entity\Ata::class)->rappresentanti($criteri, $pagina);
+    $dati = $this->em->getRepository(Ata::class)->rappresentanti($criteri, $pagina);
     // mostra la pagina di risposta
     $info['pagina'] = $pagina;
     return $this->renderHtml('ata', 'rappresentanti', $dati, $info, [$form->createView()]);
@@ -361,7 +363,7 @@ class AtaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $utente = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
+      $utente = $this->em->getRepository(Ata::class)->find($id);
       if (!$utente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -372,7 +374,7 @@ class AtaController extends BaseController {
       // azione add
       $utente = null;
       $tipi = [];
-      $listaUtenti = $this->em->getRepository(\App\Entity\Ata::class)->findBy(['abilitato' => 1,
+      $listaUtenti = $this->em->getRepository(Ata::class)->findBy(['abilitato' => 1,
         'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
@@ -421,7 +423,7 @@ class AtaController extends BaseController {
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function rappresentantiDelete(int $id): Response {
     // controlla utente
-    $utente = $this->em->getRepository(\App\Entity\Ata::class)->find($id);
+    $utente = $this->em->getRepository(Ata::class)->find($id);
     if (!$utente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

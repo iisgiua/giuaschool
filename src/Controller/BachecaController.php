@@ -9,6 +9,8 @@
 namespace App\Controller;
 
 
+use App\Entity\Avviso;
+use App\Entity\Classe;
 use App\Util\BachecaUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -110,7 +112,7 @@ class BachecaController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
+    $avviso = $this->em->getRepository(Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -143,7 +145,7 @@ class BachecaController extends BaseController {
     // inizializza
     $dati = null;
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -169,7 +171,7 @@ class BachecaController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function avvisiAlunniFirma(BachecaUtil $bac, int $classe, string $id): Response {
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

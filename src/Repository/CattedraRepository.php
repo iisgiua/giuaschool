@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use App\Entity\ScansioneOraria;
+use DateTime;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Cattedra;
@@ -182,14 +184,14 @@ class CattedraRepository extends BaseRepository {
       $dati['lista'][$cat->getId()]['orario'] = [];
       if ($cat->getMateria()->getTipo() != 'S') {
         // cattedra curricolare
-        $orario = $this->_em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
+        $orario = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join(\App\Entity\ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join(ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->where('od.cattedra=:cattedra AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('od.giorno,od.ora', 'ASC')
           ->setParameters(['cattedra' => $cat, 'sede' => $cat->getClasse()->getSede(),
-            'data' => new \DateTime('today')])
+            'data' => new DateTime('today')])
           ->getQuery()
           ->getArrayResult();
         foreach ($orario as $o) {
@@ -197,15 +199,15 @@ class CattedraRepository extends BaseRepository {
         }
       } else {
         // cattedra di sostegno: imposta orari di tutte le materie della classe
-        $orari = $this->_em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
+        $orari = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join(\App\Entity\ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join(ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->join('od.cattedra', 'c')
           ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('c.id,od.giorno,od.ora', 'ASC')
           ->setParameters(['classe' => $cat->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0,
-            'sede' => $cat->getClasse()->getSede(), 'data' => new \DateTime('today')])
+            'sede' => $cat->getClasse()->getSede(), 'data' => new DateTime('today')])
           ->getQuery()
           ->getArrayResult();
         foreach ($orari as $o) {

@@ -32,7 +32,7 @@ class PropostaVotoRepository extends EntityRepository {
    */
   public function proposteEdCivica(Classe $classe, string $periodo, array $alunni) {
     // dati valutazioni
-    $scrutinio = $this->_em->getRepository(\App\Entity\Scrutinio::class)->createQueryBuilder('s')
+    $scrutinio = $this->_em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo])
       ->setMaxResults(1)

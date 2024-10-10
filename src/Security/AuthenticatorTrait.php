@@ -8,6 +8,9 @@
 
 namespace App\Security;
 
+use DateTime;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 use App\Entity\Amministratore;
 use App\Entity\Genitore;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -33,9 +36,9 @@ trait AuthenticatorTrait {
    */
   public function controllaManutenzione(UserInterface $user): void {
     // controlla modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $inizio = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_inizio');
-    $fine = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('manutenzione_fine');
+    $ora = (new DateTime())->format('Y-m-d H:i');
+    $inizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
+    $fine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
     if ($inizio && $fine && $ora >= $inizio && $ora <= $fine && !($user instanceOf Amministratore)) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di autenticazione durante la modalità manutenzione.', [
@@ -60,7 +63,7 @@ trait AuthenticatorTrait {
       return $user;
     }
     // trova profili attivi
-    $profilo = $this->em->getRepository(\App\Entity\Utente::class)->profiliAttivi($user->getNome(),
+    $profilo = $this->em->getRepository(Utente::class)->profiliAttivi($user->getNome(),
       $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       if ($user instanceOf Genitore) {

@@ -8,6 +8,8 @@
 
 namespace App\MessageHandler;
 
+use Throwable;
+use App\Entity\Circolare;
 use App\Message\CircolareMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -78,7 +80,7 @@ class CircolareMessageHandler implements BatchHandlerInterface {
         }
         // operazione terminata senza errori
         $ack->ack($message);
-      } catch (\Throwable $e) {
+      } catch (Throwable $e) {
         // errore
         $this->logger->error('CircolareMessage: ERRORE '.$e->getMessage(), [$e]);
         $ack->nack($e);
@@ -113,10 +115,10 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @return bool Restituisce vero se è stata aggiunta una nuova circolare
    */
   private function raggruppa(int $id, array &$destinatari): bool {
-    $circolare = $this->em->getRepository(\App\Entity\Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if ($circolare) {
       // solo circolari esistenti e pubblicate
-      $utenti = $this->em->getRepository(\App\Entity\Circolare::class)->notifica($circolare);
+      $utenti = $this->em->getRepository(Circolare::class)->notifica($circolare);
       foreach ($utenti as $u) {
         // memorizza circolari per utente
         $destinatari[$u][] = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),

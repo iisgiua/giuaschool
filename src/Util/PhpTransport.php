@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use Exception;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 
@@ -55,7 +56,7 @@ final class PhpTransport extends AbstractTransport {
     }
     if (!mail($recipients, $subject, $msg, $headers)) {
       // errore: impossibile spedire la mail
-      throw new \Exception('exception.mail_transport_error');
+      throw new Exception('exception.mail_transport_error');
     }
   }
 

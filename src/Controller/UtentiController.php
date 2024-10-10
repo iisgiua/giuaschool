@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Configurazione;
 use App\Form\NotificaType;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
@@ -327,7 +328,7 @@ class UtentiController extends BaseController {
     // legge dati
     $notifica = $this->getUser()->getNotifica();
     // controlla configurazione telegram
-    $bot = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_bot');
+    $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
     if (empty($bot) && $notifica['tipo'] == 'telegram') {
       // elimina notifica telegram
       $notifica['tipo'] = 'email';
@@ -398,7 +399,7 @@ class UtentiController extends BaseController {
       $this->getUser()->creaToken();
       $this->em->flush();
       $token = base64_encode($this->getUser()->getToken().'#'.$this->getUser()->getUserIdentifier());
-      $bot = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_bot');
+      $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
       $info['messaggio'] = 'message.notifiche_configura_telegram';
       $info['url'] = 'https://t.me/'.$bot.'?start='.$token;
     } else {

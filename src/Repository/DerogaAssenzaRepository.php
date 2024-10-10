@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * DerogaAssenza - repository
  *
  * @author Antonello Dessì
  */
-class DerogaAssenzaRepository extends \Doctrine\ORM\EntityRepository {
+class DerogaAssenzaRepository extends EntityRepository {
 
 }
 

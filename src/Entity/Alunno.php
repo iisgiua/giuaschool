@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use App\Repository\AlunnoRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\AlunnoRepository::class)]
+#[ORM\Entity(repositoryClass: AlunnoRepository::class)]
 #[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Alunno::class)]
 class Alunno extends Utente {
 
@@ -501,7 +503,7 @@ class Alunno extends Utente {
   public function getCodiceFunzioni(): array {
     $lista = $this->getRappresentante() ?? [];
     // determina se è maggiorenne
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     if ($oggi->diff($this->getDataNascita())->format('%y') >= 18) {
       $lista[] = 'M';
     }

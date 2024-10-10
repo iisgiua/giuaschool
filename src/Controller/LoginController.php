@@ -8,6 +8,9 @@
 
 namespace App\Controller;
 
+use DateTime;
+use App\Entity\Utente;
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
 use App\Entity\Ata;
@@ -62,7 +65,7 @@ class LoginController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -132,7 +135,7 @@ class LoginController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -150,7 +153,7 @@ class LoginController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $email = $form->get('email')->getData();
-      $utente = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
+      $utente = $this->em->getRepository(Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
       $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
@@ -237,7 +240,7 @@ class LoginController extends BaseController {
           // invia email
           $mailer->send($message);
           $successo = 'message.recovery_ok';
-        } catch (\Exception $err) {
+        } catch (Exception $err) {
           // errore di spedizione
           $logger->error('Errore di spedizione email nella richiesta di recupero password.', [
             'username' => $utente->getUsername(),
@@ -276,7 +279,7 @@ class LoginController extends BaseController {
     $lista = [];
     foreach ($this->reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
-        $utente = $this->em->getRepository(\App\Entity\Utente::class)->find($id);
+        $utente = $this->em->getRepository(Utente::class)->find($id);
         $nome = $ruolo.' ';
         if ($ruolo == 'GENITORE') {
           // profilo genitore
@@ -309,11 +312,11 @@ class LoginController extends BaseController {
       if ($profiloId && (!$this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
           $this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
-        $utente = $this->em->getRepository(\App\Entity\Utente::class)->find($profiloId);
+        $utente = $this->em->getRepository(Utente::class)->find($profiloId);
         // imposta ultimo accesso
         $accesso = $utente->getUltimoAccesso();
         $this->reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-        $utente->setUltimoAccesso(new \DateTime());
+        $utente->setUltimoAccesso(new DateTime());
         // log azione
         $dblogger->logAzione('ACCESSO', 'Cambio profilo', [
           'Username' => $utente->getUserIdentifier(),

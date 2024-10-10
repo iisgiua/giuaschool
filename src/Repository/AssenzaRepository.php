@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 
@@ -23,10 +24,10 @@ class AssenzaRepository extends BaseRepository {
    * Elimina le assenze dell'alunno nel periodo indicato
    *
    * @param Alunno $alunno Alunno di cui si vogliono eliminare le assenze
-   * @param \DateTime $inizio Data di inizio
-   * @param \DateTime $fine Data di fine
+   * @param DateTime $inizio Data di inizio
+   * @param DateTime $fine Data di fine
    */
-  public function elimina(Alunno $alunno, \DateTime $inizio, \DateTime $fine) {
+  public function elimina(Alunno $alunno, DateTime $inizio, DateTime $fine) {
     // crea query base
     $this->createQueryBuilder('ass')
       ->delete()
@@ -58,11 +59,11 @@ class AssenzaRepository extends BaseRepository {
    * Restituisce gli alunni della classe assenti nella data indicata
    *
    * @param Classe $classe Classe di cui controllare le assenze
-   * @param \DateTime $data Data del giorno in cui controllare le assenze
+   * @param DateTime $data Data del giorno in cui controllare le assenze
    *
    * @return array Lista degli alunni assenti
    */
-  public function assentiInData(Classe $classe, \DateTime $data): array {
+  public function assentiInData(Classe $classe, DateTime $data): array {
     // crea query base
     $assenti = $this->createQueryBuilder('ass')
       ->select('a.cognome,a.nome,a.dataNascita')

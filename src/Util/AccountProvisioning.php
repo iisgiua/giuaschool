@@ -8,6 +8,10 @@
 
 namespace App\Util;
 
+use App\Entity\Configurazione;
+use App\Entity\Sede;
+use App\Entity\Istituto;
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
@@ -99,13 +103,13 @@ class AccountProvisioning {
    */
   public function inizializza() {
     // inizializza parametri configurazione
-    $this->conf['dominio'] = $this->em->getRepository(\App\Entity\Configurazione::class)
+    $this->conf['dominio'] = $this->em->getRepository(Configurazione::class)
       ->getParametro('id_provider_dominio');
-    $this->conf['anno'] = substr((string) $this->em->getRepository(\App\Entity\Configurazione::class)
+    $this->conf['anno'] = substr((string) $this->em->getRepository(Configurazione::class)
       ->getParametro('anno_inizio'), 0, 4);
-    $this->conf['citta']  = ($this->em->getRepository(\App\Entity\Sede::class)->findOneBy([], ['ordinamento' => 'ASC']))
+    $this->conf['citta']  = ($this->em->getRepository(Sede::class)->findOneBy([], ['ordinamento' => 'ASC']))
       ->getCitta();
-    $this->conf['istituto'] = $this->em->getRepository(\App\Entity\Istituto::class)->findOneBy([]);
+    $this->conf['istituto'] = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // inizializza sistemi
     if (($errore = $this->inizializzaGsuite())) {
       // errore
@@ -171,7 +175,7 @@ class AccountProvisioning {
     try {
       $idutente = $this->idUtenteMoodle($utente->getUsername());
       $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       return $e->getMessage();
     }
@@ -248,7 +252,7 @@ class AccountProvisioning {
     }
     $this->log[] = 'aggiungeUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: aggiunge ai corsi della classe
-    $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
@@ -294,7 +298,7 @@ class AccountProvisioning {
     }
     $this->log[] = 'rimuoveUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: rimuove dai corsi della classe
-    $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
@@ -318,7 +322,7 @@ class AccountProvisioning {
       $this->log[] = 'idUtenteMoodle: '.$alunno->getUsername().' -> '.$idutente;
       $idgruppo = $this->idGruppoMoodle($gruppo);
       $this->log[] = 'idGruppoMoodle: '.$gruppo.' -> '.$idgruppo;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       return $e->getMessage();
     }
@@ -376,7 +380,7 @@ class AccountProvisioning {
     // gestione cattedra di sostegno
     if ($cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie
-      $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
@@ -405,7 +409,7 @@ class AccountProvisioning {
       try {
         // lista studenti
         $students = $this->serviceGsuite['classroom']->courses_students->listCoursesStudents('d:'.$corso);
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $msg = json_decode($e->getMessage(), true);
         $errore = '[aggiungeCattedra] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -413,7 +417,7 @@ class AccountProvisioning {
       }
       if (count($students['students']) == 0) {
         // GSuite: aggiunge studenti al corso
-        $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+        $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->select('a.email')
           ->join('a.classe', 'cl')
           ->where('a.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione'.(empty($cattedra->getClasse()->getGruppo()) ? '' : (" AND cl.gruppo='".$cattedra->getClasse()->getGruppo()."'")))
@@ -447,7 +451,7 @@ class AccountProvisioning {
           $errore = '[aggiungeCattedra] '.$msg->message;
           return $errore;
         }
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $errore = '[aggiungeCattedra] '.$e->getMessage();
         return $errore;
@@ -487,7 +491,7 @@ class AccountProvisioning {
     $docente_username = $docente->getUsername();
     $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // controlla se ha altre materie nella classe
-    $altre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+    $altre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('COUNT(c.id)')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
@@ -500,7 +504,7 @@ class AccountProvisioning {
     // gestione cattedra di sostegno
     if ($materia->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie (anche cattedre/docenti disabilitati)
-      $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->select('DISTINCT m.nomeBreve')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
@@ -532,7 +536,7 @@ class AccountProvisioning {
         $this->log[] = 'idUtenteMoodle: '.$docente_username.' -> '.$idutente;
         $idcorso = $this->idCorsoMoodle($corso);
         $this->log[] = 'idCorsoMoodle: '.$corso.' -> '.$idcorso;
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         return $e->getMessage();
       }
@@ -676,7 +680,7 @@ class AccountProvisioning {
       $this->serviceGsuite = [];
       $this->serviceGsuite['directory'] = new GDirectory($client);
       $this->serviceGsuite['classroom'] = new GClassroom($client);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[inizializzaGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -707,7 +711,7 @@ class AccountProvisioning {
           'type' => 'USER']);
         $ris = $this->serviceGsuite['directory']->members->insert($gruppo, $member);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[aggiungeUtenteGruppoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -734,7 +738,7 @@ class AccountProvisioning {
         // rimuove utente
         $ris = $this->serviceGsuite['directory']->members->delete($gruppo, $utente);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveUtenteGruppoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -762,7 +766,7 @@ class AccountProvisioning {
     // controlla esistenza
     try {
       $esistente = $this->serviceGsuite['directory']->users->get($email);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // utente non esiste
       $esistente = null;
     }
@@ -814,7 +818,7 @@ class AccountProvisioning {
         // aggiunge docente a corso COLLEGIO DEI DOCENTI
         $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -842,7 +846,7 @@ class AccountProvisioning {
         'name' => ['givenName' => $nome, 'familyName' => $cognome],
         'gender' => ['type' => ($sesso == 'M' ? 'male' : 'female')]]);
       $ris = $this->serviceGsuite['directory']->users->update($email, $user);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[modificaUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -868,7 +872,7 @@ class AccountProvisioning {
         'password' => sha1($password),
         'hashFunction' => 'SHA-1']);
       $ris = $this->serviceGsuite['directory']->users->update($email, $user);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[passwordUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -920,7 +924,7 @@ class AccountProvisioning {
           $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[passwordUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -948,7 +952,7 @@ class AccountProvisioning {
       // controlla esistenza corso
       try {
         $corsoObj = $this->serviceGsuite['classroom']->courses->get('d:'.$corso);
-      } catch (\Exception) {
+      } catch (Exception) {
         $corsoObj = null;
       }
       if (!$corsoObj) {
@@ -964,7 +968,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-        } catch (\Exception) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -977,7 +981,7 @@ class AccountProvisioning {
       }
       // aggiunge docente a gruppo classe
       $errore = $this->aggiungeUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$this->conf['dominio']);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1002,7 +1006,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $studente);
-      } catch (\Exception) {
+      } catch (Exception) {
         // studente non presente
         $presente = false;
       }
@@ -1012,7 +1016,7 @@ class AccountProvisioning {
           'userId' => $studente]);
         $ris = $this->serviceGsuite['classroom']->courses_students->create('d:'.$corso, $student);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[aggiungeAlunnoCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1037,7 +1041,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $studente);
-      } catch (\Exception) {
+      } catch (Exception) {
         // studente non presente
         $presente = false;
       }
@@ -1045,7 +1049,7 @@ class AccountProvisioning {
         // rimuove studente
         $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $studente);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveAlunnoCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1095,7 +1099,7 @@ class AccountProvisioning {
         // rimuove docente da gruppo classe
         $errore = $this->rimuoveUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$this->conf['dominio']);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveDocenteCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1123,7 +1127,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-      } catch (\Exception) {
+      } catch (Exception) {
         // docente non presente
         $presente = false;
       }
@@ -1136,7 +1140,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
-        } catch (\Exception) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -1158,7 +1162,7 @@ class AccountProvisioning {
           'userId' => $docente]);
         $ris = $this->serviceGsuite['classroom']->courses_students->create('d:'.$corso, $student);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1185,7 +1189,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-      } catch (\Exception) {
+      } catch (Exception) {
         // docente non presente
         $presente = false;
       }
@@ -1197,7 +1201,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
-        } catch (\Exception) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -1206,7 +1210,7 @@ class AccountProvisioning {
           $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $docente);
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1232,7 +1236,7 @@ class AccountProvisioning {
       $this->serviceMoodle = [];
       $this->serviceMoodle['config'] = $config;
       $this->serviceMoodle['client'] = $client;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[inizializzaMoodle] '.$e->getMessage();
     }
@@ -1255,7 +1259,7 @@ class AccountProvisioning {
     $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idUtenteMoodle] '.$msg->message);
+      throw new Exception('[idUtenteMoodle] '.$msg->message);
     }
     // restituisce id utente
     return $msg[0]->id;
@@ -1278,7 +1282,7 @@ class AccountProvisioning {
     $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idGruppoMoodle] '.$msg->message);
+      throw new Exception('[idGruppoMoodle] '.$msg->message);
     }
     // restituisce id gruppo
     return $msg->cohorts[0]->id;
@@ -1313,7 +1317,7 @@ class AccountProvisioning {
     $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idCategoriaMoodle] '.$msg->message);
+      throw new Exception('[idCategoriaMoodle] '.$msg->message);
     }
     // restituisce id categoria
     return $msg[0]->id;
@@ -1347,7 +1351,7 @@ class AccountProvisioning {
         // errore
         $errore = '[aggiungeUtenteGruppoMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[aggiungeUtenteGruppoMoodle] '.$e->getMessage();
     }
@@ -1379,7 +1383,7 @@ class AccountProvisioning {
         // errore
         $errore = '[rimuoveUtenteGruppoMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[rimuoveUtenteGruppoMoodle] '.$e->getMessage();
     }
@@ -1432,7 +1436,7 @@ class AccountProvisioning {
         // aggiunge a gruppo
         $errore = $this->aggiungeUtenteGruppoMoodle($username, $gruppo);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[creaUtenteMoodle] '.$e->getMessage();
     }
@@ -1466,7 +1470,7 @@ class AccountProvisioning {
         // errore
         $errore = '[modificaUtenteMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[modificaUtenteMoodle] '.$e->getMessage();
     }
@@ -1498,7 +1502,7 @@ class AccountProvisioning {
         // errore
         $errore = '[passwordUtenteMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[passwordUtenteMoodle] '.$e->getMessage();
     }
@@ -1551,7 +1555,7 @@ class AccountProvisioning {
           $errore = $this->aggiungeUtenteGruppoMoodle($utente, $gruppo);
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[sospendeUtenteMoodle] '.$e->getMessage();
     }
@@ -1628,7 +1632,7 @@ class AccountProvisioning {
         $errore = '[creaCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[creaCorsoMoodle] '.$e->getMessage();
     }
@@ -1676,7 +1680,7 @@ class AccountProvisioning {
         $errore = '[aggiungeClasseCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[aggiungeClasseCorsoMoodle] '.$e->getMessage();
     }
@@ -1709,7 +1713,7 @@ class AccountProvisioning {
         $errore = '[rimuoveDocenteCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[rimuoveDocenteCorsoMoodle] '.$e->getMessage();
     }
@@ -1733,7 +1737,7 @@ class AccountProvisioning {
     $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idCorsoMoodle] '.$msg->message);
+      throw new Exception('[idCorsoMoodle] '.$msg->message);
     }
     // restituisce id corso
     return $msg->courses[0]->id;

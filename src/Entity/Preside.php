@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\PresideRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\PresideRepository::class)]
+#[ORM\Entity(repositoryClass: PresideRepository::class)]
 class Preside extends Staff {
 
 

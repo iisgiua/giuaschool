@@ -8,6 +8,8 @@
 
 namespace App\Util;
 
+use TCPDF;
+use Exception;
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -24,16 +26,15 @@ class PdfManager {
 
 
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
    * @param TCPDFController $pdfcontroller Controlla la creazione dell'oggetto TCPDF
-   * @param \TCPDF|null $pdf Gestore dei documenti in formato PDF
+   * @param TCPDF|null $pdf Gestore dei documenti in formato PDF
    */
   public function __construct(
       private readonly TCPDFController $pdfcontroller,
-      private ?\TCPDF $pdf = null) {
+      private ?TCPDF $pdf = null) {
   }
 
   /**
@@ -102,9 +103,9 @@ class PdfManager {
   /**
    * Restituisce il gestore del documento PDF
    *
-   * @return \TCPDF|null Restituisce il gestore del documento
+   * @return TCPDF|null Restituisce il gestore del documento
    */
-  public function getHandler(): ?\TCPDF {
+  public function getHandler(): ?TCPDF {
     return $this->pdf;
   }
 
@@ -124,7 +125,7 @@ class PdfManager {
     try {
       // importa file e calcola il numero pagine del documento
       $pageCount = $this->pdf->setSourceFile($file);
-    } catch (\Exception) {
+    } catch (Exception) {
       // documento illegibile o protetto: converte file PDF
       if (!$this->convertFormat($file)) {
         // errore nella conversione
@@ -134,7 +135,7 @@ class PdfManager {
       try {
         // riprova l'importazione
         $pageCount = $this->pdf->setSourceFile($file);
-      } catch (\Exception) {
+      } catch (Exception) {
         // errore nella codifica
         return false;
       }
@@ -180,7 +181,7 @@ class PdfManager {
         rename($file.'.pdf', $file);
         return true;
       }
-    } catch (\Exception) {
+    } catch (Exception) {
       // errore: non fa niente
     }
     // errore: restituisce falso

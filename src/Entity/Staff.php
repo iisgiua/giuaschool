@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\StaffRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\StaffRepository::class)]
+#[ORM\Entity(repositoryClass: StaffRepository::class)]
 class Staff extends Docente {
 
 

@@ -8,6 +8,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Configurazione;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Alunno;
+use App\Entity\Materia;
+use App\Entity\Scrutinio;
+use App\Entity\VotoScrutinio;
+use App\Entity\Esito;
+use App\Entity\DefinizioneScrutinio;
+use App\Entity\PropostaVoto;
+use DateTime;
 use App\Entity\Preside;
 use App\Entity\Staff;
 use App\Form\MessageType;
@@ -67,9 +78,9 @@ class ScrutinioController extends BaseController {
     $title['N'] = in_array($periodo, ['P', 'S', 'F']) ? 'message.proposte' : 'message.proposte_sospesi';
     $title['E'] = $title['N'];
     $title['R'] = 'message.proposte_religione';
-    $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -101,7 +112,7 @@ class ScrutinioController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -121,7 +132,7 @@ class ScrutinioController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -182,7 +193,7 @@ class ScrutinioController extends BaseController {
             $log['edit'] = [];
             foreach ($form->get('lista')->getData() as $key=>$prop) {
               // controllo alunno
-              $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
+              $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
                 'abilitato' => 1]);
               if (!$alunno) {
                 // alunno non esiste, salta
@@ -302,7 +313,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -409,9 +420,9 @@ class ScrutinioController extends BaseController {
     $info = [];
     $elenco = [];
     $elenco['alunni'] = [];
-    $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -431,7 +442,7 @@ class ScrutinioController extends BaseController {
     // valore predefinito
     $info['valutazioni'] = $valutazioni['N'];
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -446,8 +457,8 @@ class ScrutinioController extends BaseController {
       }
     }
     // controllo materia
-    $materia = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
-      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
+    $materia = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
+      ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
@@ -495,7 +506,7 @@ class ScrutinioController extends BaseController {
       $log['edit'] = [];
       foreach ($form->get('lista')->getData() as $key=>$prop) {
         // controllo alunno
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
+        $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $prop->getAlunno()->getId(),
           'classe' => $classe->getId(), 'abilitato' => 1]);
         if (!$alunno) {
           // alunno non esiste, salta
@@ -570,7 +581,7 @@ class ScrutinioController extends BaseController {
     $dati = [];
     $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -591,14 +602,14 @@ class ScrutinioController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // legge condotta
-    $condotta = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     if (!$condotta) {
       // errore
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $condotta, $periodo);
-    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
     $dati['assenze'] = $scrutinio->getDato('scrutinabili');
     $dati['valutazioni'] = $scrutinio->getDato('valutazioni')['C'];
     if ($alunno > 0) {
@@ -626,7 +637,7 @@ class ScrutinioController extends BaseController {
       $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -695,7 +706,7 @@ class ScrutinioController extends BaseController {
     $dati = [];
     $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -711,11 +722,11 @@ class ScrutinioController extends BaseController {
     }
     // controllo materia
     if ($periodo == 'X') {
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($materia);
+      $materia = $this->em->getRepository(Materia::class)->find($materia);
     } else {
       // scrutini altri periodi
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->createQueryBuilder('m')
-        ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
+      $materia = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
+        ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
@@ -753,7 +764,7 @@ class ScrutinioController extends BaseController {
       }
     }
     // dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -772,7 +783,7 @@ class ScrutinioController extends BaseController {
       $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -785,7 +796,7 @@ class ScrutinioController extends BaseController {
         }
         if (in_array($periodo, ['G', 'R'])) {
           // legge voto dello scrutinio finale
-          $votoFinale = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->createQueryBuilder('vs')
+          $votoFinale = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
             ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno, 'materia' => $materia,
@@ -855,7 +866,7 @@ class ScrutinioController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -869,7 +880,7 @@ class ScrutinioController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -943,14 +954,14 @@ class ScrutinioController extends BaseController {
     // inizializza variabili
     $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -981,7 +992,7 @@ class ScrutinioController extends BaseController {
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     }
     // impedisce che condotta sia modificata
-    $condotta = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $dati['materia_condotta'] = $condotta->getNomeBreve();
     $dati['voto_condotta'] = !empty($dati['voti'][$condotta->getId()]) ?
       $dati['voti'][$condotta->getId()]->getUnico() : null;
@@ -996,7 +1007,7 @@ class ScrutinioController extends BaseController {
       $lista_esiti = ['label.esito_A' => 'A', 'label.esito_N' => 'N'];
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -1062,7 +1073,7 @@ class ScrutinioController extends BaseController {
         }
         if (in_array($periodo, ['G', 'R'])) {
           // legge voto dello scrutinio finale
-          $votoFinale = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->createQueryBuilder('vs')
+          $votoFinale = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
             ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno,
@@ -1195,14 +1206,14 @@ class ScrutinioController extends BaseController {
     $credito[5] = [5 =>  7, 6 =>  9, 7 => 10, 8 => 11,  9 => 13, 10 => 14];
     $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -1258,7 +1269,7 @@ class ScrutinioController extends BaseController {
       }
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -1335,14 +1346,14 @@ class ScrutinioController extends BaseController {
     // inizializza variabili
     $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
     if ($periodo == 'X') {
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
     } else {
       $classe = $alunno->getClasse();
     }
@@ -1371,7 +1382,7 @@ class ScrutinioController extends BaseController {
     }
     $valori = $dati['esito']->getDati();
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -1548,7 +1559,7 @@ class ScrutinioController extends BaseController {
     // inizializza variabili
     $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno || !$alunno->getClasse()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1571,7 +1582,7 @@ class ScrutinioController extends BaseController {
     // elenco debiti
     $dati = $scr->elencoDebitiAlunno($this->getUser(), $alunno, $periodo);
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -1604,7 +1615,7 @@ class ScrutinioController extends BaseController {
       }
       if ($periodo != 'P' && $periodo != 'S') {
         // recupera esito
-        $esito = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
+        $esito = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
           ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
@@ -1653,7 +1664,7 @@ class ScrutinioController extends BaseController {
     // inizializza variabili
     $dati = [];
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno || !$alunno->getClasse()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1676,7 +1687,7 @@ class ScrutinioController extends BaseController {
     // elenco carenze
     $dati = $scr->elencoCarenzeAlunno($this->getUser(), $alunno, $periodo);
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->getDato('valutazioni');
     // form di inserimento
@@ -1692,7 +1703,7 @@ class ScrutinioController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // recupera esito
-      $esito = $this->em->getRepository(\App\Entity\Esito::class)->createQueryBuilder('e')
+      $esito = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->join('e.scrutinio', 's')
         ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
         ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
@@ -1743,14 +1754,14 @@ class ScrutinioController extends BaseController {
     $dati = null;
     $form = null;
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge definizione scrutinio e scrutinio
-    $def = $this->em->getRepository(\App\Entity\DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
-    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy(['periodo' => $periodo,
+    $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo,
       'classe' => $classe]);
     if (!$def || !$scrutinio) {
       // errore
@@ -1827,7 +1838,7 @@ class ScrutinioController extends BaseController {
     $dati = [];
     $dati['alunni'] = [];
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1848,7 +1859,7 @@ class ScrutinioController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // legge ed civica
-    $edcivica = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     if (!$edcivica) {
       // errore
       throw $this->createNotFoundException('exception.invalid_params');
@@ -1865,14 +1876,14 @@ class ScrutinioController extends BaseController {
       }
     }
     // legge proposte di voto
-    $dati['proposte'] = $this->em->getRepository(\App\Entity\PropostaVoto::class)->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
+    $dati['proposte'] = $this->em->getRepository(PropostaVoto::class)->proposteEdCivica($classe, $periodo, array_keys($dati['voti']));
     foreach ($dati['proposte'] as $alu=>$prop) {
       if (!empty($prop['debito']) && $dati['voti'][$alu]->getUnico() !== null) {
         $dati['proposte'][$alu]['debito'] = null;
       }
     }
     // legge dati valutazioni
-    $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+    $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
       ->findOneBy(['classe' => $classe, 'periodo' => $periodo])
       ->getDato('valutazioni')['E'];
     // form di inserimento
@@ -1892,7 +1903,7 @@ class ScrutinioController extends BaseController {
       $errore = [];
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($voto->getAlunno()->getId());
+        $alunno = $this->em->getRepository(Alunno::class)->find($voto->getAlunno()->getId());
         if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $this->em->detach($voto);
@@ -1948,7 +1959,7 @@ class ScrutinioController extends BaseController {
   public function scrutinioAggiorna(Request $request, ScrutinioUtil $scr, int $scrutinio): Response {
     $risposta = ['status' => 'ok'];
     // controllo scrutinio
-    $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->find($scrutinio);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->find($scrutinio);
     if (!$scrutinio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1979,7 +1990,7 @@ class ScrutinioController extends BaseController {
           }
           break;
         case 'fine':
-          $ora = new \DateTime($value);
+          $ora = new DateTime($value);
           $scrutinio->setFine($ora);
           break;
       }

@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 
@@ -23,13 +24,13 @@ class ValutazioneRepository extends BaseRepository {
    * Restituisce il numero di valutazioni dell'alunno nell'intervallo di tempo indicato
    *
    * @param Alunno $alunno Alunno di cui si vuole contare le valutazioni
-   * @param \DateTime $inizio Data di inizio
-   * @param \DateTime $fine Data di fine
+   * @param DateTime $inizio Data di inizio
+   * @param DateTime $fine Data di fine
    * @param Classe $classe Classe di riferimento o null per non effettuare controlli
    *
    * @return int Numero di valutazioni presenti
    */
-  public function numeroValutazioni(Alunno $alunno, \DateTime $inizio, \DateTime $fine, Classe $classe=null) {
+  public function numeroValutazioni(Alunno $alunno, DateTime $inizio, DateTime $fine, Classe $classe=null) {
     // conta valutazioni
     $voti = $this->createQueryBuilder('v')
       ->select('COUNT(v.id)')

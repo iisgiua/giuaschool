@@ -105,13 +105,13 @@ class ProvisioningCommand extends Command {
     // inizializza
     $num = 0;
     // comandi in attesa
-    $comandi = $this->em->getRepository(\App\Entity\Provisioning::class)->comandiInAttesa();
+    $comandi = $this->em->getRepository(Provisioning::class)->comandiInAttesa();
     $this->logger->notice('provisioning-esegue: Comandi in attesa', ['num' => count($comandi)]);
     // inizializza
     $errore = $this->prov->inizializza();
     if ($errore) {
       // riporta comandi in attesa
-      $this->em->getRepository(\App\Entity\Provisioning::class)->ripristinaComandi($comandi);
+      $this->em->getRepository(Provisioning::class)->ripristinaComandi($comandi);
       // esce con messaggio di errore
       $this->logger->error('provisioning-esegue: ERRORE - '.$errore);
       return 0;
@@ -119,7 +119,7 @@ class ProvisioningCommand extends Command {
     // esecuzione comandi
     foreach ($comandi as $id) {
       // esegue un comando alla volta
-      $dati = $this->em->getRepository(\App\Entity\Provisioning::class)->comandoDaEseguire($id);
+      $dati = $this->em->getRepository(Provisioning::class)->comandoDaEseguire($id);
       switch ($dati['provisioning']->getFunzione()) {
         case 'creaUtente':
           $errore = $this->prov->creaUtente($dati['provisioning']->getUtente(),
@@ -169,17 +169,17 @@ class ProvisioningCommand extends Command {
       $log = $this->prov->log();
       $this->prov->svuotaLog();
       if ($errore) {
-        $this->em->getRepository(\App\Entity\Provisioning::class)->provisioningErrato($id, $log, $errore);
+        $this->em->getRepository(Provisioning::class)->provisioningErrato($id, $log, $errore);
         // messaggio d'errore
         $this->logger->error('provisioning-esegue: ERRORE - '.$errore, ['id' => $id]);
       } else {
-        $this->em->getRepository(\App\Entity\Provisioning::class)->provisioningEseguito($id, $log);
+        $this->em->getRepository(Provisioning::class)->provisioningEseguito($id, $log);
         // conta comandi eseguiti
         $num++;
       }
     }
     // cancella vecchi comandi eseguiti
-    $this->em->getRepository(\App\Entity\Provisioning::class)->cancellaComandi();
+    $this->em->getRepository(Provisioning::class)->cancellaComandi();
     // restituisce numero comandi eseguiti
     return $num;
   }

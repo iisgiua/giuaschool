@@ -8,6 +8,7 @@
 
 namespace App\Form;
 
+use App\Entity\Alunno;
 use App\Entity\Presenza;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -111,7 +112,7 @@ class PresenzaType extends AbstractType {
       // aggiunge data transform
       $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
         fn($alunno) => 0,
-        fn($id) => $this->em->getRepository(\App\Entity\Alunno::class)->find($id)));
+        fn($id) => $this->em->getRepository(Alunno::class)->find($id)));
     } elseif ($options['form_mode'] == 'edit') {
       // form modifica
       $builder

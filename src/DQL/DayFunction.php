@@ -8,6 +8,7 @@
 
 namespace App\DQL;
 
+use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;
@@ -23,9 +24,8 @@ class DayFunction extends FunctionNode {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $date La data da considerare
+   * @var Node $date La data da considerare
    */
   public $date = null;
 

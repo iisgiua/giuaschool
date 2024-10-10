@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\SpidRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -21,10 +24,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_spid')]
-#[ORM\Entity(repositoryClass: \App\Repository\SpidRepository::class)]
+#[ORM\Entity(repositoryClass: SpidRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: 'responseId', message: 'field.unique', entityClass: \App\Entity\Spid::class)]
-class Spid implements \Stringable {
+class Spid implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -37,16 +40,16 @@ class Spid implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $idp Identity provider che ha inviato la risposta
@@ -125,7 +128,7 @@ class Spid implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
-   $this->creato = new \DateTime();
+   $this->creato = new DateTime();
    $this->modificato = $this->creato;
   }
 
@@ -135,7 +138,7 @@ class Spid implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -153,18 +156,18 @@ class Spid implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

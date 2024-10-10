@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\GenitoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\GenitoreRepository::class)]
+#[ORM\Entity(repositoryClass: GenitoreRepository::class)]
 class Genitore extends Utente {
 
 

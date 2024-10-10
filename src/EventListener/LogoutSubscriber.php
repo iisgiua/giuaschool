@@ -8,6 +8,7 @@
 
 namespace App\EventListener;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use App\Util\LogHandler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -21,7 +22,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
  *
  * @author Antonello Dessì
  */
-class LogoutSubscriber implements \Symfony\Component\EventDispatcher\EventSubscriberInterface {
+class LogoutSubscriber implements EventSubscriberInterface {
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -79,7 +80,7 @@ class LogoutSubscriber implements \Symfony\Component\EventDispatcher\EventSubscr
    */
   public static function getSubscribedEvents(): array
   {
-    return [\Symfony\Component\Security\Http\Event\LogoutEvent::class => 'onLogoutEvent'];
+    return [LogoutEvent::class => 'onLogoutEvent'];
   }
 
 }

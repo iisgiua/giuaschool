@@ -8,6 +8,9 @@
 
 namespace App\Security;
 
+use App\Entity\Utente;
+use App\Entity\App;
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\Docente;
@@ -118,7 +121,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
    */
   public function getUser(string $username): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $username,
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $username,
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
@@ -146,7 +149,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // controlla appId
-    $app = $this->em->getRepository(\App\Entity\App::class)->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
     if (!$app) {
       // app non esiste o non attiva
       $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', [
@@ -225,7 +228,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-      $token->getUser()->setUltimoAccesso(new \DateTime());
+      $token->getUser()->setUltimoAccesso(new DateTime());
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());

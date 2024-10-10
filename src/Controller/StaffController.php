@@ -8,6 +8,22 @@
 
 namespace App\Controller;
 
+use App\Entity\Docente;
+use App\Entity\Classe;
+use App\Entity\Staff;
+use App\Entity\Sede;
+use App\Entity\Materia;
+use App\Entity\Utente;
+use App\Entity\ScansioneOraria;
+use DateTime;
+use IntlDateFormatter;
+use App\Entity\Festivita;
+use App\Entity\Genitore;
+use App\Entity\Richiesta;
+use App\Entity\CambioClasse;
+use Exception;
+use App\Entity\Nota;
+use App\Entity\Cattedra;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Avviso;
@@ -83,8 +99,8 @@ class StaffController extends BaseController {
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente');
     $search['destinatari'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/destinatari', '');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/pagina', 1);
@@ -94,11 +110,11 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi', FormType::class)
       ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => \App\Entity\Staff::class,
+        'class' => Staff::class,
         'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
@@ -185,7 +201,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'C']);
+      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'C']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -236,11 +252,11 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
-    $opzioniMaterie = $this->em->getRepository(\App\Entity\Materia::class)->opzioni(true, false);
+    $opzioniMaterie = $this->em->getRepository(Materia::class)->opzioni(true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'generico',
       'return_url' => $this->generateUrl('staff_avvisi'),
       'values' => [(count($avviso->getAnnotazioni()) > 0), $opzioniSedi, $opzioniClassi,
@@ -249,11 +265,11 @@ class StaffController extends BaseController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'C') {
-      $dati['lista'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository(Classe::class)->listaClassi($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'M') {
-      $dati['lista'] = $this->em->getRepository(\App\Entity\Materia::class)->listaMaterie($form->get('filtro')->getData());
+      $dati['lista'] = $this->em->getRepository(Materia::class)->listaMaterie($form->get('filtro')->getData());
     } elseif ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository(Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // lista sedi
@@ -290,7 +306,7 @@ class StaffController extends BaseController {
       $errore = false;
       if ($avviso->getFiltroTipo() == 'C') {
         // controlla classi
-        $lista = $this->em->getRepository(\App\Entity\Classe::class)
+        $lista = $this->em->getRepository(Classe::class)
           ->controllaClassi($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -298,14 +314,14 @@ class StaffController extends BaseController {
         }
       } elseif ($avviso->getFiltroTipo() == 'M') {
         // controlla materie
-        $lista = $this->em->getRepository(\App\Entity\Materia::class)->controllaMaterie($form->get('filtro')->getData(), $errore);
+        $lista = $this->em->getRepository(Materia::class)->controllaMaterie($form->get('filtro')->getData(), $errore);
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
         }
       } elseif ($avviso->getFiltroTipo() == 'U') {
         // controlla utenti
-        $lista = $this->em->getRepository(\App\Entity\Alunno::class)
+        $lista = $this->em->getRepository(Alunno::class)
           ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -347,13 +363,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
+          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
+          $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -365,14 +381,14 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
+            ->setUtente($this->em->getReference(Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
+            ->setClasse($this->em->getReference(Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
@@ -449,7 +465,7 @@ class StaffController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
+    $avviso = $this->em->getRepository(Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -480,7 +496,7 @@ class StaffController extends BaseController {
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new Filesystem();
     // controllo avviso
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
+    $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -504,13 +520,13 @@ class StaffController extends BaseController {
       $this->em->remove($a);
     }
     // cancella destinatari
-    $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
+    $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
+    $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -583,8 +599,8 @@ class StaffController extends BaseController {
     $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', 1);
@@ -594,11 +610,11 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_orario', FormType::class)
       ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => \App\Entity\Staff::class,
+        'class' => Staff::class,
         'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
@@ -669,7 +685,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
+      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => $tipo]);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -680,26 +696,26 @@ class StaffController extends BaseController {
       // legge ora predefinita
       if ($tipo == 'E') {
         // inizio seconda ora di lunedì su orario di oggi
-        $ora_predefinita = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno AND so.ora=:ora')
           ->orderBy('s.ordinamento', 'ASC')
-          ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'giorno' => 1, 'ora' => 2])
+          ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'giorno' => 1, 'ora' => 2])
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
       } else {
         // inizio ultima ora di lunedì su orario di oggi
-        $ora_predefinita = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
+        $ora_predefinita = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('so')
           ->select('so.inizio')
           ->join('so.orario', 'o')
           ->join('o.sede', 's')
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno ')
           ->orderBy('s.ordinamento', 'ASC')
           ->addOrderBy('so.ora', 'DESC')
-          ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'giorno' => 1])
+          ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'giorno' => 1])
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
@@ -710,8 +726,8 @@ class StaffController extends BaseController {
         ->setDestinatariAta(['D','A'])
         ->setDestinatari(['G','A','D'])
         ->setFiltroTipo('C')
-        ->setData(new \DateTime('tomorrow'))
-        ->setOra(\DateTime::createFromFormat('H:i:00', $ora_predefinita))
+        ->setData(new DateTime('tomorrow'))
+        ->setOra(DateTime::createFromFormat('H:i:00', $ora_predefinita))
         ->setOggetto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_oggetto' :
           'message.avviso_uscita_oggetto'))
         ->setTesto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
@@ -727,9 +743,9 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'orario',
       'return_url' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
@@ -775,7 +791,7 @@ class StaffController extends BaseController {
       $errore = false;
       $lista_classi = array_map(fn($o) => $o->getId(),
         $form->get('classi')->getData());
-      $lista = $this->em->getRepository(\App\Entity\Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository(Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -802,13 +818,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
+          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
+          $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -820,14 +836,14 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
+            ->setUtente($this->em->getReference(Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
+            ->setClasse($this->em->getReference(Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
@@ -904,8 +920,8 @@ class StaffController extends BaseController {
     $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente');
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/pagina', 1);
@@ -915,11 +931,11 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni();
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni();
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_attivita', FormType::class)
       ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => \App\Entity\Staff::class,
+        'class' => Staff::class,
         'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
@@ -986,7 +1002,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'A']);
+      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'A']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1000,9 +1016,9 @@ class StaffController extends BaseController {
         ->setDestinatariAta(['D', 'A'])
         ->setDestinatari(['D', 'G', 'A'])
         ->setFiltroTipo('C')
-        ->setData(new \DateTime('tomorrow'))
-        ->setOra(\DateTime::createFromFormat('H:i', '08:20'))
-        ->setOraFine(\DateTime::createFromFormat('H:i', '13:50'))
+        ->setData(new DateTime('tomorrow'))
+        ->setOra(DateTime::createFromFormat('H:i', '08:20'))
+        ->setOraFine(DateTime::createFromFormat('H:i', '13:50'))
         ->setOggetto($trans->trans('message.avviso_attivita_oggetto'))
         ->setTesto($trans->trans('message.avviso_attivita_testo'));
       if ($this->getUser()->getSede()) {
@@ -1016,9 +1032,9 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'attivita',
       'return_url' => $this->generateUrl('staff_avvisi_attivita'),
@@ -1068,7 +1084,7 @@ class StaffController extends BaseController {
       $errore = false;
       $lista_classi = array_map(fn($o) => $o->getId(),
         $form->get('classi')->getData());
-      $lista = $this->em->getRepository(\App\Entity\Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
+      $lista = $this->em->getRepository(Classe::class)->controllaClassi($sedi, $lista_classi, $errore);
       if ($errore) {
         // classe non valida
         $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
@@ -1095,13 +1111,13 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
+          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $this->em->getRepository(\App\Entity\AvvisoClasse::class)->createQueryBuilder('ac')
+          $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1113,14 +1129,14 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
+            ->setUtente($this->em->getReference(Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classi
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference(\App\Entity\Classe::class, $c));
+            ->setClasse($this->em->getReference(Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
@@ -1192,7 +1208,7 @@ class StaffController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente');
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) : null);
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
@@ -1205,7 +1221,7 @@ class StaffController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_individuali', FormType::class)
       ->add('docente', EntityType::class, ['label' => 'label.autore',
         'data' => $docente,
-        'class' => \App\Entity\Staff::class,
+        'class' => Staff::class,
         'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome(),
         'placeholder' => 'label.tutti_staff',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
@@ -1259,7 +1275,7 @@ class StaffController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'I']);
+      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'I']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1275,7 +1291,7 @@ class StaffController extends BaseController {
         ->setDestinatari(['G'])
         ->setFiltroTipo('U')
         ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
-        ->setData(new \DateTime('today'));
+        ->setData(new DateTime('today'));
       if ($this->getUser()->getSede()) {
         $avviso->addSedi($this->getUser()->getSede());
       }
@@ -1287,15 +1303,15 @@ class StaffController extends BaseController {
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, true, false);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'individuale',
       'return_url' => $this->generateUrl('staff_avvisi_individuali'),
       'values' => [$opzioniSedi, $opzioniClassi]]);
     $form->handleRequest($request);
-    $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    $dati['lista'] = $this->em->getRepository(Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     if ($form->isSubmitted()) {
       // lista sedi
       $sedi = [];
@@ -1318,7 +1334,7 @@ class StaffController extends BaseController {
       }
       // controlla filtro
       $errore = false;
-      $lista = $this->em->getRepository(\App\Entity\Alunno::class)
+      $lista = $this->em->getRepository(Alunno::class)
         ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
       if ($errore) {
         // utente non valido
@@ -1335,7 +1351,7 @@ class StaffController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(\App\Entity\AvvisoUtente::class)->createQueryBuilder('au')
+          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -1347,7 +1363,7 @@ class StaffController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference(\App\Entity\Utente::class, $u));
+            ->setUtente($this->em->getReference(Utente::class, $u));
           $this->em->persist($obj);
         }
         // ok: memorizza dati
@@ -1415,7 +1431,7 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
     }
     // crea lista anni
-    $listaAnni = $this->em->getRepository(\App\Entity\Avviso::class)->anniScolastici();
+    $listaAnni = $this->em->getRepository(Avviso::class)->anniScolastici();
     // crea lista mesi
     $listaMesi = [];
     for ($i = 9; $i <= 12; $i++) {
@@ -1425,7 +1441,7 @@ class StaffController extends BaseController {
       $listaMesi[$mesi[$i]] = $i;
     }
     // crea lista docenti autori di avvisi
-    $listaDocenti = $this->em->getRepository(\App\Entity\Avviso::class)->autori();
+    $listaDocenti = $this->em->getRepository(Avviso::class)->autori();
     // crea lista destinatari
     $listaDestinatari = ['label.coordinatori' => 'C',	'label.docenti' => 'D',
       'label.genitori' => 'G', 'label.alunni' => 'A', 'label.rappresentanti_R' => 'R',
@@ -1493,7 +1509,7 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_avvisi_archivio/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository(\App\Entity\Avviso::class)->listaArchivio($cerca, $pagina, $limite);
+    $dati = $this->em->getRepository(Avviso::class)->listaArchivio($cerca, $pagina, $limite);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/avvisi_archivio.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_archivio',
@@ -1517,7 +1533,7 @@ class StaffController extends BaseController {
   #[Route(path: '/staff/classe/{id}', name: 'staff_classe', requirements: ['id' => '\d+'], defaults: ['id' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
   public function classeAjax(int $id): JsonResponse {
-    $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->where('a.classe=:classe AND a.abilitato=:abilitato')
       ->setParameters(['classe' => $id, 'abilitato' => 1])
@@ -1559,29 +1575,29 @@ class StaffController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/data'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_autorizza/data', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
     if ($pagina == 0) {
@@ -1595,7 +1611,7 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_autorizza', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_autorizza', ['data' => $data]))
@@ -1639,9 +1655,9 @@ class StaffController extends BaseController {
     $errore = $reg->controlloData($data_obj, null);
     if (!$errore) {
       // non festivo: recupera dati
-      $lista = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
+      $lista = $this->em->getRepository(Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
       $max_pagine = ceil($lista->count() / $limite);
-      $dati['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista);
+      $dati['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitoriPaginator($lista);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
     }
@@ -1686,19 +1702,19 @@ class StaffController extends BaseController {
     // inizializza
     $label = [];
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
@@ -1707,7 +1723,7 @@ class StaffController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla entrata
-    $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
       // edit
       $entrata_old = clone $entrata;
@@ -1719,7 +1735,7 @@ class StaffController extends BaseController {
         ->setDocenteGiustifica(null);
     } else {
       // nuovo
-      $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['fine']);
+      $ora = DateTime::createFromFormat('H:i:s', $orario[0]['fine']);
       $nota = $trans->trans('message.autorizza_ritardo', [
         'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
@@ -1738,7 +1754,7 @@ class StaffController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -1762,7 +1778,7 @@ class StaffController extends BaseController {
           $this->em->remove($entrata);
         } else {
           // controlla ritardo breve
-          $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
+          $inizio = DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
           $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
           if ($form->get('ora')->getData() <= $inizio) {
             // ritardo breve: giustificazione automatica (non imposta docente)
@@ -1773,7 +1789,7 @@ class StaffController extends BaseController {
               ->setValido(false);
           }
           // controlla se risulta assente
-          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -1857,19 +1873,19 @@ class StaffController extends BaseController {
     // inizializza
     $label = [];
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
@@ -1878,7 +1894,7 @@ class StaffController extends BaseController {
     // controlla richiesta
     if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
       // gestione uscita con autorizzazione
-      $richiesta = $this->em->getRepository(\App\Entity\Richiesta::class)
+      $richiesta = $this->em->getRepository(Richiesta::class)
         ->richiestaAlunno('U', $alunno->getId(), $data_obj);
       if ($richiesta && (!in_array($richiesta->getStato(), ['I', 'G'], true) ||
           $richiesta->getDefinizioneRichiesta()->getUnica() ||
@@ -1893,7 +1909,7 @@ class StaffController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
-    $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
       // edit
       $uscita_old = clone $uscita;
@@ -1907,11 +1923,11 @@ class StaffController extends BaseController {
       if ($richiesta) {
         $ora = $richiesta->getValori()['ora'];
       } else {
-        $ora = new \DateTime();
+        $ora = new DateTime();
         if ($data != $ora->format('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
             $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
           // data non odierna o ora attuale fuori da orario
-          $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
+          $ora = DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
         }
       }
       $msg = $richiesta ? 'message.autorizza_uscita_richiesta' :
@@ -1934,7 +1950,7 @@ class StaffController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -1961,7 +1977,7 @@ class StaffController extends BaseController {
           $this->em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -1975,7 +1991,7 @@ class StaffController extends BaseController {
         if ($richiesta || $form->get('giustificazione')->getData() === false) {
           // gestione autorizzazione
           $uscita
-            ->setGiustificato(new \DateTime('today'))
+            ->setGiustificato(new DateTime('today'))
             ->setDocenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
@@ -2045,7 +2061,7 @@ class StaffController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
     if ($pagina == 0) {
@@ -2059,7 +2075,7 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_deroghe', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_deroghe'))
@@ -2096,8 +2112,8 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_deroghe.html.twig', [
       'pagina_titolo' => 'page.staff_deroghe',
@@ -2126,7 +2142,7 @@ class StaffController extends BaseController {
     // inizializza
     $label = null;
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -2136,9 +2152,9 @@ class StaffController extends BaseController {
     $alunno_old['autorizzaUscita'] = $alunno->getAutorizzaUscita();
     $alunno_old['note'] = $alunno->getNote();
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format(new \DateTime());
+    $label['data'] =  $formatter->format(new DateTime());
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$alunno->getClasse();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
@@ -2195,7 +2211,7 @@ class StaffController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
     if ($pagina == 0) {
@@ -2209,7 +2225,7 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_situazione', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_situazione'))
@@ -2246,12 +2262,12 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->cercaClasse($search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(Alunno::class)->cercaClasse($search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // aggiunge dati cambio classe
     $lista['cambio'] = [];
     foreach ($lista['lista'] as $alunno) {
-      $cambio = $this->em->getRepository(\App\Entity\CambioClasse::class)->findOneBy(['alunno' => $alunno]);
+      $cambio = $this->em->getRepository(CambioClasse::class)->findOneBy(['alunno' => $alunno]);
       if ($cambio) {
         $lista['cambio'][$alunno->getId()] = $cambio;
       }
@@ -2290,10 +2306,10 @@ class StaffController extends BaseController {
     $search['docente'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/docente', null);
     $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/inizio', null);
     $search['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/fine', null);
-    $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) :
+    $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) :
       ($search['docente'] < 0 ? -1 : null));
-    $inizio = ($search['inizio'] ? \DateTime::createFromFormat('Y-m-d', $search['inizio']) : new \DateTime());
-    $fine = ($search['fine'] ? \DateTime::createFromFormat('Y-m-d', $search['fine']) : new \DateTime());
+    $inizio = ($search['inizio'] ? DateTime::createFromFormat('Y-m-d', $search['inizio']) : new DateTime());
+    $fine = ($search['fine'] ? DateTime::createFromFormat('Y-m-d', $search['fine']) : new DateTime());
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_statistiche/pagina', 1);
@@ -2303,7 +2319,7 @@ class StaffController extends BaseController {
     }
     // form di ricerca
     $limite = 20;
-    $opzioniDocenti = $this->em->getRepository(\App\Entity\Docente::class)->opzioni();
+    $opzioniDocenti = $this->em->getRepository(Docente::class)->opzioni();
     $opzioniDocenti[$trans->trans('label.tutti_docenti')] = -1;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_docenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_docenti_statistiche'))
@@ -2342,10 +2358,10 @@ class StaffController extends BaseController {
         ($form->get('docente')->getData() < 0 ? -1 : null));
       $search['inizio'] = ($form->get('inizio')->getData() ? $form->get('inizio')->getData()->format('Y-m-d') : 0);
       $search['fine'] = ($form->get('fine')->getData() ? $form->get('fine')->getData()->format('Y-m-d') : 0);
-      $docente = ($search['docente'] > 0 ? $this->em->getRepository(\App\Entity\Docente::class)->find($search['docente']) :
+      $docente = ($search['docente'] > 0 ? $this->em->getRepository(Docente::class)->find($search['docente']) :
         ($search['docente'] < 0 ? -1 : null));
-      $inizio = ($form->get('inizio')->getData() ?: new \DateTime());
-      $fine = ($form->get('fine')->getData() ?: new \DateTime());
+      $inizio = ($form->get('inizio')->getData() ?: new DateTime());
+      $fine = ($form->get('fine')->getData() ?: new DateTime());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/docente', $search['docente']);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_docenti_statistiche/inizio', $search['inizio']);
@@ -2398,7 +2414,7 @@ class StaffController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
     if ($pagina == 0) {
@@ -2412,7 +2428,7 @@ class StaffController extends BaseController {
     $sede = $this->getUser()->getSede();
     // form di ricerca
     $limite = 20;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_password', FormType::class)
       ->setAction($this->generateUrl('staff_password'))
@@ -2449,8 +2465,8 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // lista alunni
-    $lista['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
-    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
+    $lista['lista'] = $this->em->getRepository(Alunno::class)->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/password.html.twig', [
       'pagina_titolo' => 'page.staff_password',
@@ -2485,10 +2501,10 @@ class StaffController extends BaseController {
                                  PdfManager $pdf, MailerInterface $mailer, string $tipo,
                                  string $username = null): Response {
      // controlla alunno
-     $utente = $this->em->getRepository(\App\Entity\Alunno::class)->findOneByUsername($username);
+     $utente = $this->em->getRepository(Alunno::class)->findOneByUsername($username);
      if (!$utente) {
        // controlla genitore
-       $utente = $this->em->getRepository(\App\Entity\Genitore::class)->findOneByUsername($username);
+       $utente = $this->em->getRepository(Genitore::class)->findOneByUsername($username);
        if (!$utente) {
          // errore
          throw $this->createNotFoundException('exception.id_notfound');
@@ -2547,7 +2563,7 @@ class StaffController extends BaseController {
         // invia email
         $mailer->send($message);
         $this->addFlash('success', 'message.credenziali_inviate');
-      } catch (\Exception $err) {
+      } catch (Exception $err) {
         // errore di spedizione
         $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', [
           'username' => $utente->getUsername(),
@@ -2593,25 +2609,25 @@ class StaffController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/data'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_assenze/data', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
@@ -2621,11 +2637,11 @@ class StaffController extends BaseController {
       // classe non specificata
       $classe = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_assenze/classe', 0);
     }
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze', FormType::class)
       ->setMethod('GET')
@@ -2648,8 +2664,8 @@ class StaffController extends BaseController {
         // elenco alunni
         $elenco = $reg->alunniInData($data_obj, $classe);
         // elenco assenze
-        $assenti = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
-          ->join(\App\Entity\Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+        $assenti = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+          ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->where('a.id IN (:elenco)')
           ->setParameters(['elenco' => $elenco, 'data' => $data_obj->format('Y-m-d')])
           ->getQuery()
@@ -2658,7 +2674,7 @@ class StaffController extends BaseController {
         $form_assenze = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_assenze_appello', FormType::class)
           ->add('alunni', EntityType::class, ['label' => 'label.alunni_assenti',
             'data' => $assenti,
-            'class' => \App\Entity\Alunno::class,
+            'class' => Alunno::class,
             'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.
               $obj->getDataNascita()->format('d/m/Y').')',
             'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
@@ -2689,14 +2705,14 @@ class StaffController extends BaseController {
             $this->em->persist($assenza);
             $log['assenza_create'][] = $assenza;
             // controlla esistenza ritardo
-            $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][$entrata->getId()] = $entrata;
               $this->em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][$uscita->getId()] = $uscita;
@@ -2706,7 +2722,7 @@ class StaffController extends BaseController {
           // cancella assenti
           $cancella_assenti = array_diff($assenti, $form_assenze->get('alunni')->getData());
           foreach ($cancella_assenti as $alu) {
-            $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
+            $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alu, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][$assenza->getId()] = $assenza;
@@ -2787,25 +2803,25 @@ class StaffController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/data'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_statistiche/data', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data prec/succ
     $data_succ = (clone $data_obj);
-    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
     $data_prec = (clone $data_obj);
-    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
     // recupera festivi per calendario
     $lista_festivi = $reg->listaFestivi(null);
     // controllo data
@@ -2813,21 +2829,21 @@ class StaffController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede');
-    $sede = ($search['sede'] > 0 ? $this->em->getRepository(\App\Entity\Sede::class)->find($search['sede']) : null);
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository(Sede::class)->find($search['sede']) : null);
     $search['classe'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     // legge sede
     $sede_staff = $this->getUser()->getSede();
     // form di ricerca
     if ($this->getUser()->getSede()) {
       $opzioniSedi[$this->getUser()->getSede()->getNomeBreve()] = $this->getUser()->getSede();
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_statistiche', FormType::class)
       ->setAction($this->generateUrl('staff_studenti_statistiche', ['data' => $data_obj->format('Y-m-d')]))
@@ -2892,13 +2908,13 @@ class StaffController extends BaseController {
     $search = [];
     // recupera criteri dalla sessione
     $search['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/sede');
-    $sede = ($search['sede'] > 0 ? $this->em->getRepository(\App\Entity\Sede::class)->find($search['sede']) : null);
+    $sede = ($search['sede'] > 0 ? $this->em->getRepository(Sede::class)->find($search['sede']) : null);
     $search['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/inizio',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-    $inizio = \DateTime::createFromFormat('Y-m-d', $search['inizio']);
+    $inizio = DateTime::createFromFormat('Y-m-d', $search['inizio']);
     $search['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/fine',
-      (new \DateTime())->format('Y-m-d'));
-    $fine = \DateTime::createFromFormat('Y-m-d', $search['fine']);
+      (new DateTime())->format('Y-m-d'));
+    $fine = DateTime::createFromFormat('Y-m-d', $search['fine']);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/staff_studenti_condotta/pagina', 1);
@@ -2912,7 +2928,7 @@ class StaffController extends BaseController {
     if ($sedeStaff) {
       $opzioniSedi[$sedeStaff->getNomeBreve()] = $sedeStaff;
     } else {
-      $opzioniSedi = $this->em->getRepository(\App\Entity\Sede::class)->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
@@ -2955,7 +2971,7 @@ class StaffController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/staff_studenti_condotta/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository(\App\Entity\Nota::class)->statisticaCondotta($search, $pagina);
+    $dati = $this->em->getRepository(Nota::class)->statisticaCondotta($search, $pagina);
     $info['pagina'] = $pagina;
     $info['inizio'] = $search['inizio'];
     $info['fine'] = $search['fine'];
@@ -2978,12 +2994,12 @@ class StaffController extends BaseController {
     $dati = [];
     $info = [];
     // criteri di ricerca
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find(
+    $classe = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/staff_docenti_cdc/classe', 0));
     $classeId = $classe ? $classe->getId() : 0;
     // form di ricerca
     $sede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : 0;
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni($sede, false);
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni($sede, false);
     foreach ($opzioniClassi as $sede => $lista) {
       $prec = null;
       $precKey = null;
@@ -3010,7 +3026,7 @@ class StaffController extends BaseController {
       // informazioni
       $info['classe'] = $classe;
       // recupera dati
-      $dati = $this->em->getRepository(\App\Entity\Cattedra::class)->cattedreClasse($classe);
+      $dati = $this->em->getRepository(Cattedra::class)->cattedreClasse($classe);
     }
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/docenti_cdc.html.twig', [

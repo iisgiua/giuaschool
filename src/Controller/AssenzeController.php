@@ -8,6 +8,13 @@
 
 namespace App\Controller;
 
+use DateTime;
+use IntlDateFormatter;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Materia;
+use App\Entity\Festivita;
+use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Presenza;
@@ -87,24 +94,24 @@ class AssenzeController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // data inizio e fine vista
     if ($vista == 'M') {
       // vista mensile
-      $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
+      $data_inizio = DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
       $data_fine = clone $data_inizio;
       $data_fine->modify('last day of this month');
     } else {
@@ -115,7 +122,7 @@ class AssenzeController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -128,12 +135,12 @@ class AssenzeController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('U');
+      $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -147,9 +154,9 @@ class AssenzeController extends BaseController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_fine);
-      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_inizio);
-      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -206,7 +213,7 @@ class AssenzeController extends BaseController {
     // controlla cattedra
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -216,26 +223,26 @@ class AssenzeController extends BaseController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla fc
-    $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['alunno' => $alunno,
+    $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
       'data' => $data_obj]);
     if ($presenza) {
       // errore: esiste un fc
@@ -244,7 +251,7 @@ class AssenzeController extends BaseController {
     // controlla assenza
     if ($id > 0) {
       // assenza esistente
-      $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['id' => $id,
+      $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['id' => $id,
         'alunno' => $alunno, 'data' => $data_obj]);
       if (!$assenza) {
         // assenza non esiste, niente da fare
@@ -253,7 +260,7 @@ class AssenzeController extends BaseController {
       $this->em->remove($assenza);
     } else {
       // controlla se esiste assenza
-      $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+      $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
       if ($assenza) {
         // assenza esiste già, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
@@ -265,7 +272,7 @@ class AssenzeController extends BaseController {
         ->setDocente($this->getUser());
       $this->em->persist($assenza);
       // controlla esistenza ritardo
-      $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno,
+      $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno,
 	'data' => $data_obj]);
       if ($entrata) {
         // rimuove ritardo
@@ -273,7 +280,7 @@ class AssenzeController extends BaseController {
         $this->em->remove($entrata);
       }
       // controlla esistenza uscita
-      $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno,
+      $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno,
 	'data' => $data_obj]);
       if ($uscita) {
         // rimuove uscita
@@ -356,7 +363,7 @@ class AssenzeController extends BaseController {
     $label = [];
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -366,19 +373,19 @@ class AssenzeController extends BaseController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
@@ -387,7 +394,7 @@ class AssenzeController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla entrata
-    $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
       // edit
       $entrata_old['ora'] = $entrata->getOra();
@@ -410,11 +417,11 @@ class AssenzeController extends BaseController {
         ->setValido(false)
         ->setDocente($this->getUser());
       // imposta ora
-      $ora = new \DateTime();
+      $ora = new DateTime();
       if ($data != date('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
           $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // data non odierna o ora attuale fuori da orario
-        $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
+        $ora = DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
       }
       $entrata->setOra($ora);
       $this->em->persist($entrata);
@@ -425,7 +432,7 @@ class AssenzeController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -435,7 +442,7 @@ class AssenzeController extends BaseController {
     $form = $this->createForm(EntrataType::class, $entrata, ['form_mode' => 'staff']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['alunno' => $alunno,
+      $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data_obj]);
       if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
         // ritardo non esiste, niente da fare
@@ -458,7 +465,7 @@ class AssenzeController extends BaseController {
           $this->em->remove($entrata);
         } else {
           // controlla ritardo breve
-          $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
+          $inizio = DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
           $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
           if ($form->get('ora')->getData() <= $inizio) {
             // ritardo breve: giustificazione automatica (non imposta docente)
@@ -469,7 +476,7 @@ class AssenzeController extends BaseController {
               ->setValido(false);
           }
           // controlla se risulta assente
-          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -557,7 +564,7 @@ class AssenzeController extends BaseController {
     $label = [];
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -567,20 +574,20 @@ class AssenzeController extends BaseController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -588,7 +595,7 @@ class AssenzeController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
-    $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
       // edit
       $uscita_old['ora'] = $uscita->getOra();
@@ -610,11 +617,11 @@ class AssenzeController extends BaseController {
         ->setValido(false)
         ->setDocente($this->getUser());
       // imposta ora
-      $ora = new \DateTime();
+      $ora = new DateTime();
       if ($data != date('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
           $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // data non odierna o ora attuale fuori da orario
-        $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
+        $ora = DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
       }
       $uscita->setOra($ora);
       $this->em->persist($uscita);
@@ -625,7 +632,7 @@ class AssenzeController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -635,7 +642,7 @@ class AssenzeController extends BaseController {
     $form = $this->createForm(UscitaType::class, $uscita);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['alunno' => $alunno,
+      $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data_obj]);
       if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
         // uscita non esiste, niente da fare
@@ -658,7 +665,7 @@ class AssenzeController extends BaseController {
           $this->em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -746,7 +753,7 @@ class AssenzeController extends BaseController {
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -756,20 +763,20 @@ class AssenzeController extends BaseController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
+    $alunno = $this->em->getRepository(Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -782,7 +789,7 @@ class AssenzeController extends BaseController {
     // modalità assenze giornaliere
     $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -860,24 +867,24 @@ class AssenzeController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // gruppi di assenze
       foreach ($form->get('assenze')->getData() as $ass) {
-        $risultato = $this->em->getRepository(\App\Entity\Assenza::class)->createQueryBuilder('ass')
+        $risultato = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
           ->update()
           ->set('ass.modificato', ':modificato')
           ->set('ass.giustificato', ':giustificato')
           ->set('ass.docenteGiustifica', ':docenteGiustifica')
           ->where('ass.id in (:ids)')
-          ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $data_obj,
+          ->setParameters(['modificato' => new DateTime(), 'giustificato' => $data_obj,
             'docenteGiustifica' => $this->getUser(), 'ids' => explode(',', $ass->ids)])
           ->getQuery()
           ->getResult();
       }
       foreach ($form->get('convalida_assenze')->getData() as $ass) {
-        $risultato = $this->em->getRepository(\App\Entity\Assenza::class)->createQueryBuilder('ass')
+        $risultato = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
           ->update()
           ->set('ass.modificato', ':modificato')
           ->set('ass.docenteGiustifica', ':docenteGiustifica')
           ->where('ass.id in (:ids)')
-          ->setParameters(['modificato' => new \DateTime(), 'docenteGiustifica' => $this->getUser(),
+          ->setParameters(['modificato' => new DateTime(), 'docenteGiustifica' => $this->getUser(),
             'ids' => explode(',', $ass->ids)])
           ->getQuery()
           ->getResult();
@@ -954,7 +961,7 @@ class AssenzeController extends BaseController {
     $label = [];
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -964,13 +971,13 @@ class AssenzeController extends BaseController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
@@ -991,7 +998,7 @@ class AssenzeController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -1020,7 +1027,7 @@ class AssenzeController extends BaseController {
       $orario = $reg->orarioInData($data_obj, $classe->getSede());
       $alunni_assenza = [];
       foreach ($form->get('lista')->getData() as $key=>$appello) {
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($appello->getId());
+        $alunno = $this->em->getRepository(Alunno::class)->find($appello->getId());
         if (!$alunno) {
           // alunno non esiste, salta
           continue;
@@ -1029,7 +1036,7 @@ class AssenzeController extends BaseController {
         switch ($appello->getPresenza()) {
           case 'A':   // assente
             // controlla se assenza esiste
-            $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if (!$assenza) {
               // inserisce nuova assenza
               $assenza = (new Assenza())
@@ -1040,21 +1047,21 @@ class AssenzeController extends BaseController {
               $log['assenza_create'][] = $assenza;
             }
             // controlla esistenza ritardo
-            $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][] = [$entrata->getId(), $entrata];
               $this->em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][] = [$uscita->getId(), $uscita];
               $this->em->remove($uscita);
             }
             // controlla fc
-            $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['alunno' => $alunno,
+            $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
               'data' => $data_obj]);
             if ($presenza) {
               // errore: esiste un fc
@@ -1063,21 +1070,21 @@ class AssenzeController extends BaseController {
             break;
           case 'P':   // presente
             // controlla esistenza assenza
-            $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][] = [$assenza->getId(), $assenza];
               $this->em->remove($assenza);
             }
             // controlla esistenza ritardo
-            $entrata = $this->em->getRepository(\App\Entity\Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][] = [$entrata->getId(), $entrata];
               $this->em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $this->em->getRepository(\App\Entity\Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][] = [$uscita->getId(), $uscita];
@@ -1155,20 +1162,20 @@ class AssenzeController extends BaseController {
     $dati = [];
     $info = [];
     // controlla classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno,
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno,
       'classe' => $classe]);
     if (!$alunno) {
       // errore
@@ -1177,7 +1184,7 @@ class AssenzeController extends BaseController {
     // controlla presenza
     if ($id > 0) {
       // presenza esistente
-      $presenza = $this->em->getRepository(\App\Entity\Presenza::class)->findOneBy(['id' => $id,
+      $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['id' => $id,
         'alunno' => $alunno, 'data' => $data_obj]);
       if (!$presenza) {
         // errore
@@ -1229,7 +1236,7 @@ class AssenzeController extends BaseController {
           $form->addError(new FormError($trans->trans('exception.presenze_azione_non_permessa')));
         }
         // controllo coerenza
-        $assenze = $this->em->getRepository(\App\Entity\Alunno::class)->assenzeInData($alunno, $data_obj);
+        $assenze = $this->em->getRepository(Alunno::class)->assenzeInData($alunno, $data_obj);
         if ($assenze['id_assenza'] > 0) {
           // errore: assenza con fuori classe
           $form->addError(new FormError($trans->trans('exception.presenze_assenza_incoerente')));

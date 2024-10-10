@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use App\Entity\MenuOpzione;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Utente;
@@ -37,7 +38,7 @@ class MenuRepository extends EntityRepository {
     // legge dati
     $menu = $this->createQueryBuilder('m')
       ->select('m.nome AS nome_menu,m.descrizione AS descrizione_menu,m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
-      ->join(\App\Entity\MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
+      ->join(MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
       ->where('m.selettore=:selettore AND INSTR(o.ruolo, :ruolo) > 0')
       ->setParameters(['selettore' => $selettore, 'ruolo' => $ruolo])
       ->orderBy('o.ordinamento', 'ASC')
@@ -143,7 +144,7 @@ class MenuRepository extends EntityRepository {
     // legge dati
     $dati = $this->createQueryBuilder('m')
       ->select('m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
-      ->join(\App\Entity\MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
+      ->join(MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
       ->where('m.id=:id AND INSTR(o.ruolo, :ruolo) > 0')
       ->setParameters(['id' => $id, 'ruolo' => $ruolo])
       ->orderBy('o.ordinamento', 'ASC')

@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\PresenzaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,9 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_presenza')]
-#[ORM\Entity(repositoryClass: \App\Repository\PresenzaRepository::class)]
+#[ORM\Entity(repositoryClass: PresenzaRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class Presenza implements \Stringable {
+class Presenza implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -34,44 +37,41 @@ class Presenza implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data del giorno di presenza fuori classe
-   *
+   * @var DateTime|null $data Data del giorno di presenza fuori classe
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $oraInizio Ora di inizio della presenza fuori classe
-   *
+   * @var DateTime|null $oraInizio Ora di inizio della presenza fuori classe
    *
    */
   #[ORM\Column(type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $oraInizio = null;
+  private ?DateTime $oraInizio = null;
 
   /**
-   * @var \DateTime|null $oraFine Ora della fine della presenza fuori classe
-   *
+   * @var DateTime|null $oraFine Ora della fine della presenza fuori classe
    *
    */
   #[ORM\Column(type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $oraFine = null;
+  private ?DateTime $oraFine = null;
 
   /**
    * @var string $tipo Tipo di presenza fuori classe [P=PCTO, M=mobilità europea, S=attività a scuola, E=attività esterna]
@@ -110,7 +110,7 @@ class Presenza implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -120,7 +120,7 @@ class Presenza implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -138,41 +138,40 @@ class Presenza implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
 
   //==================== METODI SETTER/GETTER ====================
-
   /**
    * Restituisce la data del giorno di presenza fuori classe
    *
-   * @return \DateTime|null Data del giorno di presenza fuori classe
+   * @return DateTime|null Data del giorno di presenza fuori classe
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data del giorno di presenza fuori classe
    *
-   * @param \DateTime $data Data del giorno di presenza fuori classe
+   * @param DateTime $data Data del giorno di presenza fuori classe
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -180,20 +179,20 @@ class Presenza implements \Stringable {
   /**
    * Restituisce l'ora di inizio della presenza fuori classe
    *
-   * @return \DateTime|null Ora di inizio della presenza fuori classe
+   * @return DateTime|null Ora di inizio della presenza fuori classe
    */
-  public function getOraInizio(): ?\DateTime {
+  public function getOraInizio(): ?DateTime {
     return $this->oraInizio;
   }
 
   /**
    * Modifica l'eventuale ora di inizio della presenza fuori classe
    *
-   * @param \DateTime|null $oraInizio Ora di inizio della presenza fuori classe
+   * @param DateTime|null $oraInizio Ora di inizio della presenza fuori classe
    *
    * @return self Oggetto modificato
    */
-  public function setOraInizio(?\DateTime $oraInizio): self {
+  public function setOraInizio(?DateTime $oraInizio): self {
     $this->oraInizio = $oraInizio;
     return $this;
   }
@@ -201,20 +200,20 @@ class Presenza implements \Stringable {
   /**
    * Restituisce l'ora della fine della presenza fuori classe
    *
-   * @return \DateTime|null Ora della fine della presenza fuori classe
+   * @return DateTime|null Ora della fine della presenza fuori classe
    */
-  public function getOraFine(): ?\DateTime {
+  public function getOraFine(): ?DateTime {
     return $this->oraFine;
   }
 
   /**
    * Modifica l'eventuale ora della fine della presenza fuori classe
    *
-   * @param \DateTime|null $oraFine Ora della fine della presenza fuori classe
+   * @param DateTime|null $oraFine Ora della fine della presenza fuori classe
    *
    * @return self Oggetto modificato
    */
-  public function setOraFine(?\DateTime $oraFine): self {
+  public function setOraFine(?DateTime $oraFine): self {
     $this->oraFine = $oraFine;
     return $this;
   }

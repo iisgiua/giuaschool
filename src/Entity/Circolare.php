@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\CircolareRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,10 +28,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Table(name: 'gs_circolare')]
 #[ORM\UniqueConstraint(columns: ['anno', 'numero'])]
-#[ORM\Entity(repositoryClass: \App\Repository\CircolareRepository::class)]
+#[ORM\Entity(repositoryClass: CircolareRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['anno', 'numero'], message: 'field.unique')]
-class Circolare implements \Stringable {
+class Circolare implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -41,16 +44,16 @@ class Circolare implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var Collection|null $sedi Sedi a cui è destinata la circolare
@@ -77,14 +80,13 @@ class Circolare implements \Stringable {
   private int $numero = 0;
 
   /**
-   * @var \DateTime|null $data Data della circolare
-   *
+   * @var DateTime|null $data Data della circolare
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
    * @var string|null $oggetto Oggetto della circolare
@@ -212,7 +214,7 @@ class Circolare implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -222,7 +224,7 @@ class Circolare implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -240,18 +242,18 @@ class Circolare implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -347,20 +349,20 @@ class Circolare implements \Stringable {
   /**
    * Restituisce la data della circolare
    *
-   * @return \DateTime|null Data della circolare
+   * @return DateTime|null Data della circolare
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data della circolaredo
    *
-   * @param \DateTime $data Data della circolare
+   * @param DateTime $data Data della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }

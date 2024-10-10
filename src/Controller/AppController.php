@@ -8,6 +8,10 @@
 
 namespace App\Controller;
 
+use DateTime;
+use App\Entity\Utente;
+use App\Entity\App;
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\Docente;
@@ -57,7 +61,7 @@ class AppController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -98,7 +102,7 @@ class AppController extends BaseController {
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -113,7 +117,7 @@ class AppController extends BaseController {
           $risposta['token'] = rtrim(strtr(base64_encode($profilo.$username.$password.$appId.$token), '+/', '-_'), '=');
           // memorizza codice di pre-login
           $user->setPrelogin($risposta['token']);
-          $user->setPreloginCreato(new \DateTime());
+          $user->setPreloginCreato(new DateTime());
           $this->em->flush();
         } else {
           // errore: credenziali non corrispondono
@@ -144,7 +148,7 @@ class AppController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $this->em->getRepository(\App\Entity\App::class)->findBy(['attiva' => 1]);
+    $apps = $this->em->getRepository(App::class)->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -177,7 +181,7 @@ class AppController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $this->em->getRepository(\App\Entity\App::class)->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -211,7 +215,7 @@ class AppController extends BaseController {
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $this->em->getRepository(\App\Entity\App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -237,7 +241,7 @@ class AppController extends BaseController {
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $this->em->getRepository(\App\Entity\App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -253,7 +257,7 @@ class AppController extends BaseController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';
@@ -291,7 +295,7 @@ class AppController extends BaseController {
     $res['token'] = $token.'-'.$userId;
     // memorizza token
     $this->getUser()->setPrelogin($token.'-'.sha1((string) $ip).'-'.$sessionId);
-    $this->getUser()->setPreloginCreato(new \DateTime());
+    $this->getUser()->setPreloginCreato(new DateTime());
     $this->em->flush();
     // restituisce risposta
     return new JsonResponse($res);
@@ -315,7 +319,7 @@ class AppController extends BaseController {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -324,20 +328,20 @@ class AppController extends BaseController {
         // legge dati
         $ip = $request->getClientIp();
         [$tokenId, $userId] = explode('-', $token);
-        $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['id' => $userId, 'abilitato' => 1]);
+        $user = $this->em->getRepository(Utente::class)->findOneBy(['id' => $userId, 'abilitato' => 1]);
         if (!$user) {
           // errore utente
           $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', [
             'id' => $userId,
             'token' => $token]);
-          throw new \Exception('exception.invalid_user');
+          throw new Exception('exception.invalid_user');
         }
         if (substr_count((string) $user->getPrelogin(), '-') != 2) {
           // errore formato prelogin
           $logger->error('Formato prelogin errato nella richiesta di connessione da app.', [
             'id' => $userId,
             'token' => $token]);
-          throw new \Exception('exception.invalid_user');
+          throw new Exception('exception.invalid_user');
         }
         [$tokenCheck, $hashCheck, $sessionId] = explode('-', (string) $user->getPrelogin());
         if ($tokenCheck != $tokenId || $hashCheck != sha1((string) $ip)) {
@@ -345,16 +349,16 @@ class AppController extends BaseController {
           $logger->error('Token o hash errato nella richiesta di connessione da app.', [
             'id' => $userId,
             'token' => $token]);
-          throw new \Exception('exception.invalid_user');
+          throw new Exception('exception.invalid_user');
         }
-        $now = new \DateTime();
+        $now = new DateTime();
         $timeout = (clone $user->getPreloginCreato())->modify('+2 minutes');
         if ($now > $timeout) {
           // errore token scaduto
           $logger->error('Token scaduto nella richiesta di connessione da app.', [
             'id' => $userId,
             'token' => $token]);
-          throw new \Exception('exception.token_scaduto');
+          throw new Exception('exception.token_scaduto');
         }
         // ok, resetta token e log azione
         $user->setPrelogin(null);
@@ -380,7 +384,7 @@ class AppController extends BaseController {
         session_start();
         // redirezione a pagina iniziale
         return $this->redirectToRoute('login_home');
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $errore = $e;
       }

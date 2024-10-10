@@ -8,6 +8,13 @@
 
 namespace App\Controller;
 
+use DateTime;
+use IntlDateFormatter;
+use App\Entity\Festivita;
+use App\Entity\Materia;
+use App\Entity\Configurazione;
+use App\Entity\Esito;
+use App\Entity\Avviso;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
@@ -68,14 +75,14 @@ class GenitoriController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/GENITORE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/GENITORE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/GENITORE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/GENITORE/data_lezione', $data);
     }
     // legge l'alunno
@@ -93,18 +100,18 @@ class GenitoriController extends BaseController {
     // legge la classe (può essere null)
     $classe = $alunno->getClasse();
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
-      if ($data_succ && $data_succ->format('Y-m-d') > (new \DateTime())->format('Y-m-d')) {
+      $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
+      if ($data_succ && $data_succ->format('Y-m-d') > (new DateTime())->format('Y-m-d')) {
         $data_succ = null;
       }
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -157,7 +164,7 @@ class GenitoriController extends BaseController {
     $dati = null;
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($idmateria);
+      $materia = $this->em->getRepository(Materia::class)->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -178,7 +185,7 @@ class GenitoriController extends BaseController {
       }
     }
     // legge la classe
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     if ($classe) {
       // lista materie
       $materie = $gen->materie($classe, ($alunno->getBes() == 'H'));
@@ -237,7 +244,7 @@ class GenitoriController extends BaseController {
     $template = 'ruolo_genitore/voti.html.twig';
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($idmateria);
+      $materia = $this->em->getRepository(Materia::class)->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -258,7 +265,7 @@ class GenitoriController extends BaseController {
       }
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     if ($classe) {
       // lista materie
       $materie = $gen->materie($classe, false);
@@ -322,7 +329,7 @@ class GenitoriController extends BaseController {
       }
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     if ($classe) {
       // recupera dati
       $dati = $gen->assenze($classe, $alunno);
@@ -370,7 +377,7 @@ class GenitoriController extends BaseController {
       }
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     if ($classe) {
       // recupera dati
       $dati = $gen->note($classe, $alunno);
@@ -411,7 +418,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     if ($classe) {
       // recupera dati
       $dati = $gen->osservazioni($alunno);
@@ -486,10 +493,10 @@ class GenitoriController extends BaseController {
           // precedente A.S.
           $dati = $gen->pagellePrecedenti($alunno);
           // legge valutazioni da configurazione
-          $valutazioni['R'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_R'));
-          $valutazioni['E'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_E'));
-          $valutazioni['N'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_N'));
-          $valutazioni['C'] = unserialize($this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_C'));
+          $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
+          $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
+          $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+          $valutazioni['C'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_C'));
           $listaValori = explode(',', (string) $valutazioni['R']['valori']);
           $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
@@ -515,11 +522,11 @@ class GenitoriController extends BaseController {
           // altri periodi
           $dati = $gen->pagelle($classe, $alunno, $periodo);
           // legge valutazioni da scrutinio
-          $dati['valutazioni'] = $this->em->getRepository(\App\Entity\Scrutinio::class)
+          $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
           // imposta presa visione
-          $this->em->getRepository(\App\Entity\Esito::class)->presaVisione($dati['esito'], $this->getUser());
+          $this->em->getRepository(Esito::class)->presaVisione($dati['esito'], $this->getUser());
         }
       }
     } else {
@@ -619,7 +626,7 @@ class GenitoriController extends BaseController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($id);
+    $avviso = $this->em->getRepository(Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -657,29 +664,29 @@ class GenitoriController extends BaseController {
       // mese non specificato
       if ($this->reqstack->getSession()->get('/APP/ROUTE/genitori_eventi/mese')) {
         // recupera data da sessione
-        $mese = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/genitori_eventi/mese').'-01');
+        $mese = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/ROUTE/genitori_eventi/mese').'-01');
       } else {
         // imposta data odierna
-        $mese = (new \DateTime())->modify('first day of this month');
+        $mese = (new DateTime())->modify('first day of this month');
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $mese = \DateTime::createFromFormat('Y-m-d', $mese.'-01');
+      $mese = DateTime::createFromFormat('Y-m-d', $mese.'-01');
       $this->reqstack->getSession()->set('/APP/ROUTE/genitori_eventi/mese', $mese->format('Y-m'));
     }
     // nome/url mese
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('MMMM yyyy');
     $info['mese'] =  ucfirst($formatter->format($mese));
     // data prec/succ
-    $data_inizio = \DateTime::createFromFormat('Y-m-d', $mese->format('Y-m-01'));
+    $data_inizio = DateTime::createFromFormat('Y-m-d', $mese->format('Y-m-01'));
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
     $data_succ = (clone $data_fine);
-    $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+    $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
     $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
     $data_prec = (clone $data_inizio);
-    $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+    $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
@@ -722,7 +729,7 @@ class GenitoriController extends BaseController {
     // inizializza
     $dati = null;
     // data
-    $data = \DateTime::createFromFormat('Y-m-d', $data);
+    $data = DateTime::createFromFormat('Y-m-d', $data);
     // legge dati
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -833,12 +840,12 @@ class GenitoriController extends BaseController {
         $certificati = [];
       } else {
         // no autodichiarazione
-        $giustificato = new \DateTime();
+        $giustificato = new DateTime();
         $dichiarazione = [];
         $certificati = [];
       }
       // aggiorna dati
-      $risultato = $this->em->getRepository(\App\Entity\Assenza::class)->createQueryBuilder('ass')
+      $risultato = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
         ->update()
         ->set('ass.modificato', ':modificato')
         ->set('ass.giustificato', ':giustificato')
@@ -847,7 +854,7 @@ class GenitoriController extends BaseController {
         ->set('ass.certificati', ':certificati')
         ->set('ass.utenteGiustifica', ':utente')
         ->where('ass.id in (:ids)')
-        ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $giustificato,
+        ->setParameters(['modificato' => new DateTime(), 'giustificato' => $giustificato,
           'motivazione' => $motivazione, 'dichiarazione' => serialize($dichiarazione),
           'certificati' => serialize($certificati), 'utente' => $this->getUser(),
           'ids' => explode(',', (string) $info['assenza']['ids'])])
@@ -929,7 +936,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($entrata->getData());
     $info['ora'] =  $entrata->getOra()->format('H:i');
@@ -974,7 +981,7 @@ class GenitoriController extends BaseController {
           // aggiorna dati
           $entrata
             ->setMotivazione(substr((string) $form->get('motivazione')->getData(), 0, 255))
-            ->setGiustificato(new \DateTime())
+            ->setGiustificato(new DateTime())
             ->setUtenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
@@ -1047,7 +1054,7 @@ class GenitoriController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($uscita->getData());
     $info['ora'] =  $uscita->getOra()->format('H:i');
@@ -1092,7 +1099,7 @@ class GenitoriController extends BaseController {
           // aggiorna dati
           $uscita
             ->setMotivazione(substr((string) $form->get('motivazione')->getData(), 0, 255))
-            ->setGiustificato(new \DateTime())
+            ->setGiustificato(new DateTime())
             ->setUtenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
@@ -1146,7 +1153,7 @@ class GenitoriController extends BaseController {
       }
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    $classe = $reg->classeInData(new DateTime(), $alunno);
     // visualizza pagina
     return $this->render('ruolo_genitore/deroghe.html.twig', [
       'pagina_titolo' => 'page.genitori_deroghe',

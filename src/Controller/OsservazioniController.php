@@ -8,6 +8,12 @@
 
 namespace App\Controller;
 
+use DateTime;
+use IntlDateFormatter;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
+use App\Entity\Alunno;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
 use App\Form\MessageType;
@@ -73,24 +79,24 @@ class OsservazioniController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -102,7 +108,7 @@ class OsservazioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -121,9 +127,9 @@ class OsservazioniController extends BaseController {
       }
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -172,14 +178,14 @@ class OsservazioniController extends BaseController {
     // inizializza
     $label = [];
     // controlla cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $cattedra->getClasse()->getSede());
     if ($errore) {
       // errore: festivo
@@ -187,7 +193,7 @@ class OsservazioniController extends BaseController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->findOneBy(['id' => $id,
+      $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->findOneBy(['id' => $id,
         'data' => $data_obj]);
       if (!$osservazione) {
         // errore
@@ -217,7 +223,7 @@ class OsservazioniController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -229,7 +235,7 @@ class OsservazioniController extends BaseController {
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_edit', FormType::class, $osservazione)
       ->add('alunno', EntityType::class, ['label' => 'label.alunno',
-        'class' => \App\Entity\Alunno::class,
+        'class' => Alunno::class,
         'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
           ->where('a.id IN (:lista)'.
@@ -296,7 +302,7 @@ class OsservazioniController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function osservazioneDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
     // controlla osservazione
-    $osservazione = $this->em->getRepository(\App\Entity\OsservazioneAlunno::class)->find($id);
+    $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni');
@@ -361,24 +367,24 @@ class OsservazioniController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
       $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -390,7 +396,7 @@ class OsservazioniController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -401,9 +407,9 @@ class OsservazioniController extends BaseController {
     if ($cattedra) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $this->em->getRepository(\App\Entity\Festivita::class)->giornoSuccessivo($data_succ);
+      $data_succ = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $this->em->getRepository(\App\Entity\Festivita::class)->giornoPrecedente($data_prec);
+      $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -453,14 +459,14 @@ class OsservazioniController extends BaseController {
     // inizializza
     $label = [];
     // controlla cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $cattedra->getClasse()->getSede());
     if ($errore) {
       // errore: festivo
@@ -468,7 +474,7 @@ class OsservazioniController extends BaseController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $this->em->getRepository(\App\Entity\OsservazioneClasse::class)->findOneBy(['id' => $id,
+      $osservazione = $this->em->getRepository(OsservazioneClasse::class)->findOneBy(['id' => $id,
         'data' => $data_obj, 'cattedra' => $cattedra]);
       if (!$osservazione) {
         // errore
@@ -488,7 +494,7 @@ class OsservazioniController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -550,7 +556,7 @@ class OsservazioniController extends BaseController {
   public function osservazionePersonaleDelete(RegistroUtil $reg,
                                               LogHandler $dblogger, int $id): Response {
     // controlla osservazione
-    $osservazione = $this->em->getRepository(\App\Entity\OsservazioneClasse::class)->find($id);
+    $osservazione = $this->em->getRepository(OsservazioneClasse::class)->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni_personali');

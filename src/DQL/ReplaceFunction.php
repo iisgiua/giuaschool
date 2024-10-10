@@ -8,6 +8,7 @@
 
 namespace App\DQL;
 
+use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;
@@ -23,19 +24,18 @@ class ReplaceFunction extends FunctionNode {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $subject La stringa da modificare
+   * @var Node $subject La stringa da modificare
    */
   public $subject = null;
 
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $search Il testo da cercare
+   * @var Node $search Il testo da cercare
    */
   public $search = null;
 
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $replace Il testo da sostituire
+   * @var Node $replace Il testo da sostituire
    */
   public $replace = null;
 

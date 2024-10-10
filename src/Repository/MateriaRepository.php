@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Materia - repository
  *
  * @author Antonello Dessì
  */
-class MateriaRepository extends \Doctrine\ORM\EntityRepository {
+class MateriaRepository extends EntityRepository {
 
   /**
    * Trova una materia in base al nome normalizzato

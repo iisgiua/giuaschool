@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\OsservazioneClasseRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,12 +22,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_osservazione')]
-#[ORM\Entity(repositoryClass: \App\Repository\OsservazioneClasseRepository::class)]
+#[ORM\Entity(repositoryClass: OsservazioneClasseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'tipo', type: 'string', length: 1)]
 #[ORM\DiscriminatorMap(['C' => 'OsservazioneClasse', 'A' => 'OsservazioneAlunno'])]
-class OsservazioneClasse implements \Stringable {
+class OsservazioneClasse implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -37,26 +40,25 @@ class OsservazioneClasse implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'osservazione
-   *
+   * @var DateTime $data Data dell'osservazione
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
    * @var string|null $testo Testo dell'osservazione
@@ -82,7 +84,7 @@ class OsservazioneClasse implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -92,7 +94,7 @@ class OsservazioneClasse implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -110,38 +112,38 @@ class OsservazioneClasse implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'osservazione
    *
-   * @return \DateTime|null Data dell'osservazione
+   * @return DateTime|null Data dell'osservazione
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'osservazione
    *
-   * @param \DateTime $data Data dell'osservazione
+   * @param DateTime $data Data dell'osservazione
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }

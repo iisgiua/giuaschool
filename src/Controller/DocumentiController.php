@@ -81,7 +81,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository(\App\Entity\Documento::class)->findOneBy(['tipo' => 'P',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'P',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -227,7 +227,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository(\App\Entity\Documento::class)->findOneBy(['tipo' => 'R',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'R',
       'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'docente' => $this->getUser()]);
     if ($documentoEsistente) {
       // errore
@@ -327,7 +327,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository(\App\Entity\Documento::class)->findOneBy(['tipo' => 'L',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'L',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -424,7 +424,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository(\App\Entity\Documento::class)->findOneBy(['tipo' => 'M',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'M',
       'classe' => $classe]);
     if ($documentoEsistente) {
       // errore
@@ -529,7 +529,7 @@ class DocumentiController extends BaseController {
     $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
-    $criteri['classe'] = $this->em->getRepository(\App\Entity\Classe::class)->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -539,7 +539,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'docenti',
       'values' => [$criteri['filtro'], $criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -601,7 +601,7 @@ class DocumentiController extends BaseController {
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/tipo', '');
-    $criteri['classe'] = $this->em->getRepository(\App\Entity\Classe::class)->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -611,7 +611,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
       'values' => [$criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -677,7 +677,7 @@ class DocumentiController extends BaseController {
     // controlla azione
     $listaTipi = ['B', 'H', 'D'];
     if ($alunno) {
-      $documentiEsistenti = $this->em->getRepository(\App\Entity\Documento::class)->findBy(['alunno' => $alunno]);
+      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno]);
       $tipiEsistenti = [];
       foreach ($documentiEsistenti as $des) {
         $tipiEsistenti[] = $des->getTipo();
@@ -713,7 +713,7 @@ class DocumentiController extends BaseController {
     // form di inserimento
     $opzioniClassi = null;
     if (!$alunno) {
-      $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+      $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
         $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
     }
     $opzioniTipi = [];
@@ -729,11 +729,11 @@ class DocumentiController extends BaseController {
       $allegati = $this->reqstack->getSession()->get($varSessione, []);
       $tipo = $form->get('tipo')->getData();
       $alunnoIndividuale = $alunno ? null :
-        $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['abilitato' => 1,
+        $this->em->getRepository(Alunno::class)->findOneBy(['abilitato' => 1,
         'id' => $form->get('alunno')->getData()]);
       if (!$alunno) {
         $controllaTipi = ($tipo == 'H' || $tipo == 'D') ? ['H', 'D'] : ['B'];
-        $documentiEsistenti = $this->em->getRepository(\App\Entity\Documento::class)->findBy(['alunno' => $alunnoIndividuale,
+        $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunnoIndividuale,
           'tipo' => $controllaTipi]);
       }
       if (count($allegati) < 1) {
@@ -811,7 +811,7 @@ class DocumentiController extends BaseController {
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/tipo', '');
-    $criteri['classe'] = $this->em->getRepository(\App\Entity\Classe::class)->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -821,7 +821,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
       'values' => [$criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -901,7 +901,7 @@ class DocumentiController extends BaseController {
        $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
      }
      // recupera dati
-     $dati = $this->em->getRepository(\App\Entity\Documento::class)->lista($criteri, $this->getUser(), $pagina);
+     $dati = $this->em->getRepository(Documento::class)->lista($criteri, $this->getUser(), $pagina);
      // informazioni di visualizzazione
      $info['pagina'] = $pagina;
      // mostra la pagina di risposta

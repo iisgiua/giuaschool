@@ -8,6 +8,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Classe;
+use App\Entity\Alunno;
+use App\Entity\StoricoEsito;
+use App\Entity\Scrutinio;
+use App\Entity\Genitore;
 use App\Form\AlunnoGenitoreType;
 use App\Util\PdfManager;
 use App\Util\SegreteriaUtil;
@@ -43,7 +48,7 @@ class SegreteriaController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/nome', '');
     if ($pagina == 0) {
@@ -61,7 +66,7 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(null, false);
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_assenze', FormType::class)
       ->setAction($this->generateUrl('segreteria_assenze'))
       ->add('classe', ChoiceType::class, ['label' => 'label.classe',
@@ -96,7 +101,7 @@ class SegreteriaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_assenze/pagina', $pagina);
     }
     // lista alunni
-    $lista = $this->em->getRepository(\App\Entity\Alunno::class)->findAllEnabled($search, $pagina, $limite);
+    $lista = $this->em->getRepository(Alunno::class)->findAllEnabled($search, $pagina, $limite);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/assenze.html.twig', [
       'pagina_titolo' => 'page.segreteria_assenze',
@@ -121,7 +126,7 @@ class SegreteriaController extends BaseController {
   #[IsGranted('ROLE_ATA')]
   public function assenzeMostra(SegreteriaUtil $segr, int $alunno): Response {
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -154,7 +159,7 @@ class SegreteriaController extends BaseController {
   #[IsGranted('ROLE_ATA')]
   public function assenzeStampa(SegreteriaUtil $segr, PdfManager $pdf, int $alunno) {
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -196,7 +201,7 @@ class SegreteriaController extends BaseController {
     // recupera criteri dalla sessione
     $search = [];
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/nome', '');
     if ($pagina == 0) {
@@ -214,7 +219,7 @@ class SegreteriaController extends BaseController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(null, false);
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_scrutini', FormType::class)
       ->setAction($this->generateUrl('segreteria_scrutini'))
       ->add('classe', ChoiceType::class, ['label' => 'label.classe',
@@ -249,7 +254,7 @@ class SegreteriaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/segreteria_scrutini/pagina', $pagina);
     }
     // lista alunni
-    $dati['lista'] = $this->em->getRepository(\App\Entity\Alunno::class)->findAllEnabled($search, $pagina, $limite);
+    $dati['lista'] = $this->em->getRepository(Alunno::class)->findAllEnabled($search, $pagina, $limite);
     // legge dati pagelle
     $dati['pagelle'] = $segr->pagelleAlunni($dati['lista']);
     // mostra la pagina di risposta
@@ -279,7 +284,7 @@ class SegreteriaController extends BaseController {
   public function scrutiniMostra(SegreteriaUtil $segr, int $alunno, string $periodo,
                                  int $scrutinio): Response {
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -287,11 +292,11 @@ class SegreteriaController extends BaseController {
     // controlla scrutinio
     if ($periodo == 'A') {
       // dati storico
-      $scrutinio = $this->em->getRepository(\App\Entity\StoricoEsito::class)->findOneBy(['id' => $scrutinio,
+      $scrutinio = $this->em->getRepository(StoricoEsito::class)->findOneBy(['id' => $scrutinio,
         'alunno' => $alunno]);
     } else {
       // dati scrutinio
-      $scrutinio = $this->em->getRepository(\App\Entity\Scrutinio::class)->findOneBy(['id' => $scrutinio,
+      $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['id' => $scrutinio,
         'periodo' => $periodo, 'stato' => 'C']);
     }
     if (!$scrutinio) {
@@ -337,7 +342,7 @@ class SegreteriaController extends BaseController {
     $search['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
     $search['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/cognome', '');
     $search['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/nome', '');
-    $classe = ($search['classe'] > 0 ? $this->em->getRepository(\App\Entity\Classe::class)->find($search['classe']) : null);
+    $classe = ($search['classe'] > 0 ? $this->em->getRepository(Classe::class)->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/pagina', 1);
@@ -351,7 +356,7 @@ class SegreteriaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // form di ricerca
-    $opzioniClassi = $this->em->getRepository(\App\Entity\Classe::class)->opzioni(null, false);
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_genitori', FormType::class)
       ->setAction($this->generateUrl('segreteria_genitori'))
       ->add('classe', ChoiceType::class, ['label' => 'label.classe',
@@ -387,8 +392,8 @@ class SegreteriaController extends BaseController {
     }
     // lista alunni
     $search['abilitato'] = 1;
-    $lista = $this->em->getRepository(\App\Entity\Alunno::class)->cerca($search, $pagina);
-    $lista['genitori'] = $this->em->getRepository(\App\Entity\Genitore::class)->datiGenitoriPaginator($lista['lista']);
+    $lista = $this->em->getRepository(Alunno::class)->cerca($search, $pagina);
+    $lista['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/genitori.html.twig', [
       'pagina_titolo' => 'page.segreteria_genitori',
@@ -412,7 +417,7 @@ class SegreteriaController extends BaseController {
   #[IsGranted('ROLE_ATA')]
   public function genitoriEdit(Request $request, int $alunno): Response {
     // controlla alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

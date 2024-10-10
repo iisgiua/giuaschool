@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\DefinizioneRichiesta;
@@ -50,13 +51,13 @@ class RichiesteUtil {
    * @param Utente $utente Utente che esegue la richiesta
    * @param Classe $classe Classe di riferimento per la richiesta
    * @param array $valori Lista dei valori inseriti nel modulo di richiesta
-   * @param \DateTime|null $data Data della richiesta
-   * @param \DateTime $invio Data e ora dell'invio della richiesta
+   * @param DateTime|null $data Data della richiesta
+   * @param DateTime $invio Data e ora dell'invio della richiesta
    *
    * @return array Lista con il nome del documento PDF creato e l'id del documento
    */
   public function creaPdf(DefinizioneRichiesta $definizioneRichiesta, Utente $utente, Classe $classe,
-                          array $valori, ?\DateTime $data, \DateTime $invio): array {
+                          array $valori, ?DateTime $data, DateTime $invio): array {
     // inizializza
     $fs = new FileSystem();
     $documentoId = $definizioneRichiesta->getId().'-'.$utente->getId().'-'.uniqid();

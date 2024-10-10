@@ -8,6 +8,7 @@
 
 namespace App\Form;
 
+use App\Entity\Alunno;
 use App\Entity\PropostaVoto;
 use App\Form\MessageType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -66,7 +67,7 @@ class PropostaVotoType extends AbstractType {
     // aggiunge data transform
     $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
       fn($alunno) => $alunno->getId(),
-      fn($id) => $this->em->getRepository(\App\Entity\Alunno::class)->find($id)));
+      fn($id) => $this->em->getRepository(Alunno::class)->find($id)));
   }
 
   /**

@@ -8,6 +8,8 @@
 
 namespace App\Util;
 
+use App\Entity\Configurazione;
+use Exception;
 use App\Entity\Utente;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
@@ -38,7 +40,7 @@ class TelegramManager {
   public function __construct(
       private readonly UrlGeneratorInterface $url,
       private readonly EntityManagerInterface $em) {
-    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
+    $token = $this->em->getRepository(Configurazione::class)->getParametro('telegram_token');
     $this->client = new Client(['base_uri' => 'https://api.telegram.org/bot'.$token.'/',
       'timeout' => 60]);
   }
@@ -50,7 +52,7 @@ class TelegramManager {
    */
   public function setWebhook(): array {
     // crea client con parametri aggiornati
-    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
+    $token = $this->em->getRepository(Configurazione::class)->getParametro('telegram_token');
     if (empty($token)) {
       // token vuoto: ignora
       return ['result' => 'ok'];
@@ -66,7 +68,7 @@ class TelegramManager {
     $connections = 5;
     $allowed = ['message', 'my_chat_member'];
     $secret = 'BOT-'.bin2hex(openssl_random_pseudo_bytes(8)).'-'.bin2hex(openssl_random_pseudo_bytes(8));
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('telegram_secret', $secret);
+    $this->em->getRepository(Configurazione::class)->setParametro('telegram_secret', $secret);
     // installa webhook
     return $this->request('setWebhook', ['url' => $url, 'max_connections' => $connections,
       'allowed_updates' => $allowed, 'drop_pending_updates' => true, 'secret_token' => $secret]);
@@ -88,7 +90,7 @@ class TelegramManager {
    */
   public function deleteWebhook(): array {
     // crea client con parametri aggiornati
-    $token = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('telegram_token');
+    $token = $this->em->getRepository(Configurazione::class)->getParametro('telegram_token');
     if (empty($token)) {
       // token vuoto: ignora
       return ['result' => 'ok'];
@@ -131,7 +133,7 @@ class TelegramManager {
     // invia richiesta
     try {
       $response = $this->client->post($action, ['form_params' => $params]);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore di connessione
       $data['error'] = $e->getMessage();
       return $data;

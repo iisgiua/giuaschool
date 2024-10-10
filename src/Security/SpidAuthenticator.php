@@ -8,6 +8,9 @@
 
 namespace App\Security;
 
+use App\Entity\Spid;
+use App\Entity\Utente;
+use DateTime;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -96,7 +99,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function getUser(string $responseId): ?UserInterface {
     $user = null;
     // trova utente SPID
-    $spid = $this->em->getRepository(\App\Entity\Spid::class)->findOneBy(['responseId' => $responseId, 'state' => 'A']);
+    $spid = $this->em->getRepository(Spid::class)->findOneBy(['responseId' => $responseId, 'state' => 'A']);
     if (!$spid) {
       // errore nei dati identificativi della risposta
       $this->logger->error('Autenticazione Spid non valida per mancanza di dati.', ['responseId' => $responseId]);
@@ -106,7 +109,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
     $nome = $spid->getAttrName();
     $cognome = $spid->getAttrFamilyName();
     $codiceFiscale = substr((string) $spid->getAttrFiscalNumber(), 6);
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+    $user = $this->em->getRepository(Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
     if (empty($user)) {
       // utente non esiste nel registro
       $spid->setState('E');
@@ -146,7 +149,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-      $token->getUser()->setUltimoAccesso(new \DateTime());
+      $token->getUser()->setUltimoAccesso(new DateTime());
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());

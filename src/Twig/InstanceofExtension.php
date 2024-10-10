@@ -8,6 +8,7 @@
 
 namespace App\Twig;
 
+use ReflectionClass;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigTest;
 
@@ -39,7 +40,7 @@ class InstanceofExtension extends AbstractExtension {
    * @return bool Risultato del test effettuato
    */
   public function isInstanceOf(mixed $object, mixed $class) {
-    $reflectionClass = new \ReflectionClass($class);
+    $reflectionClass = new ReflectionClass($class);
     return $reflectionClass->isInstance($object);
   }
 

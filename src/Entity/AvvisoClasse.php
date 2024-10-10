@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use App\Repository\AvvisoClasseRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -22,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Table(name: 'gs_avviso_classe')]
 #[ORM\UniqueConstraint(columns: ['avviso_id', 'classe_id'])]
-#[ORM\Entity(repositoryClass: \App\Repository\AvvisoClasseRepository::class)]
+#[ORM\Entity(repositoryClass: AvvisoClasseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['avviso', 'classe'], message: 'field.unique')]
 class AvvisoClasse {
@@ -38,16 +40,16 @@ class AvvisoClasse {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var Avviso|null $avviso Avviso a cui ci si riferisce
@@ -70,10 +72,10 @@ class AvvisoClasse {
   private ?Classe $classe = null;
 
   /**
-   * @var \DateTime|null $letto Data e ora di lettura dell'avviso in classe
+   * @var DateTime|null $letto Data e ora di lettura dell'avviso in classe
    */
   #[ORM\Column(type: 'datetime', nullable: true)]
-  private ?\DateTime $letto = null;
+  private ?DateTime $letto = null;
 
 
   //==================== EVENTI ORM ====================
@@ -83,7 +85,7 @@ class AvvisoClasse {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -93,7 +95,7 @@ class AvvisoClasse {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -111,18 +113,18 @@ class AvvisoClasse {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -171,20 +173,20 @@ class AvvisoClasse {
   /**
    * Restituisce la data e ora di lettura dell'avviso in classe
    *
-   * @return \DateTime|null Data e ora di lettura dell'avviso in classe
+   * @return DateTime|null Data e ora di lettura dell'avviso in classe
    */
-  public function getLetto(): ?\DateTime {
+  public function getLetto(): ?DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora di lettura dell'avviso in classe
    *
-   * @param \DateTime|null $letto Data e ora di lettura dell'avviso in classe
+   * @param DateTime|null $letto Data e ora di lettura dell'avviso in classe
    *
    * @return self Oggetto modificato
    */
-  public function setLetto(?\DateTime $letto): self {
+  public function setLetto(?DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }

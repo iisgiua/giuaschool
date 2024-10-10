@@ -8,6 +8,7 @@
 
 namespace App\Message;
 
+use Exception;
 
 /**
  * GenericActionMessage - gestione dei messaggi per le azioni eseguite (classe base)
@@ -45,7 +46,7 @@ class GenericActionMessage {
     $this->tag = '<!AZIONE!><!'.$this->class.'.'.$this->action.'.'.$this->id.'!>';
     if (!$this->check()) {
       // errore: azione non prevista
-      throw new \Exception('Undefined action in message constructor: "'.$this->class.'.'.$this->action.'"');
+      throw new Exception('Undefined action in message constructor: "'.$this->class.'.'.$this->action.'"');
     }
   }
 

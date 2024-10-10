@@ -8,6 +8,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Materia;
+use DateTime;
+use App\Entity\Lezione;
+use App\Entity\Alunno;
+use IntlDateFormatter;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Form\VotoClasseType;
@@ -69,7 +76,7 @@ class VotiController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -89,12 +96,12 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->findOneByTipo('U');
+      $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -113,10 +120,10 @@ class VotiController extends BaseController {
         // seleziona periodo in base alla data
         if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
           // recupera data da sessione
-          $data = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+          $data = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
         } else {
           // imposta data odierna
-          $data = new \DateTime();
+          $data = new DateTime();
         }
         $periodo = $reg->periodo($data);
         if ($periodo) {
@@ -125,8 +132,8 @@ class VotiController extends BaseController {
       }
       if ($periodo) {
         // dati periodo
-        $inizio = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['inizio']);
-        $fine = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['fine']);
+        $inizio = DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['inizio']);
+        $fine = DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['fine']);
         // controlla permessi
         if ($reg->azioneVoti($inizio, $this->getUser(), $classe, $cattedra->getMateria(), null)) {
           // edit permesso
@@ -181,7 +188,7 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -191,10 +198,10 @@ class VotiController extends BaseController {
     // controlla data
     if ($data == '0000-00-00') {
       // data non specificata
-      $data = new \DateTime();
+      $data = new DateTime();
     } else {
       // data esistente
-      $data = \DateTime::createFromFormat('Y-m-d', $data);
+      $data = DateTime::createFromFormat('Y-m-d', $data);
     }
     // elenco di alunni
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
@@ -207,8 +214,8 @@ class VotiController extends BaseController {
     $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
       ->add('data', DateType::class, ['label' => 'label.data',
@@ -249,7 +256,7 @@ class VotiController extends BaseController {
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
-      $lezione = $this->em->getRepository(\App\Entity\Lezione::class)->lezioneVoto($form->get('data')->getData(),
+      $lezione = $this->em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
         $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
@@ -285,7 +292,7 @@ class VotiController extends BaseController {
           }
         }
         $conferma = 1;
-        $assenti = $this->em->getRepository(\App\Entity\Lezione::class)->alunniAssenti($lezione, $alunniVoto);
+        $assenti = $this->em->getRepository(Lezione::class)->alunniAssenti($lezione, $alunniVoto);
         if (!empty($assenti) && $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
           // alunni assenti: richiede conferma
           $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
@@ -299,10 +306,10 @@ class VotiController extends BaseController {
               $valutazione->setVoto(10);
             }
             // legge alunno
-            $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($valutazione->getId());
+            $alunno = $this->em->getRepository(Alunno::class)->find($valutazione->getId());
             // legge vecchio voto
             $voto = ($elenco_precedente[$key]->getVotoId() ?
-              $this->em->getRepository(\App\Entity\Valutazione::class)->find($elenco_precedente[$key]->getVotoId()) : null);
+              $this->em->getRepository(Valutazione::class)->find($elenco_precedente[$key]->getVotoId()) : null);
             if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
               // valutazione aggiunta
               $voto = (new Valutazione())
@@ -395,7 +402,7 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->find($cattedra);
+    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -403,7 +410,7 @@ class VotiController extends BaseController {
     // recupera classe
     $classe = $cattedra->getClasse();
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
+    $alunno = $this->em->getRepository(Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -411,7 +418,7 @@ class VotiController extends BaseController {
     // controllo voto
     if ($id) {
       // legge voto
-      $valutazione = $this->em->getRepository(\App\Entity\Valutazione::class)->findOneBy(['id' => $id, 'alunno' => $alunno,
+      $valutazione = $this->em->getRepository(Valutazione::class)->findOneBy(['id' => $id, 'alunno' => $alunno,
         'docente' => $this->getUser(), 'tipo' => $tipo]);
       if ($valutazione) {
         $valutazione_precedente = [$valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
@@ -431,7 +438,7 @@ class VotiController extends BaseController {
         ->setMedia(true);
       $this->em->persist($valutazione);
       $valutazione_precedente = null;
-      $data = new \DateTime();
+      $data = new DateTime();
     }
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
@@ -440,8 +447,8 @@ class VotiController extends BaseController {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
     $label['bes'] = $alunno->getBes();
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
       ->add('data', DateType::class, ['label' => 'label.data',
@@ -503,7 +510,7 @@ class VotiController extends BaseController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
-        $lezione = $this->em->getRepository(\App\Entity\Lezione::class)->lezioneVoto($form->get('data')->getData(),
+        $lezione = $this->em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
           $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
@@ -527,7 +534,7 @@ class VotiController extends BaseController {
       if ($form->isValid()) {
         // controlla presenza alunno
         $conferma = 1;
-        $assente = $this->em->getRepository(\App\Entity\Lezione::class)->alunnoAssente($valutazione->getLezione(),
+        $assente = $this->em->getRepository(Lezione::class)->alunnoAssente($valutazione->getLezione(),
           $valutazione->getAlunno());
         if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
             $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
@@ -621,7 +628,7 @@ class VotiController extends BaseController {
     }
     // parametro alunno
     if ($alunno > 0) {
-      $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->find($alunno);
+      $alunno = $this->em->getRepository(Alunno::class)->find($alunno);
       if (!$alunno) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -630,7 +637,7 @@ class VotiController extends BaseController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -643,7 +650,7 @@ class VotiController extends BaseController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -651,8 +658,8 @@ class VotiController extends BaseController {
     }
     if ($cattedra) {
       // lista alunni
-      $listaAlunni = $reg->alunniInData(new \DateTime(), $classe);
-      $alunni = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+      $listaAlunni = $reg->alunniInData(new DateTime(), $classe);
+      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.id IN (:lista)')
         ->setParameters(['lista' => $listaAlunni])
@@ -718,7 +725,7 @@ class VotiController extends BaseController {
     // controllo cattedra
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -735,7 +742,7 @@ class VotiController extends BaseController {
     }
     // parametro materia
     if ($materia > 0) {
-      $materia = $this->em->getRepository(\App\Entity\Materia::class)->find($materia);
+      $materia = $this->em->getRepository(Materia::class)->find($materia);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -805,21 +812,21 @@ class VotiController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -882,21 +889,21 @@ class VotiController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
-        $data_obj = new \DateTime();
+        $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
     }
     // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -946,7 +953,7 @@ class VotiController extends BaseController {
   public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
                                int $id): Response {
     // controllo voto
-    $valutazione = $this->em->getRepository(\App\Entity\Valutazione::class)->findOneBy(['id' => $id,
+    $valutazione = $this->em->getRepository(Valutazione::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$valutazione) {
       // errore

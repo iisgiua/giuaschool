@@ -8,6 +8,10 @@
 
 namespace App\MessageHandler;
 
+use Throwable;
+use App\Entity\Configurazione;
+use App\Entity\Sede;
+use App\Entity\Circolare;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\CircolareUtente;
@@ -102,7 +106,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
           // errore
           $this->logger->warning('ACTION ERROR: undefined class', [$action->getTag()]);
       }
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
       // errore
       $this->logger->error('ACTION ERROR: '.$e->getMessage(), [$action->getTag()]);
     }
@@ -118,17 +122,17 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    */
   public function docenteAdd(Docente $user) {
     // imposta circolari
-    $anno = substr((string) $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
-    $numSedi = $this->em->getRepository(\App\Entity\Sede::class)->createQueryBuilder('s')
+    $anno = substr((string) $this->em->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $numSedi = $this->em->getRepository(Sede::class)->createQueryBuilder('s')
       ->select('COUNT(s.id)')
       ->getQuery()
       ->getSingleScalarResult();
 
 
-    $esistenti = $this->em->getRepository(\App\Entity\CircolareUtente::class)->createQueryBuilder('cu')
+    $esistenti = $this->em->getRepository(CircolareUtente::class)->createQueryBuilder('cu')
       ->select('cu.id')
       ->where("cu.circolare=c.id AND cu.utente=:utente");
-    $circolari = $this->em->getRepository(\App\Entity\Circolare::class)->createQueryBuilder('c')
+    $circolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
       ->where("c.pubblicata=1 AND c.anno=:anno AND c.docenti='T' AND NOT EXISTS (".$esistenti.')')
       ->setParameters(['anno' => $anno, 'utente' => $user])
       ->getQuery()
@@ -144,7 +148,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
     // imposta utenti
     foreach ($listaId as $id) {
       $obj = (new CircolareUtente())
-        ->setCircolare($this->em->getReference(\App\Entity\Circolare::class, $id))
+        ->setCircolare($this->em->getReference(Circolare::class, $id))
         ->setUtente($user)
         ->setLetta($user->getCreato());
       $this->em->persist($obj);

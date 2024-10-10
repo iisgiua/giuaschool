@@ -8,6 +8,7 @@
 
 namespace App\DQL;
 
+use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;
@@ -23,14 +24,13 @@ class InstrFunction extends FunctionNode {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $str La stringa di testo da considerare
+   * @var Node $str La stringa di testo da considerare
    */
   public $str = null;
 
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $search La stringa da cercare
+   * @var Node $search La stringa da cercare
    */
   public $search = null;
 

@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\OsservazioneAlunnoRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -18,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\OsservazioneAlunnoRepository::class)]
+#[ORM\Entity(repositoryClass: OsservazioneAlunnoRepository::class)]
 class OsservazioneAlunno extends OsservazioneClasse {
 
 

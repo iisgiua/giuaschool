@@ -8,6 +8,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Avviso;
+use App\Entity\StoricoEsito;
+use App\Entity\Assenza;
 use App\Util\BachecaUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
@@ -124,7 +127,7 @@ class FileController extends BaseController {
   #[IsGranted('ROLE_UTENTE')]
   public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
     // controllo avviso
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($avviso);
+    $avviso = $this->em->getRepository(Avviso::class)->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -161,7 +164,7 @@ class FileController extends BaseController {
   #[IsGranted('ROLE_ATA')]
   public function downloadSegreteria(string $tipo, int $id): Response {
     // controllo
-    $storico = $this->em->getRepository(\App\Entity\StoricoEsito::class)->findOneByAlunno($id);
+    $storico = $this->em->getRepository(StoricoEsito::class)->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -231,7 +234,7 @@ class FileController extends BaseController {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $this->em->getRepository(\App\Entity\Assenza::class)->find($id);
+      $assenza = $this->em->getRepository(Assenza::class)->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

@@ -8,6 +8,9 @@
 
 namespace App\Security;
 
+use App\Entity\Utente;
+use App\Entity\Configurazione;
+use DateTime;
 use App\Entity\Genitore;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
@@ -121,7 +124,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    */
   public function getUser(string $username): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['username' => $username,
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $username,
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
@@ -149,8 +152,8 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione: id_provider
-    $idProvider = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider');
-    $idProviderTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider_tipo');
+    $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
     // se id_provider controlla ruolo utente
     if ($idProvider && $user->controllaRuolo($idProviderTipo)) {
       // errore: utente deve usare accesso con id provider
@@ -163,7 +166,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // controlla password
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok
-      $otpTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('otp_tipo');
+      $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
       if ($user->getOtp() && $user->controllaRuolo($otpTipo)) {
         // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
@@ -216,7 +219,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $otpTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('otp_tipo');
+    $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
     $tipo_accesso = ($token->getUser()->getOtp() && $token->getUser()->controllaRuolo($otpTipo)) ?
       'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
@@ -229,7 +232,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-      $token->getUser()->setUltimoAccesso(new \DateTime());
+      $token->getUser()->setUltimoAccesso(new DateTime());
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());

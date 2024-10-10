@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Alunno;
+use App\Entity\Genitore;
 use App\Entity\Classe;
 
 
@@ -40,7 +42,7 @@ class ClasseRepository extends BaseRepository {
     // legge gruppi
     $classi = $this->createQueryBuilder('c')
       ->select('c.id AS classe,c2.id AS gruppo')
-      ->leftJoin(\App\Entity\Classe::class, 'c2', 'WITH', 'c2.id!=c.id AND c2.anno=c.anno AND c2.sezione=c.sezione')
+      ->leftJoin(Classe::class, 'c2', 'WITH', 'c2.id!=c.id AND c2.anno=c.anno AND c2.sezione=c.sezione')
       ->where("c.id IN (:lista) AND (c.gruppo IS NULL OR c.gruppo='') AND c2.id IS NOT NULL AND c2 NOT IN (:lista)")
       ->setParameters(['lista' => $lista])
       ->getQuery()
@@ -166,8 +168,8 @@ class ClasseRepository extends BaseRepository {
     if ($filtro) {
       // filtro genitori
       $classi
-        ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
-        ->join(\App\Entity\Genitore::class, 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
+        ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
         ->andWhere('g.id IN (:lista)')
         ->setParameter('lista', $filtro)
         ->setParameter('abilitato', 1);
@@ -195,7 +197,7 @@ class ClasseRepository extends BaseRepository {
     if ($filtro) {
       // filtro alunni
       $classi
-        ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
         ->andWhere('a.id IN (:lista)')
         ->setParameter('lista', $filtro)
         ->setParameter('abilitato', 1);
@@ -240,7 +242,7 @@ class ClasseRepository extends BaseRepository {
       $classi = $this->createQueryBuilder('c')
         ->select('DISTINCT c.id')
         ->where('c.sede IN (:sedi)')
-        ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
+        ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
         ->setParameters(['sedi' => $sedi, 'abilitato' => 1, 'lista' => $filtro])
         ->getQuery()
         ->getArrayResult();
@@ -252,8 +254,8 @@ class ClasseRepository extends BaseRepository {
       $classi = $this->createQueryBuilder('c')
         ->select('DISTINCT c.id')
         ->where('c.sede IN (:sedi)')
-        ->join(\App\Entity\Genitore::class, 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
-        ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
+        ->join(Genitore::class, 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
+        ->join(Alunno::class, 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
         ->setParameters(['sedi' => $sedi, 'abilitato' => 1, 'lista' => $filtro])
         ->getQuery()
         ->getArrayResult();
@@ -337,8 +339,8 @@ class ClasseRepository extends BaseRepository {
     // legge gruppi
     $classi = $this->createQueryBuilder('c')
       ->select('c.id AS classe,cl1.id as comune,cl2.id AS gruppo')
-      ->leftJoin(\App\Entity\Classe::class, 'cl1', 'WITH', 'cl1.id!=c.id AND cl1.anno=c.anno AND cl1.sezione=c.sezione AND cl1.gruppo IS NULL')
-      ->leftJoin(\App\Entity\Classe::class, 'cl2', 'WITH', 'cl1.id IS NULL AND cl2.id!=c.id AND cl2.anno=c.anno AND cl2.sezione=c.sezione AND cl2.gruppo IS NOT NULL')
+      ->leftJoin(Classe::class, 'cl1', 'WITH', 'cl1.id!=c.id AND cl1.anno=c.anno AND cl1.sezione=c.sezione AND cl1.gruppo IS NULL')
+      ->leftJoin(Classe::class, 'cl2', 'WITH', 'cl1.id IS NULL AND cl2.id!=c.id AND cl2.anno=c.anno AND cl2.sezione=c.sezione AND cl2.gruppo IS NOT NULL')
       ->where('c.id IN (:lista) AND (cl1.id IS NOT NULL OR cl2.id IS NOT NULL)')
       ->setParameters(['lista' => $lista])
       ->getQuery()

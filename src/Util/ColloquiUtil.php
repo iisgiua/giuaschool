@@ -8,6 +8,11 @@
 
 namespace App\Util;
 
+use DateTime;
+use App\Entity\Festivita;
+use App\Entity\Cattedra;
+use App\Entity\RichiestaColloquio;
+use IntlDateFormatter;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Colloquio;
@@ -53,20 +58,20 @@ class ColloquiUtil {
    *  @param string $frequenza Frequenza del ricevimento [S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=ultima settimana]
    *  @param int $durata Durata di ogni colloquio
    *  @param int $giorno Giorno della settimana [0=domenica, 1=lunedì ... 6=sabato]
-   *  @param \DateTime $inizio Ora inizio ricevimento
-   *  @param \DateTime $fine Ora fine ricevimento
+   * @param DateTime $inizio Ora inizio ricevimento
+   * @param DateTime $fine Ora fine ricevimento
    *  @param string $luogo Luogo/link del colloquio
    *
    *  @return string|null Avviso su colloqui duplicati o null se tutto ok
    */
   public function generaDate(Docente $docente, string $tipo, string $frequenza, int $durata, int $giorno,
-                             \DateTime $inizio, \DateTime $fine, string $luogo): ?string {
+                             DateTime $inizio, DateTime $fine, string $luogo): ?string {
     // inizializza
     $week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     $avviso = null;
     // inizio e fine colloqui
-    $dataInizio = new \DateTime('tomorrow');
-    $dataFine = (\DateTime::createFromFormat('Y-m-d H:i:s',
+    $dataInizio = new DateTime('tomorrow');
+    $dataFine = (DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00'))->modify('-30 days');
     if ($dataInizio > $dataFine) {
       // errore: date oltre il limite
@@ -78,9 +83,9 @@ class ColloquiUtil {
     // lista date possibili
     $lista = [];
     $successivo = 'next '.$week[$giorno];
-    for ($giorno = (new \DateTime('today'))->modify($successivo); $giorno <= $dataFine; $giorno->modify($successivo)) {
+    for ($giorno = (new DateTime('today'))->modify($successivo); $giorno <= $dataFine; $giorno->modify($successivo)) {
       if (in_array($giorno->format('n'), $mesiBloccati, true) ||
-          $this->em->getRepository(\App\Entity\Festivita::class)->giornoFestivo($giorno)) {
+          $this->em->getRepository(Festivita::class)->giornoFestivo($giorno)) {
         // salta data
         continue;
       }
@@ -136,7 +141,7 @@ class ColloquiUtil {
         $colloquio->setNumero($this->numeroColloqui($colloquio));
         $this->em->persist($colloquio);
         // controlla se esite già
-        if ($this->em->getRepository(\App\Entity\Colloquio::class)->sovrapposizione($docente, $data,
+        if ($this->em->getRepository(Colloquio::class)->sovrapposizione($docente, $data,
             $inizio, $fine)) {
           // avviso: sovrapposizione
           $this->em->remove($colloquio);
@@ -181,7 +186,7 @@ class ColloquiUtil {
     $dati = [];
     $dati['docenti'] = [];
     // legge cattedre
-    $cattedre = $this->em->getRepository(\App\Entity\Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
@@ -202,7 +207,7 @@ class ColloquiUtil {
         $cattedra->getMateria()->getNome();
     }
     // legge richieste
-    $dati['richieste'] = $this->em->getRepository(\App\Entity\RichiestaColloquio::class)->richiesteAlunno($alunno,
+    $dati['richieste'] = $this->em->getRepository(RichiestaColloquio::class)->richiesteAlunno($alunno,
       $genitore);
     // restituisce dati
     return $dati;
@@ -217,9 +222,9 @@ class ColloquiUtil {
    */
   public function dateRicevimento(Docente $docente): array {
     // legge date valide di ricevimento
-    $inizio = new \DateTime('tomorrow');
+    $inizio = new DateTime('tomorrow');
     $fine = (clone $inizio)->modify('last day of next month');
-    $ricevimenti = $this->em->getRepository(\App\Entity\Colloquio::class)->ricevimenti($docente, $inizio, $fine, true);
+    $ricevimenti = $this->em->getRepository(Colloquio::class)->ricevimenti($docente, $inizio, $fine, true);
     $dati['validi'] = [];
     $dati['esauriti'] = [];
     foreach ($ricevimenti as $ricevimento) {
@@ -231,10 +236,10 @@ class ColloquiUtil {
     }
     // legge date prossimi ricevimenti
     $fine->modify('+1 day');
-    $dati['prossimi'] = $this->em->getRepository(\App\Entity\Colloquio::class)->ricevimenti($docente, $fine, null, true);
+    $dati['prossimi'] = $this->em->getRepository(Colloquio::class)->ricevimenti($docente, $fine, null, true);
     // crea lista per form
     $dati['lista'] = [];
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     foreach ($dati['validi'] as $colloquio) {
       $dataOra = $this->trans->trans('label.form_data_ricevimento', [

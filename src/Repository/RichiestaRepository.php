@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\Alunno;
 use App\Entity\Richiesta;
 use App\Entity\Staff;
 use App\Entity\Utente;
@@ -25,11 +27,11 @@ class RichiestaRepository extends BaseRepository {
    *
    * @param string $tipo Codifica del tipo di richiesta
    * @param int $idAlunno Identificativo alunno che ha fatto richiesta
-   * @param \DateTime $data Data di riferimento della richiesta
+   * @param DateTime $data Data di riferimento della richiesta
    *
    * @return Richiesta|null Richiesta, se esiste
    */
-  public function richiestaAlunno(string $tipo, int $idAlunno, \DateTime $data): ?Richiesta {
+  public function richiestaAlunno(string $tipo, int $idAlunno, DateTime $data): ?Richiesta {
     $richiesta = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
       ->where('dr.abilitata=:si AND dr.unica=:no AND dr.tipo=:tipo AND r.utente=:utente AND r.stato IN (:stati) AND r.data=:data')
@@ -59,7 +61,7 @@ class RichiestaRepository extends BaseRepository {
     // query base
     $richieste = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
+      ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
       ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
@@ -142,7 +144,7 @@ class RichiestaRepository extends BaseRepository {
     $richieste = $this->createQueryBuilder('r')
       ->select('COUNT(r.id) AS totale, s.nomeBreve')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
+      ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
       ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND dr.tipo!=:tipo AND r.stato=:stato')
@@ -234,7 +236,7 @@ class RichiestaRepository extends BaseRepository {
     // query base
     $moduli = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
-      ->join(\App\Entity\Alunno::class, 'a', 'WITH', 'a.id=r.utente')
+      ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
       ->join('c.sede', 's')
       ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")

@@ -8,6 +8,8 @@
 
 namespace App\MessageHandler;
 
+use App\Entity\Avviso;
+use App\Entity\Classe;
 use App\Message\AvvisoMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,7 +46,7 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    * @param AvvisoMessage $message Dati per la notifica dell'avviso
    */
   public function __invoke(AvvisoMessage $message) {
-    $avviso = $this->em->getRepository(\App\Entity\Avviso::class)->find($message->getId());
+    $avviso = $this->em->getRepository(Avviso::class)->find($message->getId());
     $destinatari = [];
     if ($avviso) {
       // dati avviso
@@ -59,12 +61,12 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
       $classi = '';
       if ($avviso->getFiltroTipo() == 'C' && !empty($avviso->getFiltro())) {
         // entrate/uscite/attività
-        $classi = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($avviso->getFiltro());
+        $classi = $this->em->getRepository(Classe::class)->listaClassi($avviso->getFiltro());
       }
       $dati = ['id' => $avviso->getId(), 'data' => $data, 'oggetto' => $oggetto,
         'testo' => $testo, 'allegati' => count($avviso->getAllegati())];
       // legge i destinatari
-      $destinatari = $this->em->getRepository(\App\Entity\Avviso::class)->notifica($avviso);
+      $destinatari = $this->em->getRepository(Avviso::class)->notifica($avviso);
       foreach ($destinatari as $utente) {
         // crea le notifiche per ogni destinatario
         $dati['alunno'] = '';

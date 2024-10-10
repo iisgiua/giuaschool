@@ -8,6 +8,12 @@
 
 namespace App\Install;
 
+use PDO;
+use Exception;
+use ZipArchive;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
+use Symfony\Component\Filesystem\Filesystem;
+use SPID_PHP\Setup;
 
 /**
  * Updater - Gestione procedure di aggiornamento dell'applicazione
@@ -36,9 +42,9 @@ class Updater {
   /**
    * Conserva la connessione al database come istanza PDO
    *
-   * @var \PDO $pdo Connessione al database
+   * @var PDO $pdo Connessione al database
    */
-  private ?\PDO $pdo = null;
+  private ?PDO $pdo = null;
 
   /**
    * Conserva il percorso della directory principale dell'applicazione
@@ -117,7 +123,7 @@ class Updater {
       $maxStep = count($this->steps['update']);
       $step = ($step < 1) ? 1 : (($step > $maxStep) ? $maxStep : $step);
       $this->{$this->steps['update'][$step]}($step);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // visualizza pagina di errore
       $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
       $page['step'] = $step.' - Errore';
@@ -144,7 +150,7 @@ class Updater {
       $maxStep = count($this->steps['install']);
       $step = ($step < 1) ? 1 : (($step > $maxStep) ? $maxStep : $step);
       $this->{$this->steps['install'][$step]}($step);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // visualizza pagina di errore
       $page['version'] = 'INSTALL';
       $page['step'] = $step.' - Errore';
@@ -259,21 +265,21 @@ class Updater {
     // controlla token
     if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
       // errore di sicurezza
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati', 0);
+      throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
     // controlla versione
     $version = $this->getParameter('versione', '0');
     $build = $this->getParameter('versione_build', '0');
     if (empty($version) || version_compare($version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
-      throw new \Exception('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
+      throw new Exception('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
     } elseif (version_compare($version, $this->sys['version'], '>')) {
       // sistema già aggiornato
-      throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+      throw new Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
     } elseif (version_compare($version, $this->sys['version'], '=') &&
               ($this->sys['build'] == '0' || $this->sys['build'] == $build)) {
       // sistema già aggiornato
-      throw new \Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+      throw new Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
     }
     // converte nomi file per compatibilità
     foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
@@ -302,7 +308,7 @@ class Updater {
     // controlla token
     if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
       // errore di sicurezza
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati', 0);
+      throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
   }
 
@@ -316,8 +322,8 @@ class Updater {
     $db = parse_url((string) $this->env['DATABASE_URL']);
     $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
       ($noSchema ? '' : (';dbname='.substr($db['path'], 1)));
-    $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
-    $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    $this->pdo = new PDO($dsn, $db['user'], $db['pass']);
+    $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   }
 
   /**
@@ -486,10 +492,10 @@ class Updater {
     // apre file ZIP
     $zipPath = $this->projectPath.'/src/Install/v'.$this->sys['version'].
       ($this->sys['build'] == '0' ? '' : '-build').'.zip';
-    $zip = new \ZipArchive();
+    $zip = new ZipArchive();
     if ($zip->open($zipPath) !== true) {
       // errore
-      throw new \Exception('Errore nell\'apertura del file ZIP.', $step);
+      throw new Exception('Errore nell\'apertura del file ZIP.', $step);
     }
     // estrae file
     for($i = 0; $i < $zip->numFiles; $i++) {
@@ -509,7 +515,7 @@ class Updater {
         $success = $zip->extractTo('../..', [$zip->getNameIndex($i)]);
         if (!$success) {
           // errore
-          throw new \Exception('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
+          throw new Exception('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
         }
       }
     }
@@ -554,7 +560,7 @@ class Updater {
         }
         if (!$success) {
           // errore
-          throw new \Exception('Errore nel copiare il file "'.$file.'"', $step);
+          throw new Exception('Errore nel copiare il file "'.$file.'"', $step);
         }
       }
     }
@@ -573,7 +579,7 @@ class Updater {
         }
         if (!$success) {
           // errore
-          throw new \Exception('Errore nel cancellare il file "'.$file.'"', $step);
+          throw new Exception('Errore nel cancellare il file "'.$file.'"', $step);
         }
       }
     }
@@ -601,7 +607,7 @@ class Updater {
     // controlla coerenza dati
     if (count($updates['sqlCommand']) != count($updates['sqlCheck'])) {
       // errore
-      throw new \Exception('Errore nelle informazioni di aggiornamento per il database', $step);
+      throw new Exception('Errore nelle informazioni di aggiornamento per il database', $step);
     }
     // aggiorna database
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
@@ -616,7 +622,7 @@ class Updater {
             // modifica già eseguita
             $toDo = false;
           }
-        } catch (\Exception) {
+        } catch (Exception) {
           // errore dovuto a campi o tabelle mancanti: modifica da eseguire
         }
       }
@@ -624,8 +630,8 @@ class Updater {
         // esegue comando SQL
         try {
           $this->pdo->exec($sql);
-        } catch (\Exception) {
-          throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database<br>'.
+        } catch (Exception) {
+          throw new Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database<br>'.
             '['.$sql.']', $step);
         }
       }
@@ -1050,12 +1056,12 @@ class Updater {
       $username = trim((string) $_POST['install']['username']);
       if (strlen($username) < 4) {
         // username troppo corto
-        throw new \Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $step);
+        throw new Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $step);
       }
       $password = trim((string) $_POST['install']['password']);
       if (strlen($password) < 8) {
         // password troppo corta
-        throw new \Exception('La password deve avere una lunghezza di almeno 8 caratteri', $step);
+        throw new Exception('La password deve avere una lunghezza di almeno 8 caratteri', $step);
       }
       // codifica password
       require $this->projectPath.'/vendor/symfony/password-hasher/PasswordHasherInterface.php';
@@ -1067,7 +1073,7 @@ class Updater {
       require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/NativePasswordHasher.php';
       require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/Pbkdf2PasswordHasher.php';
       require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/MigratingPasswordHasher.php';
-      $factory = new \Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory(
+      $factory = new PasswordHasherFactory(
         ['common' => ['algorithm' => 'auto']]);
       $passwordHasher = $factory->getPasswordHasher('common');
       $hash = $passwordHasher->hash($password);
@@ -1156,64 +1162,64 @@ class Updater {
       $spid['entityID'] = strtolower(trim((string) $_POST['install']['entityID']));
       if (empty($spid['entityID'])) {
         // errore
-        throw new \Exception('Non è stato indicato l\'identificativo del service provider', $step);
+        throw new Exception('Non è stato indicato l\'identificativo del service provider', $step);
       }
       if (!str_starts_with($spid['entityID'], 'http://') && !str_starts_with($spid['entityID'], 'https://')) {
         // errore
-        throw new \Exception('L\'identificativo del service provider deve essere un indirizzo internet', $step);
+        throw new Exception('L\'identificativo del service provider deve essere un indirizzo internet', $step);
       }
       $spid['spLocalityName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spLocalityName']));
       if (empty($spid['spLocalityName'])) {
         // errore
-        throw new \Exception('Non è stata indicata la sede legale del service provider', $step);
+        throw new Exception('Non è stata indicata la sede legale del service provider', $step);
       }
       $spid['spName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spName']));
       if (empty($spid['spName'])) {
         // errore
-        throw new \Exception('Non è stato indicato il nome del service provider', $step);
+        throw new Exception('Non è stato indicato il nome del service provider', $step);
       }
       $spid['spDescription'] = str_replace("'", "\\'", trim((string) $_POST['install']['spDescription']));
       if (empty($spid['spDescription'])) {
         // errore
-        throw new \Exception('Non è stata indicata la descrizione del service provider', $step);
+        throw new Exception('Non è stata indicata la descrizione del service provider', $step);
       }
       $spid['spOrganizationName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationName']));
       if (empty($spid['spOrganizationName'])) {
         // errore
-        throw new \Exception('Non è stato indicato il nome completo dell\'ente', $step);
+        throw new Exception('Non è stato indicato il nome completo dell\'ente', $step);
       }
       $spid['spOrganizationDisplayName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationDisplayName']));
       if (empty($spid['spOrganizationDisplayName'])) {
         // errore
-        throw new \Exception('Non è stato indicato il nome abbreviato dell\'ente', $step);
+        throw new Exception('Non è stato indicato il nome abbreviato dell\'ente', $step);
       }
       $spid['spOrganizationURL'] = trim((string) $_POST['install']['spOrganizationURL']);
       if (empty($spid['spOrganizationURL'])) {
         // errore
-        throw new \Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $step);
+        throw new Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $step);
       }
       if (!str_starts_with($spid['spOrganizationURL'], 'http://') && !str_starts_with($spid['spOrganizationURL'], 'https://')) {
         // errore
-        throw new \Exception('L\'indirizzo internet dell\'ente non è valido', $step);
+        throw new Exception('L\'indirizzo internet dell\'ente non è valido', $step);
       }
       $spid['spOrganizationCode'] = trim((string) $_POST['install']['spOrganizationCode']);
       if (empty($spid['spOrganizationCode'])) {
         // errore
-        throw new \Exception('Non è stato indicato il codice IPA dell\'ente', $step);
+        throw new Exception('Non è stato indicato il codice IPA dell\'ente', $step);
       }
       $spid['spOrganizationEmailAddress'] = trim((string) $_POST['install']['spOrganizationEmailAddress']);
       if (empty($spid['spOrganizationEmailAddress'])) {
         // errore
-        throw new \Exception('Non è stato indicato l\'indirizzo email dell\'ente', $step);
+        throw new Exception('Non è stato indicato l\'indirizzo email dell\'ente', $step);
       }
       if (!str_contains($spid['spOrganizationEmailAddress'], '@')) {
         // errore
-        throw new \Exception('L\'indirizzo email dell\'ente non è valido', $step);
+        throw new Exception('L\'indirizzo email dell\'ente non è valido', $step);
       }
       $spid['spOrganizationTelephoneNumber'] = str_replace(' ', '', trim((string) $_POST['install']['spOrganizationTelephoneNumber']));
       if (empty($spid['spOrganizationTelephoneNumber'])) {
         // errore
-        throw new \Exception('Non è stato indicato il numero di telefono dell\'ente', $step);
+        throw new Exception('Non è stato indicato il numero di telefono dell\'ente', $step);
       }
       if ($spid['spOrganizationTelephoneNumber'][0] != '+' && !str_starts_with($spid['spOrganizationTelephoneNumber'], '00')) {
         // aggiunge prefisso internazionale
@@ -1290,7 +1296,7 @@ class Updater {
       // scrive metadata
       if (file_put_contents($this->projectPath.'/config/metadata/registro-spid.xml', $xml) === false) {
         // errore di creazione del file
-        throw new \Exception('Impossibile memorizzare il file dei metadata (registro-spid.xml).', $step);
+        throw new Exception('Impossibile memorizzare il file dei metadata (registro-spid.xml).', $step);
       }
       // imposta dati della pagina
       $page['success'] = 'L\'accesso SPID è stato configurato correttamente.';
@@ -1327,7 +1333,7 @@ class Updater {
   private function spidSetup() {
     // inizializza
     require $this->projectPath.'/vendor/symfony/filesystem/Filesystem.php';
-    $fs = new \Symfony\Component\Filesystem\Filesystem();
+    $fs = new Filesystem();
     // legge configurazione e imposta validazione
     $validate = ($this->getParameter('spid') == 'validazione');
     $spid = json_decode(file_get_contents(
@@ -1381,7 +1387,7 @@ class Updater {
         while (($e = openssl_error_string()) !== false) {
           $errors .= '<br>'.$e;
         }
-        throw new \Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_new).'.$errors, $step);
+        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_new).'.$errors, $step);
       }
       $sslDn = [
         'organizationName' => $spid['spOrganizationName'],
@@ -1395,28 +1401,28 @@ class Updater {
         while (($e = openssl_error_string()) !== false) {
           $errors .= '<br>'.$e;
         }
-        throw new \Exception('Impossibile creare il certificato per lo SPID (openssl_csr_new).'.$errors, $step);
+        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_csr_new).'.$errors, $step);
       }
       if (($sslCert = openssl_csr_sign($sslCsr, null, $sslPkey, 730, $sslParams, time())) === false) {
         // errore di creazione del certificato
         while (($e = openssl_error_string()) !== false) {
           $errors .= '<br>'.$e;
         }
-        throw new \Exception('Impossibile creare il certificato per lo SPID (openssl_csr_sign).'.$errors, $step);
+        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_csr_sign).'.$errors, $step);
       }
       if (openssl_x509_export_to_file($sslCert, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.crt') === false) {
         // errore di creazione del certificato
         while (($e = openssl_error_string()) !== false) {
           $errors .= '<br>'.$e;
         }
-        throw new \Exception('Impossibile creare il certificato per lo SPID (openssl_x509_export_to_file).'.$errors, $step);
+        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_x509_export_to_file).'.$errors, $step);
       }
       if (openssl_pkey_export_to_file($sslPkey, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.pem', null, $sslParams) === false) {
         // errore di creazione del certificato
         while (($e = openssl_error_string()) !== false) {
           $errors .= '<br>'.$e;
         }
-        throw new \Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_export_to_file).'.$errors, $step);
+        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_export_to_file).'.$errors, $step);
       }
       // copia in directory di configurazione SPID
       $fs->mirror($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert',
@@ -1447,7 +1453,7 @@ class Updater {
     $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/config.php';
     if (file_put_contents($dest, $customized) === false) {
       // errore di creazione del file
-      throw new \Exception('Impossibile creare il file di configurazione SAML (config.php).', $step);
+      throw new Exception('Impossibile creare il file di configurazione SAML (config.php).', $step);
     }
     // personalizza configurazione SP
     $vars = [
@@ -1468,7 +1474,7 @@ class Updater {
     $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/authsources.php';
     if (file_put_contents($dest, $customized) === false) {
       // errore di creazione del file
-      throw new \Exception('Impossibile creare il file di configurazione del Service Provider (authsources.php).', $step);
+      throw new Exception('Impossibile creare il file di configurazione del Service Provider (authsources.php).', $step);
     }
     // aggiorna metadata
     require ($spid['installDir'].'/setup/Setup.php');
@@ -1476,13 +1482,13 @@ class Updater {
     chdir($spid['installDir']);
     try {
       ob_start();
-      \SPID_PHP\Setup::updateMetadata();
+      Setup::updateMetadata();
       ob_end_clean();
       chdir($this->projectPath.'/public/install');
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       chdir($this->projectPath.'/public/install');
-      throw new \Exception($e->getMessage(), $step);
+      throw new Exception($e->getMessage(), $step);
     }
     // copia HTML pulsante SPID
     $pathSource = $spid['installDir'].'/vendor/italia/spid-sp-access-button/src/production';

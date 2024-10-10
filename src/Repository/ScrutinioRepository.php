@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Scrutinio - repository
  *
  * @author Antonello Dessì
  */
-class ScrutinioRepository extends \Doctrine\ORM\EntityRepository {
+class ScrutinioRepository extends EntityRepository {
 
 }
 

@@ -8,6 +8,9 @@
 
 namespace App\Util;
 
+use DateTime;
+use App\Entity\Sede;
+use App\Entity\ScansioneOraria;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\Cattedra;
@@ -167,7 +170,7 @@ class CsvImporter {
           $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di docente
-      $docente = $this->em->getRepository(\App\Entity\Docente::class)->findOneByUsername($fields['username']);
+      $docente = $this->em->getRepository(Docente::class)->findOneByUsername($fields['username']);
       if ($docente) {
         // docente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -279,7 +282,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository(\App\Entity\Docente::class)->findByUsername($fields['usernameDocente']);
+      $lista = $this->em->getRepository(Docente::class)->findByUsername($fields['usernameDocente']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -302,7 +305,7 @@ class CsvImporter {
         $classeGruppo = substr($classeSezione, $pos + 1);
         $classeSezione = substr($classeSezione, 0, $pos);
       }
-      $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
+      $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
         ->where('c.anno=:anno AND c.sezione=:sezione AND '.
           ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
         ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -318,7 +321,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di materia
-      $lista = $this->em->getRepository(\App\Entity\Materia::class)->findByNomeNormalizzato($fields['materia']);
+      $lista = $this->em->getRepository(Materia::class)->findByNomeNormalizzato($fields['materia']);
       if (count($lista) != 1) {
         // errore: materia
         fclose($this->fh);
@@ -329,7 +332,7 @@ class CsvImporter {
       $materia = $lista[0];
       // controlla esistenza di alunno
       if (!empty($fields['usernameAlunno']) && $fields['usernameAlunno'] != '---') {
-        $lista = $this->em->getRepository(\App\Entity\Alunno::class)->findByUsername($fields['usernameAlunno']);
+        $lista = $this->em->getRepository(Alunno::class)->findByUsername($fields['usernameAlunno']);
       } elseif ($fields['usernameAlunno'] == '---') {
         // alunno da rimuovere
         $lista = null;
@@ -386,7 +389,7 @@ class CsvImporter {
         $empty_fields['usernameAlunno'] = true;
       }
       // controlla esistenza di cattedra
-      $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['docente' => $docente,
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['docente' => $docente,
         'classe' => $classe, 'materia' => $materia]);
       if ($cattedra) {
         // cattedra esiste
@@ -549,7 +552,7 @@ class CsvImporter {
         $empty_fields['dataNascita'] = true;
         $fields['dataNascita'] = null;
       } else {
-        $date = \DateTime::createFromFormat('!d/m/Y', $fields['dataNascita']);
+        $date = DateTime::createFromFormat('!d/m/Y', $fields['dataNascita']);
         if (!$date || $date->format('d/m/Y') != $fields['dataNascita']) {
           // errore data
           fclose($this->fh);
@@ -629,7 +632,7 @@ class CsvImporter {
             $classeGruppo = substr($classeSezione, $pos + 1);
             $classeSezione = substr($classeSezione, 0, $pos);
           }
-          $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
+          $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.sezione=:sezione AND '.
               ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
             ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -658,7 +661,7 @@ class CsvImporter {
         }
         $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
         $username = preg_replace('/[^a-z\.]+/', '', $username);
-        $result = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+        $result = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->where('a.username LIKE :username')
           ->setParameter(':username', $username.'.s%')
           ->orderBy('a.username', 'DESC')
@@ -756,10 +759,10 @@ class CsvImporter {
       $genitore2 = null;
       if (!$empty_fields['username'] && !$empty_fields['genitore1Username'] && !$empty_fields['genitore2Username']) {
         // controlla esistenza di alunno
-        $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneByUsername($fields['username']);
-        $genitore1 = $this->em->getRepository(\App\Entity\Genitore::class)->findOneBy(['username' => $fields['genitore1Username'],
+        $alunno = $this->em->getRepository(Alunno::class)->findOneByUsername($fields['username']);
+        $genitore1 = $this->em->getRepository(Genitore::class)->findOneBy(['username' => $fields['genitore1Username'],
           'alunno' => $alunno]);
-        $genitore2 = $this->em->getRepository(\App\Entity\Genitore::class)->findOneBy(['username' => $fields['genitore2Username'],
+        $genitore2 = $this->em->getRepository(Genitore::class)->findOneBy(['username' => $fields['genitore2Username'],
           'alunno' => $alunno]);
       }
       $modifica = $alunno && $genitore1 && $genitore2;
@@ -813,7 +816,7 @@ class CsvImporter {
       } else {
         // utente non esiste
         if ($filtro == 'T' || ($filtro == 'N' &&
-            !$this->em->getRepository(\App\Entity\Alunno::class)->findOneByCodiceFiscale($fields['codiceFiscale']))) {
+            !$this->em->getRepository(Alunno::class)->findOneByCodiceFiscale($fields['codiceFiscale']))) {
           // crea nuovo alunno
           $error = $this->nuovoAlunno($fields);
           if ($error) {
@@ -961,7 +964,7 @@ class CsvImporter {
         $fields['sede'] = null;
       }
       // controlla esistenza
-      $ata = $this->em->getRepository(\App\Entity\Ata::class)->findOneByUsername($fields['username']);
+      $ata = $this->em->getRepository(Ata::class)->findOneByUsername($fields['username']);
       if ($ata) {
         // utente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -1074,7 +1077,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository(\App\Entity\Docente::class)->findByUsername($fields['username']);
+      $lista = $this->em->getRepository(Docente::class)->findByUsername($fields['username']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -1090,7 +1093,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository(\App\Entity\Sede::class)->findByNomeBreve($fields['sede']);
+      $lista = $this->em->getRepository(Sede::class)->findByNomeBreve($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -1100,12 +1103,12 @@ class CsvImporter {
       }
       $sede = $lista[0];
       // legge orario
-      $definizione_orario = $this->em->getRepository(\App\Entity\Orario::class)->createQueryBuilder('o')
+      $definizione_orario = $this->em->getRepository(Orario::class)->createQueryBuilder('o')
         ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
+        ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'sede' => $sede])
         ->getQuery()
         ->getResult();
-      $scansione_oraria = $this->em->getRepository(\App\Entity\ScansioneOraria::class)->createQueryBuilder('so')
+      $scansione_oraria = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('so')
         ->join('so.orario', 'o')
         ->where('o.id=:orario')
         ->setParameters(['orario' => ($definizione_orario ? $definizione_orario[0] : null)])
@@ -1152,7 +1155,7 @@ class CsvImporter {
           $classeGruppo = substr($classeSezione, $pos + 1);
           $classeSezione = substr($classeSezione, 0, $pos);
         }
-        $classe = $this->em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
+        $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
           ->where('c.anno=:anno AND c.sezione=:sezione AND '.
             ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
           ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
@@ -1171,7 +1174,7 @@ class CsvImporter {
       // controlla esistenza di materia
       $materia = null;
       if ($fields['materia'] != '---') {
-        $lista = $this->em->getRepository(\App\Entity\Materia::class)->findByNomeNormalizzato($fields['materia']);
+        $lista = $this->em->getRepository(Materia::class)->findByNomeNormalizzato($fields['materia']);
         if (count($lista) != 1) {
           // errore: materia
           fclose($this->fh);
@@ -1183,7 +1186,7 @@ class CsvImporter {
       }
       // controlla esistenza cattedra
       if ($classe && $materia) {
-        $lista = $this->em->getRepository(\App\Entity\Cattedra::class)->findBy(['docente' => $docente,
+        $lista = $this->em->getRepository(Cattedra::class)->findBy(['docente' => $docente,
           'classe' => $classe, 'materia' => $materia]);
         if (count($lista) != 1) {
           // errore: cattedra
@@ -1200,7 +1203,7 @@ class CsvImporter {
         $cattedra = null;
       }
       // controlla esistenza di orario
-      $orario = $this->em->getRepository(\App\Entity\OrarioDocente::class)->createQueryBuilder('od')
+      $orario = $this->em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
         ->join('od.orario', 'o')
         ->join('od.cattedra', 'c')
         ->where('o.id=:orario AND c.docente=:docente AND od.giorno=:giorno AND od.ora=:ora')
@@ -1720,7 +1723,7 @@ class CsvImporter {
    */
   private function nuovoAta($fields) {
     // legge sede
-    $sede = $this->em->getRepository(\App\Entity\Sede::class)->findOneByNomeBreve($fields['sede']);
+    $sede = $this->em->getRepository(Sede::class)->findOneByNomeBreve($fields['sede']);
     if ($fields['sede'] && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');
@@ -1799,7 +1802,7 @@ class CsvImporter {
       unset($fields['segreteria']);
     }
     // legge sede
-    $sede = $this->em->getRepository(\App\Entity\Sede::class)->findOneByNomeBreve($fields['sede']);
+    $sede = $this->em->getRepository(Sede::class)->findOneByNomeBreve($fields['sede']);
     if (!isset($empty_fields['sede']) && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');

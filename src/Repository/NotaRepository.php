@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\Nota;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 
@@ -23,13 +25,13 @@ class NotaRepository extends BaseRepository {
    * Restituisce il numero di note individuali dell'alunno nell'intervallo di tempo indicato
    *
    * @param Alunno $alunno Alunno di cui si vuole contare le note individuali
-   * @param \DateTime $inizio Data di inizio
-   * @param \DateTime $fine Data di fine
+   * @param DateTime $inizio Data di inizio
+   * @param DateTime $fine Data di fine
    * @param Classe $classe Classe di riferimento o null per non effettuare controlli
    *
    * @return int Numero di valutazioni presenti
    */
-  public function numeroNoteIndividuali(Alunno $alunno, \DateTime $inizio, \DateTime $fine, Classe $classe=null) {
+  public function numeroNoteIndividuali(Alunno $alunno, DateTime $inizio, DateTime $fine, Classe $classe=null) {
     // conta note individuali
     $note = $this->createQueryBuilder('n')
       ->select('COUNT(n.id)')
@@ -61,10 +63,10 @@ class NotaRepository extends BaseRepository {
       $this->_em->getConnection()->executeStatement("SET sql_mode='$mode'");
     }
     // query base
-    $note = $this->_em->getRepository(\App\Entity\Classe::class)->createQueryBuilder('c')
+    $note = $this->_em->getRepository(Classe::class)->createQueryBuilder('c')
       ->select("COUNT(n.id) AS tot,SUM(IF(n.tipo='C',1,0)) AS nc,SUM(IF(n.tipo='I',1,0)) AS ni,c AS classe")
-      ->join(\App\Entity\Classe::class, 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
-      ->join(\App\Entity\Nota::class, 'n', 'WITH', 'n.classe=c2.id')
+      ->join(Classe::class, 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
+      ->join(Nota::class, 'n', 'WITH', 'n.classe=c2.id')
       ->where("(c.gruppo IS NULL OR c.gruppo='') AND n.annullata IS NULL AND n.data BETWEEN :inizio AND :fine")
       ->groupBy('c.anno,c.sezione')
       ->orderBy('tot', 'DESC')

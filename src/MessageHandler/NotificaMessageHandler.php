@@ -8,6 +8,10 @@
 
 namespace App\MessageHandler;
 
+use Throwable;
+use DateTime;
+use App\Entity\Istituto;
+use Exception;
 use App\Entity\Utente;
 use App\Message\NotificaMessage;
 use App\Util\TelegramManager;
@@ -56,7 +60,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   public function __invoke(NotificaMessage $message) {
     // legge dati utente
-    $utente = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['id' => $message->getUtenteId(),
+    $utente = $this->em->getRepository(Utente::class)->findOneBy(['id' => $message->getUtenteId(),
       'abilitato' => 1]);
     if (!$utente) {
       // nessuna notifica: utente non abilitato
@@ -92,7 +96,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           $this->logger->warning('NotificaMessage: canale non previsto', [$datiNotifica['tipo']]);
           return;
       }
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
       // errore
       $this->logger->error('NotificaMessage: ERRORE '.$e->getMessage(), [
         $datiNotifica['tipo'] == 'email' ? $utente->getEmail() : $datiNotifica['telegram_chat']]);
@@ -125,7 +129,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * @return bool Restituisce vero se la notifica è stata aggiornata
    */
   public static function update(EntityManagerInterface $em, string $tag, string $queue, int $delay): bool {
-    $ora = (new \DateTime())->modify('+'.$delay.' seconds');
+    $ora = (new DateTime())->modify('+'.$delay.' seconds');
     $connection = $em->getConnection();
     $sql = "UPDATE gs_messenger_messages SET available_at=:ora WHERE queue_name=:queue AND body LIKE :tag AND delivered_at IS NULL";
     $res = $connection->prepare($sql)->executeStatement(['ora' => $ora->format('Y-m-d H:i:s'),
@@ -150,7 +154,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   private function notificaEmail(NotificaMessage $message, Utente $utente): void {
     // legge dati per il mittente
-    $istituto = $this->em->getRepository(\App\Entity\Istituto::class)->findOneBy([]);
+    $istituto = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // imposta messaggio
     switch ($message->getTipo()) {
       case 'circolare':
@@ -195,7 +199,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   private function notificaTelegram(NotificaMessage $message, string $chat): void {
     // legge dati
-    $istituto = $this->em->getRepository(\App\Entity\Istituto::class)->findOneBy([]);
+    $istituto = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // imposta messaggio
     switch ($message->getTipo()) {
       case 'circolare':
@@ -221,7 +225,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     $ris = $this->telegram->sendMessage($chat, $html);
     if (isset($ris['error'])) {
       // errore invio
-      throw new \Exception($ris['error']);
+      throw new Exception($ris['error']);
     }
     $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message, $chat]);
   }

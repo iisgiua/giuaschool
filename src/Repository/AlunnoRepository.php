@@ -8,6 +8,12 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\CambioClasse;
+use App\Entity\Assenza;
+use App\Entity\Entrata;
+use App\Entity\Uscita;
+use App\Entity\Presenza;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Sede;
@@ -90,7 +96,7 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
-      ->leftJoin(\App\Entity\Classe::class, 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
+      ->leftJoin(Classe::class, 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
       ->where('a.abilitato=:abilitato AND a.frequenzaEstero=0 AND a.classe IS NOT NULL AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->andWhere('cl.sede IN (:sede)')
       ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
@@ -221,12 +227,12 @@ class AlunnoRepository extends BaseRepository {
   /**
    * Restituisce la lista degli alunni della classe indicata alla data indicata.
    *
-   * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
+   * @param DateTime $data Giorno in cui si desidera effettuare il controllo
    * @param Classe $classe Classe scolastica
    *
    * @return array Vettore con i dati degli alunni
    */
-  public function alunniInData(\DateTime $data, Classe $classe): array {
+  public function alunniInData(DateTime $data, Classe $classe): array {
     if ($data->format('Y-m-d') >= date('Y-m-d')) {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->createQueryBuilder('a')
@@ -238,7 +244,7 @@ class AlunnoRepository extends BaseRepository {
         ->getArrayResult();
     } else {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
-      $cambio = $this->_em->getRepository(\App\Entity\CambioClasse::class)->createQueryBuilder('cc')
+      $cambio = $this->_em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')
@@ -250,7 +256,7 @@ class AlunnoRepository extends BaseRepository {
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni_id2 = $this->createQueryBuilder('a')
         ->select('a.id')
-        ->join(\App\Entity\CambioClasse::class, 'cc', 'WITH', 'a.id=cc.alunno')
+        ->join(CambioClasse::class, 'cc', 'WITH', 'a.id=cc.alunno')
         ->where('a.frequenzaEstero=0 AND :data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
@@ -355,18 +361,18 @@ class AlunnoRepository extends BaseRepository {
    * Restituisce la situazione delle entrate/uscite/assenze/fc per l'alunno e la data indicata
    *
    * @param Alunno $alunno Alunno per il quale controllare le assenze
-   * @param \DateTime $data Data di riferimento per le assenze
+   * @param DateTime $data Data di riferimento per le assenze
    *
    * @return array Array associativo con la lista dei dati
    */
-  public function assenzeInData(Alunno $alunno, \DateTime $data): array {
+  public function assenzeInData(Alunno $alunno, DateTime $data): array {
     // dati alunni/assenze/ritardi/uscite
     $assenze = $this->createQueryBuilder('a')
       ->select('a.id AS id_alunno,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine')
-      ->leftJoin(\App\Entity\Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin(\App\Entity\Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin(\App\Entity\Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
-      ->leftJoin(\App\Entity\Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
+      ->leftJoin(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin(Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin(Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id=:alunno')
       ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
       ->setMaxResults(1)
@@ -454,7 +460,7 @@ class AlunnoRepository extends BaseRepository {
     // legge alunni attuali
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id,cc.note')
-      ->leftJoin(\App\Entity\CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
+      ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.classe=:classe')
       ->setParameters(['classe' => $classe])
       ->getQuery()
@@ -465,7 +471,7 @@ class AlunnoRepository extends BaseRepository {
     // legge alunni trasferiti
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id,cc.note')
-      ->join(\App\Entity\CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
+      ->join(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('cc.classe=:classe')
       ->setParameters(['classe' => $classe])
       ->getQuery()
@@ -490,7 +496,7 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->leftJoin('a.classe', 'cl')
-      ->leftJoin(\App\Entity\CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
+      ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome AND (cl.id IS NOT NULL OR cc.id IS NOT NULL)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%']);

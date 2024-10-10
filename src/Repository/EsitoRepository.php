@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Esito;
 use App\Entity\Scrutinio;
@@ -35,7 +36,7 @@ class EsitoRepository extends EntityRepository {
       $dati = $esito->getDati();
       if (empty($dati['visto'][$utente->getId()])) {
         // presa visione
-        $dati['visto'][$utente->getId()] = new \DateTime();
+        $dati['visto'][$utente->getId()] = new DateTime();
         $esito->setDati($dati);
         // memorizza dati
         $this->_em->flush();

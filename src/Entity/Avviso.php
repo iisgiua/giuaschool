@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\AvvisoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,9 +25,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_avviso')]
-#[ORM\Entity(repositoryClass: \App\Repository\AvvisoRepository::class)]
+#[ORM\Entity(repositoryClass: AvvisoRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class Avviso implements \Stringable {
+class Avviso implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -37,16 +40,16 @@ class Avviso implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
@@ -76,32 +79,29 @@ class Avviso implements \Stringable {
   private int $anno = 0;
 
   /**
-   * @var \DateTime|null $data Data dell'evento associato all'avviso
-   *
+   * @var DateTime|null $data Data dell'evento associato all'avviso
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $ora Ora associata all'evento dell'avviso
-   *
+   * @var DateTime|null $ora Ora associata all'evento dell'avviso
    *
    */
   #[ORM\Column(type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $ora = null;
+  private ?DateTime $ora = null;
 
   /**
-   * @var \DateTime|null $oraFine Ora finale associata all'evento dell'avviso
-   *
+   * @var DateTime|null $oraFine Ora finale associata all'evento dell'avviso
    *
    */
   #[ORM\Column(name: 'ora_fine', type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $oraFine = null;
+  private ?DateTime $oraFine = null;
 
   /**
    * @var Cattedra|null $cattedra Cattedra associata ad una verifica (o per altri usi)
@@ -195,7 +195,7 @@ class Avviso implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
-   $this->creato = new \DateTime();
+   $this->creato = new DateTime();
    $this->modificato = $this->creato;
   }
 
@@ -205,7 +205,7 @@ class Avviso implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -223,18 +223,18 @@ class Avviso implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -330,20 +330,20 @@ class Avviso implements \Stringable {
   /**
    * Restituisce la data dell'evento associato all'avviso
    *
-   * @return \DateTime|null Data dell'evento associato all'avviso
+   * @return DateTime|null Data dell'evento associato all'avviso
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'evento associato all'avviso
    *
-   * @param \DateTime|null $data Data dell'evento associato all'avviso
+   * @param DateTime|null $data Data dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setData(?\DateTime $data): self {
+  public function setData(?DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -351,20 +351,20 @@ class Avviso implements \Stringable {
   /**
    * Restituisce l'ora associata all'evento dell'avviso
    *
-   * @return \DateTime|null Ora dell'evento associato all'avviso
+   * @return DateTime|null Ora dell'evento associato all'avviso
    */
-  public function getOra(): ?\DateTime {
+  public function getOra(): ?DateTime {
     return $this->ora;
   }
 
   /**
    * Modifica l'ora associata all'evento dell'avviso
    *
-   * @param \DateTime|null $ora Ora dell'evento associato all'avviso
+   * @param DateTime|null $ora Ora dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setOra(?\DateTime $ora): self {
+  public function setOra(?DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -372,20 +372,20 @@ class Avviso implements \Stringable {
   /**
    * Restituisce l'ora finale dell'evento associato all'avviso
    *
-   * @return \DateTime|null Ora finale dell'evento associato all'avviso
+   * @return DateTime|null Ora finale dell'evento associato all'avviso
    */
-  public function getOraFine(): ?\DateTime {
+  public function getOraFine(): ?DateTime {
     return $this->oraFine;
   }
 
   /**
    * Modifica l'ora finale dell'evento associato all'avviso
    *
-   * @param \DateTime|null $oraFine Ora finale dell'evento associato all'avviso
+   * @param DateTime|null $oraFine Ora finale dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setOraFine(?\DateTime $oraFine): self {
+  public function setOraFine(?DateTime $oraFine): self {
     $this->oraFine = $oraFine;
     return $this;
   }

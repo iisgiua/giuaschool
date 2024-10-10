@@ -8,6 +8,9 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\Configurazione;
+use App\Entity\RichiestaColloquio;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Colloquio;
 use App\Entity\Docente;
@@ -26,27 +29,27 @@ class ColloquioRepository extends BaseRepository {
    * Viene restituito anche il numero di richieste valide (in attesa o confermate).
    *
    * @param Docente $docente Docente di cui cercare i ricevimenti
-   * @param \DateTime $inizio Data di inizio del periodo di ricerca
-   * @param \DateTime $fine Data di fine del periodo di ricerca
+   * @param DateTime $inizio Data di inizio del periodo di ricerca
+   * @param DateTime $fine Data di fine del periodo di ricerca
    * @param bool $abilitato Se vero cerca ricevimenti abilitati, se falso quelli disabilitati, se nullo tutti
    *
    * @return array Lista dati restituiti
    */
-  public function ricevimenti(Docente $docente, \DateTime $inizio=null, \DateTime $fine=null,
+  public function ricevimenti(Docente $docente, DateTime $inizio=null, DateTime $fine=null,
                               bool $abilitato=null): array {
     $dati = [];
     // imposta valori predefiniti
     if (!$inizio) {
-      $inizio = new \DateTime('today');
+      $inizio = new DateTime('today');
     }
     if (!$fine) {
-      $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
-        $this->_em->getRepository(\App\Entity\Configurazione::class)->getParametro('anno_fine').' 00:00:00');
+      $fine = DateTime::createFromFormat('Y-m-d H:i:s',
+        $this->_em->getRepository(Configurazione::class)->getParametro('anno_fine').' 00:00:00');
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')
       ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
-      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
+      ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
       ->where('c.docente=:docente AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,c.inizio', 'ASC')
       ->groupBy('c.id')
@@ -80,7 +83,7 @@ class ColloquioRepository extends BaseRepository {
     // conta richieste
     $numero = $this->createQueryBuilder('c')
       ->select('COUNT(rc.id)')
-      ->join(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->join(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND rc.stato IN (:valide)')
       ->setParameters(['colloquio' => $colloquio, 'valide' => ['R', 'C']])
       ->getQuery()
@@ -112,14 +115,14 @@ class ColloquioRepository extends BaseRepository {
    * Controlla se esiste già un'altra ricevimento che si sovrappone a quello indicato
    *
    * @param Docente $docente Docente che effettua il colloquio
-   * @param \DateTime $data Data del ricevimento
-   * @param \DateTime $inizio Ora inizio del ricevimento
-   * @param \DateTime $fine Ora fine del ricevimento
+   * @param DateTime $data Data del ricevimento
+   * @param DateTime $inizio Ora inizio del ricevimento
+   * @param DateTime $fine Ora fine del ricevimento
    * @param int $esistente ID della richiesta esistente (per le modifiche)
    *
    * @return bool Restituisce vero se c'è una sovrapposizione dei ricevimenti
    */
-  public function sovrapposizione(Docente $docente, \DateTime $data, \DateTime $inizio, \DateTime $fine,
+  public function sovrapposizione(Docente $docente, DateTime $data, DateTime $inizio, DateTime $fine,
                                   int $esistente=0): bool {
     $sovrapposto = $this->createQueryBuilder('c')
       ->select('COUNT(c.id)')
@@ -143,12 +146,12 @@ class ColloquioRepository extends BaseRepository {
    */
   public function richiesteValide(Docente $docente): array {
     $dati = [];
-    $oggi = new \DateTime('today');
-    $fine = (new \DateTime('tomorrow'))->modify('last day of next month');
+    $oggi = new DateTime('today');
+    $fine = (new DateTime('tomorrow'))->modify('last day of next month');
     // legge dati prenotazioni
     $prenotazioni = $this->createQueryBuilder('c')
       ->select('c.id,c.tipo,c.data,c.inizio,c.fine,c.luogo,c.numero,rc.id AS id_prenotazione,rc.appuntamento,rc.stato,rc.messaggio,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
-      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->leftJoin('rc.alunno', 'a')
       ->leftJoin('a.classe', 'cl')
       ->where('c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :oggi AND :fine')
@@ -203,13 +206,13 @@ class ColloquioRepository extends BaseRepository {
    *
    * @param Colloquio $colloquio Ricevimento per cui impostare il nuovo appuntamento
    *
-   * @return \DateTime Ora dell'appuntamento
+   * @return DateTime Ora dell'appuntamento
    */
-  public function nuovoAppuntamento(Colloquio $colloquio): \DateTime {
+  public function nuovoAppuntamento(Colloquio $colloquio): DateTime {
     // legge prenotazioni esistenti
     $prenotazioni = $this->createQueryBuilder('c')
       ->select('rc.appuntamento')
-      ->leftJoin(\App\Entity\RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
+      ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND c.abilitato=:abilitato AND rc.stato IN (:validi)')
       ->orderBy('rc.appuntamento', 'ASC')
       ->setParameters(['colloquio' => $colloquio, 'abilitato' => 1, 'validi' => ['R', 'C']])
@@ -237,7 +240,7 @@ class ColloquioRepository extends BaseRepository {
    */
   public function cancellabili(Docente $docente, bool $abilitato=null): array {
     // subquery richieste
-    $subquery = $this->_em->getRepository(\App\Entity\RichiestaColloquio::class)->createQueryBuilder('rc')
+    $subquery = $this->_em->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
       ->select('rc.id')
       ->where('rc.colloquio=c.id')
       ->getDQL();

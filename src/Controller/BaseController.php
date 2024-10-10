@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use App\Entity\MenuOpzione;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -54,7 +55,7 @@ class BaseController extends AbstractController {
     $breadcrumb = null;
     // legge breadcrumb (solo se nuovo tema)
     if ($tema) {
-      $breadcrumb = $this->em->getRepository(\App\Entity\MenuOpzione::class)->breadcrumb($categoria.'_'.$azionePrincipale,
+      $breadcrumb = $this->em->getRepository(MenuOpzione::class)->breadcrumb($categoria.'_'.$azionePrincipale,
         $this->getUser());
     }
     // imposta template

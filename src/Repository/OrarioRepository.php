@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
 use App\Entity\Orario;
@@ -31,7 +32,7 @@ class OrarioRepository extends EntityRepository {
     $orario = $this->createQueryBuilder('o')
       ->join('o.sede', 's')
       ->where(':data BETWEEN o.inizio AND o.fine')
-      ->setParameter('data', (new \DateTime())->format('Y-m-d'))
+      ->setParameter('data', (new DateTime())->format('Y-m-d'))
       ->orderBy('s.ordinamento', 'ASC')
       ->setMaxResults(1);
     if ($sede) {

@@ -8,12 +8,13 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Istituto - repository
  *
  * @author Antonello Dessì
  */
-class IstitutoRepository extends \Doctrine\ORM\EntityRepository {
+class IstitutoRepository extends EntityRepository {
 
 }

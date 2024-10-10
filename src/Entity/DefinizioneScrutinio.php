@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use App\Repository\DefinizioneScrutinioRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -18,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\DefinizioneScrutinioRepository::class)]
+#[ORM\Entity(repositoryClass: DefinizioneScrutinioRepository::class)]
 class DefinizioneScrutinio extends DefinizioneConsiglio {
 
 
@@ -33,14 +35,13 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   private ?string $periodo = 'P';
 
   /**
-   * @var \DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
-   *
+   * @var DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
    *
    */
   #[ORM\Column(name: 'data_proposte', type: 'date', nullable: false)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   #[Assert\NotBlank(message: 'field.notblank')]
-  private ?\DateTime $dataProposte = null;
+  private ?DateTime $dataProposte = null;
 
   /**
    * @var array $struttura Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
@@ -81,20 +82,20 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   /**
    * Restituisce l'inizio dell'inserimento delle proposte di voto
    *
-   * @return \DateTime|null Inizio dell'inserimento delle proposte di voto
+   * @return DateTime|null Inizio dell'inserimento delle proposte di voto
    */
-  public function getDataProposte(): ?\DateTime {
+  public function getDataProposte(): ?DateTime {
     return $this->dataProposte;
   }
 
   /**
    * Modifica l'inizio dell'inserimento delle proposte di voto
    *
-   * @param \DateTime $dataProposte Inizio dell'inserimento delle proposte di voto
+   * @param DateTime $dataProposte Inizio dell'inserimento delle proposte di voto
    *
    * @return self Oggetto modificato
    */
-  public function setDataProposte(\DateTime $dataProposte): self {
+  public function setDataProposte(DateTime $dataProposte): self {
     $this->dataProposte = $dataProposte;
     return $this;
   }

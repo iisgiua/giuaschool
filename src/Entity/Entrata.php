@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\EntrataRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -22,10 +25,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Table(name: 'gs_entrata')]
 #[ORM\UniqueConstraint(columns: ['data', 'alunno_id'])]
-#[ORM\Entity(repositoryClass: \App\Repository\EntrataRepository::class)]
+#[ORM\Entity(repositoryClass: EntrataRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['data', 'alunno'], message: 'field.unique')]
-class Entrata implements \Stringable {
+class Entrata implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -38,36 +41,34 @@ class Entrata implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data dell'entrata in ritardo
-   *
+   * @var DateTime|null $data Data dell'entrata in ritardo
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $ora Ora di entrata in ritardo
-   *
+   * @var DateTime|null $ora Ora di entrata in ritardo
    *
    */
   #[ORM\Column(type: 'time', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $ora = null;
+  private ?DateTime $ora = null;
 
   /**
    * @var bool $ritardoBreve Indica se l'entrata in ritardo è un ritardo breve oppure no
@@ -97,13 +98,12 @@ class Entrata implements \Stringable {
   private ?string $motivazione = '';
 
   /**
-   * @var \DateTime|null $giustificato Data della giustificazione
-   *
+   * @var DateTime|null $giustificato Data della giustificazione
    *
    */
   #[ORM\Column(type: 'date', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $giustificato = null;
+  private ?DateTime $giustificato = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'entrata in ritardo
@@ -147,7 +147,7 @@ class Entrata implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -157,7 +157,7 @@ class Entrata implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -175,38 +175,38 @@ class Entrata implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'entrata in ritardo
    *
-   * @return \DateTime|null Data dell'entrata in ritardo
+   * @return DateTime|null Data dell'entrata in ritardo
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'entrata in ritardo
    *
-   * @param \DateTime $data Data dell'entrata in ritardo
+   * @param DateTime $data Data dell'entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -214,20 +214,20 @@ class Entrata implements \Stringable {
   /**
    * Restituisce l'ora di entrata in ritardo
    *
-   * @return \DateTime|null Ora di entrata in ritardo
+   * @return DateTime|null Ora di entrata in ritardo
    */
-  public function getOra(): ?\DateTime {
+  public function getOra(): ?DateTime {
     return $this->ora;
   }
 
   /**
    * Modifica l'ora di entrata in ritardo
    *
-   * @param \DateTime $ora Ora di entrata in ritardo
+   * @param DateTime $ora Ora di entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setOra(\DateTime $ora): self {
+  public function setOra(DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -319,20 +319,20 @@ class Entrata implements \Stringable {
   /**
    * Restituisce la data della giustificazione
    *
-   * @return \DateTime|null Data della giustificazione
+   * @return DateTime|null Data della giustificazione
    */
-  public function getGiustificato(): ?\DateTime {
+  public function getGiustificato(): ?DateTime {
     return $this->giustificato;
   }
 
   /**
    * Modifica la data della giustificazione
    *
-   * @param \DateTime|null $giustificato Data della giustificazione
+   * @param DateTime|null $giustificato Data della giustificazione
    *
    * @return self Oggetto modificato
    */
-  public function setGiustificato(?\DateTime $giustificato): self {
+  public function setGiustificato(?DateTime $giustificato): self {
     $this->giustificato = $giustificato;
     return $this;
   }

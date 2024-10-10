@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\Cattedra;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
 use App\Entity\Docente;
@@ -26,12 +28,12 @@ class ScansioneOrariaRepository extends EntityRepository {
   /**
    * Restituisce l'ora di inizio delle lezioni per il giorno indicato (non festivo)
    *
-   * @param \DateTime $data Data di riferimento
+   * @param DateTime $data Data di riferimento
    * @param Sede $sede Sede scolastica
    *
    * @return string Ora nel formato hh:mm
    */
-  public function inizioLezioni(\DateTime $data, Sede $sede) {
+  public function inizioLezioni(DateTime $data, Sede $sede) {
     // legge la prima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.inizio')
@@ -47,12 +49,12 @@ class ScansioneOrariaRepository extends EntityRepository {
   /**
    * Restituisce l'ora di fine delle lezioni per il giorno indicato (non festivo)
    *
-   * @param \DateTime $data Data di riferimento
+   * @param DateTime $data Data di riferimento
    * @param Sede $sede Sede scolastica
    *
    * @return string Ora nel formato hh:mm
    */
-  public function fineLezioni(\DateTime $data, Sede $sede) {
+  public function fineLezioni(DateTime $data, Sede $sede) {
     // legge la ultima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.fine')
@@ -69,17 +71,17 @@ class ScansioneOrariaRepository extends EntityRepository {
   /**
    * Restituisce l'ora di fine delle lezioni per il docente nel giorno indicato (non festivo)
    *
-   * @param \DateTime $data Data di riferimento
+   * @param DateTime $data Data di riferimento
    * @param Docente $docente Docente
    *
    * @return string Ora nel formato hh:mm
    */
-  public function fineLezioniDocente(\DateTime $data, Docente $docente) {
+  public function fineLezioniDocente(DateTime $data, Docente $docente) {
     // legge la ultima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.fine')
       ->join('s.orario', 'o')
-      ->join(\App\Entity\Cattedra::class, 'c', 'WITH', 'c.docente=:docente')
+      ->join(Cattedra::class, 'c', 'WITH', 'c.docente=:docente')
       ->join('c.classe', 'cl')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede AND s.giorno=:giorno')
       ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d'), 'giorno' => $data->format('w')])
@@ -121,7 +123,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    */
   public function orarioGiorno($giorno, Orario $orario=null) {
     if (!$orario) {
-      $orario = $this->_em->getRepository(\App\Entity\Orario::class)->orarioSede(null);
+      $orario = $this->_em->getRepository(Orario::class)->orarioSede(null);
     }
     // legge le ore del giorno
     $ore = $this->createQueryBuilder('s')
@@ -160,8 +162,8 @@ class ScansioneOrariaRepository extends EntityRepository {
           ->setOrario($orario)
           ->setGiorno($giorno)
           ->setOra(0)
-          ->setInizio(\DateTime::createFromFormat('H:i', '08:30'))
-          ->setFine(\DateTime::createFromFormat('H:i', '09:30'))
+          ->setInizio(DateTime::createFromFormat('H:i', '08:30'))
+          ->setFine(DateTime::createFromFormat('H:i', '09:30'))
           ->setDurata(1);
         $this->_em->persist($dati[$giorno][$ora]);
       }
@@ -181,9 +183,9 @@ class ScansioneOrariaRepository extends EntityRepository {
     $dati = [];
     // legge le ore
     $ore = $this->createQueryBuilder('so')
-      ->join(\App\Entity\Orario::class, 'o', 'WITH', 'so.orario=o.id')
+      ->join(Orario::class, 'o', 'WITH', 'so.orario=o.id')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $id])
+      ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'sede' => $id])
       ->getQuery()
       ->getResult();
     foreach ($ore as $so) {

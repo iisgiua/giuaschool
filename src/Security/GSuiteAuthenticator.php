@@ -8,6 +8,9 @@
 
 namespace App\Security;
 
+use App\Entity\Utente;
+use App\Entity\Configurazione;
+use DateTime;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -108,7 +111,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // autenticato su Google: controlla se esiste nel registro
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneBy(['email' => $userGoogle->getEmail(),
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['email' => $userGoogle->getEmail(),
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste nel registro
@@ -119,8 +122,8 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione: id_provider
-    $idProvider = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider');
-    $idProviderTipo = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('id_provider_tipo');
+    $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
     if (!$idProvider || !$user->controllaRuolo($idProviderTipo)) {
       // errore: utente non abilitato deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite Google.',
@@ -150,7 +153,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-      $token->getUser()->setUltimoAccesso(new \DateTime());
+      $token->getUser()->setUltimoAccesso(new DateTime());
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());

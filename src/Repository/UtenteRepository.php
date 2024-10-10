@@ -168,7 +168,7 @@ class UtenteRepository extends EntityRepository {
     $genitori = [];
     // rappresentanti alunni
     if (in_array('S', $destinatari)) {
-      $alunni = $this->_em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('DISTINCT a.id')
         ->join('a.classe', 'cl')
         ->where('a.abilitato=:abilitato AND FIND_IN_SET(:classe, a.rappresentante)>0 AND cl.sede IN (:sedi)')
@@ -184,7 +184,7 @@ class UtenteRepository extends EntityRepository {
     }
     // rappresentanti genitori
     if (in_array('L', $destinatari)) {
-      $genitori = $this->_em->getRepository(\App\Entity\Genitore::class)->createQueryBuilder('g')
+      $genitori = $this->_em->getRepository(Genitore::class)->createQueryBuilder('g')
         ->select('DISTINCT g.id')
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')

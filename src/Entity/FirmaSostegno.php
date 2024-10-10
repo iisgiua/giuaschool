@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\FirmaSostegnoRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\FirmaSostegnoRepository::class)]
+#[ORM\Entity(repositoryClass: FirmaSostegnoRepository::class)]
 class FirmaSostegno extends Firma {
 
 

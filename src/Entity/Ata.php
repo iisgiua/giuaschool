@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\AtaRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Antonello Dessì
  */
-#[ORM\Entity(repositoryClass: \App\Repository\AtaRepository::class)]
+#[ORM\Entity(repositoryClass: AtaRepository::class)]
 #[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Ata::class)]
 class Ata extends Utente {
 

@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\ScrutinioRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -22,10 +25,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Table(name: 'gs_scrutinio')]
 #[ORM\UniqueConstraint(columns: ['periodo', 'classe_id'])]
-#[ORM\Entity(repositoryClass: \App\Repository\ScrutinioRepository::class)]
+#[ORM\Entity(repositoryClass: ScrutinioRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['periodo', 'classe'], message: 'field.unique')]
-class Scrutinio implements \Stringable {
+class Scrutinio implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -38,16 +41,16 @@ class Scrutinio implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
@@ -59,31 +62,28 @@ class Scrutinio implements \Stringable {
   private ?string $periodo = 'P';
 
   /**
-   * @var \DateTime|null $data Data dello scrutinio
-   *
+   * @var DateTime|null $data Data dello scrutinio
    *
    */
   #[ORM\Column(type: 'date', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $inizio Ora dell'apertura dello scrutinio
-   *
+   * @var DateTime|null $inizio Ora dell'apertura dello scrutinio
    *
    */
   #[ORM\Column(type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $inizio = null;
+  private ?DateTime $inizio = null;
 
   /**
-   * @var \DateTime|null $fine Ora della chiusura dello scrutinio
-   *
+   * @var DateTime|null $fine Ora della chiusura dello scrutinio
    *
    */
   #[ORM\Column(type: 'time', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $fine = null;
+  private ?DateTime $fine = null;
 
   /**
    * @var string|null $stato Stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
@@ -111,13 +111,12 @@ class Scrutinio implements \Stringable {
   private ?array $dati = [];
 
   /**
-   * @var \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   *
+   * @var DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
    */
   #[ORM\Column(type: 'datetime', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $visibile = null;
+  private ?DateTime $visibile = null;
 
   /**
    * @var string|null $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
@@ -136,7 +135,7 @@ class Scrutinio implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -146,7 +145,7 @@ class Scrutinio implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -164,18 +163,18 @@ class Scrutinio implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -203,20 +202,20 @@ class Scrutinio implements \Stringable {
   /**
    * Restituisce la data dello scrutinio
    *
-   * @return \DateTime|null Data dello scrutinio
+   * @return DateTime|null Data dello scrutinio
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dello scrutinio
    *
-   * @param \DateTime|null $data Data dello scrutinio
+   * @param DateTime|null $data Data dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setData(?\DateTime $data): self {
+  public function setData(?DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -224,20 +223,20 @@ class Scrutinio implements \Stringable {
   /**
    * Restituisce l'ora dell'apertura dello scrutinio
    *
-   * @return \DateTime|null Ora dell'apertura dello scrutinio
+   * @return DateTime|null Ora dell'apertura dello scrutinio
    */
-  public function getInizio(): ?\DateTime {
+  public function getInizio(): ?DateTime {
     return $this->inizio;
   }
 
   /**
    * Modifica l'ora dell'apertura dello scrutinio
    *
-   * @param \DateTime|null $inizio Ora dell'apertura dello scrutinio
+   * @param DateTime|null $inizio Ora dell'apertura dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setInizio(?\DateTime $inizio): self {
+  public function setInizio(?DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -245,20 +244,20 @@ class Scrutinio implements \Stringable {
   /**
    * Restituisce l'ora della chiusura dello scrutinio
    *
-   * @return \DateTime|null Ora della chiusura dello scrutinio
+   * @return DateTime|null Ora della chiusura dello scrutinio
    */
-  public function getFine(): ?\DateTime {
+  public function getFine(): ?DateTime {
     return $this->fine;
   }
 
   /**
    * Modifica l'ora della chiusura dello scrutinio
    *
-   * @param \DateTime|null $fine Ora della chiusura dello scrutinio
+   * @param DateTime|null $fine Ora della chiusura dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setFine(?\DateTime $fine): self {
+  public function setFine(?DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }
@@ -333,20 +332,20 @@ class Scrutinio implements \Stringable {
   /**
    * Restituisce la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
-   * @return \DateTime|null Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   * @return DateTime|null Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    */
-  public function getVisibile(): ?\DateTime {
+  public function getVisibile(): ?DateTime {
     return $this->visibile;
   }
 
   /**
    * Modifica la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
-   * @param \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   * @param DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
    * @return self Oggetto modificato
    */
-  public function setVisibile(?\DateTime $visibile): self {
+  public function setVisibile(?DateTime $visibile): self {
     $this->visibile = $visibile;
     return $this;
   }

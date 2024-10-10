@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\ScansioneOrariaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,9 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_scansione_oraria')]
-#[ORM\Entity(repositoryClass: \App\Repository\ScansioneOrariaRepository::class)]
+#[ORM\Entity(repositoryClass: ScansioneOrariaRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class ScansioneOraria implements \Stringable {
+class ScansioneOraria implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -34,16 +37,16 @@ class ScansioneOraria implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
@@ -61,24 +64,22 @@ class ScansioneOraria implements \Stringable {
   private int $ora = 1;
 
   /**
-   * @var \DateTime|null $inizio Inizio dell'ora di lezione
-   *
+   * @var DateTime|null $inizio Inizio dell'ora di lezione
    *
    */
   #[ORM\Column(type: 'time', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $inizio = null;
+  private ?DateTime $inizio = null;
 
   /**
-   * @var \DateTime|null $fine Fine dell'ora di lezione
-   *
+   * @var DateTime|null $fine Fine dell'ora di lezione
    *
    */
   #[ORM\Column(type: 'time', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $fine = null;
+  private ?DateTime $fine = null;
 
   /**
    * @var float $durata Durata dell'ora di lezione (intesa come unità oraria)
@@ -104,7 +105,7 @@ class ScansioneOraria implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -114,7 +115,7 @@ class ScansioneOraria implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -132,18 +133,18 @@ class ScansioneOraria implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -192,20 +193,20 @@ class ScansioneOraria implements \Stringable {
   /**
    * Restituisce l'inizio dell'ora di lezione
    *
-   * @return \DateTime|null Inizio dell'ora di lezione
+   * @return DateTime|null Inizio dell'ora di lezione
    */
-  public function getInizio(): ?\DateTime {
+  public function getInizio(): ?DateTime {
     return $this->inizio;
   }
 
   /**
    * Modifica l'inizio dell'ora di lezione
    *
-   * @param \DateTime $inizio Inizio dell'ora di lezione
+   * @param DateTime $inizio Inizio dell'ora di lezione
    *
    * @return self Oggetto modificato
    */
-  public function setInizio(\DateTime $inizio): self {
+  public function setInizio(DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -213,20 +214,20 @@ class ScansioneOraria implements \Stringable {
   /**
    * Restituisce la fine dell'ora di lezione
    *
-   * @return \DateTime|null Fine dell'ora di lezione
+   * @return DateTime|null Fine dell'ora di lezione
    */
-  public function getFine(): ?\DateTime {
+  public function getFine(): ?DateTime {
     return $this->fine;
   }
 
   /**
    * Modifica la fine dell'ora di lezione
    *
-   * @param \DateTime $fine Fine dell'ora di lezione
+   * @param DateTime $fine Fine dell'ora di lezione
    *
    * @return self Oggetto modificato
    */
-  public function setFine(\DateTime $fine): self {
+  public function setFine(DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }

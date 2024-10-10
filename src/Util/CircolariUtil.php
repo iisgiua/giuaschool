@@ -8,6 +8,12 @@
 
 namespace App\Util;
 
+use DateTime;
+use App\Entity\Genitore;
+use App\Entity\Classe;
+use App\Entity\Alunno;
+use App\Entity\Materia;
+use App\Entity\CircolareUtente;
 use App\Entity\Ata;
 use App\Entity\Circolare;
 use App\Entity\Docente;
@@ -46,13 +52,13 @@ class CircolariUtil {
    * Controlla se è possibile eseguire l'azione specificata relativamente alle circolari
    *
    * @param string $azione Azione da controllare
-   * @param \DateTime $data Data dell'evento
+   * @param DateTime $data Data dell'evento
    * @param Staff $docente Docente che esegue l'azione
    * @param Circolare $circolare Circolare su cui eseguire l'azione
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  public function azioneCircolare($azione, \DateTime $data, Staff $docente, Circolare $circolare=null) {
+  public function azioneCircolare($azione, DateTime $data, Staff $docente, Circolare $circolare=null) {
     if ($azione == 'add') {
       // azione di creazione
       if (!$circolare) {
@@ -113,7 +119,7 @@ class CircolariUtil {
   public function listaCircolari($ricerca, $pagina, $limite, Staff $docente) {
     $dati = [];
     // legge circolari in bozza
-    $dati['bozza'] = $this->em->getRepository(\App\Entity\Circolare::class)->bozza();
+    $dati['bozza'] = $this->em->getRepository(Circolare::class)->bozza();
     // controllo azioni e aggiunta info
     foreach ($dati['bozza'] as $k=>$c) {
       // edit
@@ -133,7 +139,7 @@ class CircolariUtil {
       }
     }
     // legge circolari pubblicate
-    $dati['lista'] = $this->em->getRepository(\App\Entity\Circolare::class)->pubblicate($ricerca, $pagina, $limite);
+    $dati['lista'] = $this->em->getRepository(Circolare::class)->pubblicate($ricerca, $pagina, $limite);
     // controllo azioni e aggiunta info
     foreach ($dati['lista'] as $k=>$c) {
       // unpublish
@@ -143,7 +149,7 @@ class CircolariUtil {
       }
     }
     // add
-    if ($this->azioneCircolare('add', new \DateTime(), $docente, null)) {
+    if ($this->azioneCircolare('add', new DateTime(), $docente, null)) {
       // pulsante add
       $dati['azioni']['add'] = 1;
     }
@@ -165,47 +171,47 @@ class CircolariUtil {
     // dsga
     if ($circolare->getDsga()) {
       // aggiunge DSGA
-      $utenti = $this->em->getRepository(\App\Entity\Ata::class)->getIdDsga();
+      $utenti = $this->em->getRepository(Ata::class)->getIdDsga();
     }
     // ata
     if ($circolare->getAta()) {
       // aggiunge ATA
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Ata::class)->getIdAta($sedi));
+      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdAta($sedi));
     }
     // coordinatori
     if ($circolare->getCoordinatori() != 'N') {
       // aggiunge coordinatori
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Docente::class)
+      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)
         ->getIdCoordinatore($sedi, $circolare->getCoordinatori() == 'C' ? $circolare->getFiltroCoordinatori() : null));
     }
     // docenti
     if ($circolare->getDocenti() != 'N') {
       // aggiunge docenti
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Docente::class)
+      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)
         ->getIdDocente($sedi, $circolare->getDocenti(), $circolare->getFiltroDocenti()));
     }
     // genitori
     if ($circolare->getGenitori() != 'N') {
       // aggiunge genitori
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Genitore::class)
+      $utenti = array_merge($utenti, $this->em->getRepository(Genitore::class)
         ->getIdGenitore($sedi, $circolare->getGenitori(), $circolare->getFiltroGenitori()));
       if ($circolare->getGenitori() != 'U') {
         // aggiunge classi
-        $classi = array_merge($classi, $this->em->getRepository(\App\Entity\Classe::class)
+        $classi = array_merge($classi, $this->em->getRepository(Classe::class)
           ->getIdClasse($sedi, $circolare->getGenitori() == 'C' ? $circolare->getFiltroGenitori() : null));
       }
     }
     // alunni
     if ($circolare->getAlunni() != 'N') {
       // aggiunge alunni
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Alunno::class)
+      $utenti = array_merge($utenti, $this->em->getRepository(Alunno::class)
         ->getIdAlunno($sedi, $circolare->getAlunni(), $circolare->getFiltroAlunni()));
       // aggiunge genitori
-      $utenti = array_merge($utenti, $this->em->getRepository(\App\Entity\Genitore::class)
+      $utenti = array_merge($utenti, $this->em->getRepository(Genitore::class)
         ->getIdGenitore($sedi, $circolare->getAlunni(), $circolare->getFiltroAlunni()));
       if ($circolare->getAlunni() != 'U') {
         // aggiunge classi
-        $classi = array_merge($classi, $this->em->getRepository(\App\Entity\Classe::class)
+        $classi = array_merge($classi, $this->em->getRepository(Classe::class)
           ->getIdClasse($sedi, $circolare->getAlunni() == 'C' ? $circolare->getFiltroAlunni() : null));
       }
     }
@@ -230,31 +236,31 @@ class CircolariUtil {
     $dati['alunni'] = '';
     // coordinatori
     if ($circolare->getCoordinatori() == 'C') {
-      $dati['coordinatori'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($circolare->getFiltroCoordinatori());
+      $dati['coordinatori'] = $this->em->getRepository(Classe::class)->listaClassi($circolare->getFiltroCoordinatori());
     }
     // docenti
     if ($circolare->getDocenti() == 'C') {
-      $dati['docenti'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($circolare->getFiltroDocenti());
+      $dati['docenti'] = $this->em->getRepository(Classe::class)->listaClassi($circolare->getFiltroDocenti());
     } elseif ($circolare->getDocenti() == 'M') {
-      $dati['docenti'] = $this->em->getRepository(\App\Entity\Materia::class)->listaMaterie($circolare->getFiltroDocenti());
+      $dati['docenti'] = $this->em->getRepository(Materia::class)->listaMaterie($circolare->getFiltroDocenti());
     } elseif ($circolare->getDocenti() == 'U') {
-      $dati['docenti'] = $this->em->getRepository(\App\Entity\Docente::class)->listaDocenti($circolare->getFiltroDocenti(), 'gs-docenti-');
+      $dati['docenti'] = $this->em->getRepository(Docente::class)->listaDocenti($circolare->getFiltroDocenti(), 'gs-docenti-');
     }
     // genitori
     if ($circolare->getGenitori() == 'C') {
-      $dati['genitori'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($circolare->getFiltroGenitori());
+      $dati['genitori'] = $this->em->getRepository(Classe::class)->listaClassi($circolare->getFiltroGenitori());
     } elseif ($circolare->getGenitori() == 'U') {
-      $dati['genitori'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($circolare->getFiltroGenitori(), 'gs-genitori-');
+      $dati['genitori'] = $this->em->getRepository(Alunno::class)->listaAlunni($circolare->getFiltroGenitori(), 'gs-genitori-');
     }
     // alunni
     if ($circolare->getAlunni() == 'C') {
-      $dati['alunni'] = $this->em->getRepository(\App\Entity\Classe::class)->listaClassi($circolare->getFiltroAlunni());
+      $dati['alunni'] = $this->em->getRepository(Classe::class)->listaClassi($circolare->getFiltroAlunni());
     } elseif ($circolare->getAlunni() == 'U') {
-      $dati['alunni'] = $this->em->getRepository(\App\Entity\Alunno::class)->listaAlunni($circolare->getFiltroAlunni(), 'gs-alunni-');
+      $dati['alunni'] = $this->em->getRepository(Alunno::class)->listaAlunni($circolare->getFiltroAlunni(), 'gs-alunni-');
     }
     // statistiche di lettura
     if ($circolare->getPubblicata()) {
-      $dati['statistiche'] = $this->em->getRepository(\App\Entity\Circolare::class)->statistiche($circolare);
+      $dati['statistiche'] = $this->em->getRepository(Circolare::class)->statistiche($circolare);
     }
     // restituisce dati
     return $dati;
@@ -274,7 +280,7 @@ class CircolariUtil {
       return true;
     }
     // altri: solo destinatari
-    $cu = $this->em->getRepository(\App\Entity\CircolareUtente::class)->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
+    $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
     return ($cu != null);
   }
 

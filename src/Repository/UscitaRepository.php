@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 
 
@@ -22,10 +23,10 @@ class UscitaRepository extends BaseRepository {
    * Elimina le uscite anticipate dell'alunno nel periodo indicato
    *
    * @param Alunno $alunno Alunno di cui si vogliono eliminare le assenze
-   * @param \DateTime $inizio Data di inizio
-   * @param \DateTime $fine Data di fine
+   * @param DateTime $inizio Data di inizio
+   * @param DateTime $fine Data di fine
    */
-  public function elimina(Alunno $alunno, \DateTime $inizio, \DateTime $fine) {
+  public function elimina(Alunno $alunno, DateTime $inizio, DateTime $fine) {
     // crea query base
     $this->createQueryBuilder('u')
       ->delete()

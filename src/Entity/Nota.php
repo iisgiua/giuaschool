@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\NotaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,9 +24,9 @@ use Doctrine\Common\Collections\Collection;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_nota')]
-#[ORM\Entity(repositoryClass: \App\Repository\NotaRepository::class)]
+#[ORM\Entity(repositoryClass: NotaRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class Nota implements \Stringable {
+class Nota implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -36,16 +39,16 @@ class Nota implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo della nota [C=di classe, I=individuale]
@@ -57,14 +60,13 @@ class Nota implements \Stringable {
   private ?string $tipo = 'C';
 
   /**
-   * @var \DateTime|null $data Data della nota
-   *
+   * @var DateTime|null $data Data della nota
    *
    */
   #[ORM\Column(type: 'date', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $data = null;
+  private ?DateTime $data = null;
 
   /**
    * @var string|null $testo Testo della nota
@@ -82,10 +84,10 @@ class Nota implements \Stringable {
   private ?string $provvedimento = '';
 
   /**
-   * @var \DateTime|null $annullata Data di annullamento della nota (null se è valida)
+   * @var DateTime|null $annullata Data di annullamento della nota (null se è valida)
    */
   #[ORM\Column(type: 'date', nullable: true)]
-  private ?\DateTime $annullata = null;
+  private ?DateTime $annullata = null;
 
   /**
    * @var Classe|null $classe Classe della nota
@@ -131,7 +133,7 @@ class Nota implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -141,7 +143,7 @@ class Nota implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -159,18 +161,18 @@ class Nota implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -198,20 +200,20 @@ class Nota implements \Stringable {
   /**
    * Restituisce la data della nota
    *
-   * @return \DateTime|null Data della nota
+   * @return DateTime|null Data della nota
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data della nota
    *
-   * @param \DateTime $data Data della nota
+   * @param DateTime $data Data della nota
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -261,20 +263,20 @@ class Nota implements \Stringable {
   /**
    * Restituisce la data di annullamento della nota (null se è valida)
    *
-   * @return \DateTime|null Data di annullamento della nota (null se è valida)
+   * @return DateTime|null Data di annullamento della nota (null se è valida)
    */
-  public function getAnnullata(): ?\DateTime {
+  public function getAnnullata(): ?DateTime {
     return $this->annullata;
   }
 
   /**
    * Modifica la data di annullamento della nota (null se è valida)
    *
-   * @param \DateTime|null $annullata Data di annullamento della nota (null se è valida)
+   * @param DateTime|null $annullata Data di annullamento della nota (null se è valida)
    *
    * @return self Oggetto modificato
    */
-  public function setAnnullata(?\DateTime $annullata): self {
+  public function setAnnullata(?DateTime $annullata): self {
     $this->annullata = $annullata;
     return $this;
   }

@@ -8,6 +8,10 @@
 
 namespace App\Entity;
 
+use App\Repository\UtenteRepository;
+use Serializable;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -23,14 +27,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_utente')]
-#[ORM\Entity(repositoryClass: \App\Repository\UtenteRepository::class)]
+#[ORM\Entity(repositoryClass: UtenteRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'ruolo', type: 'string', length: 3)]
 #[ORM\DiscriminatorMap(['UTE' => 'Utente', 'AMM' => 'Amministratore', 'ATA' => 'Ata', 'DOC' => 'Docente', 'STA' => 'Staff', 'PRE' => 'Preside', 'ALU' => 'Alunno', 'GEN' => 'Genitore'])]
 #[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 #[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
-class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable, \Stringable {
+class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Serializable, Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -43,16 +47,16 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $username Nome utente univoco
@@ -97,10 +101,10 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $token = '';
 
   /**
-   * @var \DateTime|null $tokenCreato Data/ora di creazione del token
+   * @var DateTime|null $tokenCreato Data/ora di creazione del token
    */
   #[ORM\Column(name: 'token_creato', type: 'datetime', nullable: true)]
-  private ?\DateTime $tokenCreato = null;
+  private ?DateTime $tokenCreato = null;
 
   /**
    * @var string|null $prelogin Codice di pre-login
@@ -109,10 +113,10 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $prelogin = '';
 
   /**
-   * @var \DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
+   * @var DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
    */
   #[ORM\Column(name: 'prelogin_creato', type: 'datetime', nullable: true)]
-  private ?\DateTime $preloginCreato = null;
+  private ?DateTime $preloginCreato = null;
 
   /**
    * @var bool $abilitato Indica se l'utente è abilitato al login o no
@@ -127,10 +131,10 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private bool $spid = false;
 
   /**
-   * @var \DateTime|null $ultimoAccesso Data/ora dell'ultimo accesso
+   * @var DateTime|null $ultimoAccesso Data/ora dell'ultimo accesso
    */
   #[ORM\Column(name: 'ultimo_accesso', type: 'datetime', nullable: true)]
-  private ?\DateTime $ultimoAccesso = null;
+  private ?DateTime $ultimoAccesso = null;
 
   /**
    * @var string|null $otp Codice segreto per accesso con OTP (se vuoto non è attivato)
@@ -174,13 +178,12 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $sesso = 'M';
 
   /**
-   * @var \DateTime|null $dataNascita Data di nascita dell'utente
-   *
+   * @var DateTime|null $dataNascita Data di nascita dell'utente
    *
    */
   #[ORM\Column(name: 'data_nascita', type: 'date', nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $dataNascita = null;
+  private ?DateTime $dataNascita = null;
 
   /**
    * @var string|null $comuneNascita Comune di nascita dell'utente
@@ -274,7 +277,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -284,7 +287,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -370,18 +373,18 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -484,20 +487,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data/ora di creazione del token, usato per la procedura di attivazione o di recupero password
    *
-   * @return \DateTime|null Data/ora di creazione del token
+   * @return DateTime|null Data/ora di creazione del token
    */
-  public function getTokenCreato(): ?\DateTime {
+  public function getTokenCreato(): ?DateTime {
     return $this->tokenCreato;
   }
 
   /**
    * Modifica la data/ora di creazione del token
    *
-   * @param \DateTime|null $tokenCreato Data/ora di creazione del token
+   * @param DateTime|null $tokenCreato Data/ora di creazione del token
    *
    * @return self Oggetto modificato
    */
-  public function setTokenCreato(?\DateTime $tokenCreato): self {
+  public function setTokenCreato(?DateTime $tokenCreato): self {
     $this->tokenCreato = $tokenCreato;
     return $this;
   }
@@ -526,20 +529,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data/ora di creazione del codice di pre-login
    *
-   * @return \DateTime|null Data/ora di creazione del codice di pre-login
+   * @return DateTime|null Data/ora di creazione del codice di pre-login
    */
-  public function getPreloginCreato(): ?\DateTime {
+  public function getPreloginCreato(): ?DateTime {
     return $this->preloginCreato;
   }
 
   /**
    * Modifica la data/ora di creazione del codice di pre-login
    *
-   * @param \DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
+   * @param DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
    *
    * @return self Oggetto modificato
    */
-  public function setPreloginCreato(?\DateTime $preloginCreato): self {
+  public function setPreloginCreato(?DateTime $preloginCreato): self {
     $this->preloginCreato = $preloginCreato;
     return $this;
   }
@@ -589,9 +592,9 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data/ora dell'ultimo accesso
    *
-   * @return \DateTime|null Data/ora dell'ultimo accesso
+   * @return DateTime|null Data/ora dell'ultimo accesso
    */
-  public function getUltimoAccesso(): ?\DateTime {
+  public function getUltimoAccesso(): ?DateTime {
     return $this->ultimoAccesso;
   }
 
@@ -602,7 +605,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    *
    * @return self Oggetto modificato
    */
-  public function setUltimoAccesso(?\DateTime $ultimoAccesso): self {
+  public function setUltimoAccesso(?DateTime $ultimoAccesso): self {
     $this->ultimoAccesso = $ultimoAccesso;
     return $this;
   }
@@ -715,20 +718,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la data di nascita dell'utente
    *
-   * @return \DateTime|null Data di nascita dell'utente
+   * @return DateTime|null Data di nascita dell'utente
    */
-  public function getDataNascita(): ?\DateTime {
+  public function getDataNascita(): ?DateTime {
     return $this->dataNascita;
   }
 
   /**
    * Modifica la data di nascita dell'utente
    *
-   * @param \DateTime|null $dataNascita Data di nascita dell'utente
+   * @param DateTime|null $dataNascita Data di nascita dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setDataNascita(?\DateTime $dataNascita): self {
+  public function setDataNascita(?DateTime $dataNascita): self {
     $this->dataNascita = $dataNascita;
     return $this;
   }
@@ -1060,7 +1063,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    */
   public function creaToken(): void {
     $this->token = bin2hex(openssl_random_pseudo_bytes(16));
-    $this->tokenCreato = new \DateTime();
+    $this->tokenCreato = new DateTime();
   }
 
   /**

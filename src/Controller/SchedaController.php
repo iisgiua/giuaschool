@@ -8,6 +8,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Cattedra;
+use App\Entity\Configurazione;
+use App\Entity\Alunno;
+use App\Entity\VotoScrutinio;
+use App\Entity\Classe;
+use DateTime;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -43,7 +49,7 @@ class SchedaController extends BaseController {
     $info = null;
     $dati = null;
     // controllo cattedra
-    $cattedra = $this->em->getRepository(\App\Entity\Cattedra::class)->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -57,14 +63,14 @@ class SchedaController extends BaseController {
     // valutazioni
     $materiaTipo = $cattedra->getMateria()->getTipo();
     $valutazioni[$materiaTipo] = unserialize(
-      $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('voti_finali_'.$materiaTipo));
+      $this->em->getRepository(Configurazione::class)->getParametro('voti_finali_'.$materiaTipo));
     $listaValori = explode(',', (string) $valutazioni[$materiaTipo]['valori']);
     $listaVoti = explode(',', (string) $valutazioni[$materiaTipo]['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['lista'][$val] = trim($listaVoti[$key], '"');
     }
     // controllo alunno
-    $alunno = $this->em->getRepository(\App\Entity\Alunno::class)->findOneBy(['id' => $alunno]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -85,7 +91,7 @@ class SchedaController extends BaseController {
       $periodoNome = $periodi[2]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $voti = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -100,7 +106,7 @@ class SchedaController extends BaseController {
       $periodoNome = $periodi[3]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $voti = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -112,7 +118,7 @@ class SchedaController extends BaseController {
       }
       // voto secondo periodo
       $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
-      $voti = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->voti($cattedra->getClasse(), 'S',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'S',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -127,7 +133,7 @@ class SchedaController extends BaseController {
       $periodoNome = $trans->trans('label.periodo_G');
       // voto finale
       $dati['scrutini'][0]['nome'] = $trans->trans('label.periodo_F');
-      $voti = $this->em->getRepository(\App\Entity\VotoScrutinio::class)->voti($cattedra->getClasse(), 'F',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'F',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -171,14 +177,14 @@ class SchedaController extends BaseController {
     $info = null;
     $dati = null;
     // controllo classe
-    $classe = $this->em->getRepository(\App\Entity\Classe::class)->findOneBy(['id' => $classe]);
+    $classe = $this->em->getRepository(Classe::class)->findOneBy(['id' => $classe]);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo date
-    $dataInizio = \DateTime::createFromFormat('Y-m-d', $inizio);
-    $dataFine = \DateTime::createFromFormat('Y-m-d', $fine);
+    $dataInizio = DateTime::createFromFormat('Y-m-d', $inizio);
+    $dataFine = DateTime::createFromFormat('Y-m-d', $fine);
     // informazioni
     $info['classe'] = $classe;
     // legge dati

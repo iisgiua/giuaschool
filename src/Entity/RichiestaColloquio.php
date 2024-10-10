@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use App\Repository\RichiestaColloquioRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,9 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_richiesta_colloquio')]
-#[ORM\Entity(repositoryClass: \App\Repository\RichiestaColloquioRepository::class)]
+#[ORM\Entity(repositoryClass: RichiestaColloquioRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class RichiestaColloquio implements \Stringable {
+class RichiestaColloquio implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -34,26 +37,25 @@ class RichiestaColloquio implements \Stringable {
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $creato = null;
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: 'datetime', nullable: false)]
-  private ?\DateTime $modificato = null;
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $appuntamento Ora di inizio del colloquio
-   *
+   * @var DateTime|null $appuntamento Ora di inizio del colloquio
    *
    */
   #[ORM\Column(type: 'time', nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?\DateTime $appuntamento = null;
+  private ?DateTime $appuntamento = null;
 
   /**
    * @var Colloquio|null $colloquio Colloquio richiesto
@@ -115,7 +117,7 @@ class RichiestaColloquio implements \Stringable {
   #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
@@ -125,7 +127,7 @@ class RichiestaColloquio implements \Stringable {
   #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -143,38 +145,38 @@ class RichiestaColloquio implements \Stringable {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'ora di inizio del colloquio
    *
-   * @return \DateTime|null Ora di inizio del colloquio
+   * @return DateTime|null Ora di inizio del colloquio
    */
-  public function getAppuntamento(): ?\DateTime {
+  public function getAppuntamento(): ?DateTime {
     return $this->appuntamento;
   }
 
   /**
    * Modifica l'ora di inizio del colloquio
    *
-   * @param \DateTime $appuntamento Ora di inizio del colloquio
+   * @param DateTime $appuntamento Ora di inizio del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setAppuntamento(\DateTime $appuntamento): self {
+  public function setAppuntamento(DateTime $appuntamento): self {
     $this->appuntamento = $appuntamento;
     return $this;
   }

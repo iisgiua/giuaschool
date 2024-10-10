@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Configurazione;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -35,7 +37,7 @@ class CommandController extends BaseController {
   #[Route(path: '/command/notify/{token}/{time}', name: 'command_notify', requirements: ['token' => '[\w\-\+=]+', 'time' => '\d+'], methods: ['GET'])]
   public function notify(KernelInterface $kernel, string $token, int $time): Response {
     // controlla token
-    $tok = $this->em->getRepository(\App\Entity\Configurazione::class)->getParametro('comando_token');
+    $tok = $this->em->getRepository(Configurazione::class)->getParametro('comando_token');
     if (empty($tok) || $tok != $token) {
       // errore: codice di sicurezza errato
       throw $this->createNotFoundException('exception.not_allowed');
@@ -54,7 +56,7 @@ class CommandController extends BaseController {
     $output = new BufferedOutput();
     try {
       $status = $application->run($command, $output);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore di esecuzione
       throw $this->createNotFoundException($e->getMessage());
     }
