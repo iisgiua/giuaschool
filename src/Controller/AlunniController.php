@@ -247,8 +247,8 @@ class AlunniController extends BaseController {
       $telefono = [];
       foreach ($genitore1->getNumeriTelefono() as $tel) {
         $tel = preg_replace('/[^+\d]/', '', (string) $tel);
-        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
           $telefono[] = $tel;
         }
       }
@@ -257,8 +257,8 @@ class AlunniController extends BaseController {
       $telefono = [];
       foreach ($genitore2->getNumeriTelefono() as $tel) {
         $tel = preg_replace('/[^+\d]/', '', (string) $tel);
-        $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
           $telefono[] = $tel;
         }
       }
