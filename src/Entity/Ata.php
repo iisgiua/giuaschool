@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Antonello Dessì
  */
 #[ORM\Entity(repositoryClass: \App\Repository\AtaRepository::class)]
-#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: 'App\Entity\Ata')]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Ata::class)]
 class Ata extends Utente {
 
 

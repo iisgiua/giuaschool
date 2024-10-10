@@ -28,8 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'ruolo', type: 'string', length: 3)]
 #[ORM\DiscriminatorMap(['UTE' => 'Utente', 'AMM' => 'Amministratore', 'ATA' => 'Ata', 'DOC' => 'Docente', 'STA' => 'Staff', 'PRE' => 'Preside', 'ALU' => 'Alunno', 'GEN' => 'Genitore'])]
-#[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: 'App\Entity\Utente')]
-#[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: 'App\Entity\Utente')]
+#[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
+#[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable, \Stringable {
 
 

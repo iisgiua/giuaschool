@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'gs_app')]
 #[ORM\Entity(repositoryClass: \App\Repository\AppRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: 'token', message: 'field.unique', entityClass: 'App\Entity\App')]
+#[UniqueEntity(fields: 'token', message: 'field.unique', entityClass: \App\Entity\App::class)]
 class App implements \Stringable {
 
 

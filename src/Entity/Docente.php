@@ -20,7 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @author Antonello Dessì
  */
 #[ORM\Entity(repositoryClass: \App\Repository\DocenteRepository::class)]
-#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: 'App\Entity\Docente')]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Docente::class)]
 class Docente extends Utente {
 
 

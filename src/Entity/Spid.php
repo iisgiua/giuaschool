@@ -23,7 +23,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Table(name: 'gs_spid')]
 #[ORM\Entity(repositoryClass: \App\Repository\SpidRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: 'responseId', message: 'field.unique', entityClass: 'App\Entity\Spid')]
+#[UniqueEntity(fields: 'responseId', message: 'field.unique', entityClass: \App\Entity\Spid::class)]
 class Spid implements \Stringable {
 
 
