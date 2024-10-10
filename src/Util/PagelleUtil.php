@@ -525,7 +525,7 @@ class PagelleUtil {
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/' .
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $nomeClasse . '-riepilogo-voti-' .
-        strtolower(preg_replace('/\W+/', '-', $periodoNome)) . '.pdf';
+        strtolower(preg_replace('/\W+/', '-', (string) $periodoNome)) . '.pdf';
       if ( !$fs->exists($percorso . '/' . $nomefile) ) {
         // crea documento
         $this->pdf->configure(
@@ -918,7 +918,7 @@ class PagelleUtil {
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/' .
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $nomeClasse . '-firme-registro-' .
-        strtolower(preg_replace('/\W+/', '-', $periodoNome)) . '.pdf';
+        strtolower(preg_replace('/\W+/', '-', (string) $periodoNome)) . '.pdf';
       if ( !$fs->exists($percorso . '/' . $nomefile) ) {
         // crea documento
         $nome_classe = '' . $classe;
@@ -1683,7 +1683,7 @@ class PagelleUtil {
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/' .
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $nomeClasse . '-pagella-' .
-        strtolower(preg_replace('/\W+/', '-', $periodoNome)) . '-' . $alunno->getId() . '.pdf';
+        strtolower(preg_replace('/\W+/', '-', (string) $periodoNome)) . '-' . $alunno->getId() . '.pdf';
       if ( !$fs->exists($percorso . '/' . $nomefile) ) {
         // crea documento PDF
         $this->pdf->configure(
@@ -1939,7 +1939,7 @@ class PagelleUtil {
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/' .
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $nomeClasse . '-debiti-' .
-        strtolower(preg_replace('/\W+/', '-', $periodoNome)) . '-' . $alunno->getId() . '.pdf';
+        strtolower(preg_replace('/\W+/', '-', (string) $periodoNome)) . '-' . $alunno->getId() . '.pdf';
       if ( !$fs->exists($percorso . '/' . $nomefile) ) {
         // crea documento PDF
         $this->pdf->configure(
@@ -2804,7 +2804,7 @@ class PagelleUtil {
       $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/' .
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $nomeClasse . '-scrutinio-' .
-        strtolower(preg_replace('/\W+/', '-', $periodoNome)) . '.pdf';
+        strtolower(preg_replace('/\W+/', '-', (string) $periodoNome)) . '.pdf';
       if ( !$fs->exists($percorso . '/' . $nomefile) ) {
         // crea documento
         $nome_classe = '' . $classe;

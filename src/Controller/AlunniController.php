@@ -246,7 +246,7 @@ class AlunniController extends BaseController {
       // controlla numeri di telefono genitore1
       $telefono = [];
       foreach ($genitore1->getNumeriTelefono() as $tel) {
-        $tel = preg_replace('/[^+\d]/', '', $tel);
+        $tel = preg_replace('/[^+\d]/', '', (string) $tel);
         $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
         if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
           $telefono[] = $tel;
@@ -256,7 +256,7 @@ class AlunniController extends BaseController {
       // controlla numeri di telefono genitore2
       $telefono = [];
       foreach ($genitore2->getNumeriTelefono() as $tel) {
-        $tel = preg_replace('/[^+\d]/', '', $tel);
+        $tel = preg_replace('/[^+\d]/', '', (string) $tel);
         $tel = (str_starts_with($tel, '+39')) ? substr($tel, 3) : $tel;
         if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
           $telefono[] = $tel;

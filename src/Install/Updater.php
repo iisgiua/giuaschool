@@ -45,7 +45,7 @@ class Updater {
    *
    * @var string $projectPath Percorso della directory principale dell'applicazione
    */
-  private string $projectPath;
+  private readonly string $projectPath;
 
   /**
    * Conserva il percorso base della URL dell'applicazione
@@ -87,7 +87,7 @@ class Updater {
    * @param string $publicPath Percorso della directory pubblica (accessibile dal web)
    */
   public function __construct(
-      private string $publicPath) {
+      private readonly string $publicPath) {
     $this->env = [];
     $this->sys = [];
     $this->pdo = null;

@@ -1391,7 +1391,7 @@ class BrowserContext extends BaseContext {
         }
         $col++;
       }
-      $text = trim(preg_replace('/\s+/', ' ', $cell->getText()));
+      $text = trim(preg_replace('/\s+/', ' ', (string) $cell->getText()));
       if ($cell->hasAttribute('rowspan')) {
         $rspan = (int) $cell->getAttribute('rowspan');
         if ($rspan > 1) {
