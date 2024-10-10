@@ -1,4 +1,6 @@
 <?php
+use SimpleSAML\Database;
+
 /*
  * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
@@ -30,7 +32,7 @@ $data['logout_url'] = $spidsdk->getLogoutURL('https://'.$_SERVER['HTTP_HOST'].'/
 $data['state'] = 'A';
 // connette a database condiviso con symfony
 // NB: impostare nome db, user e password su config di simplesamlphp
-$db = \SimpleSAML\Database::getInstance();
+$db = Database::getInstance();
 // inserisce dati
 $sql = "INSERT INTO gs_spid (creato, modificato, ".implode(', ', array_keys($data)).") ".
   "VALUES (NOW(), NOW(), :".implode(', :', array_keys($data)).")";

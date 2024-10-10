@@ -8,6 +8,7 @@
 
 namespace App\Tests\Behat;
 
+use DateTime;
 use Faker\Generator;
 use Datetime;
 use stdClass;
@@ -993,7 +994,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione date e time
       if ($fn[1] == 'dat' || $fn[1] == 'tim') {
         $var = substr(substr($var, 5), 0 , -1);
-        $val = $var == '' ? new \DateTime() : $this->getVar($var);
+        $val = $var == '' ? new DateTime() : $this->getVar($var);
         return ($fn[1] == 'dat') ? $val->format('d/m/Y') : $val->format('H:i');
       }
       // controlla funzione ArrayCollection
@@ -1314,7 +1315,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param string $action Descrizione dell'azione
    */
   protected function log($type, $action) {
-    $now = new \DateTime();
+    $now = new DateTime();
     $this->log[] = $now->format('d/m/Y H:i:s.u').' - '.strtoupper(trim($type)).' - '.$action."\n";
   }
 

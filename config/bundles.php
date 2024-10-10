@@ -1,19 +1,35 @@
 <?php
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle;
+use Fidry\AliceDataFixtures\Bridge\Symfony\FidryAliceDataFixturesBundle;
+use FriendsOfBehat\SymfonyExtension\Bundle\FriendsOfBehatSymfonyExtensionBundle;
+use KnpU\OAuth2ClientBundle\KnpUOAuth2ClientBundle;
+use Nelmio\Alice\Bridge\Symfony\NelmioAliceBundle;
+use Qipsius\TCPDFBundle\QipsiusTCPDFBundle;
+use Symfony\Bundle\DebugBundle\DebugBundle;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\MakerBundle\MakerBundle;
+use Symfony\Bundle\MonologBundle\MonologBundle;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
+use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
+
 return [
-    Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
-    Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
-    Fidry\AliceDataFixtures\Bridge\Symfony\FidryAliceDataFixturesBundle::class => ['dev' => true, 'test' => true],
-    FriendsOfBehat\SymfonyExtension\Bundle\FriendsOfBehatSymfonyExtensionBundle::class => ['test' => true],
-    KnpU\OAuth2ClientBundle\KnpUOAuth2ClientBundle::class => ['all' => true],
-    Nelmio\Alice\Bridge\Symfony\NelmioAliceBundle::class => ['dev' => true, 'test' => true],
-    Qipsius\TCPDFBundle\QipsiusTCPDFBundle::class => ['all' => true],
-    Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true],
-    Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
-    Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true, 'test' => true],
-    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
-    Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
-    Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
-    Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
-    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    DoctrineBundle::class => ['all' => true],
+    DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
+    FidryAliceDataFixturesBundle::class => ['dev' => true, 'test' => true],
+    FriendsOfBehatSymfonyExtensionBundle::class => ['test' => true],
+    KnpUOAuth2ClientBundle::class => ['all' => true],
+    NelmioAliceBundle::class => ['dev' => true, 'test' => true],
+    QipsiusTCPDFBundle::class => ['all' => true],
+    DebugBundle::class => ['dev' => true],
+    FrameworkBundle::class => ['all' => true],
+    MakerBundle::class => ['dev' => true, 'test' => true],
+    MonologBundle::class => ['all' => true],
+    SecurityBundle::class => ['all' => true],
+    TwigBundle::class => ['all' => true],
+    WebProfilerBundle::class => ['dev' => true, 'test' => true],
+    TwigExtraBundle::class => ['all' => true],
 ];
