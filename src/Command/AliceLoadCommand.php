@@ -8,6 +8,7 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +32,7 @@ use Symfony\Component\Process\Process;
  *
  * @author Antonello Dessì
  */
+#[AsCommand(name: 'app:alice:load', description: 'Carica le fixture create con alice')]
 class AliceLoadCommand extends Command {
 
 
@@ -64,10 +66,6 @@ class AliceLoadCommand extends Command {
    *
    */
   protected function configure(): void {
-    // nome del comando (da inserire dopo "php bin/console")
-    $this->setName('app:alice:load');
-    // breve descrizione (mostrata col comando "php bin/console list")
-    $this->setDescription('Carica le fixture create con alice');
     // descrizione completa (mostrata con l'opzione "--help")
     $this->setHelp("Il comando permette di caricare sul database i dati delle fixtures create tramite alice.");
     // argomenti del comando

@@ -8,6 +8,7 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,6 +23,7 @@ use App\Util\AccountProvisioning;
  *
  * @author Antonello Dessì
  */
+#[AsCommand(name: 'app:provisioning:esegue', description: 'Esegue il provisioning sui sistemi esterni')]
 class ProvisioningCommand extends Command {
 
 
@@ -46,10 +48,6 @@ class ProvisioningCommand extends Command {
    *
    */
   protected function configure() {
-    // nome del comando (da inserire dopo "php bin/console")
-    $this->setName('app:provisioning:esegue');
-    // breve descrizione (mostrata col comando "php bin/console list")
-    $this->setDescription('Esegue il provisioning sui sistemi esterni');
     // descrizione completa (mostrata con l'opzione "--help")
     $this->setHelp("Il comando esegue il provisioning sui sistemi esterni.");
     // argomenti del comando
