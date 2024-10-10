@@ -28,7 +28,7 @@ class AlunnoGenitoreType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'completo') {
       // form completo per l'amministratore
       $builder
@@ -70,7 +70,7 @@ class AlunnoGenitoreType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('return_url');
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');

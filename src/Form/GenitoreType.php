@@ -30,7 +30,7 @@ class GenitoreType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // form di modifica
     $builder
       ->add('nome', TextType::class, ['label' => 'label.nome',
@@ -74,7 +74,7 @@ class GenitoreType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefaults([
       'form_mode' => 'completo',

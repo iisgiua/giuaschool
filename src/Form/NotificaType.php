@@ -29,7 +29,7 @@ class NotificaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // form notifiche
     $builder
       ->add('tipo', ChoiceType::class, ['label' => 'label._ok',
@@ -60,7 +60,7 @@ class NotificaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
     $resolver->setDefaults([

@@ -37,7 +37,7 @@ class ConfigurazioneType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'banner') {
       // form banner
       $builder
@@ -124,7 +124,7 @@ class ConfigurazioneType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('return_url');
     $resolver->setDefined('values');
@@ -151,7 +151,7 @@ class ParametroType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     $builder
       ->add('valore', TextType::class, [
         'empty_data' => '',
@@ -172,7 +172,7 @@ class ParametroType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefaults([
       'data_class' => Configurazione::class]);
     }

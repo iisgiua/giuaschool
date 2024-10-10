@@ -28,7 +28,7 @@ class MessageType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options): void {
       $builder->addModelTransformer(new CallbackTransformer(
           // converte nel formato testo semplice per l'editing
           fn($messaggio) => strip_tags((string) $messaggio),
@@ -47,7 +47,7 @@ class MessageType extends AbstractType {
      *
      * @param OptionsResolver $resolver Gestore delle opzioni
      */
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver): void {
     }
 
     /**
