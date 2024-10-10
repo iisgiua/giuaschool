@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use App\Entity\Configurazione;
+use DateTime;
 use App\Security\GSuiteAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -233,8 +235,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // utente Google inesistente
     $this->mockedGoogleUser = null;
     try {
@@ -288,7 +290,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente->setAbilitato(true);
     $this->em->flush();
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', '');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -305,8 +307,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'AG');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'AG');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -323,8 +325,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -357,7 +359,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente = $this->getReference('docente_curricolare_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $ga->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -378,7 +380,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente = $this->getReference('staff_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $utente->setListaProfili(['DOCENTE' => [2], 'GENITORE' => [1]]);
     $this->em->flush();
     $res = $ga->onAuthenticationSuccess($req, $tok, 'fw');

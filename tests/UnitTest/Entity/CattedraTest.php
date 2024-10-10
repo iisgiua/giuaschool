@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Cattedra;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class CattedraTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Cattedra::class;
+    $this->entity = Cattedra::class;
     // campi da testare
     $this->fields = ['attiva', 'supplenza', 'tipo', 'materia', 'docente', 'classe', 'alunno'];
     $this->noStoredFields = [];
@@ -105,7 +107,7 @@ class CattedraTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -135,21 +137,21 @@ class CattedraTest extends EntityTestCase {
     $existent->setTipo('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // materia
-    $property = $this->getPrivateProperty(\App\Entity\Cattedra::class, 'materia');
+    $property = $this->getPrivateProperty(Cattedra::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
     $existent->setMateria($this->getReference("materia_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Cattedra::class, 'docente');
+    $property = $this->getPrivateProperty(Cattedra::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // classe
-    $property = $this->getPrivateProperty(\App\Entity\Cattedra::class, 'classe');
+    $property = $this->getPrivateProperty(Cattedra::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');

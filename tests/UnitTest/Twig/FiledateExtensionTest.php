@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Twig;
 
+use DateTime;
 use App\Twig\FiledateExtension;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\TwigFunction;
@@ -67,7 +68,7 @@ class FiledateExtensionTest extends KernelTestCase {
     $this->assertSame(null, $res);
     // file esistente
     $res = $ext->getFileDate(__FILE__);
-    $tm = new \DateTime('@'.\filemtime(__FILE__));
+    $tm = new DateTime('@'.\filemtime(__FILE__));
     $this->assertEquals($tm, $res);
   }
 

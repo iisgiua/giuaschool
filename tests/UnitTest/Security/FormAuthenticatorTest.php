@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use App\Entity\Configurazione;
+use DateTime;
 use App\Security\FormAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -288,8 +290,8 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente con id provider attivo
     $utente = $this->getReference('docente_curricolare_1');
     $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $fa->checkCredentials($credenziali, $utente);
@@ -322,7 +324,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore1_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', '');
     $utente->setOtp('otp1234');
     $this->em->flush();
     try {
@@ -340,7 +342,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore2_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     try {
@@ -449,11 +451,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -474,12 +476,12 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otpALTRO');
     $this->em->flush();
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -501,7 +503,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository(\App\Entity\Configurazione::class)->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $utente->setListaProfili(['GENITORE' => [1], 'DOCENTE' => [2]]);
     $this->em->flush();

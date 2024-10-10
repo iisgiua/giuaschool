@@ -8,6 +8,14 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Utente;
+use ReflectionClass;
+use App\Entity\Genitore;
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Amministratore;
+use App\Entity\Docente;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +34,7 @@ class UtenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Utente::class;
+    $this->entity = Utente::class;
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
@@ -121,7 +129,7 @@ class UtenteTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -135,9 +143,9 @@ class UtenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
-          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
-          !($obj instanceOf \App\Entity\Docente)) {
+      if (!($obj instanceOf Genitore) && !($obj instanceOf Alunno) &&
+          !($obj instanceOf Ata) && !($obj instanceOf Amministratore) &&
+          !($obj instanceOf Docente)) {
         $existent = $obj;
         break;
       }
@@ -156,7 +164,7 @@ class UtenteTest extends EntityTestCase {
     $this->assertSame(serialize([$existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato()]), $existent->serialize(), $this->entity.'::serialize');
     // unserialize
     $s = $existent->serialize();
-    $o = new \App\Entity\Utente();
+    $o = new Utente();
     $o->unserialize($s);
     $this->assertSame(serialize([$o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato()]), $o->serialize(), $this->entity.'::serialize');
     // getCodiceRuolo
@@ -175,7 +183,7 @@ class UtenteTest extends EntityTestCase {
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getUsername().')', (string) $existent, $this->entity.'::toString');
     // creaToken
-    $ora = new \DateTime();
+    $ora = new DateTime();
     $existent->setToken('');
     $existent->setTokenCreato(null);
     $existent->creaToken();
@@ -193,9 +201,9 @@ class UtenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
-          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
-          !($obj instanceOf \App\Entity\Docente)) {
+      if (!($obj instanceOf Genitore) && !($obj instanceOf Alunno) &&
+          !($obj instanceOf Ata) && !($obj instanceOf Amministratore) &&
+          !($obj instanceOf Docente)) {
         $existent = $obj;
         break;
       }
@@ -218,14 +226,14 @@ class UtenteTest extends EntityTestCase {
     $existent->setUsername($this->faker->unique()->regexify('^[a-zA-Z][a-zA-Z0-9\._\-]+[a-zA-Z0-9]$'));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID REGEX');
     // password
-    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'password');
+    $property = $this->getPrivateProperty(Utente::class, 'password');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Password - NOT BLANK');
     $existent->setPassword($this->faker->randomLetter());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Password - VALID NOT BLANK');
     // email
-    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'email');
+    $property = $this->getPrivateProperty(Utente::class, 'email');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Email - NOT BLANK');
@@ -254,7 +262,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setUltimoAccesso(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UltimoAccesso - VALID NULL');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'nome');
+    $property = $this->getPrivateProperty(Utente::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -266,7 +274,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // cognome
-    $property = $this->getPrivateProperty(\App\Entity\Utente::class, 'cognome');
+    $property = $this->getPrivateProperty(Utente::class, 'cognome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cognome - NOT BLANK');
@@ -284,7 +292,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setSesso('M');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sesso - VALID CHOICE');
     // dataNascita
-    $existent->setDataNascita(new \DateTime());
+    $existent->setDataNascita(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID TYPE');
     $existent->setDataNascita(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID NULL');
@@ -351,7 +359,7 @@ class UtenteTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::email - UNIQUE');
     $objects[1]->setEmail($emailSaved);
     // unique
-    $newObject = new \App\Entity\Utente();
+    $newObject = new Utente();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

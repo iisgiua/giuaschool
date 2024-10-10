@@ -8,6 +8,8 @@
 
 namespace App\Tests;
 
+use App\Entity\Utente;
+use DateTime;
 use App\Entity\Alunno;
 use Faker\Generator;
 use Faker\Provider\it_IT\Person;
@@ -307,7 +309,7 @@ class PersonaProvider extends Person {
    * @return string Password codificata
    */
   public function passwordCodificata(string $password): string {
-    $passwordCodificata = $this->hasher->hashPassword(new \App\Entity\Utente(), $password);
+    $passwordCodificata = $this->hasher->hashPassword(new Utente(), $password);
     // restituisce la password codificata
     return $passwordCodificata;
   }
@@ -424,10 +426,10 @@ class PersonaProvider extends Person {
    *
    * @param string $data Stringa data nel formato "gg/mm/aaaa"
    *
-   * @return \DateTime Oggetto data
+   * @return DateTime Oggetto data
    */
-  public function dataFissa(string $data): \DateTime {
-    return \DateTime::createFromFormat('d/m/Y H:i:s', $data.' 00:00:00');
+  public function dataFissa(string $data): DateTime {
+    return DateTime::createFromFormat('d/m/Y H:i:s', $data.' 00:00:00');
   }
 
   /**
@@ -435,10 +437,10 @@ class PersonaProvider extends Person {
    *
    * @param string $ora Stringa ora nel formato "hh:mm"
    *
-   * @return \DateTime Oggetto data
+   * @return DateTime Oggetto data
    */
-  public function oraFissa(string $ora): \DateTime {
-    return \DateTime::createFromFormat('H:i:s', $ora.':00');
+  public function oraFissa(string $ora): DateTime {
+    return DateTime::createFromFormat('H:i:s', $ora.':00');
   }
 
 }

@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Sede;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class SedeTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Sede::class;
+    $this->entity = Sede::class;
     // campi da testare
     $this->fields = ['nome', 'nomeBreve', 'citta', 'indirizzo1', 'indirizzo2', 'telefono', 'ordinamento'];
     $this->noStoredFields = [];
@@ -103,7 +105,7 @@ class SedeTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -127,7 +129,7 @@ class SedeTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'nome');
+    $property = $this->getPrivateProperty(Sede::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -139,7 +141,7 @@ class SedeTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // nomeBreve
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'nomeBreve');
+    $property = $this->getPrivateProperty(Sede::class, 'nomeBreve');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
@@ -151,7 +153,7 @@ class SedeTest extends EntityTestCase {
     $existent->setNomeBreve(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::NomeBreve - VALID MAX LENGTH');
     // citta
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'citta');
+    $property = $this->getPrivateProperty(Sede::class, 'citta');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Citta - NOT BLANK');
@@ -163,7 +165,7 @@ class SedeTest extends EntityTestCase {
     $existent->setCitta(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Citta - VALID MAX LENGTH');
     // indirizzo1
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'indirizzo1');
+    $property = $this->getPrivateProperty(Sede::class, 'indirizzo1');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Indirizzo1 - NOT BLANK');
@@ -175,7 +177,7 @@ class SedeTest extends EntityTestCase {
     $existent->setIndirizzo1(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Indirizzo1 - VALID MAX LENGTH');
     // indirizzo2
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'indirizzo2');
+    $property = $this->getPrivateProperty(Sede::class, 'indirizzo2');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Indirizzo2 - NOT BLANK');
@@ -187,7 +189,7 @@ class SedeTest extends EntityTestCase {
     $existent->setIndirizzo2(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Indirizzo2 - VALID MAX LENGTH');
     // telefono
-    $property = $this->getPrivateProperty(\App\Entity\Sede::class, 'telefono');
+    $property = $this->getPrivateProperty(Sede::class, 'telefono');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Telefono - NOT BLANK');
@@ -227,7 +229,7 @@ class SedeTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::nomeBreve - UNIQUE');
     $objects[1]->setNomeBreve($nomeBreveSaved);
     // unique
-    $newObject = new \App\Entity\Sede();
+    $newObject = new Sede();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Log;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class LogTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Log::class;
+    $this->entity = Log::class;
     // campi da testare
     $this->fields = ['utente', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'dati'];
     $this->noStoredFields = [];
@@ -106,7 +108,7 @@ class LogTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -130,14 +132,14 @@ class LogTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // utente
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'utente');
+    $property = $this->getPrivateProperty(Log::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
     $existent->setUtente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
     // username
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'username');
+    $property = $this->getPrivateProperty(Log::class, 'username');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Username - NOT BLANK');
@@ -149,7 +151,7 @@ class LogTest extends EntityTestCase {
     $existent->setUsername(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID MAX LENGTH');
     // ruolo
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'ruolo');
+    $property = $this->getPrivateProperty(Log::class, 'ruolo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ruolo - NOT BLANK');
@@ -167,7 +169,7 @@ class LogTest extends EntityTestCase {
     $existent->setAlias(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alias - VALID MAX LENGTH');
     // ip
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'ip');
+    $property = $this->getPrivateProperty(Log::class, 'ip');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ip - NOT BLANK');
@@ -179,7 +181,7 @@ class LogTest extends EntityTestCase {
     $existent->setIp(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ip - VALID MAX LENGTH');
     // origine
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'origine');
+    $property = $this->getPrivateProperty(Log::class, 'origine');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Origine - NOT BLANK');
@@ -197,7 +199,7 @@ class LogTest extends EntityTestCase {
     $existent->setTipo('A');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // categoria
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'categoria');
+    $property = $this->getPrivateProperty(Log::class, 'categoria');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Categoria - NOT BLANK');
@@ -209,7 +211,7 @@ class LogTest extends EntityTestCase {
     $existent->setCategoria(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Categoria - VALID MAX LENGTH');
     // azione
-    $property = $this->getPrivateProperty(\App\Entity\Log::class, 'azione');
+    $property = $this->getPrivateProperty(Log::class, 'azione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Azione - NOT BLANK');

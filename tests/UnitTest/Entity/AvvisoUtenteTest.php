@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\AvvisoUtente;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class AvvisoUtenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\AvvisoUtente::class;
+    $this->entity = AvvisoUtente::class;
     // campi da testare
     $this->fields = ['avviso', 'utente', 'letto'];
     $this->noStoredFields = [];
@@ -102,7 +104,7 @@ class AvvisoUtenteTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -125,14 +127,14 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // avviso
     $temp = $existent->getAvviso();
-    $property = $this->getPrivateProperty(\App\Entity\AvvisoUtente::class, 'avviso');
+    $property = $this->getPrivateProperty(AvvisoUtente::class, 'avviso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
     $existent->setAvviso($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // utente
-    $property = $this->getPrivateProperty(\App\Entity\AvvisoUtente::class, 'utente');
+    $property = $this->getPrivateProperty(AvvisoUtente::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
@@ -159,7 +161,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     $objects[1]->setAvviso($avvisoSaved);
     $objects[1]->setUtente($utenteSaved);
     // unique
-    $newObject = new \App\Entity\AvvisoUtente();
+    $newObject = new AvvisoUtente();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

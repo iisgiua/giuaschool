@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Ata;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class AtaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Ata::class;
+    $this->entity = Ata::class;
     // campi da testare
     $this->fields = ['tipo', 'segreteria', 'sede', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = [];
@@ -124,7 +126,7 @@ class AtaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -179,7 +181,7 @@ class AtaTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
     $objects[1]->setCodiceFiscale($codiceFiscaleSaved);
     // unique
-    $newObject = new \App\Entity\Ata();
+    $newObject = new Ata();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

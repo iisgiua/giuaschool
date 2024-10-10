@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\StoricoEsito;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class StoricoEsitoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\StoricoEsito::class;
+    $this->entity = StoricoEsito::class;
     // campi da testare
     $this->fields = ['classe', 'esito', 'periodo', 'media', 'credito', 'creditoPrecedente', 'alunno', 'dati'];
     $this->noStoredFields = [];
@@ -105,7 +107,7 @@ class StoricoEsitoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -129,7 +131,7 @@ class StoricoEsitoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // classe
-    $property = $this->getPrivateProperty(\App\Entity\StoricoEsito::class, 'classe');
+    $property = $this->getPrivateProperty(StoricoEsito::class, 'classe');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
@@ -149,7 +151,7 @@ class StoricoEsitoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // alunno
     $temp = $existent->getAlunno();
-    $property = $this->getPrivateProperty(\App\Entity\StoricoEsito::class, 'alunno');
+    $property = $this->getPrivateProperty(StoricoEsito::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
@@ -165,7 +167,7 @@ class StoricoEsitoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::alunno - UNIQUE');
     $objects[1]->setAlunno($alunnoSaved);
     // unique
-    $newObject = new \App\Entity\StoricoEsito();
+    $newObject = new StoricoEsito();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

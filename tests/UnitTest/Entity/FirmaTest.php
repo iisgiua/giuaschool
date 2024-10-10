@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Firma;
+use ReflectionClass;
+use App\Entity\FirmaSostegno;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class FirmaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Firma::class;
+    $this->entity = Firma::class;
     // campi da testare
     $this->fields = ['lezione', 'docente'];
     $this->noStoredFields = [];
@@ -101,7 +104,7 @@ class FirmaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -115,7 +118,7 @@ class FirmaTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\FirmaSostegno)) {
+      if (!($obj instanceOf FirmaSostegno)) {
         $existent = $obj;
         break;
       }
@@ -137,7 +140,7 @@ class FirmaTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\FirmaSostegno)) {
+      if (!($obj instanceOf FirmaSostegno)) {
         $existent = $obj;
         break;
       }
@@ -145,7 +148,7 @@ class FirmaTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // lezione
     $temp = $existent->getLezione();
-    $property = $this->getPrivateProperty(\App\Entity\Firma::class, 'lezione');
+    $property = $this->getPrivateProperty(Firma::class, 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
@@ -153,7 +156,7 @@ class FirmaTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // docente
     $temp = $existent->getDocente();
-    $property = $this->getPrivateProperty(\App\Entity\Firma::class, 'docente');
+    $property = $this->getPrivateProperty(Firma::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
@@ -172,7 +175,7 @@ class FirmaTest extends EntityTestCase {
     $objects[1]->setLezione($lezioneSaved);
     $objects[1]->setDocente($docenteSaved);
     // unique
-    $newObject = new \App\Entity\Firma();
+    $newObject = new Firma();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

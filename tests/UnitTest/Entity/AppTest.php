@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\App;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class AppTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\App::class;
+    $this->entity = App::class;
     // campi da testare
     $this->fields = ['nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati'];
     $this->noStoredFields = [];
@@ -104,7 +106,7 @@ class AppTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -156,7 +158,7 @@ class AppTest extends EntityTestCase {
     $existent->setNotifica('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Notifica - VALID CHOICE');
     // abilitati
-    $property = $this->getPrivateProperty(\App\Entity\App::class, 'abilitati');
+    $property = $this->getPrivateProperty(App::class, 'abilitati');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Abilitati - NOT BLANK');
@@ -172,7 +174,7 @@ class AppTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::token - UNIQUE');
     $objects[1]->setToken($tokenSaved);
     // unique
-    $newObject = new \App\Entity\App();
+    $newObject = new App();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

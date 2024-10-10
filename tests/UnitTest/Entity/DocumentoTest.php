@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Documento;
+use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Materia;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +30,7 @@ class DocumentoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Documento::class;
+    $this->entity = Documento::class;
     // campi da testare
     $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma'];
     $this->noStoredFields = ['allegati'];
@@ -107,7 +111,7 @@ class DocumentoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -120,7 +124,7 @@ class DocumentoTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAllegato
-    $existent->setAllegati(new \Doctrine\Common\Collections\ArrayCollection());
+    $existent->setAllegati(new ArrayCollection());
     $existent->addAllegato($this->getReference('file_word_1'));
     $existent->addAllegato($this->getReference('file_word_2'));
     $existent->addAllegato($this->getReference('file_word_1'));
@@ -146,7 +150,7 @@ class DocumentoTest extends EntityTestCase {
     $dt['tipo'] = 'P';
     $existent->setTipo('P');
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $materia = $this->em->getRepository(\App\Entity\Materia::class)->find(1);
+    $materia = $this->em->getRepository(Materia::class)->find(1);
     $existent->setMateria($materia);
     $dt['materia'] = $materia->getId();
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -169,7 +173,7 @@ class DocumentoTest extends EntityTestCase {
     $existent->setTipo('L');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'docente');
+    $property = $this->getPrivateProperty(Documento::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
@@ -177,18 +181,18 @@ class DocumentoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // listaDestinatari
     $temp = $existent->getListaDestinatari();
-    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'listaDestinatari');
+    $property = $this->getPrivateProperty(Documento::class, 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
     $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // allegati
-    $property = $this->getPrivateProperty(\App\Entity\Documento::class, 'allegati');
+    $property = $this->getPrivateProperty(Documento::class, 'allegati');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Allegati - NOT BLANK');
-    $existent->setAllegati(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("file_1")]));
+    $existent->setAllegati(new ArrayCollection([$this->getReference("file_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID NOT BLANK');
     // materia
     $existent->setMateria(null);

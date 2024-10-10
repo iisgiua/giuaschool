@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Istituto;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class IstitutoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Istituto::class;
+    $this->entity = Istituto::class;
     // campi da testare
     $this->fields = ['tipo', 'tipoSigla', 'nome', 'nomeBreve', 'email', 'pec', 'urlSito', 'urlRegistro', 'firmaPreside', 'emailAmministratore', 'emailNotifiche'];
     $this->noStoredFields = [];
@@ -107,7 +109,7 @@ class IstitutoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -135,7 +137,7 @@ class IstitutoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // tipo
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'tipo');
+    $property = $this->getPrivateProperty(Istituto::class, 'tipo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Tipo - NOT BLANK');
@@ -147,7 +149,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setTipo(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID MAX LENGTH');
     // tipoSigla
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'tipoSigla');
+    $property = $this->getPrivateProperty(Istituto::class, 'tipoSigla');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::TipoSigla - NOT BLANK');
@@ -159,7 +161,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setTipoSigla(str_repeat('*', 16));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::TipoSigla - VALID MAX LENGTH');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'nome');
+    $property = $this->getPrivateProperty(Istituto::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -171,7 +173,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // nomeBreve
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'nomeBreve');
+    $property = $this->getPrivateProperty(Istituto::class, 'nomeBreve');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
@@ -183,7 +185,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setNomeBreve(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::NomeBreve - VALID MAX LENGTH');
     // email
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'email');
+    $property = $this->getPrivateProperty(Istituto::class, 'email');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Email - NOT BLANK');
@@ -203,7 +205,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setEmail('user@domain.com');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Email - VALID EMAIL');
     // pec
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'pec');
+    $property = $this->getPrivateProperty(Istituto::class, 'pec');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Pec - NOT BLANK');
@@ -223,7 +225,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setPec('user@domain.com');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Pec - VALID EMAIL');
     // urlSito
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'urlSito');
+    $property = $this->getPrivateProperty(Istituto::class, 'urlSito');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::UrlSito - NOT BLANK');
@@ -245,7 +247,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setUrlSito('https://domain.com/path/index.php');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UrlSito - VALID URL');
     // urlRegistro
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'urlRegistro');
+    $property = $this->getPrivateProperty(Istituto::class, 'urlRegistro');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::UrlRegistro - NOT BLANK');
@@ -267,7 +269,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setUrlRegistro('https://domain.com/path/index.php');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UrlRegistro - VALID URL');
     // firmaPreside
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'firmaPreside');
+    $property = $this->getPrivateProperty(Istituto::class, 'firmaPreside');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::FirmaPreside - NOT BLANK');
@@ -279,7 +281,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setFirmaPreside(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::FirmaPreside - VALID MAX LENGTH');
     // emailAmministratore
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'emailAmministratore');
+    $property = $this->getPrivateProperty(Istituto::class, 'emailAmministratore');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::EmailAmministratore - NOT BLANK');
@@ -299,7 +301,7 @@ class IstitutoTest extends EntityTestCase {
     $existent->setEmailAmministratore('user@domain.com');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::EmailAmministratore - VALID EMAIL');
     // emailNotifiche
-    $property = $this->getPrivateProperty(\App\Entity\Istituto::class, 'emailNotifiche');
+    $property = $this->getPrivateProperty(Istituto::class, 'emailNotifiche');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::EmailNotifiche - NOT BLANK');

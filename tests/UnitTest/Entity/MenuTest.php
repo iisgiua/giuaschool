@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Menu;
+use ReflectionClass;
+use App\Entity\MenuOpzione;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class MenuTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Menu::class;
+    $this->entity = Menu::class;
     // campi da testare
     $this->fields = ['selettore', 'nome', 'descrizione', 'mega'];
     $this->noStoredFields = ['opzioni'];
@@ -101,7 +104,7 @@ class MenuTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -117,7 +120,7 @@ class MenuTest extends EntityTestCase {
     $this->assertSame($existent->getSelettore(), (string) $existent, $this->entity.'::toString');
     // addOpzioni
     $items = $existent->getOpzioni()->toArray();
-    $item = new \App\Entity\MenuOpzione();
+    $item = new MenuOpzione();
     $existent->addOpzioni($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getOpzioni()->toArray()), $this->entity.'::addOpzioni');
     $existent->addOpzioni($item);
@@ -125,7 +128,7 @@ class MenuTest extends EntityTestCase {
     // removeOpzioni
     $items = $existent->getOpzioni()->toArray();
     if (count($items) == 0) {
-      $item = new \App\Entity\MenuOpzione();
+      $item = new MenuOpzione();
     } else {
       $item = $items[0];
     }
@@ -143,7 +146,7 @@ class MenuTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // selettore
-    $property = $this->getPrivateProperty(\App\Entity\Menu::class, 'selettore');
+    $property = $this->getPrivateProperty(Menu::class, 'selettore');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Selettore - NOT BLANK');
@@ -176,7 +179,7 @@ class MenuTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::selettore - UNIQUE');
     $objects[1]->setSelettore($selettoreSaved);
     // unique
-    $newObject = new \App\Entity\Menu();
+    $newObject = new Menu();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

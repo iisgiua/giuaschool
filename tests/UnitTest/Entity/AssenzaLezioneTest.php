@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\AssenzaLezione;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class AssenzaLezioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\AssenzaLezione::class;
+    $this->entity = AssenzaLezione::class;
     // campi da testare
     $this->fields = ['alunno', 'lezione', 'ore'];
     $this->noStoredFields = [];
@@ -103,7 +105,7 @@ class AssenzaLezioneTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -128,7 +130,7 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
     $temp = $existent->getAlunno();
-    $property = $this->getPrivateProperty(\App\Entity\AssenzaLezione::class, 'alunno');
+    $property = $this->getPrivateProperty(AssenzaLezione::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
@@ -136,7 +138,7 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // lezione
     $temp = $existent->getLezione();
-    $property = $this->getPrivateProperty(\App\Entity\AssenzaLezione::class, 'lezione');
+    $property = $this->getPrivateProperty(AssenzaLezione::class, 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
@@ -149,7 +151,7 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::alunno-lezione - UNIQUE');
     $object = null;
     // unique
-    $newObject = new \App\Entity\AssenzaLezione();
+    $newObject = new AssenzaLezione();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($existent->{'get'.ucfirst((string) $field)}());
     }

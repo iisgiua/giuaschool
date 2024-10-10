@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Docente;
+use ReflectionClass;
+use App\Entity\Staff;
+use App\Entity\Preside;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +30,7 @@ class DocenteTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Docente::class;
+    $this->entity = Docente::class;
     // campi da testare
     $this->fields = ['responsabileBes', 'responsabileBesSede', 'rspp', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = [];
@@ -124,7 +128,7 @@ class DocenteTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -138,7 +142,7 @@ class DocenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Staff) && !($obj instanceOf \App\Entity\Preside)) {
+      if (!($obj instanceOf Staff) && !($obj instanceOf Preside)) {
         $existent = $obj;
         break;
       }
@@ -173,7 +177,7 @@ class DocenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Staff) && !($obj instanceOf \App\Entity\Preside)) {
+      if (!($obj instanceOf Staff) && !($obj instanceOf Preside)) {
         $existent = $obj;
         break;
       }
@@ -192,7 +196,7 @@ class DocenteTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
     $objects[1]->setCodiceFiscale($codiceFiscaleSaved);
     // unique
-    $newObject = new \App\Entity\Docente();
+    $newObject = new Docente();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Repository;
 
+use App\Entity\Alunno;
 use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\Query;
 
@@ -39,11 +40,11 @@ class BaseRepositoryTest extends DatabaseTestCase {
    */
   public function testPaginazione(): void {
     // init
-    $count = $this->em->getRepository(\App\Entity\Alunno::class)->createQueryBuilder('a')
+    $count = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select("COUNT(a.id)")
       ->getQuery()
       ->getSingleScalarResult();
-    $repository = $this->em->getRepository(\App\Entity\Alunno::class);
+    $repository = $this->em->getRepository(Alunno::class);
     $query = new Query($this->em);
     // pagina iniziale
     $query->setDQL("SELECT a FROM App\Entity\Alunno AS a");

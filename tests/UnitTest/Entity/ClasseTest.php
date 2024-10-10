@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use ReflectionClass;
 use App\Entity\Classe;
 use App\Tests\EntityTestCase;
 
@@ -27,7 +28,7 @@ class ClasseTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Classe::class;
+    $this->entity = Classe::class;
     // campi da testare
     $this->fields = ['anno', 'sezione', 'gruppo', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
     $this->noStoredFields = [];
@@ -105,7 +106,7 @@ class ClasseTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -138,7 +139,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setAnno(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Anno - VALID CHOICE');
     // sezione
-    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'sezione');
+    $property = $this->getPrivateProperty(Classe::class, 'sezione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sezione - NOT BLANK');
@@ -150,7 +151,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setSezione(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sezione - VALID MAX LENGTH');
     // gruppo
-    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'gruppo');
+    $property = $this->getPrivateProperty(Classe::class, 'gruppo');
     $property->setValue($existent, '');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');
     $existent->setGruppo(str_repeat('*', 65));
@@ -168,14 +169,14 @@ class ClasseTest extends EntityTestCase {
     $existent->setOreSettimanali(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::OreSettimanali - VALID POSITIVE');
     // sede
-    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'sede');
+    $property = $this->getPrivateProperty(Classe::class, 'sede');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');
     $existent->setSede($this->getReference("sede_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sede - VALID NOT BLANK');
     // corso
-    $property = $this->getPrivateProperty(\App\Entity\Classe::class, 'corso');
+    $property = $this->getPrivateProperty(Classe::class, 'corso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Corso - NOT BLANK');

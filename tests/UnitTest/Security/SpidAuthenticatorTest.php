@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use DateTime;
 use App\Security\SpidAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -369,7 +370,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->em->flush();
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $sa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -392,7 +393,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $utente->setInfoLogin(['logoutUrl' => 'https://nome.dominio.it/logout/url']);
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $utente->setListaProfili(['DOCENTE' => [2], 'GENITORE' => [1]]);
     $this->em->flush();
     $res = $sa->onAuthenticationSuccess($req, $tok, 'fw');

@@ -8,6 +8,11 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Alunno;
+use ReflectionClass;
+use DateTime;
+use App\Entity\Genitore;
+use Symfony\Component\HttpFoundation\File\File;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +31,7 @@ class AlunnoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Alunno::class;
+    $this->entity = Alunno::class;
     // campi da testare
     $this->fields = ['bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero', 'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = ['genitori'];
@@ -134,7 +139,7 @@ class AlunnoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -154,7 +159,7 @@ class AlunnoTest extends EntityTestCase {
     $this->assertFalse($existent->controllaRuolo('NUGDSPTM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('A'), $this->entity.'::controllaRuolo');
     // getCodiceFunzioni
-    $existent->setDataNascita(new \DateTime('today'));
+    $existent->setDataNascita(new DateTime('today'));
     $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante(['C']);
@@ -165,13 +170,13 @@ class AlunnoTest extends EntityTestCase {
     $this->assertSame(['P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRappresentante(['C', 'P']);
     $this->assertSame(['C', 'P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setDataNascita(\DateTime::createFromFormat('d/m/Y', '01/01/2000'));
+    $existent->setDataNascita(DateTime::createFromFormat('d/m/Y', '01/01/2000'));
     $this->assertSame(['C', 'P', 'M', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getDataNascita()->format('d/m/Y').')', (string) $existent, $this->entity.'::toString');
     // addGenitori
     $items = $existent->getGenitori()->toArray();
-    $item = new \App\Entity\Genitore();
+    $item = new Genitore();
     $existent->addGenitori($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getGenitori()->toArray()), $this->entity.'::addGenitori');
     $existent->addGenitori($item);
@@ -179,7 +184,7 @@ class AlunnoTest extends EntityTestCase {
     // removeGenitori
     $items = $existent->getGenitori()->toArray();
     if (count($items) == 0) {
-      $item = new \App\Entity\Genitore();
+      $item = new Genitore();
     } else {
       $item = $items[0];
     }
@@ -221,23 +226,23 @@ class AlunnoTest extends EntityTestCase {
     $existent->setReligione('S');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Religione - VALID CHOICE');
     // foto
-    $f = new \Symfony\Component\HttpFoundation\File\File(__FILE__);
+    $f = new File(__FILE__);
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.type', $this->entity.'::Foto - IMAGE TYPE');
-    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image2.png');
+    $f = new File(__DIR__.'/../../data/image2.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::Foto - IMAGE SQUARE');
-    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image3.png');
+    $f = new File(__DIR__.'/../../data/image3.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::Foto - IMAGE NOT SQUARE');
-    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image1.png');
+    $f = new File(__DIR__.'/../../data/image1.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.width', $this->entity.'::Foto - IMAGE WIDTH');
-    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image0.png');
+    $f = new File(__DIR__.'/../../data/image0.png');
     $existent->setFoto($f);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Foto - VALID IMAGE');
     // classe
@@ -253,7 +258,7 @@ class AlunnoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
     $objects[1]->setCodiceFiscale($codiceFiscaleSaved);
     // unique
-    $newObject = new \App\Entity\Alunno();
+    $newObject = new Alunno();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

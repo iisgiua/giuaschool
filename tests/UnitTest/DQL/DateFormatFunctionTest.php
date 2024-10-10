@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\DQL;
 
+use Exception;
 use App\DQL\DateFormatFunction;
 use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\Query;
@@ -63,7 +64,7 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     try {
       $exception = null;
       $ext->parse($parser);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame(null, $exception);

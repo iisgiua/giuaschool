@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Nota;
+use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +30,7 @@ class NotaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Nota::class;
+    $this->entity = Nota::class;
     // campi da testare
     $this->fields = ['tipo', 'data', 'testo', 'provvedimento', 'annullata', 'classe', 'docente', 'docenteProvvedimento'];
     $this->noStoredFields = ['alunni'];
@@ -105,7 +109,7 @@ class NotaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -118,7 +122,7 @@ class NotaTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAlunni
-    $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection());
+    $existent->setAlunni(new ArrayCollection());
     $item1 = $this->getReference('alunno_1A_1');
     $existent->addAlunni($item1);
     $item2 = $this->getReference('alunno_1A_2');
@@ -146,30 +150,30 @@ class NotaTest extends EntityTestCase {
     $existent->setTipo('C');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // data
-    $property = $this->getPrivateProperty(\App\Entity\Nota::class, 'data');
+    $property = $this->getPrivateProperty(Nota::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // testo
-    $property = $this->getPrivateProperty(\App\Entity\Nota::class, 'testo');
+    $property = $this->getPrivateProperty(Nota::class, 'testo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Testo - NOT BLANK');
     $existent->setTesto($this->faker->randomLetter());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Testo - VALID NOT BLANK');
     // classe
-    $property = $this->getPrivateProperty(\App\Entity\Nota::class, 'classe');
+    $property = $this->getPrivateProperty(Nota::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
     $existent->setClasse($this->getReference("classe_1A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Nota::class, 'docente');
+    $property = $this->getPrivateProperty(Nota::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

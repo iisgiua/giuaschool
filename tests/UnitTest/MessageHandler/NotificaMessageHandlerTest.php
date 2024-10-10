@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\MessageHandler;
 
+use DateTime;
 use App\Tests\DatabaseTestCase;
 use App\Message\NotificaMessage;
 use App\MessageHandler\NotificaMessageHandler;
@@ -834,7 +835,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
     $connection->prepare($sql)->executeStatement();
     // esegue
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";
@@ -861,7 +862,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
     $connection->prepare($sql)->executeStatement();
     // esegue
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";

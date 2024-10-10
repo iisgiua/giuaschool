@@ -12,6 +12,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\DefinizioneRichiesta;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -29,7 +31,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\DefinizioneRichiesta::class;
+    $this->entity = DefinizioneRichiesta::class;
     // campi da testare
     $this->fields = ['nome', 'sede', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'gestione', 'tipo'];
     $this->noStoredFields = [];
@@ -110,7 +112,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -148,7 +150,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneRichiesta::class, 'nome');
+    $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -160,7 +162,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // richiedenti
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneRichiesta::class, 'richiedenti');
+    $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'richiedenti');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Richiedenti - NOT BLANK');
@@ -172,7 +174,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent->setRichiedenti(str_repeat('*', 16));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Richiedenti - VALID MAX LENGTH');
     // destinatari
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneRichiesta::class, 'destinatari');
+    $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'destinatari');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Destinatari - NOT BLANK');
@@ -184,7 +186,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent->setDestinatari(str_repeat('*', 16));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Destinatari - VALID MAX LENGTH');
     // modulo
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneRichiesta::class, 'modulo');
+    $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'modulo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Modulo - NOT BLANK');
@@ -204,7 +206,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent->setAllegati(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID POSITIVE OR ZERO');
     // tipo
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneRichiesta::class, 'tipo');
+    $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'tipo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Tipo - NOT BLANK');
@@ -225,7 +227,7 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::nome - UNIQUE');
     $objects[1]->setNome($nomeSaved);
     // unique
-    $newObject = new \App\Entity\DefinizioneRichiesta();
+    $newObject = new DefinizioneRichiesta();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

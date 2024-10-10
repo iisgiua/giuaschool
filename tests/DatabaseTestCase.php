@@ -8,6 +8,12 @@
 
 namespace App\Tests;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
+use Symfony\Component\Validator\Validator\TraceableValidator;
+use ReflectionProperty;
+use ReflectionClass;
+use ReflectionMethod;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManager;
 use Faker\Generator;
@@ -97,14 +103,14 @@ class DatabaseTestCase extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->em = $kernel->getContainer()->get('doctrine')->getManager();
-    $this->hasher = $kernel->getContainer()->get('security.user_password_hasher');
-    $this->val = $kernel->getContainer()->get('validator');
-    $this->faker = $kernel->getContainer()->get(\Faker\Generator::class);
+    $this->em = $kernel->getContainer()->get(Registry::class)->getManager();
+    $this->hasher = $kernel->getContainer()->get(UserPasswordHasher::class);
+    $this->val = $kernel->getContainer()->get(TraceableValidator::class);
+    $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
+    $this->alice = $kernel->getContainer()->get(PurgerLoader::class);
     // svuota database e carica dati fissi
     $this->addFixtures();
     // crea istanze fittizie per altri servizi
@@ -206,34 +212,34 @@ class DatabaseTestCase extends KernelTestCase {
   }
 
   /**
- 	 * Restituisce l'attributo privato di una classe in modo che sia leggibile e modificabile.
+   * Restituisce l'attributo privato di una classe in modo che sia leggibile e modificabile.
    * Usare $property->getValue($object) e $property->setValue($object, $value) per leggere/modificare l'attributo.
- 	 *
- 	 * @author Joe Sexton <joe@webtipblog.com>
    *
- 	 * @param string $className Nome della classe
- 	 * @param string $propertyName Nome dell'attributo
+   * @author Joe Sexton <joe@webtipblog.com>
    *
- 	 * @return \ReflectionProperty L'attributo richiesto
- 	 */
-  protected function getPrivateProperty(string $className, string $propertyName): \ReflectionProperty {
-		$reflector = new \ReflectionClass($className);
+   * @param string $className Nome della classe
+   * @param string $propertyName Nome dell'attributo
+   *
+   * @return ReflectionProperty L'attributo richiesto
+   */
+  protected function getPrivateProperty(string $className, string $propertyName): ReflectionProperty {
+		$reflector = new ReflectionClass($className);
 		$property = $reflector->getProperty($propertyName);
 		$property->setAccessible(true);
 		return $property;
 	}
 
   /**
- 	 * Restituisce il metodo privato di una classe in modo che sia eseguibile.
-   * Usare $method->invokeArgs($object, $array_params) per eseguire il metodo.
- 	 *
- 	 * @author Joe Sexton <joe@webtipblog.com>
- 	 * @param string $className Nome della classe
- 	 * @param string $propertyName Nome dell'attributo
- 	 * @return \ReflectionMethod Il metodo richiesto
- 	 */
-	protected function getPrivateMethod(string $className, string $methodName): \ReflectionMethod {
-		$reflector = new \ReflectionClass($className);
+  * Restituisce il metodo privato di una classe in modo che sia eseguibile.
+  * Usare $method->invokeArgs($object, $array_params) per eseguire il metodo.
+  *
+  * @author Joe Sexton <joe@webtipblog.com>
+  * @param string $className Nome della classe
+  * @param string $propertyName Nome dell'attributo
+  * @return ReflectionMethod Il metodo richiesto
+  */
+ protected function getPrivateMethod(string $className, string $methodName): ReflectionMethod {
+		$reflector = new ReflectionClass($className);
 		$method = $reflector->getMethod($methodName);
 		$method->setAccessible(true);
 		return $method;

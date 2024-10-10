@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Materia;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class MateriaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Materia::class;
+    $this->entity = Materia::class;
     // campi da testare
     $this->fields = ['nome', 'nomeBreve', 'tipo', 'valutazione', 'media', 'ordinamento'];
     $this->noStoredFields = [];
@@ -102,7 +104,7 @@ class MateriaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -126,7 +128,7 @@ class MateriaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Materia::class, 'nome');
+    $property = $this->getPrivateProperty(Materia::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -138,7 +140,7 @@ class MateriaTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // nomeBreve
-    $property = $this->getPrivateProperty(\App\Entity\Materia::class, 'nomeBreve');
+    $property = $this->getPrivateProperty(Materia::class, 'nomeBreve');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
@@ -171,7 +173,7 @@ class MateriaTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::nome - UNIQUE');
     $objects[1]->setNome($nomeSaved);
     // unique
-    $newObject = new \App\Entity\Materia();
+    $newObject = new Materia();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

@@ -8,6 +8,11 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Circolare;
+use ReflectionClass;
+use App\Entity\Sede;
+use Symfony\Component\HttpFoundation\File\File;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +31,7 @@ class CircolareTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Circolare::class;
+    $this->entity = Circolare::class;
     // campi da testare
     $this->fields = ['anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni', 'coordinatori', 'filtroCoordinatori', 'docenti', 'filtroDocenti', 'altri', 'firma', 'notifica', 'pubblicata'];
     $this->noStoredFields = ['sedi'];
@@ -122,7 +127,7 @@ class CircolareTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -136,7 +141,7 @@ class CircolareTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addSedi
     $items = $existent->getSedi()->toArray();
-    $item = new \App\Entity\Sede();
+    $item = new Sede();
     $existent->addSedi($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::addSedi');
     $existent->addSedi($item);
@@ -144,7 +149,7 @@ class CircolareTest extends EntityTestCase {
     // removeSedi
     $items = $existent->getSedi()->toArray();
     if (count($items) == 0) {
-      $item = new \App\Entity\Sede();
+      $item = new Sede();
     } else {
       $item = $items[0];
     }
@@ -154,9 +159,9 @@ class CircolareTest extends EntityTestCase {
     $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::removeSedi');
     // addAllegato
     $existent->setAllegati([]);
-    $fl1 = new \Symfony\Component\HttpFoundation\File\File(__FILE__);
+    $fl1 = new File(__FILE__);
     $existent->addAllegato($fl1);
-    $fl2 = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image2.png');
+    $fl2 = new File(__DIR__.'/../../data/image2.png');
     $existent->addAllegato($fl2);
     $existent->addAllegato($fl1);
     $this->assertSame([$fl1->getBasename(), $fl2->getBasename()], $existent->getAllegati(), $this->entity.'::addAllegato');
@@ -235,23 +240,23 @@ class CircolareTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // sedi
     $savedProperty = $existent->getSedi();
-    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'sedi');
+    $property = $this->getPrivateProperty(Circolare::class, 'sedi');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
     $existent->setSedi($savedProperty);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // data
-    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'data');
+    $property = $this->getPrivateProperty(Circolare::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // oggetto
-    $property = $this->getPrivateProperty(\App\Entity\Circolare::class, 'oggetto');
+    $property = $this->getPrivateProperty(Circolare::class, 'oggetto');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Oggetto - NOT BLANK');
@@ -299,10 +304,10 @@ class CircolareTest extends EntityTestCase {
     $objects[1]->setAnno($annoSaved);
     $objects[1]->setNumero($numeroSaved);
     // unique
-    $newObject = new \App\Entity\Circolare();
+    $newObject = new Circolare();
     foreach ($this->fields as $field) {
       if ($field == 'documento') {
-        $newObject->setDocumento(new \Symfony\Component\HttpFoundation\File\File(dirname(__DIR__, 2).'/data/'.$objects[0]->getDocumento()));
+        $newObject->setDocumento(new File(dirname(__DIR__, 2).'/data/'.$objects[0]->getDocumento()));
       } else {
         $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
       }

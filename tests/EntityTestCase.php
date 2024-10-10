@@ -8,6 +8,7 @@
 
 namespace App\Tests;
 
+use DateTime;
 use Doctrine\DBAL\Logging\DebugStack;
 use function Symfony\Component\String\u;
 use PhpMyAdmin\SqlParser\Parser;
@@ -191,7 +192,7 @@ class EntityTestCase extends DatabaseTestCase {
     } elseif (is_bool($value)) {
       // booleano
       $result = $value ? '1' : '0';
-    } elseif ($value instanceOf \DateTime) {
+    } elseif ($value instanceOf DateTime) {
       // oggetto DateTime
       $result = "'".addslashes($value->format('Y-m-d H:i:s'))."'";
     } elseif (is_object($value)) {

@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\ListaDestinatari;
+use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Sede;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +30,7 @@ class ListaDestinatariTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\ListaDestinatari::class;
+    $this->entity = ListaDestinatari::class;
     // campi da testare
     $this->fields = ['dsga', 'ata', 'docenti', 'filtroDocenti', 'coordinatori', 'filtroCoordinatori', 'staff', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni'];
     $this->noStoredFields = ['sedi'];
@@ -108,7 +112,7 @@ class ListaDestinatariTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -144,13 +148,13 @@ class ListaDestinatariTest extends EntityTestCase {
     $dt['filtroGenitori'] = [1, 2];
     $existent->setGenitori('C')->setFiltroGenitori([1, 2]);
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $sedi = new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1"), $this->getReference("sede_2")]);
+    $sedi = new ArrayCollection([$this->getReference("sede_1"), $this->getReference("sede_2")]);
     $existent->setSedi($sedi);
     $dt['sedi'] = array_map(fn($ogg) => $ogg->getId(), $sedi->toArray());
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
     // addSedi
     $items = $existent->getSedi()->toArray();
-    $item = new \App\Entity\Sede();
+    $item = new Sede();
     $existent->addSedi($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::addSedi');
     $existent->addSedi($item);
@@ -158,7 +162,7 @@ class ListaDestinatariTest extends EntityTestCase {
     // removeSedi
     $items = $existent->getSedi()->toArray();
     if (count($items) == 0) {
-      $item = new \App\Entity\Sede();
+      $item = new Sede();
     } else {
       $item = $items[0];
     }
@@ -176,11 +180,11 @@ class ListaDestinatariTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // sedi
-    $property = $this->getPrivateProperty(\App\Entity\ListaDestinatari::class, 'sedi');
+    $property = $this->getPrivateProperty(ListaDestinatari::class, 'sedi');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
-    $existent->setSedi(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]));
+    $existent->setSedi(new ArrayCollection([$this->getReference("sede_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // docenti
     $existent->setDocenti('*');

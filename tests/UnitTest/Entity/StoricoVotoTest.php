@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\StoricoVoto;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class StoricoVotoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\StoricoVoto::class;
+    $this->entity = StoricoVoto::class;
     // campi da testare
     $this->fields = ['voto', 'carenze', 'dati', 'storicoEsito', 'materia'];
     $this->noStoredFields = [];
@@ -103,7 +105,7 @@ class StoricoVotoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -128,7 +130,7 @@ class StoricoVotoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // storicoEsito
     $temp = $existent->getStoricoEsito();
-    $property = $this->getPrivateProperty(\App\Entity\StoricoVoto::class, 'storicoEsito');
+    $property = $this->getPrivateProperty(StoricoVoto::class, 'storicoEsito');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::StoricoEsito - NOT BLANK');
@@ -136,7 +138,7 @@ class StoricoVotoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::StoricoEsito - VALID NOT BLANK');
     // materia
     $temp = $existent->getMateria();
-    $property = $this->getPrivateProperty(\App\Entity\StoricoVoto::class, 'materia');
+    $property = $this->getPrivateProperty(StoricoVoto::class, 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
@@ -155,7 +157,7 @@ class StoricoVotoTest extends EntityTestCase {
     $objects[1]->setStoricoEsito($storicoEsitoSaved);
     $objects[1]->setMateria($materiaSaved);
     // unique
-    $newObject = new \App\Entity\StoricoVoto();
+    $newObject = new StoricoVoto();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Annotazione;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class AnnotazioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Annotazione::class;
+    $this->entity = Annotazione::class;
     // campi da testare
     $this->fields = ['data', 'testo', 'visibile', 'avviso', 'classe', 'docente'];
     $this->noStoredFields = [];
@@ -103,7 +106,7 @@ class AnnotazioneTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -127,16 +130,16 @@ class AnnotazioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
-    $property = $this->getPrivateProperty(\App\Entity\Annotazione::class, 'data');
+    $property = $this->getPrivateProperty(Annotazione::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // testo
-    $property = $this->getPrivateProperty(\App\Entity\Annotazione::class, 'testo');
+    $property = $this->getPrivateProperty(Annotazione::class, 'testo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Testo - NOT BLANK');
@@ -146,14 +149,14 @@ class AnnotazioneTest extends EntityTestCase {
     $existent->setAvviso(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NULL');
     // classe
-    $property = $this->getPrivateProperty(\App\Entity\Annotazione::class, 'classe');
+    $property = $this->getPrivateProperty(Annotazione::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
     $existent->setClasse($this->getReference("classe_1A"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Annotazione::class, 'docente');
+    $property = $this->getPrivateProperty(Annotazione::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

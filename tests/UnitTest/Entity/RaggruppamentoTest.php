@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Raggruppamento;
+use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class RaggruppamentoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Raggruppamento::class;
+    $this->entity = Raggruppamento::class;
     // campi da testare
     $this->fields = ['nome'];
     $this->noStoredFields = ['alunni'];
@@ -99,7 +102,7 @@ class RaggruppamentoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -137,7 +140,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Raggruppamento::class, 'nome');
+    $property = $this->getPrivateProperty(Raggruppamento::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
@@ -149,11 +152,11 @@ class RaggruppamentoTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
     // alunni
-    $property = $this->getPrivateProperty(\App\Entity\Raggruppamento::class, 'alunni');
+    $property = $this->getPrivateProperty(Raggruppamento::class, 'alunni');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunni - NOT BLANK');
-    $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("alunno_1A_1")]));
+    $existent->setAlunni(new ArrayCollection([$this->getReference("alunno_1A_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunni - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

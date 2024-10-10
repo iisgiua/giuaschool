@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Colloquio;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class ColloquioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Colloquio::class;
+    $this->entity = Colloquio::class;
     // campi da testare
     $this->fields = ['docente', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato'];
     $this->noStoredFields = [];
@@ -105,7 +108,7 @@ class ColloquioTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -143,38 +146,38 @@ class ColloquioTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Colloquio::class, 'docente');
+    $property = $this->getPrivateProperty(Colloquio::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // data
-    $property = $this->getPrivateProperty(\App\Entity\Colloquio::class, 'data');
+    $property = $this->getPrivateProperty(Colloquio::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // inizio
-    $property = $this->getPrivateProperty(\App\Entity\Colloquio::class, 'inizio');
+    $property = $this->getPrivateProperty(Colloquio::class, 'inizio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
     // fine
-    $property = $this->getPrivateProperty(\App\Entity\Colloquio::class, 'fine');
+    $property = $this->getPrivateProperty(Colloquio::class, 'fine');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
     // tipo
     $existent->setTipo('*');

@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Scrutinio;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class ScrutinioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Scrutinio::class;
+    $this->entity = Scrutinio::class;
     // campi da testare
     $this->fields = ['periodo', 'data', 'inizio', 'fine', 'stato', 'classe', 'dati', 'visibile', 'sincronizzazione'];
     $this->noStoredFields = [];
@@ -106,7 +109,7 @@ class ScrutinioTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -155,17 +158,17 @@ class ScrutinioTest extends EntityTestCase {
     $existent->setPeriodo('P');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // data
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     $existent->setData(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NULL');
     // inizio
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
     $existent->setInizio(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NULL');
     // fine
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
     $existent->setFine(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NULL');
@@ -177,14 +180,14 @@ class ScrutinioTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Stato - VALID CHOICE');
     // classe
     $temp = $existent->getClasse();
-    $property = $this->getPrivateProperty(\App\Entity\Scrutinio::class, 'classe');
+    $property = $this->getPrivateProperty(Scrutinio::class, 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
     $existent->setClasse($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // visibile
-    $existent->setVisibile(new \DateTime());
+    $existent->setVisibile(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Visibile - VALID TYPE');
     $existent->setVisibile(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Visibile - VALID NULL');
@@ -207,7 +210,7 @@ class ScrutinioTest extends EntityTestCase {
     $objects[1]->setPeriodo($periodoSaved);
     $objects[1]->setClasse($classeSaved);
     // unique
-    $newObject = new \App\Entity\Scrutinio();
+    $newObject = new Scrutinio();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

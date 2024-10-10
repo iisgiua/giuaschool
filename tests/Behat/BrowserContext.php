@@ -8,6 +8,8 @@
 
 namespace App\Tests\Behat;
 
+use App\Entity\Utente;
+use Exception;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ExpectationException;
@@ -103,7 +105,7 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtente($valore, $password=null): void {
     $this->assertEmpty($this->vars['sys']['logged']);
-    $user = $this->em->getRepository(\App\Entity\Utente::class)->findOneByUsername($valore);
+    $user = $this->em->getRepository(Utente::class)->findOneByUsername($valore);
     $this->paginaAttiva('login_form');
     $this->assertTrue($user && $user->getUsername() == $valore);
     $this->session->getPage()->fillField('username', $valore);
@@ -118,7 +120,7 @@ class BrowserContext extends BaseContext {
     }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
-    $others = $this->em->getRepository(\App\Entity\Utente::class)->createQueryBuilder('u')
+    $others = $this->em->getRepository(Utente::class)->createQueryBuilder('u')
       ->where('u.username!=:username AND u INSTANCE OF '.$user::class)
       ->setParameters(['username' => $user->getUsername()])
       ->getQuery()
@@ -652,7 +654,7 @@ class BrowserContext extends BaseContext {
         // conversione ok
         $testo = file_get_contents($convertito);
       }
-    } catch (\Exception) {
+    } catch (Exception) {
       // errore: evita eccezione
     }
     $this->assertTrue($testo && preg_match($ricerca, $testo));
@@ -688,7 +690,7 @@ class BrowserContext extends BaseContext {
       } else {
         $this->logDebug('ERRORE analizziPDF -> '.$proc->getErrorOutput());
       }
-    } catch (\Exception $err) {
+    } catch (Exception $err) {
       // errore: evita eccezione
       $this->logDebug('ERRORE analizziPDF -> '.$err);
     }

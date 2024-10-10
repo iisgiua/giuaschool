@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\MenuOpzione;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class MenuOpzioneTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\MenuOpzione::class;
+    $this->entity = MenuOpzione::class;
     // campi da testare
     $this->fields = ['ruolo', 'funzione', 'nome', 'descrizione', 'url', 'ordinamento', 'abilitato', 'icona', 'menu', 'sottoMenu'];
     $this->noStoredFields = [];
@@ -106,7 +108,7 @@ class MenuOpzioneTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -130,7 +132,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // ruolo
-    $property = $this->getPrivateProperty(\App\Entity\MenuOpzione::class, 'ruolo');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'ruolo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ruolo - NOT BLANK');
@@ -148,7 +150,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setFunzione(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Funzione - VALID MAX LENGTH');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\MenuOpzione::class, 'nome');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -160,7 +162,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // descrizione
-    $property = $this->getPrivateProperty(\App\Entity\MenuOpzione::class, 'descrizione');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'descrizione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Descrizione - NOT BLANK');
@@ -184,7 +186,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setIcona(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Icona - VALID MAX LENGTH');
     // menu
-    $property = $this->getPrivateProperty(\App\Entity\MenuOpzione::class, 'menu');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'menu');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Menu - NOT BLANK');

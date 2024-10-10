@@ -8,6 +8,9 @@
 
 namespace App\Tests\Behat;
 
+use Faker\Generator;
+use Datetime;
+use stdClass;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
 use Behat\Behat\Context\Context;
@@ -158,12 +161,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
       protected EntityManagerInterface $em,
       protected RouterInterface $router,
       protected UserPasswordHasherInterface $hasher,
-      protected SluggerInterface $slugger) {
-    $this->faker = $kernel->getContainer()->get(\Faker\Generator::class);
+      protected SluggerInterface $slugger,
+      private PurgerLoader $purgerLoader) {
+    $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
+    $this->alice = $this->purgerLoader;
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
     // inizializza variabili
@@ -977,13 +981,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
-        $dtm = (new \Datetime())
+        $dtm = (new Datetime())
           ->setDate($dt[3], $dt[2], $dt[1])
           ->setTime($dt[4], $dt[5], $dt[6], 0);
         return $dtm;
       } elseif (preg_match('/^#dtm\(\)$/', $var, $dt)) {
         // crea variabile DateTime
-        $dtm = new \Datetime();
+        $dtm = new Datetime();
         return $dtm;
       }
       // controlla funzione date e time
@@ -1054,14 +1058,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione stringa non presente
       if ($fn[1] == 'nos') {
         $var = substr(substr($var, 5), 0 , -1);
-        $obj = new \stdClass();
+        $obj = new stdClass();
         $obj->str = $var;
         $obj->func = 'nos';
         return $obj;
       }
       // controlla funzione cifra non presente
       if ($fn[1] == 'noc') {
-        $obj = new \stdClass();
+        $obj = new stdClass();
         $obj->func = 'noc';
         return $obj;
       }

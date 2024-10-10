@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\ScansioneOraria;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class ScansioneOrariaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\ScansioneOraria::class;
+    $this->entity = ScansioneOraria::class;
     // campi da testare
     $this->fields = ['giorno', 'ora', 'inizio', 'fine', 'durata', 'orario'];
     $this->noStoredFields = [];
@@ -102,7 +105,7 @@ class ScansioneOrariaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -132,25 +135,25 @@ class ScansioneOrariaTest extends EntityTestCase {
     $existent->setGiorno(0);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giorno - VALID CHOICE');
     // inizio
-    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'inizio');
+    $property = $this->getPrivateProperty(ScansioneOraria::class, 'inizio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
     // fine
-    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'fine');
+    $property = $this->getPrivateProperty(ScansioneOraria::class, 'fine');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
     // orario
-    $property = $this->getPrivateProperty(\App\Entity\ScansioneOraria::class, 'orario');
+    $property = $this->getPrivateProperty(ScansioneOraria::class, 'orario');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Orario - NOT BLANK');

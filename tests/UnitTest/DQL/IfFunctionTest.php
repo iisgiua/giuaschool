@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\DQL;
 
+use Exception;
 use App\DQL\IfFunction;
 use App\DQL\ReplaceFunction;
 use App\Tests\DatabaseTestCase;
@@ -63,7 +64,7 @@ class IfFunctionTest extends DatabaseTestCase {
     try {
       $exception = null;
       $ext->parse($parser);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame(null, $exception);

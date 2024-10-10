@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\CambioClasse;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class CambioClasseTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\CambioClasse::class;
+    $this->entity = CambioClasse::class;
     // campi da testare
     $this->fields = ['alunno', 'inizio', 'fine', 'classe', 'note'];
     $this->noStoredFields = [];
@@ -103,7 +106,7 @@ class CambioClasseTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -127,29 +130,29 @@ class CambioClasseTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
-    $property = $this->getPrivateProperty(\App\Entity\CambioClasse::class, 'alunno');
+    $property = $this->getPrivateProperty(CambioClasse::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // inizio
-    $property = $this->getPrivateProperty(\App\Entity\CambioClasse::class, 'inizio');
+    $property = $this->getPrivateProperty(CambioClasse::class, 'inizio');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
-    $existent->setInizio(new \DateTime());
+    $existent->setInizio(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
     // fine
-    $property = $this->getPrivateProperty(\App\Entity\CambioClasse::class, 'fine');
+    $property = $this->getPrivateProperty(CambioClasse::class, 'fine');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
-    $existent->setFine(new \DateTime());
+    $existent->setFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
     // classe
     $existent->setClasse(null);

@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Spid;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class SpidTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Spid::class;
+    $this->entity = Spid::class;
     // campi da testare
     $this->fields = ['idp', 'responseId', 'attrName', 'attrFamilyName', 'attrFiscalNumber', 'logoutUrl', 'state'];
     $this->noStoredFields = [];
@@ -103,7 +105,7 @@ class SpidTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -127,7 +129,7 @@ class SpidTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // idp
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'idp');
+    $property = $this->getPrivateProperty(Spid::class, 'idp');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Idp - NOT BLANK');
@@ -139,7 +141,7 @@ class SpidTest extends EntityTestCase {
     $existent->setIdp(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Idp - VALID MAX LENGTH');
     // responseId
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'responseId');
+    $property = $this->getPrivateProperty(Spid::class, 'responseId');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ResponseId - NOT BLANK');
@@ -151,7 +153,7 @@ class SpidTest extends EntityTestCase {
     $existent->setResponseId(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ResponseId - VALID MAX LENGTH');
     // attrName
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'attrName');
+    $property = $this->getPrivateProperty(Spid::class, 'attrName');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::AttrName - NOT BLANK');
@@ -163,7 +165,7 @@ class SpidTest extends EntityTestCase {
     $existent->setAttrName(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AttrName - VALID MAX LENGTH');
     // attrFamilyName
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'attrFamilyName');
+    $property = $this->getPrivateProperty(Spid::class, 'attrFamilyName');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::AttrFamilyName - NOT BLANK');
@@ -175,7 +177,7 @@ class SpidTest extends EntityTestCase {
     $existent->setAttrFamilyName(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AttrFamilyName - VALID MAX LENGTH');
     // attrFiscalNumber
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'attrFiscalNumber');
+    $property = $this->getPrivateProperty(Spid::class, 'attrFiscalNumber');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::AttrFiscalNumber - NOT BLANK');
@@ -187,7 +189,7 @@ class SpidTest extends EntityTestCase {
     $existent->setAttrFiscalNumber(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AttrFiscalNumber - VALID MAX LENGTH');
     // logoutUrl
-    $property = $this->getPrivateProperty(\App\Entity\Spid::class, 'logoutUrl');
+    $property = $this->getPrivateProperty(Spid::class, 'logoutUrl');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::LogoutUrl - NOT BLANK');
@@ -214,7 +216,7 @@ class SpidTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::responseId - UNIQUE');
     $objects[1]->setResponseId($responseIdSaved);
     // unique
-    $newObject = new \App\Entity\Spid();
+    $newObject = new Spid();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Uscita;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class UscitaTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Uscita::class;
+    $this->entity = Uscita::class;
     // campi da testare
     $this->fields = ['data', 'ora', 'note', 'valido', 'motivazione', 'giustificato', 'alunno', 'docente', 'docenteGiustifica', 'utenteGiustifica'];
     $this->noStoredFields = [];
@@ -107,7 +110,7 @@ class UscitaTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -131,22 +134,22 @@ class UscitaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
-    $property = $this->getPrivateProperty(\App\Entity\Uscita::class, 'data');
+    $property = $this->getPrivateProperty(Uscita::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // ora
-    $property = $this->getPrivateProperty(\App\Entity\Uscita::class, 'ora');
+    $property = $this->getPrivateProperty(Uscita::class, 'ora');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ora - NOT BLANK');
-    $existent->setOra(new \DateTime());
+    $existent->setOra(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID NOT BLANK');
-    $existent->setOra(new \DateTime());
+    $existent->setOra(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID TYPE');
     // motivazione
     $existent->setMotivazione(str_repeat('*', 1025));
@@ -155,19 +158,19 @@ class UscitaTest extends EntityTestCase {
     $existent->setMotivazione(str_repeat('*', 1024));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Motivazione - VALID MAX LENGTH');
     // giustificato
-    $existent->setGiustificato(new \DateTime());
+    $existent->setGiustificato(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giustificato - VALID TYPE');
     $existent->setGiustificato(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giustificato - VALID NULL');
     // alunno
-    $property = $this->getPrivateProperty(\App\Entity\Uscita::class, 'alunno');
+    $property = $this->getPrivateProperty(Uscita::class, 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1A_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // docente
-    $property = $this->getPrivateProperty(\App\Entity\Uscita::class, 'docente');
+    $property = $this->getPrivateProperty(Uscita::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
@@ -192,7 +195,7 @@ class UscitaTest extends EntityTestCase {
     $objects[1]->setData($dataSaved);
     $objects[1]->setAlunno($alunnoSaved);
     // unique
-    $newObject = new \App\Entity\Uscita();
+    $newObject = new Uscita();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

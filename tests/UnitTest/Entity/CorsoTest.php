@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Corso;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +28,7 @@ class CorsoTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\Corso::class;
+    $this->entity = Corso::class;
     // campi da testare
     $this->fields = ['nome', 'nomeBreve'];
     $this->noStoredFields = [];
@@ -98,7 +100,7 @@ class CorsoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -122,7 +124,7 @@ class CorsoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $property = $this->getPrivateProperty(\App\Entity\Corso::class, 'nome');
+    $property = $this->getPrivateProperty(Corso::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -134,7 +136,7 @@ class CorsoTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // nomeBreve
-    $property = $this->getPrivateProperty(\App\Entity\Corso::class, 'nomeBreve');
+    $property = $this->getPrivateProperty(Corso::class, 'nomeBreve');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
@@ -161,7 +163,7 @@ class CorsoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::nomeBreve - UNIQUE');
     $objects[1]->setNomeBreve($nomeBreveSaved);
     // unique
-    $newObject = new \App\Entity\Corso();
+    $newObject = new Corso();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

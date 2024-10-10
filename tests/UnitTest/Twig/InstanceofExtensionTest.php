@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Twig;
 
+use DateTime;
 use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Utente;
@@ -66,7 +67,7 @@ class InstanceofExtensionTest extends KernelTestCase {
     // init
     $ext = new InstanceofExtension();
     // classe diversa
-    $res = $ext->isInstanceOf(new Docente(), \DateTime::class);
+    $res = $ext->isInstanceOf(new Docente(), DateTime::class);
     $this->assertFalse($res);
     // stessa classe
     $res = $ext->isInstanceOf(new Docente(), Docente::class);

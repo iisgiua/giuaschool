@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\DefinizioneScrutinio;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -26,7 +29,7 @@ class DefinizioneScrutinioTest extends EntityTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = \App\Entity\DefinizioneScrutinio::class;
+    $this->entity = DefinizioneScrutinio::class;
     // campi da testare
     $this->fields = ['periodo', 'dataProposte', 'struttura', 'classiVisibili', 'data', 'argomenti', 'dati'];
     $this->noStoredFields = [];
@@ -103,7 +106,7 @@ class DefinizioneScrutinioTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
@@ -133,13 +136,13 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     $existent->setPeriodo('P');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // dataProposte
-    $existent->setDataProposte(new \DateTime());
+    $existent->setDataProposte(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataProposte - VALID TYPE');
-    $property = $this->getPrivateProperty(\App\Entity\DefinizioneScrutinio::class, 'dataProposte');
+    $property = $this->getPrivateProperty(DefinizioneScrutinio::class, 'dataProposte');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::DataProposte - NOT BLANK');
-    $existent->setDataProposte(new \DateTime());
+    $existent->setDataProposte(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataProposte - VALID NOT BLANK');
   }
 
