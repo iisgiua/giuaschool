@@ -10,7 +10,6 @@ namespace App\Tests\Behat;
 
 use DateTime;
 use Faker\Generator;
-use Datetime;
 use stdClass;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
