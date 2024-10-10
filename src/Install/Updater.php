@@ -41,13 +41,6 @@ class Updater {
   private ?\PDO $pdo = null;
 
   /**
-   * Conserva il percorso della directory pubblica (accessibile dal web)
-   *
-   * @var string $publicPath Percorso della directory pubblica (accessibile dal web)
-   */
-  private string $publicPath;
-
-  /**
    * Conserva il percorso della directory principale dell'applicazione
    *
    * @var string $projectPath Percorso della directory principale dell'applicazione
@@ -88,18 +81,17 @@ class Updater {
 
 
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
-   * @param string $path Percorso della directory pubblica (accessibile dal web)
+   * @param string $publicPath Percorso della directory pubblica (accessibile dal web)
    */
-  public function __construct(string $path) {
+  public function __construct(
+      private string $publicPath) {
     $this->env = [];
     $this->sys = [];
     $this->pdo = null;
-    $this->publicPath = $path;
-    $this->projectPath = dirname($path);
+    $this->projectPath = dirname($this->publicPath);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
     if (str_contains((string) $_SERVER['REQUEST_URI'], '/install/update.php')) {
