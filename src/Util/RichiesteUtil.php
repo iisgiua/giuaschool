@@ -9,11 +9,9 @@
 namespace App\Util;
 
 use DateTime;
-use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\Utente;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 

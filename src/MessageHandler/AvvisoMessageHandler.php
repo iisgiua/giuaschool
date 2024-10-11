@@ -15,7 +15,6 @@ use App\Message\AvvisoMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 

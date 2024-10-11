@@ -11,10 +11,8 @@ namespace App\Repository;
 use DateTime;
 use App\Entity\Configurazione;
 use App\Entity\RichiestaColloquio;
-use Doctrine\ORM\EntityRepository;
 use App\Entity\Colloquio;
 use App\Entity\Docente;
-use App\Entity\Orario;
 
 
 /**

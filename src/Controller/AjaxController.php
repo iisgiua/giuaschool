@@ -14,7 +14,7 @@ use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Staff;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 

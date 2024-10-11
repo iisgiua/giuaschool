@@ -10,7 +10,6 @@ namespace App\Tests;
 
 use DateTime;
 use Doctrine\DBAL\Logging\DebugStack;
-use function Symfony\Component\String\u;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
 use PhpMyAdmin\SqlParser\Statements\InsertStatement;

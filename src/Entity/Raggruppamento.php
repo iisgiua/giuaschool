@@ -12,7 +12,6 @@ use App\Repository\RaggruppamentoRepository;
 use Stringable;
 use DateTime;
 use App\Entity\Alunno;
-use App\Entity\Classe;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

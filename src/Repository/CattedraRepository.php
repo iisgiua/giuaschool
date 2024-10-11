@@ -12,7 +12,6 @@ use App\Entity\ScansioneOraria;
 use DateTime;
 use App\Entity\Docente;
 use App\Entity\Classe;
-use App\Entity\Cattedra;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
 use Doctrine\ORM\Tools\Pagination\Paginator;

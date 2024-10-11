@@ -10,7 +10,6 @@ namespace App\Tests\UnitTest\DQL;
 
 use Exception;
 use App\DQL\IfFunction;
-use App\DQL\ReplaceFunction;
 use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Lexer;

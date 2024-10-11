@@ -19,7 +19,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Utente;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
-use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Ata;

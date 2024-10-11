@@ -19,8 +19,6 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Annotazione;
-use App\Entity\AvvisoIndividuale;
-use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\Festivita;

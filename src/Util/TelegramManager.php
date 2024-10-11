@@ -10,7 +10,6 @@ namespace App\Util;
 
 use App\Entity\Configurazione;
 use Exception;
-use App\Entity\Utente;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

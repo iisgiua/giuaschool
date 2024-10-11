@@ -19,9 +19,8 @@ use App\Entity\Genitore;
 use App\Entity\Staff;
 use App\Util\GenitoriUtil;
 use App\Util\PagelleUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**

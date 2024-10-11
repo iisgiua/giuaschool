@@ -13,14 +13,11 @@ use Throwable;
 use App\Entity\Configurazione;
 use App\Entity\Sede;
 use App\Entity\Circolare;
-use App\Entity\Alunno;
-use App\Entity\Ata;
 use App\Entity\CircolareUtente;
 use App\Entity\Docente;
 use App\Message\UtenteActionMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 
 /**

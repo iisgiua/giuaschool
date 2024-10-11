@@ -15,7 +15,6 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\QueryException;
-use Doctrine\ORM\EntityManager;
 
 
 /**
