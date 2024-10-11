@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Classe;
 use DateTime;
 use App\Entity\Alunno;
@@ -32,7 +33,6 @@ use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use Doctrine\Common\Collections\ArrayCollection;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -733,7 +733,7 @@ class CoordinatoreController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('coordinatore/avviso_edit.html.twig', [
       'pagina_titolo' => 'page.coordinatore_avvisi',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_avviso_coordinatore' : 'title.nuovo_avviso_coordinatore'),
       'dati' => $dati]);
   }

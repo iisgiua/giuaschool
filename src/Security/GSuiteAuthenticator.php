@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Entity\Utente;
 use App\Entity\Configurazione;
 use DateTime;
@@ -180,7 +181,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
    */
    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }
@@ -198,7 +199,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationE
   public function start(Request $request, AuthenticationException $authException = null): Response {
     // eccezione che ha richiesto l'autenticazione
     $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }

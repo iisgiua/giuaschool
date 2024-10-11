@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use App\Entity\DefinizioneRichiesta;
 use DateTime;
 use App\Entity\Alunno;
@@ -25,7 +27,6 @@ use App\Form\UscitaType;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\RichiesteUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -50,7 +51,7 @@ class RichiesteController extends BaseController {
    *
    */
   #[Route(path: '/richieste/lista', name: 'richieste_lista', methods: ['GET'])]
-  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function lista(): Response {
     // inizializza
     $info = [];
@@ -73,7 +74,7 @@ class RichiesteController extends BaseController {
    *
    */
   #[Route(path: '/richieste/add/{modulo}', name: 'richieste_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
-  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function add(Request $request, TranslatorInterface $trans,
                       RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
     // inizializza
@@ -213,7 +214,7 @@ class RichiesteController extends BaseController {
    *
    */
   #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
-  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function delete(LogHandler $dblogger, int $id): Response {
     // inizializza
     $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();

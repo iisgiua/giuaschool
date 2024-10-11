@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Configurazione;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
@@ -26,7 +27,6 @@ use App\Form\PropostaVotoType;
 use App\Form\VotoScrutinioType;
 use App\Util\LogHandler;
 use App\Util\ScrutinioUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;

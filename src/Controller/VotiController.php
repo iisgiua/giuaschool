@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Materia;
@@ -22,7 +23,6 @@ use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;

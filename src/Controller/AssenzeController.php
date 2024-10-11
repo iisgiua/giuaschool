@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use IntlDateFormatter;
 use App\Entity\Cattedra;
@@ -26,7 +27,6 @@ use App\Form\UscitaType;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -532,7 +532,7 @@ class AssenzeController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('lezioni/entrata_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_assenze',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
       'btn_delete' => isset($entrata_old),
@@ -721,7 +721,7 @@ class AssenzeController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('lezioni/uscita_edit.html.twig', [
       'pagina_titolo' => 'page.lezioni_assenze',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
       'btn_delete' => isset($uscita_old),

@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Cattedra;
 use App\Entity\Configurazione;
 use App\Entity\Alunno;
@@ -16,7 +17,6 @@ use App\Entity\Classe;
 use DateTime;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;

@@ -8,6 +8,7 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
 use App\Entity\Circolare;
 use App\Message\CircolareMessage;
@@ -25,6 +26,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
  *
  * @author Antonello Dessì
  */
+#[AsMessageHandler]
 class CircolareMessageHandler implements BatchHandlerInterface {
 
   use BatchHandlerTrait;

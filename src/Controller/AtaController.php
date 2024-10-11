@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Sede;
 use Exception;
 use App\Entity\Ata;
@@ -20,7 +21,6 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;

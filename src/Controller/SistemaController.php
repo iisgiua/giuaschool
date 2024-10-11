@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Configurazione;
 use DateTime;
 use App\Entity\Utente;
@@ -36,7 +37,6 @@ use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
 use App\Util\LogHandler;
 use App\Util\TelegramManager;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;

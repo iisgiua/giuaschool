@@ -8,6 +8,7 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Entity\Avviso;
 use App\Entity\Classe;
 use App\Message\AvvisoMessage;
@@ -23,7 +24,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
  *
  * @author Antonello Dessì
  */
-class AvvisoMessageHandler implements MessageHandlerInterface {
+#[AsMessageHandler]
+class AvvisoMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
   /**

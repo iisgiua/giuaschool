@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Entity\Utente;
 use App\Entity\Configurazione;
 use DateTime;
@@ -105,7 +106,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
       'otp' => $request->request->get('_otp'),
       'ip' => $request->getClientIp()];
     // salva la username usata
-    $request->getSession()->set(Security::LAST_USERNAME, $username);
+    $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
     // crea e restituisce il passaporto
     return new Passport(
       new UserBadge($username, $this->getUser(...)),
@@ -259,7 +260,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    */
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }
@@ -277,7 +278,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function start(Request $request, AuthenticationException $authException = null): Response {
     // eccezione che ha richiesto l'autenticazione
     $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }

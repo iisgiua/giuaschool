@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Festivita;
 use App\Entity\Docente;
@@ -21,7 +22,6 @@ use App\Form\PrenotazioneType;
 use App\Form\RichiestaColloquioType;
 use App\Util\ColloquiUtil;
 use App\Util\LogHandler;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

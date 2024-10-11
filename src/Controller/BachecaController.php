@@ -9,10 +9,11 @@
 namespace App\Controller;
 
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use App\Entity\Avviso;
 use App\Entity\Classe;
 use App\Util\BachecaUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -107,7 +108,7 @@ class BachecaController extends BaseController {
    *
    */
   #[Route(path: '/bacheca/avvisi/dettagli/{id}', name: 'bacheca_avvisi_dettagli', requirements: ['id' => '\d+'], methods: ['GET'])]
-  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')"))]
   public function avvisiDettagli(BachecaUtil $bac, int $id): Response {
     // inizializza
     $dati = null;

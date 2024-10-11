@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Utente;
 use App\Entity\App;
@@ -20,7 +21,6 @@ use App\Entity\Log;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;

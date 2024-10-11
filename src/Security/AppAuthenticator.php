@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Entity\Utente;
 use App\Entity\App;
 use DateTime;
@@ -255,7 +256,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
    * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }
@@ -273,7 +274,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
   public function start(Request $request, AuthenticationException $authException = null): Response {
     // eccezione che ha richiesto l'autenticazione
     $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }

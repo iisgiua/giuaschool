@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use IntlDateFormatter;
 use App\Entity\Festivita;
@@ -25,7 +26,6 @@ use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Doctrine\Common\Collections\ArrayCollection;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -361,7 +361,7 @@ class AgendaController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('agenda/verifica_edit.html.twig', [
       'pagina_titolo' => 'page.agenda_verifica',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_verifica' : 'title.nuova_verifica'),
       'verifiche' => $verifiche,
       'lista_festivi' => $lista_festivi,
@@ -690,7 +690,7 @@ class AgendaController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('agenda/compito_edit.html.twig', [
       'pagina_titolo' => 'page.agenda_compito',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_compito' : 'title.nuovo_compito'),
       'compiti' => $compiti,
       'lista_festivi' => $lista_festivi,

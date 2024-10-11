@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use DateTime;
 use App\Security\SpidAuthenticator;
 use App\Tests\DatabaseTestCase;
@@ -429,7 +430,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame($exc, $this->session[Security::AUTHENTICATION_ERROR]);
+    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
@@ -452,7 +453,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[Security::AUTHENTICATION_ERROR]->getMessage());
+    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 

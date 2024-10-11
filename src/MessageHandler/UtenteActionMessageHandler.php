@@ -8,6 +8,7 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
 use App\Entity\Configurazione;
 use App\Entity\Sede;
@@ -27,7 +28,8 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  *
  * @author Antonello Dessì
  */
-class UtenteActionMessageHandler implements MessageHandlerInterface {
+#[AsMessageHandler]
+class UtenteActionMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -161,6 +163,5 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
 
 
   }
-
 
 }

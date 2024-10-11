@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
@@ -19,7 +20,6 @@ use App\Entity\Materia;
 use App\Form\DocumentoType;
 use App\Util\DocumentiUtil;
 use App\Util\LogHandler;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -130,7 +130,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/programmi_add.html.twig', [
       'pagina_titolo' => 'page.documenti_programmi',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_programma',
       'info' => $info]);
   }
@@ -278,7 +278,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/relazioni_add.html.twig', [
       'pagina_titolo' => 'page.documenti_relazioni',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuova_relazione',
       'info' => $info]);
   }
@@ -376,7 +376,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/piani_add.html.twig', [
       'pagina_titolo' => 'page.documenti_piani',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_piano',
       'info' => $info]);
   }
@@ -471,7 +471,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/maggio_add.html.twig', [
       'pagina_titolo' => 'page.documenti_maggio',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_maggio',
       'info' => $info]);
   }
@@ -565,7 +565,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/docenti.html.twig', [
       'pagina_titolo' => 'page.documenti_docenti',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
@@ -633,7 +633,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/bes.html.twig', [
       'pagina_titolo' => 'page.documenti_bes',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
@@ -790,7 +790,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/bes_add.html.twig', [
       'pagina_titolo' => 'page.documenti_bes',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_documento_bes',
       'info' => $info]);
   }
@@ -844,7 +844,7 @@ class DocumentiController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('documenti/alunni.html.twig', [
       'pagina_titolo' => 'page.documenti_alunni',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
@@ -907,7 +907,7 @@ class DocumentiController extends BaseController {
      // mostra la pagina di risposta
      return $this->render('documenti/bacheca.html.twig', [
       'pagina_titolo' => 'page.documenti_bacheca',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,

@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use App\Entity\Classe;
 use App\Entity\Scrutinio;
 use App\Entity\Alunno;
@@ -41,7 +43,7 @@ class PagelleController extends BaseController {
    *
    */
   #[Route(path: '/pagelle/classe/{classe}/{tipo}/{periodo}', name: 'pagelle_classe', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
-  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')"))]
   public function documentoClasse(PagelleUtil $pag, int $classe, string $tipo,
                                   string $periodo): Response {
     // inizializza
@@ -160,7 +162,7 @@ class PagelleController extends BaseController {
    *
    */
   #[Route(path: '/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}', name: 'pagelle_alunno', requirements: ['classe' => '\d+', 'alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
-  #[Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')"))]
   public function documentoAlunno(PagelleUtil $pag, GenitoriUtil $gen,
                                   int $classe, int $alunno, string $tipo, string $periodo): Response {
     // inizializza

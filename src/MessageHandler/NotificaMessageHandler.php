@@ -8,6 +8,7 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
 use DateTime;
 use App\Entity\Istituto;
@@ -30,9 +31,11 @@ use Twig\Environment;
  *
  * @author Antonello Dessì
  */
-class NotificaMessageHandler implements MessageHandlerInterface {
+#[AsMessageHandler]
+class NotificaMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
+
   /**
    * Costruttore
    *

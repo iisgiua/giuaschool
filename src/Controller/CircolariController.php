@@ -8,6 +8,8 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use DateTime;
 use App\Entity\Sede;
 use App\Entity\Classe;
@@ -28,7 +30,6 @@ use App\MessageHandler\NotificaMessageHandler;
 use App\Util\CircolariUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -389,7 +390,7 @@ class CircolariController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('circolari/edit.html.twig', [
       'pagina_titolo' => 'page.staff_circolari',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_circolare' : 'title.nuova_circolare'),
       'documento' => $documento,
       'allegati' => $allegati,
@@ -737,7 +738,7 @@ class CircolariController extends BaseController {
    *
    */
   #[Route(path: '/circolari/genitori/{pagina}', name: 'circolari_genitori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
-  #[Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function genitori(Request $request, int $pagina): Response {
     // inizializza
     $limite = 20;

@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Materia;
@@ -22,7 +23,6 @@ use PhpOffice\PhpWord\Style\Image;
 use PhpOffice\PhpWord\IOFactory;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

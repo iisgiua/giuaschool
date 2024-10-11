@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Staff;
@@ -47,7 +48,6 @@ use App\Util\StaffUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -444,7 +444,7 @@ class StaffController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/avvisi_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_avviso' : 'title.nuovo_avviso'),
       'allegati' => $allegati,
       'dati' => $dati]);
@@ -897,7 +897,7 @@ class StaffController extends BaseController {
     }
     return $this->render('ruolo_staff/avvisi_orario_edit.html.twig', [
       'pagina_titolo' => ($tipo == 'E' ? 'page.staff_avvisi_entrate' : 'page.staff_avvisi_uscite'),
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => $title]);
   }
 
@@ -1186,7 +1186,7 @@ class StaffController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/avvisi_attivita_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_attivita',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_avviso_attivita' : 'title.nuovo_avviso_attivita')]);
   }
 
@@ -1395,7 +1395,7 @@ class StaffController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/avvisi_individuali_edit.html.twig', [
       'pagina_titolo' => 'page.staff_avvisi_individuali',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_avviso_individuale' : 'title.nuovo_avviso_individuale'),
       'dati' => $dati]);
   }
@@ -1845,7 +1845,7 @@ class StaffController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_autorizza_entrata.html.twig', [
       'pagina_titolo' => 'page.staff_autorizza',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
       'btn_delete' => isset($entrata_old)]);
@@ -2039,7 +2039,7 @@ class StaffController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_autorizza_uscita.html.twig', [
       'pagina_titolo' => 'page.staff_autorizza',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
       'btn_delete' => isset($uscita_old)]);

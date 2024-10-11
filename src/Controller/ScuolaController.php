@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Configurazione;
 use DateTime;
 use App\Entity\Scrutinio;
@@ -37,7 +38,6 @@ use App\Form\OrarioType;
 use App\Form\PresideType;
 use App\Form\ScansioneOrariaSettimanaleType;
 use App\Form\SedeType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;

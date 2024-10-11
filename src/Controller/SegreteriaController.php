@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Classe;
 use App\Entity\Alunno;
 use App\Entity\StoricoEsito;
@@ -16,7 +17,6 @@ use App\Entity\Genitore;
 use App\Form\AlunnoGenitoreType;
 use App\Util\PdfManager;
 use App\Util\SegreteriaUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -450,7 +450,7 @@ class SegreteriaController extends BaseController {
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/genitori_edit.html.twig', [
       'pagina_titolo' => 'page.segreteria_genitori',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.segreteria_genitori',
       'alunno' => $alunno]);
   }
