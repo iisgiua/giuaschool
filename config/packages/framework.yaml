@@ -11,7 +11,7 @@ framework:
     enabled: true
   session:
     enabled: true
-    handler_id: null
+    handler_id: 'session.handler.native_file'
     storage_factory_id: 'session.storage.factory.native'
     cookie_samesite: 'lax'
     cookie_secure: 'auto'
@@ -28,7 +28,7 @@ framework:
   annotations: false
   serializer:
     enabled: true
-    enable_annotations: true
+    enable_attributes: true
   php_errors:
     log: true
   web_link:
@@ -46,7 +46,7 @@ when@prod:
 
 
 when@test:
-    framework:
-        test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
+  framework:
+    test: true
+    session:
+      storage_factory_id: session.storage.factory.mock_file

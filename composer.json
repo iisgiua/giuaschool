@@ -17,7 +17,6 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-xml": "*",
-        "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "google/apiclient": "^2.10",
