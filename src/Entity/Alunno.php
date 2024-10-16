@@ -136,7 +136,7 @@ class Alunno extends Utente {
    * @var Collection|null $genitori Genitori dell'alunno
    */
   #[ORM\OneToMany(targetEntity: \Genitore::class, mappedBy: 'alunno')]
-  private ?Collection $genitori = null;
+  private ?Collection $genitori;
 
 
   //==================== METODI SETTER/GETTER ====================

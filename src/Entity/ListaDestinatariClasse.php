@@ -11,7 +11,7 @@ namespace App\Entity;
 use App\Repository\ListaDestinatariClasseRepository;
 use Stringable;
 use DateTime;
-use listaDestinatari;
+use App\Entity\ListaDestinatari;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -59,7 +59,7 @@ class ListaDestinatariClasse implements Stringable {
    *
    */
   #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: listaDestinatari::class)]
+  #[ORM\ManyToOne(targetEntity: ListaDestinatari::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?ListaDestinatari $listaDestinatari = null;
 

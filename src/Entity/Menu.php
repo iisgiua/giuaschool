@@ -92,7 +92,7 @@ class Menu implements Stringable {
     * @var Collection|null $opzioni Lista delle opzioni del menu
     */
    #[ORM\OneToMany(targetEntity: \MenuOpzione::class, mappedBy: 'menu')]
-   private ?Collection $opzioni = null;
+   private ?Collection $opzioni;
 
 
   //==================== EVENTI ORM ====================

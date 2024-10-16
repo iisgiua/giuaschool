@@ -58,7 +58,7 @@ class InstrFunction extends FunctionNode {
    *
    * @return string Stringa con la funzione SQL
    */
-  public function getSql(SqlWalker $sqlWalker) {
+  public function getSql(SqlWalker $sqlWalker): string {
     return 'INSTR('.
       $this->str->dispatch($sqlWalker).', '.
       $this->search->dispatch($sqlWalker).')';

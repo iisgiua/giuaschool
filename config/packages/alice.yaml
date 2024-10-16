@@ -1,0 +1,38 @@
+# config/packages/alice.yaml
+
+when@test:
+  nelmio_alice:
+    locale: 'it_IT'
+    seed: 9999
+    functions_blacklist:
+      - 'current'
+      - 'md5'
+      - 'date'
+    loading_limit: 5
+    max_unique_values_retry: 200
+  fidry_alice_data_fixtures:
+    default_purge_mode: truncate
+    db_drivers:
+      doctrine_orm: true
+      doctrine_mongodb_odm: false
+      doctrine_phpcr_odm: false
+      eloquent_orm: false
+
+
+when@dev:
+  nelmio_alice:
+    locale: 'it_IT'
+    seed: 9999
+    functions_blacklist:
+      - 'current'
+      - 'md5'
+      - 'date'
+    loading_limit: 5
+    max_unique_values_retry: 200
+  fidry_alice_data_fixtures:
+    default_purge_mode: truncate
+    db_drivers:
+      doctrine_orm: true
+      doctrine_mongodb_odm: false
+      doctrine_phpcr_odm: false
+      eloquent_orm: false

@@ -9,7 +9,6 @@
 namespace App\Entity;
 
 use App\Repository\UtenteRepository;
-use Serializable;
 use Stringable;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
@@ -34,7 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\DiscriminatorMap(['UTE' => 'Utente', 'AMM' => 'Amministratore', 'ATA' => 'Ata', 'DOC' => 'Docente', 'STA' => 'Staff', 'PRE' => 'Preside', 'ALU' => 'Alunno', 'GEN' => 'Genitore'])]
 #[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 #[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
-class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Serializable, Stringable {
+class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -343,19 +342,24 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Seria
   /**
    * Serializza l'oggetto Utente
    *
-   * @return string Oggetto Utente serializzato
+   * @return array Lista dati utente da serializzare
    */
-  public function serialize(): string {
-    return serialize([$this->id, $this->username, $this->password, $this->email, $this->abilitato]);
+  public function __serialize(): array {
+    return ['id' => $this->id, 'username' => $this->username, 'password' => $this->password,
+      'email' => $this->email, 'abilitato' => $this->abilitato];
   }
 
   /**
    * Deserializza l'oggetto Utente
    *
-   * @param mixed $oggetto Oggetto Utente serializzato
+   * @param array $oggetto Oggetto Utente serializzato
    */
-  public function unserialize(mixed $oggetto): void {
-    [$this->id, $this->username, $this->password, $this->email, $this->abilitato] = unserialize($oggetto);
+  public function __unserialize(array $oggetto): void {
+    $this->id = $oggetto['id'];
+    $this->username = $oggetto['username'];
+    $this->password = $oggetto['password'];
+    $this->email = $oggetto['email'];
+    $this->abilitato = $oggetto['abilitato'];
   }
 
 

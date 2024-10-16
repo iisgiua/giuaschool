@@ -1,0 +1,95 @@
+# config/packages/monolog.yaml
+
+when@prod:
+  monolog:
+    use_microseconds: false
+    channels:
+      - command
+      - messenger_logger
+    handlers:
+      main:
+        type: rotating_file
+        max_files: 30
+        path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+        level: '%env(LOG_LEVEL)%'
+        channels: ['!command', '!console', '!messenger_logger']
+      command:
+        type: rotating_file
+        max_files: 30
+        path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+        level: '%env(LOG_LEVEL)%'
+        channels: ['command', 'console']
+      messenger:
+        type: rotating_file
+        max_files: 30
+        path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
+        level: '%env(LOG_LEVEL)%'
+        channels: ['messenger_logger']
+
+
+when@dev:
+  monolog:
+    use_microseconds: false
+    channels:
+      - command
+      - deprecation
+      - messenger_logger
+    handlers:
+      main:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+        level: '%env(LOG_LEVEL)%'
+        channels: ['!command', '!deprecation', '!console', '!event', '!messenger_logger']
+      command:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+        level: debug
+        channels: ['command', 'console']
+      deprecation:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
+        level: debug
+        channels: ['deprecation']
+      messenger:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
+        level: debug
+        channels: ['messenger_logger']
+
+
+when@test:
+  monolog:
+    use_microseconds: false
+    channels:
+      - command
+      - deprecation
+      - messenger_logger
+    handlers:
+      main:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+        level: error
+        channels: ['!command', '!deprecation', '!console', '!messenger_logger']
+      command:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+        level: error
+        channels: ['command', 'console']
+      deprecation:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
+        level: debug
+        channels: ['deprecation']
+      messenger:
+        type: rotating_file
+        max_files: 10
+        path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
+        level: debug
+        channels: ['messenger_logger']

@@ -75,7 +75,7 @@ class Raggruppamento implements Stringable {
   #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
   #[ORM\ManyToMany(targetEntity: \Alunno::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Collection $alunni = null;
+  private ?Collection $alunni;
 
 
   //==================== EVENTI ORM ====================

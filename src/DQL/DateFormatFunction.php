@@ -58,7 +58,7 @@ class DateFormatFunction extends FunctionNode {
    *
    * @return string Stringa con la funzione SQL
    */
-  public function getSql(SqlWalker $sqlWalker) {
+  public function getSql(SqlWalker $sqlWalker): string {
     return 'DATE_FORMAT('.
       $this->date->dispatch($sqlWalker).', '.
       $this->format->dispatch($sqlWalker).')';

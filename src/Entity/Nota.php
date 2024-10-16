@@ -123,7 +123,7 @@ class Nota implements Stringable {
   #[ORM\JoinColumn(name: 'nota_id', nullable: false)]
   #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
   #[ORM\ManyToMany(targetEntity: \Alunno::class)]
-  private ?Collection $alunni = null;
+  private ?Collection $alunni;
 
 
   //==================== EVENTI ORM ====================

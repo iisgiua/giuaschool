@@ -89,7 +89,7 @@ class Documento implements Stringable {
   #[ORM\InverseJoinColumn(name: 'file_id', nullable: false, unique: true)]
   #[ORM\ManyToMany(targetEntity: \File::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Collection $allegati = null;
+  private ?Collection $allegati;
 
   /**
    * @var Materia|null $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)

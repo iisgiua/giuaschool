@@ -60,7 +60,7 @@ class ListaDestinatari implements Stringable {
   #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
   #[ORM\ManyToMany(targetEntity: \Sede::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Collection $sedi = null;
+  private ?Collection $sedi;
 
   /**
    * @var bool $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]

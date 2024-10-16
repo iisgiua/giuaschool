@@ -8,9 +8,6 @@
 
 namespace App\Tests;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
-use Symfony\Component\Validator\Validator\TraceableValidator;
 use ReflectionProperty;
 use ReflectionClass;
 use ReflectionMethod;
@@ -103,9 +100,9 @@ class DatabaseTestCase extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->em = $kernel->getContainer()->get(Registry::class)->getManager();
-    $this->hasher = $kernel->getContainer()->get(UserPasswordHasher::class);
-    $this->val = $kernel->getContainer()->get(TraceableValidator::class);
+    $this->em = $kernel->getContainer()->get('doctrine')->getManager();
+    $this->hasher = $kernel->getContainer()->get('security.user_password_hasher');
+    $this->val = $kernel->getContainer()->get('validator.traceable_validator');
     $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);

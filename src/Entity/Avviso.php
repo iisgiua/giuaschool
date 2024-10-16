@@ -70,7 +70,7 @@ class Avviso implements Stringable {
   #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
   #[ORM\ManyToMany(targetEntity: \Sede::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Collection $sedi = null;
+  private ?Collection $sedi;
 
   /**
    * @var int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
@@ -185,7 +185,7 @@ class Avviso implements Stringable {
    * @var Collection|null $annotazioni Annotazioni associate all'avviso
    */
   #[ORM\OneToMany(targetEntity: \Annotazione::class, mappedBy: 'avviso')]
-  private ?Collection $annotazioni = null;
+  private ?Collection $annotazioni;
 
 
   //==================== EVENTI ORM ====================
