@@ -20,18 +20,15 @@
       </div>
       <div class="row">
         <div class="col-sm-6">
-          {{ form_row(form[0].inizio) }}
-        </div>
-        <div class="col-sm-6">
-          {{ form_row(form[0].fine) }}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-6">
           {{ form_row(form[0].durata) }}
         </div>
         <div id="gs-sede" class="col-sm-6">
           {{ form_row(form[0].sede) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].ora) }}
         </div>
       </div>
       <div class="row">
@@ -63,11 +60,9 @@
 {{ parent() }}
 <script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
-<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
-<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
-<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+  var orario = new Array();
   $('.input-group.date').datepicker({
     format: "dd/mm/yyyy",
     weekStart: 1,
@@ -82,46 +77,48 @@ $(document).ready(function() {
     language: "it",
     zIndexOffset: 1200
   });
-  $('.input-group.time').datetimepicker({
-    format: "HH:mm",
-    enabledHours: [8, 9, 10, 11, 12 ,13, 14, 15, 16, 17, 18, 19, 20],
-    useCurrent: false,
-    tooltips: {
-      incrementHour: 'Incrementa l\'ora',
-      pickHour: 'Imposta l\'ora',
-      decrementHour:'Decrementa l\'ora',
-      incrementMinute: 'Incrementa i minuti',
-      pickMinute: 'Imposta i minuti',
-      decrementMinute:'Decrementa i minuti'
-      },
-    widgetPositioning: { horizontal: 'left' },
-    allowInputToggle: true
-  });
   $('#colloquio_tipo').change(function() {
     if ($(this).val() == 'P') {
-      $('#gs-sede').show();
       $('#gs-luogo').text('Luogo');
-      $('#colloquio_luogo').val('');
-      $('#colloquio_sede').change();
     } else {
-      $('#gs-sede').hide();
       $('#gs-luogo').text('Link');
       $('#colloquio_luogo').val('https://meet.google.com/');
     }
+    $('#colloquio_sede').change();
   });
   $('#colloquio_sede').change(function() {
-    var s = $('#colloquio_sede :selected').text();
-    if (s != '') {
-      $('#colloquio_luogo').val('Sede di '+s);
+    if ($('#colloquio_tipo').val() == 'P') {
+      $('#colloquio_luogo').val('Sede di '+$('#colloquio_sede :selected').text());
     }
+    $('#colloquio_data').change();
+  });
+  $('#colloquio_data').change(function() {
+    var s = $('#colloquio_sede').val();
+    var d = $(this).val();
+    var dg = d.substr(0, 2);
+    var dm = d.substr(3, 2);
+    var da = d.substr(-4);
+    var g = new Date();
+    g.setFullYear(da);
+    g.setMonth(dm - 1);
+    g.setDate(dg);
+    var w = g.getDay();
+    var html = '';
+    orario[s][w].forEach((o, i) => { html += '<option value="'+i+'">'+o+'</option>'; });
+    $('#colloquio_ora').html(html);
   });
   // init
-  if ($('#colloquio_tipo').val() == 'D') {
-    $('#gs-sede').hide();
-    $('#gs-luogo').text('Link');
-  } else if ($('#colloquio_luogo').val() == '') {
-    $('#colloquio_sede').change();
-  }
+  {% for s,or in info.orario %}
+  orario[{{ s }}] = new Array();
+    {% for g,gv in or %}
+  orario[{{ s }}][{{ g }}] = new Array();
+      {% for o,ov in gv %}
+  orario[{{ s }}][{{ g }}][{{ o }}] = '{{ o }}ª: {{ ov.inizio|date('G:i') }} - {{ ov.fine|date('G:i') }}';
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  $('#colloquio_tipo').change();
+  $('#colloquio_ora').val({{ info.ora }});
 });
 </script>
 {% endblock %}
