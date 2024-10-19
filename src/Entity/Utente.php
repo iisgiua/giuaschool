@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\UtenteRepository;
 use Stringable;
 use DateTime;
@@ -40,21 +42,21 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   /**
    * @var int|null $id Identificativo univoco per il generico utente
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -62,7 +64,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
   #[Assert\Length(min: 3, max: 128, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   #[Assert\Regex(pattern: '/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/', message: 'field.regex')]
   private ?string $username = '';
@@ -72,7 +74,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $password = '';
 
@@ -87,7 +89,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Email(message: 'field.email')]
@@ -96,55 +98,55 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   /**
    * @var string|null $token Token generato per la procedura di attivazione o di recupero password
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
   private ?string $token = '';
 
   /**
-   * @var DateTime|null $tokenCreato Data/ora di creazione del token
+   * @var DateTimeInterface|null $tokenCreato Data/ora di creazione del token
    */
-  #[ORM\Column(name: 'token_creato', type: 'datetime', nullable: true)]
+  #[ORM\Column(name: 'token_creato', type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $tokenCreato = null;
 
   /**
    * @var string|null $prelogin Codice di pre-login
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
   private ?string $prelogin = '';
 
   /**
-   * @var DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
+   * @var DateTimeInterface|null $preloginCreato Data/ora di creazione del codice di pre-login
    */
-  #[ORM\Column(name: 'prelogin_creato', type: 'datetime', nullable: true)]
+  #[ORM\Column(name: 'prelogin_creato', type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $preloginCreato = null;
 
   /**
    * @var bool $abilitato Indica se l'utente è abilitato al login o no
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $abilitato = false;
 
   /**
    * @var bool $spid Indica se l'utente è abilitato all'accesso SPID
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $spid = false;
 
   /**
-   * @var DateTime|null $ultimoAccesso Data/ora dell'ultimo accesso
+   * @var DateTimeInterface|null $ultimoAccesso Data/ora dell'ultimo accesso
    */
-  #[ORM\Column(name: 'ultimo_accesso', type: 'datetime', nullable: true)]
+  #[ORM\Column(name: 'ultimo_accesso', type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $ultimoAccesso = null;
 
   /**
    * @var string|null $otp Codice segreto per accesso con OTP (se vuoto non è attivato)
    */
-  #[ORM\Column(type: 'string', length: 128, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: true)]
   private ?string $otp = '';
 
   /**
    * @var string|null $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
    */
-  #[ORM\Column(name: 'ultimo_otp', type: 'string', length: 128, nullable: true)]
+  #[ORM\Column(name: 'ultimo_otp', type: Types::STRING, length: 128, nullable: true)]
   private ?string $ultimoOtp = '';
 
   /**
@@ -152,7 +154,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
@@ -162,7 +164,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $cognome = '';
@@ -172,15 +174,14 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['M', 'F'], strict: true, message: 'field.choice')]
   private ?string $sesso = 'M';
 
   /**
-   * @var DateTime|null $dataNascita Data di nascita dell'utente
-   *
+   * @var DateTimeInterface|null $dataNascita Data di nascita dell'utente
    */
-  #[ORM\Column(name: 'data_nascita', type: 'date', nullable: true)]
+  #[ORM\Column(name: 'data_nascita', type: Types::DATE_MUTABLE, nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $dataNascita = null;
 
@@ -189,7 +190,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(name: 'comune_nascita', type: 'string', length: 64, nullable: true)]
+  #[ORM\Column(name: 'comune_nascita', type: Types::STRING, length: 64, nullable: true)]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $comuneNascita = '';
 
@@ -198,7 +199,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(name: 'provincia_nascita', type: 'string', length: 2, nullable: true)]
+  #[ORM\Column(name: 'provincia_nascita', type: Types::STRING, length: 2, nullable: true)]
   #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
   private ?string $provinciaNascita = '';
 
@@ -207,7 +208,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(name: 'codice_fiscale', type: 'string', length: 16, nullable: true)]
+  #[ORM\Column(name: 'codice_fiscale', type: Types::STRING, length: 16, nullable: true)]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private ?string $codiceFiscale = '';
 
@@ -216,7 +217,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 32, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $citta = '';
 
@@ -225,7 +226,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 2, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 2, nullable: true)]
   #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
   private ?string $provincia = '';
 
@@ -234,26 +235,26 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $indirizzo = '';
 
   /**
    * @var array|null $numeriTelefono Lista di numeri di telefono dell'utente
    */
-  #[ORM\Column(name: 'numeri_telefono', type: 'array', nullable: true)]
+  #[ORM\Column(name: 'numeri_telefono', type: Types::ARRAY, nullable: true)]
   private ?array $numeriTelefono = [];
 
   /**
    * @var array|null $notifica Lista di parametri di notifica per i servizi esterni
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
 
   /**
    * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
    */
-  #[ORM\Column(type: 'simple_array', nullable: true)]
+  #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $rappresentante = [''];
 
   /**

@@ -8,11 +8,11 @@
 
 namespace App\Tests\UnitTest\DQL;
 
+use Doctrine\ORM\Query\TokenType;
 use Exception;
 use App\DQL\MonthFunction;
 use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\QueryException;
 
@@ -59,7 +59,7 @@ class MonthFunctionTest extends DatabaseTestCase {
     $query->setDQL("SELECT MONTH(c.creato) FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
@@ -71,7 +71,7 @@ class MonthFunctionTest extends DatabaseTestCase {
     $query->setDQL("SELECT MONTH() FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
@@ -83,7 +83,7 @@ class MonthFunctionTest extends DatabaseTestCase {
     $query->setDQL("SELECT MONTH(c.creato, 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);

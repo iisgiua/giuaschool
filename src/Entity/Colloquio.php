@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ColloquioRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class Colloquio implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per il colloquio
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -59,28 +61,25 @@ class Colloquio implements Stringable {
   private ?Docente $docente = null;
 
   /**
-   * @var DateTime|null $data Data del colloquio
-   *
+   * @var DateTimeInterface|null $data Data del colloquio
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
 
   /**
-   * @var DateTime|null $inizio Ora iniziale del colloquio
-   *
+   * @var DateTimeInterface|null $inizio Ora iniziale del colloquio
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $inizio = null;
 
   /**
-   * @var DateTime|null $fine Ora finale del colloquio
-   *
+   * @var DateTimeInterface|null $fine Ora finale del colloquio
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $fine = null;
@@ -90,7 +89,7 @@ class Colloquio implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['D', 'P'], strict: true, message: 'field.choice')]
   private string $tipo = 'P';
 
@@ -99,26 +98,26 @@ class Colloquio implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 2048, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 2048, nullable: true)]
   #[Assert\Length(max: 2048, maxMessage: 'field.maxlength')]
   private ?string $luogo = '';
 
   /**
    * @var int $durata Durata di ogni colloquio del ricevimento (in minuti)
    */
-  #[ORM\Column(type: 'integer', nullable: false)]
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $durata = 10;
 
   /**
    * @var int $numero Numero di colloqui per ricevimento
    */
-  #[ORM\Column(type: 'integer', nullable: false)]
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $numero = 6;
 
   /**
    * @var bool $abilitato Indica se il ricevimento è abilitato
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $abilitato = true;
 
 

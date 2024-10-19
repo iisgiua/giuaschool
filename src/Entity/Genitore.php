@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use App\Repository\GenitoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -26,7 +27,7 @@ class Genitore extends Utente {
   /**
    * @var bool $giustificaOnline Indica se il genitore può effettuare la giustificazione online oppure no
    */
-  #[ORM\Column(name: 'giustifica_online', type: 'boolean', nullable: false)]
+  #[ORM\Column(name: 'giustifica_online', type: Types::BOOLEAN, nullable: false)]
   private bool $giustificaOnline = true;
 
   /**

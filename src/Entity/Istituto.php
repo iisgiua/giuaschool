@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\IstitutoRepository;
 use Stringable;
 use DateTime;
@@ -32,21 +34,21 @@ class Istituto implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per l'istituto scolastico
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -54,7 +56,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $tipo = '';
@@ -64,7 +66,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'tipo_sigla', type: 'string', length: 16, nullable: false)]
+  #[ORM\Column(name: 'tipo_sigla', type: Types::STRING, length: 16, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private ?string $tipoSigla = '';
@@ -74,7 +76,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
@@ -84,7 +86,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'nome_breve', type: 'string', length: 32, nullable: false)]
+  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 32, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
@@ -94,7 +96,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Email(message: 'field.email')]
@@ -105,7 +107,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Email(message: 'field.email')]
@@ -116,7 +118,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'url_sito', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'url_sito', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Url(message: 'field.url')]
@@ -127,7 +129,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'url_registro', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'url_registro', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Url(message: 'field.url')]
@@ -138,7 +140,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'firma_preside', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'firma_preside', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $firmaPreside = '';
@@ -148,7 +150,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'email_amministratore', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'email_amministratore', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Email(message: 'field.email')]
@@ -159,7 +161,7 @@ class Istituto implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'email_notifiche', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'email_notifiche', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   #[Assert\Email(message: 'field.email')]

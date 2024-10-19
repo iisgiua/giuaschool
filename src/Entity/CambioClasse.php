@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\CambioClasseRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class CambioClasse implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per il cambio classe
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -59,19 +61,17 @@ class CambioClasse implements Stringable {
   private ?Alunno $alunno = null;
 
   /**
-   * @var DateTime|null $inizio Data iniziale della permanenza nella classe indicata
-   *
+   * @var DateTimeInterface|null $inizio Data iniziale della permanenza nella classe indicata
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $inizio = null;
 
   /**
-   * @var DateTime|null $fine Data finale della permanenza nella classe indicata
-   *
+   * @var DateTimeInterface|null $fine Data finale della permanenza nella classe indicata
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $fine = null;
@@ -88,7 +88,7 @@ class CambioClasse implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $note = '';
 

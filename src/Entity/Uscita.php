@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\UscitaRepository;
 use Stringable;
 use DateTime;
@@ -35,37 +37,35 @@ class Uscita implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per l'uscita anticipata
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
-   * @var DateTime|null $data Data dell'uscita anticipata
-   *
+   * @var DateTimeInterface|null $data Data dell'uscita anticipata
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
 
   /**
-   * @var DateTime|null $ora Ora dell'uscita anticipata
-   *
+   * @var DateTimeInterface|null $ora Ora dell'uscita anticipata
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $ora = null;
@@ -73,13 +73,13 @@ class Uscita implements Stringable {
   /**
    * @var string|null $note Note informative sull'uscita anticipata
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $note = '';
 
   /**
    * @var bool $valido Indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    */
-  #[ORM\Column(name: 'valido', type: 'boolean', nullable: false)]
+  #[ORM\Column(name: 'valido', type: Types::BOOLEAN, nullable: false)]
   private bool $valido = false;
 
   /**
@@ -87,15 +87,14 @@ class Uscita implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1024, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
   #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $motivazione = '';
 
   /**
-   * @var DateTime|null $giustificato Data della giustificazione
-   *
+   * @var DateTimeInterface|null $giustificato Data della giustificazione
    */
-  #[ORM\Column(type: 'date', nullable: true)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $giustificato = null;
 

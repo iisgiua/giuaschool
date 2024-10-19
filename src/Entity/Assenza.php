@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\AssenzaRepository;
 use Stringable;
 use DateTime;
@@ -35,37 +37,35 @@ class Assenza implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per l'assenza
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
-   * @var DateTime|null $data Data dell'assenza
-   *
+   * @var DateTimeInterface|null $data Data dell'assenza
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
 
   /**
-   * @var DateTime|null $giustificato Data della giustificazione
-   *
+   * @var DateTimeInterface|null $giustificato Data della giustificazione
    */
-  #[ORM\Column(type: 'date', nullable: true)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $giustificato = null;
 
@@ -74,20 +74,20 @@ class Assenza implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1024, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
   #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $motivazione = '';
 
   /**
    * @var array|null $dichiarazione Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $dichiarazione = [];
 
   /**
    * @var array|null $certificati Lista di file allegati per i certificati medici
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $certificati = [];
 
   /**

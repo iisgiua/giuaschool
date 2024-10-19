@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\StoricoEsitoRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class StoricoEsito implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per l'esito
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class StoricoEsito implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $classe = '';
 
@@ -65,7 +67,7 @@ class StoricoEsito implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['A', 'N', 'R', 'L', 'E'], strict: true, message: 'field.choice')]
   private ?string $esito = 'A';
 
@@ -74,26 +76,26 @@ class StoricoEsito implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['F', 'G', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'F';
 
   /**
    * @var float|null $media Media dei voti
    */
-  #[ORM\Column(type: 'float', nullable: true)]
+  #[ORM\Column(type: Types::FLOAT, nullable: true)]
   private ?float $media = 0;
 
   /**
    * @var int|null $credito Punteggio di credito
    */
-  #[ORM\Column(type: 'integer', nullable: true)]
+  #[ORM\Column(type: Types::INTEGER, nullable: true)]
   private ?int $credito = 0;
 
   /**
    * @var int|null $creditoPrecedente Punteggio di credito degli anni precedenti
    */
-  #[ORM\Column(name: 'credito_precedente', type: 'integer', nullable: true)]
+  #[ORM\Column(name: 'credito_precedente', type: Types::INTEGER, nullable: true)]
   private ?int $creditoPrecedente = 0;
 
   /**
@@ -109,7 +111,7 @@ class StoricoEsito implements Stringable {
   /**
    * @var array|null $dati Lista dei dati dello scrutinio
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $dati = [];
 
 

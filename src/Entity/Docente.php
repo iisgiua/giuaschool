@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use App\Repository\DocenteRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -29,7 +30,7 @@ class Docente extends Utente {
   /**
    * @var bool $responsabileBes Indica se il docente ha accesso alle funzioni di responsabile BES
    */
-  #[ORM\Column(name: 'responsabile_bes', type: 'boolean', nullable: false)]
+  #[ORM\Column(name: 'responsabile_bes', type: Types::BOOLEAN, nullable: false)]
   private bool $responsabileBes = false;
 
   /**
@@ -42,7 +43,7 @@ class Docente extends Utente {
   /**
    * @var bool $rspp Indica se il docente è il responsabile della sicurezza
    */
-  #[ORM\Column(name: 'rspp', type: 'boolean', nullable: false)]
+  #[ORM\Column(name: 'rspp', type: Types::BOOLEAN, nullable: false)]
   private bool $rspp = false;
 
 

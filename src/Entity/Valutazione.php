@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ValutazioneRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class Valutazione implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la lezione
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -53,38 +55,38 @@ class Valutazione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['S', 'O', 'P'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'O';
 
   /**
    * @var bool $visibile Indica se la valutazione è visibile ai genitori o no
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $visibile = true;
 
   /**
    * @var bool $media Indica se la valutazione entra nella media di riepilogo o no
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $media = true;
 
   /**
    * @var float|null $voto Voto numerico della valutazione [0|null=non presente, 1, 1.25, 1.50, 1.75, 2, ...]
    */
-  #[ORM\Column(type: 'float', nullable: true)]
+  #[ORM\Column(type: Types::FLOAT, nullable: true)]
   private ?float $voto = null;
 
   /**
    * @var string|null $giudizio Giudizio della valutazione
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $giudizio = null;
 
   /**
    * @var string|null $argomento Argomento relativo alla valutazione
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $argomento = null;
 
   /**

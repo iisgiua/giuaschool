@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\RichiestaRepository;
 use Stringable;
 use DateTime;
@@ -31,59 +33,58 @@ class Richiesta implements Stringable {
   /**
    * @var int|null $id Identificatore univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
-   * @var DateTime|null $inviata Data e ora dell'invio della richiesta
-   *
+   * @var DateTimeInterface|null $inviata Data e ora dell'invio della richiesta
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?DateTime $inviata = null;
 
   /**
-   * @var DateTime|null $gestita Data e ora della gestione della richiesta, o null se non ancora gestita
+   * @var DateTimeInterface|null $gestita Data e ora della gestione della richiesta, o null se non ancora gestita
    */
-  #[ORM\Column(type: 'datetime', nullable: true)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $gestita = null;
 
   /**
-   * @var DateTime|null $data Data della richiesta (solo per le richieste multiple)
+   * @var DateTimeInterface|null $data Data della richiesta (solo per le richieste multiple)
    */
-  #[ORM\Column(type: 'date', nullable: true)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
   private ?DateTime $data = null;
 
   /**
    * @var array $valori Lista dei valori per i campi da compilare nel modulo: nome1 => valore1, nome2 => valore2...
    */
-  #[ORM\Column(type: 'array', nullable: false)]
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
   private array $valori = [];
 
   /**
    * @var string $documento Percorso del file del documento generato dalla richiesta
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   private string $documento = '';
 
   /**
    * @var array $allegati Lista dei percorsi dei file allegati
    */
-  #[ORM\Column(type: 'array', nullable: false)]
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
   private array $allegati = [];
 
   /**
@@ -91,14 +92,14 @@ class Richiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['I', 'G', 'A', 'C'], strict: true, message: 'field.choice')]
   private string $stato = '';
 
   /**
    * @var string $messaggio Eventuale messaggio da mostrare al richiedente
    */
-  #[ORM\Column(type: 'text', nullable: false)]
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   private string $messaggio = '';
 
   /**

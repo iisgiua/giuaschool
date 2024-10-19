@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ListaDestinatariClasseRepository;
 use Stringable;
 use DateTime;
@@ -36,21 +38,21 @@ class ListaDestinatariClasse implements Stringable {
   /**
    * @var int|null $id Identificativo univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -74,15 +76,15 @@ class ListaDestinatariClasse implements Stringable {
   private ?Classe $classe = null;
 
   /**
-   * @var DateTime|null $letto Data e ora di lettura dell'avviso/circolare/documento
+   * @var DateTimeInterface|null $letto Data e ora di lettura dell'avviso/circolare/documento
    */
-  #[ORM\Column(type: 'datetime', nullable: true)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $letto = null;
 
   /**
-   * @var DateTime|null $firmato Data e ora di firma per presa visione dell'avviso/circolare/documento
+   * @var DateTimeInterface|null $firmato Data e ora di firma per presa visione dell'avviso/circolare/documento
    */
-  #[ORM\Column(type: 'datetime', nullable: true)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $firmato = null;
 
 

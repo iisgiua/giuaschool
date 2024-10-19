@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\CattedraRepository;
 use Stringable;
 use DateTime;
@@ -31,33 +33,33 @@ class Cattedra implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la cattedra
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
    * @var bool $attiva Indica se la cattedra è attiva o no
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $attiva = true;
 
   /**
    * @var bool $supplenza Indica se la cattedra è una supplenza temporanea o no
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $supplenza = false;
 
   /**
@@ -65,7 +67,7 @@ class Cattedra implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'I', 'P', 'A'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'N';
 

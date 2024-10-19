@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\MenuOpzioneRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class MenuOpzione implements Stringable {
   /**
    * @var int|null $id Identificativo univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -53,7 +55,7 @@ class MenuOpzione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $ruolo = '';
@@ -63,7 +65,7 @@ class MenuOpzione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $funzione = '';
 
@@ -72,7 +74,7 @@ class MenuOpzione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
@@ -82,7 +84,7 @@ class MenuOpzione implements Stringable {
     *
     *
     */
-   #[ORM\Column(type: 'string', length: 255, nullable: false)]
+   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
    #[Assert\NotBlank(message: 'field.notblank')]
    #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $descrizione = '';
@@ -92,20 +94,20 @@ class MenuOpzione implements Stringable {
     *
     *
     */
-   #[ORM\Column(type: 'string', length: 255, nullable: true)]
+   #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
    #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $url = '';
 
   /**
    * @var int $ordinamento Numero d'ordine per la visualizzazione dell'opzione
    */
-  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   private int $ordinamento = 0;
 
   /**
     * @var bool $abilitato Indica se l'opzione è abilitata o meno
     */
-   #[ORM\Column(type: 'boolean', nullable: false)]
+   #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
    private bool $abilitato = true;
 
   /**
@@ -113,7 +115,7 @@ class MenuOpzione implements Stringable {
     *
     *
     */
-   #[ORM\Column(type: 'string', length: 64, nullable: true)]
+   #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
    #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
    private ?string $icona = '';
 

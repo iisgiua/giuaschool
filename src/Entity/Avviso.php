@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\AvvisoRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class Avviso implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per l'avviso
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class Avviso implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['U', 'E', 'V', 'P', 'A', 'I', 'C', 'D', 'O'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'U';
 
@@ -75,31 +77,28 @@ class Avviso implements Stringable {
   /**
    * @var int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
    */
-  #[ORM\Column(type: 'integer', nullable: false)]
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $anno = 0;
 
   /**
-   * @var DateTime|null $data Data dell'evento associato all'avviso
-   *
+   * @var DateTimeInterface|null $data Data dell'evento associato all'avviso
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
 
   /**
-   * @var DateTime|null $ora Ora associata all'evento dell'avviso
-   *
+   * @var DateTimeInterface|null $ora Ora associata all'evento dell'avviso
    */
-  #[ORM\Column(type: 'time', nullable: true)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $ora = null;
 
   /**
-   * @var DateTime|null $oraFine Ora finale associata all'evento dell'avviso
-   *
+   * @var DateTimeInterface|null $oraFine Ora finale associata all'evento dell'avviso
    */
-  #[ORM\Column(name: 'ora_fine', type: 'time', nullable: true)]
+  #[ORM\Column(name: 'ora_fine', type: Types::TIME_MUTABLE, nullable: true)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $oraFine = null;
 
@@ -122,38 +121,38 @@ class Avviso implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $oggetto = '';
 
   /**
    * @var string|null $testo Testo dell'avviso
    */
-  #[ORM\Column(type: 'text', nullable: false)]
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   private ?string $testo = '';
 
   /**
    * @var array|null $allegati Lista di file allegati all'avviso
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $allegati = [];
 
   /**
     * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
     */
-   #[ORM\Column(name: 'destinatari_ata', type: 'simple_array', nullable: true)]
+   #[ORM\Column(name: 'destinatari_ata', type: Types::SIMPLE_ARRAY, nullable: true)]
    private ?array $destinatariAta = [];
 
   /**
     * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
     */
-   #[ORM\Column(name: 'destinatari_speciali', type: 'simple_array', nullable: true)]
+   #[ORM\Column(name: 'destinatari_speciali', type: Types::SIMPLE_ARRAY, nullable: true)]
    private ?array $destinatariSpeciali = [];
 
   /**
     * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
     */
-   #[ORM\Column(type: 'simple_array', nullable: true)]
+   #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
    private ?array $destinatari = [];
 
   /**
@@ -161,14 +160,14 @@ class Avviso implements Stringable {
     *
     *
     */
-   #[ORM\Column(name: 'filtro_tipo', type: 'string', length: 1, nullable: false)]
+   #[ORM\Column(name: 'filtro_tipo', type: Types::STRING, length: 1, nullable: false)]
    #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
    private ?string $filtroTipo = 'N';
 
   /**
    * @var array|null $filtro Lista degli ID per il tipo di filtro specificato
    */
-  #[ORM\Column(name: 'filtro', type: 'simple_array', nullable: true)]
+  #[ORM\Column(name: 'filtro', type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $filtro = [];
 
   /**

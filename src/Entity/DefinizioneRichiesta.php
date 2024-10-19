@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\DefinizioneRichiestaRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class DefinizioneRichiesta implements Stringable {
   /**
    * @var int|null $id Identificatore univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private string $nome = '';
@@ -74,7 +76,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 16, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private string $richiedenti = '';
@@ -85,7 +87,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 16, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private string $destinatari = '';
@@ -95,7 +97,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private string $modulo = '';
@@ -103,7 +105,7 @@ class DefinizioneRichiesta implements Stringable {
   /**
    * @var array $campi Lista dei campi da compilare nel modulo: nome1 => tipo1, nome2 => tipo2... I tipi ammessi sono: string/text/int/float/bool/date/time
    */
-  #[ORM\Column(type: 'array', nullable: false)]
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
   private array $campi = [];
 
   /**
@@ -111,7 +113,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   #[Assert\PositiveOrZero(message: 'field.zeropositive')]
   private int $allegati = 0;
 
@@ -120,7 +122,7 @@ class DefinizioneRichiesta implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 1, maxMessage: 'field.maxlength')]
   private string $tipo = '*';
@@ -128,19 +130,19 @@ class DefinizioneRichiesta implements Stringable {
   /**
    * @var bool $unica Indica se è ammessa una sola richiesta per l'utente
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $unica = false;
 
   /**
    * @var bool $gestione Indica se il modulo richiede la gestione degli stati
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $gestione = true;
 
   /**
    * @var bool $abilitata Indica se la definizione della richiesta è abilitata
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $abilitata = true;
 
 

@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\DefinizioneScrutinioRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,15 +32,14 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'P';
 
   /**
-   * @var DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
-   *
+   * @var DateTimeInterface|null $dataProposte Inizio dell'inserimento delle proposte di voto
    */
-  #[ORM\Column(name: 'data_proposte', type: 'date', nullable: false)]
+  #[ORM\Column(name: 'data_proposte', type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?DateTime $dataProposte = null;
@@ -46,13 +47,13 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   /**
    * @var array $struttura Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
    */
-  #[ORM\Column(type: 'array', nullable: false)]
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
   private array $struttura = [];
 
   /**
    * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
    */
-  #[ORM\Column(name: 'classi_visibili', type: 'array', nullable: false)]
+  #[ORM\Column(name: 'classi_visibili', type: Types::ARRAY, nullable: false)]
   private array $classiVisibili = [];
 
 

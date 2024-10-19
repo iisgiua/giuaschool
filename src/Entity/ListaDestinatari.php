@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ListaDestinatariRepository;
 use Stringable;
 use DateTime;
@@ -33,21 +35,21 @@ class ListaDestinatari implements Stringable {
   /**
    * @var int|null $id Identificativo univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -65,13 +67,13 @@ class ListaDestinatari implements Stringable {
   /**
    * @var bool $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $dsga = false;
 
   /**
    * @var bool $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $ata = false;
 
   /**
@@ -79,14 +81,14 @@ class ListaDestinatari implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
   private ?string $docenti = 'N';
 
   /**
    * @var array|null $filtroDocenti Lista dei filtri per i docenti
    */
-  #[ORM\Column(name: 'filtro_docenti', type: 'simple_array', nullable: true)]
+  #[ORM\Column(name: 'filtro_docenti', type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $filtroDocenti = [];
 
   /**
@@ -94,20 +96,20 @@ class ListaDestinatari implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'T', 'C'], strict: true, message: 'field.choice')]
   private ?string $coordinatori = 'N';
 
   /**
    * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
    */
-  #[ORM\Column(name: 'filtro_coordinatori', type: 'simple_array', nullable: true)]
+  #[ORM\Column(name: 'filtro_coordinatori', type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $filtroCoordinatori = [];
 
   /**
    * @var bool $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $staff = false;
 
   /**
@@ -115,14 +117,14 @@ class ListaDestinatari implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $genitori = 'N';
 
   /**
    * @var array $filtroGenitori Lista dei filtri per i genitori
    */
-  #[ORM\Column(name: 'filtro_genitori', type: 'simple_array', nullable: true)]
+  #[ORM\Column(name: 'filtro_genitori', type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $filtroGenitori = [];
 
   /**
@@ -130,14 +132,14 @@ class ListaDestinatari implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $alunni = 'N';
 
   /**
    * @var array $filtroAlunni Lista dei filtri per gli alunni
    */
-  #[ORM\Column(name: 'filtro_alunni', type: 'simple_array', nullable: true)]
+  #[ORM\Column(name: 'filtro_alunni', type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $filtroAlunni = [];
 
 

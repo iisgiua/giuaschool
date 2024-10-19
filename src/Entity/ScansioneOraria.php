@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ScansioneOrariaRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class ScansioneOraria implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la scansione oraria
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -53,30 +55,28 @@ class ScansioneOraria implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   #[Assert\Choice(choices: [0, 1, 2, 3, 4, 5, 6], strict: true, message: 'field.choice')]
   private int $giorno = 0;
 
   /**
    * @var int $ora Numero dell'ora di lezione [1,2,...]
    */
-  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   private int $ora = 1;
 
   /**
-   * @var DateTime|null $inizio Inizio dell'ora di lezione
-   *
+   * @var DateTimeInterface|null $inizio Inizio dell'ora di lezione
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $inizio = null;
 
   /**
-   * @var DateTime|null $fine Fine dell'ora di lezione
-   *
+   * @var DateTimeInterface|null $fine Fine dell'ora di lezione
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $fine = null;
@@ -84,7 +84,7 @@ class ScansioneOraria implements Stringable {
   /**
    * @var float $durata Durata dell'ora di lezione (intesa come unità oraria)
    */
-  #[ORM\Column(type: 'float', nullable: false)]
+  #[ORM\Column(type: Types::FLOAT, nullable: false)]
   private float $durata = 1.0;
 
   /**

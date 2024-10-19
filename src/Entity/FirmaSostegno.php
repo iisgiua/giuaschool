@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use App\Repository\FirmaSostegnoRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -26,13 +27,13 @@ class FirmaSostegno extends Firma {
   /**
    * @var string|null $argomento Argomento della lezione di sostegno
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $argomento = '';
 
   /**
    * @var string|null $attivita Attività della lezione di sostegno
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $attivita = '';
 
   /**

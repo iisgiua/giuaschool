@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\LezioneRepository;
 use Stringable;
 use DateTime;
@@ -35,28 +37,27 @@ class Lezione implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la lezione
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
-   * @var DateTime|null $data Data della lezione
-   *
+   * @var DateTimeInterface|null $data Data della lezione
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
@@ -64,7 +65,7 @@ class Lezione implements Stringable {
   /**
    * @var int $ora Numero dell'ora di lezione [1,2,...]
    */
-  #[ORM\Column(type: 'smallint', nullable: false)]
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   private int $ora = 1;
 
   /**
@@ -82,7 +83,7 @@ class Lezione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, nullable: true)]
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $gruppo = '';
 
@@ -91,7 +92,7 @@ class Lezione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'C', 'R'], strict: true, message: 'field.choice')]
   private string $tipoGruppo = 'N';
 
@@ -108,13 +109,13 @@ class Lezione implements Stringable {
   /**
    * @var string|null $argomento Argomento della lezione
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $argomento = '';
 
   /**
    * @var string|null $attivita Attività della lezione
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $attivita = '';
 
 

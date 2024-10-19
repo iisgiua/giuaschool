@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\CorsoRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class Corso implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per il corso
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class Corso implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 128, unique: true, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
@@ -66,7 +68,7 @@ class Corso implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'nome_breve', type: 'string', length: 32, unique: true, nullable: false)]
+  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 32, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';

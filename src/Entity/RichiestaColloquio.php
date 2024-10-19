@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\RichiestaColloquioRepository;
 use Stringable;
 use DateTime;
@@ -31,28 +33,27 @@ class RichiestaColloquio implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la richiesta del colloquio
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
-   * @var DateTime|null $appuntamento Ora di inizio del colloquio
-   *
+   * @var DateTimeInterface|null $appuntamento Ora di inizio del colloquio
    */
-  #[ORM\Column(type: 'time', nullable: false)]
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $appuntamento = null;
@@ -99,14 +100,14 @@ class RichiestaColloquio implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['R', 'A', 'C', 'N'], strict: true, message: 'field.choice')]
   private ?string $stato = 'R';
 
   /**
    * @var string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $messaggio = '';
 
 

@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\FileRepository;
 use Stringable;
 use DateTime;
@@ -31,21 +33,21 @@ class File implements Stringable {
   /**
    * @var int|null $id Identificativo univoco
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -53,7 +55,7 @@ class File implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $titolo = '';
@@ -63,7 +65,7 @@ class File implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
@@ -73,7 +75,7 @@ class File implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 16, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private ?string $estensione = '';
@@ -83,7 +85,7 @@ class File implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'integer', nullable: false)]
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   #[Assert\Positive(message: 'field.positive')]
   private int $dimensione = 0;
 
@@ -92,7 +94,7 @@ class File implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $file = '';

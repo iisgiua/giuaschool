@@ -14,8 +14,7 @@ use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Proxies\__CG__\App\Entity\Materia;
+use App\Entity\Materia;
 
 
 /**
@@ -25,35 +24,35 @@ use Proxies\__CG__\App\Entity\Materia;
  */
 class CattedraRepository extends BaseRepository {
 
-  /**
-   * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
-   *
-   * @param array $search Lista dei criteri di ricerca
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function findAll($search=null, $page=1, $limit=10) {
-    // crea query base
-    $query = $this->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.materia', 'm')
-      ->join('c.docente', 'd')
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,d.cognome,d.nome', 'ASC');
-    if ($search['classe'] > 0) {
-      $query->where('cl.id=:classe')->setParameter('classe', $search['classe']);
-    }
-    if ($search['materia'] > 0) {
-      $query->andwhere('m.id=:materia')->setParameter('materia', $search['materia']);
-    }
-    if ($search['docente'] > 0) {
-      $query->andwhere('d.id=:docente')->setParameter('docente', $search['docente']);
-    }
-    // crea lista con pagine
-    $res = $this->paginazione($query->getQuery(), $page);
-    return $res['lista'];
-  }
+  // /**
+  //  * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
+  //  *
+  //  * @param array $search Lista dei criteri di ricerca
+  //  * @param int $page Pagina corrente
+  //  * @param int $limit Numero di elementi per pagina
+  //  *
+  //  * @return Paginator Oggetto Paginator
+  //  */
+  // public function findAll($search=null, $page=1, $limit=10) {
+  //   // crea query base
+  //   $query = $this->createQueryBuilder('c')
+  //     ->join('c.classe', 'cl')
+  //     ->join('c.materia', 'm')
+  //     ->join('c.docente', 'd')
+  //     ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,d.cognome,d.nome', 'ASC');
+  //   if ($search['classe'] > 0) {
+  //     $query->where('cl.id=:classe')->setParameter('classe', $search['classe']);
+  //   }
+  //   if ($search['materia'] > 0) {
+  //     $query->andwhere('m.id=:materia')->setParameter('materia', $search['materia']);
+  //   }
+  //   if ($search['docente'] > 0) {
+  //     $query->andwhere('d.id=:docente')->setParameter('docente', $search['docente']);
+  //   }
+  //   // crea lista con pagine
+  //   $res = $this->paginazione($query->getQuery(), $page);
+  //   return $res['lista'];
+  // }
 
   /**
    * Restituisce la lista delle cattedre del docente indicato

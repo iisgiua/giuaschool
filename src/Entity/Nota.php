@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\NotaRepository;
 use Stringable;
 use DateTime;
@@ -33,21 +35,21 @@ class Nota implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la nota
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -55,15 +57,14 @@ class Nota implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['C', 'I'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'C';
 
   /**
-   * @var DateTime|null $data Data della nota
-   *
+   * @var DateTimeInterface|null $data Data della nota
    */
-  #[ORM\Column(type: 'date', nullable: false)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Type(type: '\DateTime', message: 'field.type')]
   private ?DateTime $data = null;
@@ -73,20 +74,20 @@ class Nota implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'text', nullable: false)]
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $testo = '';
 
   /**
    * @var string|null $provvedimento Provvedimento disciplinare preso per la nota
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $provvedimento = '';
 
   /**
-   * @var DateTime|null $annullata Data di annullamento della nota (null se è valida)
+   * @var DateTimeInterface|null $annullata Data di annullamento della nota (null se è valida)
    */
-  #[ORM\Column(type: 'date', nullable: true)]
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
   private ?DateTime $annullata = null;
 
   /**

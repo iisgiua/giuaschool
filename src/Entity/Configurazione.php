@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\ConfigurazioneRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class Configurazione implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per la configurazione
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class Configurazione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 32, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $categoria = '';
@@ -66,7 +68,7 @@ class Configurazione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 64, unique: true, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 64, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $parametro = '';
@@ -76,20 +78,20 @@ class Configurazione implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1024, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: false)]
   #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $descrizione = '';
 
   /**
    * @var string|null $valore Valore della configurazione
    */
-  #[ORM\Column(type: 'text', nullable: false)]
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   private ?string $valore = '';
 
   /**
    * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
    */
-  #[ORM\Column(type: 'boolean', nullable: false)]
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $gestito = false;
 
 

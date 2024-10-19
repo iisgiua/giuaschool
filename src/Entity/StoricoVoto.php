@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\StoricoVotoRepository;
 use Stringable;
 use DateTime;
@@ -35,40 +37,40 @@ class StoricoVoto implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per il voto assegnato allo scrutinio
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
    * @var int $voto Valutazione della materia
    */
-  #[ORM\Column(type: 'integer', nullable: false)]
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $voto = 0;
 
   /**
    * @var string|null $carenze Carenze segnalate allo scrutinio finale
    */
-  #[ORM\Column(type: 'text', nullable: true)]
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $carenze = '';
 
   /**
    * @var array|null $dati Dati aggiuntivi sulla valutazione
    *|null
    */
-  #[ORM\Column(type: 'array', nullable: true)]
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
   private ?array $dati = [];
 
   /**

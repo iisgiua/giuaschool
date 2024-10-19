@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use App\Repository\AtaRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -32,14 +33,14 @@ class Ata extends Utente {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['A', 'T', 'C', 'U', 'D'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'A';
 
   /**
    * @var bool $segreteria Indica se il dipendente ATA ha accesso alle funzioni della segreteria
    */
-  #[ORM\Column(name: 'segreteria', type: 'boolean', nullable: false)]
+  #[ORM\Column(name: 'segreteria', type: Types::BOOLEAN, nullable: false)]
   private bool $segreteria = false;
 
   /**

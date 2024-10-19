@@ -8,6 +8,8 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
 use App\Repository\SpidRepository;
 use Stringable;
 use DateTime;
@@ -34,21 +36,21 @@ class Spid implements Stringable {
   /**
    * @var int|null $id Identificativo univoco per le istanze della classe
    */
-  #[ORM\Column(type: 'integer')]
+  #[ORM\Column(type: Types::INTEGER)]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  #[ORM\Column(type: 'datetime', nullable: false)]
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
 
   /**
@@ -56,7 +58,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $idp = '';
@@ -66,7 +68,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'response_id', type: 'string', length: 255, unique: true, nullable: false)]
+  #[ORM\Column(name: 'response_id', type: Types::STRING, length: 255, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $responseId = '';
@@ -76,7 +78,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'attr_name', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'attr_name', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $attrName = '';
@@ -86,7 +88,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'attr_family_name', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'attr_family_name', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $attrFamilyName = '';
@@ -96,7 +98,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'attr_fiscal_number', type: 'string', length: 32, nullable: false)]
+  #[ORM\Column(name: 'attr_fiscal_number', type: Types::STRING, length: 32, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $attrFiscalNumber = '';
@@ -106,7 +108,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(name: 'logout_url', type: 'string', length: 255, nullable: false)]
+  #[ORM\Column(name: 'logout_url', type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $logoutUrl = '';
@@ -116,7 +118,7 @@ class Spid implements Stringable {
    *
    *
    */
-  #[ORM\Column(type: 'string', length: 1, nullable: false)]
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['A', 'L', 'E'], strict: true, message: 'field.choice')]
   private ?string $state = 'A';
 
