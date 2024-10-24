@@ -8,6 +8,7 @@ google-chrome --headless --disable-gpu --disable-software-rasterizer --disable-d
 
 # Make sure test sessions directory exists
 mkdir -p var/sessions/test
+chown www-data:www-data var/sessions/test
 
 # Run only Behat tests
 php -d memory_limit=-1 vendor/bin/behat $1 --stop-on-failure --rerun -f progress
