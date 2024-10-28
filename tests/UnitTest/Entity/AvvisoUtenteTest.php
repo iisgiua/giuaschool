@@ -144,7 +144,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertFalse(in_array('field.unique', $msgs, true), $this->entity.'::Utente - VALID NOT BLANK');
+    $this->assertNotContains('field.unique', $msgs, $this->entity.'::Utente - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Letto - VALID NULL');
@@ -170,7 +170,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

@@ -183,7 +183,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     foreach ($this->bus as $notifica) {
       $this->assertSame('circolare', $notifica->getTipo());
       $this->assertSame('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
-      $this->assertSame(1, count($notifica->getDati()));
+      $this->assertCount(1, $notifica->getDati());
       $this->assertSame($circolare->getId(), $notifica->getDati()[0]['id']);
       $this->assertSame($circolare->getNumero(), $notifica->getDati()[0]['numero']);
       $this->assertSame($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);
@@ -265,14 +265,14 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     foreach ($risultato as $dato) {
       $destinatari[$dato['utente']][] = $dato['circolare'];
     }
-    $this->assertSame(count($destinatari), count($this->bus));
+    $this->assertCount(count($destinatari), $this->bus);
     foreach ($this->bus as $notifica) {
       $this->assertSame('circolare', $notifica->getTipo());
       $utente = $notifica->getUtenteId();
-      $this->assertSame(count($destinatari[$utente]), count($notifica->getDati()));
+      $this->assertCount(count($destinatari[$utente]), $notifica->getDati());
       $this->assertSame('<!CIRCOLARE!><!'.implode(',', $destinatari[$utente]).'!>', $notifica->getTag());
       foreach ($notifica->getDati() as $dati) {
-        $this->assertTrue(in_array($dati['id'], $destinatari[$utente]));
+        $this->assertContains($dati['id'], $destinatari[$utente]);
         $this->assertSame($listaCircolari[$dati['id']]->getNumero(), $dati['numero']);
         $this->assertSame($listaCircolari[$dati['id']]->getData()->format('d/m/Y'), $dati['data']);
         $this->assertSame($listaCircolari[$dati['id']]->getOggetto(), $dati['oggetto']);
@@ -317,7 +317,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     foreach ($this->bus as $notifica) {
       $this->assertSame('circolare', $notifica->getTipo());
       $this->assertSame('<!CIRCOLARE!><!'.$circolare->getId().'!>', $notifica->getTag());
-      $this->assertSame(1, count($notifica->getDati()));
+      $this->assertCount(1, $notifica->getDati());
       $this->assertSame($circolare->getId(), $notifica->getDati()[0]['id']);
       $this->assertSame($circolare->getNumero(), $notifica->getDati()[0]['numero']);
       $this->assertSame($circolare->getData()->format('d/m/Y'), $notifica->getDati()[0]['data']);

@@ -333,7 +333,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -368,7 +368,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(2, $this->session);
     $this->assertSame('Google', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
     // con profili
     $this->logs = [];

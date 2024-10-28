@@ -205,7 +205,7 @@ class DocenteTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 3, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 3, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

@@ -127,7 +127,7 @@ class ScrutinioTest extends EntityTestCase {
     $existent->addDato('int', 1234);
     $this->assertSame('stringa di testo', $existent->getDato('txt'), $this->entity.'::getDato');
     $this->assertSame(1234, $existent->getDato('int'), $this->entity.'::getDato');
-    $this->assertSame(null, $existent->getDato('non_esiste'), $this->entity.'::getDato');
+    $this->assertNull($existent->getDato('non_esiste'), $this->entity.'::getDato');
     // addDato
     $existent->setDati([]);
     $existent->addDato('txt', 'stringa di testo');
@@ -219,7 +219,7 @@ class ScrutinioTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

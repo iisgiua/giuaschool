@@ -52,7 +52,7 @@ return RectorConfig::configure()
   ->withSets([
     // PHPUnitSetList::PHPUNIT_100,
     // PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
-    PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+    // PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     ])
 
 //   twig core phpunit

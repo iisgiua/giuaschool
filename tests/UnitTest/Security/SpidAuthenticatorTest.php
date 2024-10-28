@@ -340,7 +340,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertSame('L', $spid->getState());
     $this->assertSame($utente, $res);
     $this->assertSame(['logoutUrl' => $spid->getLogoutUrl()], $utente->getInfoLogin());
@@ -380,7 +380,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame('SPID', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($utente->getInfoLogin()['logoutUrl'], $this->session['/APP/UTENTE/spid_logout']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
     // con profili
     $this->logs = [];

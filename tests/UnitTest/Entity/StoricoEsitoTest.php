@@ -176,7 +176,7 @@ class StoricoEsitoTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

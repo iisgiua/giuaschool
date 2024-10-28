@@ -339,7 +339,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertSame(3, count($this->tpl[0][1]));
+    $this->assertCount(3, $this->tpl[0][1]);
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('intestazione_istituto_breve', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
@@ -381,7 +381,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
@@ -422,7 +422,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
@@ -463,7 +463,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
@@ -598,7 +598,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -638,7 +638,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -678,7 +678,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -718,7 +718,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -788,7 +788,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);

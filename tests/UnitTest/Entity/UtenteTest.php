@@ -153,7 +153,7 @@ class UtenteTest extends EntityTestCase {
     // getUserIdentifier
     $this->assertSame($existent->getUsername(), $existent->getUserIdentifier(), $this->entity.'::getUserIdentifier');
     // getSalt
-    $this->assertSame(null, $existent->getSalt(), $this->entity.'::getSalt');
+    $this->assertNull($existent->getSalt(), $this->entity.'::getSalt');
     // getRoles
     $this->assertSame(['ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // eraseCredentials
@@ -368,7 +368,7 @@ class UtenteTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 2, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 2, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

@@ -66,7 +66,7 @@ class FindInSetFunctionTest extends DatabaseTestCase {
     } catch (Exception $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     // sintassi errata: no parametri
     $query->setDQL("SELECT FIND_IN_SET() FROM App\Entity\Configurazione c");
     $parser = new Parser($query);

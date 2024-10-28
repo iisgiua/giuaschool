@@ -65,7 +65,7 @@ class FiledateExtensionTest extends KernelTestCase {
     $ext = new FiledateExtension();
     // file inesistente
     $res = $ext->getFileDate('NESSUN-FILE.NON.ESISTE');
-    $this->assertSame(null, $res);
+    $this->assertNull($res);
     // file esistente
     $res = $ext->getFileDate(__FILE__);
     $tm = new DateTime('@'.\filemtime(__FILE__));

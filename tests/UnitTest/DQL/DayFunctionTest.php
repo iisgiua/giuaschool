@@ -66,7 +66,7 @@ class DayFunctionTest extends DatabaseTestCase {
     } catch (Exception $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     // sintassi errata: no parametri
     $query->setDQL("SELECT DAY() FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
