@@ -42,7 +42,7 @@ class ColloquioRepository extends BaseRepository {
     }
     if (!$fine) {
       $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-        $this->_em->getRepository(Configurazione::class)->getParametro('anno_fine').' 00:00:00');
+        $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_fine').' 00:00:00');
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')
@@ -51,8 +51,10 @@ class ColloquioRepository extends BaseRepository {
       ->where('c.docente=:docente AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,c.inizio', 'ASC')
       ->groupBy('c.id')
-      ->setParameters(['valide' => ['R', 'C'], 'docente' => $docente, 'inizio' => $inizio->format('Y-m-d'),
-        'fine' => $fine->format('Y-m-d')]);
+      ->setParameter('valide', ['R', 'C'])
+      ->setParameter('docente', $docente)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'));
     // cerca abilitati/disabilitati
     if ($abilitato !== null) {
       $colloqui
@@ -83,7 +85,8 @@ class ColloquioRepository extends BaseRepository {
       ->select('COUNT(rc.id)')
       ->join(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND rc.stato IN (:valide)')
-      ->setParameters(['colloquio' => $colloquio, 'valide' => ['R', 'C']])
+      ->setParameter('colloquio', $colloquio)
+      ->setParameter('valide', ['R', 'C'])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce valore
@@ -102,7 +105,8 @@ class ColloquioRepository extends BaseRepository {
     $colloqui = $this->createQueryBuilder('c')
       ->where('c.docente=:docente AND c.abilitato=:abilitato')
       ->orderBy('c.data,c.inizio', 'ASC')
-      ->setParameters(['docente' => $criteri['docente'], 'abilitato' => 1])
+      ->setParameter('docente', $criteri['docente'])
+      ->setParameter('abilitato', 1)
       ->getQuery()
       ->getResult();
     // restituisce dati
@@ -126,8 +130,12 @@ class ColloquioRepository extends BaseRepository {
       ->select('COUNT(c.id)')
       ->where('c.abilitato=:abilitato AND c.docente=:docente AND c.data=:data AND c.id!=:esistente')
       ->andWhere('(c.inizio>=:inizio AND c.inizio<:fine) OR (c.fine>:inizio AND c.fine<=:fine) OR (:inizio>=c.inizio AND :inizio<c.fine)')
-      ->setParameters(['abilitato' => 1, 'docente' => $docente, 'data' => $data->format('Y-m-d'),
-        'esistente' => $esistente, 'inizio' => $inizio->format('H:i:s'), 'fine' => $fine->format('H:i:s')])
+      ->setParameter('abilitato', 1)
+      ->setParameter('docente', $docente)
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('esistente', $esistente)
+      ->setParameter('inizio', $inizio->format('H:i:s'))
+      ->setParameter('fine', $fine->format('H:i:s'))
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce vero se esiste sovrapposizione
@@ -154,8 +162,10 @@ class ColloquioRepository extends BaseRepository {
       ->leftJoin('a.classe', 'cl')
       ->where('c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :oggi AND :fine')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['docente' => $docente, 'abilitato' => 1, 'oggi' => $oggi->format('Y-m-d'),
-        'fine' => $fine->format('Y-m-d')])
+      ->setParameter('docente', $docente)
+      ->setParameter('abilitato', 1)
+      ->setParameter('oggi', $oggi->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // imposta dati da restituire
@@ -213,7 +223,9 @@ class ColloquioRepository extends BaseRepository {
       ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id')
       ->where('c.id=:colloquio AND c.abilitato=:abilitato AND rc.stato IN (:validi)')
       ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['colloquio' => $colloquio, 'abilitato' => 1, 'validi' => ['R', 'C']])
+      ->setParameter('colloquio', $colloquio)
+      ->setParameter('abilitato', 1)
+      ->setParameter('validi', ['R', 'C'])
       ->getQuery()
       ->getResult();
     $ora = clone $colloquio->getInizio();
@@ -238,7 +250,7 @@ class ColloquioRepository extends BaseRepository {
    */
   public function cancellabili(Docente $docente, bool $abilitato=null): array {
     // subquery richieste
-    $subquery = $this->_em->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
+    $subquery = $this->getEntityManager()->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
       ->select('rc.id')
       ->where('rc.colloquio=c.id')
       ->getDQL();
@@ -246,7 +258,7 @@ class ColloquioRepository extends BaseRepository {
     $colloqui = $this->createQueryBuilder('c')
       ->where('c.docente=:docente AND NOT EXISTS ('.$subquery.')')
       ->orderBy('c.data,c.inizio', 'ASC')
-      ->setParameters(['docente' => $docente]);
+      ->setParameter('docente', $docente);
     // cerca abilitati/disabilitati
     if ($abilitato !== null) {
       $colloqui

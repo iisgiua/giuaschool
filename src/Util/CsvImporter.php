@@ -308,8 +308,9 @@ class CsvImporter {
       $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
         ->where('c.anno=:anno AND c.sezione=:sezione AND '.
           ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
-        ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
-          'gruppo' => $classeGruppo])
+        ->setParameter('anno', $classeAnno)
+        ->setParameter('sezione', $classeSezione)
+        ->setParameter('gruppo', $classeGruppo)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
@@ -635,8 +636,9 @@ class CsvImporter {
           $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.sezione=:sezione AND '.
               ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
-            ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
-              'gruppo' => $classeGruppo])
+            ->setParameter('anno', $classeAnno)
+            ->setParameter('sezione', $classeSezione)
+            ->setParameter('gruppo', $classeGruppo)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -1105,13 +1107,14 @@ class CsvImporter {
       // legge orario
       $definizione_orario = $this->em->getRepository(Orario::class)->createQueryBuilder('o')
         ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'sede' => $sede])
+        ->setParameter('data', (new DateTime())->format('Y-m-d'))
+        ->setParameter('sede', $sede)
         ->getQuery()
         ->getResult();
       $scansione_oraria = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('so')
         ->join('so.orario', 'o')
         ->where('o.id=:orario')
-        ->setParameters(['orario' => ($definizione_orario ? $definizione_orario[0] : null)])
+			  ->setParameter('orario', ($definizione_orario ? $definizione_orario[0] : null))
         ->getQuery()
         ->getResult();
       if (!$scansione_oraria) {
@@ -1158,8 +1161,9 @@ class CsvImporter {
         $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
           ->where('c.anno=:anno AND c.sezione=:sezione AND '.
             ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
-          ->setParameters(['anno' => $classeAnno, 'sezione' => $classeSezione,
-            'gruppo' => $classeGruppo])
+          ->setParameter('anno', $classeAnno)
+          ->setParameter('sezione', $classeSezione)
+          ->setParameter('gruppo', $classeGruppo)
           ->setMaxResults(1)
           ->getQuery()
           ->getOneOrNullResult();
@@ -1207,8 +1211,10 @@ class CsvImporter {
         ->join('od.orario', 'o')
         ->join('od.cattedra', 'c')
         ->where('o.id=:orario AND c.docente=:docente AND od.giorno=:giorno AND od.ora=:ora')
-        ->setParameters(['orario' => $definizione_orario[0], 'docente' => $docente,
-          'giorno' => $giorno, 'ora' => $ora])
+        ->setParameter('orario', $definizione_orario[0])
+        ->setParameter('docente', $docente)
+        ->setParameter('giorno', $giorno)
+        ->setParameter('ora', $ora)
         ->getQuery()
         ->getOneOrNullResult();
       if ($orario) {

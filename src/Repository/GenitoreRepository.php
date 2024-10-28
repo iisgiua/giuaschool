@@ -35,7 +35,8 @@ class GenitoreRepository extends BaseRepository {
       ->join('g.alunno', 'a')
       ->join('a.classe', 'cl')
       ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
-      ->setParameters(['abilitato' => 1, 'sedi' => $sedi]);
+      ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi);
     if ($tipo == 'C') {
       // filtro classi
       $genitori
@@ -65,11 +66,11 @@ class GenitoreRepository extends BaseRepository {
    */
   public function datiGenitori(array $alunni) {
     // legge dati
-    $genitori = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $genitori = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,g.cognome,g.nome,g.codiceFiscale,g.numeriTelefono,g.spid,g.username,g.email,g.ultimoAccesso')
       ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id')
       ->where('a.id IN (:alunni)')
-      ->setParameters(['alunni' => $alunni])
+      ->setParameter('alunni', $alunni)
       ->orderBy('g.username')
       ->getQuery()
       ->getArrayResult();
@@ -114,8 +115,9 @@ class GenitoreRepository extends BaseRepository {
       ->join('a.classe', 'c')
       ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND g.nome LIKE :nome AND g.cognome LIKE :cognome')
       ->orderBy('c.anno,c.sezione,c.gruppo,g.cognome,g.nome')
-      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
-        'cognome' => $criteri['cognome'].'%']);
+      ->setParameter('abilitato', 1)
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
     // controlla tipo
     if (empty($criteri['tipo'])) {
       // tutti i rappresentanti

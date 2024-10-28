@@ -193,8 +193,9 @@ class ColloquiUtil {
       ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione")
       ->andWhere("cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL")
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getResult();
     // imposta i dati

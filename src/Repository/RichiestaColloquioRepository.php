@@ -39,7 +39,9 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->leftJoin('a.classe', 'cl')
       ->where('c.docente=:docente AND (c.abilitato=:disabilitato OR c.data<:oggi)')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['docente' => $docente, 'disabilitato' => 0, 'oggi' => $oggi->format('Y-m-d')])
+      ->setParameter('docente', $docente)
+      ->setParameter('disabilitato', 0)
+      ->setParameter('oggi', $oggi->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // imposta dati da restituire
@@ -85,8 +87,10 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'abilitato' => 1,
-        'oggi' => $oggi->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('genitore', $genitore)
+      ->setParameter('abilitato', 1)
+      ->setParameter('oggi', $oggi->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce i dati
@@ -112,8 +116,12 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('c.docente', 'd')
       ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND rc.stato=:stato AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'stato' => 'C', 'abilitato' => 1,
-          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('genitore', $genitore)
+      ->setParameter('stato', 'C')
+      ->setParameter('abilitato', 1)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce i dati
@@ -138,8 +146,11 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'C', 'docente' => $docente, 'abilitato' => 1,
-          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('stato', 'C')
+      ->setParameter('docente', $docente)
+      ->setParameter('abilitato', 1)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce dati
@@ -160,8 +171,10 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'R', 'docente' => $docente, 'abilitato' => 1,
-        'oggi' => (new DateTime())->format('Y-m-d')])
+      ->setParameter('stato', 'R')
+      ->setParameter('docente', $docente)
+      ->setParameter('abilitato', 1)
+      ->setParameter('oggi', (new DateTime())->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati

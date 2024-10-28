@@ -241,7 +241,7 @@ class OsservazioniController extends BaseController {
           ->where('a.id IN (:lista)'.
             ($religione ? " and a.religione='".$religione."'" : ''))
           ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-          ->setParameters(['lista' => $listaAlunni]),
+          ->setParameter('lista', $listaAlunni),
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],

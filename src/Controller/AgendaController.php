@@ -230,10 +230,10 @@ class AgendaController extends BaseController {
         $materia = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
           ->join('c.classe', 'cl')
           ->where("c.tipo='N' AND c.materia=:materia AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-          ->setParameters(['materia' => $form->get('materia_sostegno')->getData(),
-            'anno' => $avviso->getCattedra()->getClasse()->getAnno(),
-            'sezione' => $avviso->getCattedra()->getClasse()->getSezione(),
-            'gruppo' => $avviso->getCattedra()->getClasse()->getGruppo()])
+          ->setParameter('materia', $form->get('materia_sostegno')->getData())
+          ->setParameter('anno', $avviso->getCattedra()->getClasse()->getAnno())
+          ->setParameter('sezione', $avviso->getCattedra()->getClasse()->getSezione())
+          ->setParameter('gruppo', $avviso->getCattedra()->getClasse()->getGruppo())
           ->getQuery()
           ->getOneOrNullResult();
           if (!$materia ||
@@ -292,7 +292,7 @@ class AgendaController extends BaseController {
             $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
               ->delete()
               ->where('au.avviso=:avviso')
-              ->setParameters(['avviso' => $avviso])
+              ->setParameter('avviso', $avviso)
               ->getQuery()
               ->execute();
           }
@@ -383,7 +383,9 @@ class AgendaController extends BaseController {
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->join(Cattedra::class, 'c', 'WITH', 'c.classe=a.classe')
       ->where('a.abilitato=:abilitato AND c.id=:cattedra AND c.attiva=:attiva')
-      ->setParameters(['abilitato' => 1, 'cattedra' => $id, 'attiva' => 1])
+      ->setParameter('abilitato', 1)
+      ->setParameter('cattedra', $id)
+      ->setParameter('attiva', 1)
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -409,8 +411,9 @@ class AgendaController extends BaseController {
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->where("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL) AND c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND m.tipo!='E'")
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo())
       ->orderBy('m.nomeBreve', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -462,7 +465,7 @@ class AgendaController extends BaseController {
     $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     // cancella avviso
@@ -635,7 +638,7 @@ class AgendaController extends BaseController {
             $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
               ->delete()
               ->where('au.avviso=:avviso')
-              ->setParameters(['avviso' => $avviso])
+              ->setParameter('avviso', $avviso)
               ->getQuery()
               ->execute();
           }
@@ -726,7 +729,7 @@ class AgendaController extends BaseController {
     $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     // cancella avviso

@@ -80,7 +80,8 @@ class GenitoriUtil {
     $alunno = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(Genitore::class, 'g', 'WITH', 'a.id=g.alunno')
       ->where('g.id=:genitore AND a.abilitato=:abilitato AND g.abilitato=:abilitato')
-      ->setParameters(['genitore' => $genitore, 'abilitato' => 1])
+			->setParameter('genitore', $genitore)
+			->setParameter('abilitato', 1)
       ->getQuery()
       ->getOneOrNullResult();
     return $alunno;
@@ -111,8 +112,11 @@ class GenitoriUtil {
         ->join('l.classe', 'c')
         ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
         ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
-        ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'anno' => $classe->getAnno(),
-          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('ora', $ora)
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->getQuery()
         ->getResult();
       if (count($lezioni) > 0) {
@@ -127,7 +131,8 @@ class GenitoriUtil {
             // legge sostegno
             $sostegno = $this->em->getRepository(FirmaSostegno::class)->createQueryBuilder('fs')
               ->where('fs.lezione=:lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-              ->setParameters(['lezione' => $lezione, 'alunno' => $alunno])
+              ->setParameter('lezione', $lezione)
+              ->setParameter('alunno', $alunno)
               ->getQuery()
               ->getResult();
             foreach ($sostegno as $sost) {
@@ -153,8 +158,11 @@ class GenitoriUtil {
       ->where('a.data=:data AND a.visibile=:visibile AND c.anno=:anno AND c.sezione=:sezione')
       ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('a.modificato', 'DESC')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'visibile' => 1, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('visibile', 1)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getResult();
     $lista = [];
@@ -182,7 +190,9 @@ class GenitoriUtil {
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     if ($sostegno) {
@@ -218,8 +228,11 @@ class GenitoriUtil {
       ->andWhere("c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('l.ora', 'ASC')
-      ->setParameters(['materia' => $materia, 'alunno' => $alunno, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('materia', $materia)
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -299,7 +312,8 @@ class GenitoriUtil {
       ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
-      ->setParameters(['classe' => $classe, 'alunno' => $alunno])
+			->setParameter('classe', $classe)
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -384,7 +398,8 @@ class GenitoriUtil {
       ->where('v.alunno=:alunno AND v.visibile=:visibile')
       ->orderBy('m.ordinamento', 'ASC')
       ->addOrderBy('l.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'visibile' => 1]);
+			->setParameter('alunno', $alunno)
+			->setParameter('visibile', 1);
     if ($materia) {
       $voti = $voti
         ->andWhere('v.materia=:materia')
@@ -452,7 +467,7 @@ class GenitoriUtil {
       ->join(Entrata::class, 'e', 'WITH', 'a.id=e.alunno')
       ->where('a.id=:alunno')
       ->orderBy('e.data', 'DESC')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per ritardi
@@ -493,7 +508,7 @@ class GenitoriUtil {
       ->join(Uscita::class, 'u', 'WITH', 'a.id=u.alunno')
       ->where('a.id=:alunno')
       ->orderBy('u.data', 'DESC')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per uscite
@@ -535,8 +550,10 @@ class GenitoriUtil {
       ->join('l.classe', 'c')
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where("al.alunno=:alunno AND m.tipo IN ('N', 'E') AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
-      ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getSingleScalarResult();
     if ($alunno->getReligione() == 'S' || $alunno->getReligione() == 'A') {
@@ -548,8 +565,10 @@ class GenitoriUtil {
         ->join('l.classe', 'c')
         ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
         ->where("al.alunno=:alunno AND m.tipo='R' AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
-        ->setParameters(['alunno' => $alunno, 'anno' => $classe->getAnno(),
-         'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+        ->setParameter('alunno', $alunno)
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->getQuery()
         ->getSingleScalarResult();
       if ($ass_rel) {
@@ -602,8 +621,11 @@ class GenitoriUtil {
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=:alunno AND n.data BETWEEN cc.inizio AND cc.fine')
       ->where("n.annullata IS NULL AND n.tipo=:tipo AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
       ->andWhere('NOT EXISTS ('.$subquery.')')
-      ->setParameters(['tipo' => 'C', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('tipo', 'C')
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -628,8 +650,11 @@ class GenitoriUtil {
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id AND n.data BETWEEN cc.inizio AND cc.fine')
       ->where("n.annullata IS NULL AND n.tipo=:tipo AND a.id=:alunno AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR n.classe=cc.classe)")
-      ->setParameters(['tipo' => 'I', 'alunno' => $alunno, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('tipo', 'I')
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note individuali
@@ -674,7 +699,7 @@ class GenitoriUtil {
       ->join('c.materia', 'm')
       ->where('o.alunno=:alunno')
       ->orderBy('o.data', 'DESC')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per osservazioni
@@ -705,7 +730,7 @@ class GenitoriUtil {
     $periodi = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->select('s.periodo,s.stato')
       ->where('s.classe=:classe')
-      ->setParameters(['classe' => $classe])
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     $lista = [];
@@ -729,8 +754,9 @@ class GenitoriUtil {
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->select('s.periodo,s.stato')
       ->where('s.classe=:classe AND s.stato=:stato AND s.visibile<=:ora')
-      ->setParameters(['classe' => $classe, 'stato' => 'C',
-        'ora' => (new DateTime())->format('Y-m-d H:i:00')])
+			->setParameter('classe', $classe)
+			->setParameter('stato', 'C')
+			->setParameter('ora', (new DateTime())->format('Y-m-d H:i:00'))
       ->orderBy('s.data', 'DESC')
       ->setMaxResults(1);
     if ($periodo) {
@@ -771,7 +797,7 @@ class GenitoriUtil {
       ->select('m.id,m.nome,m.tipo,m.ordinamento')
       ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['lista' => $listaMaterie])
+			->setParameter('lista', $listaMaterie)
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -786,7 +812,9 @@ class GenitoriUtil {
     $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getResult();
     foreach ($voti as $v) {
@@ -844,7 +872,9 @@ class GenitoriUtil {
           $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
-            ->setParameters(['classe' => $classe, 'periodo' => 'R', 'alunno' => $alunno])
+            ->setParameter('classe', $classe)
+            ->setParameter('periodo', 'R')
+            ->setParameter('alunno', $alunno)
             ->getQuery()
             ->getResult();
           foreach ($voti as $v) {
@@ -881,7 +911,9 @@ class GenitoriUtil {
       ->join('c.materia', 'm')
       ->where('c.docente=:docente AND c.classe=:classe AND c.attiva=:attiva')
       ->orderBy('m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['docente' => $docente, 'classe' => $classe, 'attiva' => 1])
+			->setParameter('docente', $docente)
+			->setParameter('classe', $classe)
+			->setParameter('attiva', 1)
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $m) {
@@ -910,8 +942,11 @@ class GenitoriUtil {
       ->leftJoin('s.classe', 'c')
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=:alunno')
       ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo NOT IN (:rinviati)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe,
-        'stato' => 'C', 'adesso' => $adesso, 'rinviati' => ['R', 'X']])
+			->setParameter('alunno', $alunno)
+			->setParameter('classe', $classe)
+			->setParameter('stato', 'C')
+			->setParameter('adesso', $adesso)
+			->setParameter('rinviati', ['R', 'X'])
       ->orderBy('s.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -926,7 +961,7 @@ class GenitoriUtil {
     $storico = $this->em->getRepository(StoricoEsito::class)->createQueryBuilder('se')
       ->join('se.alunno', 'a')
       ->where('a.id=:alunno')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getOneOrNullResult();
     if ($storico) {
@@ -999,7 +1034,7 @@ class GenitoriUtil {
       ->join('sv.materia', 'm')
       ->where('sv.storicoEsito=:esito')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['esito' => $dati['esito']])
+			->setParameter('esito', $dati['esito'])
       ->getQuery()
       ->getResult();
     // carenze
@@ -1022,8 +1057,13 @@ class GenitoriUtil {
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
       ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
-      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione,
-        'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X', 'data' => new DateTime()])
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classeAnno)
+			->setParameter('sezione', $classeSezione)
+			->setParameter('gruppo', $classeGruppo)
+			->setParameter('stato', 'C')
+			->setParameter('rinviato', 'X')
+			->setParameter('data', new DateTime())
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -1032,7 +1072,8 @@ class GenitoriUtil {
         ->join('vs.materia', 'm')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['scrutinio' => $dati['esitoRinviato']->getScrutinio(), 'alunno' => $alunno])
+        ->setParameter('scrutinio', $dati['esitoRinviato']->getScrutinio())
+        ->setParameter('alunno', $alunno)
         ->getQuery()
         ->getResult();
     }
@@ -1061,7 +1102,7 @@ class GenitoriUtil {
       ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno')
       ->where('a.id=:alunno')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
@@ -1180,7 +1221,8 @@ class GenitoriUtil {
       ->join(Assenza::class, 'ass', 'WITH', 'ass.alunno=a.id')
       ->where('a.id=:alunno AND a.classe=:classe')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse()])
+			->setParameter('alunno', $alunno)
+			->setParameter('classe', $alunno->getClasse())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze

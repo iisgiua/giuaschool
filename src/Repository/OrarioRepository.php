@@ -55,8 +55,9 @@ class OrarioRepository extends EntityRepository {
     $sovrapposizioni = $this->createQueryBuilder('o')
       ->where('o.sede=:sede')
       ->andWhere('(:inizio BETWEEN o.inizio AND o.fine) OR (:fine BETWEEN o.inizio AND o.fine) OR (:inizio <= o.inizio AND :fine >= o.fine)')
-      ->setParameters(['sede' => $orario->getSede(), 'inizio' => $orario->getInizio()->format('Y-m-d'),
-        'fine' => $orario->getFine()->format('Y-m-d')]);
+      ->setParameter('sede', $orario->getSede())
+      ->setParameter('inizio', $orario->getInizio()->format('Y-m-d'))
+      ->setParameter('fine', $orario->getFine()->format('Y-m-d'));
     if ($orario->getId()) {
       $sovrapposizioni = $sovrapposizioni->andWhere('o.id!=:orario')->setParameter('orario', $orario->getId());
     }

@@ -120,7 +120,7 @@ class StaffController extends BaseController {
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
             ->where('d.abilitato=:abilitato')
             ->orderBy('d.cognome,d.nome', 'ASC')
-            ->setParameters(['abilitato' => 1]),
+            ->setParameter('abilitato', 1),
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
@@ -366,13 +366,13 @@ class StaffController extends BaseController {
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
           $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -523,13 +523,13 @@ class StaffController extends BaseController {
     $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     // cancella avviso
@@ -620,7 +620,7 @@ class StaffController extends BaseController {
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
             ->where('d.abilitato=:abilitato')
             ->orderBy('d.cognome,d.nome', 'ASC')
-            ->setParameters(['abilitato' => 1]),
+            ->setParameter('abilitato', 1),
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
@@ -702,7 +702,9 @@ class StaffController extends BaseController {
           ->join('o.sede', 's')
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno AND so.ora=:ora')
           ->orderBy('s.ordinamento', 'ASC')
-          ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'giorno' => 1, 'ora' => 2])
+          ->setParameter('data', (new DateTime())->format('Y-m-d'))
+          ->setParameter('giorno', 1)
+          ->setParameter('ora', 2)
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
@@ -715,7 +717,8 @@ class StaffController extends BaseController {
           ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno ')
           ->orderBy('s.ordinamento', 'ASC')
           ->addOrderBy('so.ora', 'DESC')
-          ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'giorno' => 1])
+          ->setParameter('data', (new DateTime())->format('Y-m-d'))
+          ->setParameter('giorno', 1)
           ->setMaxResults(1)
           ->getQuery()
           ->getSingleScalarResult();
@@ -821,13 +824,13 @@ class StaffController extends BaseController {
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
           $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -941,7 +944,7 @@ class StaffController extends BaseController {
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
           ->where('d.abilitato=:abilitato')
           ->orderBy('d.cognome,d.nome', 'ASC')
-          ->setParameters(['abilitato' => 1]),
+          ->setParameter('abilitato', 1),
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
@@ -1114,13 +1117,13 @@ class StaffController extends BaseController {
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
           $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -1227,7 +1230,7 @@ class StaffController extends BaseController {
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('d')
           ->where('d.abilitato=:abilitato')
           ->orderBy('d.cognome,d.nome', 'ASC')
-          ->setParameters(['abilitato' => 1]),
+          ->setParameter('abilitato', 1),
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
@@ -1354,7 +1357,7 @@ class StaffController extends BaseController {
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -1536,7 +1539,8 @@ class StaffController extends BaseController {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
       ->where('a.classe=:classe AND a.abilitato=:abilitato')
-      ->setParameters(['classe' => $id, 'abilitato' => 1])
+      ->setParameter('classe', $id)
+      ->setParameter('abilitato', 1)
       ->orderBy('a.cognome,a.nome', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -2667,7 +2671,8 @@ class StaffController extends BaseController {
         $assenti = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->where('a.id IN (:elenco)')
-          ->setParameters(['elenco' => $elenco, 'data' => $data_obj->format('Y-m-d')])
+          ->setParameter('elenco', $elenco)
+          ->setParameter('data', $data_obj->format('Y-m-d'))
           ->getQuery()
           ->getResult();
         // form di inserimento
@@ -2680,7 +2685,7 @@ class StaffController extends BaseController {
             'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
               ->where('a.id IN (:elenco)')
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-              ->setParameters(['elenco' => $elenco]),
+              ->setParameter('elenco', $elenco),
             'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
             'expanded' => true,
             'multiple' => true,

@@ -873,8 +873,10 @@ class AssenzeController extends BaseController {
           ->set('ass.giustificato', ':giustificato')
           ->set('ass.docenteGiustifica', ':docenteGiustifica')
           ->where('ass.id in (:ids)')
-          ->setParameters(['modificato' => new DateTime(), 'giustificato' => $data_obj,
-            'docenteGiustifica' => $this->getUser(), 'ids' => explode(',', $ass->ids)])
+          ->setParameter('modificato', new DateTime())
+          ->setParameter('giustificato', $data_obj)
+          ->setParameter('docenteGiustifica', $this->getUser())
+          ->setParameter('ids', explode(',', $ass->ids))
           ->getQuery()
           ->getResult();
       }
@@ -884,8 +886,9 @@ class AssenzeController extends BaseController {
           ->set('ass.modificato', ':modificato')
           ->set('ass.docenteGiustifica', ':docenteGiustifica')
           ->where('ass.id in (:ids)')
-          ->setParameters(['modificato' => new DateTime(), 'docenteGiustifica' => $this->getUser(),
-            'ids' => explode(',', $ass->ids)])
+          ->setParameter('modificato', new DateTime())
+          ->setParameter('docenteGiustifica', $this->getUser())
+          ->setParameter('ids', explode(',', $ass->ids))
           ->getQuery()
           ->getResult();
       }

@@ -71,7 +71,8 @@ class CattedraRepository extends BaseRepository {
       ->leftJoin('c.alunno', 'a')
       ->where('c.docente=:docente AND c.attiva=:attiva')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'attiva' => 1])
+      ->setParameter('docente', $docente)
+      ->setParameter('attiva', 1)
       ->getQuery()
       ->getResult();
     // formato dati
@@ -117,8 +118,9 @@ class CattedraRepository extends BaseRepository {
       ->join('c.classe', 'cl')
       ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // elimina docenti in più
@@ -166,7 +168,8 @@ class CattedraRepository extends BaseRepository {
       ->leftJoin('c.alunno', 'a')
       ->where('c.docente=:docente AND c.attiva=:attiva')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'attiva' => 1])
+      ->setParameter('docente', $docente)
+      ->setParameter('attiva', 1)
       ->getQuery()
       ->getResult();
     // array associativo
@@ -182,14 +185,15 @@ class CattedraRepository extends BaseRepository {
       $dati['lista'][$cat->getId()]['orario'] = [];
       if ($cat->getMateria()->getTipo() != 'S') {
         // cattedra curricolare
-        $orario = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
+        $orario = $this->getEntityManager()->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
           ->join(ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->where('od.cattedra=:cattedra AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('od.giorno,od.ora', 'ASC')
-          ->setParameters(['cattedra' => $cat, 'sede' => $cat->getClasse()->getSede(),
-            'data' => new DateTime('today')])
+          ->setParameter('cattedra', $cat)
+          ->setParameter('sede', $cat->getClasse()->getSede())
+          ->setParameter('data', new DateTime( 'today'))
           ->getQuery()
           ->getArrayResult();
         foreach ($orario as $o) {
@@ -197,15 +201,19 @@ class CattedraRepository extends BaseRepository {
         }
       } else {
         // cattedra di sostegno: imposta orari di tutte le materie della classe
-        $orari = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
+        $orari = $this->getEntityManager()->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
           ->join(ScansioneOraria::class, 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->join('od.cattedra', 'c')
           ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('c.id,od.giorno,od.ora', 'ASC')
-          ->setParameters(['classe' => $cat->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0,
-            'sede' => $cat->getClasse()->getSede(), 'data' => new DateTime('today')])
+          ->setParameter('classe', $cat->getClasse())
+          ->setParameter('attiva', 1)
+          ->setParameter('tipo', 'N')
+          ->setParameter('supplenza', 0)
+          ->setParameter('sede', $cat->getClasse()->getSede())
+          ->setParameter('data', new DateTime('today'))
           ->getQuery()
           ->getArrayResult();
         foreach ($orari as $o) {
@@ -265,7 +273,8 @@ class CattedraRepository extends BaseRepository {
       ->leftJoin('c.alunno', 'a')
       ->where("c.docente=:docente AND c.classe=:classe AND c.attiva=1 AND m.tipo IN ('N', 'E')")
       ->orderBy('m.nomeBreve,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'classe' => $classe])
+      ->setParameter('docente', $docente)
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getResult();
     // dati materie
@@ -319,8 +328,9 @@ class CattedraRepository extends BaseRepository {
     } else {
       $cattedre
         ->andWhere("cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-          'gruppo' => $classe->getGruppo()]);
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo());
     }
     if (!$potenziamento) {
       $cattedre->andWhere("c.tipo!='P'");

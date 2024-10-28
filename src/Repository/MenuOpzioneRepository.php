@@ -40,7 +40,8 @@ class MenuOpzioneRepository extends EntityRepository {
         ->leftJoin(MenuOpzione::class, 'o2', 'WITH', 'o.menu=o2.sottoMenu AND INSTR(o2.ruolo, :ruolo) > 0')
         ->leftJoin(MenuOpzione::class, 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND INSTR(o3.ruolo, :ruolo) > 0')
         ->where('o.url=:url AND INSTR(o.ruolo, :ruolo) > 0')
-        ->setParameters(['url' => $url, 'ruolo' => $ruolo])
+        ->setParameter('url', $url)
+        ->setParameter('ruolo', $ruolo)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();

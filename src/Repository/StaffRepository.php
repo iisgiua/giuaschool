@@ -28,7 +28,8 @@ class StaffRepository extends BaseRepository {
       ->select('DISTINCT s.id')
       ->where('s.abilitato=:abilitato AND NOT s INSTANCE OF App\Entity\Preside')
       ->andWhere('s.sede IS NULL OR s.sede IN (:sedi)')
-      ->setParameters(['abilitato' => 1, 'sedi' => $sedi])
+      ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();
     // restituisce la lista degli ID

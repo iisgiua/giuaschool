@@ -65,7 +65,7 @@ class BachecaUtil {
     $dati['sedi'] = $this->em->getRepository(Sede::class)->createQueryBuilder('s')
       ->select('s.citta')
       ->where('s.id IN (:lista)')
-      ->setParameters(['lista' => array_map(fn($s) => $s->getId(), $avviso->getSedi()->toArray())])
+			->setParameter('lista', array_map(fn($s) => $s->getId(), $avviso->getSedi()->toArray()))
       ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -90,7 +90,8 @@ class BachecaUtil {
         ->leftJoin(AvvisoUtente::class, 'ag1', 'WITH', 'ag1.utente=g1.id AND ag1.avviso=:avviso')
         ->leftJoin(AvvisoUtente::class, 'ag2', 'WITH', 'ag2.utente=g2.id AND ag2.avviso=:avviso')
         ->where('a.id IN (:lista)')
-        ->setParameters(['lista' => $avviso->getFiltro(), 'avviso' => $avviso])
+        ->setParameter('lista', $avviso->getFiltro())
+        ->setParameter('avviso', $avviso)
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -99,7 +100,7 @@ class BachecaUtil {
       $dati['materie'] = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('m.nome')
         ->where('m.id IN (:lista)')
-        ->setParameters(['lista' => $avviso->getFiltro()])
+			  ->setParameter('lista', $avviso->getFiltro())
         ->orderBy('m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -350,7 +351,8 @@ class BachecaUtil {
     // controlla destinatario
     $dest = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->where('au.avviso=:avviso AND au.utente=:utente')
-      ->setParameters(['avviso' => $avviso, 'utente' => $utente])
+			->setParameter('avviso', $avviso)
+			->setParameter('utente', $utente)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -379,7 +381,7 @@ class BachecaUtil {
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.anno=0 AND au.utente=:utente')
       ->orderBy('a.data', 'DESC')
-      ->setParameters(['utente' => $utente]);
+			->setParameter('utente', $utente);
     if ($search['visualizza'] == 'D') {
       $avvisi = $avvisi
         ->andWhere('au.letto IS NULL');
@@ -411,7 +413,7 @@ class BachecaUtil {
     $avvisi = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
       ->select('COUNT(avc.avviso)')
       ->where('avc.classe=:classe AND avc.letto IS NULL')
-      ->setParameters(['classe' => $classe])
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -431,7 +433,7 @@ class BachecaUtil {
       ->join(AvvisoClasse::class, 'avc', 'WITH', 'avc.avviso=a.id')
       ->where('a.anno=0 AND avc.classe=:classe AND avc.letto IS NULL')
       ->orderBy('a.data', 'ASC')
-      ->setParameters(['classe' => $classe])
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getResult();
     $dati['lista'] = $avvisi;
@@ -455,14 +457,15 @@ class BachecaUtil {
       // tutti gli avvisi
       $avc = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
         ->where('avc.classe=:classe AND avc.letto IS NULL')
-        ->setParameters(['classe' => $classe])
+			  ->setParameter('classe', $classe)
         ->getQuery()
         ->getResult();
     } elseif (((int) $id) > 0) {
       // solo avviso indicato
       $avc = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
         ->where('avc.avviso=:avviso AND avc.classe=:classe AND avc.letto IS NULL')
-        ->setParameters(['avviso' => (int) $id, 'classe' => $classe])
+        ->setParameter('avviso', (int) $id)
+        ->setParameter('classe', $classe)
         ->getQuery()
         ->getResult();
     }
@@ -488,7 +491,8 @@ class BachecaUtil {
     $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->where('a.tipo=:tipo AND c.classe=:classe')
-      ->setParameters(['tipo' => 'O', 'classe' => $classe])
+			->setParameter('tipo', 'O')
+			->setParameter('classe', $classe)
       ->orderBy('a.data', 'DESC')
       ->getQuery();
     // paginazione
@@ -621,7 +625,8 @@ class BachecaUtil {
     // solo avviso indicato
     $au = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->where('au.avviso=:avviso AND au.utente=:utente AND au.letto IS NULL')
-      ->setParameters(['avviso' => $avviso, 'utente' => $utente])
+			->setParameter('avviso', $avviso)
+			->setParameter('utente', $utente)
       ->getQuery()
       ->getOneOrNullResult();
     // aggiorna data lettura

@@ -87,7 +87,7 @@ class SegreteriaUtil {
     $assenze = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
       ->select('a.data')
       ->where('a.alunno=:alunno')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     foreach ($assenze as $a) {
@@ -97,7 +97,8 @@ class SegreteriaUtil {
     $entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
       ->select('e.data')
       ->where('e.alunno=:alunno AND e.ritardoBreve!=:breve')
-      ->setParameters(['alunno' => $alunno, 'breve' => 1])
+			->setParameter('alunno', $alunno)
+			->setParameter('breve', 1)
       ->getQuery()
       ->getArrayResult();
     foreach ($entrate as $e) {
@@ -107,7 +108,7 @@ class SegreteriaUtil {
     $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
       ->select('u.data')
       ->where('u.alunno=:alunno')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     foreach ($uscite as $u) {
@@ -120,7 +121,7 @@ class SegreteriaUtil {
     // cambio classe
     $cambi = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
       ->where('cc.alunno=:alunno')
-      ->setParameters(['alunno' => $alunno])
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getResult();
     foreach ($cambi as $c) {
@@ -161,8 +162,9 @@ class SegreteriaUtil {
     // aggiunge festivi
     $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo AND f.data<=:data')
-      ->setParameters(['sede' => ($classe ? $classe->getSede() : null), 'tipo' => 'F',
-        'data' => $fine->format('Y-m-d')])
+			->setParameter('sede', ($classe ? $classe->getSede() : null))
+			->setParameter('tipo', 'F')
+			->setParameter('data', $fine->format('Y-m-d'))
       ->getQuery()
       ->getResult();
     foreach ($festivi as $f) {
@@ -188,8 +190,10 @@ class SegreteriaUtil {
         ->leftJoin('s.classe', 'c')
         ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=:alunno')
         ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.periodo NOT IN (:rinviati)')
-        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C',
-          'rinviati' => ['R', 'X']])
+        ->setParameter('alunno', $alu)
+        ->setParameter('classe', $alu->getClasse())
+        ->setParameter('stato', 'C')
+        ->setParameter('rinviati', ['R', 'X'])
         ->orderBy('s.data', 'DESC')
         ->getQuery()
         ->getResult();
@@ -207,7 +211,7 @@ class SegreteriaUtil {
       $storico = $this->em->getRepository(StoricoEsito::class)->createQueryBuilder('se')
         ->join('se.alunno', 'a')
         ->where('a.id=:alunno')
-        ->setParameters(['alunno' => $alu])
+			  ->setParameter('alunno', $alu)
         ->getQuery()
         ->getOneOrNullResult();
       if ($storico) {
@@ -241,7 +245,10 @@ class SegreteriaUtil {
           ->join('vs.materia', 'm')
           ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo IN (:tipo) AND vs.unico IS NOT NULL AND vs.unico<:suff')
           ->orderBy('m.ordinamento', 'ASC')
-          ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'tipo' => ['N', 'E'], 'suff' => 6])
+          ->setParameter('scrutinio', $scrutinio)
+          ->setParameter('alunno', $alunno)
+          ->setParameter('tipo', ['N', 'E'])
+          ->setParameter('suff', 6)
           ->getQuery()
           ->getArrayResult();
       } elseif ($scrutinio->getPeriodo() == 'F') {
@@ -312,8 +319,12 @@ class SegreteriaUtil {
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
       ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
-      ->setParameters(['alunno' => $alunno, 'anno' => $classeAnno, 'sezione' => $classeSezione,
-        'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
+			->setParameter('alunno', $alunno)
+			->setParameter('anno', $classeAnno)
+			->setParameter('sezione', $classeSezione)
+			->setParameter('gruppo', $classeGruppo)
+			->setParameter('stato', 'C')
+			->setParameter('rinviato', 'X')
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -368,7 +379,8 @@ class SegreteriaUtil {
         $ammessi = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.scrutinio=:scrutinio AND e.esito=:ammesso')
-          ->setParameters(['scrutinio' => $dati['esitoRinviato']->getScrutinio(), 'ammesso' => 'A'])
+          ->setParameter('scrutinio', $dati['esitoRinviato']->getScrutinio())
+          ->setParameter('ammesso', 'A')
           ->getQuery()
           ->getSingleScalarResult();
         if ($ammessi > 0) {

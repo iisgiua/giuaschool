@@ -39,7 +39,7 @@ class EsitoRepository extends EntityRepository {
         $dati['visto'][$utente->getId()] = new DateTime();
         $esito->setDati($dati);
         // memorizza dati
-        $this->_em->flush();
+        $this->getEntityManager()->flush();
       }
     }
   }
@@ -65,7 +65,7 @@ class EsitoRepository extends EntityRepository {
         ->setScrutinio($scrutinio)
         ->setAlunno($alunno)
         ->setDati($datiEsito);
-      $this->_em->persist($esito);
+      $this->getEntityManager()->persist($esito);
     }
     if (in_array($codiceEsito, ['R', 'L', 'E', 'X'])) {
       // imposta esito speciale

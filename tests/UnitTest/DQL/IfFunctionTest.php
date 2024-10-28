@@ -90,7 +90,7 @@ class IfFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 26: Error: Expected Doctrine\ORM\Query\Lexer::T_COMMA, got ')'", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 26: Error: Expected Doctrine\ORM\Query\TokenType::T_COMMA, got ')'", $exception);
     // sintassi errata: due parametri
     $query->setDQL("SELECT IF(c.valore IS NULL, 's') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
@@ -102,7 +102,7 @@ class IfFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 31: Error: Expected Doctrine\ORM\Query\Lexer::T_COMMA, got ')'", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 31: Error: Expected Doctrine\ORM\Query\TokenType::T_COMMA, got ')'", $exception);
     // sintassi errata: quattro parametri
     $query->setDQL("SELECT IF(c.valore IS NULL, 's', '*', 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
@@ -114,7 +114,7 @@ class IfFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 36: Error: Expected Doctrine\ORM\Query\Lexer::T_CLOSE_PARENTHESIS, got ','", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 36: Error: Expected Doctrine\ORM\Query\TokenType::T_CLOSE_PARENTHESIS, got ','", $exception);
   }
 
   /**

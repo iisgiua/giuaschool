@@ -136,7 +136,7 @@ class ConfigLoader {
       $classi = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.coordinatore=:docente')
-        ->setParameters(['docente' => $utente])
+        ->setParameter('docente', $utente)
         ->getQuery()
         ->getArrayResult();
       $lista = implode(',', array_column($classi, 'id'));

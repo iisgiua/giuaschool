@@ -37,6 +37,8 @@ use App\Form\ScrutinioPresenza;
 use App\Form\ScrutinioPresenzaType;
 use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -132,7 +134,8 @@ class ScrutinioUtil {
       ->select('d.periodo,s.stato')
       ->leftJoin(Scrutinio::class, 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where('d.dataProposte<=:data')
-      ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'classe' => $classe])
+			->setParameter('data', (new DateTime())->format('Y-m-d'))
+			->setParameter('classe', $classe)
       ->orderBy('d.data', 'ASC')
       ->getQuery()
       ->getResult();
@@ -175,7 +178,8 @@ class ScrutinioUtil {
       ->select('d.periodo,s.stato')
       ->leftJoin(Scrutinio::class, 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where('d.dataProposte<=:data')
-      ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'classe' => $classe])
+			->setParameter('data', (new DateTime())->format('Y-m-d'))
+			->setParameter('classe', $classe)
       ->orderBy('d.data', 'ASC')
       ->getQuery()
       ->getResult();
@@ -205,15 +209,15 @@ class ScrutinioUtil {
     if ($periodo == 'G') {
       // alunni con sospensione nella materia
       $cond = '';
-      $param = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+      $param = [new Parameter('anno', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
       if (!empty($classe->getGruppo())) {
         $cond = ' AND c.gruppo=:gruppo';
-        $param['gruppo'] = $classe->getGruppo();
+        $param[] = new Parameter('gruppo', $classe->getGruppo());
       }
       $scrutini = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
         ->join('s.classe', 'c')
         ->where("s.periodo='F' AND c.anno=:anno AND c.sezione=:sezione".$cond)
-        ->setParameters($param)
+        ->setParameters(new ArrayCollection($param))
         ->getQuery()
         ->getResult();
       $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutini));
@@ -222,7 +226,9 @@ class ScrutinioUtil {
         ->join('vs.alunno', 'a')
         ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=s.id')
         ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.unico<6 AND vs.materia=:materia AND e.esito='S'")
-        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutini, 'materia' => $materia])
+        ->setParameter('alunni', $idAlunni)
+        ->setParameter('scrutini', $scrutini)
+        ->setParameter('materia', $materia)
         ->getQuery()
         ->getResult();
       foreach ($votiSospesi as $voto) {
@@ -232,21 +238,21 @@ class ScrutinioUtil {
     } elseif ($periodo == 'R') {
       // alunni con scrutinio rinviato
       $cond = '';
-      $param = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+      $param = [new Parameter('anno', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
       if (!empty($classe->getGruppo())) {
         $cond = ' AND c.gruppo=:gruppo';
-        $param['gruppo'] = $classe->getGruppo();
+        $param[] = new Parameter('gruppo', $classe->getGruppo());
       }
       $scrutiniF = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
         ->join('s.classe', 'c')
         ->where("s.periodo='F' AND c.anno=:anno AND c.sezione=:sezione".$cond)
-        ->setParameters($param)
+        ->setParameters(new ArrayCollection($param))
         ->getQuery()
         ->getResult();
       $scrutiniG = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
         ->join('s.classe', 'c')
         ->where("s.periodo='G' AND c.anno=:anno AND c.sezione=:sezione".$cond)
-        ->setParameters($param)
+        ->setParameters(new ArrayCollection($param))
         ->getQuery()
         ->getResult();
       $idAlunni = array_merge(... array_map(fn($s) => array_keys($s->getDato('scrutinabili')), $scrutiniG));
@@ -255,14 +261,17 @@ class ScrutinioUtil {
         ->join('e.scrutinio', 's')
         ->join('e.alunno', 'a')
         ->where("e.alunno IN (:alunni) AND e.scrutinio IN (:scrutini) AND e.esito='X'")
-        ->setParameters(['alunni' => $idAlunni, 'scrutini' => $scrutiniG])
+        ->setParameter('alunni', $idAlunni)
+        ->setParameter('scrutini', $scrutiniG)
         ->getQuery()
         ->getResult();
       $votiSospesi = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->join('vs.alunno', 'a')
         ->where("vs.alunno IN (:alunni) AND vs.scrutinio IN (:scrutini) AND vs.materia=:materia AND vs.unico<6")
-        ->setParameters(['alunni' => $rinviati, 'scrutini' => $scrutiniF, 'materia' => $materia])
+        ->setParameter('alunni', $rinviati)
+        ->setParameter('scrutini', $scrutiniF)
+        ->setParameter('materia', $materia)
         ->getQuery()
         ->getResult();
       foreach ($votiSospesi as $voto) {
@@ -279,7 +288,7 @@ class ScrutinioUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->where('a.id IN (:alunni)'.$religione)
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $listaAlunni])
+			->setParameter('alunni', $listaAlunni)
       ->getQuery()
       ->getResult();
     foreach ($alunni as $alu) {
@@ -328,7 +337,8 @@ class ScrutinioUtil {
       ->select('d.periodo,s.stato')
       ->leftJoin(Scrutinio::class, 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where($dataAttivazione.'<=:data')
-      ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'classe' => $classe])
+			->setParameter('data', (new DateTime())->format('Y-m-d'))
+			->setParameter('classe', $classe)
       ->orderBy('d.data', 'DESC')
       ->setMaxResults(1)
       ->getQuery()
@@ -354,7 +364,8 @@ class ScrutinioUtil {
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->select('s.periodo,s.stato')
       ->where('s.classe=:classe AND s.stato=:stato')
-      ->setParameters(['classe' => $classe, 'stato' => 'C'])
+			->setParameter('classe', $classe)
+			->setParameter('stato', 'C')
       ->orderBy('s.data', 'DESC')
       ->setMaxResults(1)
       ->getQuery()
@@ -646,7 +657,8 @@ class ScrutinioUtil {
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
-      ->setParameters(['periodo' => $periodo, 'classe' => $classe])
+			->setParameter('periodo', $periodo)
+			->setParameter('classe', $classe)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -713,8 +725,9 @@ class ScrutinioUtil {
       ->join('c.classe', 'cl')
       ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -879,12 +892,14 @@ class ScrutinioUtil {
             ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
             ->where('al.alunno=:alunno AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine')
             ->andWhere("(c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe")
-            ->setParameters(['alunno' => $alunno, 'materia' => $materia,
-              'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo'.
-                ($scrutinio->getPeriodo() == 'P' ? 1 : 2).'_fine'),
-              'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-              'gruppo' => $classe->getGruppo()])
+            ->setParameter('alunno', $alunno)
+            ->setParameter('materia', $materia)
+            ->setParameter('inizio', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))
+            ->setParameter('fine', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo'.
+              ($scrutinio->getPeriodo() == 'P' ? 1 : 2).'_fine'))
+            ->setParameter('anno', $classe->getAnno())
+            ->setParameter('sezione', $classe->getSezione())
+            ->setParameter('gruppo', $classe->getGruppo())
             ->getQuery()
             ->getSingleScalarResult();
           $ore = ($ore ? ((int) $ore) : 0);
@@ -896,8 +911,11 @@ class ScrutinioUtil {
               ->set('vs.modificato', ':modificato')
               ->set('vs.assenze', ':assenze')
               ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
-              ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materia' => $materia,
-                'modificato' => new DateTime(), 'assenze' => $ore])
+              ->setParameter('scrutinio', $scrutinio)
+              ->setParameter('alunno', $alunno)
+              ->setParameter('materia', $materia,)
+              ->setParameter('modificato', new DateTime())
+              ->setParameter('assenze', $ore)
               ->getQuery()
               ->getResult();
           } else {
@@ -984,7 +1002,8 @@ class ScrutinioUtil {
     // legge dati scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
-      ->setParameters(['periodo' => $periodo, 'classe' => $classe])
+			->setParameter('periodo', $periodo)
+			->setParameter('classe', $classe)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -999,7 +1018,7 @@ class ScrutinioUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.id IN (:lista)')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $scrutinio->getDato('materie')])
+			  ->setParameter('lista', $scrutinio->getDato('materie'))
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -1274,7 +1293,7 @@ class ScrutinioUtil {
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
       ->where('a.id in (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista])
+			->setParameter('lista', $lista)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -1292,7 +1311,8 @@ class ScrutinioUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
         ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $scrutinio->getDato('materie'),	'sostegno' => 'S'])
+        ->setParameter('lista', $scrutinio->getDato('materie'))
+        ->setParameter('sostegno', 'S')
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -1306,7 +1326,7 @@ class ScrutinioUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
         ->where("m.id IN (:lista) AND m.tipo!='S'")
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $listaMaterie])
+			  ->setParameter('lista', $listaMaterie)
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -1339,10 +1359,9 @@ class ScrutinioUtil {
       $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->join('e.scrutinio', 's')
         ->where('e.alunno IN (:lista) AND s.classe=:classe AND s.periodo=:periodo')
-        ->setParameters([
-          'lista' => $lista,
-          'classe' => $classe,
-          'periodo' => $periodo])
+        ->setParameter('lista', $lista)
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getResult();
       foreach ($esiti as $e) {
@@ -1369,7 +1388,8 @@ class ScrutinioUtil {
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -1378,7 +1398,7 @@ class ScrutinioUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista_id])
+			->setParameter('lista', $lista_id)
       ->getQuery()
       ->getResult();
     foreach ($alunni as $alu) {
@@ -1436,7 +1456,7 @@ class ScrutinioUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita')
       ->where('a.id IN (:lista)')
-      ->setParameters(['lista' => $scrutinio->getDato('alunni')])
+			->setParameter('lista', $scrutinio->getDato('alunni'))
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -1451,8 +1471,9 @@ class ScrutinioUtil {
     // legge i voti
     $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->where('vs.scrutinio=:scrutinio AND vs.materia=:materia AND vs.alunno IN (:lista)')
-      ->setParameters(['scrutinio' => $scrutinio, 'materia' => $materia,
-        'lista' => array_keys($elenco['alunni'])])
+			->setParameter('scrutinio', $scrutinio)
+			->setParameter('materia', $materia)
+			->setParameter('lista', array_keys($elenco['alunni']))
       ->getQuery()
       ->getResult();
     foreach ($voti as $v) {
@@ -1888,7 +1909,8 @@ class ScrutinioUtil {
     // legge dati scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
-      ->setParameters(['periodo' => $periodo, 'classe' => $classe])
+			->setParameter('periodo', $periodo)
+			->setParameter('classe', $classe)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -1897,7 +1919,8 @@ class ScrutinioUtil {
       $lista = $this->alunniInScrutinio($classe, $periodo);
       $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
-        ->setParameters(['lista' => $lista, 'scrutinio' => $scrutinio])
+        ->setParameter('lista', $lista)
+        ->setParameter('scrutinio', $scrutinio)
         ->getQuery()
         ->getResult();
       foreach ($esiti as $e) {
@@ -2095,7 +2118,7 @@ class ScrutinioUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista])
+			  ->setParameter('lista', $lista)
         ->getQuery()
         ->getResult();
       foreach ($alunni as $alu) {
@@ -2109,7 +2132,11 @@ class ScrutinioUtil {
         ->join('vs.alunno', 'a')
         ->where('s.classe=:classe AND s.periodo=:periodo AND m.tipo IN (:tipo) AND vs.unico IS NOT NULL AND vs.unico<:suff AND a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['suff' => 6, 'classe' => $classe, 'periodo' => $periodo, 'tipo' => ['N',	'E'], 'lista' => $lista])
+        ->setParameter('suff', 6)
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+        ->setParameter('tipo', ['N',	'E'])
+        ->setParameter('lista', $lista)
         ->getQuery()
         ->getResult();
       $dati['debiti'] = [];
@@ -2123,13 +2150,18 @@ class ScrutinioUtil {
         ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
-        ->setParameters(['lista' => $lista, 'esito' => 'N', 'classe' => $classe, 'periodo' => $periodo])
+        ->setParameter('lista', $lista)
+        ->setParameter('esito', 'N')
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
       $non_ammessi = array_column($non_ammessi, 'id');
       $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
         ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+        ->setParameter('stato', 'C')
         ->getQuery()
         ->getOneOrNullResult();
       $noscrut = ($scrutinio->getDato('no_scrutinabili') ?: []);
@@ -2142,8 +2174,8 @@ class ScrutinioUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => array_merge($non_ammessi,
-          ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza')))])
+			  ->setParameter('lista', array_merge($non_ammessi,
+          ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'))))
         ->getQuery()
         ->getArrayResult();
       // legge i debiti
@@ -2153,7 +2185,10 @@ class ScrutinioUtil {
         ->join('e.scrutinio', 's')
         ->where('a.id in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'sospeso' => 'S', 'classe' => $classe, 'periodo' => $periodo])
+			->setParameter('lista', $lista)
+			->setParameter('sospeso', 'S')
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
       // legge le carenze
@@ -2163,7 +2198,10 @@ class ScrutinioUtil {
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito IN (:esiti) AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'esiti' => ['A', 'S'], 'classe' => $classe, 'periodo' => $periodo])
+        ->setParameter('lista', $lista)
+        ->setParameter('esiti', ['A', 'S'])
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
       $dati['carenze'] = [];
@@ -2181,7 +2219,10 @@ class ScrutinioUtil {
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'esito' => 'N', 'classe' => $classe, 'periodo' => $periodo])
+        ->setParameter('lista', $lista)
+        ->setParameter('esito', 'N')
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
     }
@@ -2192,13 +2233,19 @@ class ScrutinioUtil {
       ->join('e.scrutinio', 's')
       ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista, 'esito' => 'A', 'classe' => $classe, 'periodo' => $periodo])
+			->setParameter('lista', $lista)
+			->setParameter('esito', 'A')
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->getQuery()
       ->getSingleScalarResult();
     // controlla se attivare pulsante riapertura o no
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato AND (s.sincronizzazione IS NULL OR s.sincronizzazione=:vuota)')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C', 'vuota' => ''])
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
+			->setParameter('stato', 'C')
+			->setParameter('vuota', '')
       ->getQuery()
       ->getOneOrNullResult();
     $dati['precedente'] = ($docente instanceOf Staff) && $scrutinio;
@@ -2286,13 +2333,15 @@ class ScrutinioUtil {
             ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
             ->where('al.alunno=:alunno AND l.materia=:materia AND l.data>:inizio AND l.data<=:fine')
             ->andWhere("(c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe")
-            ->setParameters(['alunno' => $alunno, 'materia' => $materia,
-              'inizio' => empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome')) ?
-                $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine') :
-                $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine'),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'),
-              'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-              'gruppo' => $classe->getGruppo()])
+            ->setParameter('alunno', $alunno)
+            ->setParameter('materia', $materia)
+            ->setParameter('inizio', empty($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome')) ?
+              $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine') :
+              $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine'))
+            ->setParameter('fine', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))
+            ->setParameter('anno', $classe->getAnno())
+            ->setParameter('sezione', $classe->getSezione())
+            ->setParameter('gruppo', $classe->getGruppo())
             ->getQuery()
             ->getSingleScalarResult();
           $ore = ($ore ? ((int) $ore) : 0);
@@ -2304,8 +2353,11 @@ class ScrutinioUtil {
               ->set('vs.modificato', ':modificato')
               ->set('vs.assenze', ':assenze')
               ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
-              ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materia' => $materia,
-                'modificato' => new DateTime(), 'assenze' => $ore])
+              ->setParameter('scrutinio', $scrutinio)
+              ->setParameter('alunno', $alunno)
+              ->setParameter('materia', $materia)
+              ->setParameter('modificato', new DateTime())
+              ->setParameter('assenze', $ore)
               ->getQuery()
               ->getResult();
           } else {
@@ -2532,7 +2584,7 @@ class ScrutinioUtil {
       ->select('a.id,cc.note')
       ->join(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.id IN (:alunni) AND cc.classe IS NULL')
-      ->setParameters(['alunni' => $scrutinioDati['alunni']])
+			->setParameter('alunni', $scrutinioDati['alunni'])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunniTrasferiti as $alu) {
@@ -2557,7 +2609,8 @@ class ScrutinioUtil {
       ->where('a.id IN (:alunni) AND s.id IN (:scrutini)')
       ->groupBy('a.id,a.cognome,a.nome,a.sesso,a.dataNascita')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['alunni' => $scrutinioDati['alunni'], 'scrutini' => $listaScrutini])
+			->setParameter('alunni', $scrutinioDati['alunni'])
+			->setParameter('scrutini', $listaScrutini)
       ->getQuery()
       ->getArrayResult();
     // imposta ore assenze di alunni
@@ -2569,7 +2622,8 @@ class ScrutinioUtil {
           ->select('SUM(vs.assenze)')
           ->join('vs.scrutinio', 's')
           ->where("vs.alunno=:alunno AND s.periodo='P' AND s.id!=:scrutinio")
-          ->setParameters(['alunno' => $a['id'], 'scrutinio' => $scrutinioP])
+          ->setParameter('alunno', $a['id'])
+          ->setParameter('scrutinio', $scrutinioP)
           ->getQuery()
           ->getSingleScalarResult();
         if ($ore === null) {
@@ -2578,9 +2632,9 @@ class ScrutinioUtil {
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
             ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-            ->setParameters(['alunno' => $a['id'],
-              'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')])
+            ->setParameter('alunno', $a['id'])
+            ->setParameter('inizio', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))
+            ->setParameter('fine', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'))
             ->getQuery()
             ->getSingleScalarResult();
         }
@@ -2594,7 +2648,8 @@ class ScrutinioUtil {
           ->select('SUM(vs.assenze)')
           ->join('vs.scrutinio', 's')
           ->where("vs.alunno=:alunno AND s.periodo='S' AND s.id!=:scrutinio")
-          ->setParameters(['alunno' => $a['id'], 'scrutinio' => $scrutinioS])
+          ->setParameter('alunno', $a['id'])
+          ->setParameter('scrutinio', $scrutinioS)
           ->getQuery()
           ->getSingleScalarResult();
         if ($ore === null) {
@@ -2603,9 +2658,9 @@ class ScrutinioUtil {
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
             ->where('al.alunno=:alunno AND l.data>:inizio AND l.data<=:fine')
-            ->setParameters(['alunno' => $a['id'],
-              'inizio' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'),
-              'fine' => $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine')])
+            ->setParameter('alunno', $a['id'])
+            ->setParameter('inizio', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine'))
+            ->setParameter('fine', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine'))
             ->getQuery()
             ->getSingleScalarResult();
         }
@@ -2648,7 +2703,7 @@ class ScrutinioUtil {
       ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes')
       ->where('a.classe=:classe AND a.frequenzaEstero=1')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['classe' => $classe])
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -2707,8 +2762,10 @@ class ScrutinioUtil {
       ->select('f.data')
       ->where('f.tipo=:festivo AND f.data BETWEEN :inizio AND :fine AND (f.sede IS NULL OR f.sede=:sede)')
       ->orderBy('f.data', 'ASC')
-      ->setParameters(['festivo' => 'F', 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-        'sede' => $classe->getSede()])
+			->setParameter('festivo', 'F')
+			->setParameter('inizio', $inizio->format('Y-m-d'))
+			->setParameter('fine', $fine->format('Y-m-d'))
+			->setParameter('sede', $classe->getSede())
       ->getQuery()
       ->getScalarResult();
     $giorni_festivi = array_column($festivi, 'data');
@@ -2751,7 +2808,9 @@ class ScrutinioUtil {
     $giorni_assenza = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
       ->select('a.data')
       ->where('a.alunno=:alunno AND a.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno_id, 'inizio' => $inizio, 'fine' => $fine])
+			->setParameter('alunno', $alunno_id)
+			->setParameter('inizio', $inizio)
+			->setParameter('fine', $fine)
       ->getQuery()
       ->getScalarResult();
     $giorni_assenza = array_column($giorni_assenza, 'data');
@@ -2768,19 +2827,23 @@ class ScrutinioUtil {
         ->select('n.data')
         ->join('n.alunni', 'a')
         ->where('a.id=:alunno AND n.tipo=:nota AND n.data IN (:date)')
-        ->setParameters(['alunno' => $alunno_id, 'nota' => 'I', 'date' => $giorni_presenza_str])
+        ->setParameter('alunno', $alunno_id)
+        ->setParameter('nota', 'I')
+        ->setParameter('date', $giorni_presenza_str)
         ->getQuery()
         ->getScalarResult();
       $giorni_entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
         ->select('e.data')
         ->where('e.alunno=:alunno AND e.data IN (:date)')
-        ->setParameters(['alunno' => $alunno_id, 'date' => $giorni_presenza_str])
+        ->setParameter('alunno', $alunno_id)
+        ->setParameter('date', $giorni_presenza_str)
         ->getQuery()
         ->getScalarResult();
       $giorni_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
         ->select('u.data')
         ->where('u.alunno=:alunno AND u.data IN (:date)')
-        ->setParameters(['alunno' => $alunno_id, 'date' => $giorni_presenza_str])
+        ->setParameter('alunno', $alunno_id)
+        ->setParameter('date', $giorni_presenza_str)
         ->getQuery()
         ->getScalarResult();
       if (count($giorni_note)+count($giorni_entrate)+count($giorni_uscite) > 0) {
@@ -3129,7 +3192,8 @@ class ScrutinioUtil {
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
+			->setParameter('classe', $alunno->getClasse())
+			->setParameter('periodo', $periodo)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -3141,7 +3205,7 @@ class ScrutinioUtil {
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['lista' => $listaMaterie])
+			->setParameter('lista', $listaMaterie)
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -3158,7 +3222,8 @@ class ScrutinioUtil {
       ->join('vs.materia', 'm')
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno])
+			->setParameter('scrutinio', $scrutinio)
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getResult();
     foreach ($voti as $v) {
@@ -3444,7 +3509,10 @@ class ScrutinioUtil {
       ->join('e.scrutinio', 's')
       ->where('a.id in (:lista) AND e.esito=:ammesso AND s.classe=:classe AND s.periodo=:periodo')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista, 'ammesso' => 'A', 'classe' => $classe, 'periodo' => $periodo])
+			->setParameter('lista', $lista)
+			->setParameter('ammesso', 'A')
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -3491,7 +3559,10 @@ class ScrutinioUtil {
       ->join('e.scrutinio', 's')
       ->where('a.id in (:lista) AND e.esito=:ammesso AND s.classe=:classe AND s.periodo=:periodo')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista, 'ammesso' => 'A', 'classe' => $classe, 'periodo' => $periodo])
+			->setParameter('lista', $lista)
+			->setParameter('ammesso', 'A')
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -3529,7 +3600,9 @@ class ScrutinioUtil {
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['scrutinio' => $scrutinio, 'lista' => $lista_id, 'ammesso' => 'A'])
+        ->setParameter('scrutinio', $scrutinio)
+        ->setParameter('lista', $lista_id)
+        ->setParameter('ammesso', 'A')
         ->getQuery()
         ->getArrayResult();
       foreach ($competenze as $c) {
@@ -3546,7 +3619,9 @@ class ScrutinioUtil {
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND (e.credito=0 OR e.credito IS NULL)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['scrutinio' => $scrutinio, 'lista' => $lista_id, 'ammesso' => 'A'])
+        ->setParameter('scrutinio', $scrutinio)
+        ->setParameter('lista', $lista_id)
+        ->setParameter('ammesso', 'A')
         ->getQuery()
         ->getArrayResult();
       foreach ($crediti as $c) {
@@ -3602,8 +3677,11 @@ class ScrutinioUtil {
         ->join('vs.scrutinio', 's')
         ->where('a.id in (:lista) AND s.classe=:classe AND s.periodo=:periodo AND m.tipo IN (:tipo) AND vs.unico<:suff')
         ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $lista, 'classe' => $classe, 'periodo' => $periodo,
-          'tipo' => ['N', 'E'], 'suff' => 6])
+        ->setParameter('lista', $lista)
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+			  ->setParameter('tipo', ['N', 'E'])
+			  ->setParameter('suff', 6)
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -3623,7 +3701,12 @@ class ScrutinioUtil {
         ->join('vs.materia', 'm')
         ->where('a.id in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo AND vs.unico<:suff AND m.tipo IN (:tipo)')
         ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $lista, 'sospeso' => 'S', 'classe' => $classe, 'periodo' => $periodo, 'suff' => 6, 'tipo' => ['N', 'E']])
+        ->setParameter('lista', $lista)
+        ->setParameter('sospeso', 'S')
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+        ->setParameter('suff', 6)
+        ->setParameter('tipo', ['N', 'E'])
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -3641,8 +3724,12 @@ class ScrutinioUtil {
         ->join('vs.materia', 'm')
         ->where('a.id in (:lista) AND e.esito IN (:esiti) AND s.classe=:classe AND s.periodo=:periodo AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff AND m.tipo=:tipo')
         ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $lista, 'esiti' => ['A', 'S'], 'classe' => $classe, 'periodo' => $periodo,
-          'suff' => 6, 'tipo' => 'N'])
+        ->setParameter('lista', $lista)
+        ->setParameter('esiti', ['A', 'S'])
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+        ->setParameter('suff', 6)
+        ->setParameter('tipo', 'N')
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -3675,7 +3762,9 @@ class ScrutinioUtil {
     // legge esiti
     $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
       ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio AND e.esito IN (:esiti)')
-      ->setParameters(['lista' => $lista, 'scrutinio' => $scrutinio, 'esiti' => ['A','S']])
+			->setParameter('lista', $lista)
+			->setParameter('scrutinio', $scrutinio)
+			->setParameter('esiti', ['A','S'])
       ->getQuery()
       ->getResult();
     // cancella conferme comunicazioni
@@ -3722,8 +3811,11 @@ class ScrutinioUtil {
         ->join('vs.materia', 'm')
         ->where('vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND m.tipo IN (:tipo) AND vs.unico<:suff')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
-          'tipo' => ['N', 'E'], 'suff' => 6])
+        ->setParameter('alunno', $alunno)
+        ->setParameter('classe', $alunno->getClasse())
+        ->setParameter('periodo', $periodo)
+        ->setParameter('tipo', ['N', 'E'])
+        ->setParameter('suff', 6)
         ->getQuery()
         ->getResult();
     } else {
@@ -3733,8 +3825,12 @@ class ScrutinioUtil {
         ->join(Esito::class, 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
         ->where('vs.alunno=:alunno AND vs.unico<:suff AND s.classe=:classe AND s.periodo=:periodo AND m.tipo IN (:tipo) AND e.esito=:sospeso')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['alunno' => $alunno, 'suff' => 6, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
-          'tipo' => ['N', 'E'], 'sospeso' => 'S'])
+        ->setParameter('alunno', $alunno)
+        ->setParameter('suff', 6)
+        ->setParameter('classe', $alunno->getClasse())
+        ->setParameter('periodo', $periodo)
+        ->setParameter('tipo', ['N', 'E'])
+        ->setParameter('sospeso', 'S')
         ->getQuery()
         ->getResult();
     }
@@ -3767,8 +3863,12 @@ class ScrutinioUtil {
       ->join(PropostaVoto::class, 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.periodo=s.periodo')
       ->where('vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND m.tipo=:tipo AND e.esito IN (:esiti) AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
-        'tipo' => 'N', 	'esiti' => ['A','S'], 'suff' => 6])
+			->setParameter('alunno', $alunno)
+			->setParameter('classe', $alunno->getClasse())
+			->setParameter('periodo', $periodo)
+			->setParameter('tipo', 'N')
+			->setParameter('esiti', ['A','S'])
+			->setParameter('suff', 6)
       ->getQuery()
       ->getResult();
     // aggiunge proposte
@@ -3776,8 +3876,10 @@ class ScrutinioUtil {
       $proposta = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
         ->join('pv.materia', 'm')
         ->where('pv.alunno=:alunno AND pv.periodo=:periodo AND m.tipo=:tipo AND m.id=:materia')
-        ->setParameters(['alunno' => $alunno, 'periodo' => $periodo,
-          'tipo' => 'N', 'materia' => $voto->getMateria()])
+        ->setParameter('alunno', $alunno)
+        ->setParameter('periodo', $periodo)
+        ->setParameter('tipo', 'N')
+        ->setParameter('materia', $voto->getMateria())
         ->getQuery()
         ->setMaxResults(1)
         ->getOneOrNullResult();
@@ -4032,7 +4134,7 @@ class ScrutinioUtil {
       $rinviati = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->where('a.id IN (:lista)')
-        ->setParameters(['lista' => $scrutinio->getDato('alunni')])
+			  ->setParameter('lista', $scrutinio->getDato('alunni'))
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -4047,7 +4149,8 @@ class ScrutinioUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
         ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['lista' => $scrutinio->getDato('materie'), 'sostegno' => 'S'])
+        ->setParameter('lista', $scrutinio->getDato('materie'))
+        ->setParameter('sostegno', 'S')
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -4067,18 +4170,19 @@ class ScrutinioUtil {
       // scrutinio sospeso o rinviato
       $lista = $this->alunniInScrutinio($classe, 'F');
       // considera solo alunni sospesi o con scrutinio rinviato
-      $params = ['lista' => $lista, 'sospeso' => 'S', 'classe' => $classe, 'periodo' => 'F'];
+      $params = [new Parameter('lista', $lista), new Parameter('sospeso', 'S'),
+        new Parameter('classe', $classe), new Parameter('periodo', 'F')];
       if ($periodo != 'G') {
         // alunni con scrutinio rinviato
-        $params['periodo'] = 'G';
-        $params['sospeso'] = 'X';
+        $params[] = new Parameter('periodo', 'G');
+        $params[] = new Parameter('sospeso', 'X');
       }
       $sospesi = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note')
         ->join('e.scrutinio', 's')
         ->join('e.alunno', 'a')
         ->where('e.alunno in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo')
-        ->setParameters($params)
+        ->setParameters(new ArrayCollection($params))
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -4092,8 +4196,9 @@ class ScrutinioUtil {
         ->join('c.classe', 'cl')
         ->where("c.attiva=1 AND c.tipo='N' AND m.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-          'gruppo' => $classe->getGruppo()])
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -4109,7 +4214,9 @@ class ScrutinioUtil {
       $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno IN (:sospesi) AND vs.unico IS NOT NULL')
-        ->setParameters(['classe' => $classe, 'periodo' => 'F', 'sospesi' => array_keys($dati['alunni'])])
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', 'F')
+        ->setParameter('sospesi', array_keys($dati['alunni']))
         ->getQuery()
         ->getResult();
       foreach ($voti as $v) {
@@ -4216,8 +4323,10 @@ class ScrutinioUtil {
               ->update()
               ->set('vs.modificato', ':modificato')
               ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
-              ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materia' => $materia,
-                'modificato' => new DateTime()])
+              ->setParameter('scrutinio', $scrutinio)
+              ->setParameter('alunno', $alunno)
+              ->setParameter('materia', $materia)
+              ->setParameter('modificato', new DateTime())
               ->getQuery()
               ->getResult();
           } else {
@@ -4451,7 +4560,8 @@ class ScrutinioUtil {
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
+			->setParameter('classe', $alunno->getClasse())
+			->setParameter('periodo', $periodo)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -4463,7 +4573,7 @@ class ScrutinioUtil {
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['lista' => $listaMaterie])
+			->setParameter('lista', $listaMaterie)
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -4482,8 +4592,11 @@ class ScrutinioUtil {
       ->join(VotoScrutinio::class, 'vsf', 'WITH', 'vsf.scrutinio=s.id AND vsf.materia=m.id AND vsf.alunno=:alunno')
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vsf.unico<:suff')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno,
-        'classe' => $alunno->getClasse(), 'periodo' => 'F', 'suff' => 6])
+			->setParameter('scrutinio', $scrutinio)
+			->setParameter('alunno', $alunno)
+			->setParameter('classe', $alunno->getClasse())
+			->setParameter('periodo', 'F')
+			->setParameter('suff', 6)
       ->getQuery()
       ->getResult();
     foreach ($voti as $v) {
@@ -4532,7 +4645,8 @@ class ScrutinioUtil {
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -4544,7 +4658,7 @@ class ScrutinioUtil {
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.ordinamento')
       ->where("m.id IN (:lista) AND m.tipo!='S'")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['lista' => $listaMaterie])
+			->setParameter('lista', $listaMaterie)
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -4562,7 +4676,8 @@ class ScrutinioUtil {
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno'.
         ($tutti ? '' : ' AND vs.debito IS NOT NULL'))
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno])
+			->setParameter('scrutinio', $scrutinio)
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getResult();
     foreach ($voti as $v) {
@@ -4793,7 +4908,9 @@ class ScrutinioUtil {
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['scrutinio' => $scrutinio, 'lista' => $lista_id, 'ammesso' => 'A'])
+        ->setParameter('scrutinio', $scrutinio)
+        ->setParameter('lista', $lista_id)
+        ->setParameter('ammesso', 'A')
         ->getQuery()
         ->getArrayResult();
       foreach ($competenze as $c) {
@@ -4810,7 +4927,9 @@ class ScrutinioUtil {
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND (e.credito=0 OR e.credito IS NULL)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['scrutinio' => $scrutinio, 'lista' => $lista_id, 'ammesso' => 'A'])
+        ->setParameter('scrutinio', $scrutinio)
+        ->setParameter('lista', $lista_id)
+        ->setParameter('ammesso', 'A')
         ->getQuery()
         ->getArrayResult();
       foreach ($crediti as $c) {
@@ -5112,7 +5231,7 @@ class ScrutinioUtil {
       ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno=a.id')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $lista])
+			->setParameter('lista', $lista)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -5126,7 +5245,9 @@ class ScrutinioUtil {
       ->join('se.alunno', 'a')
       ->join(Cattedra::class, 'c', 'WITH', 'c.materia=sv.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=a.classe')
       ->where('a.classe=:classe')
-      ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId()])
+			->setParameter('attiva', 1)
+			->setParameter('docente', $docente->getId())
+			->setParameter('classe', $classe->getId())
       ->getQuery()
       ->getArrayResult();
     foreach ($voti as $v) {
@@ -5144,8 +5265,12 @@ class ScrutinioUtil {
           ->join('e.scrutinio', 's')
           ->join('s.classe', 'cl')
           ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND cl.gruppo=:gruppo AND s.stato=:stato AND s.periodo=:rinviato')
-          ->setParameters(['alunno' => $alu['id'], 'anno' => $classeAnno, 'sezione' => $classeSezione,
-            'gruppo' => $classeGruppo, 'stato' => 'C', 'rinviato' => 'X'])
+          ->setParameter('alunno', $alu['id'])
+          ->setParameter('anno', $classeAnno)
+          ->setParameter('sezione', $classeSezione)
+          ->setParameter('gruppo', $classeGruppo)
+          ->setParameter('stato', 'C')
+          ->setParameter('rinviato', 'X')
           ->setMaxResults(1)
           ->getQuery()
           ->getOneOrNullResult();
@@ -5159,8 +5284,11 @@ class ScrutinioUtil {
             ->join('vs.materia', 'm')
             ->join(Cattedra::class, 'c', 'WITH', 'c.materia=vs.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe')
             ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
-            ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId(),
-              'scrutinio' => $esitoRinviato->getScrutinio(), 'alunno' => $alu['id']])
+            ->setParameter('attiva', 1)
+            ->setParameter('docente', $docente->getId())
+            ->setParameter('classe', $classe->getId())
+            ->setParameter('scrutinio', $esitoRinviato->getScrutinio())
+            ->setParameter('alunno', $alu['id'])
             ->getQuery()
             ->getArrayResult();
           foreach ($voti as $voto) {

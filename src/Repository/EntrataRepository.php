@@ -31,7 +31,9 @@ class EntrataRepository extends BaseRepository {
     $this->createQueryBuilder('e')
       ->delete()
       ->where('e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->execute();
   }

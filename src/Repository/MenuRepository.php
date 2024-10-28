@@ -39,7 +39,8 @@ class MenuRepository extends EntityRepository {
       ->select('m.nome AS nome_menu,m.descrizione AS descrizione_menu,m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
       ->join(MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
       ->where('m.selettore=:selettore AND INSTR(o.ruolo, :ruolo) > 0')
-      ->setParameters(['selettore' => $selettore, 'ruolo' => $ruolo])
+      ->setParameter('selettore', $selettore)
+      ->setParameter('ruolo', $ruolo)
       ->orderBy('o.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -145,7 +146,8 @@ class MenuRepository extends EntityRepository {
       ->select('m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
       ->join(MenuOpzione::class, 'o', 'WITH', 'o.menu=m.id')
       ->where('m.id=:id AND INSTR(o.ruolo, :ruolo) > 0')
-      ->setParameters(['id' => $id, 'ruolo' => $ruolo])
+      ->setParameter('id', $id)
+      ->setParameter('ruolo', $ruolo)
       ->orderBy('o.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();

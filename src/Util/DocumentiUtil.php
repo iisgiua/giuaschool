@@ -27,6 +27,7 @@ use App\Entity\Staff;
 use App\Entity\Utente;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 
@@ -568,14 +569,14 @@ class DocumentiUtil {
     $this->em->getRepository(ListaDestinatariUtente::class)->createQueryBuilder('ldu')
       ->delete()
       ->where('ldu.listaDestinatari=:destinatari')
-      ->setParameters(['destinatari' => $documento->getListaDestinatari()])
+			->setParameter('destinatari', $documento->getListaDestinatari())
       ->getQuery()
       ->execute();
     // cancella classi in lista
     $this->em->getRepository(ListaDestinatariClasse::class)->createQueryBuilder('ldc')
       ->delete()
       ->where('ldc.listaDestinatari=:destinatari')
-      ->setParameters(['destinatari' => $documento->getListaDestinatari()])
+			->setParameter('destinatari', $documento->getListaDestinatari())
       ->getQuery()
       ->execute();
     // cancella lista
@@ -692,8 +693,10 @@ class DocumentiUtil {
         ->join(Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.materia=:materia')
         ->where('c.attiva=:attiva AND c.tipo!=:potenziamento')
         ->orderBy('d.cognome,d.nome', 'ASC')
-        ->setParameters(['classe' => $cattedra['classe_id'], 'materia' => $cattedra['materia_id'],
-          'attiva' => 1, 'potenziamento' => 'P']);
+        ->setParameter('classe', $cattedra['classe_id'])
+        ->setParameter('materia', $cattedra['materia_id'])
+        ->setParameter('attiva', 1)
+        ->setParameter('potenziamento', 'P');
       if ($criteri['tipo'] == 'R' && $cattedra['alunno_id']) {
         // relazioni di sostegno
         $docenti
@@ -703,8 +706,10 @@ class DocumentiUtil {
           ->join('d.docente', 'doc')
           ->where('d.tipo=:documento AND d.classe=:classe AND d.materia=:materia AND d.alunno=:alunno')
           ->orderBy('doc.cognome,doc.nome', 'ASC')
-          ->setParameters(['documento' => 'R', 'classe' => $cattedra['classe_id'],
-            'materia' => $cattedra['materia_id'], 'alunno' => $cattedra['alunno_id']])
+          ->setParameter('documento', 'R')
+          ->setParameter('classe', $cattedra['classe_id'])
+          ->setParameter('materia', $cattedra['materia_id'])
+          ->setParameter('alunno', $cattedra['alunno_id'])
           ->getQuery()
           ->getResult();
       }
@@ -738,7 +743,8 @@ class DocumentiUtil {
         ->join('d.alunno', 'a')
         ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
         ->orderBy('d.tipo', 'ASC')
-        ->setParameters(['tipi' => ['B', 'H', 'D'], 'alunno' => $alunno])
+        ->setParameter('tipi', ['B', 'H', 'D'])
+        ->setParameter('alunno', $alunno)
         ->getQuery()
         ->getResult();
       // controlla azioni

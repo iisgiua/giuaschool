@@ -662,7 +662,7 @@ class VotiController extends BaseController {
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.id IN (:lista)')
-        ->setParameters(['lista' => $listaAlunni])
+        ->setParameter('lista', $listaAlunni)
         ->orderBY('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();

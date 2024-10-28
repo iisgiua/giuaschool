@@ -50,7 +50,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->groupBy('ata.tipo')
         ->getQuery()
         ->getArrayResult();
@@ -74,7 +74,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->orderBy('ata.cognome,ata.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -92,7 +92,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       $dati['coordinatori'] = [$utenti[0]['tot'], $utenti[0]['letti'], []];
@@ -103,7 +103,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -121,7 +121,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       $dati['docenti'] = [$utenti[0]['tot'], $utenti[0]['letti']];
@@ -131,7 +131,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -148,7 +148,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Genitore::class, 'g', 'WITH', 'g.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       $dati['genitori'] = [$utenti[0]['tot'], $utenti[0]['letti']];
@@ -160,7 +160,7 @@ class AvvisoRepository extends BaseRepository {
         ->join('g.alunno', 'al')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -179,7 +179,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
         ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       $dati['alunni'] = [$utenti[0]['tot'], $utenti[0]['letti']];
@@ -190,7 +190,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -206,7 +206,7 @@ class AvvisoRepository extends BaseRepository {
         ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
         ->join('ac.classe', 'cl')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       if ($classi[0]['tot'] > 0) {
@@ -218,7 +218,7 @@ class AvvisoRepository extends BaseRepository {
             ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
             ->join('ac.classe', 'cl')
             ->where('a.id=:avviso AND ac.letto IS NULL')
-            ->setParameters(['avviso' => $avviso])
+			      ->setParameter('avviso', $avviso)
             ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
             ->getQuery()
             ->getArrayResult();
@@ -240,10 +240,10 @@ class AvvisoRepository extends BaseRepository {
    */
   public function notifica(Avviso $avviso) {
     // legge destinatari
-    $destinatari = $this->_em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $destinatari = $this->getEntityManager()->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->join('au.utente', 'u')
       ->where('au.avviso=:avviso AND au.letto IS NULL')
-      ->setParameters(['avviso' => $avviso])
+			->setParameter('avviso', $avviso)
       ->getQuery()
       ->getResult();
     $utenti = [];

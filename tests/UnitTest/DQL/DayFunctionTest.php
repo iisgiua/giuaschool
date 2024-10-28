@@ -90,7 +90,7 @@ class DayFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 19: Error: Expected Doctrine\ORM\Query\Lexer::T_CLOSE_PARENTHESIS, got ','", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 19: Error: Expected Doctrine\ORM\Query\TokenType::T_CLOSE_PARENTHESIS, got ','", $exception);
   }
 
   /**

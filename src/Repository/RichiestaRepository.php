@@ -35,8 +35,12 @@ class RichiestaRepository extends BaseRepository {
     $richiesta = $this->createQueryBuilder('r')
       ->join('r.definizioneRichiesta', 'dr')
       ->where('dr.abilitata=:si AND dr.unica=:no AND dr.tipo=:tipo AND r.utente=:utente AND r.stato IN (:stati) AND r.data=:data')
-      ->setParameters(['si' => 1, 'no' => 0, 'tipo' => $tipo, 'utente' => $idAlunno, 'stati' => ['I', 'G'],
-        'data' => $data->format('Y-m-d')])
+			->setParameter('si', 1)
+			->setParameter('no', 0)
+			->setParameter('tipo', $tipo)
+			->setParameter('utente', $idAlunno)
+			->setParameter('stati', ['I', 'G'])
+			->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getOneOrNullResult();
     // restituisce risultato
@@ -65,7 +69,8 @@ class RichiestaRepository extends BaseRepository {
       ->join('r.classe', 'c')
       ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
-      ->setParameters(['abilitata' => 1, 'sede' => $criteri['sede']])
+			->setParameter('abilitata', 1)
+			->setParameter('sede', $criteri['sede'])
       ->orderBy('dr.nome,r.data,r.inviata', 'ASC');
     // controllo tipo
     if ($criteri['tipo'] == 'E' || $criteri['tipo'] == 'D') {
@@ -151,7 +156,9 @@ class RichiestaRepository extends BaseRepository {
       ->andWhere($sql)
       ->groupBy('s.nomeBreve')
       ->orderBy('s.ordinamento', 'ASC')
-      ->setParameters(['abilitata' => 1, 'tipo' => 'U', 'stato' => 'I']);
+			->setParameter('abilitata', 1)
+			->setParameter('tipo', 'U')
+			->setParameter('stato', 'I');
     // controlla sede
     if ($staff->getSede()) {
       // imposta sede
@@ -189,7 +196,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('c.sede', 's')
       ->where("dr.abilitata=1 AND dr.tipo=:tipo AND r.stato='I'")
       ->andWhere($sql)
-      ->setParameters(['tipo' => $tipo])
+			->setParameter('tipo', $tipo)
       ->orderBy('s.ordinamento,c.anno,c.sezione,r.data', 'ASC');
     // controllo sede
     if ($criteri['sede']) {
@@ -241,7 +248,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('c.sede', 's')
       ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")
       ->andWhere($sql)
-      ->setParameters(['modulo' => $criteri['tipo']])
+			->setParameter('modulo', $criteri['tipo'])
       ->orderBy('s.ordinamento,c.anno,c.sezione,a.cognome,a.nome,r.data', 'ASC');
     // controllo sede
     if ($criteri['sede']) {

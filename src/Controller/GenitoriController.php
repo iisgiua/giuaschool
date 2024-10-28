@@ -854,10 +854,13 @@ class GenitoriController extends BaseController {
         ->set('ass.certificati', ':certificati')
         ->set('ass.utenteGiustifica', ':utente')
         ->where('ass.id in (:ids)')
-        ->setParameters(['modificato' => new DateTime(), 'giustificato' => $giustificato,
-          'motivazione' => $motivazione, 'dichiarazione' => serialize($dichiarazione),
-          'certificati' => serialize($certificati), 'utente' => $this->getUser(),
-          'ids' => explode(',', (string) $info['assenza']['ids'])])
+        ->setParameter('modificato', new DateTime())
+        ->setParameter('giustificato', $giustificato)
+        ->setParameter('motivazione', $motivazione)
+        ->setParameter('dichiarazione', serialize($dichiarazione))
+        ->setParameter('certificati', serialize($certificati))
+        ->setParameter('utente', $this->getUser())
+        ->setParameter('ids', explode(',', (string) $info['assenza']['ids']))
         ->getQuery()
         ->getResult();
       // memorizza dati

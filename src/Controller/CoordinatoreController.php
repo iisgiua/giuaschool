@@ -92,7 +92,7 @@ class CoordinatoreController extends BaseController {
     $classi = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
-      ->setParameters(['lista' => explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
+      ->setParameter('lista', explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')))
       ->getQuery()
       ->getResult();
     // lista tutte le classi
@@ -103,7 +103,7 @@ class CoordinatoreController extends BaseController {
         $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
           ->where('c.sede=:sede')
           ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
-          ->setParameters(['sede' => $this->getUser()->getSede()])
+          ->setParameter('sede', $this->getUser()->getSede())
           ->getQuery()
           ->getResult();
       } else {
@@ -644,13 +644,13 @@ class CoordinatoreController extends BaseController {
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
           $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -844,13 +844,13 @@ class CoordinatoreController extends BaseController {
     $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     // cancella avviso

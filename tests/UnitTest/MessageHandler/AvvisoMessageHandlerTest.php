@@ -118,7 +118,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':ora')
       ->where('au.avviso=:avviso')
-      ->setParameters(['ora'=> new DateTime(), 'avviso' => $avviso->getId()])
+      ->setParameter('ora', new DateTime())
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -144,7 +145,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -179,7 +181,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -214,7 +217,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -249,7 +253,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -284,7 +289,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -319,7 +325,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -354,7 +361,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -389,7 +397,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -424,7 +433,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -459,7 +469,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -498,7 +509,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());
@@ -530,7 +542,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       ->update()
       ->set('au.letto', ':nulla')
       ->where('au.avviso=:avviso')
-      ->setParameters(['nulla' => null, 'avviso' => $avviso->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('avviso', $avviso->getId())
       ->getQuery()
       ->getResult();
     $msg = new AvvisoMessage($avviso->getId());

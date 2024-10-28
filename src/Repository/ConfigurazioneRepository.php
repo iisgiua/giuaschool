@@ -50,7 +50,8 @@ class ConfigurazioneRepository extends EntityRepository {
       ->update()
       ->set('c.valore', ':valore')
       ->where('c.parametro=:nome')
-      ->setParameters(['nome' => $nome, 'valore' => $valore])
+      ->setParameter('nome', $nome)
+      ->setParameter('valore', $valore)
       ->getQuery()
       ->getResult();
   }
@@ -77,7 +78,7 @@ class ConfigurazioneRepository extends EntityRepository {
   public function parametriConfigurazione() {
     $parametri = $this->createQueryBuilder('c')
       ->where('c.gestito=:gestito')
-      ->setParameters(['gestito' => 0])
+      ->setParameter('gestito', 0)
       ->orderBy('c.categoria,c.parametro', 'ASC')
       ->getQuery()
       ->getResult();

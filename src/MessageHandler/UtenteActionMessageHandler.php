@@ -133,7 +133,8 @@ class UtenteActionMessageHandler {
       ->where("cu.circolare=c.id AND cu.utente=:utente");
     $circolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
       ->where("c.pubblicata=1 AND c.anno=:anno AND c.docenti='T' AND NOT EXISTS (".$esistenti.')')
-      ->setParameters(['anno' => $anno, 'utente' => $user])
+      ->setParameter('anno', $anno)
+      ->setParameter('utente', $user)
       ->getQuery()
       ->getResult();
 

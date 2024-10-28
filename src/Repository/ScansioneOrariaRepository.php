@@ -39,7 +39,10 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->select('s.inizio')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'sede' => $sede, 'giorno' => $data->format('w'), 'ora' => 1])
+			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('sede', $sede)
+			->setParameter('giorno', $data->format('w'))
+			->setParameter('ora', 1)
       ->setMaxResults(1)
       ->getQuery()
       ->getScalarResult();
@@ -60,7 +63,9 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->select('s.fine')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'sede' => $sede, 'giorno' => $data->format('w')])
+			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('sede', $sede)
+			->setParameter('giorno', $data->format('w'))
       ->orderBy('s.ora', 'DESC')
       ->setMaxResults(1)
       ->getQuery()
@@ -84,7 +89,9 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->join(Cattedra::class, 'c', 'WITH', 'c.docente=:docente')
       ->join('c.classe', 'cl')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede AND s.giorno=:giorno')
-      ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d'), 'giorno' => $data->format('w')])
+			->setParameter('docente', $docente)
+			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('giorno', $data->format('w'))
       ->orderBy('s.fine', 'DESC')
       ->setMaxResults(1)
       ->getQuery()
@@ -104,9 +111,10 @@ class ScansioneOrariaRepository extends EntityRepository {
     $ora = $this->createQueryBuilder('s')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
-      ->setParameters(['data' => $lezione->getData()->format('Y-m-d'),
-        'sede' => $lezione->getClasse()->getSede(), 'giorno' => $lezione->getData()->format('w'),
-        'ora' => $lezione->getOra()])
+			->setParameter('data', $lezione->getData()->format('Y-m-d'))
+			->setParameter('sede', $lezione->getClasse()->getSede())
+			->setParameter('giorno', $lezione->getData()->format('w'))
+			->setParameter('ora', $lezione->getOra())
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -123,14 +131,15 @@ class ScansioneOrariaRepository extends EntityRepository {
    */
   public function orarioGiorno($giorno, Orario $orario=null) {
     if (!$orario) {
-      $orario = $this->_em->getRepository(Orario::class)->orarioSede(null);
+      $orario = $this->getEntityManager()->getRepository(Orario::class)->orarioSede(null);
     }
     // legge le ore del giorno
     $ore = $this->createQueryBuilder('s')
       ->select('s.ora,s.inizio,s.fine')
       ->where('s.orario=:orario AND s.giorno=:giorno')
       ->orderBy('s.ora', 'ASC')
-      ->setParameters(['orario' => $orario, 'giorno' => $giorno])
+			->setParameter('orario', $orario)
+			->setParameter('giorno', $giorno)
       ->getQuery()
       ->getArrayResult();
     return $ore;
@@ -149,7 +158,7 @@ class ScansioneOrariaRepository extends EntityRepository {
     $ore = $this->createQueryBuilder('s')
       ->where('s.orario=:orario')
       ->orderBy('s.giorno,s.ora', 'ASC')
-      ->setParameters(['orario' => $orario])
+			->setParameter('orario', $orario)
       ->getQuery()
       ->getResult();
     foreach ($ore as $so) {
@@ -165,7 +174,7 @@ class ScansioneOrariaRepository extends EntityRepository {
           ->setInizio(DateTime::createFromFormat('H:i', '08:30'))
           ->setFine(DateTime::createFromFormat('H:i', '09:30'))
           ->setDurata(1);
-        $this->_em->persist($dati[$giorno][$ora]);
+        $this->getEntityManager()->persist($dati[$giorno][$ora]);
       }
     }
     // restituisce dati
@@ -185,7 +194,8 @@ class ScansioneOrariaRepository extends EntityRepository {
     $ore = $this->createQueryBuilder('so')
       ->join(Orario::class, 'o', 'WITH', 'so.orario=o.id')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['data' => (new DateTime())->format('Y-m-d'), 'sede' => $id])
+			->setParameter('data', (new DateTime())->format('Y-m-d'))
+			->setParameter('sede', $id)
       ->getQuery()
       ->getResult();
     foreach ($ore as $so) {

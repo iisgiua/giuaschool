@@ -403,7 +403,7 @@ class SistemaController extends BaseController {
             ->update()
             ->set('c.coordinatore', ':nessuno')
             ->set('c.segretario', ':nessuno')
-            ->setParameters(['nessuno' => null])
+            ->setParameter('nessuno', null)
             ->getQuery()
             ->execute();
           // cancella dati annuali alunni
@@ -412,7 +412,8 @@ class SistemaController extends BaseController {
             ->set('a.autorizzaEntrata', ':no')
             ->set('a.autorizzaUscita', ':no')
             ->set('a.frequenzaEstero', ':falso')
-            ->setParameters(['no' => null, 'falso' => 0])
+            ->setParameter('no', null)
+            ->setParameter('falso', 0)
             ->getQuery()
             ->getResult();
           // messaggio finale
@@ -422,7 +423,7 @@ class SistemaController extends BaseController {
           // scrutini finali
           $scrutini = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
             ->where('s.periodo=:finale')
-            ->setParameters(['finale' => 'F'])
+            ->setParameter('finale', 'F')
             ->getQuery()
             ->getResult();
           foreach ($scrutini as $scrutinio) {
@@ -542,7 +543,8 @@ class SistemaController extends BaseController {
             ->join(Esito::class, 'e', 'WITH', 'e.scrutinio=s.id')
             ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno=e.alunno')
             ->where('s.periodo=:periodo AND se.periodo=:rinviato')
-            ->setParameters(['periodo' => 'F', 'rinviato' => 'X'])
+            ->setParameter('periodo', 'F')
+            ->setParameter('rinviato', 'X')
             ->getQuery()
             ->getResult();
           foreach ($scrutini as $scrutinio) {
@@ -554,9 +556,9 @@ class SistemaController extends BaseController {
               ->join('c.classe', 'cl')
               ->where("c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('m.ordinamento', 'ASC')
-              ->setParameters(['anno' => $scrutinio->getClasse()->getAnno(),
-                'sezione' => $scrutinio->getClasse()->getSezione(),
-                'gruppo' => $scrutinio->getClasse()->getGruppo()])
+              ->setParameter('anno', $scrutinio->getClasse()->getAnno())
+              ->setParameter('sezione', $scrutinio->getClasse()->getSezione())
+              ->setParameter('gruppo', $scrutinio->getClasse()->getGruppo())
               ->getQuery()
               ->getArrayResult();
             $dati['materie'] = array_map(fn($m) => $m['id'], $materie);
@@ -566,7 +568,8 @@ class SistemaController extends BaseController {
             $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
               ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno=a.id')
               ->where('se.periodo=:rinviato AND a.classe=:classe')
-              ->setParameters(['rinviato' => 'X', 'classe' => $scrutinio->getClasse()])
+              ->setParameter('rinviato', 'X')
+              ->setParameter('classe', $scrutinio->getClasse())
               ->getQuery()
               ->getResult();
             foreach ($alunni as $alunno) {
@@ -578,7 +581,8 @@ class SistemaController extends BaseController {
               // voti e assenze alunno
               $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
                 ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
-                ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno])
+                ->setParameter('scrutinio', $scrutinio)
+                ->setParameter('alunno', $alunno)
                 ->getQuery()
                 ->getResult();
               foreach ($voti as $voto) {
@@ -594,9 +598,9 @@ class SistemaController extends BaseController {
               ->join('c.classe', 'cl')
               ->where("c.attiva=1 AND c.tipo!='P' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('d.cognome,d.nome,m.ordinamento', 'ASC')
-              ->setParameters(['anno' => $scrutinio->getClasse()->getAnno(),
-                'sezione' => $scrutinio->getClasse()->getSezione(),
-                'gruppo' => $scrutinio->getClasse()->getGruppo()])
+              ->setParameter('anno', $scrutinio->getClasse()->getAnno())
+              ->setParameter('sezione', $scrutinio->getClasse()->getSezione())
+              ->setParameter('gruppo', $scrutinio->getClasse()->getGruppo())
               ->getQuery()
               ->getArrayResult();
             foreach ($docenti as $docente) {
@@ -696,8 +700,10 @@ class SistemaController extends BaseController {
           // legge circolari pubblicate prima del 1/9 e non già modificate
           $circolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data<:inizio AND c.documento NOT LIKE :modificato')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
-            'inizio' => $info['nuovoAnno'].'-09-01', 'modificato' => $info['vecchioAnno'].'/%'])
+            ->setParameter('anno', $info['vecchioAnno'])
+            ->setParameter('si', 1)
+            ->setParameter('inizio', $info['nuovoAnno'].'-09-01')
+            ->setParameter('modificato', $info['vecchioAnno'].'/%')
             ->getQuery()
             ->getResult();
           // modifica path e sposta file
@@ -720,16 +726,18 @@ class SistemaController extends BaseController {
             ->set('c.documento', "CONCAT(:anno,'/',c.documento)")
             ->set('c.allegati', ':allegati')
             ->where('c.id=:id')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'allegati' => serialize($nuoviAllegati),
-              'id' => $circolare->getId()])
+            ->setParameter('anno', $info['vecchioAnno'])
+            ->setParameter('allegati', serialize($nuoviAllegati))
+            ->setParameter('id', $circolare->getId())
             ->getQuery()
             ->execute();
           }
           // controlla presenza di circolari dal 1/9 in poi
           $nuoveCircolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
             ->where('c.anno=:anno AND c.pubblicata=:si AND c.data>=:inizio')
-            ->setParameters(['anno' => $info['vecchioAnno'], 'si' => 1,
-              'inizio' => $info['nuovoAnno'].'-09-01'])
+            ->setParameter('anno', $info['vecchioAnno'])
+            ->setParameter('si', 1)
+            ->setParameter('inizio', $info['nuovoAnno'].'-09-01')
             ->orderBy('c.numero', 'ASC')
             ->getQuery()
             ->getResult();
@@ -750,7 +758,7 @@ class SistemaController extends BaseController {
               ->select('(cu.circolare) AS circolare,(cu.utente) AS utente,cu.letta,cu.confermata')
               ->join('cu.utente', 'u')
               ->where('cu.circolare=:circolare AND u.abilitato=1')
-              ->setParameters(['circolare' => $circolare->getId()])
+              ->setParameter('circolare', $circolare->getId())
               ->getQuery()
               ->getScalarResult();
             $dati['utente'] = array_merge($dati['utente'], $utenti);
@@ -790,7 +798,7 @@ class SistemaController extends BaseController {
           // legge avvisi prima del 1/9 e non già modificati
           $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
             ->where("a.anno=0 AND a.data<:inizio AND a.tipo IN ('C', 'A')")
-            ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
+            ->setParameter('inizio', $info['nuovoAnno'].'-09-01')
             ->getQuery()
             ->getResult();
           // modifica path e sposta file
@@ -809,15 +817,16 @@ class SistemaController extends BaseController {
               ->set('a.anno', ':anno')
               ->set('a.allegati', ':allegati')
               ->where('a.id=:id')
-              ->setParameters(['anno' => $info['vecchioAnno'],
-                'allegati' => serialize($nuoviAllegati), 'id' => $avviso->getId()])
+              ->setParameter('anno', $info['vecchioAnno'])
+              ->setParameter('allegati', serialize($nuoviAllegati))
+              ->setParameter('id', $avviso->getId())
               ->getQuery()
               ->execute();
           }
           // controlla presenza di avvisi dal 1/9 (esclusi quelli su cattedre che sono azzerate)
           $nuoviAvvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
             ->where('a.data>=:inizio AND a.cattedra IS NULL')
-            ->setParameters(['inizio' => $info['nuovoAnno'].'-09-01'])
+            ->setParameter('inizio', $info['nuovoAnno'].'-09-01')
             ->getQuery()
             ->getResult();
           // avvisi per il nuovo A.S.
@@ -836,7 +845,7 @@ class SistemaController extends BaseController {
               ->select('(au.avviso) AS avviso,(au.utente) AS utente,au.letto')
               ->join('au.utente', 'u')
               ->where('au.avviso=:avviso AND u.abilitato=1')
-              ->setParameters(['avviso' => $avviso->getId()])
+              ->setParameter('avviso', $avviso->getId())
               ->getQuery()
               ->getScalarResult();
             $dati['utente'] = array_merge($dati['utente'], $utenti);
@@ -855,7 +864,7 @@ class SistemaController extends BaseController {
           $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
             ->delete()
             ->where('(a.data<:data AND a.anno=0) OR (a.data>=:data AND a.cattedra IS NOT NULL)')
-            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
+            ->setParameter('data', $info['nuovoAnno'].'-09-01')
             ->getQuery()
             ->execute();
           // riscrive dati sede per nuovi avvisi
@@ -892,7 +901,7 @@ class SistemaController extends BaseController {
             ->join('d.alunno', 'a')
             ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
             ->where('d.tipo IN (:tipi)')
-            ->setParameters(['tipi' => ['B', 'D', 'H']])
+            ->setParameter('tipi', ['B', 'D', 'H'])
             ->getQuery()
             ->getResult();
           foreach ($documenti as $documento) {
@@ -1053,7 +1062,7 @@ class SistemaController extends BaseController {
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
-      ->setParameters(['tipi' => ['N', 'R', 'E']])
+      ->setParameter('tipi', ['N', 'R', 'E'])
       ->getQuery()
       ->getResult();
     $listaDocenti = [];
@@ -1067,7 +1076,7 @@ class SistemaController extends BaseController {
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
       ->orderBy('d.cognome,d.nome', 'ASC')
-      ->setParameters(['tipo' => 'S'])
+      ->setParameter('tipo', 'S')
       ->getQuery()
       ->getResult();
     $listaSostegno = [];
@@ -1091,8 +1100,8 @@ class SistemaController extends BaseController {
     $listaCircolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
       ->where('c.pubblicata=:si AND c.anno=:anno')
       ->orderBy('c.numero', 'ASC')
-      ->setParameters(['si' => 1,
-        'anno' => (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4)])
+      ->setParameter('si', 1)
+      ->setParameter('anno', (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
       ->getQuery()
       ->getResult();
     // form

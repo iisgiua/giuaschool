@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Rector\Config\RectorConfig;
 use Rector\Symfony\Set\SymfonySetList;
 use Rector\Doctrine\Set\DoctrineSetList;
+use Rector\PHPUnit\Set\PHPUnitSetList;
 
 
 return RectorConfig::configure()
@@ -46,6 +47,13 @@ return RectorConfig::configure()
     // DoctrineSetList::TYPED_COLLECTIONS,
     // DoctrineSetList::DOCTRINE_CODE_QUALITY,
     // ])
+
+  // --- PHPUnit
+  ->withSets([
+    // PHPUnitSetList::PHPUNIT_100,
+    // PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
+    PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+    ])
 
 //   twig core phpunit
     ;

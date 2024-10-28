@@ -14,6 +14,8 @@ use App\Entity\Utente;
 use App\Entity\Firma;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -82,8 +84,10 @@ class StaffUtil {
       $entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
         ->select('e.data,e.ora,e.note')
         ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d')])
+        ->setParameter('valido', 1)
+        ->setParameter('alunno', $a)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
         ->orderBy('e.data', 'DESC')
         ->getQuery()
         ->getArrayResult();
@@ -92,8 +96,10 @@ class StaffUtil {
       $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
         ->select('u.data,u.ora,u.note')
         ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d')])
+        ->setParameter('valido', 1)
+        ->setParameter('alunno', $a)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
         ->orderBy('u.data', 'DESC')
         ->getQuery()
         ->getArrayResult();
@@ -119,11 +125,11 @@ class StaffUtil {
     $periodi = $this->regUtil->infoPeriodi();
     $dati = [];
     // legge note di classe
-    $params = ['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+    $params = [new Parameter('anno', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
     $where = '';
     if ($classe->getGruppo()) {
-      $params['gruppo'] = $classe->getGruppo();
       $where = " AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)";
+      $params[] = new Parameter('gruppo', $classe->getGruppo());
     }
     $note = $this->em->getRepository(Nota::class)->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov,c.gruppo")
@@ -131,7 +137,7 @@ class StaffUtil {
       ->join('n.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->where("n.annullata IS NULL AND n.tipo='C' AND c.anno=:anno AND c.sezione=:sezione".$where)
-      ->setParameters($params);
+      ->setParameters(new ArrayCollection($params));
     if ($inizio && $fine) {
       $note
         ->andWhere('n.data BETWEEN :inizio AND :fine')
@@ -164,7 +170,7 @@ class StaffUtil {
       ->join('a.classe', 'c')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->where("n.annullata IS NULL AND n.tipo='I' AND c.anno=:anno AND c.sezione=:sezione".$where)
-      ->setParameters($params);
+      ->setParameters(new ArrayCollection($params));
     if ($inizio && $fine) {
       $individuali
         ->andWhere('n.data BETWEEN :inizio AND :fine')
@@ -224,7 +230,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.frequenzaEstero,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -236,7 +242,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $listaTrasferiti])
+			->setParameter('lista', $listaTrasferiti)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -249,7 +255,7 @@ class StaffUtil {
     $assenze = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
       ->select('(a.alunno) AS id,a.giustificato')
       ->where('a.alunno IN (:lista)')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per le assenze
@@ -267,7 +273,7 @@ class StaffUtil {
     $entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
       ->select('(e.alunno) AS id,e.data,e.ora,e.ritardoBreve,e.giustificato,e.valido')
       ->where('e.alunno IN (:lista)')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per i ritardi
@@ -293,7 +299,7 @@ class StaffUtil {
     $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
       ->select('(u.alunno) AS id,u.data,u.ora,u.valido')
       ->where('u.alunno IN (:lista)')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per le uscite
@@ -316,8 +322,10 @@ class StaffUtil {
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where("al.alunno IN (:lista) AND m.tipo IN ('N', 'E') AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $listaAlunni, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('lista', $listaAlunni)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // ore di assenza di religione (per chi si avvale)
@@ -330,8 +338,10 @@ class StaffUtil {
       ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where("al.alunno IN (:lista) AND a.religione IN ('S', 'A') AND m.tipo='R' AND ((c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)) OR l.classe=cc.classe)")
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $listaAlunni, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('lista', $listaAlunni)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // ore di assenza totali
@@ -384,8 +394,9 @@ class StaffUtil {
       ->join('c.classe', 'cl')
       ->where("m.valutazione='N' AND m.media=1 AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(),
-        'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per le materie
@@ -404,9 +415,12 @@ class StaffUtil {
       ->join('l.classe', 'cl')
       ->where("v.alunno IN (:lista) AND v.media=1 AND v.voto>0 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL) AND l.data BETWEEN :inizio AND :fine AND m.media=1")
       ->groupBy('v.alunno,v.materia,v.tipo')
-      ->setParameters(['lista' => $listaAlunni, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo(),
-        'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+			->setParameter('lista', $listaAlunni)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per gli alunni
@@ -437,7 +451,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per gli alunni
@@ -462,7 +476,7 @@ class StaffUtil {
       ->join('o.sede', 's')
       ->where(':data BETWEEN o.inizio AND o.fine')
       ->orderBy('s.id,so.giorno,so.ora', 'ASC')
-      ->setParameters(['data' => (new DateTime())->format('Y-m-d')])
+			->setParameter('data', (new DateTime())->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     foreach ($ore as $o) {
@@ -487,7 +501,8 @@ class StaffUtil {
       ->join('cl.sede', 's')
       ->where('c.attiva=:attiva AND d.abilitato=:abilitato')
       ->orderBy('d.cognome,d.nome', 'ASC')
-      ->setParameters(['attiva' => 1, 'abilitato' => 1])
+			->setParameter('attiva', 1)
+			->setParameter('abilitato', 1)
       ->getQuery()
       ->getArrayResult();
     foreach ($docenti as $d) {
@@ -516,7 +531,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.frequenzaEstero,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $listaAlunni])
+			->setParameter('lista', $listaAlunni)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -528,7 +543,7 @@ class StaffUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.religione,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['lista' => $listaTrasferiti])
+			->setParameter('lista', $listaTrasferiti)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -643,8 +658,10 @@ class StaffUtil {
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
         ->orderBy('d.cognome,d.nome', 'ASC')
-        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d'), 'docente' => $docente])
+        ->setParameter('abilitato', 1)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
+        ->setParameter('docente', $docente)
         ->groupBy('d.id')
         ->getQuery();
     } elseif ($docente == -1) {
@@ -658,15 +675,16 @@ class StaffUtil {
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')
-        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d')])
+        ->setParameter('abilitato', 1)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
         ->groupBy('d.id')
         ->getQuery();
     } else {
       // query vuota
       $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->where('d.id=:valore')
-        ->setParameters(['valore' => -999])
+			  ->setParameter('valore', -999)
         ->getQuery();
     }
     // paginazione
@@ -695,16 +713,16 @@ class StaffUtil {
     if ($search['sede']) {
       $classi = $classi
         ->andWhere('c.sede=:sede');
-      $param['sede'] = $search['sede'];
+      $param[] = new Parameter('sede', $search['sede']);
     }
     if ($search['classe']) {
       $classi = $classi
         ->andWhere('c.id=:classe');
-      $param['classe'] = $search['classe'];
+      $param[] = new Parameter('classe', $search['classe']);
     }
     $classi = $classi
       ->orderBy('c.anno,c.sezione,c.gruppo')
-      ->setParameters($param)
+      ->setParameters(new ArrayCollection($param))
       ->getQuery()
       ->getResult();
     foreach ($classi as $c) {
@@ -715,7 +733,8 @@ class StaffUtil {
       $assenti = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
         ->select('COUNT(a.id)')
         ->where('a.data=:data AND a.alunno IN (:lista)')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'lista' => $lista])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('lista', $lista)
         ->getQuery()
         ->getSingleScalarResult();
       $presenti = $totale - $assenti;
@@ -753,8 +772,10 @@ class StaffUtil {
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
-        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d'), 'docente' => $docente])
+        ->setParameter('abilitato', 1)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
+        ->setParameter('docente', $docente)
         ->groupBy('d.id')
         ->getQuery()
         ->getArrayResult();
@@ -769,8 +790,9 @@ class StaffUtil {
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')
-        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
-          'fine' => $fine->format('Y-m-d')])
+        ->setParameter('abilitato', 1)
+        ->setParameter('inizio', $inizio->format('Y-m-d'))
+        ->setParameter('fine', $fine->format('Y-m-d'))
         ->groupBy('d.id')
         ->getQuery()
         ->getArrayResult();
@@ -778,7 +800,7 @@ class StaffUtil {
       // query vuota
       $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->where('d.id=:valore')
-        ->setParameters(['valore' => -999])
+			  ->setParameter('valore', -999)
         ->getQuery();
     }
     // restituisce dati

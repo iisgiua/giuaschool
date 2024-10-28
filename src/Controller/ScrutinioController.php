@@ -461,8 +461,10 @@ class ScrutinioController extends BaseController {
       ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+      ->setParameter('materia', $materia)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo())
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -729,8 +731,10 @@ class ScrutinioController extends BaseController {
         ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
         ->join('c.classe', 'cl')
         ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['materia' => $materia, 'anno' => $classe->getAnno(),
-          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+        ->setParameter('materia', $materia)
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
@@ -799,8 +803,10 @@ class ScrutinioController extends BaseController {
           $votoFinale = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
-            ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno, 'materia' => $materia,
-              'classe' => $classe])
+            ->setParameter('voto', $voto->getUnico())
+            ->setParameter('alunno', $alunno)
+            ->setParameter('materia', $materia)
+            ->setParameter('classe', $classe)
             ->getQuery()
             ->getOneOrNullResult();
           if ($votoFinale) {
@@ -1076,8 +1082,10 @@ class ScrutinioController extends BaseController {
           $votoFinale = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where("vs.unico>:voto AND vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo='F'")
-            ->setParameters(['voto' => $voto->getUnico(), 'alunno' => $alunno,
-              'materia' => $voto->getMateria(), 'classe' => $classe])
+            ->setParameter('voto', $voto->getUnico())
+            ->setParameter('alunno', $alunno)
+            ->setParameter('materia', $voto->getMateria())
+            ->setParameter('classe', $classe)
             ->getQuery()
             ->getOneOrNullResult();
           if ($votoFinale) {
@@ -1618,7 +1626,9 @@ class ScrutinioController extends BaseController {
         $esito = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
           ->join('e.scrutinio', 's')
           ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
-          ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
+          ->setParameter('alunno', $alunno)
+          ->setParameter('classe', $alunno->getClasse())
+          ->setParameter('periodo', $periodo)
           ->getQuery()
           ->setMaxResults(1)
           ->getOneOrNullResult();
@@ -1706,7 +1716,9 @@ class ScrutinioController extends BaseController {
       $esito = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->join('e.scrutinio', 's')
         ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
-        ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
+        ->setParameter('alunno', $alunno)
+        ->setParameter('classe', $alunno->getClasse())
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->setMaxResults(1)
         ->getOneOrNullResult();

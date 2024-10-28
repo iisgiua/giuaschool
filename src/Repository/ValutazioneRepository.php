@@ -36,7 +36,9 @@ class ValutazioneRepository extends BaseRepository {
       ->select('COUNT(v.id)')
       ->join('v.lezione', 'l')
       ->where('v.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio, 'fine' => $fine]);
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio)
+      ->setParameter('fine', $fine);
     if ($classe) {
       // controlla classe di appartenenza
       $voti->andWhere('l.classe=:classe')->setParameter('classe', $classe);

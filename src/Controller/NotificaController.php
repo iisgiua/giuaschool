@@ -108,7 +108,7 @@ class NotificaController extends BaseController {
       $chat = $richiesta['my_chat_member']['chat']['id'];
       $utente = $this->em->getRepository(Utente::class)->createQueryBuilder('u')
         ->where('u.notifica LIKE :chat')
-        ->setParameters(['chat' => '%s:13:"telegram\_chat";s:'.strlen((string) $chat).':"'.$chat.'";%'])
+        ->setParameter('chat', '%s:13:"telegram\_chat";s:'.strlen((string) $chat).':"'.$chat.'";%')
         ->getQuery()
         ->setMaxResults(1)
         ->getOneOrNullResult();

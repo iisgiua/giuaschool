@@ -601,13 +601,13 @@ class CircolariController extends BaseController {
       $query = $this->em->getRepository(CircolareUtente::class)->createQueryBuilder('ce')
         ->delete()
         ->where('ce.circolare=:circolare')
-        ->setParameters(['circolare' => $circolare])
+        ->setParameter('circolare', $circolare)
         ->getQuery()
         ->execute();
       $query = $this->em->getRepository(CircolareClasse::class)->createQueryBuilder('cc')
         ->delete()
         ->where('cc.circolare=:circolare')
-        ->setParameters(['circolare' => $circolare])
+        ->setParameter('circolare', $circolare)
         ->getQuery()
         ->execute();
     }

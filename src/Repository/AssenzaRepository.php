@@ -32,7 +32,9 @@ class AssenzaRepository extends BaseRepository {
     $this->createQueryBuilder('ass')
       ->delete()
       ->where('ass.alunno=:alunno AND ass.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->execute();
   }
@@ -49,7 +51,7 @@ class AssenzaRepository extends BaseRepository {
     $assenze = $this->createQueryBuilder('ass')
       ->select('COUNT(ass.id)')
       ->where('ass.alunno=:alunno AND ass.giustificato IS NULL')
-      ->setParameters(['alunno' => $alunno])
+      ->setParameter('alunno', $alunno)
       ->getQuery()
       ->getSingleScalarResult();
     return $assenze;
@@ -70,8 +72,10 @@ class AssenzaRepository extends BaseRepository {
       ->join('ass.alunno', 'a')
       ->join('a.classe', 'c')
       ->where('ass.data=:data AND a.abilitato=:abilitato AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'abilitato' => 1, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione()]);
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('abilitato', 1)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione());
     if (!empty($classe->getGruppo())) {
       $assenti = $assenti
         ->andWhere('c.gruppo=:gruppo')

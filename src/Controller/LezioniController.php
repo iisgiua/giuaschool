@@ -73,7 +73,8 @@ class LezioniController extends BaseController {
         ->join('c.materia', 'm')
         ->where('c.docente=:docente AND c.attiva=:attiva')
         ->orderBy('cl.sede,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
-        ->setParameters(['docente' => $this->getUser(), 'attiva' => 1])
+        ->setParameter('docente', $this->getUser())
+        ->setParameter('attiva', 1)
         ->getQuery()
         ->getResult();
       // raggruppa per classi

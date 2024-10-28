@@ -161,12 +161,12 @@ class UtenteTest extends EntityTestCase {
     $existent->eraseCredentials();
     $this->assertSame('', $existent->getPasswordNonCifrata(), $this->entity.'::eraseCredentials');
     // serialize
-    $this->assertSame(serialize([$existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato()]), $existent->serialize(), $this->entity.'::serialize');
+    $this->assertSame(['id' => $existent->getId(), 'username' => $existent->getUsername(), 'password' => $existent->getPassword(), 'email' => $existent->getEmail(), 'abilitato' => $existent->getAbilitato()], $existent->__serialize(), $this->entity.'::serialize');
     // unserialize
-    $s = $existent->serialize();
+    $s = ['id' => 99999, 'username' => 'unserialize.test', 'password' => '123456', 'email' => 'unserialize.test@noemail.local', 'abilitato' => true];
     $o = new Utente();
-    $o->unserialize($s);
-    $this->assertSame(serialize([$o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato()]), $o->serialize(), $this->entity.'::serialize');
+    $o->__unserialize($s);
+    $this->assertSame($s, ['id' => $o->getId(), 'username' => $o->getUsername(), 'password' => $o->getPassword(), 'email' => $o->getEmail(), 'abilitato' => $o->getAbilitato()], $this->entity.'::unserialize');
     // getCodiceRuolo
     $this->assertSame('U', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo

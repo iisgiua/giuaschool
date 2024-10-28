@@ -107,7 +107,8 @@ class ArchiviazioneUtil {
       ->join('c.classe', 'cl')
       ->where('d.id=:docente AND m.tipo IN (:tipi)')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.ordinamento', 'ASC')
-      ->setParameters(['docente' => $docente, 'tipi' => ['N', 'R', 'E']])
+			->setParameter('docente', $docente)
+			->setParameter('tipi', ['N', 'R', 'E'])
       ->getQuery()
       ->getResult();
     if (empty($cattedre)) {
@@ -197,7 +198,8 @@ class ArchiviazioneUtil {
       ->join('c.alunno', 'a')
       ->where('d.id=:docente AND m.tipo=:tipo')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['docente' => $docente, 'tipo' => 'S'])
+			->setParameter('docente', $docente)
+			->setParameter('tipo', 'S')
       ->getQuery()
       ->getResult();
     if (empty($cattedre)) {
@@ -402,9 +404,12 @@ class ArchiviazioneUtil {
       ->join(ScansioneOraria::class, 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-        'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-        'sede' => $cattedra->getClasse()->getSede()])
+			->setParameter('docente', $docente)
+			->setParameter('classe', $cattedra->getClasse())
+			->setParameter('materia', $cattedra->getMateria())
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
+			->setParameter('sede', $cattedra->getClasse()->getSede())
       ->getQuery()
       ->getSingleScalarResult();
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
@@ -415,8 +420,11 @@ class ArchiviazioneUtil {
       ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.materia!=:materia AND l.data BETWEEN :inizio AND :fine')
       ->orderBy('l.data', 'ASC')
-      ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+			->setParameter('docente', $docente)
+			->setParameter('materia', $cattedra->getMateria())
+			->setParameter('classe', $cattedra->getClasse())
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getSingleScalarResult();
     if ($ore > 0 || $votiNoLezione > 0) {
@@ -428,9 +436,12 @@ class ArchiviazioneUtil {
         ->join('so.orario', 'o')
         ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
-          'sede' => $cattedra->getClasse()->getSede()])
+        ->setParameter('docente', $docente)
+        ->setParameter('classe', $cattedra->getClasse())
+        ->setParameter('materia', $cattedra->getMateria())
+        ->setParameter('inizio', $periodo['inizio'])
+        ->setParameter('fine', $periodo['fine'])
+        ->setParameter('sede', $cattedra->getClasse()->getSede())
         ->getQuery()
         ->getArrayResult();
       // legge assenze
@@ -458,7 +469,7 @@ class ArchiviazioneUtil {
         $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
           ->select('(al.alunno) AS id,al.ore')
           ->where('al.lezione=:lezione')
-          ->setParameters(['lezione' => $l['id']])
+			    ->setParameter('lezione', $l['id'])
           ->getQuery()
           ->getArrayResult();
         // somma ore di assenza per alunno
@@ -477,7 +488,7 @@ class ArchiviazioneUtil {
         ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.frequenzaEstero,(a.classe) AS idclasse')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista_alunni])
+			  ->setParameter('lista', $lista_alunni)
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -488,8 +499,10 @@ class ArchiviazioneUtil {
       $proposte = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
         ->select('(pv.alunno) AS idalunno,pv.unico')
         ->where('pv.alunno IN (:alunni) AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo=:periodo')
-        ->setParameters(['alunni' => $lista_alunni, 'classe' => $cattedra->getClasse(),
-          'materia' => $cattedra->getMateria(), 'periodo' => $periodo['scrutinio']]);
+        ->setParameter('alunni', $lista_alunni)
+        ->setParameter('classe', $cattedra->getClasse())
+        ->setParameter('materia', $cattedra->getMateria())
+        ->setParameter('periodo', $periodo['scrutinio']);
       if ($cattedra->getMateria()->getTipo() == 'E') {
         // proposte multiple per Ed.civica: aggiunge condizione su docente
         $proposte = $proposte
@@ -653,8 +666,11 @@ class ArchiviazioneUtil {
         ->join('v.lezione', 'l')
         ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
-        ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
-          'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+        ->setParameter('docente', $docente)
+        ->setParameter('materia', $cattedra->getMateria())
+        ->setParameter('classe', $cattedra->getClasse())
+        ->setParameter('inizio', $periodo['inizio'])
+        ->setParameter('fine', $periodo['fine'])
         ->orderBy('l.data', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -713,8 +729,9 @@ class ArchiviazioneUtil {
       ->join('o.alunno', 'a')
       ->where('o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
-        'fine' => $periodo['fine']])
+			->setParameter('cattedra', $cattedra)
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getArrayResult();
     foreach ($osservazioni as $o) {
@@ -749,8 +766,9 @@ class ArchiviazioneUtil {
       ->select('o.data,o.testo')
       ->where('NOT (o INSTANCE OF App\Entity\OsservazioneAlunno) AND o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
-        'fine' => $periodo['fine']])
+			->setParameter('cattedra', $cattedra)
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getArrayResult();
     foreach ($personali as $p) {
@@ -782,8 +800,10 @@ class ArchiviazioneUtil {
       $proposte = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
         ->select('(pv.alunno) AS idalunno,pv.unico,pv.debito,pv.periodo')
         ->where('pv.docente=:docente AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo IN (:periodi)')
-        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
-          'materia' => $cattedra->getMateria(), 'periodi' => ['G', 'R']])
+        ->setParameter('docente', $docente)
+        ->setParameter('classe', $cattedra->getClasse())
+        ->setParameter('materia', $cattedra->getMateria())
+        ->setParameter('periodi', ['G', 'R'])
         ->orderBy('pv.periodo', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -901,10 +921,14 @@ class ArchiviazioneUtil {
       ->join(ScansioneOraria::class, 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
-      ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-        'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(),
-        'gruppo' => $cattedra->getClasse()->getGruppo(), 'inizio' => $periodo['inizio'],
-        'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
+			->setParameter('docente', $docente)
+			->setParameter('alunno', $cattedra->getAlunno())
+			->setParameter('anno', $cattedra->getClasse()->getAnno())
+			->setParameter('sezione', $cattedra->getClasse()->getSezione())
+			->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
+			->setParameter('sede', $cattedra->getClasse()->getSede())
       ->getQuery()
       ->getSingleScalarResult();
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
@@ -919,10 +943,14 @@ class ArchiviazioneUtil {
         ->join('so.orario', 'o')
         ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
         ->orderBy('l.data,l.ora', 'ASC')
-        ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-          'anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(),
-          'gruppo' => $cattedra->getClasse()->getGruppo(), 'inizio' => $periodo['inizio'],
-          'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
+        ->setParameter('docente', $docente)
+        ->setParameter('alunno', $cattedra->getAlunno())
+        ->setParameter('anno', $cattedra->getClasse()->getAnno())
+        ->setParameter('sezione', $cattedra->getClasse()->getSezione())
+        ->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
+        ->setParameter('inizio', $periodo['inizio'])
+        ->setParameter('fine', $periodo['fine'])
+        ->setParameter('sede', $cattedra->getClasse()->getSede())
         ->getQuery()
         ->getArrayResult();
       // legge assenze
@@ -947,7 +975,8 @@ class ArchiviazioneUtil {
         $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
           ->select('SUM(al.ore)')
           ->where('al.lezione=:lezione AND al.alunno=:alunno')
-          ->setParameters(['lezione' => $l['id'], 'alunno' => $cattedra->getAlunno()])
+          ->setParameter('lezione', $l['id'])
+          ->setParameter('alunno', $cattedra->getAlunno())
           ->getQuery()
           ->getSingleScalarResult();
         // somma ore di assenza per alunno
@@ -1108,8 +1137,9 @@ class ArchiviazioneUtil {
       ->join('o.alunno', 'a')
       ->where('o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
-        'fine' => $periodo['fine']])
+			->setParameter('cattedra', $cattedra)
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getArrayResult();
     foreach ($osservazioni as $o) {
@@ -1144,8 +1174,9 @@ class ArchiviazioneUtil {
       ->select('o.data,o.testo')
       ->where('NOT (o INSTANCE OF App\Entity\OsservazioneAlunno) AND o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
-        'fine' => $periodo['fine']])
+			->setParameter('cattedra', $cattedra)
+			->setParameter('inizio', $periodo['inizio'])
+			->setParameter('fine', $periodo['fine'])
       ->getQuery()
       ->getArrayResult();
     foreach ($personali as $p) {
@@ -1227,7 +1258,8 @@ class ArchiviazioneUtil {
       ->select('f.data')
       ->where('f.tipo=:festivo AND (f.sede IS NULL OR f.sede=:sede)')
       ->orderBy('f.data', 'ASC')
-      ->setParameters(['festivo' => 'F', 'sede' => $classe->getSede()])
+			->setParameter('festivo', 'F')
+			->setParameter('sede', $classe->getSede())
       ->getQuery()
       ->getArrayResult();
     $giorni_festivi = [];
@@ -1267,8 +1299,10 @@ class ArchiviazioneUtil {
         $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
           ->join('l.classe', 'c')
           ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora,
-            'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+          ->setParameter('data', $data->format('Y-m-d'))
+          ->setParameter('ora', $ora)
+          ->setParameter('anno', $classe->getAnno())
+          ->setParameter('sezione', $classe->getSezione())
           ->orderBy('l.gruppo')
           ->getQuery()
           ->getResult();
@@ -1292,7 +1326,7 @@ class ArchiviazioneUtil {
               ->join('f.docente', 'd')
               ->where('f.lezione=:lezione')
               ->orderBy('d.cognome,d.nome', 'ASC')
-              ->setParameters(['lezione' => $lezione])
+			        ->setParameter('lezione', $lezione)
               ->getQuery()
               ->getResult();
             // docenti
@@ -1365,7 +1399,8 @@ class ArchiviazioneUtil {
         ->join(Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->setParameter('lista', $lista)
+        ->setParameter('data', $data->format('Y-m-d'))
         ->getQuery()
         ->getArrayResult();
       foreach ($fc as $idx => $ffcc) {
@@ -1392,7 +1427,8 @@ class ArchiviazioneUtil {
         ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.giustificato=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita,ass.data', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->setParameter('lista', $lista)
+        ->setParameter('data', $data->format('Y-m-d'))
         ->getQuery()
         ->getArrayResult();
       foreach ($giustificaAssenze as $ass) {
@@ -1405,7 +1441,8 @@ class ArchiviazioneUtil {
         ->join(Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.giustificato=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita,e.data', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->setParameter('lista', $lista)
+        ->setParameter('data', $data->format('Y-m-d'))
         ->getQuery()
         ->getArrayResult();
       foreach ($giustificaRitardi as $rit) {
@@ -1418,7 +1455,8 @@ class ArchiviazioneUtil {
         ->join(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.giustificato=:data AND u.utenteGiustifica IS NOT NULL')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita,u.data', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->setParameter('lista', $lista)
+        ->setParameter('data', $data->format('Y-m-d'))
         ->getQuery()
         ->getArrayResult();
       foreach ($giustificaUscite as $usc) {
@@ -1434,7 +1472,8 @@ class ArchiviazioneUtil {
         ->leftJoin(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
+        ->setParameter('lista', $lista)
+        ->setParameter('data', $data->format('Y-m-d'))
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -1513,8 +1552,9 @@ class ArchiviazioneUtil {
         ->leftJoin('n.docenteProvvedimento', 'dp')
         ->where('n.data=:data AND c.anno=:anno AND c.sezione=:sezione')
         ->orderBy('n.modificato', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'anno' => $classe->getAnno(),
-          'sezione' => $classe->getSezione()])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
         ->getQuery()
         ->getResult();
       foreach ($note as $n) {
@@ -1539,8 +1579,9 @@ class ArchiviazioneUtil {
         ->join('a.classe', 'c')
         ->where('a.data=:data AND c.anno=:anno AND c.sezione=:sezione')
         ->orderBy('a.modificato', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'anno' => $classe->getAnno(),
-          'sezione' => $classe->getSezione()])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
         ->getQuery()
         ->getResult();
       foreach ($annotazioni as $a) {
@@ -1552,7 +1593,9 @@ class ArchiviazioneUtil {
             ->join(AvvisoUtente::class, 'au', 'WITH', 'au.utente=a.id')
             ->join('au.avviso', 'av')
             ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
-            ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'A', 'filtro' => 'U'])
+            ->setParameter('avviso', $a->getAvviso())
+            ->setParameter('destinatari', 'A')
+            ->setParameter('filtro', 'U')
             ->getQuery()
             ->getResult();
         } elseif ($a->getAvviso() && in_array('G', $a->getAvviso()->getDestinatari())) {
@@ -1562,7 +1605,9 @@ class ArchiviazioneUtil {
             ->join(AvvisoUtente::class, 'au', 'WITH', 'au.utente=g.id')
             ->join('au.avviso', 'av')
             ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
-            ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'G', 'filtro' => 'U'])
+            ->setParameter('avviso', $a->getAvviso())
+            ->setParameter('destinatari', 'G')
+            ->setParameter('filtro', 'U')
             ->getQuery()
             ->getResult();
         }
@@ -1666,7 +1711,8 @@ class ArchiviazioneUtil {
       ->join('s.classe', 'c')
       ->where("s.stato='C' AND c.anno=:anno AND c.sezione=:sezione")
       ->orderBy('s.data,c.gruppo', 'ASC')
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
       ->getQuery()
       ->getResult();
     foreach ($scrutini as $scrut) {
@@ -1703,8 +1749,10 @@ class ArchiviazioneUtil {
             ->join('vs.materia', 'm')
             ->where('a.id IN (:lista) AND vs.unico IS NOT NULL AND vs.unico<:suff AND m.tipo IN (:tipi)')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['scrutinio' => $scrut, 'lista' => $scrut->getDato('alunni'), 'suff' => 6,
-              'tipi' => ['N', 'E']])
+            ->setParameter('scrutinio', $scrut)
+            ->setParameter('lista', $scrut->getDato('alunni'))
+            ->setParameter('suff', 6)
+            ->setParameter('tipi', ['N', 'E'])
             ->getQuery()
             ->getResult();
           $debiti_num = 0;
@@ -1769,7 +1817,9 @@ class ArchiviazioneUtil {
             ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=:scrutinio')
             ->where('a.id IN (:lista) AND e.esito=:sospeso')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['scrutinio' => $scrut, 'lista' => $scrut->getDato('alunni'), 'sospeso' => 'S'])
+            ->setParameter('scrutinio', $scrut)
+            ->setParameter('lista', $scrut->getDato('alunni'))
+            ->setParameter('sospeso', 'S')
             ->getQuery()
             ->getResult();
           $debiti_num = 0;
@@ -1797,7 +1847,9 @@ class ArchiviazioneUtil {
             ->join('e.alunno', 'a')
             ->where('e.scrutinio=:scrutinio AND e.esito IN (:esiti) AND a.id IN (:lista)')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['scrutinio' => $scrut, 'esiti' => ['A', 'S'], 'lista' => $scrut->getDato('alunni')])
+            ->setParameter('scrutinio', $scrut)
+            ->setParameter('esiti', ['A', 'S'])
+            ->setParameter('lista', $scrut->getDato('alunni'))
             ->getQuery()
             ->getResult();
           $carenze_num = 0;

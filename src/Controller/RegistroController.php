@@ -270,8 +270,10 @@ class RegistroController extends BaseController
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
       ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione()])
+      ->setParameter('data', $data)
+      ->setParameter('ora', $ora)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
       ->orderBy('l.gruppo')
       ->getQuery()
       ->getResult();
@@ -281,7 +283,7 @@ class RegistroController extends BaseController
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
         ->where('f.lezione=:lezione')
-        ->setParameters(['lezione' => $lezione])
+        ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
       // docenti
@@ -384,7 +386,8 @@ class RegistroController extends BaseController
             if (!empty($classe->getGruppo())) {
               $classeComune = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
                 ->where("c.anno=:anno AND c.sezione=:sezione AND (c.gruppo='' OR c.gruppo IS NULL)")
-                ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+                ->setParameter('anno', $classe->getAnno())
+                ->setParameter('sezione', $classe->getSezione())
                 ->getQuery()
                 ->setMaxResults(1)
                 ->getOneOrNullResult();
@@ -542,8 +545,10 @@ class RegistroController extends BaseController
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
       ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione()])
+      ->setParameter('data', $data)
+      ->setParameter('ora', $ora)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
       ->orderBy('l.gruppo')
       ->getQuery()
       ->getResult();
@@ -553,7 +558,7 @@ class RegistroController extends BaseController
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
         ->where('f.lezione=:lezione')
-        ->setParameters(['lezione' => $lezione])
+        ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
       // docenti
@@ -618,7 +623,7 @@ class RegistroController extends BaseController
           ->select('DISTINCT c.tipo')
           ->join('c.materia', 'm')
           ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
-          ->setParameters(['classe' => $classe])
+          ->setParameter('classe', $classe)
           ->getQuery()
           ->getSingleColumnResult();
         if (in_array('N', $cattedreReligione, true)) {
@@ -696,9 +701,13 @@ class RegistroController extends BaseController
             $altraLezione = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
               ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
               ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.gruppo=:gruppo AND l.tipoGruppo=:tipoGruppo AND l.materia=:materia AND f.docente=:docente')
-              ->setParameters(['id' => $lezioneDocente, 'data' => $data, 'classe' => $classe,
-                'gruppo' => $lezioneDocente->getGruppo(), 'tipoGruppo' => $lezioneDocente->getTipoGruppo(),
-                'materia' => $lezioneDocente->getMateria(), 'docente' => $this->getUser()])
+              ->setParameter('id', $lezioneDocente)
+              ->setParameter('data', $data)
+              ->setParameter('classe', $classe)
+              ->setParameter('gruppo', $lezioneDocente->getGruppo())
+              ->setParameter('tipoGruppo', $lezioneDocente->getTipoGruppo())
+              ->setParameter('materia', $lezioneDocente->getMateria())
+              ->setParameter('docente', $this->getUser())
               ->setMaxResults(1)
               ->getQuery()
               ->getOneOrNullResult();
@@ -749,7 +758,7 @@ class RegistroController extends BaseController
         $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
           ->delete()
           ->where('al.lezione=:lezione')
-          ->setParameters(['lezione' => $log['cancella']->getId()])
+          ->setParameter('lezione', $log['cancella']->getId())
           ->getQuery()
           ->execute();
       }
@@ -821,8 +830,10 @@ class RegistroController extends BaseController
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
       ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
-      ->setParameters(['data' => $data, 'ora' => $ora, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione()])
+      ->setParameter('data', $data)
+      ->setParameter('ora', $ora)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
       ->orderBy('l.gruppo')
       ->getQuery()
       ->getResult();
@@ -832,7 +843,7 @@ class RegistroController extends BaseController
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
         ->where('f.lezione=:lezione')
-        ->setParameters(['lezione' => $lezione])
+        ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
       // docenti
@@ -868,9 +879,13 @@ class RegistroController extends BaseController
       $altraLezione = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
         ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
         ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.gruppo=:gruppo AND l.tipoGruppo=:tipoGruppo AND l.materia=:materia AND f.docente=:docente')
-        ->setParameters(['id' => $lezioneDocente, 'data' => $data, 'classe' => $classe,
-          'gruppo' => $lezioneDocente->getGruppo(), 'tipoGruppo' => $lezioneDocente->getTipoGruppo(),
-          'materia' => $lezioneDocente->getMateria(), 'docente' => $this->getUser()])
+        ->setParameter('id', $lezioneDocente)
+        ->setParameter('data', $data)
+        ->setParameter('classe', $classe)
+        ->setParameter('gruppo', $lezioneDocente->getGruppo())
+        ->setParameter('tipoGruppo', $lezioneDocente->getTipoGruppo())
+        ->setParameter('materia', $lezioneDocente->getMateria())
+        ->setParameter('docente', $this->getUser())
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
@@ -937,7 +952,8 @@ class RegistroController extends BaseController
           $vecchiaLezione = clone $lezioneDocente;
           $nuovaClasse = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
             ->where("c.anno=:anno AND c.sezione=:sezione AND (c.gruppo='' OR c.gruppo IS NULL)")
-            ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()])
+            ->setParameter('anno', $classe->getAnno())
+            ->setParameter('sezione', $classe->getSezione())
             ->getQuery()
             ->setMaxResults(1)
             ->getOneOrNullResult();
@@ -949,7 +965,7 @@ class RegistroController extends BaseController
           $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
             ->delete()
             ->where('al.lezione IN (:lezioni)')
-            ->setParameters(['lezioni' => array_map(fn($l) => $l->getId(), $lezioni)])
+            ->setParameter('lezioni', array_map(fn($l) => $l->getId(), $lezioni))
             ->getQuery()
             ->execute();
           // cancella altri gruppi
@@ -973,7 +989,7 @@ class RegistroController extends BaseController
       $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
         ->delete()
         ->where('al.lezione=:lezione')
-        ->setParameters(['lezione' => $lezione->getId()])
+        ->setParameter('lezione', $lezione->getId())
         ->getQuery()
         ->execute();
     }
@@ -1099,7 +1115,7 @@ class RegistroController extends BaseController
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
           ->where('a.id IN (:lista)')
           ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-          ->setParameters(['lista' => $listaAlunni]),
+          ->setParameter('lista', $listaAlunni),
         'expanded' => true,
         'multiple' => true,
         'placeholder' => false,
@@ -1151,7 +1167,7 @@ class RegistroController extends BaseController
           $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $annotazione->getAvviso()])
+            ->setParameter('avviso', $annotazione->getAvviso())
             ->getQuery()
             ->execute();
           // cancella avviso
@@ -1271,7 +1287,7 @@ class RegistroController extends BaseController
       $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
         ->delete()
         ->where('au.avviso=:avviso')
-        ->setParameters(['avviso' => $annotazione->getAvviso()])
+        ->setParameter('avviso', $annotazione->getAvviso())
         ->getQuery()
         ->execute();
       // cancella avviso
@@ -1425,7 +1441,7 @@ class RegistroController extends BaseController
           'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
             ->where('a.id IN (:lista)')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-            ->setParameters(['lista' => $listaAlunni]),
+            ->setParameter('lista', $listaAlunni),
           'expanded' => true,
           'multiple' => true,
           'disabled' => false,

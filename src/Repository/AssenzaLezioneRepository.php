@@ -35,14 +35,16 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->select('al.id')
       ->join('al.lezione', 'l')
       ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // cancella
     $this->createQueryBuilder('al')
       ->delete()
       ->where('al.id IN (:lista)')
-      ->setParameters(['lista' => $ids])
+	    ->setParameter('lista', $ids)
       ->getQuery()
       ->execute();
   }
@@ -60,20 +62,22 @@ class AssenzaLezioneRepository extends BaseRepository {
     $lista = [];
     if ($ora > 1) {
       // recupera lezione precedente
-      $lezione = $this->_em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezione = $this->getEntityManager()->getRepository(Lezione::class)->createQueryBuilder('l')
         ->where('l.classe=:classe AND l.data=:data AND l.ora<:ora')
         ->orderBy('l.ora', 'DESC')
-        ->setParameters(['classe' => $classe, 'data' => $data->format('Y-m-d'), 'ora' => $ora])
+        ->setParameter('classe', $classe)
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('ora', $ora)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
       if ($lezione) {
         // recupera alunni assenti
-        $lista = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
+        $lista = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
           ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
           ->join('al.lezione', 'l')
           ->where('l.id=:lezione')
-          ->setParameters(['lezione' => $lezione])
+	        ->setParameter('lezione', $lezione)
           ->getQuery()
           ->getResult();
       }
@@ -91,11 +95,11 @@ class AssenzaLezioneRepository extends BaseRepository {
    */
   public function assentiLezione(Lezione $lezione) {
     // recupera alunni assenti
-    $lista = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $lista = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione')
-      ->setParameters(['lezione' => $lezione])
+	    ->setParameter('lezione', $lezione)
       ->getQuery()
       ->getResult();
     // restituisce assenti
@@ -116,11 +120,11 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->where('al2.alunno=al.alunno AND l2.id!=:lezione AND l2.data=l.data')
       ->getDQL();
     // recupera alunni assenti
-    $assenti = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $assenti = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione AND NOT EXISTS ('.$altre.')')
-      ->setParameters(['lezione' => $lezione])
+	    ->setParameter('lezione', $lezione)
       ->getQuery()
       ->getResult();
     // restituisce assenti
@@ -144,7 +148,8 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->join('al.lezione', 'l')
       ->where('l.data=:data AND l.classe=:classe')
       ->orderBy('l.ora,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     foreach ($lista as $l) {
@@ -171,7 +176,8 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->join('al.lezione', 'l')
       ->where('a.id=:alunno AND l.data=:data')
       ->orderBy('l.ora', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     $ore = array_column($lista, 'ora');

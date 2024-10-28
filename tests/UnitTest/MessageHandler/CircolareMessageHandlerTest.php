@@ -144,7 +144,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':ora')
       ->set('cu.confermata', ':ora')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['ora'=> new DateTime(), 'circolare' => $circolare->getId()])
+      ->setParameter('ora', new DateTime())
+      ->setParameter('circolare', $circolare->getId())
       ->getQuery()
       ->getResult();
     // esegue
@@ -171,7 +172,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['nulla'=> null, 'circolare' => $circolare->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('circolare', $circolare->getId())
       ->getQuery()
       ->getResult();
     // esegue
@@ -210,7 +212,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['nulla'=> null, 'circolare' => $circolare1->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('circolare', $circolare1->getId())
       ->getQuery()
       ->getResult();
     // esegue: inserisce in coda
@@ -227,7 +230,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['nulla'=> null, 'circolare' => $circolare2->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('circolare', $circolare2->getId())
       ->getQuery()
       ->getResult();
     // esegue: inserisce in coda
@@ -244,7 +248,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['nulla'=> null, 'circolare' => $circolare3->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('circolare', $circolare3->getId())
       ->getQuery()
       ->getResult();
     // esegue: invia tutta la coda
@@ -253,7 +258,7 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $risultato = $this->em->getRepository(CircolareUtente::class)->createQueryBuilder('cu')
       ->select('(cu.utente) AS utente,(cu.circolare) AS circolare')
       ->where('cu.circolare IN (:circolari)')
-      ->setParameters(['circolari' => [$circolare1->getId(), $circolare2->getId(), $circolare3->getId()]])
+      ->setParameter('circolari', [$circolare1->getId(), $circolare2->getId(), $circolare3->getId()])
       ->getQuery()
       ->getArrayResult();
     $destinatari = [];
@@ -294,7 +299,8 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
       ->set('cu.letta', ':nulla')
       ->set('cu.confermata', ':nulla')
       ->where('cu.circolare=:circolare')
-      ->setParameters(['nulla'=> null, 'circolare' => $circolare->getId()])
+      ->setParameter('nulla', null)
+      ->setParameter('circolare', $circolare->getId())
       ->getQuery()
       ->getResult();
     // esegue: inserisce in coda

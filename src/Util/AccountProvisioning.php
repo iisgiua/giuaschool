@@ -258,7 +258,9 @@ class AccountProvisioning {
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -304,7 +306,9 @@ class AccountProvisioning {
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -385,7 +389,9 @@ class AccountProvisioning {
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo()])
+        ->setParameter('anno', $cattedra->getClasse()->getAnno())
+        ->setParameter('sezione', $cattedra->getClasse()->getSezione())
+        ->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
         ->getQuery()
         ->getResult();
     } elseif ($cattedra->getMateria()->getTipo() != 'E') {
@@ -421,7 +427,8 @@ class AccountProvisioning {
           ->select('a.email')
           ->join('a.classe', 'cl')
           ->where('a.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione'.(empty($cattedra->getClasse()->getGruppo()) ? '' : (" AND cl.gruppo='".$cattedra->getClasse()->getGruppo()."'")))
-          ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()])
+          ->setParameter('anno', $cattedra->getClasse()->getAnno())
+          ->setParameter('sezione', $cattedra->getClasse()->getSezione())
           ->getQuery()
           ->getArrayResult();
         foreach ($alunni as $alu) {
@@ -497,8 +504,12 @@ class AccountProvisioning {
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND d.id=:docente AND m.id!=:materia AND m.tipo!=:civica')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'docente' => $docente,
-        'materia' => $materia, 'civica' => 'E'])
+			->setParameter('attiva', 1)
+			->setParameter('classe', $classe)
+			->setParameter('abilitato', 1)
+			->setParameter('docente', $docente)
+			->setParameter('materia', $materia)
+			->setParameter('civica', 'E')
       ->getQuery()
       ->getSingleScalarResult();
     // gestione cattedra di sostegno
@@ -510,7 +521,9 @@ class AccountProvisioning {
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where("m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->getQuery()
         ->getArrayResult();
     } elseif ($materia->getTipo() == 'E') {

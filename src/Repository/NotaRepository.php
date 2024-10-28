@@ -37,7 +37,9 @@ class NotaRepository extends BaseRepository {
       ->select('COUNT(n.id)')
       ->join('n.alunni', 'a')
       ->where('a.id=:alunno AND n.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio, 'fine' => $fine]);
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio)
+      ->setParameter('fine', $fine);
     if ($classe) {
       // controlla classe di appartenenza
       $note->andWhere('n.classe=:classe')->setParameter('classe', $classe);
@@ -55,15 +57,15 @@ class NotaRepository extends BaseRepository {
    * @return array Vettore associativo con i dati della statistica
    */
   public function statisticaCondotta(array $search, int $pagina): array {
-    $mode = $this->_em->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
+    $mode = $this->getEntityManager()->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
     if (str_contains((string) $mode, 'ONLY_FULL_GROUP_BY')) {
       $mode = str_replace('ONLY_FULL_GROUP_BY', '', $mode);
       $mode = $mode[0] == ',' ? substr($mode, 1) : ($mode[-1] == ',' ? substr($mode, 0, -1) :
         str_replace(',,', ',', $mode));
-      $this->_em->getConnection()->executeStatement("SET sql_mode='$mode'");
+      $this->getEntityManager()->getConnection()->executeStatement("SET sql_mode='$mode'");
     }
     // query base
-    $note = $this->_em->getRepository(Classe::class)->createQueryBuilder('c')
+    $note = $this->getEntityManager()->getRepository(Classe::class)->createQueryBuilder('c')
       ->select("COUNT(n.id) AS tot,SUM(IF(n.tipo='C',1,0)) AS nc,SUM(IF(n.tipo='I',1,0)) AS ni,c AS classe")
       ->join(Classe::class, 'c2', 'WITH', "c2.anno=c.anno AND c2.sezione=c.sezione")
       ->join(Nota::class, 'n', 'WITH', 'n.classe=c2.id')
@@ -71,7 +73,8 @@ class NotaRepository extends BaseRepository {
       ->groupBy('c.anno,c.sezione')
       ->orderBy('tot', 'DESC')
       ->addOrderBy('c.anno,c.sezione')
-      ->setParameters(['inizio' => $search['inizio'], 'fine' => $search['fine']]);
+      ->setParameter('inizio', $search['inizio'])
+      ->setParameter('fine', $search['fine']);
     // criterio sulla sede
     if ($search['sede']) {
       // controlla classe di appartenenza

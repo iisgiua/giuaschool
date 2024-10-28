@@ -32,8 +32,10 @@ class PresenzaRepository extends BaseRepository {
     $query = $this->createQueryBuilder('p')
       ->join('p.alunno', 'a')
       ->where('p.data BETWEEN :inizio AND :fine AND a.abilitato=:abilitato AND a.classe=:classe')
-      ->setParameters(['inizio' => $criteri['inizio'], 'fine' => $criteri['fine'], 'abilitato' => 1,
-        'classe' => $classe])
+      ->setParameter('inizio', $criteri['inizio'])
+      ->setParameter('fine', $criteri['fine'])
+      ->setParameter('abilitato', 1)
+      ->setParameter('classe', $classe)
       ->orderBy('a.cognome,a.nome,a.dataNascita,p.data,p.oraInizio', 'ASC');
     // ricerca alunno
     if ($criteri['alunno'] > 0) {

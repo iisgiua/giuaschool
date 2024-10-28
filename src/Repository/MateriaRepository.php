@@ -46,7 +46,9 @@ class MateriaRepository extends EntityRepository {
     $materie = $this->createQueryBuilder('m')
       ->select('m.id')
       ->where('m.id IN (:lista) AND m.tipo!=:supplenza AND m.tipo!=:condotta')
-      ->setParameters(['lista' => $lista, 'supplenza' => 'U', 'condotta' => 'C'])
+      ->setParameter('lista', $lista)
+      ->setParameter('supplenza', 'U')
+      ->setParameter('condotta', 'C')
       ->getQuery()
       ->getArrayResult();
     $lista_materie = array_column($materie, 'id');
@@ -68,7 +70,9 @@ class MateriaRepository extends EntityRepository {
     $materie = $this->createQueryBuilder('m')
       ->select('m.nome')
       ->where('m.id IN (:lista) AND m.tipo!=:supplenza AND m.tipo!=:condotta')
-      ->setParameters(['lista' => $lista, 'supplenza' => 'U', 'condotta' => 'C'])
+      ->setParameter('lista', $lista)
+      ->setParameter('supplenza', 'U')
+      ->setParameter('condotta', 'C')
       ->orderBy('m.nome', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -95,7 +99,7 @@ class MateriaRepository extends EntityRepository {
     } elseif ($cattedra === false) {
       $materie = $materie->where("m.tipo NOT IN ('N','R','S','E')");
     }
-    $materie = $materie 
+    $materie = $materie
       ->orderBy('m.nome')
       ->getQuery()
       ->getResult();
@@ -108,4 +112,3 @@ class MateriaRepository extends EntityRepository {
   }
 
 }
-

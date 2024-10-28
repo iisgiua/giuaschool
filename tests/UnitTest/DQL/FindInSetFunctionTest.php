@@ -90,7 +90,7 @@ class FindInSetFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 22: Error: Expected Doctrine\ORM\Query\Lexer::T_COMMA, got ')'", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 22: Error: Expected Doctrine\ORM\Query\TokenType::T_COMMA, got ')'", $exception);
     // sintassi errata: tre parametri
     $query->setDQL("SELECT FIND_IN_SET('A', c.valore, 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
@@ -102,7 +102,7 @@ class FindInSetFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 32: Error: Expected Doctrine\ORM\Query\Lexer::T_CLOSE_PARENTHESIS, got ','", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 32: Error: Expected Doctrine\ORM\Query\TokenType::T_CLOSE_PARENTHESIS, got ','", $exception);
   }
 
   /**

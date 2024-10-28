@@ -79,7 +79,8 @@ class NotificheUtil {
         ->join('a.classe', 'c')
         ->join(Genitore::class, 'g', 'WITH', 'a.id=g.alunno')
         ->where('g.id=:genitore AND a.abilitato=:abilitato AND g.abilitato=:abilitato')
-        ->setParameters(['genitore' => $utente, 'abilitato' => 1])
+        ->setParameter('genitore', $utente)
+        ->setParameter('abilitato', 1)
         ->getQuery()
         ->getOneOrNullResult();
       if ($alunno) {
@@ -148,7 +149,7 @@ class NotificheUtil {
       ->select('COUNT(a.id)')
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('au.utente=:utente AND au.letto is NULL')
-      ->setParameters(['utente' => $utente])
+			->setParameter('utente', $utente)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce numero avvisi
@@ -170,7 +171,9 @@ class NotificheUtil {
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
-      ->setParameters(['tipo' => 'V', 'docente' => $docente, 'oggi' => $ora->format('Y-m-d')])
+			->setParameter('tipo', 'V')
+			->setParameter('docente', $docente)
+			->setParameter('oggi', $ora->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge verifiche dell'alunno per cattedre di sostegno
@@ -180,7 +183,10 @@ class NotificheUtil {
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
-      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $ora->format('Y-m-d'), 'attiva' => 1])
+			->setParameter('docente', $docente)
+			->setParameter('tipo', 'V')
+			->setParameter('data', $ora->format('Y-m-d'))
+			->setParameter('attiva', 1)
       ->getQuery()
       ->getSingleScalarResult();
     // conta prossime verifiche
@@ -191,8 +197,10 @@ class NotificheUtil {
     $dati['prossime'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data BETWEEN :inizio AND :fine')
-      ->setParameters(['tipo' => 'V', 'docente' => $docente, 'inizio' => $inizio->format('Y-m-d'),
-        'fine' => $fine->format('Y-m-d')])
+			->setParameter('tipo', 'V')
+			->setParameter('docente', $docente)
+			->setParameter('inizio', $inizio->format('Y-m-d'))
+			->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge verifiche dell'alunno per cattedre di sostegno
@@ -202,8 +210,11 @@ class NotificheUtil {
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c2.attiva=:attiva')
-      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'),
-        'fine' => $fine->format('Y-m-d'), 'attiva' => 1])
+			->setParameter('docente', $docente)
+			->setParameter('tipo', 'V')
+			->setParameter('inizio', $inizio->format('Y-m-d'))
+			->setParameter('fine', $fine->format('Y-m-d'))
+			->setParameter('attiva', 1)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -226,7 +237,9 @@ class NotificheUtil {
       ->select('COUNT(a.id)')
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
-      ->setParameters(['tipo' => 'V', 'oggi' => $ora->format('Y-m-d'), 'alunno' => $alunno])
+			->setParameter('tipo', 'V')
+			->setParameter('oggi', $ora->format('Y-m-d'))
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getSingleScalarResult();
     // conta prossime verifiche
@@ -238,8 +251,10 @@ class NotificheUtil {
       ->select('COUNT(a.id)')
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND au.utente=:alunno')
-      ->setParameters(['tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-        'alunno' => $alunno])
+			->setParameter('tipo', 'V')
+			->setParameter('inizio', $inizio->format('Y-m-d'))
+			->setParameter('fine', $fine->format('Y-m-d'))
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -262,7 +277,9 @@ class NotificheUtil {
       ->select('COUNT(a.id)')
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
-      ->setParameters(['tipo' => 'P', 'oggi' => $ora->format('Y-m-d'), 'alunno' => $alunno])
+			->setParameter('tipo', 'P')
+			->setParameter('oggi', $ora->format('Y-m-d'))
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getSingleScalarResult();
     // conta compiti per il giorno dopo
@@ -272,7 +289,9 @@ class NotificheUtil {
       ->select('COUNT(a.id)')
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:domani AND au.utente=:alunno')
-      ->setParameters(['tipo' => 'P', 'domani' => $domani->format('Y-m-d'), 'alunno' => $alunno])
+			->setParameter('tipo', 'P')
+			->setParameter('domani', $domani->format('Y-m-d'))
+			->setParameter('alunno', $alunno)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -294,7 +313,9 @@ class NotificheUtil {
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
-      ->setParameters(['tipo' => 'P', 'docente' => $docente, 'oggi' => $ora->format('Y-m-d')])
+			->setParameter('tipo', 'P')
+			->setParameter('docente', $docente)
+			->setParameter('oggi', $ora->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge compiti dell'alunno per cattedre di sostegno
@@ -304,7 +325,10 @@ class NotificheUtil {
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
-      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $ora->format('Y-m-d'), 'attiva' => 1])
+			->setParameter('docente', $docente)
+			->setParameter('tipo', 'P')
+			->setParameter('data', $ora->format('Y-m-d'))
+			->setParameter('attiva', 1)
       ->getQuery()
       ->getSingleScalarResult();
     // conta compiti per il giorno dopo
@@ -313,7 +337,9 @@ class NotificheUtil {
     $dati['domani'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:domani')
-      ->setParameters(['tipo' => 'P', 'docente' => $docente, 'domani' => $domani->format('Y-m-d')])
+			->setParameter('tipo', 'P')
+			->setParameter('docente', $docente)
+			->setParameter('domani', $domani->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge compiti dell'alunno per cattedre di sostegno
@@ -323,8 +349,10 @@ class NotificheUtil {
       ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:domani AND c2.attiva=:attiva')
-      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'domani' => $domani->format('Y-m-d'),
-        'attiva' => 1])
+			->setParameter('docente', $docente)
+			->setParameter('tipo', 'P')
+			->setParameter('domani', $domani->format('Y-m-d'))
+			->setParameter('attiva', 1)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati

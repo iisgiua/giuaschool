@@ -126,8 +126,10 @@ class ScuolaController extends BaseController {
           ->set('s.modificato', ':modificato')
           ->set('s.visibile', ':visibile')
           ->where('s.periodo=:periodo AND s.classe IN ('.$subquery.')')
-          ->setParameters(['modificato' => new DateTime(), 'visibile' => $classiVisibili[$cl],
-            'periodo' => $periodo, 'anno' => $cl])
+          ->setParameter('modificato', new DateTime())
+          ->setParameter('visibile', $classiVisibili[$cl])
+          ->setParameter('periodo', $periodo)
+          ->setParameter('anno', $cl)
           ->getQuery()
           ->getResult();
       }

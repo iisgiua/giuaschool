@@ -90,11 +90,11 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 27: Error: Expected Doctrine\ORM\Query\Lexer::T_COMMA, got ')'", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 27: Error: Expected Doctrine\ORM\Query\TokenType::T_COMMA, got ')'", $exception);
     // sintassi errata: tre parametri
     $query->setDQL("SELECT DATE_FORMAT(c.creato, '%d/%m/%Y', 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
-    $parser->getLexer()->moveNext();
+    $parser->getTokenType()->moveNext();
     $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
@@ -102,7 +102,7 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 39: Error: Expected Doctrine\ORM\Query\Lexer::T_CLOSE_PARENTHESIS, got ','", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 39: Error: Expected Doctrine\ORM\Query\TokenType::T_CLOSE_PARENTHESIS, got ','", $exception);
   }
 
   /**

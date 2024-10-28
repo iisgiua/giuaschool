@@ -122,7 +122,7 @@ class BrowserContext extends BaseContext {
     $this->vars['sys']['logged'] = $user;
     $others = $this->em->getRepository(Utente::class)->createQueryBuilder('u')
       ->where('u.username!=:username AND u INSTANCE OF '.$user::class)
-      ->setParameters(['username' => $user->getUsername()])
+      ->setParameter('username', $user->getUsername())
       ->getQuery()
       ->getResult();
     $other = null;

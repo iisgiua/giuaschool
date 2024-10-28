@@ -713,8 +713,11 @@ class RichiesteController extends BaseController {
           ->update()
           ->set('r.stato', ':rimossa')
           ->where('r.definizioneRichiesta=:modulo AND r.utente=:alunno AND r.stato=:gestita AND r.id!=:richiesta')
-          ->setParameters(['rimossa' => 'R', 'modulo' => $richiesta->getDefinizioneRichiesta(),
-            'alunno' => $richiesta->getUtente(), 'gestita' => 'G', 'richiesta' => $richiesta->getId()])
+          ->setParameter('rimossa', 'R')
+          ->setParameter('modulo', $richiesta->getDefinizioneRichiesta())
+          ->setParameter('alunno', $richiesta->getUtente())
+          ->setParameter('gestita', 'G')
+          ->setParameter('richiesta', $richiesta->getId())
           ->getQuery()
           ->getResult();
       }
