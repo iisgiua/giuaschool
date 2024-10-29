@@ -14,7 +14,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use App\Security\AuthenticatorTrait;
 use App\Tests\DatabaseTestCase;
 use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Symfony\Set\SymfonySetList;
+use Rector\Symfony\Set\TwigSetList;
 use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 
@@ -36,7 +37,6 @@ return RectorConfig::configure()
     // SymfonySetList::SYMFONY_CODE_QUALITY,
     // SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION])
 
-
   // --- Doctrine
   // ->withSets([
     // DoctrineSetList::DOCTRINE_DBAL_30,
@@ -55,6 +55,14 @@ return RectorConfig::configure()
     // PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     // ])
 
+  // --- Twig
+  // ->withSets([
+  //   TwigSetList::TWIG_240,
+  //   ])
 
-//   twig core
+  // --- core
+  ->withSets([
+    ,
+    ])
+
     ;
