@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class ListaDestinatariUtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = ListaDestinatariUtente::class;
     // campi da testare
@@ -43,6 +41,8 @@ class ListaDestinatariUtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_lista_destinatari_utente' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'utente_id', 'letto', 'firmato']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

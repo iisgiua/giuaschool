@@ -56,14 +56,14 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // dati da caricare
     $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

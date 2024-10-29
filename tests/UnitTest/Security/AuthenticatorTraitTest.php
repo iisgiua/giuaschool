@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use App\Security\AuthenticatorTrait;
 use App\Tests\DatabaseTestCase;
 use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 
@@ -73,7 +74,11 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->mockedLogger->method('error')->willReturnCallback(
       function($text, $a) { $this->logs['error'][] = [$text, $a]; });
     // Authenticator trait
-    $this->testedTrait = $this->getMockForTrait(AuthenticatorTrait::class);
+    $this->testedTrait = new class {
+        public $em;
+        public $logger;
+        use AuthenticatorTrait;
+      };
     $this->testedTrait->em = $this->em;
     $this->testedTrait->logger = $this->mockedLogger;
 	}
@@ -196,8 +201,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
   /**
    * Test di utente con profilo unico.
    *
-   * @dataProvider profiliProvider()
    */
+  #[DataProvider('profiliProvider')]
   public function testProfili(array $utenti, string $risposta, array $lista): void {
     // init
     $this->logs = [];
@@ -225,7 +230,7 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
    * Dati per test dei profili.
    *
    */
-  public function profiliProvider(): array {
+  public static function profiliProvider(): array {
     return [
       // profilo unico
       [['amministratore'], 'amministratore', []],

@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class AssenzaLezioneTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = AssenzaLezione::class;
     // campi da testare
@@ -45,6 +43,8 @@ class AssenzaLezioneTest extends EntityTestCase {
     $this->canWrite = ['gs_assenza_lezione' => ['id', 'creato', 'modificato', 'alunno_id', 'lezione_id', 'ore']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

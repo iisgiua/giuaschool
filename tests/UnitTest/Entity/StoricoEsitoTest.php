@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class StoricoEsitoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = StoricoEsito::class;
     // campi da testare
@@ -42,6 +40,8 @@ class StoricoEsitoTest extends EntityTestCase {
     $this->canWrite = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

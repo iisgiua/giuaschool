@@ -78,15 +78,15 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // dati da caricare
     $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures',
       'CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures', 'IstitutoFixtures'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

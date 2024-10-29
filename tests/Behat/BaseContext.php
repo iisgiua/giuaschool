@@ -9,7 +9,6 @@
 namespace App\Tests\Behat;
 
 use DateTime;
-use Faker\Generator;
 use stdClass;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
@@ -28,7 +27,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
-use Faker\Factory;
+use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
 use Symfony\Component\Filesystem\Filesystem;
@@ -53,9 +52,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Generatore automatico di dati fittizi
    *
-   * @var Factory $faker Generatore automatico di dati fittizi
+   * @var Generator|null $faker Generatore automatico di dati fittizi
    */
-  protected $faker;
+  protected ?Generator $faker = null;
 
   /**
    * Generatore personalizzato di dati fittizi
@@ -65,32 +64,25 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected ?CustomProvider $customProvider = null;
 
   /**
-   * Generatore di fixtures con memmorizzazione su database
-   *
-   * @var PurgerLoader|null $alice Generatore di fixtures con memmorizzazione su database
-   */
-  protected ?PurgerLoader $alice = null;
-
-  /**
    * Servizio per la gestione della sessione di navigazione HTTP
    *
-   * @var Session $session Gestore della sessione di navigazione HTTP
+   * @var Session|null $session Gestore della sessione di navigazione HTTP
    */
-  protected $session;
+  protected ?Session $session = null;
 
   /**
    * Lista di variabili definite nell'esecuzione, impostate da sistema o da fixtures
    *
    * @var array $vars Lista di variabili
    */
-  protected $vars;
+  protected array $vars;
 
   /**
    * Lista dei file usati nei test
    *
    * @var array $files Lista dei percorsi dei file usati per i test
    */
-  protected $files;
+  protected array $files;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -98,44 +90,44 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Testo visualizzato nell'output dell'ultimo comando eseguito
    *
-   * @var string $cmdOutput Output del comando
+   * @var array $cmdOutput Output del comando
    */
-  private $cmdOutput;
+  private array $cmdOutput;
 
   /**
    * Codice di uscita dell'ultimo comando eseguito
    *
    * @var int $cmdStatus Codice di uscita del comando
    */
-  private $cmdStatus;
+  private int $cmdStatus;
 
   /**
    * Log delle azioni da registrare
    *
    * @var array $log Lista delle azioni da registrare
    */
-  private $log;
+  private array $log;
 
   /**
    * Indica se la modalità debug è attiva
    *
    * @var bool $debug Vero per attivare la modalità debug
    */
-  private $debug;
+  private bool $debug;
 
   /**
    * Indica se la modalità step-by-step è attiva
    *
    * @var bool $stepper Vero per attivare la modalità step-by-step
    */
-  private $stepper;
+  private bool $stepper;
 
   /**
    * Indica il numero di screenshot eseguiti
    *
    * @var int $numScreenshots Numero di screenshots eseguiti
    */
-  private $numScreenshots;
+  private int $numScreenshots;
 
   /**
    * Indica il nome del file con i dati di test
@@ -155,6 +147,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param RouterInterface $router Gestore delle URL
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
+   * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
   public function __construct(
       protected KernelInterface $kernel,
@@ -162,12 +155,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
       protected RouterInterface $router,
       protected UserPasswordHasherInterface $hasher,
       protected SluggerInterface $slugger,
-      private PurgerLoader $purgerLoader) {
+      protected PurgerLoader $alice) {
     $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $this->purgerLoader;
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
     // inizializza variabili

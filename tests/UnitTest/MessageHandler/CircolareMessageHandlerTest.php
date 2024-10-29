@@ -58,14 +58,14 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // dati da caricare
     $this->fixtures = ['CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -88,8 +88,12 @@ class CircolareMessageHandlerTest extends DatabaseTestCase {
     $this->mockedMessageBus->method('dispatch')->willReturnCallback(
       function($m) { $this->bus[] = $m; return new Envelope($m); });
     // acknowledger: gestione risposta di invio asincrono
-    $this->mockedAcknowledger = $this->createMock(Acknowledger::class);
-	}
+    $this->mockedAcknowledger = new class extends Acknowledger {
+        public function __construct() {}
+        public function ack($result = null): void {}
+        public function __destruct() {}
+      };
+  }
 
   /**
    * Invio messaggio per circolare non più presente nel database.

@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class CorsoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Corso::class;
     // campi da testare
@@ -41,6 +39,8 @@ class CorsoTest extends EntityTestCase {
     $this->canWrite = ['gs_corso' => ['id', 'creato', 'modificato', 'nome', 'nome_breve']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

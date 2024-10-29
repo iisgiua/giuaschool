@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class CircolareUtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = CircolareUtente::class;
     // campi da testare
@@ -42,6 +40,8 @@ class CircolareUtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_circolare_utente' => ['id', 'creato', 'modificato', 'circolare_id', 'utente_id', 'letta', 'confermata']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

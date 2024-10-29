@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class ProvisioningTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Provisioning::class;
     // campi da testare
@@ -41,6 +39,8 @@ class ProvisioningTest extends EntityTestCase {
     $this->canWrite = ['gs_provisioning' => ['id', 'creato', 'modificato', 'utente_id', 'dati', 'funzione', 'stato']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

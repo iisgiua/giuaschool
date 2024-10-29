@@ -24,13 +24,11 @@ use App\Tests\EntityTestCase;
 */
 class RichiestaTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Richiesta::class;
     // campi da testare
@@ -45,6 +43,8 @@ class RichiestaTest extends EntityTestCase {
     $this->canWrite = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'classe_id', 'definizione_richiesta_id', 'data']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

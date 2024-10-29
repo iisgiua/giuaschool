@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class IstitutoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Istituto::class;
     // campi da testare
@@ -41,6 +39,8 @@ class IstitutoTest extends EntityTestCase {
     $this->canWrite = ['gs_istituto' => ['id', 'creato', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email', 'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

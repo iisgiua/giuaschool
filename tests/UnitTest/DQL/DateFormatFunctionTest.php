@@ -94,7 +94,7 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     // sintassi errata: tre parametri
     $query->setDQL("SELECT DATE_FORMAT(c.creato, '%d/%m/%Y', 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
-    $parser->getTokenType()->moveNext();
+    $parser->getLexer()->moveNext();
     $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;

@@ -3,9 +3,8 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
   bootstrap="tests/bootstrap.php"
-  cacheResultFile="tests/temp/.phpunit.result.cache"
+  cacheDirectory="tests/temp/.phpunit.cache"
   colors="true"
-  convertDeprecationsToExceptions="false"
 >
   <php>
     <ini name="display_errors" value="1" />
@@ -18,35 +17,32 @@
   </php>
   <testsuites>
     <testsuite name="entity">
-      <directory>tests/UnitTest/Entity</directory>
+      <directory>./tests/UnitTest/Entity</directory>
     </testsuite>
     <testsuite name="extension">
-      <directory>tests/UnitTest/Twig</directory>
-      <directory>tests/UnitTest/DQL</directory>
+      <directory>./tests/UnitTest/Twig</directory>
+      <directory>./tests/UnitTest/DQL</directory>
     </testsuite>
     <testsuite name="message">
-      <directory>tests/UnitTest/Message</directory>
-      <directory>tests/UnitTest/MessageHandler</directory>
+      <directory>./tests/UnitTest/Message</directory>
+      <directory>./tests/UnitTest/MessageHandler</directory>
     </testsuite>
     <testsuite name="repository">
-      <directory>tests/UnitTest/Repository</directory>
+      <directory>./tests/UnitTest/Repository</directory>
     </testsuite>
     <testsuite name="security">
-      <directory>tests/UnitTest/Security</directory>
+      <directory>./tests/UnitTest/Security</directory>
     </testsuite>
   </testsuites>
-  <coverage cacheDirectory="tests/temp">
+  <source>
     <include>
-      <directory suffix=".php">src</directory>
+      <directory suffix=".php">./src</directory>
     </include>
     <exclude>
-      <directory>src/Controller</directory>
-      <directory>src/DataFixtures</directory>
-      <directory>src/Install</directory>
-      <file>src/Kernel.php</file>
+      <directory>./src/Controller</directory>
+      <directory>./src/DataFixtures</directory>
+      <directory>./src/Install</directory>
+      <file>./src/Kernel.php</file>
     </exclude>
-  </coverage>
-  <listeners>
-    <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
-  </listeners>
+  </source>
 </phpunit>

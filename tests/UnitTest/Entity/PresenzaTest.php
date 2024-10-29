@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
 */
 class PresenzaTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Presenza::class;
     // campi da testare
@@ -42,6 +40,8 @@ class PresenzaTest extends EntityTestCase {
     $this->canWrite = ['gs_presenza' => ['id', 'creato', 'modificato', 'data', 'ora_inizio', 'ora_fine', 'tipo', 'descrizione', 'alunno_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

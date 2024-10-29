@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class RaggruppamentoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Raggruppamento::class;
     // campi da testare
@@ -44,6 +42,8 @@ class RaggruppamentoTest extends EntityTestCase {
       'gs_raggruppamento_alunno' => '*'];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

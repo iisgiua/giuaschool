@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class CambioClasseTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = CambioClasse::class;
     // campi da testare
@@ -44,6 +42,8 @@ class CambioClasseTest extends EntityTestCase {
     $this->canWrite = ['gs_cambio_classe' => ['id', 'creato', 'modificato', 'alunno_id', 'inizio', 'fine', 'classe_id', 'note']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

@@ -22,13 +22,11 @@ use App\Tests\EntityTestCase;
  */
 class NotaTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Nota::class;
     // campi da testare
@@ -44,6 +42,8 @@ class NotaTest extends EntityTestCase {
     $this->canWrite = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'annullata', 'classe_id', 'docente_id', 'docente_provvedimento_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

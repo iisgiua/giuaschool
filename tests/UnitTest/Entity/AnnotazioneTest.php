@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class AnnotazioneTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Annotazione::class;
     // campi da testare
@@ -43,6 +41,8 @@ class AnnotazioneTest extends EntityTestCase {
     $this->canWrite = ['gs_annotazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'visibile', 'avviso_id', 'classe_id', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

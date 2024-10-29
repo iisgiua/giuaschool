@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class PropostaVotoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = PropostaVoto::class;
     // campi da testare
@@ -43,6 +41,8 @@ class PropostaVotoTest extends EntityTestCase {
     $this->canWrite = ['gs_proposta_voto' => ['id', 'creato', 'modificato', 'periodo', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'alunno_id', 'classe_id', 'materia_id', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

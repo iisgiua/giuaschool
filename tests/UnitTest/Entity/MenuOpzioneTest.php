@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class MenuOpzioneTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = MenuOpzione::class;
     // campi da testare
@@ -41,6 +39,8 @@ class MenuOpzioneTest extends EntityTestCase {
     $this->canWrite = ['gs_menu_opzione' => ['id', 'creato', 'modificato', 'ruolo', 'funzione', 'nome', 'descrizione', 'url', 'ordinamento', 'abilitato', 'icona', 'menu_id', 'sotto_menu_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

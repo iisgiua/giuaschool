@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class AvvisoUtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = AvvisoUtente::class;
     // campi da testare
@@ -43,6 +41,8 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

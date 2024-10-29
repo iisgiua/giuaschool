@@ -22,13 +22,11 @@ use App\Tests\EntityTestCase;
  */
 class DefinizioneConsiglioTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = DefinizioneConsiglio::class;
     // campi da testare
@@ -43,6 +41,8 @@ class DefinizioneConsiglioTest extends EntityTestCase {
     $this->canWrite = ['gs_definizione_consiglio' => ['id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'periodo', 'data_proposte', 'struttura', 'classi_visibili', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

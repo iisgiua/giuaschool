@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class DerogaAssenzaTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = DerogaAssenza::class;
     // campi da testare
@@ -43,6 +41,8 @@ class DerogaAssenzaTest extends EntityTestCase {
     $this->canWrite = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

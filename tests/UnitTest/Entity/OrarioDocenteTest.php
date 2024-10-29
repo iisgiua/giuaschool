@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class OrarioDocenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = OrarioDocente::class;
     // campi da testare
@@ -44,6 +42,8 @@ class OrarioDocenteTest extends EntityTestCase {
     $this->canWrite = ['gs_orario_docente' => ['id', 'creato', 'modificato', 'orario_id', 'giorno', 'ora', 'cattedra_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

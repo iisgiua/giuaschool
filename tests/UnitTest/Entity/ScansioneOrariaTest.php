@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class ScansioneOrariaTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = ScansioneOraria::class;
     // campi da testare
@@ -42,6 +40,8 @@ class ScansioneOrariaTest extends EntityTestCase {
     $this->canWrite = ['gs_scansione_oraria' => ['id', 'creato', 'modificato', 'giorno', 'ora', 'inizio', 'fine', 'durata', 'orario_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

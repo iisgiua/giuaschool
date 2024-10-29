@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class ConfigurazioneTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Configurazione::class;
     // campi da testare
@@ -41,6 +39,8 @@ class ConfigurazioneTest extends EntityTestCase {
     $this->canWrite = ['gs_configurazione' => ['id', 'creato', 'modificato', 'categoria', 'parametro', 'descrizione', 'valore', 'gestito']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

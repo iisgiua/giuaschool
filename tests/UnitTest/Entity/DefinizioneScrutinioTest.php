@@ -21,13 +21,11 @@ use App\Tests\EntityTestCase;
  */
 class DefinizioneScrutinioTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = DefinizioneScrutinio::class;
     // campi da testare
@@ -42,6 +40,8 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     $this->canWrite = ['gs_definizione_consiglio' => ['periodo', 'data_proposte', 'struttura', 'classi_visibili', 'id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

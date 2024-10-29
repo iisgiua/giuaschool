@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class FirmaSostegnoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = FirmaSostegno::class;
     // campi da testare
@@ -42,6 +40,8 @@ class FirmaSostegnoTest extends EntityTestCase {
     $this->canWrite = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

@@ -19,6 +19,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 
 
 /**
@@ -38,10 +39,11 @@ class BrowserContext extends BaseContext {
    * @param RouterInterface $router Gestore delle URL
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
+   * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
-                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
-    parent::__construct($kernel, $em, $router, $hasher, $slugger);
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger, PurgerLoader $alice) {
+    parent::__construct($kernel, $em, $router, $hasher, $slugger, $alice);
     $this->vars['sys']['logged'] = null;
     $this->vars['sys']['other'] = null;
     $this->vars['sys']['pdf'] = null;

@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class SpidTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = Spid::class;
     // campi da testare
@@ -41,6 +39,8 @@ class SpidTest extends EntityTestCase {
     $this->canWrite = ['gs_spid' => ['id', 'creato', 'modificato', 'idp', 'response_id', 'attr_name', 'attr_family_name', 'attr_fiscal_number', 'logout_url', 'state']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**

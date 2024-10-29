@@ -20,13 +20,11 @@ use App\Tests\EntityTestCase;
  */
 class OsservazioneAlunnoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
     $this->entity = OsservazioneAlunno::class;
     // campi da testare
@@ -45,6 +43,8 @@ class OsservazioneAlunnoTest extends EntityTestCase {
     $this->canWrite = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
