@@ -47,7 +47,7 @@
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
-        "tecnickcom/tcpdf": "6.7.5",
+        "tecnickcom/tcpdf": "^6.7.5",
         "twig/extra-bundle": "^3.0",
         "twig/intl-extra": "^3.0",
         "twig/string-extra": "^3.4",
