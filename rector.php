@@ -36,6 +36,8 @@ return RectorConfig::configure()
     // SymfonySetList::SYMFONY_64,
     // SymfonySetList::SYMFONY_CODE_QUALITY,
     // SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION])
+    // ->withPreparedSets(symfonyCodeQuality: true, symfonyConfigs: true)
+
 
   // --- Doctrine
   // ->withSets([
@@ -47,6 +49,7 @@ return RectorConfig::configure()
     // DoctrineSetList::TYPED_COLLECTIONS,
     // DoctrineSetList::DOCTRINE_CODE_QUALITY,
     // ])
+    // ->withPreparedSets(doctrineCodeQuality: true)
 
   // --- PHPUnit
   // ->withSets([
@@ -54,15 +57,15 @@ return RectorConfig::configure()
     // PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
     // PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     // ])
+  // ->withPreparedSets(phpunit: true, phpunitCodeQuality: true)
 
   // --- Twig
   // ->withSets([
   //   TwigSetList::TWIG_240,
   //   ])
+  // ->withPreparedSets(twig: true)
 
-  // --- core
-  ->withSets([
-    ,
-    ])
+
+
 
     ;

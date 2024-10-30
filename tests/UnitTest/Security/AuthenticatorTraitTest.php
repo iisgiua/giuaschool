@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Iterator;
 use DateTime;
 use App\Entity\Configurazione;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -229,32 +230,30 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
    * Dati per test dei profili.
    *
    */
-  public static function profiliProvider(): array {
-    return [
-      // profilo unico
-      [['amministratore'], 'amministratore', []],
-      [['ata_A'], 'ata_A', []],
-      [['docente_curricolare_1'], 'docente_curricolare_1', []],
-      [['staff_1'], 'staff_1', []],
-      [['preside'], 'preside', []],
-      [['genitore1_1A_1'], 'genitore1_1A_1', []],
-      [['alunno_2A_1'], 'alunno_2A_1', []],
-      [['utente_1'], 'utente_1', []],
-      // profilo multiplo
-      [['genitore1_1A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_3A_1']],
-      [['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1']],
-      [['docente_curricolare_1', 'genitore1_1A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1']],
-      [['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1']],
-      [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']],
-      [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']],
-      [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']],
-      [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []],
-    ];
+  public static function profiliProvider(): Iterator {
+    // profilo unico
+    yield [['amministratore'], 'amministratore', []];
+    yield [['ata_A'], 'ata_A', []];
+    yield [['docente_curricolare_1'], 'docente_curricolare_1', []];
+    yield [['staff_1'], 'staff_1', []];
+    yield [['preside'], 'preside', []];
+    yield [['genitore1_1A_1'], 'genitore1_1A_1', []];
+    yield [['alunno_2A_1'], 'alunno_2A_1', []];
+    yield [['utente_1'], 'utente_1', []];
+    // profilo multiplo
+    yield [['genitore1_1A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_3A_1']];
+    yield [['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1']];
+    yield [['docente_curricolare_1', 'genitore1_1A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1']];
+    yield [['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1']];
+    yield [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']];
+    yield [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']];
+    yield [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']];
+    yield [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []];
   }
 
 }

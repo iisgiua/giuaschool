@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use App\Entity\AvvisoClasse;
 use ReflectionClass;
 use App\Tests\EntityTestCase;
@@ -113,6 +114,7 @@ class AvvisoClasseTest extends EntityTestCase {
   /**
    * Test altri metodi
    */
+  #[DoesNotPerformAssertions]
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);

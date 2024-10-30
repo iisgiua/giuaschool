@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use App\Entity\CircolareUtente;
 use ReflectionClass;
 use App\Tests\EntityTestCase;
@@ -112,6 +113,7 @@ class CircolareUtenteTest extends EntityTestCase {
   /**
    * Test altri metodi
    */
+  #[DoesNotPerformAssertions]
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
