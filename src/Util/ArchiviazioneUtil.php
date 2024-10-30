@@ -412,7 +412,7 @@ class ArchiviazioneUtil {
 			->setParameter('sede', $cattedra->getClasse()->getSede())
       ->getQuery()
       ->getSingleScalarResult();
-    $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
+    $ore = rtrim(rtrim(number_format((int) $ore, 1, ',', ''), '0'), ',');
     // voti in lezione di altra materia
     $votiNoLezione = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
       ->select('COUNT(v.id)')

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7061b7f94f60911f1f2c34452e5551b5",
+    "content-hash": "ebfac37ed534515b20226f9fda0034e4",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -3187,29 +3187,30 @@
         },
         {
             "name": "qipsius/tcpdf-bundle",
-            "version": "dev-2.0-fix",
+            "version": "3.0.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/trinko/QipsiusTCPDFBundle.git",
-                "reference": "ed6bc0565b512a339095b8f030c990c44e819713"
+                "url": "https://github.com/Qipsius/QipsiusTCPDFBundle.git",
+                "reference": "4eeac9204a1b059d8dddc539021e2e890c81fd87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/trinko/QipsiusTCPDFBundle/zipball/ed6bc0565b512a339095b8f030c990c44e819713",
-                "reference": "ed6bc0565b512a339095b8f030c990c44e819713",
+                "url": "https://api.github.com/repos/Qipsius/QipsiusTCPDFBundle/zipball/4eeac9204a1b059d8dddc539021e2e890c81fd87",
+                "reference": "4eeac9204a1b059d8dddc539021e2e890c81fd87",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1",
-                "symfony/framework-bundle": ">=3.4",
+                "php": ">=8.1",
+                "symfony/framework-bundle": ">=6.1",
                 "tecnickcom/tcpdf": "*"
             },
             "type": "symfony-bundle",
             "autoload": {
                 "psr-4": {
-                    "Qipsius\\TCPDFBundle\\": ""
+                    "Qipsius\\TCPDFBundle\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -3217,18 +3218,23 @@
                 {
                     "name": "Rich Sage",
                     "email": "rich.sage@gmail.com"
+                },
+                {
+                    "name": "David Navarro",
+                    "email": "info@qipsius.com"
                 }
             ],
             "description": "A bundle to easily integrate TCPDF into Symfony",
             "homepage": "https://github.com/qipsius/QipsiusTCPDFBundle",
             "keywords": [
-                "pdf",
-                "tcpdf"
+                "TCPDF",
+                "pdf"
             ],
             "support": {
-                "source": "https://github.com/trinko/QipsiusTCPDFBundle/tree/2.0-fix"
+                "issues": "https://github.com/Qipsius/QipsiusTCPDFBundle/issues",
+                "source": "https://github.com/Qipsius/QipsiusTCPDFBundle/tree/3.0.5"
             },
-            "time": "2024-08-17T08:57:16+00:00"
+            "time": "2024-08-17T13:41:33+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -8690,20 +8696,20 @@
     "packages-dev": [
         {
             "name": "behat/behat",
-            "version": "v3.14.0",
+            "version": "v3.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/Behat.git",
-                "reference": "2a3832d9cb853a794af3a576f9e524ae460f3340"
+                "reference": "132e32fdad69340f503b103a5ccaf5dd72ce7d83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Behat/zipball/2a3832d9cb853a794af3a576f9e524ae460f3340",
-                "reference": "2a3832d9cb853a794af3a576f9e524ae460f3340",
+                "url": "https://api.github.com/repos/Behat/Behat/zipball/132e32fdad69340f503b103a5ccaf5dd72ce7d83",
+                "reference": "132e32fdad69340f503b103a5ccaf5dd72ce7d83",
                 "shasum": ""
             },
             "require": {
-                "behat/gherkin": "^4.9.0",
+                "behat/gherkin": "^4.10.0",
                 "behat/transliterator": "^1.2",
                 "ext-mbstring": "*",
                 "php": "^7.2 || ^8.0",
@@ -8717,7 +8723,6 @@
             },
             "require-dev": {
                 "herrera-io/box": "~1.6.1",
-                "phpspec/prophecy": "^1.15",
                 "phpunit/phpunit": "^8.5 || ^9.0",
                 "symfony/process": "^4.4 || ^5.0 || ^6.0 || ^7.0",
                 "vimeo/psalm": "^4.8"
@@ -8754,7 +8759,7 @@
                 }
             ],
             "description": "Scenario-oriented BDD framework for PHP",
-            "homepage": "http://behat.org/",
+            "homepage": "https://behat.org/",
             "keywords": [
                 "Agile",
                 "BDD",
@@ -8771,9 +8776,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Behat/Behat/issues",
-                "source": "https://github.com/Behat/Behat/tree/v3.14.0"
+                "source": "https://github.com/Behat/Behat/tree/v3.15.0"
             },
-            "time": "2023-12-09T13:55:02+00:00"
+            "time": "2024-10-30T07:54:51+00:00"
         },
         {
             "name": "behat/gherkin",
@@ -10856,16 +10861,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "6.1.1",
+            "version": "6.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "5ef523a49ae7a302b87b2102b72b1eda8918d686"
+                "reference": "df95a6e827808debe3dbe190022dd0f643d5d909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/5ef523a49ae7a302b87b2102b72b1eda8918d686",
-                "reference": "5ef523a49ae7a302b87b2102b72b1eda8918d686",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/df95a6e827808debe3dbe190022dd0f643d5d909",
+                "reference": "df95a6e827808debe3dbe190022dd0f643d5d909",
                 "shasum": ""
             },
             "require": {
@@ -10876,12 +10881,12 @@
                 "sebastian/exporter": "^6.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^11.3"
+                "phpunit/phpunit": "^11.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "6.1-dev"
+                    "dev-main": "6.2-dev"
                 }
             },
             "autoload": {
@@ -10921,7 +10926,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/6.1.1"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/6.2.0"
             },
             "funding": [
                 {
@@ -10929,7 +10934,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-10-18T15:00:48+00:00"
+            "time": "2024-10-30T13:12:44+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -12348,13 +12353,11 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "qipsius/tcpdf-bundle": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*"
     },

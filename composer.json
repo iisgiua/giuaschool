@@ -6,14 +6,8 @@
     "homepage": "https://github.com/iisgiua/giuaschool",
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/trinko/QipsiusTCPDFBundle"
-        }
-    ],
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/dbal": "^3.0",
@@ -24,7 +18,7 @@
         "league/oauth2-google": "^4.0",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpoffice/phpword": "^0.18",
-        "qipsius/tcpdf-bundle": "dev-2.0-fix",
+        "qipsius/tcpdf-bundle": "^3.0",
         "setasign/fpdi": "^2.0",
         "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
