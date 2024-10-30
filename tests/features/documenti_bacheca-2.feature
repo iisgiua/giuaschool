@@ -98,7 +98,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  E vedi pagina "documenti_bes"
+  E vedi la pagina "documenti_bes"
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
@@ -117,4 +117,4 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
 
 Scenario: mostra errore all'accesso alla pagina senza utente
   Quando vai alla pagina "documenti_alunni"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"

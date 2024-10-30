@@ -31,7 +31,7 @@ Scenario: visualizza pagina inserimento documento 15 maggio non presente
     | $c1  | 5    | A       |
   Quando pagina attiva "documenti_maggio"
   E click su "Aggiungi"
-  Allora vedi pagina "documenti_maggio_add" con parametri:
+  Allora vedi la pagina "documenti_maggio_add" con parametri:
     | classe |
     | $c1:id |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento del 15 maggio/"
@@ -89,7 +89,7 @@ Scenario: inserisce documento 15 maggio e lo visualizza su lista cattedre
     | $c1:id |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_maggio"
+  Allora vedi la pagina "documenti_maggio"
   E vedi la tabella:
     | classe                      | documento                 | azione   |
     | $c1:anno,sezione,corso,sede | /Documento 15 maggio.*5A/ | Cancella |
@@ -107,7 +107,7 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
     | $c1:id |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
-  Allora vedi pagina "documenti_maggio"
+  Allora vedi la pagina "documenti_maggio"
   E vedi la tabella:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
@@ -154,7 +154,7 @@ Scenario: accesso pagina inserimento documento 15 maggio senza utente
   Quando pagina attiva "documenti_maggio_add" con parametri:
     | classe |
     | $c1:id |
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina inserimento documento 15 maggio con altri utenti
   Data modifica istanze di tipo "Classe":

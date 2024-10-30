@@ -252,13 +252,13 @@ class BrowserContext extends BaseContext {
    *  $pagina: nome della pagina
    *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
-   * @Then vedi pagina :pagina
    * @Then vedi la pagina :pagina
-   * @Then vedi pagina :pagina con parametri:
+   * @Then vedi la pagina :pagina con errore :errore
    * @Then vedi la pagina :pagina con parametri:
+   * @Then vedi la pagina :pagina con errore :errore e con parametri:
    */
-  public function vediPagina($pagina, TableNode $tabella=null): void {
-    $this->assertPageStatus(200);
+  public function vediPagina($pagina, $errore = 200, TableNode $tabella = null): void {
+    $this->assertPageStatus($errore);
     $parametri = [];
     if ($tabella) {
       foreach ($tabella->getHash() as $row) {
