@@ -62,23 +62,32 @@ class RichiesteUtil {
     // crea template per il documento
     $template = file_get_contents($this->dirProgetto.'/PERSONAL/data/moduli/'.$definizioneRichiesta->getModulo());
     foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
-      $template = match ($campo[0]) {
-        // testo, aggiunge formattazione
-        'text' => preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-          '<em><strong>{{ valori.'.$nome.' ?? "---" }}</strong></em>', $template),
-        // converte booleano in testo
-        'bool' => preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-          '<strong>{{ valori.'.$nome.' ? "SI" : "NO" }}</strong>', $template),
-        // converte data in testo
-        'date' => preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-          '<strong>{{ valori.'.$nome.' ? (valori.'.$nome.'|date("d/m/Y")) : "---" }}</strong>', $template),
-        // converte ora in testo
-        'time' => preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-          '<strong>{{ valori.'.$nome.' ? (valori.'.$nome.'|date("H:i")) : "---" }}</strong>', $template),
+      switch ($campo[0]) {
+        case 'text':
+          // aggiunge formattazione
+          $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
+            '<em><strong>{{ (valori.'.$nome.'|trim) ? (valori.'.$nome.'|trim) : "---" }}</strong></em>', $template);
+          break;
+        case 'bool':
+          // converte booleano in testo
+          $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
+            '<strong>{{ valori.'.$nome.' ? "SI" : "NO" }}</strong>', $template);
+          break;
+        case 'date':
+          // converte data in testo
+          $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
+            '<strong>{{ valori.'.$nome.' ? (valori.'.$nome.'|date("d/m/Y")) : "---" }}</strong>', $template);
+          break;
+        case 'time':
+          // converte ora in testo
+          $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
+            '<strong>{{ valori.'.$nome.' ? (valori.'.$nome.'|date("H:i")) : "---" }}</strong>', $template);
+          break;
+        default:
         // sostituzione con il valore
-        default => preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
-          '<strong>{{ valori.'.$nome.' ?? "---" }}</strong>', $template),
-      };
+          $template = preg_replace('/\{\{\s*form_widget\(\s*form\.'.$nome.'\s*[^\)]*\)\s*\}\}/',
+            '<strong>{{ (valori.'.$nome.'|trim) ? (valori.'.$nome.'|trim) : "---" }}</strong>', $template);
+      }
     }
     if (!$definizioneRichiesta->getUnica()) {
       // data della richiesta: converte data in testo

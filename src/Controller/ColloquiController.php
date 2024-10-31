@@ -286,6 +286,7 @@ class ColloquiController extends BaseController {
         ->setData(new DateTime('today'))
         ->setInizio(new DateTime('08:30'))
         ->setFine(new DateTime('09:30'));
+        ->setDurata(10);
       $this->em->persist($colloquio);
     }
     // informazioni per la visualizzazione
@@ -299,13 +300,45 @@ class ColloquiController extends BaseController {
     $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
     // lista sedi
     $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
+    if (isset($listaSedi[''])) {
+      // elimina opzione vuota
+      unset($listaSedi['']);
+    }
+    // lista sedi
+    foreach ($listaSedi as $idSede) {
+      $info['orario'][$idSede] = $this->em->getRepository(ScansioneOraria::class)->orarioSede($idSede);
+    }
+    $listaOre = [];
+    for ($i = 1; $i <= 10; $i++) {
+      $listaOre[$i] = $i;
+    }
+    // determina l'ora di lezione
+    $info['ora'] = 1;
+    if ($id > 0) {
+      $giorno = $colloquio->getData()->format('w');
+      $sede = $listaSedi[array_key_first($listaSedi)];
+      $info['ora'] = 1;
+      foreach ($info['orario'][$sede][$giorno] as $ora => $orario) {
+        if ($orario->getInizio() == $colloquio->getInizio()) {
+          $info['ora'] = $ora;
+          break;
+        }
+      }
+    }
     // form di inserimento
     $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'singolo',
-      'values' => [$listaSedi]]);
+      'values' => [$listaSedi, $listaOre]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla data
       $data = $form->get('data')->getData();
+      $sede = $form->get('sede')->getData();
+      $ora = $form->get('ora')->getData();
+      $giorno = $data->format('w');
+      $oraInizio = $info['orario'][$sede][$giorno][$ora]->getInizio();
+      $oraFine = $info['orario'][$sede][$giorno][$ora]->getFine();
+      $colloquio->setInizio($oraInizio);
+      $colloquio->setFine($oraFine);
       if ($this->em->getRepository(Festivita::class)->giornoFestivo($data) || $data < $oggi ||
           $data > $fine) {
         // errore: data non valida
@@ -313,7 +346,7 @@ class ColloquiController extends BaseController {
       }
       // controlla se esite già
       if ($this->em->getRepository(Colloquio::class)->sovrapposizione($this->getUser(), $data,
-          $form->get('inizio')->getData(), $form->get('fine')->getData(), $id)) {
+          $inizio, $fine, $id)) {
         // errore: sovrapposizione
         $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
       }

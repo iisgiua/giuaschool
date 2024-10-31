@@ -45,7 +45,11 @@
       {% endif %}
         </td>
         <td rowspan="{{ d.documento.allegati|length }}">
-          {% if d.documento.classe %}Classe: {{ d.documento.classe }} - {{ d.documento.classe.corso }} - {{ d.documento.classe.sede|upper }}<br>{% endif %}
+      {% if d.documento.alunno %}
+          Classe: {{ d.documento.alunno.classe }} - {{ d.documento.alunno.classe.corso }} - {{ d.documento.alunno.classe.sede|upper }}<br>
+      {% elseif d.documento.classe %}
+          Classe: {{ d.documento.classe }} - {{ d.documento.classe.corso }} - {{ d.documento.classe.sede|upper }}<br>
+      {% endif %}
           {% if d.documento.materia %}Materia: {{ d.documento.materia }}<br>{% endif %}
           {% if d.documento.alunno %}Alunn{{ d.documento.alunno.sesso == 'M' ? 'o' : 'a' }}: {{ d.documento.alunno }}{% endif %}
         </td>

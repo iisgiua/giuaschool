@@ -1,0 +1,14 @@
+<?php
+
+return [
+  'fileCopy' => [
+  ],
+  'fileDelete' => [
+    'public/install/app.php',
+    'templates/circolari/staff.html.twig',
+  ],
+  'sqlCommand' => [
+  ],
+  'envDelete' => [
+  ]
+];

@@ -54,10 +54,16 @@ class AlunnoType extends AbstractType {
       ->add('comuneNascita', TextType::class, ['label' => 'label.comune_nascita',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true])
-      ->add('codiceFiscale', TextType::class, ['label' => 'label.codice_fiscale',
+      ->add('provinciaNascita', TextType::class, ['label' => 'label.provincia_nascita',
         'attr' => ['widget' => 'gs-row-end'],
+        'required' => false])
+      ->add('codiceFiscale', TextType::class, ['label' => 'label.codice_fiscale',
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true])
       ->add('citta', TextType::class, ['label' => 'label.citta',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false])
+      ->add('provincia', TextType::class, ['label' => 'label.provincia',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => false])
       ->add('indirizzo', TextType::class, ['label' => 'label.indirizzo',
@@ -69,7 +75,7 @@ class AlunnoType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true])
       ->add('bes', ChoiceType::class, ['label' => 'label.bes',
-        'choices' => ['label.bes_B' => 'B', 'label.bes_D' => 'D', 'label.bes_H' => 'H',  'label.bes_N' => 'N'],
+        'choices' => ['label.bes_B' => 'B', 'label.bes_D' => 'D', 'label.bes_H' => 'H', 'label.bes_A' => 'A', 'label.bes_N' => 'N'],
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true])
       ->add('noteBes', MessageType::class, ['label' => 'label.note_bes',

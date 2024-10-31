@@ -584,13 +584,15 @@ class CircolareRepository extends EntityRepository {
   }
 
   /**
-   * Restituisce la lista degli anni scolastici presenti nell'archivio delle circolari
+   * Restituisce la lista degli anni scolastici presenti nell'archivio delle circolari (escluso l'anno corrente)
    *
    * @return array Dati formattati come array associativo
    */
   public function anniScolastici() {
     // inizializza
     $dati = [];
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
     // legge anni
     $anni = $this->createQueryBuilder('c')
       ->select('DISTINCT c.anno')
@@ -600,7 +602,9 @@ class CircolareRepository extends EntityRepository {
       ->getQuery()
       ->getArrayResult();
     foreach ($anni as $val) {
-      $dati['A.S. '.$val['anno'].'/'.($val['anno'] + 1)] = $val['anno'];
+      if ($val['anno'] != $anno) {
+        $dati['A.S. '.$val['anno'].'/'.($val['anno'] + 1)] = $val['anno'];
+      }
     }
     // restituisce dati formattati
     return $dati;

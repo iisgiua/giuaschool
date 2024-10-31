@@ -106,7 +106,7 @@ class VotoClasse implements Stringable {
   }
 
   /**
-   * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    *
    * @return string|null Bisogni educativi speciali dell'alunno
    */
@@ -115,7 +115,7 @@ class VotoClasse implements Stringable {
   }
 
   /**
-   * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    *
    * @param string|null $bes Bisogni educativi speciali dell'alunno
    *

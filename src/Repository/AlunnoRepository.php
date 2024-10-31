@@ -213,8 +213,8 @@ class AlunnoRepository extends BaseRepository {
   public function getIdAlunno($sedi, $tipo, $filtro): array {
     $alunni = $this->createQueryBuilder('a')
       ->select('DISTINCT a.id')
-      ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND cl.sede IN (:sedi)')
+      ->leftJoin('a.classe', 'cl')
+      ->where('a.abilitato=:abilitato AND (cl.id IS NULL OR cl.sede IN (:sedi))')
       ->setParameter('abilitato', 1)
       ->setParameter('sedi', $sedi);
     if ($tipo == 'C') {

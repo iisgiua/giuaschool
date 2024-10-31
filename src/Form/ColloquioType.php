@@ -45,27 +45,22 @@ class ColloquioType extends AbstractType {
           'format' => 'dd/MM/yyyy',
           'attr' => ['widget' => 'gs-picker'],
           'required' => true])
-        ->add('inizio', TimeType::class, ['label' => 'label.ora_inizio',
-          'widget' => 'single_text',
-          'html5' => false,
-          'attr' => ['widget' => 'gs-picker'],
-          'required' => true])
-        ->add('fine', TimeType::class, ['label' => 'label.ora_fine',
-          'widget' => 'single_text',
-          'html5' => false,
-          'attr' => ['widget' => 'gs-picker'],
-          'required' => true])
         ->add('durata', ChoiceType::class, ['label' => 'label.durata',
-        'choices' => ['label.durata_colloquio_5' => 5, 'label.durata_colloquio_10' => 10,
-					'label.durata_colloquio_15' => 15],
-				'required' => true])
+          'choices' => ['label.durata_colloquio_5' => 5, 'label.durata_colloquio_10' => 10,
+            'label.durata_colloquio_15' => 15],
+          'required' => true])
         ->add('sede', ChoiceType::class, ['label' => 'label.sede',
-					'choices' => $options['values'][0],
-					'choice_translation_domain' => false,
-					'mapped' => false,
-					'required' => true])
+          'choices' => $options['values'][0],
+          'choice_translation_domain' => false,
+          'mapped' => false,
+          'required' => true])
+        ->add('ora', ChoiceType::class, ['label' => 'label.ora',
+          'choices' => $options['values'][1],
+          'mapped' => false,
+          'choice_translation_domain' => false,
+          'required' => true])
         ->add('luogo', TextType::class, ['label' => 'label.colloquio_luogo',
-					'required' => true]);
+          'required' => true]);
     } elseif ($options['form_mode'] == 'periodico') {
       // ricevimento periodico
       $builder

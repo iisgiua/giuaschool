@@ -36,8 +36,9 @@ class DefinizioneRichiestaRepository extends BaseRepository {
       $utente->getCodiceFunzioni());
     $sql = implode(' OR ', $funzioni);
     // opzione sede
-    $sedi = ($utente instanceOf Alunno) ? [$utente->getClasse()->getSede()] :
-      (($utente instanceOf Genitore) ? [$utente->getAlunno()->getClasse()->getSede()] : []);
+    $classe = ($utente instanceOf Alunno) ? $utente->getClasse() :
+      (($utente instanceOf Genitore) ? $utente->getAlunno()->getClasse() : null);
+    $sedi = $classe ? [$classe->getSede()] : [];
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')

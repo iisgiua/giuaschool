@@ -50,7 +50,7 @@
           data-campi="{{ r.valori|length }}"
     {% for c,cv in r.definizioneRichiesta.campi %}
           data-campo-{{ loop.index }}="{{ c }}"
-          data-valore-{{ loop.index }}="{{ cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c]) }}"
+          data-valore-{{ loop.index }}="{{ r.valori[c] is empty ? '' : (cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c])) }}"
     {% endfor %}
           data-documento="{{ path('richieste_download', {id: r.id}) }}"
           data-allegati="{{ r.allegati|length }}"

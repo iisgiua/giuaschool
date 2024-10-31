@@ -33,8 +33,8 @@ class GenitoreRepository extends BaseRepository {
     $genitori = $this->createQueryBuilder('g')
       ->select('DISTINCT g.id')
       ->join('g.alunno', 'a')
-      ->join('a.classe', 'cl')
-      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
+      ->leftJoin('a.classe', 'cl')
+      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND (cl.id IS NULL OR cl.sede IN (:sedi))')
       ->setParameter('abilitato', 1)
       ->setParameter('sedi', $sedi);
     if ($tipo == 'C') {
