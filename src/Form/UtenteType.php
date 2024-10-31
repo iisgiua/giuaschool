@@ -31,34 +31,34 @@ class UtenteType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'password') {
       // form password
       $builder
-        ->add('username', TextType::class, array('label' => 'label.username',
-          'required' => true))
-        ->add('password', RepeatedType::class, array(
+        ->add('username', TextType::class, ['label' => 'label.username',
+          'required' => true])
+        ->add('password', RepeatedType::class, [
           'type' => PasswordType::class,
           'invalid_message' => 'password.nomatch',
-          'first_options' => array('label' => 'label.password'),
-          'second_options' => array('label' => 'label.password2'),
-          'required' => true));
+          'first_options' => ['label' => 'label.password'],
+          'second_options' => ['label' => 'label.password2'],
+          'required' => true]);
     } elseif ($options['form_mode'] == 'alias') {
       // form alias
       $builder
-        ->add('username', TextType::class, array('label' => 'label.username',
-          'required' => true));
+        ->add('username', TextType::class, ['label' => 'label.username',
+          'required' => true]);
     }
     // aggiunge pulsanti al form
     if ($options['return_url']) {
       $builder
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['widget' => 'gs-button-start']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['widget' => 'gs-button-start']])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
     } else {
       $builder
-        ->add('submit', SubmitType::class, array('label' => 'label.submit'));
+        ->add('submit', SubmitType::class, ['label' => 'label.submit']);
     }
   }
 
@@ -67,13 +67,13 @@ class UtenteType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('return_url');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'password',
       'return_url' => null,
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

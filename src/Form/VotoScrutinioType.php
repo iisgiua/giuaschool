@@ -8,6 +8,7 @@
 
 namespace App\Form;
 
+use App\Entity\Alunno;
 use App\Entity\VotoScrutinio;
 use App\Form\MessageType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,14 +28,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class VotoScrutinioType extends AbstractType {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -42,8 +35,9 @@ class VotoScrutinioType extends AbstractType {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    */
-  public function __construct(EntityManagerInterface $em) {
-    $this->em = $em;
+  public function __construct(
+      private readonly EntityManagerInterface $em)
+  {
   }
 
   /**
@@ -52,28 +46,28 @@ class VotoScrutinioType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'condotta') {
       // voto di condotta
       $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
-        ->add('motivazione', MessageType::class, array('label' => false,
+        ->add('motivazione', MessageType::class, ['label' => false,
           'property_path' => 'dati[motivazione]',
           'trim' => true,
-          'required' => false))
-        ->add('unanimita', ChoiceType::class, array('label' => false,
+          'required' => false])
+        ->add('unanimita', ChoiceType::class, ['label' => false,
           'property_path' => 'dati[unanimita]',
           'choices' => ['label.votazione_unanimita' => true, 'label.votazione_maggioranza' => false],
           'placeholder' => null,
           'expanded' => true,
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline gs-mr-4'],
-          'required' => false))
-        ->add('contrari', TextType::class, array('label' => false,
+          'required' => false])
+        ->add('contrari', TextType::class, ['label' => false,
           'property_path' => 'dati[contrari]',
           'trim' => true,
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'edcivica') {
       // voto di ed.civica
       $builder
@@ -89,75 +83,68 @@ class VotoScrutinioType extends AbstractType {
       $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
-        ->add('recupero', ChoiceType::class, array('label' => false,
+        ->add('recupero', ChoiceType::class, ['label' => false,
           'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
             'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
-              'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
+            'label.recupero_R' => 'R',
+          'label.recupero_N' => 'N'],
           'placeholder' => 'label.scegli_recupero',
           'expanded' => false,
           'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false))
-        ->add('debito', MessageType::class, array('label' => false,
+          'required' => false])
+        ->add('debito', MessageType::class, ['label' => false,
           'trim' => true,
-          'attr' => array('rows' => '3'),
-          'required' => false));
+          'attr' => ['rows' => '3'],
+          'required' => false]);
     } elseif ($options['form_mode'] == 'carenze') {
       // carenze
       $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
-        ->add('debito', MessageType::class, array('label' => false,
+        ->add('debito', MessageType::class, ['label' => false,
           'trim' => true,
-          'required' => false));
+          'required' => false]);
     } else {
       // form completo
       $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
-        ->add('recupero', ChoiceType::class, array('label' => false,
+        ->add('recupero', ChoiceType::class, ['label' => false,
           'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
             'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
             'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
           'placeholder' => 'label.scegli_recupero',
           'expanded' => false,
           'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
-          'required' => false))
-        ->add('debito', MessageType::class, array('label' => false,
+          'required' => false])
+        ->add('debito', MessageType::class, ['label' => false,
           'trim' => true,
-          'required' => false))
-        ->add('motivazione', MessageType::class, array('label' => false,
+          'required' => false])
+        ->add('motivazione', MessageType::class, ['label' => false,
           'property_path' => 'dati[motivazione]',
           'trim' => true,
-          'required' => false))
-        ->add('unanimita', ChoiceType::class, array('label' => false,
+          'required' => false])
+        ->add('unanimita', ChoiceType::class, ['label' => false,
           'property_path' => 'dati[unanimita]',
           'choices' => ['label.votazione_unanimita' => true, 'label.votazione_maggioranza' => false],
           'placeholder' => null,
           'expanded' => true,
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline gs-mr-4'],
-          'required' => false))
-        ->add('contrari', TextType::class, array('label' => false,
+          'required' => false])
+        ->add('contrari', TextType::class, ['label' => false,
           'property_path' => 'dati[contrari]',
           'trim' => true,
-          'required' => false));
+          'required' => false]);
     }
     // aggiunge data transform
     $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
-      function ($alunno) {
-        return $alunno->getId();
-      },
-      function ($id) {
-        return $this->em->getRepository('App\Entity\Alunno')->find($id);
-      }));
+      fn($alunno) => $alunno->getId(),
+      fn($id) => $this->em->getRepository(Alunno::class)->find($id)));
   }
 
   /**
@@ -165,11 +152,11 @@ class VotoScrutinioType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'completo',
-      'data_class' => VotoScrutinio::class));
+      'data_class' => VotoScrutinio::class]);
   }
 
 }

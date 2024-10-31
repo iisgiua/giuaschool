@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Log - repository
  *
  * @author Antonello Dessì
  */
-class LogRepository extends \Doctrine\ORM\EntityRepository {
+class LogRepository extends EntityRepository {
 
 }
 

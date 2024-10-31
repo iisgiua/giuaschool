@@ -8,16 +8,17 @@
 
 namespace App\Entity;
 
+use App\Repository\PresideRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
 /**
  * Preside - dati del dirigente scolastico
  *
- * @ORM\Entity(repositoryClass="App\Repository\PresideRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: PresideRepository::class)]
 class Preside extends Staff {
 
 

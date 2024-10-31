@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * DefinizioneConsiglio - repository
  *
  * @author Antonello Dessì
  */
-class DefinizioneConsiglioRepository extends \Doctrine\ORM\EntityRepository {
+class DefinizioneConsiglioRepository extends EntityRepository {
 
 }
 

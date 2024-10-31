@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\CircolareRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,230 +24,208 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Circolare - dati per le circolari scolastiche
  *
- * @ORM\Entity(repositoryClass="App\Repository\CircolareRepository")
- * @ORM\Table(name="gs_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","numero"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"anno","numero"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Circolare {
+#[ORM\Table(name: 'gs_circolare')]
+#[ORM\UniqueConstraint(columns: ['anno', 'numero'])]
+#[ORM\Entity(repositoryClass: CircolareRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['anno', 'numero'], message: 'field.unique')]
+class Circolare implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la circolare
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var Collection|null $sedi Sedi a cui è destinata la circolare
    *
-   * @ORM\ManyToMany(targetEntity="Sede")
-   * @ORM\JoinTable(name="gs_circolare_sede",
-   *    joinColumns={@ORM\JoinColumn(name="circolare_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private ?Collection $sedi = null;
+  #[ORM\JoinTable(name: 'gs_circolare_sede')]
+  #[ORM\JoinColumn(name: 'circolare_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Sede::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?Collection $sedi;
 
   /**
    * @var int $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
-   *
-   * @ORM\Column(type="integer", nullable=false)
    */
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $anno = 0;
 
   /**
    * @var int $numero Numero della circolare
-   *
-   * @ORM\Column(type="integer", nullable=false)
    */
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $numero = 0;
 
   /**
-   * @var \DateTime|null $data Data della circolare
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data della circolare
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
    * @var string|null $oggetto Oggetto della circolare
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $oggetto = '';
 
   /**
    * @var string|null $documento Documento della circolare
-   *
-   * @ORM\Column(type="string", length=255, nullable=false)
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   private ?string $documento = '';
 
   /**
    * @var array|null $allegati Lista di file allegati alla circolare
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $allegati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $allegati = [];
 
   /**
    * @var bool $ata Indica se il personale ATA è destinatario della circolare o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $ata = false;
 
   /**
    * @var bool $dsga Indica se il DSGA è destinatario della circolare o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $dsga = false;
 
   /**
    * @var string|null $genitori Indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $genitori = 'N';
 
   /**
    * @var array|null $filtroGenitori Lista dei filtri per i genitori
-   *
-   * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
-  private ?array $filtroGenitori = array();
+  #[ORM\Column(name: 'filtro_genitori', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroGenitori = [];
 
   /**
    * @var string|null $alunni Indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $alunni = 'N';
 
   /**
    * @var array|null $filtroAlunni Lista dei filtri per gli alunni
-   *
-   * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
-  private ?array $filtroAlunni = array();
+  #[ORM\Column(name: 'filtro_alunni', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroAlunni = [];
 
   /**
    * @var string|null $coordinatori Indica quali coordinatori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C'], strict: true, message: 'field.choice')]
   private ?string $coordinatori = 'N';
 
   /**
    * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
-   *
-   * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
-  private ?array $filtroCoordinatori = array();
+  #[ORM\Column(name: 'filtro_coordinatori', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroCoordinatori = [];
 
   /**
    * @var string|null $docenti Indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
   private ?string $docenti = 'N';
 
   /**
    * @var array|null $filtroDocenti Lista dei filtri per i docenti
-   *
-   * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
-  private ?array $filtroDocenti = array();
+  #[ORM\Column(name: 'filtro_docenti', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroDocenti = [];
 
   /**
    * @var array|null $altri Altri destinatari della circolare non riferiti ad utenti sul registro
-   *
-   * @ORM\Column(type="simple_array", nullable=true)
    */
-  private array $altri = array();
+  #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
+  private array $altri = [];
 
   /**
    * @var bool $firma Indica se è richiesta la conferma esplicita di lettura della circolare o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $firma = false;
 
   /**
    * @var bool $notifica Indica se è richiesta la notifica della circolare ai destinatari o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $notifica = false;
 
   /**
    * @var bool $pubblicata Indica se la circolare è pubblicata o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $pubblicata = false;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -260,18 +243,18 @@ class Circolare {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -367,20 +350,20 @@ class Circolare {
   /**
    * Restituisce la data della circolare
    *
-   * @return \DateTime|null Data della circolare
+   * @return DateTime|null Data della circolare
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data della circolaredo
    *
-   * @param \DateTime $data Data della circolare
+   * @param DateTime $data Data della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -792,7 +775,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroGenitori($filtro): self {
+  public function addFiltroGenitori(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroGenitori)) {
       $this->filtroGenitori[] = $filtro->getId();
     }
@@ -806,7 +789,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroGenitori($filtro): self {
+  public function removeFiltroGenitori(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroGenitori)) {
       unset($this->filtroGenitori[array_search($filtro->getId(), $this->filtroGenitori)]);
     }
@@ -820,7 +803,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroAlunni($filtro): self {
+  public function addFiltroAlunni(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroAlunni)) {
       $this->filtroAlunni[] = $filtro->getId();
     }
@@ -834,7 +817,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroAlunni($filtro): self {
+  public function removeFiltroAlunni(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroAlunni)) {
       unset($this->filtroAlunni[array_search($filtro->getId(), $this->filtroAlunni)]);
     }
@@ -848,7 +831,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroCoordinatori($filtro): self {
+  public function addFiltroCoordinatori(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroCoordinatori)) {
       $this->filtroCoordinatori[] = $filtro->getId();
     }
@@ -862,7 +845,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroCoordinatori($filtro): self {
+  public function removeFiltroCoordinatori(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroCoordinatori)) {
       unset($this->filtroCoordinatori[array_search($filtro->getId(), $this->filtroCoordinatori)]);
     }
@@ -876,7 +859,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function addFiltroDocenti($filtro): self {
+  public function addFiltroDocenti(mixed $filtro): self {
     if (!in_array($filtro->getId(), $this->filtroDocenti)) {
       $this->filtroDocenti[] = $filtro->getId();
     }
@@ -890,7 +873,7 @@ class Circolare {
    *
    * @return self Oggetto modificato
    */
-  public function removeFiltroDocenti($filtro): self {
+  public function removeFiltroDocenti(mixed $filtro): self {
     if (in_array($filtro->getId(), $this->filtroDocenti)) {
       unset($this->filtroDocenti[array_search($filtro->getId(), $this->filtroDocenti)]);
     }

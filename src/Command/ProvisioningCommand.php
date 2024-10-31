@@ -8,6 +8,7 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,25 +23,8 @@ use App\Util\AccountProvisioning;
  *
  * @author Antonello Dessì
  */
+#[AsCommand(name: 'app:provisioning:esegue', description: 'Esegue il provisioning sui sistemi esterni')]
 class ProvisioningCommand extends Command {
-
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-  * @var LoggerInterface $logger Gestore dei log su file
-  */
-  private $logger;
-
-  /**
-  * @var AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
-  */
-  private $prov;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -52,12 +36,11 @@ class ProvisioningCommand extends Command {
    * @param LoggerInterface $logger Gestore dei log su file
    * @param AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $logger,
-                              AccountProvisioning $prov) {
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger,
+      private readonly AccountProvisioning $prov) {
     parent::__construct();
-    $this->em = $em;
-    $this->logger = $logger;
-    $this->prov = $prov;
   }
 
   /**
@@ -65,10 +48,6 @@ class ProvisioningCommand extends Command {
    *
    */
   protected function configure() {
-    // nome del comando (da inserire dopo "php bin/console")
-    $this->setName('app:provisioning:esegue');
-    // breve descrizione (mostrata col comando "php bin/console list")
-    $this->setDescription('Esegue il provisioning sui sistemi esterni');
     // descrizione completa (mostrata con l'opzione "--help")
     $this->setHelp("Il comando esegue il provisioning sui sistemi esterni.");
     // argomenti del comando
@@ -101,7 +80,7 @@ class ProvisioningCommand extends Command {
    *
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     // inizio
     $this->logger->notice('provisioning-esegue: Inizio procedura di esecuzione del provisioning');
     // esegue provisioning
@@ -124,13 +103,13 @@ class ProvisioningCommand extends Command {
     // inizializza
     $num = 0;
     // comandi in attesa
-    $comandi = $this->em->getRepository('App\Entity\Provisioning')->comandiInAttesa();
+    $comandi = $this->em->getRepository(Provisioning::class)->comandiInAttesa();
     $this->logger->notice('provisioning-esegue: Comandi in attesa', ['num' => count($comandi)]);
     // inizializza
     $errore = $this->prov->inizializza();
     if ($errore) {
       // riporta comandi in attesa
-      $this->em->getRepository('App\Entity\Provisioning')->ripristinaComandi($comandi);
+      $this->em->getRepository(Provisioning::class)->ripristinaComandi($comandi);
       // esce con messaggio di errore
       $this->logger->error('provisioning-esegue: ERRORE - '.$errore);
       return 0;
@@ -138,7 +117,7 @@ class ProvisioningCommand extends Command {
     // esecuzione comandi
     foreach ($comandi as $id) {
       // esegue un comando alla volta
-      $dati = $this->em->getRepository('App\Entity\Provisioning')->comandoDaEseguire($id);
+      $dati = $this->em->getRepository(Provisioning::class)->comandoDaEseguire($id);
       switch ($dati['provisioning']->getFunzione()) {
         case 'creaUtente':
           $errore = $this->prov->creaUtente($dati['provisioning']->getUtente(),
@@ -188,17 +167,17 @@ class ProvisioningCommand extends Command {
       $log = $this->prov->log();
       $this->prov->svuotaLog();
       if ($errore) {
-        $this->em->getRepository('App\Entity\Provisioning')->provisioningErrato($id, $log, $errore);
+        $this->em->getRepository(Provisioning::class)->provisioningErrato($id, $log, $errore);
         // messaggio d'errore
         $this->logger->error('provisioning-esegue: ERRORE - '.$errore, ['id' => $id]);
       } else {
-        $this->em->getRepository('App\Entity\Provisioning')->provisioningEseguito($id, $log);
+        $this->em->getRepository(Provisioning::class)->provisioningEseguito($id, $log);
         // conta comandi eseguiti
         $num++;
       }
     }
     // cancella vecchi comandi eseguiti
-    $this->em->getRepository('App\Entity\Provisioning')->cancellaComandi();
+    $this->em->getRepository(Provisioning::class)->cancellaComandi();
     // restituisce numero comandi eseguiti
     return $num;
   }

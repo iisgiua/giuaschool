@@ -11,7 +11,7 @@ namespace App\Controller;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -27,10 +27,9 @@ class OAuth2Controller extends BaseController {
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
    *
    * @return Response Redirezione al servizio richiesto
-   *
-   * @Route("/login/gsuite", name="login_gsuite")
    */
-  public function connectAction(ClientRegistry $clientRegistry): Response {
+  #[Route(path: '/login/gsuite', name: 'login_gsuite')]
+  public function connect(ClientRegistry $clientRegistry): Response {
     // redirezione alla GSuite
     return $clientRegistry
       ->getClient('gsuite')
@@ -44,11 +43,10 @@ class OAuth2Controller extends BaseController {
    * @param string $email Email dell'utente di cui effettuare il login
    *
    * @return Response Redirezione al servizio richiesto
-   *
-   * @Route("/login/gsuite/app/{email}", name="login_gsuite_app")
    */
-  public function connectAppAction(ClientRegistry $clientRegistry, string $email): Response {
-    $options = array();
+  #[Route(path: '/login/gsuite/app/{email}', name: 'login_gsuite_app')]
+  public function connectApp(ClientRegistry $clientRegistry, string $email): Response {
+    $options = [];
     $options['login_hint'] = $email;
     // redirezione alla GSuite
     return $clientRegistry
@@ -61,10 +59,9 @@ class OAuth2Controller extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
-   *
-   * @Route("/login/gsuite/check", name="login_gsuite_check")
    */
-  public function checkAction(Request $request, ClientRegistry $clientRegistry) {
+  #[Route(path: '/login/gsuite/check', name: 'login_gsuite_check')]
+  public function check(ClientRegistry $clientRegistry) {
   }
 
 }

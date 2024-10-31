@@ -1,5 +1,0 @@
-# config/packages/sensio_framework_extra.yaml
-
-sensio_framework_extra:
-  router:
-    annotations: false

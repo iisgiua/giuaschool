@@ -9,7 +9,7 @@
     <td align="center" style="width:6mm">&nbsp;<br style="line-height:20mm"><strong>Pr.</strong></td>
     <td align="center" style="width:50mm" colspan="2">&nbsp;<br style="line-height:20mm"><strong>Alunno</strong></td>
 {% for idmat,mat in dati.materie %}
-    <td style="width:{{ mat.tipo == 'R' ? 12 : 6 }}mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:{{ mat.tipo == 'R' ? 24 : 12 }}pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params[idmat] }}" /><tcpdf method="StopTransform" /></strong></td>
+    <td style="width:{{ mat.tipo == 'R' ? 12 : 6 }}mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:{{ mat.tipo == 'R' ? 24 : 12 }}pt">&nbsp;</span><strong style="font-size:8pt">{% for t in dati.tcpdf[idmat] %}<tcpdf data="{{ t }}" />{% endfor %}</strong></td>
 {% endfor %}
     <td align="center" style="width:12mm">&nbsp;<br style="line-height:20mm"><strong>Media</strong></td>
   </tr>

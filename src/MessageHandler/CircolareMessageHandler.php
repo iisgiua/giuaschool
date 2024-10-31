@@ -8,6 +8,9 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Throwable;
+use App\Entity\Circolare;
 use App\Message\CircolareMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,43 +26,25 @@ use Symfony\Component\Messenger\MessageBusInterface;
  *
  * @author Antonello Dessì
  */
+#[AsMessageHandler]
 class CircolareMessageHandler implements BatchHandlerInterface {
 
   use BatchHandlerTrait;
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-  /**
-   * @var MessageBusInterface $messageBus Gestore della coda dei messaggi
-   */
-  private MessageBusInterface $messageBus;
-
-
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param LoggerInterface $msgLogger Gestore dei log su file
+   * @param LoggerInterface $logger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $msgLogger,
-                              MessageBusInterface $messageBus) {
-    $this->em = $em;
-    $this->logger = $msgLogger;
-    $this->messageBus = $messageBus;
+  public function __construct(
+      private EntityManagerInterface $em,
+      private LoggerInterface $logger,
+      private MessageBusInterface $messageBus)
+  {
   }
 
   /**
@@ -97,7 +82,7 @@ class CircolareMessageHandler implements BatchHandlerInterface {
         }
         // operazione terminata senza errori
         $ack->ack($message);
-      } catch (\Throwable $e) {
+      } catch (Throwable $e) {
         // errore
         $this->logger->error('CircolareMessage: ERRORE '.$e->getMessage(), [$e]);
         $ack->nack($e);
@@ -132,14 +117,14 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @return bool Restituisce vero se è stata aggiunta una nuova circolare
    */
   private function raggruppa(int $id, array &$destinatari): bool {
-    $circolare = $this->em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if ($circolare) {
       // solo circolari esistenti e pubblicate
-      $utenti = $this->em->getRepository('App\Entity\Circolare')->notifica($circolare);
+      $utenti = $this->em->getRepository(Circolare::class)->notifica($circolare);
       foreach ($utenti as $u) {
         // memorizza circolari per utente
-        $destinatari[$u][] = array('id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-          'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto());
+        $destinatari[$u][] = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
+          'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
       }
       // segnala nuova circolare
       return true;

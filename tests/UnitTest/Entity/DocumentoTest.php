@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Documento;
+use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Materia;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +22,13 @@ use App\Tests\EntityTestCase;
  */
 class DocumentoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\Documento';
+    $this->entity = Documento::class;
     // campi da testare
     $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma'];
     $this->noStoredFields = ['allegati'];
@@ -42,6 +44,8 @@ class DocumentoTest extends EntityTestCase {
     $this->canWrite = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -54,7 +58,7 @@ class DocumentoTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -79,17 +83,17 @@ class DocumentoTest extends EntityTestCase {
           ($field == 'cifrato' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'firma' ? $this->faker->boolean() :
           null))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -102,14 +106,14 @@ class DocumentoTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -120,7 +124,7 @@ class DocumentoTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAllegato
-    $existent->setAllegati(new \Doctrine\Common\Collections\ArrayCollection());
+    $existent->setAllegati(new ArrayCollection());
     $existent->addAllegato($this->getReference('file_word_1'));
     $existent->addAllegato($this->getReference('file_word_2'));
     $existent->addAllegato($this->getReference('file_word_1'));
@@ -136,7 +140,7 @@ class DocumentoTest extends EntityTestCase {
       'tipo' => $existent->getTipo(),
       'docente' => $existent->getDocente()->getId(),
       'listaDestinatari' => $existent->getListaDestinatari()->datiVersione(),
-      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $existent->getAllegati()->toArray()),
+      'allegati' => array_map(fn($ogg) => $ogg->datiVersione(), $existent->getAllegati()->toArray()),
       'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
       'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
       'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
@@ -146,7 +150,7 @@ class DocumentoTest extends EntityTestCase {
     $dt['tipo'] = 'P';
     $existent->setTipo('P');
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $materia = $this->em->getRepository('App\Entity\Materia')->find(1);
+    $materia = $this->em->getRepository(Materia::class)->find(1);
     $existent->setMateria($materia);
     $dt['materia'] = $materia->getId();
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -169,7 +173,7 @@ class DocumentoTest extends EntityTestCase {
     $existent->setTipo('L');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'docente');
+    $property = $this->getPrivateProperty(Documento::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
@@ -177,18 +181,18 @@ class DocumentoTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // listaDestinatari
     $temp = $existent->getListaDestinatari();
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'listaDestinatari');
+    $property = $this->getPrivateProperty(Documento::class, 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
     $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // allegati
-    $property = $this->getPrivateProperty('App\Entity\Documento', 'allegati');
+    $property = $this->getPrivateProperty(Documento::class, 'allegati');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Allegati - NOT BLANK');
-    $existent->setAllegati(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("file_1")]));
+    $existent->setAllegati(new ArrayCollection([$this->getReference("file_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID NOT BLANK');
     // materia
     $existent->setMateria(null);

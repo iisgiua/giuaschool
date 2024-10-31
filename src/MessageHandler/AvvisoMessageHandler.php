@@ -8,11 +8,13 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use App\Entity\Avviso;
+use App\Entity\Classe;
 use App\Message\AvvisoMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 
@@ -21,40 +23,22 @@ use Symfony\Component\Messenger\MessageBusInterface;
  *
  * @author Antonello Dessì
  */
-class AvvisoMessageHandler implements MessageHandlerInterface {
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-  /**
-   * @var MessageBusInterface $messageBus Gestore della coda dei messaggi
-   */
-  private MessageBusInterface $messageBus;
-
+#[AsMessageHandler]
+class AvvisoMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param LoggerInterface $msgLogger Gestore dei log su file
+   * @param LoggerInterface $logger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $msgLogger,
-                              MessageBusInterface $messageBus) {
-    $this->em = $em;
-    $this->logger = $msgLogger;
-    $this->messageBus = $messageBus;
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger,
+      private readonly MessageBusInterface $messageBus)
+  {
   }
 
   /**
@@ -63,7 +47,7 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
    * @param AvvisoMessage $message Dati per la notifica dell'avviso
    */
   public function __invoke(AvvisoMessage $message) {
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($message->getId());
+    $avviso = $this->em->getRepository(Avviso::class)->find($message->getId());
     $destinatari = [];
     if ($avviso) {
       // dati avviso
@@ -78,12 +62,12 @@ class AvvisoMessageHandler implements MessageHandlerInterface {
       $classi = '';
       if ($avviso->getFiltroTipo() == 'C' && !empty($avviso->getFiltro())) {
         // entrate/uscite/attività
-        $classi = $this->em->getRepository('App\Entity\Classe')->listaClassi($avviso->getFiltro());
+        $classi = $this->em->getRepository(Classe::class)->listaClassi($avviso->getFiltro());
       }
       $dati = ['id' => $avviso->getId(), 'data' => $data, 'oggetto' => $oggetto,
         'testo' => $testo, 'allegati' => count($avviso->getAllegati())];
       // legge i destinatari
-      $destinatari = $this->em->getRepository('App\Entity\Avviso')->notifica($avviso);
+      $destinatari = $this->em->getRepository(Avviso::class)->notifica($avviso);
       foreach ($destinatari as $utente) {
         // crea le notifiche per ogni destinatario
         $dati['alunno'] = '';

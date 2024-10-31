@@ -8,6 +8,11 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use DateTime;
+use App\Entity\Utente;
+use App\Entity\App;
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\Docente;
@@ -16,7 +21,6 @@ use App\Entity\Log;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
@@ -25,7 +29,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -49,19 +53,15 @@ class AppController extends BaseController {
    * @param int $lapp Lunghezza del token identificativo dell'app
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/login/{codice}/{lusr}/{lpsw}/{lapp}", name="app_login",
-   *    requirements={"codice": "[\w\-=]+", "lusr": "\d+", "lpsw": "\d+", "lapp": "\d+"},
-   *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
-   *    methods={"GET"})
    */
-  public function loginAction(AuthenticationUtils $auth, ConfigLoader $config,
-                              string $codice, int $lusr, int $lpsw, int $lapp): Response {
+  #[Route(path: '/app/login/{codice}/{lusr}/{lpsw}/{lapp}', name: 'app_login', requirements: ['codice' => '[\w\-=]+', 'lusr' => '\d+', 'lpsw' => '\d+', 'lapp' => '\d+'], defaults: ['codice' => '0', 'lusr' => 0, 'lpsw' => 0, 'lapp' => 0], methods: ['GET'])]
+  public function login(AuthenticationUtils $auth, ConfigLoader $config,
+                        string $codice, int $lusr, int $lpsw, int $lapp): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -70,11 +70,10 @@ class AppController extends BaseController {
       $errore = $auth->getLastAuthenticationError();
     }
     // mostra la pagina di risposta
-    return $this->render('app/login.html.twig', array(
+    return $this->render('app/login.html.twig', [
       'pagina_titolo' => 'page.app_login',
       'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
+      'manutenzione' => $manutenzione]);
   }
 
   /**
@@ -85,12 +84,10 @@ class AppController extends BaseController {
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/app/prelogin/", name="app_prelogin",
-   *    methods={"POST"})
    */
-  public function preloginAction(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
-    $risposta = array();
+  #[Route(path: '/app/prelogin/', name: 'app_prelogin', methods: ['POST'])]
+  public function prelogin(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
+    $risposta = [];
     $risposta['errore'] = 0;
     $risposta['token'] = null;
     // legge dati
@@ -99,13 +96,13 @@ class AppController extends BaseController {
     $lpsw = (int) $request->request->get('lpsw');
     $lapp = (int) $request->request->get('lapp');
     // decodifica credenziali
-    $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
+    $testo = base64_decode(str_replace(['-', '_'], ['+', '/'], $codice));
     $profilo = substr($testo, 0, 1);
     $username = substr($testo, 1, $lusr - 1);
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -120,7 +117,7 @@ class AppController extends BaseController {
           $risposta['token'] = rtrim(strtr(base64_encode($profilo.$username.$password.$appId.$token), '+/', '-_'), '=');
           // memorizza codice di pre-login
           $user->setPrelogin($risposta['token']);
-          $user->setPreloginCreato(new \DateTime());
+          $user->setPreloginCreato(new DateTime());
           $this->em->flush();
         } else {
           // errore: credenziali non corrispondono
@@ -144,16 +141,14 @@ class AppController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/info/", name="app_info",
-   *    methods={"GET"})
    */
-  public function infoAction(ConfigLoader $config): Response {
-    $applist = array();
+  #[Route(path: '/app/info/', name: 'app_info', methods: ['GET'])]
+  public function info(ConfigLoader $config): Response {
+    $applist = [];
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $this->em->getRepository('App\Entity\App')->findBy(['attiva' => 1]);
+    $apps = $this->em->getRepository(App::class)->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -167,11 +162,10 @@ class AppController extends BaseController {
       break;
     }
     // mostra la pagina di risposta
-    return $this->render('app/info.html.twig', array(
+    return $this->render('app/info.html.twig', [
       'pagina_titolo' => 'page.app_info',
       'applist' => $applist,
-      'giuaReg' => $giuaReg,
-      ));
+      'giuaReg' => $giuaReg]);
   }
 
   /**
@@ -181,16 +175,13 @@ class AppController extends BaseController {
    * @param int $id ID dell'app da scaricare
    *
    * @return Response File inviato in risposta
-   *
-   * @Route("/app/download/{id}", name="app_download",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
    */
-  public function downloadAction(ConfigLoader $config, int $id): Response {
+  #[Route(path: '/app/download/{id}', name: 'app_download', requirements: ['id' => '\d+'], methods: ['GET'])]
+  public function download(ConfigLoader $config, int $id): Response {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,7 +194,7 @@ class AppController extends BaseController {
     $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nome);
     $response = new BinaryFileResponse($file);
     $response->headers->set('Content-Disposition', $disposition);
-    if (substr($nome, -4) == '.apk') {
+    if (str_ends_with($nome, '.apk')) {
       // imposta il content-type per le applicazioni android
       $response->headers->set('Content-Type', 'application/vnd.android.package-archive');
     }
@@ -217,22 +208,20 @@ class AppController extends BaseController {
    * @param Request $request Pagina richiesta
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/app/versione/", name="app_versione",
-   *    methods={"POST"})
    */
-  public function versioneAction(Request $request): JsonResponse {
-    $risposta = array();
+  #[Route(path: '/app/versione/', name: 'app_versione', methods: ['POST'])]
+  public function versione(Request $request): JsonResponse {
+    $risposta = [];
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge versione
-    $risposta['versione'] = isset($app->getDati()['versione']) ? $app->getDati()['versione'] : '0.0';
+    $risposta['versione'] = $app->getDati()['versione'] ?? '0.0';
     // restituisce la risposta
     return new JsonResponse($risposta);
   }
@@ -244,17 +233,15 @@ class AppController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/info/studenti/", name="app_info_studenti",
-   *    methods={"POST"})
    */
-  public function infoStudentiAction(Request $request, TranslatorInterface $trans): Response {
+  #[Route(path: '/app/info/studenti/', name: 'app_info_studenti', methods: ['POST'])]
+  public function infoStudenti(Request $request, TranslatorInterface $trans): Response {
     // inizializza
-    $dati = array();
+    $dati = [];
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -270,7 +257,7 @@ class AppController extends BaseController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';
@@ -294,13 +281,11 @@ class AppController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/app/connect/init", name="app_connectInit",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function connectInitAction(Request $request): JsonResponse {
-    $res = array();
+  #[Route(path: '/app/connect/init', name: 'app_connectInit', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function connectInit(Request $request): JsonResponse {
+    $res = [];
     // legge dati
     $userId = $this->getUser()->getId();
     $ip = $request->getClientIp();
@@ -309,8 +294,8 @@ class AppController extends BaseController {
     // crea token
     $res['token'] = $token.'-'.$userId;
     // memorizza token
-    $this->getUser()->setPrelogin($token.'-'.sha1($ip).'-'.$sessionId);
-    $this->getUser()->setPreloginCreato(new \DateTime());
+    $this->getUser()->setPrelogin($token.'-'.sha1((string) $ip).'-'.$sessionId);
+    $this->getUser()->setPreloginCreato(new DateTime());
     $this->em->flush();
     // restituisce risposta
     return new JsonResponse($res);
@@ -326,17 +311,15 @@ class AppController extends BaseController {
    * @param string $token Token con le informazioni per la connessione
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/app/connect/{token}", name="app_connect",
-   *    methods={"GET"})
    */
-  public function connectAction(Request $request, LogHandler $dblogger, LoggerInterface $logger,
-                                ConfigLoader $config, string $token): Response {
+  #[Route(path: '/app/connect/{token}', name: 'app_connect', methods: ['GET'])]
+  public function connect(Request $request, LogHandler $dblogger, LoggerInterface $logger,
+                          ConfigLoader $config, string $token): Response {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $ora = (new DateTime())->format('Y-m-d H:i');
     $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
       $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
       $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
@@ -344,38 +327,38 @@ class AppController extends BaseController {
       try {
         // legge dati
         $ip = $request->getClientIp();
-        list($tokenId, $userId) = explode('-', $token);
-        $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['id' => $userId, 'abilitato' => 1]);
+        [$tokenId, $userId] = explode('-', $token);
+        $user = $this->em->getRepository(Utente::class)->findOneBy(['id' => $userId, 'abilitato' => 1]);
         if (!$user) {
           // errore utente
-          $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', array(
+          $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', [
             'id' => $userId,
-            'token' => $token));
-          throw new \Exception('exception.invalid_user');
+            'token' => $token]);
+          throw new Exception('exception.invalid_user');
         }
-        if (substr_count($user->getPrelogin(), '-') != 2) {
+        if (substr_count((string) $user->getPrelogin(), '-') != 2) {
           // errore formato prelogin
-          $logger->error('Formato prelogin errato nella richiesta di connessione da app.', array(
+          $logger->error('Formato prelogin errato nella richiesta di connessione da app.', [
             'id' => $userId,
-            'token' => $token));
-          throw new \Exception('exception.invalid_user');
+            'token' => $token]);
+          throw new Exception('exception.invalid_user');
         }
-        list($tokenCheck, $hashCheck, $sessionId) = explode('-', $user->getPrelogin());
-        if ($tokenCheck != $tokenId || $hashCheck != sha1($ip)) {
+        [$tokenCheck, $hashCheck, $sessionId] = explode('-', (string) $user->getPrelogin());
+        if ($tokenCheck != $tokenId || $hashCheck != sha1((string) $ip)) {
           // errore token o hash
-          $logger->error('Token o hash errato nella richiesta di connessione da app.', array(
+          $logger->error('Token o hash errato nella richiesta di connessione da app.', [
             'id' => $userId,
-            'token' => $token));
-          throw new \Exception('exception.invalid_user');
+            'token' => $token]);
+          throw new Exception('exception.invalid_user');
         }
-        $now = new \DateTime();
+        $now = new DateTime();
         $timeout = (clone $user->getPreloginCreato())->modify('+2 minutes');
         if ($now > $timeout) {
           // errore token scaduto
-          $logger->error('Token scaduto nella richiesta di connessione da app.', array(
+          $logger->error('Token scaduto nella richiesta di connessione da app.', [
             'id' => $userId,
-            'token' => $token));
-          throw new \Exception('exception.token_scaduto');
+            'token' => $token]);
+          throw new Exception('exception.token_scaduto');
         }
         // ok, resetta token e log azione
         $user->setPrelogin(null);
@@ -401,17 +384,16 @@ class AppController extends BaseController {
         session_start();
         // redirezione a pagina iniziale
         return $this->redirectToRoute('login_home');
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $errore = $e;
       }
     }
     // mostra la pagina di risposta
-    return $this->render('app/login.html.twig', array(
+    return $this->render('app/login.html.twig', [
       'pagina_titolo' => 'page.app_login',
       'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
+      'manutenzione' => $manutenzione]);
   }
 
 }

@@ -224,7 +224,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
 Scenario: mostra errore all'accesso alla pagina senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_alunni"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso alla pagina con altri utenti
   Dato logout utente

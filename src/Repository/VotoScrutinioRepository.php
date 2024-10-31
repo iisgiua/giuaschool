@@ -10,6 +10,8 @@ namespace App\Repository;
 
 use App\Entity\Classe;
 use App\Entity\Scrutinio;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 
 
 /**
@@ -30,11 +32,11 @@ class VotoScrutinioRepository extends BaseRepository {
     $lista = $this->createQueryBuilder('vs')
       ->select('(vs.alunno) AS alunno, (vs.materia) AS materia')
       ->where('vs.scrutinio=:scrutinio')
-      ->setParameters(['scrutinio' => $scrutinio])
+      ->setParameter('scrutinio', $scrutinio)
       ->getQuery()
       ->getArrayResult();
     // restituisce lista degli alunni e delle materie
-    $alunni = array();
+    $alunni = [];
     foreach ($lista as $l) {
       $alunni[$l['alunno']][] = $l['materia'];
     }
@@ -56,17 +58,18 @@ class VotoScrutinioRepository extends BaseRepository {
                        string $stato = ''): array {
     // query di base
     $cond = '';
-    $param = ['periodo' => $periodo, 'anno' => $classe->getAnno(), 'sezione' => $classe->getSezione()];
+    $param = [new Parameter('periodo', $periodo), new Parameter('anno', $classe->getAnno()),
+      new Parameter('sezione', $classe->getSezione())];
     if (!empty($classe->getGruppo())) {
       $cond = ' AND c.gruppo=:gruppo';
-      $param['gruppo'] = $classe->getGruppo();
+      $param[] = new Parameter('gruppo', $classe->getGruppo());
     }
     $query = $this->createQueryBuilder('vs')
       ->select('s.periodo,(vs.materia) AS materia,(vs.alunno) AS alunno,vs AS voto')
       ->join('vs.scrutinio', 's')
       ->join('s.classe', 'c')
       ->where('s.periodo=:periodo AND c.anno=:anno AND c.sezione=:sezione'.$cond)
-      ->setParameters($param)
+      ->setParameters(new ArrayCollection($param))
       ->orderBy('s.data');
     // filtro alunno
     if (!empty($alunni)) {

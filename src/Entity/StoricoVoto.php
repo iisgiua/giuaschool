@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\StoricoVotoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,105 +21,97 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * StoricoVoto - dati per la memorizzazione dei voti finali del precedente anno scolastico
  *
- * @ORM\Entity(repositoryClass="App\Repository\StoricoVotoRepository")
- * @ORM\Table(name="gs_storico_voto", uniqueConstraints={@ORM\UniqueConstraint(columns={"storico_esito_id","materia_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"storicoEsito","materia"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class StoricoVoto {
+#[ORM\Table(name: 'gs_storico_voto')]
+#[ORM\UniqueConstraint(columns: ['storico_esito_id', 'materia_id'])]
+#[ORM\Entity(repositoryClass: StoricoVotoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['storicoEsito', 'materia'], message: 'field.unique')]
+class StoricoVoto implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per il voto assegnato allo scrutinio
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var int $voto Valutazione della materia
-   *
-   * @ORM\Column(type="integer", nullable=false)
    */
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $voto = 0;
 
   /**
    * @var string|null $carenze Carenze segnalate allo scrutinio finale
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $carenze = '';
 
   /**
    * @var array|null $dati Dati aggiuntivi sulla valutazione
    *|null
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dati = [];
 
   /**
    * @var StoricoEsito|null $storicoEsito Esito dello storico a cui si riferisce il voto
    *
-   * @ORM\ManyToOne(targetEntity="StoricoEsito")
-   * @ORM\JoinColumn(name="storico_esito_id", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(name: 'storico_esito_id', nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \StoricoEsito::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?StoricoEsito $storicoEsito = null;
 
   /**
    * @var Materia|null $materia Materia della valutazione
    *
-   * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Materia $materia = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -132,18 +129,18 @@ class StoricoVoto {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

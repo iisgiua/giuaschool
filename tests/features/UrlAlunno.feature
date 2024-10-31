@@ -13,7 +13,7 @@ Funzionalità: Controllo sulla visualizzazione delle pagine del registro
 Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti alunni
   Dato login utente con ruolo esatto "Alunno"
   Quando vai alla pagina "<route>"
-  Allora vedi pagina "<route>"
+  Allora vedi la pagina "<route>"
   Esempi:
     | route                      |
     | genitori_lezioni           |

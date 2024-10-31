@@ -8,6 +8,10 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\AvvisoUtenteRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,91 +20,84 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * AvvisoUtente - dati per l'associazione tra avviso e utente
  *
- * @ORM\Entity(repositoryClass="App\Repository\AvvisoUtenteRepository")
- * @ORM\Table(name="gs_avviso_utente", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","utente_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"avviso","utente"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_avviso_utente')]
+#[ORM\UniqueConstraint(columns: ['avviso_id', 'utente_id'])]
+#[ORM\Entity(repositoryClass: AvvisoUtenteRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['avviso', 'utente'], message: 'field.unique')]
 class AvvisoUtente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
-   * @ORM\ManyToOne(targetEntity="Avviso")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Avviso::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Avviso $avviso = null;
 
   /**
    * @var Utente|null $utente Utente destinatario della circolare
    *
-   * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Utente $utente = null;
 
   /**
-   * @var \DateTime|null $letto Data e ora di lettura dell'avviso da parte dell'utente
-   *
-   * @ORM\Column(type="datetime", nullable=true)
+   * @var DateTimeInterface|null $letto Data e ora di lettura dell'avviso da parte dell'utente
    */
-  private ?\DateTime $letto = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+  private ?DateTime $letto = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -118,18 +115,18 @@ class AvvisoUtente {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -178,20 +175,20 @@ class AvvisoUtente {
   /**
    * Restituisce la data e ora di lettura dell'avviso
    *
-   * @return \DateTime|null Data e ora di lettura dell'avviso
+   * @return DateTime|null Data e ora di lettura dell'avviso
    */
-  public function getLetto(): ?\DateTime {
+  public function getLetto(): ?DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora di lettura dell'avviso
    *
-   * @param \DateTime|null $letto Data e ora di lettura dell'avviso
+   * @param DateTime|null $letto Data e ora di lettura dell'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setLetto(?\DateTime $letto): self {
+  public function setLetto(?DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }

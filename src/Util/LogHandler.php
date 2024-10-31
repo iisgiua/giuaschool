@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -22,24 +23,6 @@ use App\Entity\Log;
  */
 class LogHandler {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var RequestStack $request Coda delle pagine richieste
-   */
-  private $request;
-
-  /**
-   * @var TokenStorageInterface $token Gestore dei dati di autenticazione
-   */
-  private $token;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -49,11 +32,11 @@ class LogHandler {
    * @param RequestStack $request Coda delle pagine richieste
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
-  public function __construct(EntityManagerInterface $em, RequestStack $request,
-                              TokenStorageInterface $token) {
-    $this->em = $em;
-    $this->request = $request;
-    $this->token = $token;
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $request,
+      private readonly TokenStorageInterface $token)
+  {
   }
 
   /**
@@ -78,6 +61,9 @@ class LogHandler {
     // dati di navigazione
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
+    if (empty($origine) && $req->getRequestUri() === '/logout/') {
+      $origine = 'App\Controller\LoginController::logout';
+    }
     // scrive su db
     $log = (new Log())
       ->setUtente($utente)
@@ -123,7 +109,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggetto);
+    $dati['classe'] = $oggetto::class;
     $dati['id'] = $oggetto->getId();
     $dati['dati'] = $oggetto->datiVersione();
     // scrive su db
@@ -142,7 +128,7 @@ class LogHandler {
       $this->em->persist($log);
       $this->em->flush();
       $conn->commit();
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore: evita scrittura di tutto quanto
       $conn->rollBack();
       throw $e;
@@ -173,7 +159,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggetto);
+    $dati['classe'] = $oggetto::class;
     $dati['id'] = $oggetto->getId();
     $dati['vecchi_dati'] = $oggetto->datiVersione();
     // scrive su db
@@ -217,7 +203,7 @@ class LogHandler {
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
     // dati oggetto
-    $dati['classe'] = get_class($oggIniziale);
+    $dati['classe'] = $oggIniziale::class;
     $dati['id'] = $oggIniziale->getId();
     $dati['vecchi_dati'] = [];
     $dati['dati'] = [];

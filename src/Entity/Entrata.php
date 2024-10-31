@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\EntrataRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,159 +21,142 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Entrata - dati per le entrate in ritardo degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\EntrataRepository")
- * @ORM\Table(name="gs_entrata", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Entrata {
+#[ORM\Table(name: 'gs_entrata')]
+#[ORM\UniqueConstraint(columns: ['data', 'alunno_id'])]
+#[ORM\Entity(repositoryClass: EntrataRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['data', 'alunno'], message: 'field.unique')]
+class Entrata implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'entrata in ritardo
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data dell'entrata in ritardo
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data dell'entrata in ritardo
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $ora Ora di entrata in ritardo
-   *
-   * @ORM\Column(type="time", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $ora Ora di entrata in ritardo
    */
-  private ?\DateTime $ora = null;
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $ora = null;
 
   /**
    * @var bool $ritardoBreve Indica se l'entrata in ritardo è un ritardo breve oppure no
-   *
-   * @ORM\Column(name="ritardo_breve", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'ritardo_breve', type: Types::BOOLEAN, nullable: false)]
   private bool $ritardoBreve = false;
 
   /**
    * @var string|null $note Note informative sull'entrata in ritardo
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $note = '';
 
   /**
    * @var bool $valido Indica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $valido = false;
 
   /**
    * @var string|null $motivazione Motivazione dell'assenza
    *
-   * @ORM\Column(type="string", length=1024, nullable=true)
    *
-   * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
+  #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $motivazione = '';
 
   /**
-   * @var \DateTime|null $giustificato Data della giustificazione
-   *
-   * @ORM\Column(type="date", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $giustificato Data della giustificazione
    */
-  private ?\DateTime $giustificato = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $giustificato = null;
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'entrata in ritardo
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Docente|null $docente Docente che autorizza l'entrata in ritardo
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteGiustifica Docente che giustifica l'entrata in ritardo
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $docenteGiustifica = null;
 
   /**
    * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
-   *
-   * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
   private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -186,38 +174,38 @@ class Entrata {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'entrata in ritardo
    *
-   * @return \DateTime|null Data dell'entrata in ritardo
+   * @return DateTime|null Data dell'entrata in ritardo
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'entrata in ritardo
    *
-   * @param \DateTime $data Data dell'entrata in ritardo
+   * @param DateTime $data Data dell'entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -225,20 +213,20 @@ class Entrata {
   /**
    * Restituisce l'ora di entrata in ritardo
    *
-   * @return \DateTime|null Ora di entrata in ritardo
+   * @return DateTime|null Ora di entrata in ritardo
    */
-  public function getOra(): ?\DateTime {
+  public function getOra(): ?DateTime {
     return $this->ora;
   }
 
   /**
    * Modifica l'ora di entrata in ritardo
    *
-   * @param \DateTime $ora Ora di entrata in ritardo
+   * @param DateTime $ora Ora di entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setOra(\DateTime $ora): self {
+  public function setOra(DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -330,20 +318,20 @@ class Entrata {
   /**
    * Restituisce la data della giustificazione
    *
-   * @return \DateTime|null Data della giustificazione
+   * @return DateTime|null Data della giustificazione
    */
-  public function getGiustificato(): ?\DateTime {
+  public function getGiustificato(): ?DateTime {
     return $this->giustificato;
   }
 
   /**
    * Modifica la data della giustificazione
    *
-   * @param \DateTime|null $giustificato Data della giustificazione
+   * @param DateTime|null $giustificato Data della giustificazione
    *
    * @return self Oggetto modificato
    */
-  public function setGiustificato(?\DateTime $giustificato): self {
+  public function setGiustificato(?DateTime $giustificato): self {
     $this->giustificato = $giustificato;
     return $this;
   }

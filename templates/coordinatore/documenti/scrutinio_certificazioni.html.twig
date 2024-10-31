@@ -1,7 +1,5 @@
 {% for id,alu in dati.ammessi %}
-<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['false'] }}" />
-<tcpdf method="startPageGroup" />
-<tcpdf method="AddPage" />
+  {% for t in dati.tcpdf['header'] %}<tcpdf data="{{ t }}" />{% endfor %}
 <div style="text-align:center;font-family:times;font-size:11pt">
   <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
   <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
@@ -41,9 +39,7 @@
     illustrati.
   </p>
 </div>
-<tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
-<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
-<tcpdf method="AddPage" />
+  {% for t in dati.tcpdf[id] %}<tcpdf data="{{ t }}" />{% endfor %}
 <table border="1" cellpadding="2" cellspacing="0" style="font-family:helvetica;font-size:9pt">
   <tr>
     <td width="17%" style="font-size:10pt" align="center"><strong>COMPETENZA<br>CHIAVE</strong></td>
@@ -114,9 +110,7 @@
     <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_personale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_personale'])|trans }}</strong></td>
   </tr>
 </table>
-<tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
-<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
-<tcpdf method="AddPage" />
+  {% for t in dati.tcpdf[id] %}<tcpdf data="{{ t }}" />{% endfor %}
 <table border="1" cellpadding="2" cellspacing="0" style="font-family:helvetica;font-size:9pt">
   <tr>
     <td width="17%" style="font-size:10pt" align="center"><strong>COMPETENZA<br>CHIAVE</strong></td>

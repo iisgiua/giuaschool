@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use DateTime;
 use App\Security\SpidAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -18,7 +20,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
@@ -102,7 +103,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(
@@ -189,7 +190,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    $passport = new SelfValidatingPassport(new UserBadge('1234', [$sa, 'getUser']));
+    $passport = new SelfValidatingPassport(new UserBadge('1234', $sa->getUser(...)));
     $this->assertEquals($passport, $res);
   }
 
@@ -339,7 +340,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertSame('L', $spid->getState());
     $this->assertSame($utente, $res);
     $this->assertSame(['logoutUrl' => $spid->getLogoutUrl()], $utente->getInfoLogin());
@@ -369,7 +370,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->em->flush();
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $sa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -379,7 +380,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame('SPID', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($utente->getInfoLogin()['logoutUrl'], $this->session['/APP/UTENTE/spid_logout']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
     // con profili
     $this->logs = [];
@@ -392,7 +393,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $utente->setInfoLogin(['logoutUrl' => 'https://nome.dominio.it/logout/url']);
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $utente->setListaProfili(['DOCENTE' => [2], 'GENITORE' => [1]]);
     $this->em->flush();
     $res = $sa->onAuthenticationSuccess($req, $tok, 'fw');
@@ -428,7 +429,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame($exc, $this->session[Security::AUTHENTICATION_ERROR]);
+    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
@@ -451,7 +452,7 @@ class SpidAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[Security::AUTHENTICATION_ERROR]->getMessage());
+    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 

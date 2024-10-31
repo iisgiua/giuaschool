@@ -82,7 +82,7 @@ Scenario: visualizza lista cattedre docente con documenti
 Scenario: mostra errore all'accesso pagina lista cattedre senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_programmi"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso pagina lista cattedre con altri utenti
   Dato logout utente

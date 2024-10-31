@@ -8,6 +8,9 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Sede;
+use Exception;
 use App\Entity\Ata;
 use App\Form\AtaType;
 use App\Form\ImportaCsvType;
@@ -18,7 +21,6 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
@@ -29,7 +31,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -48,12 +50,10 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/importa/", name="ata_importa",
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer): Response {
+  #[Route(path: '/ata/importa/', name: 'ata_importa', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function importa(Request $request, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -79,7 +79,7 @@ class AtaController extends BaseController {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
-      $dati = $importer->importaAta($file, $form);
+      $dati = $importer->importaAta($form, $file);
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
       $this->reqstack->getSession()->remove($var_sessione.'/file');
@@ -97,21 +97,17 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/modifica/{pagina}", name="ata_modifica",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+  #[Route(path: '/ata/modifica/{pagina}', name: 'ata_modifica', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['sede'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
-    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : $criteri['sede']);
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository(Sede::class)->find($criteri['sede']) : $criteri['sede']);
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
     if ($pagina == 0) {
@@ -122,7 +118,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     $opzioniSedi[$trans->trans('label.nessuna_sede')] = -1;
     $form = $this->createForm(RicercaType::class, null, ['form_mode' => 'ata',
       'values' => [$sede, $opzioniSedi, $criteri['cognome'], $criteri['nome']]]);
@@ -131,8 +127,8 @@ class AtaController extends BaseController {
       // imposta criteri di ricerca
       $criteri['sede'] = is_object($form->get('sede')->getData()) ?
         $form->get('sede')->getData()->getId() : ((int) $form->get('sede')->getData());
-      $criteri['cognome'] = trim($form->get('cognome')->getData());
-      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim((string) $form->get('cognome')->getData());
+      $criteri['nome'] = trim((string) $form->get('nome')->getData());
       $pagina = 1;
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
@@ -140,7 +136,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Ata')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository(Ata::class)->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);
@@ -154,15 +150,12 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/abilita/{id}/{abilita}", name="ata_abilita",
-   *    requirements={"id": "\d+", "abilita": "0|1"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(int $id, int $abilita): Response {
+  #[Route(path: '/ata/abilita/{id}/{abilita}', name: 'ata_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function abilita(int $id, int $abilita): Response {
     // controlla ata
-    $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
+    $ata = $this->em->getRepository(Ata::class)->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -184,18 +177,14 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/edit/{id}", name="ata_modifica_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, int $id): Response {
+  #[Route(path: '/ata/edit/{id}', name: 'ata_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function modificaEdit(Request $request, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
+      $ata = $this->em->getRepository(Ata::class)->find($id);
       if (!$ata) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -208,7 +197,7 @@ class AtaController extends BaseController {
       $this->em->persist($ata);
     }
     // form
-    $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+    $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     $form = $this->createForm(AtaType::class, $ata, ['return_url' => $this->generateUrl('ata_modifica'),
       'values' => [$opzioniSedi]]);
     $form->handleRequest($request);
@@ -239,18 +228,15 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/password/{id}/{tipo}", name="ata_password",
-   *    requirements={"id": "\d+", "tipo": "E|P"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
-                                 LoggerInterface $logger, LogHandler $dblogger, int $id,
-                                 string $tipo): Response {
+  #[Route(path: '/ata/password/{id}/{tipo}', name: 'ata_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
+                           LoggerInterface $logger, LogHandler $dblogger, int $id,
+                           string $tipo): Response {
     // controlla ata
-    $ata = $this->em->getRepository('App\Entity\Ata')->find($id);
+    $ata = $this->em->getRepository(Ata::class)->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -263,21 +249,20 @@ class AtaController extends BaseController {
     // memorizza su db
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', [
       'Username' => $ata->getUsername(),
       'Ruolo' => $ata->getRoles()[0],
-      'ID' => $ata->getId()));
+      'ID' => $ata->getId()]);
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
-    $html = $this->renderView('pdf/credenziali_ata.html.twig', array(
+    $html = $this->renderView('pdf/credenziali_ata.html.twig', [
       'ata' => $ata,
-      'password' => $password,
-      ));
+      'password' => $password]);
     $pdf->createFromHtml($html);
-    $html = $this->renderView('pdf/credenziali_privacy.html.twig', array(
-      'utente' => $ata));
+    $html = $this->renderView('pdf/credenziali_privacy.html.twig', [
+      'utente' => $ata]);
     $pdf->createFromHtml($html);
     if ($tipo == 'E') {
       // invia per email
@@ -293,13 +278,13 @@ class AtaController extends BaseController {
         // invia email
         $mailer->send($message);
         $this->addFlash('success', 'message.credenziali_inviate');
-      } catch (\Exception $err) {
+      } catch (Exception $err) {
         // errore di spedizione
-        $logger->error('Errore di spedizione email delle credenziali ata.', array(
+        $logger->error('Errore di spedizione email delle credenziali ata.', [
           'username' => $ata->getUsername(),
           'email' => $ata->getEmail(),
           'ip' => $request->getClientIp(),
-          'errore' => $err->getMessage()));
+          'errore' => $err->getMessage()]);
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
       }
       // redirezione
@@ -319,19 +304,15 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/{pagina}", name="ata_rappresentanti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiAction(Request $request, int $pagina): Response {
+  #[Route(path: '/ata/rappresentanti/{pagina}', name: 'ata_rappresentanti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function rappresentanti(Request $request, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/tipo', '');
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/cognome', '');
     $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/ata_rappresentanti/nome', '');
@@ -359,7 +340,7 @@ class AtaController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/ata_rappresentanti/pagina', $pagina);
     }
     // lista rappresentanti
-    $dati = $this->em->getRepository('App\Entity\Ata')->rappresentanti($criteri, $pagina);
+    $dati = $this->em->getRepository(Ata::class)->rappresentanti($criteri, $pagina);
     // mostra la pagina di risposta
     $info['pagina'] = $pagina;
     return $this->renderHtml('ata', 'rappresentanti', $dati, $info, [$form->createView()]);
@@ -374,19 +355,15 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/edit/{id}", name="ata_rappresentanti_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiEditAction(Request $request, TranslatorInterface $trans,
-                                           int $id): Response {
+  #[Route(path: '/ata/rappresentanti/edit/{id}', name: 'ata_rappresentanti_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function rappresentantiEdit(Request $request, TranslatorInterface $trans,
+                                     int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $utente = $this->em->getRepository('App\Entity\Ata')->find($id);
+      $utente = $this->em->getRepository(Ata::class)->find($id);
       if (!$utente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -396,9 +373,9 @@ class AtaController extends BaseController {
     } else {
       // azione add
       $utente = null;
-      $tipi = array();
-      $listaUtenti = $this->em->getRepository('App\Entity\Ata')->findBy(['abilitato' => 1,
-          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
+      $tipi = [];
+      $listaUtenti = $this->em->getRepository(Ata::class)->findBy(['abilitato' => 1,
+        'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];
@@ -441,15 +418,12 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/rappresentanti/delete/{id}", name="ata_rappresentanti_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function rappresentantiDeleteAction(int $id): Response {
+  #[Route(path: '/ata/rappresentanti/delete/{id}', name: 'ata_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function rappresentantiDelete(int $id): Response {
     // controlla utente
-    $utente = $this->em->getRepository('App\Entity\Ata')->find($id);
+    $utente = $this->em->getRepository(Ata::class)->find($id);
     if (!$utente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

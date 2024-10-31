@@ -3,3 +3,4 @@
 qipsius_tcpdf:
   tcpdf:
     k_tcpdf_calls_in_html: true
+    k_allowed_tcpdf_tags: '|StartTransform|StopTransform|Rotate|MultiCell|setHeaderData|setPrintHeader|startPageGroup|AddPage|'

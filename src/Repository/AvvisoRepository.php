@@ -8,6 +8,13 @@
 
 namespace App\Repository;
 
+use App\Entity\AvvisoUtente;
+use App\Entity\Ata;
+use App\Entity\Docente;
+use App\Entity\Classe;
+use App\Entity\Genitore;
+use App\Entity\Alunno;
+use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -27,31 +34,31 @@ class AvvisoRepository extends BaseRepository {
    * @return array Dati formattati come array associativo
    */
   public function statistiche(Avviso $avviso): array {
-    $dati = array();
-    $dati['ata'] = array(0, 0, []);
-    $dati['dsga'] = array(0, 0, []);
-    $dati['coordinatori'] = array(0, 0, []);
-    $dati['docenti'] = array(0, 0, []);
-    $dati['genitori'] = array(0, 0, []);
-    $dati['alunni'] = array(0, 0, []);
-    $dati['classi'] = array(0, 0, []);
+    $dati = [];
+    $dati['ata'] = [0, 0, []];
+    $dati['dsga'] = [0, 0, []];
+    $dati['coordinatori'] = [0, 0, []];
+    $dati['docenti'] = [0, 0, []];
+    $dati['genitori'] = [0, 0, []];
+    $dati['alunni'] = [0, 0, []];
+    $dati['classi'] = [0, 0, []];
     // lettura utenti
     if (count($avviso->getDestinatariAta()) > 0) {
       // dsga/ata
       $utenti = $this->createQueryBuilder('a')
         ->select('ata.tipo,COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->groupBy('ata.tipo')
         ->getQuery()
         ->getArrayResult();
-      $ata = array(0, 0, []);
+      $ata = [0, 0, []];
       foreach ($utenti as $u) {
         if ($u['tipo'] == 'D') {
           // dsga
-          $dati['dsga'] = array($u['tot'], $u['letti'], []);
+          $dati['dsga'] = [$u['tot'], $u['letti'], []];
         } else {
           // altri ata
           $ata[0] += $u['tot'];
@@ -64,10 +71,10 @@ class AvvisoRepository extends BaseRepository {
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
         ->select('ata.cognome,ata.nome,ata.tipo,au.letto')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->orderBy('ata.cognome,ata.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -81,22 +88,22 @@ class AvvisoRepository extends BaseRepository {
       // coordinatori
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
-        ->join('App\Entity\Classe', 'c', 'WITH', 'c.coordinatore=d.id')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
+        ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+        ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
-      $dati['coordinatori'] = array($utenti[0]['tot'], $utenti[0]['letti'], []);
+      $dati['coordinatori'] = [$utenti[0]['tot'], $utenti[0]['letti'], []];
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
         ->select('d.cognome,d.nome,c.anno,c.sezione,c.gruppo,au.letto')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
-        ->join('App\Entity\Classe', 'c', 'WITH', 'c.coordinatore=d.id')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
+        ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -111,20 +118,20 @@ class AvvisoRepository extends BaseRepository {
       // docenti
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
-      $dati['docenti'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['docenti'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
         ->select('d.cognome,d.nome,au.letto')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -138,22 +145,22 @@ class AvvisoRepository extends BaseRepository {
       // genitori
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Genitore::class, 'g', 'WITH', 'g.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
-      $dati['genitori'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['genitori'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
         ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,g.cognome AS cognome_gen,g.nome AS nome_gen,au.letto')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Genitore::class, 'g', 'WITH', 'g.id=au.utente')
         ->join('g.alunno', 'al')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -169,21 +176,21 @@ class AvvisoRepository extends BaseRepository {
       // alunni
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Alunno', 'al', 'WITH', 'al.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
-      $dati['alunni'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['alunni'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('a')
         ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,au.letto')
-        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App\Entity\Alunno', 'al', 'WITH', 'al.id=au.utente')
+        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+        ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
         ->join('al.classe', 'c')
         ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -196,22 +203,22 @@ class AvvisoRepository extends BaseRepository {
       // classi
       $classi = $this->createQueryBuilder('a')
         ->select('COUNT(ac.id) AS tot,COUNT(ac.letto) AS letti')
-        ->join('App\Entity\AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
+        ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
         ->join('ac.classe', 'cl')
         ->where('a.id=:avviso')
-        ->setParameters(['avviso' => $avviso])
+			  ->setParameter('avviso', $avviso)
         ->getQuery()
         ->getArrayResult();
       if ($classi[0]['tot'] > 0) {
-        $dati['classi'] = array($classi[0]['tot'], $classi[0]['letti'], []);
+        $dati['classi'] = [$classi[0]['tot'], $classi[0]['letti'], []];
         if ($classi[0]['tot'] > $classi[0]['letti']) {
           // lista classi in cui va letta
           $classi = $this->createQueryBuilder('a')
             ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome,cl.gruppo")
-            ->join('App\Entity\AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
+            ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
             ->join('ac.classe', 'cl')
             ->where('a.id=:avviso AND ac.letto IS NULL')
-            ->setParameters(['avviso' => $avviso])
+			      ->setParameter('avviso', $avviso)
             ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
             ->getQuery()
             ->getArrayResult();
@@ -233,10 +240,10 @@ class AvvisoRepository extends BaseRepository {
    */
   public function notifica(Avviso $avviso) {
     // legge destinatari
-    $destinatari = $this->_em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $destinatari = $this->getEntityManager()->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->join('au.utente', 'u')
       ->where('au.avviso=:avviso AND au.letto IS NULL')
-      ->setParameters(['avviso' => $avviso])
+			->setParameter('avviso', $avviso)
       ->getQuery()
       ->getResult();
     $utenti = [];

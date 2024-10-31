@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\DefinizioneRichiestaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,161 +21,149 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DefinizioneRichiesta - dati per la definizione dei moduli di richiesta
  *
- * @ORM\Entity(repositoryClass="App\Repository\DefinizioneRichiestaRepository")
- * @ORM\Table(name="gs_definizione_richiesta")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="nome", message="field.unique")
  *
  * @author Antonello Dessì
  */
-class DefinizioneRichiesta {
+#[ORM\Table(name: 'gs_definizione_richiesta')]
+#[ORM\Entity(repositoryClass: DefinizioneRichiestaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'nome', message: 'field.unique')]
+class DefinizioneRichiesta implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificatore univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string $nome Nome univoco della richiesta
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private string $nome = '';
 
   /**
    * @var Sede|null $sede Sede del modulo, null per tutte le sedi
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $sede = null;
 
   /**
    * @var string $richiedenti Lista dei ruoli degli utenti autorizzati a inviare la richiesta
    * Si usa una lista separata da virgole: ogni elemento è una coppia di codici per ruolo e funzione dell'utente
    *
-   * @ORM\Column(type="string", length=16, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private string $richiedenti = '';
 
   /**
    * @var string $destinatari Lista dei ruoli degli utenti autorizzati a gestire la richiesta
    * Si usa una lista separata da virgole: ogni elemento è una coppia di codici per ruolo e funzione dell'utente
    *
-   * @ORM\Column(type="string", length=16, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
   private string $destinatari = '';
 
   /**
    * @var string $modulo Nome del file del modulo di richiesta da compilare da parte del richiedente
    *
-   * @ORM\Column(type="string", length=128, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private string $modulo = '';
 
   /**
    * @var array $campi Lista dei campi da compilare nel modulo: nome1 => tipo1, nome2 => tipo2... I tipi ammessi sono: string/text/int/float/bool/date/time
-   *
-   * @ORM\Column(type="array", nullable=false)
    */
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
   private array $campi = [];
 
   /**
    * @var int $allegati Numero di allegati da inserire nella richiesta
    *
-   * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\PositiveOrZero(message="field.zeropositive")
    */
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
+  #[Assert\PositiveOrZero(message: 'field.zeropositive')]
   private int $allegati = 0;
 
   /**
    * @var string $tipo Codifica del tipo di richiesta
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=1,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 1, maxMessage: 'field.maxlength')]
   private string $tipo = '*';
 
   /**
    * @var bool $unica Indica se è ammessa una sola richiesta per l'utente
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $unica = false;
 
   /**
    * @var bool $gestione Indica se il modulo richiede la gestione degli stati
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $gestione = true;
 
   /**
    * @var bool $abilitata Indica se la definizione della richiesta è abilitata
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $abilitata = true;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -188,18 +181,18 @@ class DefinizioneRichiesta {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

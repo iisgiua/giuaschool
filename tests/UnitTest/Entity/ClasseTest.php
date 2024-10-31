@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use ReflectionClass;
 use App\Entity\Classe;
 use App\Tests\EntityTestCase;
 
@@ -19,15 +20,13 @@ use App\Tests\EntityTestCase;
  */
 class ClasseTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\Classe';
+    $this->entity = Classe::class;
     // campi da testare
     $this->fields = ['anno', 'sezione', 'gruppo', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
     $this->noStoredFields = [];
@@ -41,6 +40,8 @@ class ClasseTest extends EntityTestCase {
     $this->canWrite = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'gruppo', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -53,7 +54,7 @@ class ClasseTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -77,17 +78,17 @@ class ClasseTest extends EntityTestCase {
           ($field == 'corso' ? $this->getReference("corso_BIN") :
           ($field == 'coordinatore' ? $this->getReference("docente_curricolare_1") :
           $this->getReference("docente_curricolare_2"))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -100,14 +101,14 @@ class ClasseTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -138,7 +139,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setAnno(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Anno - VALID CHOICE');
     // sezione
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'sezione');
+    $property = $this->getPrivateProperty(Classe::class, 'sezione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sezione - NOT BLANK');
@@ -150,7 +151,7 @@ class ClasseTest extends EntityTestCase {
     $existent->setSezione(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sezione - VALID MAX LENGTH');
     // gruppo
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'gruppo');
+    $property = $this->getPrivateProperty(Classe::class, 'gruppo');
     $property->setValue($existent, '');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::gruppo - VALID BLANK');
     $existent->setGruppo(str_repeat('*', 65));
@@ -168,14 +169,14 @@ class ClasseTest extends EntityTestCase {
     $existent->setOreSettimanali(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::OreSettimanali - VALID POSITIVE');
     // sede
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'sede');
+    $property = $this->getPrivateProperty(Classe::class, 'sede');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');
     $existent->setSede($this->getReference("sede_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sede - VALID NOT BLANK');
     // corso
-    $property = $this->getPrivateProperty('App\Entity\Classe', 'corso');
+    $property = $this->getPrivateProperty(Classe::class, 'corso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Corso - NOT BLANK');

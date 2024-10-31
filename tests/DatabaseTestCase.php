@@ -8,6 +8,9 @@
 
 namespace App\Tests;
 
+use ReflectionProperty;
+use ReflectionClass;
+use ReflectionMethod;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManager;
 use Faker\Generator;
@@ -99,12 +102,12 @@ class DatabaseTestCase extends KernelTestCase {
     $kernel = self::bootKernel();
     $this->em = $kernel->getContainer()->get('doctrine')->getManager();
     $this->hasher = $kernel->getContainer()->get('security.user_password_hasher');
-    $this->val = $kernel->getContainer()->get('validator');
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->val = $kernel->getContainer()->get('validator.traceable_validator');
+    $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
+    $this->alice = $kernel->getContainer()->get(PurgerLoader::class);
     // svuota database e carica dati fissi
     $this->addFixtures();
     // crea istanze fittizie per altri servizi
@@ -186,7 +189,7 @@ class DatabaseTestCase extends KernelTestCase {
       $objectMap = [];
       foreach ($this->objects as $name => $object) {
         // determina classe e numero di istanza
-        $objectMap[$name] = [get_class($object), $object->getId()];
+        $objectMap[$name] = [$object::class, $object->getId()];
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));
@@ -201,43 +204,39 @@ class DatabaseTestCase extends KernelTestCase {
    * @return mixed|null Oggetto relativo al riferimento indicato o null se riferimento non definito
    */
   protected function getReference(string $name): ?object {
-    // carica fixture alice
-    if (isset($this->objects[$name])) {
-      return $this->objects[$name];
-    }
     // riferimento non definito
-    return null;
+    return $this->objects[$name] ?? null;
   }
 
   /**
- 	 * Restituisce l'attributo privato di una classe in modo che sia leggibile e modificabile.
+   * Restituisce l'attributo privato di una classe in modo che sia leggibile e modificabile.
    * Usare $property->getValue($object) e $property->setValue($object, $value) per leggere/modificare l'attributo.
- 	 *
- 	 * @author Joe Sexton <joe@webtipblog.com>
    *
- 	 * @param string $className Nome della classe
- 	 * @param string $propertyName Nome dell'attributo
+   * @author Joe Sexton <joe@webtipblog.com>
    *
- 	 * @return \ReflectionProperty L'attributo richiesto
- 	 */
-  protected function getPrivateProperty(string $className, string $propertyName): \ReflectionProperty {
-		$reflector = new \ReflectionClass($className);
+   * @param string $className Nome della classe
+   * @param string $propertyName Nome dell'attributo
+   *
+   * @return ReflectionProperty L'attributo richiesto
+   */
+  protected function getPrivateProperty(string $className, string $propertyName): ReflectionProperty {
+		$reflector = new ReflectionClass($className);
 		$property = $reflector->getProperty($propertyName);
 		$property->setAccessible(true);
 		return $property;
 	}
 
   /**
- 	 * Restituisce il metodo privato di una classe in modo che sia eseguibile.
-   * Usare $method->invokeArgs($object, $array_params) per eseguire il metodo.
- 	 *
- 	 * @author Joe Sexton <joe@webtipblog.com>
- 	 * @param string $className Nome della classe
- 	 * @param string $propertyName Nome dell'attributo
- 	 * @return \ReflectionMethod Il metodo richiesto
- 	 */
-	protected function getPrivateMethod(string $className, string $methodName): \ReflectionMethod {
-		$reflector = new \ReflectionClass($className);
+  * Restituisce il metodo privato di una classe in modo che sia eseguibile.
+  * Usare $method->invokeArgs($object, $array_params) per eseguire il metodo.
+  *
+  * @author Joe Sexton <joe@webtipblog.com>
+  * @param string $className Nome della classe
+  * @param string $propertyName Nome dell'attributo
+  * @return ReflectionMethod Il metodo richiesto
+  */
+ protected function getPrivateMethod(string $className, string $methodName): ReflectionMethod {
+		$reflector = new ReflectionClass($className);
 		$method = $reflector->getMethod($methodName);
 		$method->setAccessible(true);
 		return $method;

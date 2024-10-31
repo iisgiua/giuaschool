@@ -8,11 +8,10 @@
 
 namespace App\Util;
 
-use App\Entity\Alunno;
+use DateTime;
 use App\Entity\Classe;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\Utente;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 
@@ -25,29 +24,6 @@ use Twig\Environment;
 class RichiesteUtil {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var PdfManager $pdf Gestore dei documenti PDF
-   */
-  private PdfManager $pdf;
-
-  /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private RequestStack $reqstack;
-
-  /**
-   * @var Environment $tpl Gestione template
-   */
-  private Environment $tpl;
-
-  /**
-   * @var string $dirProgetto Percorso della directory di progetto
-   */
-  private string $dirProgetto;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -58,11 +34,12 @@ class RichiesteUtil {
    * @param Environment $tpl Gestione template
    * @param string $dirProgetto Percorso della directory di progetto
    */
-  public function __construct(PdfManager $pdf, RequestStack $reqstack, Environment $tpl, string $dirProgetto) {
-    $this->pdf = $pdf;
-    $this->reqstack = $reqstack;
-    $this->tpl = $tpl;
-    $this->dirProgetto = $dirProgetto;
+  public function __construct(
+      private readonly PdfManager $pdf,
+      private readonly RequestStack $reqstack,
+      private readonly Environment $tpl,
+      private readonly string $dirProgetto)
+  {
   }
 
   /**
@@ -72,13 +49,13 @@ class RichiesteUtil {
    * @param Utente $utente Utente che esegue la richiesta
    * @param Classe $classe Classe di riferimento per la richiesta
    * @param array $valori Lista dei valori inseriti nel modulo di richiesta
-   * @param \DateTime|null $data Data della richiesta
-   * @param \DateTime $invio Data e ora dell'invio della richiesta
+   * @param DateTime|null $data Data della richiesta
+   * @param DateTime $invio Data e ora dell'invio della richiesta
    *
    * @return array Lista con il nome del documento PDF creato e l'id del documento
    */
   public function creaPdf(DefinizioneRichiesta $definizioneRichiesta, Utente $utente, Classe $classe,
-                          array $valori, ?\DateTime $data, \DateTime $invio): array {
+                          array $valori, ?DateTime $data, DateTime $invio): array {
     // inizializza
     $fs = new FileSystem();
     $documentoId = $definizioneRichiesta->getId().'-'.$utente->getId().'-'.uniqid();
@@ -132,8 +109,8 @@ class RichiesteUtil {
       $definizioneRichiesta->getNome());
     $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
     $this->pdf->getHandler()->SetFooterMargin(10);
-    $this->pdf->getHandler()->setFooterFont(array('helvetica', '', 9));
-    $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+    $this->pdf->getHandler()->setFooterFont(['helvetica', '', 9]);
+    $this->pdf->getHandler()->setFooterData([0, 0, 0], [255, 255, 255]);
     $this->pdf->getHandler()->setPrintFooter(true);
     $this->pdf->createFromHtml($html);
     // salva il documento

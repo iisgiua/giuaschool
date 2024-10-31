@@ -30,36 +30,36 @@ class ScrutinioPresenzaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
       ->add('docente', HiddenType::class)
-      ->add('presenza', ChoiceType::class, array('label' => false,
+      ->add('presenza', ChoiceType::class, ['label' => false,
         'choices' => ['label.scrutinio_presente' => true, 'label.scrutinio_assente' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline gs-pt-0 gs-mr-5'],
-        'required' => true))
-      ->add('sessoSostituto', ChoiceType::class, array('label' => false,
+        'required' => true])
+      ->add('sessoSostituto', ChoiceType::class, ['label' => false,
         'choices' => ['label.prof_M' => 'M', 'label.prof_F' => 'F'],
         'expanded' => false,
         'multiple' => false,
-        'required' => true))
-      ->add('sostituto', TextType::class, array('label' => false,
+        'required' => true])
+      ->add('sostituto', TextType::class, ['label' => false,
         'empty_data' => '',
         'attr' => ['placeholder' => 'label.scrutinio_sostituto'],
         'trim' => true,
-        'required' => false))
-      ->add('surrogaProtocollo', TextType::class, array('label' => 'label.scrutinio_surroga_protocollo',
+        'required' => false])
+      ->add('surrogaProtocollo', TextType::class, ['label' => 'label.scrutinio_surroga_protocollo',
         'empty_data' => '',
         'trim' => true,
-        'required' => false))
-      ->add('surrogaData', DateType::class, array('label' => 'label.scrutinio_surroga_data',
+        'required' => false])
+      ->add('surrogaData', DateType::class, ['label' => 'label.scrutinio_surroga_data',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
-        'required' => false));
+        'required' => false]);
   }
 
   /**
@@ -67,8 +67,9 @@ class ScrutinioPresenzaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => ScrutinioPresenza::class));
+  public function configureOptions(OptionsResolver $resolver): void {
+    $resolver->setDefaults([
+      'data_class' => ScrutinioPresenza::class]);
   }
 
 }

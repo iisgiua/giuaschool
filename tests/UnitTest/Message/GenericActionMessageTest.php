@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Message;
 
+use Exception;
 use App\Message\GenericActionMessage;
 use Faker\Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -42,7 +43,7 @@ class GenericActionMessageTest extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker = $kernel->getContainer()->get(Generator::class);
   }
 
   /**
@@ -88,7 +89,7 @@ class GenericActionMessageTest extends KernelTestCase {
           parent::__construct($id, $class, $action, $data);
         }
       };
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame('Undefined action in message constructor: "'.$class.'.'.$action.'"', $exception);
@@ -103,7 +104,7 @@ class GenericActionMessageTest extends KernelTestCase {
           parent::__construct($id, $class, $action, $data);
         }
       };
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame('Undefined action in message constructor: "'.$class.'.'.$action.'"', $exception);
@@ -117,7 +118,7 @@ class GenericActionMessageTest extends KernelTestCase {
           parent::__construct($id, $class, $action, $data);
         }
       };
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame('Undefined action in message constructor: "'.$class.'.'.$action.'"', $exception);

@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Message;
 
+use Exception;
 use App\Message\UtenteActionMessage;
 use Faker\Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -42,7 +43,7 @@ class UtenteActionMessageTest extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker = $kernel->getContainer()->get(Generator::class);
   }
 
   /**
@@ -71,7 +72,7 @@ class UtenteActionMessageTest extends KernelTestCase {
     $exception = null;
     try {
       $obj = new UtenteActionMessage($id, 'Docente', 'altro');
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
     $this->assertSame('Undefined action in message constructor: "Docente.altro"', $exception);

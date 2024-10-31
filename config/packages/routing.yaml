@@ -1,0 +1,12 @@
+# config/packages/routing.yaml
+
+framework:
+  router:
+    strict_requirements: true
+    utf8: true
+
+
+when@prod:
+  framework:
+    router:
+      strict_requirements: null

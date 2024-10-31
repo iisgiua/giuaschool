@@ -27,15 +27,15 @@ class PrenotazioneType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'prenotazione') {
       // form prenotazione
       $builder
-        ->add('data', ChoiceType::class, array('label' => 'label.date_disponibili',
+        ->add('data', ChoiceType::class, ['label' => 'label.date_disponibili',
           'choices' => $options['values'][0],
           'expanded' => true,
           'choice_translation_domain' => false,
-          'required' => true));
+          'required' => true]);
     }
   }
 
@@ -44,14 +44,14 @@ class PrenotazioneType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'prenotazione',
       'values' => [],
       'allow_extra_fields' => true,
-      'data_class' => null));
+      'data_class' => null]);
   }
 
 }

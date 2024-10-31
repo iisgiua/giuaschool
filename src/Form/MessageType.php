@@ -28,16 +28,14 @@ class MessageType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options): void {
       $builder->addModelTransformer(new CallbackTransformer(
           // converte nel formato testo semplice per l'editing
-          function ($messaggio) {
-            return strip_tags($messaggio);
-          },
+          fn($messaggio) => strip_tags((string) $messaggio),
           // converte nel formato messaggio (testo con HTML) per la memorizzazione
           function ($testo) {
             // sanifica input
-            $testoPulito = strip_tags($testo);
+            $testoPulito = strip_tags((string) $testo);
             return preg_replace('#\b(https?):(/?/?)([^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/)))#i',
               '<a href="$1://$3" target="_blank" title="Collegamento esterno">$1://$3</a>', $testoPulito);;
           }
@@ -49,7 +47,7 @@ class MessageType extends AbstractType {
      *
      * @param OptionsResolver $resolver Gestore delle opzioni
      */
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver): void {
     }
 
     /**
@@ -57,7 +55,7 @@ class MessageType extends AbstractType {
      *
      * @return string Classe padre
      */
-    public function getParent() {
+    public function getParent(): ?string {
       return TextareaType::class;
     }
 

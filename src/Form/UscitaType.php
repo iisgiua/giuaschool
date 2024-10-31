@@ -30,34 +30,34 @@ class UscitaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
-      ->add('ora', TimeType::class, array('label' => 'label.ora_uscita',
+      ->add('ora', TimeType::class, ['label' => 'label.ora_uscita',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_uscite',
+        'required' => true])
+      ->add('valido', ChoiceType::class, ['label' => 'label.conteggio_uscite',
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true));
+        'required' => true]);
     if ($options['form_mode'] == 'staff') {
       $builder
-        ->add('giustificazione', ChoiceType::class, array('label' => 'label.richiedi_giustificazione',
+        ->add('giustificazione', ChoiceType::class, ['label' => 'label.richiedi_giustificazione',
           'data' => $options['values'][0],
           'choices' => ['label.si' => true, 'label.no' => false],
           'expanded' => true,
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline'],
-          'required' => true));
+          'required' => true]);
     }
     $builder
-      ->add('note', MessageType::class, array('label' => 'label.note',
+      ->add('note', MessageType::class, ['label' => 'label.note',
         'trim' => true,
-        'required' => false));
+        'required' => false]);
   }
 
   /**
@@ -65,14 +65,14 @@ class UscitaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'form_mode' => 'richiesta',
       'values' => [],
       'allow_extra_fields' => true,
-      'data_class' => Uscita::class));
+      'data_class' => Uscita::class]);
   }
 
 }

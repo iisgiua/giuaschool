@@ -8,9 +8,9 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Message\EventoMessage;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 
@@ -19,34 +19,21 @@ use Symfony\Component\Messenger\MessageBusInterface;
  *
  * @author Antonello Dessì
  */
-class EventoMessageHandler implements MessageHandlerInterface {
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
-  /**
-   * @var MessageBusInterface $messageBus Gestore della coda dei messaggi
-   */
-  private MessageBusInterface $messageBus;
-
-
+#[AsMessageHandler]
+class EventoMessageHandler
+{
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
-   * @param LoggerInterface $msgLogger Gestore dei log su file
+   * @param LoggerInterface $logger Gestore dei log su file
    * @param MessageBusInterface $messageBus Gestore della coda dei messaggi
    */
-  public function __construct(LoggerInterface $msgLogger, MessageBusInterface $messageBus) {
-    $this->logger = $msgLogger;
-    $this->messageBus = $messageBus;
+  public function __construct(
+      private readonly LoggerInterface $logger,
+      private readonly MessageBusInterface $messageBus)
+  {
   }
-
   /**
    * Prepara i dati per l'invio successivo della notifica
    *
@@ -57,5 +44,4 @@ class EventoMessageHandler implements MessageHandlerInterface {
 // crea le notifiche per ogni destinatario
 // le inserisce nella coda delle notifiche
   }
-
 }

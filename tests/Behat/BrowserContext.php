@@ -8,6 +8,8 @@
 
 namespace App\Tests\Behat;
 
+use App\Entity\Utente;
+use Exception;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ExpectationException;
@@ -17,6 +19,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 
 
 /**
@@ -36,10 +39,11 @@ class BrowserContext extends BaseContext {
    * @param RouterInterface $router Gestore delle URL
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
+   * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
-                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
-    parent::__construct($kernel, $em, $router, $hasher, $slugger);
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger, PurgerLoader $alice) {
+    parent::__construct($kernel, $em, $router, $hasher, $slugger, $alice);
     $this->vars['sys']['logged'] = null;
     $this->vars['sys']['other'] = null;
     $this->vars['sys']['pdf'] = null;
@@ -103,11 +107,11 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtente($valore, $password=null): void {
     $this->assertEmpty($this->vars['sys']['logged']);
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($valore);
+    $user = $this->em->getRepository(Utente::class)->findOneByUsername($valore);
     $this->paginaAttiva('login_form');
     $this->assertTrue($user && $user->getUsername() == $valore);
     $this->session->getPage()->fillField('username', $valore);
-    $this->session->getPage()->fillField('password', $password ? $password : $valore);
+    $this->session->getPage()->fillField('password', $password ?: $valore);
     $this->session->getPage()->pressButton('login');
     $this->waitForPage();
     $this->assertPageStatus(200);
@@ -118,14 +122,14 @@ class BrowserContext extends BaseContext {
     }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
-    $others = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
-      ->where('u.username!=:username AND u INSTANCE OF '.get_class($user))
-      ->setParameters(['username' => $user->getUsername()])
+    $others = $this->em->getRepository(Utente::class)->createQueryBuilder('u')
+      ->where('u.username!=:username AND u INSTANCE OF '.$user::class)
+      ->setParameter('username', $user->getUsername())
       ->getQuery()
       ->getResult();
     $other = null;
     foreach ($others as $val) {
-      if (get_class($val) == get_class($user)) {
+      if ($val::class == $user::class) {
         $other = $val;
         break;
       }
@@ -142,7 +146,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo :ruolo
    */
   public function loginUtenteConRuolo($ruolo): void {
-    $class_name = ucfirst($ruolo);
+    $class_name = ucfirst((string) $ruolo);
     $user = $this->faker->randomElement($this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
@@ -155,13 +159,13 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo esatto :ruolo
    */
   public function loginUtenteConRuoloEsatto($ruolo): void {
-    $class_name = ucfirst($ruolo);
+    $class_name = ucfirst((string) $ruolo);
     $users = $this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]);
     $this->assertNotEmpty($users);
     do {
       $user = $this->faker->randomElement($users);
-    } while (get_class($user) != 'App\Entity\\'.$class_name  &&
-             get_class($user) != 'Proxies\__CG__\App\Entity\\'.$class_name);
+    } while ($user::class != 'App\\Entity\\'.$class_name  &&
+             $user::class != 'Proxies\\__CG__\\App\\Entity\\'.$class_name);
     $this->loginUtente($user->getUsername());
   }
 
@@ -176,7 +180,7 @@ class BrowserContext extends BaseContext {
     foreach ($tabella->getHash() as $row) {
       foreach ($row as $key=>$val) {
         $value = $this->convertText($val);
-        $this->vars['sys']['logged']->{'set'.ucfirst($key)}($value);
+        $this->vars['sys']['logged']->{'set'.ucfirst((string) $key)}($value);
       }
     }
     $this->em->flush();
@@ -248,13 +252,13 @@ class BrowserContext extends BaseContext {
    *  $pagina: nome della pagina
    *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
-   * @Then vedi pagina :pagina
    * @Then vedi la pagina :pagina
-   * @Then vedi pagina :pagina con parametri:
+   * @Then vedi la pagina :pagina con errore :errore
    * @Then vedi la pagina :pagina con parametri:
+   * @Then vedi la pagina :pagina con errore :errore e con parametri:
    */
-  public function vediPagina($pagina, TableNode $tabella=null): void {
-    $this->assertPageStatus(200);
+  public function vediPagina($pagina, $errore = 200, TableNode $tabella = null): void {
+    $this->assertPageStatus($errore);
     $parametri = [];
     if ($tabella) {
       foreach ($tabella->getHash() as $row) {
@@ -376,21 +380,41 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la tabella abbia le intestazioni delle colonne specificate
+   *  $colonne: i campi dell'unica riga corrispondono alle intestazioni delle colonne della tabella
+   *
+   * @Then vedi nella tabella le colonne:
+   */
+  public function vediNellaTabellaLeColonne(TableNode $colonne): void {
+    $this->vediNellaTabellaLeColonneIndice(1, $colonne);
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni delle colonne specificate
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $colonne: i campi dell'unica riga corrispondono alle intestazioni delle colonne della tabella
    *
    * @Then vedi nella tabella :indice le colonne:
-   * @Then vedi nella tabella le colonne:
    */
-  public function vediNellaTabellaLeColonne($indice=1, TableNode $colonne): void {
+  public function vediNellaTabellaLeColonneIndice($indice, TableNode $colonne): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertEquals(count($intestazioni), count($colonne->getRow(0)));
     foreach ($colonne->getRow(0) as $key=>$val) {
-      $this->assertEquals(strtolower(trim($val)), strtolower(trim($intestazioni[$key]->getText())));
+      $this->assertEquals(strtolower(trim((string) $val)), strtolower(trim($intestazioni[$key]->getText())));
     }
+  }
+
+  /**
+   * Controlla che nella tabella e riga indicata i dati corrispondano a quelli specificati
+   *  $numero: numero di riga dei dati della tabella (parte da 1)
+   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
+   *
+   * @Then vedi nella riga :numero della tabella i dati:
+   */
+  public function vediNellaRigaDellaTabellaIDati($numero, TableNode $dati): void {
+    $this->vediNellaRigaDellaTabellaIDatiIndice($numero, 1, $dati);
   }
 
   /**
@@ -400,21 +424,20 @@ class BrowserContext extends BaseContext {
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi nella riga :numero della tabella :indice i dati:
-   * @Then vedi nella riga :numero della tabella i dati:
    */
-  public function vediNellaRigaDellaTabellaIDati($numero, $indice=1, TableNode $dati): void {
+  public function vediNellaRigaDellaTabellaIDatiIndice($numero, $indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertNotEmpty($intestazioni);
-    $intestazioni_nomi = array_map(function($v){ return strtolower(trim($v->getText())); }, $intestazioni);
+    $intestazioni_nomi = array_map(fn($v) => strtolower(trim($v->getText())), $intestazioni);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
     $this->assertNotEmpty($righe[$numero - 1]);
     $colonne = $righe[$numero - 1]->findAll('css', 'td');
     $this->assertNotEmpty($colonne);
     foreach ($dati->getHash()[0] as $key=>$val) {
-      $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
-      $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
+      $this->assertArrayContains(strtolower((string) $key), $intestazioni_nomi);
+      $cella = $colonne[array_search(strtolower((string) $key), $intestazioni_nomi)]->getText();
       $cerca = $this->convertSearch($val);
       $this->logDebug('vediNellaRigaDellaTabellaIDati -> '.$cerca.' | '.$cella);
       $this->assertTrue(preg_match($cerca, $cella));
@@ -427,20 +450,31 @@ class BrowserContext extends BaseContext {
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
-   * @Then vedi nella tabella :indice i dati:
    * @Then vedi nella tabella i dati:
    */
-  public function vediNellaTabellaIDati($indice=1, TableNode $dati): void {
+  public function vediNellaTabellaIDati(TableNode $dati): void {
+    $this->vediNellaTabellaIDatiIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che in una riga qualsiasi della tabella indicata i dati corrispondano a quelli specificati
+   * NB: non funziona se si usa nella tabella COLSPAN o ROWSPAN
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
+   *
+   * @Then vedi nella tabella :indice i dati:
+   */
+  public function vediNellaTabellaIDatiIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertNotEmpty($datiIntestazioni);
     $colonne = [];
     foreach ($datiIntestazioni as $nome) {
       $trovato = false;
       foreach ($intestazione as $col=>$val) {
-        if (strtolower($nome) == strtolower($val)) {
+        if (strtolower($nome) == strtolower((string) $val)) {
           $colonne[$nome] = $col;
           $trovato = true;
           break;
@@ -457,7 +491,7 @@ class BrowserContext extends BaseContext {
         foreach ($rdati as $nome=>$val) {
           $cerca = $this->convertSearch($val);
           $this->logDebug('vediNellaTabellaIDati ['.$idx.','.$nome.'] -> '.$cerca.' | '.$valori[$ri][$colonne[$nome]]);
-          if (!preg_match($cerca, $valori[$ri][$colonne[$nome]])) {
+          if (!preg_match($cerca, (string) $valori[$ri][$colonne[$nome]])) {
             $trovato = false;
             break;
           }
@@ -483,7 +517,7 @@ class BrowserContext extends BaseContext {
    * @When click su :testo con indice :indice
    */
   public function clickSu($testo, $indice=1): void {
-    $links = $this->session->getPage()->findAll('named', array('link_or_button', $testo));
+    $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
     $this->assertNotEmpty($links[$indice - 1]);
     $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
@@ -513,7 +547,7 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato, 'Selector not found');
-    $links = $sezione->findAll('named', array('link_or_button', $testoParam));
+    $links = $sezione->findAll('named', ['link_or_button', $testoParam]);
     $this->assertNotEmpty($links[$indice - 1]);
     $links[$indice - 1]->click();
     // attesa per completare le modifiche sulla pagina
@@ -532,7 +566,7 @@ class BrowserContext extends BaseContext {
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
-    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", $headers['Content-Disposition'], $data));
+    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", (string) $headers['Content-Disposition'], $data));
     $this->assertTrue($data[1] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
     $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
   }
@@ -622,12 +656,12 @@ class BrowserContext extends BaseContext {
         // conversione ok
         $testo = file_get_contents($convertito);
       }
-    } catch (\Exception $err) {
+    } catch (Exception) {
       // errore: evita eccezione
     }
     $this->assertTrue($testo && preg_match($ricerca, $testo));
     $this->files[] = 'FILES/'.$testoParam;
-    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+    $this->files[] = 'FILES/'.substr((string) $testoParam, 0, -3).'txt';
   }
 
   /**
@@ -658,7 +692,7 @@ class BrowserContext extends BaseContext {
       } else {
         $this->logDebug('ERRORE analizziPDF -> '.$proc->getErrorOutput());
       }
-    } catch (\Exception $err) {
+    } catch (Exception $err) {
       // errore: evita eccezione
       $this->logDebug('ERRORE analizziPDF -> '.$err);
     }
@@ -667,7 +701,7 @@ class BrowserContext extends BaseContext {
     $this->vars['sys']['pdfRiga'] = -1;
     $this->vars['sys']['pdfSegnalibro'] = -1;
     $this->files[] = 'FILES/'.$testoParam;
-    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
+    $this->files[] = 'FILES/'.substr((string) $testoParam, 0, -3).'txt';
   }
 
   /**
@@ -705,7 +739,7 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($this->vars['sys']['pdf']);
     $this->assertNotEmpty($this->vars['sys']['pdf'][$valore - 1]);
     $testo = $this->vars['sys']['pdf'][$valore - 1];
-    $this->assertTrue(preg_match($ricerca, $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
+    $this->assertTrue(preg_match($ricerca, (string) $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
     $this->vars['sys']['pdfRiga'] = $valore - 1;
   }
 
@@ -832,7 +866,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -858,7 +892,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -911,7 +945,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -933,7 +967,7 @@ class BrowserContext extends BaseContext {
     foreach ($options as $opt) {
       $id = $opt->getAttribute('id');
       $name = $opt->getAttribute('name');
-      if (preg_match('/^'.preg_quote($testoParam).'_\d+$/i', $id) || strtolower($testoParam) == strtolower($name)) {
+      if (preg_match('/^'.preg_quote((string) $testoParam).'_\d+$/i', (string) $id) || strtolower((string) $testoParam) == strtolower((string) $name)) {
         $option = $opt;
         break;
       }
@@ -942,22 +976,31 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Controlla che la tabella abbia le intestazioni e i dati corrispondenti a quelli specificati
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella:
+   */
+  public function vediLaTabella(TableNode $dati): void {
+    $this->vediLaTabellaIndice(1, $dati);
+  }
+
+  /**
    * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice:
-   * @Then vedi la tabella:
    */
-  public function vediLaTabella($indice=1, TableNode $dati): void {
+  public function vediLaTabellaIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
     foreach ($datiIntestazioni as $i=>$nome) {
-      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+      $this->assertEquals(strtolower($nome), strtolower((string) $intestazione[$i]), 'Table header is different');
     }
     // controlla dati
     $datiValori = $dati->getHash();
@@ -966,10 +1009,20 @@ class BrowserContext extends BaseContext {
       foreach (array_values($riga) as $co=>$val) {
         $cerca = $this->convertSearch($val);
         $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
-        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+        $this->assertTrue(preg_match($cerca, (string) $valori[$ri][$co]),
           'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
       }
     }
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella senza intestazioni:
+   */
+  public function vediLaTabellaSenzaIntestazioni(TableNode $dati): void {
+    $this->vediLaTabellaSenzaIntestazioniIndice(1, $dati);
   }
 
   /**
@@ -978,12 +1031,11 @@ class BrowserContext extends BaseContext {
    *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice senza intestazioni:
-   * @Then vedi la tabella senza intestazioni:
    */
-  public function vediLaTabellaSenzaIntestazioni($indice=1, TableNode $dati): void {
+  public function vediLaTabellaSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $datiValori = $dati->getHash();
     $this->assertEquals(count($datiValori), count($valori), 'Table row count is different');
@@ -991,10 +1043,21 @@ class BrowserContext extends BaseContext {
       foreach (array_values($riga) as $co=>$val) {
         $cerca = $this->convertSearch($val);
         $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
-        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+        $this->assertTrue(preg_match($cerca, (string) $valori[$ri][$co]),
           'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
       }
     }
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella non ordinata:
+   */
+  public function vediLaTabellaNonOrdinata(TableNode $dati): void {
+    $this->vediLaTabellaNonOrdinataIndice(1, $dati);
   }
 
   /**
@@ -1004,17 +1067,16 @@ class BrowserContext extends BaseContext {
    *  $dati: intestazione e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice non ordinata:
-   * @Then vedi la tabella non ordinata:
    */
-  public function vediLaTabellaNonOrdinata($indice=1, TableNode $dati): void {
+  public function vediLaTabellaNonOrdinataIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
     foreach ($datiIntestazioni as $i=>$nome) {
-      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+      $this->assertEquals(strtolower($nome), strtolower((string) $intestazione[$i]), 'Table header is different');
     }
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
@@ -1027,7 +1089,7 @@ class BrowserContext extends BaseContext {
         }
         $trovato = true;
         foreach (array_values($riga) as $co=>$val) {
-          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+          if (!preg_match($this->convertSearch($val), (string) $valori[$ri][$co])) {
             $trovato = false;
             break;
           }
@@ -1046,16 +1108,26 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati,
    * ma non considera l'ordine delle righe
+   *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella non ordinata senza intestazioni:
+   */
+  public function vediLaTabellaNonOrdinataSenzaIntestazioni(TableNode $dati): void {
+    $this->vediLaTabellaNonOrdinataSenzaIntestazioniIndice(1, $dati);
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: intestazione (non considerata) e dati da confrontare con la tabella indicata
    *
    * @Then vedi la tabella :indice non ordinata senza intestazioni:
-   * @Then vedi la tabella non ordinata senza intestazioni:
    */
-  public function vediLaTabellaNonOrdinataSenzaIntestazioni($indice=1, TableNode $dati): void {
+  public function vediLaTabellaNonOrdinataSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1], false);
+    [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
     $righeTrovate = [];
@@ -1067,7 +1139,7 @@ class BrowserContext extends BaseContext {
         }
         $trovato = true;
         foreach (array_values($riga) as $co=>$val) {
-          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+          if (!preg_match($this->convertSearch($val), (string) $valori[$ri][$co])) {
             $trovato = false;
             break;
           }
@@ -1093,10 +1165,10 @@ class BrowserContext extends BaseContext {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     if (!empty($tabelle)) {
       foreach ($tabelle as $tabella) {
-        list($intestazione, $valori) = $this->parseTable($tabella);
+        [$intestazione, $valori] = $this->parseTable($tabella);
         $trovato = true;
         foreach ($dati->getRows()[0] as $i=>$nome) {
-          if (strtolower($nome) != strtolower($intestazione[$i])) {
+          if (strtolower((string) $nome) != strtolower((string) $intestazione[$i])) {
             $trovato = false;
             break;
           }
@@ -1143,15 +1215,24 @@ class BrowserContext extends BaseContext {
 
   /**
    * Clicca su link o pulsante per eseguire azione
-   *  $indice: indice progressivo dei cursori presenti nel contenuto della pagina (parte da 1)
    *  $pos: numero di posizioni di far scorrere il cursore (+ a destra, - a sinistra)
    *
    * @When scorri cursore di :pos posizione
    * @When scorri cursore di :pos posizioni
+   */
+  public function scorreCursore($pos): void {
+    $this->scorreCursoreIndice(1, $pos);
+  }
+
+  /**
+   * Clicca su link o pulsante per eseguire azione
+   *  $indice: indice progressivo dei cursori presenti nel contenuto della pagina (parte da 1)
+   *  $pos: numero di posizioni di far scorrere il cursore (+ a destra, - a sinistra)
+   *
    * @When scorri cursore :indice di :pos posizione
    * @When scorri cursore :indice di :pos posizioni
    */
-  public function scorreCursore($indice=1, $pos): void {
+  public function scorreCursoreIndice($indice, $pos): void {
     $sliders = $this->session->getPage()->findAll('css', 'form div.slider');
     $this->assertNotEmpty($sliders[$indice - 1]);
     $handle = $sliders[$indice - 1]->find('css', '.min-slider-handle');
@@ -1187,7 +1268,7 @@ class BrowserContext extends BaseContext {
         }
       }
     }
-    $this->assertTrue($field && strtolower($field->getValue()) == strtolower($valore));
+    $this->assertTrue($field && strtolower($field->getValue()) == strtolower((string) $valore));
   }
 
   /**
@@ -1212,7 +1293,7 @@ class BrowserContext extends BaseContext {
         }
       }
     }
-    $this->assertTrue($field && strtolower($field->getValue()) != strtolower($valore));
+    $this->assertTrue($field && strtolower($field->getValue()) != strtolower((string) $valore));
   }
 
 
@@ -1226,12 +1307,12 @@ class BrowserContext extends BaseContext {
    */
   protected function assertPageUrl($url, $message=null): void {
     $current = $this->session->getCurrentUrl();
-    if (strpos($current, '?') !== false) {
+    if (str_contains($current, '?')) {
       $current = substr($current, 0, strpos($current, '?'));
     }
     if ($url != $current) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that URL is the address of the current page').$info."\n".
+      $msg = ($message ?: 'Failed asserting that URL is the address of the current page').$info."\n".
         '+++ Expected: '.var_export($url, true)."\n".
         '+++ Actual: '.var_export($this->session->getCurrentUrl(), true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -1247,7 +1328,7 @@ class BrowserContext extends BaseContext {
   protected function assertPageStatus($status, $message=null): void {
     if ($status != $this->session->getStatusCode()) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that value is the status code of the current page').$info."\n".
+      $msg = ($message ?: 'Failed asserting that value is the status code of the current page').$info."\n".
         '+++ Expected: '.var_export($status, true)."\n".
         '+++ Actual: '.var_export($this->session->getStatusCode(), true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -1289,7 +1370,7 @@ class BrowserContext extends BaseContext {
       }
       $body[] = $row;
     }
-    return array($header, $body);
+    return [$header, $body];
   }
 
   /**
@@ -1314,7 +1395,7 @@ class BrowserContext extends BaseContext {
         }
         $col++;
       }
-      $text = trim(preg_replace('/\s+/', ' ', $cell->getText()));
+      $text = trim((string) preg_replace('/\s+/', ' ', (string) $cell->getText()));
       if ($cell->hasAttribute('rowspan')) {
         $rspan = (int) $cell->getAttribute('rowspan');
         if ($rspan > 1) {

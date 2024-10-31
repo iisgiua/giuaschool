@@ -8,8 +8,8 @@
 
 namespace App\Tests;
 
+use DateTime;
 use Doctrine\DBAL\Logging\DebugStack;
-use function Symfony\Component\String\u;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
 use PhpMyAdmin\SqlParser\Statements\InsertStatement;
@@ -173,7 +173,7 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @return string Valore modificato
    */
-  private function escapeSql($value): string {
+  private function escapeSql(mixed $value): string {
     // controlla il tipo e modifica il risultato
     if (is_string($value) && !preg_match('//u', $value)) {
       // stringa non unicode
@@ -191,7 +191,7 @@ class EntityTestCase extends DatabaseTestCase {
     } elseif (is_bool($value)) {
       // booleano
       $result = $value ? '1' : '0';
-    } elseif ($value instanceOf \DateTime) {
+    } elseif ($value instanceOf DateTime) {
       // oggetto DateTime
       $result = "'".addslashes($value->format('Y-m-d H:i:s'))."'";
     } elseif (is_object($value)) {
@@ -216,7 +216,7 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @return string Comando SQL con sostituzione dei parametri
    */
-  private function runnableSql(string $sql, $params): string {
+  private function runnableSql(string $sql, mixed $params): string {
     // rimuove caratteri inutili
     $sql = trim($sql, " \r\n\t\"");
     // se il parametro è un oggetto legge il valore
@@ -256,7 +256,7 @@ class EntityTestCase extends DatabaseTestCase {
   private function isValidSql(string $sql): bool {
     // effettua il parsing del comando
     $parser = new Parser($sql);
-    $stmt = isset($parser->statements[0]) ? $parser->statements[0] : null;
+    $stmt = $parser->statements[0] ?? null;
     if ($stmt instanceOf InsertStatement) {
       // insert
       return $this->isValidSqlInsert($stmt);
@@ -315,7 +315,7 @@ class EntityTestCase extends DatabaseTestCase {
     // campi modificati
     foreach ($stmt->set as $col) {
       $column = $col->column;
-      if (strpos($column, '.') === false) {
+      if (!str_contains($column, '.')) {
         // tabella unica
         $doWrite[$tables[0]][] = $column;
       } else {
@@ -414,7 +414,7 @@ class EntityTestCase extends DatabaseTestCase {
    *
    * @return bool Vero se il comando SQL è ammissibile
    */
-  private function isValidSqlCommand(string $command, $stmt): bool {
+  private function isValidSqlCommand(string $command, mixed $stmt): bool {
     $doExecute = [];
     // comando eseguito
     $doExecute[$command] = '*';

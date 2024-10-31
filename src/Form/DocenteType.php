@@ -31,38 +31,38 @@ class DocenteType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => true])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('sesso', ChoiceType::class, array('label' => 'label.sesso',
-        'choices' => array('label.maschile' => 'M', 'label.femminile' => 'F'),
+        'required' => true])
+      ->add('sesso', ChoiceType::class, ['label' => 'label.sesso',
+        'choices' => ['label.maschile' => 'M', 'label.femminile' => 'F'],
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
+        'required' => true])
+      ->add('codiceFiscale', TextType::class, ['label' => 'label.codice_fiscale',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => false))
-      ->add('spid', ChoiceType::class, array('label' => 'label.spid',
-        'choices' => array('label.si' => true, 'label.no' => false),
+        'required' => false])
+      ->add('spid', ChoiceType::class, ['label' => 'label.spid',
+        'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))
-      ->add('username', TextType::class, array('label' => 'label.username',
+        'required' => true])
+      ->add('username', TextType::class, ['label' => 'label.username',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('email', TextType::class, array('label' => 'label.email',
+        'required' => true])
+      ->add('email', TextType::class, ['label' => 'label.email',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -70,11 +70,11 @@ class DocenteType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('return_url');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
-      'data_class' => Docente::class));
+      'data_class' => Docente::class]);
   }
 
 }

@@ -50,12 +50,13 @@ class AtaRepository extends BaseRepository {
     $dsga = $this->createQueryBuilder('a')
       ->select('a.id')
       ->where('a.abilitato=:abilitato AND a.tipo=:dsga')
-      ->setParameters(['abilitato' => 1, 'dsga' => 'D'])
+      ->setParameter('abilitato', 1)
+      ->setParameter('dsga', 'D')
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
     // restituisce l'ID
-    return ($dsga ? array($dsga['id']) : array());
+    return ($dsga ? [$dsga['id']] : []);
   }
 
   /**
@@ -70,7 +71,9 @@ class AtaRepository extends BaseRepository {
       ->select('a.id')
       ->where('a.abilitato=:abilitato')
       ->andWhere('a.tipo!=:dsga AND (a.sede IS NULL OR a.sede IN (:sedi))')
-      ->setParameters(['dsga' => 'D', 'abilitato' => 1, 'sedi' => $sedi])
+      ->setParameter('dsga', 'D')
+      ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();
     // restituisce la lista degli ID
@@ -90,8 +93,9 @@ class AtaRepository extends BaseRepository {
     $query = $this->createQueryBuilder('a')
       ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome')
-      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
-        'cognome' => $criteri['cognome'].'%']);
+      ->setParameter('abilitato', 1)
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
     // controlla tipo
     if (empty($criteri['tipo'])) {
       // tutti i rappresentanti

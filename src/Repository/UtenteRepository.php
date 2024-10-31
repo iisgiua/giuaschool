@@ -168,11 +168,13 @@ class UtenteRepository extends EntityRepository {
     $genitori = [];
     // rappresentanti alunni
     if (in_array('S', $destinatari)) {
-      $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('DISTINCT a.id')
         ->join('a.classe', 'cl')
         ->where('a.abilitato=:abilitato AND FIND_IN_SET(:classe, a.rappresentante)>0 AND cl.sede IN (:sedi)')
-        ->setParameters(['abilitato' => 1, 'classe' => 'S', 'sedi' => $sedi]);
+        ->setParameter('abilitato', 1)
+        ->setParameter('classe', 'S')
+        ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi
         $alunni->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
@@ -184,12 +186,14 @@ class UtenteRepository extends EntityRepository {
     }
     // rappresentanti genitori
     if (in_array('L', $destinatari)) {
-      $genitori = $this->_em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
+      $genitori = $this->getEntityManager()->getRepository(Genitore::class)->createQueryBuilder('g')
         ->select('DISTINCT g.id')
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')
         ->where('g.abilitato=:abilitato AND FIND_IN_SET(:classe, g.rappresentante)>0 AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
-        ->setParameters(['abilitato' => 1, 'classe' => 'L', 'sedi' => $sedi]);
+        ->setParameter('abilitato', 1)
+        ->setParameter('classe', 'L')
+        ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi
         $genitori->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);

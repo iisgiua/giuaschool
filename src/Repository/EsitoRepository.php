@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Esito;
 use App\Entity\Scrutinio;
@@ -35,10 +36,10 @@ class EsitoRepository extends EntityRepository {
       $dati = $esito->getDati();
       if (empty($dati['visto'][$utente->getId()])) {
         // presa visione
-        $dati['visto'][$utente->getId()] = new \DateTime();
+        $dati['visto'][$utente->getId()] = new DateTime();
         $esito->setDati($dati);
         // memorizza dati
-        $this->_em->flush();
+        $this->getEntityManager()->flush();
       }
     }
   }
@@ -55,10 +56,7 @@ class EsitoRepository extends EntityRepository {
    */
   public function impostaSpeciale(Scrutinio $scrutinio, Alunno $alunno, string $codiceEsito = null): Esito {
     // init
-    $datiEsito = array(
-      'unanimita' => true,
-      'contrari' => null,
-      'giudizio' => null);
+    $datiEsito = ['unanimita' => true, 'contrari' => null, 'giudizio' => null];
     // trova esisto esitente
     $esito = $this->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
     if (!$esito) {
@@ -67,7 +65,7 @@ class EsitoRepository extends EntityRepository {
         ->setScrutinio($scrutinio)
         ->setAlunno($alunno)
         ->setDati($datiEsito);
-      $this->_em->persist($esito);
+      $this->getEntityManager()->persist($esito);
     }
     if (in_array($codiceEsito, ['R', 'L', 'E', 'X'])) {
       // imposta esito speciale

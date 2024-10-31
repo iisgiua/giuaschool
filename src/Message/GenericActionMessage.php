@@ -8,6 +8,7 @@
 
 namespace App\Message;
 
+use Exception;
 
 /**
  * GenericActionMessage - gestione dei messaggi per le azioni eseguite (classe base)
@@ -16,32 +17,10 @@ namespace App\Message;
  */
 class GenericActionMessage {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var int $id Identificativo dell'istanza di riferimento
-   */
-  private int $id;
-
-  /**
-   * @var string $class Nome della classe di riferimento
-   */
-  private string $class;
-
-  /**
-   * @var string $action Nome che identifica l'azione eseguita
-   */
-  private string $action;
-
-  /**
-   * @var array $data Dati aggiuntivi
-   */
-  private array $data;
-
   /**
    * @var string $tag Testo usato per identificare l'azione
    */
-  private string $tag;
+  private readonly string $tag;
 
   /**
    * @var array $list Lista delle azioni permesse: $list[nomeClasse][nomeAzione] = null|nomeAltraClasse
@@ -59,16 +38,16 @@ class GenericActionMessage {
    * @param string $action Nome che identifica l'azione eseguita
    * @param array $data Dati aggiuntivi
    */
-   public function __construct(int $id, string $class, string $action, array $data) {
-     $this->id = $id;
-     $this->class = $class;
-     $this->action = $action;
-     $this->data = $data;
-     $this->tag = '<!AZIONE!><!'.$class.'.'.$action.'.'.$id.'!>';
-     if (!$this->check()) {
-       // errore: azione non prevista
-       throw new \Exception('Undefined action in message constructor: "'.$class.'.'.$action.'"');
-     }
+  public function __construct(
+      private readonly int $id,
+      private readonly string $class,
+      private readonly string $action,
+      private array $data) {
+    $this->tag = '<!AZIONE!><!'.$this->class.'.'.$this->action.'.'.$this->id.'!>';
+    if (!$this->check()) {
+      // errore: azione non prevista
+      throw new Exception('Undefined action in message constructor: "'.$this->class.'.'.$this->action.'"');
+    }
   }
 
   /**

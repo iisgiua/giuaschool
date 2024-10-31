@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\CambioClasseRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,109 +20,97 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * CambioClasse - dati per la gestione dei trasferimenti degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\CambioClasseRepository")
- * @ORM\Table(name="gs_cambio_classe")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class CambioClasse {
+#[ORM\Table(name: 'gs_cambio_classe')]
+#[ORM\Entity(repositoryClass: CambioClasseRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class CambioClasse implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per il cambio classe
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var Alunno|null $alunno Alunno che ha effettuato il cambio classe
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
-   * @var \DateTime|null $inizio Data iniziale della permanenza nella classe indicata
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $inizio Data iniziale della permanenza nella classe indicata
    */
-  private ?\DateTime $inizio = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $inizio = null;
 
   /**
-   * @var \DateTime|null $fine Data finale della permanenza nella classe indicata
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $fine Data finale della permanenza nella classe indicata
    */
-  private ?\DateTime $fine = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $fine = null;
 
   /**
    * @var Classe|null $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
-   *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
   private ?Classe $classe = null;
 
   /**
    * @var string|null $note Note descrittive sul cambio classe
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $note = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -135,18 +128,18 @@ class CambioClasse {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -174,20 +167,20 @@ class CambioClasse {
   /**
    * Restituisce la data iniziale della permanenza nella classe indicata
    *
-   * @return \DateTime|null Data iniziale della permanenza nella classe indicata
+   * @return DateTime|null Data iniziale della permanenza nella classe indicata
    */
-  public function getInizio(): ?\DateTime {
+  public function getInizio(): ?DateTime {
     return $this->inizio;
   }
 
   /**
    * Modifica la data iniziale della permanenza nella classe indicata
    *
-   * @param \DateTime $inizio Data iniziale della permanenza nella classe indicata
+   * @param DateTime $inizio Data iniziale della permanenza nella classe indicata
    *
    * @return self Oggetto modificato
    */
-  public function setInizio(\DateTime $inizio): self {
+  public function setInizio(DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -195,20 +188,20 @@ class CambioClasse {
   /**
    * Restituisce la data finale della permanenza nella classe indicata
    *
-   * @return \DateTime|null Data finale della permanenza nella classe indicata
+   * @return DateTime|null Data finale della permanenza nella classe indicata
    */
-  public function getFine(): ?\DateTime {
+  public function getFine(): ?DateTime {
     return $this->fine;
   }
 
   /**
    * Modifica la data finale della permanenza nella classe indicata
    *
-   * @param \DateTime $fine Data finale della permanenza nella classe indicata
+   * @param DateTime $fine Data finale della permanenza nella classe indicata
    *
    * @return self Oggetto modificato
    */
-  public function setFine(\DateTime $fine): self {
+  public function setFine(DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }

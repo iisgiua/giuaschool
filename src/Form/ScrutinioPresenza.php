@@ -8,6 +8,7 @@
 
 namespace App\Form;
 
+use DateTime;
 
 /**
  * ScrutinioPresenza - classe di utilità per la gestione delle presenze nello scrutinio
@@ -45,9 +46,9 @@ class ScrutinioPresenza {
   private ?string $surrogaProtocollo = '';
 
   /**
-   * @var \DateTime|null $surrogaData Data del provvedimento di surroga
+   * @var DateTime|null $surrogaData Data del provvedimento di surroga
    */
-  private ?\DateTime $surrogaData = null;
+  private ?DateTime $surrogaData = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -160,20 +161,20 @@ class ScrutinioPresenza {
   /**
    * Restituisce la data del provvedimento di surroga
    *
-   * @return \DateTime|null Data del provvedimento di surroga
+   * @return DateTime|null Data del provvedimento di surroga
    */
-  public function getSurrogaData(): ?\DateTime  {
+  public function getSurrogaData(): ?DateTime  {
     return $this->surrogaData;
   }
 
   /**
    * Modifica la data del provvedimento di surroga
    *
-   * @var \DateTime $surrogaData Data del provvedimento di surroga
+   * @var DateTime $surrogaData Data del provvedimento di surroga
    *
    * @return ScrutinioPresenza Oggetto modificato
    */
-  public function setSurrogaData(?\DateTime $surrogaData): self {
+  public function setSurrogaData(?DateTime $surrogaData): self {
     $this->surrogaData = $surrogaData;
     return $this;
   }

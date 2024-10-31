@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\MessageHandler;
 
+use DateTime;
 use App\Tests\DatabaseTestCase;
 use App\Message\NotificaMessage;
 use App\MessageHandler\NotificaMessageHandler;
@@ -77,15 +78,15 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // dati da caricare
     $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures',
       'CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures', 'IstitutoFixtures'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -96,7 +97,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // translator: restituisce tag richiesta
     $this->mockedTranslator = $this->createMock(TranslatorInterface::class);
     $this->mockedTranslator->method('trans')->willReturnCallback(
-      function($tag) { return $tag; });
+      fn($tag) => $tag);
     // environment: inserisce dati in coda template
     $this->mockedEnvironment = $this->createMock(Environment::class);
     $this->mockedEnvironment->method('render')->willReturnCallback(
@@ -338,7 +339,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertSame(3, count($this->tpl[0][1]));
+    $this->assertCount(3, $this->tpl[0][1]);
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('intestazione_istituto_breve', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
@@ -380,11 +381,11 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($docente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -421,11 +422,11 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -462,11 +463,11 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('email/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(1, $this->email);
-    $this->assertSame($dati['oggetto'], substr($this->email[0]->getSubject(), 2 + strpos($this->email[0]->getSubject(), '-')));
+    $this->assertSame($dati['oggetto'], substr((string) $this->email[0]->getSubject(), 2 + strpos((string) $this->email[0]->getSubject(), '-')));
     $this->assertSame('email/notifica_avvisi.html.twig', $this->email[0]->getHtmlBody());
     $this->assertSame($utente->getEmail(), $this->email[0]->getTo()[0]->getAddress());
     $this->assertCount(0, $this->telegram);
@@ -597,7 +598,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_circolari.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('circolari', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -637,7 +638,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -677,7 +678,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -717,7 +718,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertCount(1, $this->tpl);
     $this->assertSame('chat/notifica_avvisi.html.twig', $this->tpl[0][0]);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -787,7 +788,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $nmh->__invoke($msg);
     // controlla
     $this->assertCount(1, $this->tpl);
-    $this->assertSame(2, count($this->tpl[0][1]));
+    $this->assertCount(2, $this->tpl[0][1]);
     $this->assertArrayHasKey('dati', $this->tpl[0][1]);
     $this->assertArrayHasKey('url_registro', $this->tpl[0][1]);
     $this->assertCount(0, $this->email);
@@ -834,7 +835,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
     $connection->prepare($sql)->executeStatement();
     // esegue
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";
@@ -843,7 +844,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $rset = $result->fetchAllAssociative();
     $this->assertTrue($aggiornato);
     $this->assertCount(3, $rset);
-    $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr($rset[0]['available_at'], 0, 16)]);
+    $this->assertSame(['[1]', $adesso->modify('+3600 sec')->format('Y-m-d H:i')], [$rset[0]['headers'], substr((string) $rset[0]['available_at'], 0, 16)]);
     $this->assertSame(['[2]', '2023-01-01 00:00:00'], [$rset[1]['headers'], $rset[1]['available_at']]);
     $this->assertSame(['[3]', '2023-01-01 00:00:00'], [$rset[2]['headers'], $rset[2]['available_at']]);
   }
@@ -861,7 +862,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
       "INSERT INTO gs_messenger_messages (body, headers, queue_name, created_at, available_at, delivered_at) VALUES ('O:36:\"Symfony\\Component\\Messenger\\Envelope\":2:{s:44:\"\0Symfony\\Component\\Messenger\\Envelope\0stamps\";a:2:{s:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\";a:1:{i:0;O:44:\"Symfony\\Component\\Messenger\\Stamp\\DelayStamp\":1:{s:51:\"\0Symfony\\Component\\Messenger\\Stamp\\DelayStamp\0delay\";i:1800000;}}s:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\";a:1:{i:0;O:46:\"Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\":1:{s:55:\"\0Symfony\\Component\\Messenger\\Stamp\\BusNameStamp\0busName\";s:21:\"messenger.bus.default\";}}}s:45:\"\0Symfony\\Component\\Messenger\\Envelope\0message\";O:25:\"App\\Message\\AvvisoMessage\":2:{s:29:\"\0App\\Message\\AvvisoMessage\0id\";i:35536;s:30:\"\0App\\Message\\AvvisoMessage\0tag\";s:17:\"<!AVVISO!><!134!>\";}}', '[3]', 'notifica', NOW(), '2023-01-01 00:00:00', NULL);";
     $connection->prepare($sql)->executeStatement();
     // esegue
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $aggiornato = NotificaMessageHandler::update($this->em, '<!AVVISO!><!1!>', 'avviso', 3600);
     // controlla
     $sql = "SELECT * FROM gs_messenger_messages ORDER BY headers";

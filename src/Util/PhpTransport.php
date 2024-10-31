@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use Exception;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 
@@ -39,11 +40,11 @@ final class PhpTransport extends AbstractTransport {
         $isHeader = false;
       } elseif ($isHeader) {
         // parte dell'header
-        foreach (explode("\r\n", $chunk) as $hdr) {
-          if (substr($hdr, 0, 9) === 'Subject: ') {
+        foreach (explode("\r\n", (string) $chunk) as $hdr) {
+          if (str_starts_with($hdr, 'Subject: ')) {
             // estrae oggetto
             $subject = substr($hdr, 9);
-          } elseif (substr($hdr, 0, 4) !== 'To: ') {
+          } elseif (!str_starts_with($hdr, 'To: ')) {
             // aggiunge agli header
             $headers .= $hdr ? ($hdr."\r\n") : '';
           }
@@ -55,7 +56,7 @@ final class PhpTransport extends AbstractTransport {
     }
     if (!mail($recipients, $subject, $msg, $headers)) {
       // errore: impossibile spedire la mail
-      throw new \Exception('exception.mail_transport_error');
+      throw new Exception('exception.mail_transport_error');
     }
   }
 

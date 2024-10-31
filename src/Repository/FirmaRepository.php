@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Firma - repository
  *
  * @author Antonello Dessì
  */
-class FirmaRepository extends \Doctrine\ORM\EntityRepository {
+class FirmaRepository extends EntityRepository {
 
 }
 

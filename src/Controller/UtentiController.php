@@ -8,10 +8,11 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Configurazione;
 use App\Form\NotificaType;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -22,7 +23,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -39,16 +40,13 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/profilo/", name="utenti_profilo",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction(): Response {
+  #[Route(path: '/utenti/profilo/', name: 'utenti_profilo', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function profilo(): Response {
     // mostra la pagina di risposta
-    return $this->render('utenti/profilo.html.twig', array(
-      'pagina_titolo' => 'page.utenti_profilo',
-    ));
+    return $this->render('utenti/profilo.html.twig', [
+      'pagina_titolo' => 'page.utenti_profilo']);
   }
 
   /**
@@ -60,13 +58,11 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/email/", name="utenti_email",
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, ValidatorInterface $validator, 
-                              LogHandler $dblogger): Response {
+  #[Route(path: '/utenti/email/', name: 'utenti_email', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function email(Request $request, ValidatorInterface $validator,
+                        LogHandler $dblogger): Response {
     $success = null;
     // controlli
     $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
@@ -77,14 +73,14 @@ class UtentiController extends BaseController {
     }
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
-      ->add('email', TextType::class, array('label' => 'label.email',
-        'data' => substr($this->getUser()->getEmail(), -6) == '.local' ? '' : $this->getUser()->getEmail(),
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
+      ->add('email', TextType::class, ['label' => 'label.email',
+	      'data' => str_ends_with((string) $this->getUser()->getEmail(), '.local') ? '' : $this->getUser()->getEmail(),
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+	      'attr' => ['widget' => 'gs-button-end',
+          'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -98,8 +94,8 @@ class UtentiController extends BaseController {
         // memorizza modifica
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('SICUREZZA', 'Cambio Email', array(
-          'Precedente email' => $vecchia_email));
+        $dblogger->logAzione('SICUREZZA', 'Cambio Email', [
+          'Precedente email' => $vecchia_email]);
         // messaggio di successo
         $this->addFlash('success', 'message.update_ok');
         // redirezione
@@ -107,13 +103,12 @@ class UtentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('utenti/email.html.twig', array(
+    return $this->render('utenti/email.html.twig', [
       'pagina_titolo' => 'page.utenti_email',
       'form' => $form->createView(),
       'form_title' => 'title.modifica_email',
       'form_help' => 'message.modifica_email',
-      'form_success' => $success,
-    ));
+      'form_success' => $success]);
   }
 
   /**
@@ -127,14 +122,12 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/password/", name="utenti_password",
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function passwordAction(Request $request, UserPasswordHasherInterface $hasher,
-                                 TranslatorInterface $trans, ValidatorInterface $validator,
-                                 LogHandler $dblogger): Response {
+  #[Route(path: '/utenti/password/', name: 'utenti_password', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function password(Request $request, UserPasswordHasherInterface $hasher,
+                           TranslatorInterface $trans, ValidatorInterface $validator,
+                           LogHandler $dblogger): Response {
     $success = null;
     $errore = null;
     $form = null;
@@ -144,25 +137,25 @@ class UtentiController extends BaseController {
     if ($idProvider && $this->getUser()->controllaRuolo($idProviderTipo)) {
       // cambio password su Google
       $errore = 'exception.cambio_password_google';
-    } elseif (substr($this->getUser()->getEmail(), -6) == '.local') {
+    } elseif (str_ends_with((string) $this->getUser()->getEmail(), '.local')) {
       // utente senza email
       $errore = 'exception.cambio_password_noemail';
     } else {
       // form
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_password', FormType::class)
-        ->add('current_password', PasswordType::class, array('label' => 'label.current_password',
-          'required' => true))
-        ->add('password', RepeatedType::class, array(
+        ->add('current_password', PasswordType::class, ['label' => 'label.current_password',
+	        'required' => true])
+        ->add('password', RepeatedType::class, [
           'type' => PasswordType::class,
           'invalid_message' => 'password.nomatch',
-          'first_options' => array('label' => 'label.new_password'),
-          'second_options' => array('label' => 'label.new_password2'),
-          'required' => true))
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end',
-          'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
+          'first_options' => ['label' => 'label.new_password'],
+          'second_options' => ['label' => 'label.new_password2'],
+          'required' => true])
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+	        'attr' => ['widget' => 'gs-button-end',
+            'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -174,9 +167,9 @@ class UtentiController extends BaseController {
         }
         // validazione nuova password
         $psw = $form->get('password')->getData();
-        $minuscole = preg_match('/[a-z]+/', $psw);
-        $maiuscole = preg_match('/[A-Z]+/', $psw);
-        $cifre = preg_match('/\d+/', $psw);
+        $minuscole = preg_match('/[a-z]+/', (string) $psw);
+        $maiuscole = preg_match('/[A-Z]+/', (string) $psw);
+        $cifre = preg_match('/\d+/', (string) $psw);
         $this->getUser()->setPasswordNonCifrata($psw);
         $errors = $validator->validate($this->getUser());
         if (count($errors) > 0) {
@@ -194,7 +187,7 @@ class UtentiController extends BaseController {
           // memorizza password
           $this->em->flush();
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array());
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password', []);
           // messaggio di successo
           $this->addFlash('success', 'message.update_ok');
           // redirezione
@@ -203,14 +196,13 @@ class UtentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('utenti/password.html.twig', array(
+    return $this->render('utenti/password.html.twig', [
       'pagina_titolo' => 'page.utenti_password',
       'form' => ($form ? $form->createView() : null),
       'form_title' => 'title.modifica_password',
       'form_help' => 'message.modifica_password',
       'form_success' => $success,
-      'errore' => $errore,
-    ));
+      'errore' => $errore]);
   }
 
   /**
@@ -223,13 +215,11 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/otp/", name="utenti_otp",
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function otpAction(Request $request, TranslatorInterface $trans, OtpUtil $otp,
-                            LogHandler $dblogger): Response {
+  #[Route(path: '/utenti/otp/', name: 'utenti_otp', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function otp(Request $request, TranslatorInterface $trans, OtpUtil $otp,
+                      LogHandler $dblogger): Response {
     // inizializza
     $reset = false;
     $qrcode = null;
@@ -249,10 +239,10 @@ class UtentiController extends BaseController {
       $reset = true;
       // form reset OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['class' => 'btn btn-primary']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	        'attr' => ['class' => 'btn btn-primary']])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+	        'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -260,7 +250,7 @@ class UtentiController extends BaseController {
         $this->getUser()->setOtp(null);
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP', array());
+        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP', []);
         // messaggio di successo
         $this->addFlash('success', 'message.otp_disabilitato');
         // redirezione
@@ -280,14 +270,14 @@ class UtentiController extends BaseController {
       $qrcode = $otp->qrcode($this->getUser()->getUserIdentifier(), 'Registro Elettronico', $token);
       // form inserimeno OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
-        ->add('otp', TextType::class, array('label' => 'label.otp',
+        ->add('otp', TextType::class, ['label' => 'label.otp',
           'attr' => ['class' => 'gs-ml-2'],
           'trim' => true,
-          'required' => true))
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['class' => 'btn btn-primary']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]))
+          'required' => true])
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['class' => 'btn btn-primary']])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+	        'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -299,7 +289,7 @@ class UtentiController extends BaseController {
           // cancella sessione
           $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', array());
+          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', []);
           // messaggio di successo
           $this->addFlash('success', 'message.otp_abilitato');
           // redirezione
@@ -311,14 +301,13 @@ class UtentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('utenti/otp.html.twig', array(
+    return $this->render('utenti/otp.html.twig', [
       'pagina_titolo' => 'page.utenti_otp',
       'form' => ($form ? $form->createView() : null),
       'form_help' => null,
       'form_success' => null,
       'reset' => $reset,
-      'qrcode' => $qrcode,
-      ));
+      'qrcode' => $qrcode]);
   }
 
   /**
@@ -329,19 +318,17 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/notifiche/", name="utenti_notifiche",
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheAction(Request $request, LogHandler $dblogger): Response {
+  #[Route(path: '/utenti/notifiche/', name: 'utenti_notifiche', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function notifiche(Request $request, LogHandler $dblogger): Response {
     // init
     $dati = [];
     $info = [];
     // legge dati
     $notifica = $this->getUser()->getNotifica();
     // controlla configurazione telegram
-    $bot = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
+    $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
     if (empty($bot) && $notifica['tipo'] == 'telegram') {
       // elimina notifica telegram
       $notifica['tipo'] = 'email';
@@ -369,7 +356,7 @@ class UtentiController extends BaseController {
       $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$nuovaNotifica]);
       // controlla configurazione
       if (($nuovaNotifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
-           substr($this->getUser()->getEmail(), -6) == '.local')) ||
+           str_ends_with((string) $this->getUser()->getEmail(), '.local'))) ||
           ($nuovaNotifica['tipo'] == 'telegram' && empty($nuovaNotifica['telegram_chat']))) {
         // redirect alla configurazione
         return $this->redirectToRoute('utenti_notifiche_configura');
@@ -393,19 +380,17 @@ class UtentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/utenti/notifiche/configura/", name="utenti_notifiche_configura",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function notificheConfiguraAction(): Response {
+  #[Route(path: '/utenti/notifiche/configura/', name: 'utenti_notifiche_configura', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function notificheConfigura(): Response {
     // init
     $dati = [];
     $info = [];
     // legge dati
     $notifica = $this->getUser()->getNotifica();
     if ($notifica['tipo'] == 'email' &&
-        (empty($this->getUser()->getEmail()) || substr($this->getUser()->getEmail(), -6) == '.local')) {
+        (empty($this->getUser()->getEmail()) || str_ends_with((string) $this->getUser()->getEmail(), '.local'))) {
       // imposta email
       $info['messaggio'] = 'message.notifiche_configura_email';
       $info['url'] = $this->generateUrl('utenti_email');
@@ -414,7 +399,7 @@ class UtentiController extends BaseController {
       $this->getUser()->creaToken();
       $this->em->flush();
       $token = base64_encode($this->getUser()->getToken().'#'.$this->getUser()->getUserIdentifier());
-      $bot = $this->em->getRepository('App\Entity\Configurazione')->getParametro('telegram_bot');
+      $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
       $info['messaggio'] = 'message.notifiche_configura_telegram';
       $info['url'] = 'https://t.me/'.$bot.'?start='.$token;
     } else {

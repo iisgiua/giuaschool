@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\DocumentoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,143 +22,132 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Documento - dati per la gestione di un documento generico
  *
- * @ORM\Entity(repositoryClass="App\Repository\DocumentoRepository")
- * @ORM\Table(name="gs_documento")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class Documento {
+#[ORM\Table(name: 'gs_documento')]
+#[ORM\Entity(repositoryClass: DocumentoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class Documento implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"L","P","R","M","H","D","C","G"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['L', 'P', 'R', 'M', 'H', 'D', 'C', 'G'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'G';
 
   /**
    * @var Docente|null $docente Docente che carica il documento
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari del documento
    *
-   * @ORM\OneToOne(targetEntity="ListaDestinatari")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\OneToOne(targetEntity: \ListaDestinatari::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?ListaDestinatari $listaDestinatari = null;
 
   /**
    * @var Collection $allegati Lista dei file allegati al documento
    *
-   * @ORM\ManyToMany(targetEntity="File")
-   * @ORM\JoinTable(name="gs_documento_file",
-   *    joinColumns={@ORM\JoinColumn(name="documento_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="file_id", nullable=false, unique=true)})
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private ?Collection $allegati = null;
+  #[ORM\JoinTable(name: 'gs_documento_file')]
+  #[ORM\JoinColumn(name: 'documento_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'file_id', nullable: false, unique: true)]
+  #[ORM\ManyToMany(targetEntity: \File::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?Collection $allegati;
 
   /**
    * @var Materia|null $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
   private ?Materia $materia = null;
 
   /**
    * @var Classe|null $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
   private ?Classe $classe = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
-   *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
   private ?Alunno $alunno = null;
 
   /**
    * @var string|null $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $cifrato = '';
 
   /**
    * @var bool $firma Indica se è richiesta la firma di presa visione
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $firma = false;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -171,18 +165,18 @@ class Documento {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -433,7 +427,7 @@ class Documento {
       'tipo' => $this->tipo,
       'docente' => $this->docente->getId(),
       'listaDestinatari' => $this->listaDestinatari->datiVersione(),
-      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $this->allegati->toArray()),
+      'allegati' => array_map(fn($ogg) => $ogg->datiVersione(), $this->allegati->toArray()),
       'materia' => $this->materia ? $this->materia->getId() : null,
       'classe' => $this->classe ? $this->classe->getId() : null,
       'alunno' => $this->alunno ? $this->alunno->getId() : null,

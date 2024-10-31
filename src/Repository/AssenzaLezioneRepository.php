@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\AssenzaLezione;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Lezione;
@@ -24,23 +26,25 @@ class AssenzaLezioneRepository extends BaseRepository {
    * Elimina le ore di assenza dell'alunno nel periodo indicato
    *
    * @param Alunno $alunno Alunno di cui si vogliono eliminare le assenze
-   * @param \DateTime $inizio Data di inizio
-   * @param \DateTime $fine Data di fine
+   * @param DateTime $inizio Data di inizio
+   * @param DateTime $fine Data di fine
    */
-  public function elimina(Alunno $alunno, \DateTime $inizio, \DateTime $fine) {
+  public function elimina(Alunno $alunno, DateTime $inizio, DateTime $fine) {
     // recupera id
     $ids = $this->createQueryBuilder('al')
       ->select('al.id')
       ->join('al.lezione', 'l')
       ->where('al.alunno=:alunno AND l.data BETWEEN :inizio AND :fine')
-      ->setParameters(['alunno' => $alunno, 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // cancella
     $this->createQueryBuilder('al')
       ->delete()
       ->where('al.id IN (:lista)')
-      ->setParameters(['lista' => $ids])
+	    ->setParameter('lista', $ids)
       ->getQuery()
       ->execute();
   }
@@ -49,29 +53,31 @@ class AssenzaLezioneRepository extends BaseRepository {
    * Restituisce la lista alunni degli assenti nell'ora precedente
    *
    * @param Classe $classe Classe della lezione
-   * @param \DateTime $data Data della lezione
+   * @param DateTime $data Data della lezione
    * @param int $ora Ora della lezione
    *
    * @return array Lista degli ID degli alunni assenti
    */
-  public function assentiLezionePrecedente(Classe $classe, \DateTime $data, $ora) {
-    $lista = array();
+  public function assentiLezionePrecedente(Classe $classe, DateTime $data, $ora) {
+    $lista = [];
     if ($ora > 1) {
       // recupera lezione precedente
-      $lezione = $this->_em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      $lezione = $this->getEntityManager()->getRepository(Lezione::class)->createQueryBuilder('l')
         ->where('l.classe=:classe AND l.data=:data AND l.ora<:ora')
         ->orderBy('l.ora', 'DESC')
-        ->setParameters(['classe' => $classe, 'data' => $data->format('Y-m-d'), 'ora' => $ora])
+        ->setParameter('classe', $classe)
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('ora', $ora)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
       if ($lezione) {
         // recupera alunni assenti
-        $lista = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-          ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+        $lista = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
+          ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
           ->join('al.lezione', 'l')
           ->where('l.id=:lezione')
-          ->setParameters(['lezione' => $lezione])
+	        ->setParameter('lezione', $lezione)
           ->getQuery()
           ->getResult();
       }
@@ -89,11 +95,11 @@ class AssenzaLezioneRepository extends BaseRepository {
    */
   public function assentiLezione(Lezione $lezione) {
     // recupera alunni assenti
-    $lista = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+    $lista = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
+      ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione')
-      ->setParameters(['lezione' => $lezione])
+	    ->setParameter('lezione', $lezione)
       ->getQuery()
       ->getResult();
     // restituisce assenti
@@ -114,11 +120,11 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->where('al2.alunno=al.alunno AND l2.id!=:lezione AND l2.data=l.data')
       ->getDQL();
     // recupera alunni assenti
-    $assenti = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+    $assenti = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
+      ->join(AssenzaLezione::class, 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione AND NOT EXISTS ('.$altre.')')
-      ->setParameters(['lezione' => $lezione])
+	    ->setParameter('lezione', $lezione)
       ->getQuery()
       ->getResult();
     // restituisce assenti
@@ -129,12 +135,12 @@ class AssenzaLezioneRepository extends BaseRepository {
    * Restituisce la lista degli alunni assenti, per ogni ora, nel giorno indicato
    *
    * @param CLasse $classe Classe delle lezioni
-   * @param \DateTime $data Giorno delle lezioni
+   * @param DateTime $data Giorno delle lezioni
    *
    * @return array Lista degli alunni assenti, per ogni ora
    */
-  public function assentiOre(CLasse $classe, \DateTime $data) {
-    $assenti = array('nomi' => [], 'id' => []);
+  public function assentiOre(CLasse $classe, DateTime $data) {
+    $assenti = ['nomi' => [], 'id' => []];
     // recupera alunni assenti
     $lista = $this->createQueryBuilder('al')
       ->select('l.ora,a.id,a.cognome,a.nome')
@@ -142,7 +148,8 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->join('al.lezione', 'l')
       ->where('l.data=:data AND l.classe=:classe')
       ->orderBy('l.ora,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     foreach ($lista as $l) {
@@ -157,11 +164,11 @@ class AssenzaLezioneRepository extends BaseRepository {
    * Restituisce la lista delle ore di assenza di un alunno in una certa data
    *
    * @param Alunno $alunno Alunno di cui recuperare le assenze
-   * @param \DateTime $data Giorno delle lezioni
+   * @param DateTime $data Giorno delle lezioni
    *
    * @return array Lista delle ore di assenza
    */
-  public function alunnoOreAssenze(Alunno $alunno, \DateTime $data) {
+  public function alunnoOreAssenze(Alunno $alunno, DateTime $data) {
     // ore di assenza
     $lista = $this->createQueryBuilder('al')
       ->select('l.ora')
@@ -169,7 +176,8 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->join('al.lezione', 'l')
       ->where('a.id=:alunno AND l.data=:data')
       ->orderBy('l.ora', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     $ore = array_column($lista, 'ora');

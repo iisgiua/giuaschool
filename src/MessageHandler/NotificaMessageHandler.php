@@ -8,13 +8,17 @@
 
 namespace App\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Throwable;
+use DateTime;
+use App\Entity\Istituto;
+use Exception;
 use App\Entity\Utente;
 use App\Message\NotificaMessage;
 use App\Util\TelegramManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -26,40 +30,8 @@ use Twig\Environment;
  *
  * @author Antonello Dessì
  */
-class NotificaMessageHandler implements MessageHandlerInterface {
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var TranslatorInterface $trans Gestore delle traduzioni
-   */
-  private TranslatorInterface $trans;
-
-  /**
-   * @var Environment $tpl Gestione template
-   */
-  private Environment $tpl;
-
-  /**
-   * @var MailerInterface $mailer Gestore della spedizione delle email
-   */
-  private MailerInterface $mailer;
-
-  /**
-   * @var TelegramManager $telegram Gestore delle comunicazioni tramite Telegram
-   */
-  private TelegramManager $telegram;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
+#[AsMessageHandler]
+class NotificaMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -71,17 +43,16 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * @param Environment $tpl Gestione template
    * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param TelegramManager $telegram Gestore delle comunicazioni tramite Telegram
-   * @param LoggerInterface $msgLogger Gestore dei log su file
+   * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                              Environment $tpl, MailerInterface $mailer, TelegramManager $telegram,
-                              LoggerInterface $msgLogger) {
-    $this->em = $em;
-    $this->trans = $trans;
-    $this->tpl = $tpl;
-    $this->mailer = $mailer;
-    $this->telegram = $telegram;
-    $this->logger = $msgLogger;
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private readonly TranslatorInterface $trans,
+      private readonly Environment $tpl,
+      private readonly MailerInterface $mailer,
+      private readonly TelegramManager $telegram,
+      private readonly LoggerInterface $logger)
+  {
   }
 
   /**
@@ -91,7 +62,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   public function __invoke(NotificaMessage $message) {
     // legge dati utente
-    $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['id' => $message->getUtenteId(),
+    $utente = $this->em->getRepository(Utente::class)->findOneBy(['id' => $message->getUtenteId(),
       'abilitato' => 1]);
     if (!$utente) {
       // nessuna notifica: utente non abilitato
@@ -110,7 +81,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
         case 'email':
           // invio per email
           $address = $utente->getEmail();
-          if (!empty($address) && substr($address, -6) != '.local') {
+          if (!empty($address) && !str_ends_with($address, '.local')) {
             // invia
             $this->notificaEmail($message, $utente);
           }
@@ -127,7 +98,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
           $this->logger->warning('NotificaMessage: canale non previsto', [$datiNotifica['tipo']]);
           return;
       }
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
       // errore
       $this->logger->error('NotificaMessage: ERRORE '.$e->getMessage(), [
         $datiNotifica['tipo'] == 'email' ? $utente->getEmail() : $datiNotifica['telegram_chat']]);
@@ -160,7 +131,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    * @return bool Restituisce vero se la notifica è stata aggiornata
    */
   public static function update(EntityManagerInterface $em, string $tag, string $queue, int $delay): bool {
-    $ora = (new \DateTime())->modify('+'.$delay.' seconds');
+    $ora = (new DateTime())->modify('+'.$delay.' seconds');
     $connection = $em->getConnection();
     $sql = "UPDATE gs_messenger_messages SET available_at=:ora WHERE queue_name=:queue AND body LIKE :tag AND delivered_at IS NULL";
     $res = $connection->prepare($sql)->executeStatement(['ora' => $ora->format('Y-m-d H:i:s'),
@@ -185,26 +156,26 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   private function notificaEmail(NotificaMessage $message, Utente $utente): void {
     // legge dati per il mittente
-    $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
+    $istituto = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // imposta messaggio
     switch ($message->getTipo()) {
       case 'circolare':
         // dati circolare
         $oggetto = $this->trans->trans('message.notifica_circolare_oggetto',
           ['intestazione_istituto_breve' => $istituto->getIntestazioneBreve()]);
-        $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
+        $testo = $this->tpl->render('email/notifica_circolari.html.twig', [
           'circolari' => $message->getDati(),
           'intestazione_istituto_breve' => $istituto->getIntestazioneBreve(),
-          'url_registro' => $istituto->getUrlRegistro()));
+          'url_registro' => $istituto->getUrlRegistro()]);
         break;
       case 'avviso':
       case 'verifica':
       case 'compito':
         // dati avviso
         $oggetto = $istituto->getIntestazioneBreve().' - '.$message->getDati()['oggetto'];
-        $testo = $this->tpl->render('email/notifica_avvisi.html.twig', array(
+        $testo = $this->tpl->render('email/notifica_avvisi.html.twig', [
           'dati' => $message->getDati(),
-          'url_registro' => $istituto->getUrlRegistro()));
+          'url_registro' => $istituto->getUrlRegistro()]);
         break;
       default:
         // errore
@@ -230,22 +201,22 @@ class NotificaMessageHandler implements MessageHandlerInterface {
    */
   private function notificaTelegram(NotificaMessage $message, string $chat): void {
     // legge dati
-    $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
+    $istituto = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // imposta messaggio
     switch ($message->getTipo()) {
       case 'circolare':
         // dati circolare
-        $html = $this->tpl->render('chat/notifica_circolari.html.twig', array(
+        $html = $this->tpl->render('chat/notifica_circolari.html.twig', [
           'circolari' => $message->getDati(),
-          'url_registro' => $istituto->getUrlRegistro()));
+          'url_registro' => $istituto->getUrlRegistro()]);
         break;
       case 'avviso':
       case 'verifica':
       case 'compito':
         // dati avviso/verifica/compito
-        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', array(
+        $html = $this->tpl->render('chat/notifica_avvisi.html.twig', [
           'dati' => $message->getDati(),
-          'url_registro' => $istituto->getUrlRegistro()));
+          'url_registro' => $istituto->getUrlRegistro()]);
         break;
       default:
         // errore
@@ -256,7 +227,7 @@ class NotificaMessageHandler implements MessageHandlerInterface {
     $ris = $this->telegram->sendMessage($chat, $html);
     if (isset($ris['error'])) {
       // errore invio
-      throw new \Exception($ris['error']);
+      throw new Exception($ris['error']);
     }
     $this->logger->debug('NotificaMessage: evento notificato via Telegram', [$message, $chat]);
   }

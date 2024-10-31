@@ -8,6 +8,10 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\CircolareClasseRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,91 +20,84 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * CircolareClasse - associazione tra la circolare e le classi di destinazione
  *
- * @ORM\Entity(repositoryClass="App\Repository\CircolareClasseRepository")
- * @ORM\Table(name="gs_circolare_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"circolare_id","classe_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"circolare","classe"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
+#[ORM\Table(name: 'gs_circolare_classe')]
+#[ORM\UniqueConstraint(columns: ['circolare_id', 'classe_id'])]
+#[ORM\Entity(repositoryClass: CircolareClasseRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['circolare', 'classe'], message: 'field.unique')]
 class CircolareClasse {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var Circolare|null $circolare Circolare a cui ci si riferisce
    *
-   * @ORM\ManyToOne(targetEntity="Circolare")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Circolare::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Circolare $circolare = null;
 
   /**
    * @var Classe|null $classe Classe in cui deve essere letta la circolare
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
-   * @var \DateTime|null $letta Data e ora di lettura della circolare nella classe
-   *
-   * @ORM\Column(type="datetime", nullable=true)
+   * @var DateTimeInterface|null $letta Data e ora di lettura della circolare nella classe
    */
-  private ?\DateTime $letta = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+  private ?DateTime $letta = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -118,18 +115,18 @@ class CircolareClasse {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -178,20 +175,20 @@ class CircolareClasse {
   /**
    * Restituisce la data e ora di lettura della circolare nella classe
    *
-   * @return \DateTime|null Data e ora di lettura della circolare nella classe
+   * @return DateTime|null Data e ora di lettura della circolare nella classe
    */
-  public function getLetta(): ?\DateTime {
+  public function getLetta(): ?DateTime {
     return $this->letta;
   }
 
   /**
    * Modifica la data e ora di lettura della circolare nella classe
    *
-   * @param \DateTime|null $letta Data e ora di lettura della circolare nella classe
+   * @param DateTime|null $letta Data e ora di lettura della circolare nella classe
    *
    * @return self Oggetto modificato
    */
-  public function setLetta(?\DateTime $letta): self {
+  public function setLetta(?DateTime $letta): self {
     $this->letta = $letta;
     return $this;
   }

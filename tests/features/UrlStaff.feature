@@ -13,7 +13,7 @@ Funzionalità: Controllo sulla visualizzazione delle pagine del registro
 Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti staff
   Dato login utente con ruolo esatto "Staff"
   Quando vai alla pagina "<route>"
-  Allora vedi pagina "<route>"
+  Allora vedi la pagina "<route>"
   Esempi:
     | route                      |
     | lezioni_classe             |

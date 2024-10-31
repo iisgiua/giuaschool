@@ -20,14 +20,6 @@ use Twig\TwigFunction;
 class Image64Extension extends AbstractExtension {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var string Percorso della directory di progetto
-   */
-  private string $dirProgetto = '';
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -35,8 +27,9 @@ class Image64Extension extends AbstractExtension {
    *
    * @param string $dirProgetto Percorso della directory di progetto
    */
-  public function __construct(string $dirProgetto) {
-    $this->dirProgetto = $dirProgetto;
+  public function __construct(
+    private readonly string $dirProgetto)
+  {
   }
 
   /**
@@ -46,7 +39,7 @@ class Image64Extension extends AbstractExtension {
    */
   public function getFunctions() {
     return [
-      new TwigFunction('image64', [$this, 'getImage64']),
+      new TwigFunction('image64', $this->getImage64(...)),
     ];
   }
 

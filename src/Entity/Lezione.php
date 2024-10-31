@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\LezioneRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,133 +21,122 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Lezione - dati delle ore di lezione
  *
- * @ORM\Entity(repositoryClass="App\Repository\LezioneRepository")
- * @ORM\Table(name="gs_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","ora","classe_id","gruppo"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"data","ora","classe","gruppo"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Lezione {
+#[ORM\Table(name: 'gs_lezione')]
+#[ORM\UniqueConstraint(columns: ['data', 'ora', 'classe_id', 'gruppo'])]
+#[ORM\Entity(repositoryClass: LezioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['data', 'ora', 'classe', 'gruppo'], message: 'field.unique')]
+class Lezione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la lezione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data della lezione
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data della lezione
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
    * @var int $ora Numero dell'ora di lezione [1,2,...]
-   *
-   * @ORM\Column(type="smallint", nullable=false)
    */
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
   private int $ora = 1;
 
   /**
    * @var Classe|null $classe Classe della lezione
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var string|null $gruppo Nome dell'eventuale gruppo a cui è riferita la lezione
    *
-   * @ORM\Column(type="string", length=64, nullable=true)
    *
-   * @Assert\Length(max=64, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $gruppo = '';
 
   /**
    * @var string $tipoGruppo Tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","C","R"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'C', 'R'], strict: true, message: 'field.choice')]
   private string $tipoGruppo = 'N';
 
   /**
    * @var Materia|null $materia Materia della lezione
    *
-   * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Materia $materia = null;
 
   /**
    * @var string|null $argomento Argomento della lezione
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $argomento = '';
 
   /**
    * @var string|null $attivita Attività della lezione
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $attivita = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -160,38 +154,38 @@ class Lezione {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data della lezione
    *
-   * @return \DateTime|null Data della lezione
+   * @return DateTime|null Data della lezione
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data della lezione
    *
-   * @param \DateTime $data Data della lezione
+   * @param DateTime $data Data della lezione
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }

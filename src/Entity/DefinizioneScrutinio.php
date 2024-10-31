@@ -8,6 +8,10 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\DefinizioneScrutinioRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,47 +19,42 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DefinizioneScrutinio - dati per lo svolgimento degli scrutini
  *
- * @ORM\Entity(repositoryClass="App\Repository\DefinizioneScrutinioRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: DefinizioneScrutinioRepository::class)]
 class DefinizioneScrutinio extends DefinizioneConsiglio {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'P';
 
   /**
-   * @var \DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
-   *
-   * @ORM\Column(name="data_proposte", type="date", nullable=false)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
-   * @Assert\NotBlank(message="field.notblank")
+   * @var DateTimeInterface|null $dataProposte Inizio dell'inserimento delle proposte di voto
    */
-  private ?\DateTime $dataProposte = null;
+  #[ORM\Column(name: 'data_proposte', type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?DateTime $dataProposte = null;
 
   /**
    * @var array $struttura Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
-   *
-   * @ORM\Column(type="array", nullable=false)
    */
-  private array $struttura = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: false)]
+  private array $struttura = [];
 
   /**
-  * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
-  *
-  * @ORM\Column(name="classi_visibili", type="array", nullable=false)
-  */
-  private array $classiVisibili = array();
+   * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   */
+  #[ORM\Column(name: 'classi_visibili', type: Types::ARRAY, nullable: false)]
+  private array $classiVisibili = [];
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -84,20 +83,20 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   /**
    * Restituisce l'inizio dell'inserimento delle proposte di voto
    *
-   * @return \DateTime|null Inizio dell'inserimento delle proposte di voto
+   * @return DateTime|null Inizio dell'inserimento delle proposte di voto
    */
-  public function getDataProposte(): ?\DateTime {
+  public function getDataProposte(): ?DateTime {
     return $this->dataProposte;
   }
 
   /**
    * Modifica l'inizio dell'inserimento delle proposte di voto
    *
-   * @param \DateTime $dataProposte Inizio dell'inserimento delle proposte di voto
+   * @param DateTime $dataProposte Inizio dell'inserimento delle proposte di voto
    *
    * @return self Oggetto modificato
    */
-  public function setDataProposte(\DateTime $dataProposte): self {
+  public function setDataProposte(DateTime $dataProposte): self {
     $this->dataProposte = $dataProposte;
     return $this;
   }
@@ -160,7 +159,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    */
   public function __construct() {
     // valori predefiniti
-    $this->classiVisibili = array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null);
+    $this->classiVisibili = [1 => null, 2 => null, 3 => null, 4 => null, 5 => null];
   }
 
   /**
