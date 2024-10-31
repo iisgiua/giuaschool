@@ -285,7 +285,7 @@ class ColloquiController extends BaseController {
         ->setDocente($this->getUser())
         ->setData(new DateTime('today'))
         ->setInizio(new DateTime('08:30'))
-        ->setFine(new DateTime('09:30'));
+        ->setFine(new DateTime('09:30'))
         ->setDurata(10);
       $this->em->persist($colloquio);
     }
