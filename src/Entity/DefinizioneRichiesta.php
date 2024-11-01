@@ -100,7 +100,7 @@ class DefinizioneRichiesta implements Stringable {
   #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
   #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
-  private string $modulo = '';
+  private ?string $modulo = '';
 
   /**
    * @var array $campi Lista dei campi da compilare nel modulo: nome1 => tipo1, nome2 => tipo2... I tipi ammessi sono: string/text/int/float/bool/date/time
@@ -292,11 +292,11 @@ class DefinizioneRichiesta implements Stringable {
   /**
    * Modifica il nome del file del modulo di richiesta da compilare da parte del richiedente
    *
-   * @param string $modulo Nome del file del modulo di richiesta da compilare da parte del richiedente
+   * @param string|null $modulo Nome del file del modulo di richiesta da compilare da parte del richiedente
    *
    * @return self Oggetto modificato
    */
-  public function setModulo(string $modulo): self {
+  public function setModulo(?string $modulo): self {
     $this->modulo = $modulo;
     return $this;
   }

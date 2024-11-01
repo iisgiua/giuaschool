@@ -1248,8 +1248,9 @@ class SistemaController extends BaseController {
     // comandi per la pulizia della cache del database
     $commands = [
       new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),
-      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => true, '-n' => true, '-q' => true]),
       new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-metadata', '--flush' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-query', '-n' => true, '-q' => true]),
     ];
     // esegue comandi
     $application = new Application($kernel);

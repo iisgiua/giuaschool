@@ -80,10 +80,11 @@ class Updater {
     'update' => [
       1 => 'unzip',
       2 => 'fileUpdate',
-      3 => 'schemaUpdate',
-      4 => 'envUpdate',
-      5 => 'cleanUpdate',
-      6 => 'endUpdate']];
+      3 => 'requirements',
+      4 => 'schemaUpdate',
+      5 => 'envUpdate',
+      6 => 'cleanUpdate',
+      7 => 'endUpdate']];
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -740,9 +741,9 @@ class Updater {
     $data = [];
     // --- requisiti obbligatori ---
     // versione PHP
-    $test = version_compare(PHP_VERSION, '7.4', '>=');
+    $test = version_compare(PHP_VERSION, '8.2', '>=');
     $data['mandatory'][] = [
-      'Versione PHP 7.4 o superiore',
+      'Versione PHP 8.2 o superiore',
       PHP_VERSION,
       $test];
     // estensioni PHP: Ctype
@@ -757,29 +758,11 @@ class Updater {
       'Estensione PHP: iconv',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
-    // estensioni PHP: JSON
-    $test = function_exists('json_encode');
-    $data['mandatory'][] = [
-      'Estensione PHP: JSON',
-      $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
-    // estensioni PHP: mysqli
-    $test = function_exists('mysqli_connect');
-    $data['mandatory'][] = [
-      'Estensione PHP: mysqli',
-      $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
     // estensioni PHP: PCRE
     $test = defined('PCRE_VERSION');
     $data['mandatory'][] = [
       'Estensione PHP: PCRE',
       $test ? PCRE_VERSION : 'NON INSTALLATA',
-      $test];
-    // estensioni PHP: PDO
-    $test = class_exists('PDO');
-    $data['mandatory'][] = [
-      'Estensione PHP: PDO',
-      $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
     // estensioni PHP: Session
     $test = function_exists('session_start');
@@ -797,6 +780,24 @@ class Updater {
     $test = function_exists('token_get_all');
     $data['mandatory'][] = [
       'Estensione PHP: Tokenizer',
+      $test ? 'INSTALLATA' : 'NON INSTALLATA',
+      $test];
+    // estensioni PHP: JSON
+    $test = function_exists('json_encode');
+    $data['mandatory'][] = [
+      'Estensione PHP: JSON',
+      $test ? 'INSTALLATA' : 'NON INSTALLATA',
+      $test];
+    // estensioni PHP: PDO
+    $test = class_exists('PDO');
+    $data['mandatory'][] = [
+      'Estensione PHP: PDO',
+      $test ? 'INSTALLATA' : 'NON INSTALLATA',
+      $test];
+    // // estensioni PHP: mysqli
+    $test = function_exists('mysqli_connect');
+    $data['mandatory'][] = [
+      'Estensione PHP: mysqli',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
     // directory scrivibili: .

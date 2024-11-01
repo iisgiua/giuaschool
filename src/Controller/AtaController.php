@@ -374,8 +374,8 @@ class AtaController extends BaseController {
       // azione add
       $utente = null;
       $tipi = [];
-      $listaUtenti = $this->em->getRepository(Ata::class)->findBy(['abilitato' => 1,
-        'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
+      $listaUtenti = $this->em->getRepository(Ata::class)->findBy(['abilitato' => 1],
+        ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
     $listaTipi = ['label.rappresentante_I' => 'I', 'label.rappresentante_R' => 'R'];

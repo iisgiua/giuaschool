@@ -939,10 +939,8 @@ class AlunniController extends BaseController {
       $utente = null;
       $tipi = [];
       $listaUtenti = ($ruolo == 'A') ?
-        $this->em->getRepository(Alunno::class)->findBy(['abilitato' => 1,
-          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']) :
-        $this->em->getRepository(Genitore::class)->findBy(['abilitato' => 1,
-          'rappresentante' => ['']], ['cognome' => 'ASC', 'nome' => 'ASC']);
+        $this->em->getRepository(Alunno::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']) :
+        $this->em->getRepository(Genitore::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']);
     }
     // form
     $listaTipi = ['label.rappresentante_L' => 'L', 'label.rappresentante_I' => 'I'];
