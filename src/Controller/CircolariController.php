@@ -1134,7 +1134,6 @@ class CircolariController extends BaseController {
    * @param int $id ID della circolare (0 indica tutte)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/circolari/firma/classe/{classe}/{id}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -1180,20 +1179,15 @@ class CircolariController extends BaseController {
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/circolari/archivio/{pagina}", name="circolari_archivio",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function archivioAction(Request $request, CircolariUtil $circ, int $pagina): Response {
+  #[Route(path: '/circolari/archivio/{pagina}', name: 'circolari_archivio', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function archivio(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
-    $cerca = array();
+    $cerca = [];
     $cerca['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/anno', null);
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/oggetto', '');
@@ -1205,12 +1199,12 @@ class CircolariController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/circolari_archivio/pagina', $pagina);
     }
     // crea lista anni
-    $lista_anni = $this->em->getRepository('App\Entity\Circolare')->anniScolastici();
+    $lista_anni = $this->em->getRepository(Circolare::class)->anniScolastici();
     if (empty($cerca['anno']) && count($lista_anni) > 0) {
       $cerca['anno'] = array_values($lista_anni)[0];
     }
     // crea lista mesi
-    $lista_mesi = array();
+    $lista_mesi = [];
     for ($i=9; $i<=12; $i++) {
       $lista_mesi[$mesi[$i]] = $i;
     }
@@ -1219,34 +1213,30 @@ class CircolariController extends BaseController {
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_docenti', FormType::class)
-      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+      ->add('anno', ChoiceType::class, ['label' => 'label.filtro_anno_scolastico',
         'data' => $cerca['anno'],
         'choices' => $lista_anni,
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn($val, $key, $index) => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('mese', ChoiceType::class, array('label' => 'label.filtro_mese',
+        'required' => true])
+      ->add('mese', ChoiceType::class, ['label' => 'label.filtro_mese',
         'data' => $cerca['mese'],
         'choices' => $lista_mesi,
         'placeholder' => 'label.circolari_tutte',
         'choice_translation_domain' => false,
         'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn($val, $key, $index) => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
-      ->add('oggetto', TextType::class, array('label' => 'label.circolari_filtro_oggetto',
+        'required' => false])
+      ->add('oggetto', TextType::class, ['label' => 'label.circolari_filtro_oggetto',
         'data' => $cerca['oggetto'],
         'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
         'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.filtra',
-        'attr' => ['class' => 'btn-primary']))
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.filtra',
+        'attr' => ['class' => 'btn-primary']])
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -1262,13 +1252,13 @@ class CircolariController extends BaseController {
     }
     // legge le circolari
     $cerca['visualizza'] = 'T';
-    $dati = $this->em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati = $this->em->getRepository(Circolare::class)->lista($cerca, $pagina, $limite, $this->getUser());
     // legge dettagli su circolari
     foreach ($dati['lista'] as $c) {
       $dati['info'][$c->getId()] = $circ->dettagli($c);
     }
     // mostra la pagina di risposta
-    return $this->render('circolari/archivio.html.twig', array(
+    return $this->render('circolari/archivio.html.twig', [
       'pagina_titolo' => 'page.circolari_archivio',
       'form' => $form->createView(),
       'form_help' => null,
@@ -1276,8 +1266,7 @@ class CircolariController extends BaseController {
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
       'dati' => $dati,
-      'mesi' => $mesi,
-    ));
+      'mesi' => $mesi]);
   }
 
 }

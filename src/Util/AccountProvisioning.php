@@ -27,7 +27,6 @@ use Google_Service_Classroom_Teacher as GTeacher;
 use Google_Service_Directory as GDirectory;
 use Google_Service_Directory_Member as GMember;
 use Google_Service_Directory_User as GUser;
-use Google_Service_Directory_UserPhoto as GPhoto;
 use GuzzleHttp\Client;
 
 

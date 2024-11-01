@@ -41,22 +41,22 @@ return RectorConfig::configure()
 
   // --- Doctrine
   // ->withSets([
-    // DoctrineSetList::DOCTRINE_DBAL_30,
-    // DoctrineSetList::DOCTRINE_ORM_25,
-    // DoctrineSetList::DOCTRINE_ORM_29,
-    // DoctrineSetList::DOCTRINE_BUNDLE_210,
-    // DoctrineSetList::DOCTRINE_COLLECTION_22,
-    // DoctrineSetList::TYPED_COLLECTIONS,
-    // DoctrineSetList::DOCTRINE_CODE_QUALITY,
-    // ])
+  //   DoctrineSetList::DOCTRINE_DBAL_30,
+  //   DoctrineSetList::DOCTRINE_ORM_25,
+  //   DoctrineSetList::DOCTRINE_ORM_29,
+  //   DoctrineSetList::DOCTRINE_BUNDLE_210,
+  //   DoctrineSetList::DOCTRINE_COLLECTION_22,
+  //   DoctrineSetList::TYPED_COLLECTIONS,
+  //   DoctrineSetList::DOCTRINE_CODE_QUALITY,
+  //   ])
     // ->withPreparedSets(doctrineCodeQuality: true)
 
   // --- PHPUnit
   // ->withSets([
-    // PHPUnitSetList::PHPUNIT_100,
-    // PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
-    // PHPUnitSetList::PHPUNIT_CODE_QUALITY,
-    // ])
+  //   PHPUnitSetList::PHPUNIT_100,
+  //   PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
+  //   PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+  //   ])
   // ->withPreparedSets(phpunit: true, phpunitCodeQuality: true)
 
   // --- Twig

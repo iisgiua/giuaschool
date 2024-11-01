@@ -592,7 +592,7 @@ class CircolareRepository extends EntityRepository {
     // inizializza
     $dati = [];
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // legge anni
     $anni = $this->createQueryBuilder('c')
       ->select('DISTINCT c.anno')
