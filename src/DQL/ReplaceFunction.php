@@ -8,7 +8,8 @@
 
 namespace App\DQL;
 
-use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\TokenType;
+use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\SqlWalker;
@@ -23,19 +24,18 @@ class ReplaceFunction extends FunctionNode {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $subject La stringa da modificare
+   * @var Node $subject La stringa da modificare
    */
   public $subject = null;
 
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $search Il testo da cercare
+   * @var Node $search Il testo da cercare
    */
   public $search = null;
 
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $replace Il testo da sostituire
+   * @var Node $replace Il testo da sostituire
    */
   public $replace = null;
 
@@ -48,14 +48,14 @@ class ReplaceFunction extends FunctionNode {
    * @param Parser $parser Oggetto Parser
    */
   public function parse(Parser $parser): void {
-    $parser->match(Lexer::T_IDENTIFIER);
-    $parser->match(Lexer::T_OPEN_PARENTHESIS);
+    $parser->match(TokenType::T_IDENTIFIER);
+    $parser->match(TokenType::T_OPEN_PARENTHESIS);
     $this->subject = $parser->StringPrimary();
-    $parser->match(Lexer::T_COMMA);
+    $parser->match(TokenType::T_COMMA);
     $this->search = $parser->StringPrimary();
-    $parser->match(Lexer::T_COMMA);
+    $parser->match(TokenType::T_COMMA);
     $this->replace = $parser->StringPrimary();
-    $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+    $parser->match(TokenType::T_CLOSE_PARENTHESIS);
   }
 
   /**
@@ -65,7 +65,7 @@ class ReplaceFunction extends FunctionNode {
    *
    * @return string Stringa con la funzione SQL
    */
-  public function getSql(SqlWalker $sqlWalker) {
+  public function getSql(SqlWalker $sqlWalker): string {
     return 'REPLACE('.
       $this->subject->dispatch($sqlWalker).', '.
       $this->search->dispatch($sqlWalker).', '.

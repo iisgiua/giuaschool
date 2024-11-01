@@ -3,12 +3,15 @@
 framework:
   secret: '%env(APP_SECRET)%'
   ide: 'vscode'
+  http_method_override: false
+  handle_all_throwables: true
   form:
     enabled: true
   csrf_protection:
     enabled: true
   session:
     enabled: true
+    handler_id: 'session.handler.native_file'
     storage_factory_id: 'session.storage.factory.native'
     cookie_samesite: 'lax'
     cookie_secure: 'auto'
@@ -22,13 +25,26 @@ framework:
     throw_exception_on_invalid_property_path: false
   property_info:
     enabled: false
-  annotations:
-    enabled: true
-    cache: 'file'
+  annotations: false
   serializer:
     enabled: true
-    enable_annotations: true
+    enable_attributes: true
   php_errors:
     log: true
   web_link:
     enabled: true
+
+
+when@prod:
+  framework:
+    cache:
+      pools:
+        doctrine.result_cache_pool:
+          adapter: cache.app
+        doctrine.system_cache_pool:
+          adapter: cache.system
+
+
+when@test:
+  framework:
+    test: true

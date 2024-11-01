@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use App\Entity\Configurazione;
+use DateTime;
 use App\Security\GSuiteAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -22,7 +25,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
@@ -120,7 +122,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(
@@ -143,12 +145,12 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->mockedGoogleUser = null;
     $this->mockedOAuth2Client = $this->createMock(OAuth2ClientInterface::class);
     $this->mockedOAuth2Client->method('getAccessToken')->willReturnCallback(
-      function() { return new AccessToken(['access_token' => 'ACCTOK']); });
+      fn() => new AccessToken(['access_token' => 'ACCTOK']));
     $this->mockedOAuth2Client->method('fetchUserFromToken')->with('ACCTOK')->willReturnCallback(
-      function() { return $this->mockedGoogleUser; });
+      fn() => $this->mockedGoogleUser);
     $this->mockedOAuth2 = $this->createMock(ClientRegistry::class);
     $this->mockedOAuth2->method('getClient')->with('gsuite')->willReturnCallback(
-      function() { return $this->mockedOAuth2Client; });
+      fn() => $this->mockedOAuth2Client);
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
@@ -217,7 +219,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', [$ga, 'getUser']));
+    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', $ga->getUser(...)));
     $this->assertEquals($passport, $res);
   }
 
@@ -233,8 +235,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // utente Google inesistente
     $this->mockedGoogleUser = null;
     try {
@@ -288,7 +290,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente->setAbilitato(true);
     $this->em->flush();
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', '');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -305,8 +307,8 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'AG');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'AG');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
@@ -323,15 +325,15 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -357,7 +359,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente = $this->getReference('docente_curricolare_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $ga->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -366,7 +368,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(2, $this->session);
     $this->assertSame('Google', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
     // con profili
     $this->logs = [];
@@ -378,7 +380,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $utente = $this->getReference('staff_1');
     $tok = new PreAuthenticatedToken($utente, 'fw', []);
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $utente->setListaProfili(['DOCENTE' => [2], 'GENITORE' => [1]]);
     $this->em->flush();
     $res = $ga->onAuthenticationSuccess($req, $tok, 'fw');
@@ -413,7 +415,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame($exc, $this->session[Security::AUTHENTICATION_ERROR]);
+    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
@@ -436,7 +438,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[Security::AUTHENTICATION_ERROR]->getMessage());
+    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 

@@ -8,13 +8,13 @@
 
 namespace App\Tests\UnitTest\DQL;
 
+use Doctrine\ORM\Query\TokenType;
+use Exception;
 use App\DQL\DateFormatFunction;
 use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\QueryException;
-use Doctrine\ORM\EntityManager;
 
 
 /**
@@ -59,19 +59,19 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     $query->setDQL("SELECT DATE_FORMAT(c.creato, '%d/%m/%Y') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     // sintassi errata: no parametri
     $query->setDQL("SELECT DATE_FORMAT() FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
@@ -83,26 +83,26 @@ class DateFormatFunctionTest extends DatabaseTestCase {
     $query->setDQL("SELECT DATE_FORMAT(c.creato) FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 27: Error: Expected Doctrine\ORM\Query\Lexer::T_COMMA, got ')'", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 27: Error: Expected Doctrine\ORM\Query\TokenType::T_COMMA, got ')'", $exception);
     // sintassi errata: tre parametri
     $query->setDQL("SELECT DATE_FORMAT(c.creato, '%d/%m/%Y', 'altro') FROM App\Entity\Configurazione c");
     $parser = new Parser($query);
     $parser->getLexer()->moveNext();
-    $parser->match(Lexer::T_SELECT);
+    $parser->match(TokenType::T_SELECT);
     try {
       $exception = null;
       $ext->parse($parser);
     } catch (QueryException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame("[Syntax Error] line 0, col 39: Error: Expected Doctrine\ORM\Query\Lexer::T_CLOSE_PARENTHESIS, got ','", $exception);
+    $this->assertSame("[Syntax Error] line 0, col 39: Error: Expected Doctrine\ORM\Query\TokenType::T_CLOSE_PARENTHESIS, got ','", $exception);
   }
 
   /**

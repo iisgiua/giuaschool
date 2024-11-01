@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use App\Entity\Configurazione;
+use DateTime;
 use App\Security\FormAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -19,7 +22,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -109,11 +111,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // router: restituisce route richiesta
     $this->mockedRouter = $this->createMock(RouterInterface::class);
     $this->mockedRouter->method('generate')->willReturnCallback(
-      function($url) { return $url; });
+      fn($url) => $url);
     // otp: restituisce TRUE se i codici sono uguali
     $this->mockedOtp = $this->createMock(OtpUtil::class);
     $this->mockedOtp->method('controllaOtp')->willReturnCallback(
-      function($o1, $o2) { return $o1 === $o2 && !empty($o1); });
+      fn($o1, $o2) => $o1 === $o2 && !empty($o1));
     // logger: inserisce in coda logs
     $this->mockedLogger = $this->createMock(LoggerInterface::class);
     $this->mockedLogger->method('debug')->willReturnCallback(
@@ -204,10 +206,10 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame('user', $this->session[Security::LAST_USERNAME]);
+    $this->assertSame('user', $this->session[SecurityRequestAttributes::LAST_USERNAME]);
     $passport = new Passport(
-      new UserBadge('user', [$fa, 'getUser']),
-      new CustomCredentials([$fa, 'checkCredentials'], ['password' => 'pass', 'otp' => 'otp', 'ip' => '1.2.3.4']),
+      new UserBadge('user', $fa->getUser(...)),
+      new CustomCredentials($fa->checkCredentials(...), ['password' => 'pass', 'otp' => 'otp', 'ip' => '1.2.3.4']),
       [new CsrfTokenBadge('authenticate', 'TOKEN')]);
     $this->assertEquals($passport, $res);
   }
@@ -265,7 +267,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -288,8 +290,8 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente con id provider attivo
     $utente = $this->getReference('docente_curricolare_1');
     $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider', 'gsuite');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     try {
       $exception = null;
       $res = $fa->checkCredentials($credenziali, $utente);
@@ -322,7 +324,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore1_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', '');
     $utente->setOtp('otp1234');
     $this->em->flush();
     try {
@@ -331,7 +333,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -340,7 +342,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('genitore2_1A_1');
     $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     try {
@@ -349,7 +351,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -367,7 +369,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
-    $this->assertSame(null, $exception);
+    $this->assertNull($exception);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -449,11 +451,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -462,7 +464,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(2, $this->session);
     $this->assertSame('form', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
     // login otp, no profili
     $this->logs = [];
@@ -474,12 +476,12 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otpALTRO');
     $this->em->flush();
     $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
-    $adesso = new \DateTime();
+    $adesso = new DateTime();
     $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
@@ -488,7 +490,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(2, $this->session);
     $this->assertSame('form/OTP', $this->session['/APP/UTENTE/tipo_accesso']);
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
-    $this->assertTrue($utente->getUltimoAccesso() >= $adesso);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('otp1234', $utente->getUltimoOtp());
     $this->assertSame('login_home', $res->getTargetUrl());
     // login con profili
@@ -501,7 +503,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     $utente = $this->getReference('genitore1_2A_1');
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('otp_tipo', 'G');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $utente->setListaProfili(['GENITORE' => [1], 'DOCENTE' => [2]]);
     $this->em->flush();
@@ -539,7 +541,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame($exc, $this->session[Security::AUTHENTICATION_ERROR]);
+    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
@@ -563,7 +565,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[Security::AUTHENTICATION_ERROR]->getMessage());
+    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 

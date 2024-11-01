@@ -557,7 +557,7 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
 Scenario: mostra errore all'accesso alla pagina senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_docenti"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso alla pagina con altri utenti
   Dato logout utente

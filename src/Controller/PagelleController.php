@@ -8,6 +8,10 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
+use App\Entity\Classe;
+use App\Entity\Scrutinio;
 use App\Entity\Alunno;
 use App\Entity\Ata;
 use App\Entity\Docente;
@@ -15,9 +19,8 @@ use App\Entity\Genitore;
 use App\Entity\Staff;
 use App\Util\GenitoriUtil;
 use App\Util\PagelleUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -37,18 +40,15 @@ class PagelleController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|G|R|X"},
-   *    methods={"GET"})
-   *
-   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(PagelleUtil $pag, int $classe, string $tipo,
-                                        string $periodo): Response {
+  #[Route(path: '/pagelle/classe/{classe}/{tipo}/{periodo}', name: 'pagelle_classe', requirements: ['classe' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')"))]
+  public function documentoClasse(PagelleUtil $pag, int $classe, string $tipo,
+                                  string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -59,14 +59,14 @@ class PagelleController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // docente non abilitato
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore
@@ -159,18 +159,15 @@ class PagelleController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "periodo": "P|S|F|G|R|X"},
-   *    methods={"GET"})
-   *
-   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
-  public function documentoAlunnoAction(PagelleUtil $pag, GenitoriUtil $gen,
-                                        int $classe, int $alunno, string $tipo, string $periodo): Response {
+  #[Route(path: '/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}', name: 'pagelle_alunno', requirements: ['classe' => '\d+', 'alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')"))]
+  public function documentoAlunno(PagelleUtil $pag, GenitoriUtil $gen,
+                                  int $classe, int $alunno, string $tipo, string $periodo): Response {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -193,7 +190,7 @@ class PagelleController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore

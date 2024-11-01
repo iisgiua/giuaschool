@@ -55,7 +55,7 @@ class AnnotazioneRepository extends EntityRepository {
       ->join('a.docente', 'd')
       ->where('a.data=:data AND d INSTANCE OF App\Entity\Staff')
       ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
-      ->setParameters(['data' => $search['data']]);
+      ->setParameter('data',$search['data']);
     if ($sede) {
       $query
         ->andwhere('cl.sede=:sede')
@@ -71,4 +71,3 @@ class AnnotazioneRepository extends EntityRepository {
   }
 
 }
-

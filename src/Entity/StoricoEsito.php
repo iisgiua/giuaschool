@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\StoricoEsitoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,129 +21,118 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * StoricoEsito - dati per la memorizzazione degli esiti del precedente anno scolastico
  *
- * @ORM\Entity(repositoryClass="App\Repository\StoricoEsitoRepository")
- * @ORM\Table(name="gs_storico_esito")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="alunno", message="field.unique")
  *
  * @author Antonello Dessì
  */
-class StoricoEsito {
+#[ORM\Table(name: 'gs_storico_esito')]
+#[ORM\Entity(repositoryClass: StoricoEsitoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'alunno', message: 'field.unique')]
+class StoricoEsito implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'esito
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $classe Classe dell'alunno
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $classe = '';
 
   /**
    * @var string|null $esito Esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"A","N","R","L","E"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['A', 'N', 'R', 'L', 'E'], strict: true, message: 'field.choice')]
   private ?string $esito = 'A';
 
   /**
    * @var string|null $periodo Periodo dello scrutinio [F=scrutinio finale, G=esame giudizio sospeso, X=rinviato in precedente A.S.]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"F","G","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['F', 'G', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'F';
 
   /**
    * @var float|null $media Media dei voti
-   *
-   * @ORM\Column(type="float", nullable=true)
    */
+  #[ORM\Column(type: Types::FLOAT, nullable: true)]
   private ?float $media = 0;
 
   /**
    * @var int|null $credito Punteggio di credito
-   *
-   * @ORM\Column(type="integer", nullable=true)
    */
+  #[ORM\Column(type: Types::INTEGER, nullable: true)]
   private ?int $credito = 0;
 
   /**
    * @var int|null $creditoPrecedente Punteggio di credito degli anni precedenti
-   *
-   * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
    */
+  #[ORM\Column(name: 'credito_precedente', type: Types::INTEGER, nullable: true)]
   private ?int $creditoPrecedente = 0;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
-   * @ORM\OneToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\OneToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var array|null $dati Lista dei dati dello scrutinio
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -156,18 +150,18 @@ class StoricoEsito {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

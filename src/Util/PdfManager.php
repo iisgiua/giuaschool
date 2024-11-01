@@ -8,6 +8,8 @@
 
 namespace App\Util;
 
+use TCPDF;
+use Exception;
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -23,29 +25,16 @@ use Symfony\Component\Process\Process;
 class PdfManager {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var TCPDFController|null $pdfcontroller Controlla la creazione dell'oggetto TCPDF
-   */
-  private ?TCPDFController $pdfcontroller = null;
-
-  /**
-   * @var \TCPDF|null $pdf Gestore dei documenti in formato PDF
-   */
-  private ?\TCPDF $pdf = null;
-
-
   //==================== METODI DELLA CLASSE ====================
-
   /**
    * Costruttore
    *
    * @param TCPDFController $pdfcontroller Controlla la creazione dell'oggetto TCPDF
+   * @param TCPDF|null $pdf Gestore dei documenti in formato PDF
    */
-  public function __construct(TCPDFController $pdfcontroller) {
-    $this->pdfcontroller = $pdfcontroller;
-    $this->pdf = null;
+  public function __construct(
+      private readonly TCPDFController $pdfcontroller,
+      private ?TCPDF $pdf = null) {
   }
 
   /**
@@ -114,9 +103,9 @@ class PdfManager {
   /**
    * Restituisce il gestore del documento PDF
    *
-   * @return \TCPDF|null Restituisce il gestore del documento
+   * @return TCPDF|null Restituisce il gestore del documento
    */
-  public function getHandler(): ?\TCPDF {
+  public function getHandler(): ?TCPDF {
     return $this->pdf;
   }
 
@@ -136,7 +125,7 @@ class PdfManager {
     try {
       // importa file e calcola il numero pagine del documento
       $pageCount = $this->pdf->setSourceFile($file);
-    } catch (\Exception $e) {
+    } catch (Exception) {
       // documento illegibile o protetto: converte file PDF
       if (!$this->convertFormat($file)) {
         // errore nella conversione
@@ -146,7 +135,7 @@ class PdfManager {
       try {
         // riprova l'importazione
         $pageCount = $this->pdf->setSourceFile($file);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         // errore nella codifica
         return false;
       }
@@ -192,7 +181,7 @@ class PdfManager {
         rename($file.'.pdf', $file);
         return true;
       }
-    } catch (\Exception $err) {
+    } catch (Exception) {
       // errore: non fa niente
     }
     // errore: restituisce falso
@@ -210,8 +199,8 @@ class PdfManager {
     $testo = mb_strtoupper($nome, 'UTF-8');
     $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
     $testo = preg_replace('/\W+/','-', $testo);
-    if (substr($testo, -1) == '-') {
-      $testo = substr($testo, 0, -1);
+    if (str_ends_with((string) $testo, '-')) {
+      $testo = substr((string) $testo, 0, -1);
     }
     return $testo;
   }

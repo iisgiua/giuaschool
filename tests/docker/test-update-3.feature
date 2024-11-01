@@ -91,7 +91,7 @@ Scenario: inserisce piano di lavoro e lo visualizza su lista cattedre
     | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_piani"
+  Allora vedi la pagina "documenti_piani"
   E vedi la tabella:
     | classe e materia                                 | documento                          | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Piano di lavoro.*1B.*Informatica/ | Cancella |

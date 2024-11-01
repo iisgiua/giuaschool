@@ -1,6 +1,7 @@
 # config/packages/twig.yaml
 
 twig:
+  file_name_pattern: '*.twig'
   date:
     format: '%locale_date%'
   number_format:
@@ -8,8 +9,14 @@ twig:
     decimal_point: ','
     thousands_separator: ''
   form_themes: ['form.html.twig']
-  strict_variables: '%kernel.debug%'
+  strict_variables: false
   exception_controller: null
   paths:
     'PERSONAL/templates': ~
     'PERSONAL/data': 'data'
+
+
+
+when@test:
+    twig:
+        strict_variables: true

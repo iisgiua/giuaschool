@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\ScrutinioRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,144 +21,129 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Scrutinio - dati per la gestione di uno scrutinio
  *
- * @ORM\Entity(repositoryClass="App\Repository\ScrutinioRepository")
- * @ORM\Table(name="gs_scrutinio", uniqueConstraints={@ORM\UniqueConstraint(columns={"periodo","classe_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"periodo","classe"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Scrutinio {
+#[ORM\Table(name: 'gs_scrutinio')]
+#[ORM\UniqueConstraint(columns: ['periodo', 'classe_id'])]
+#[ORM\Entity(repositoryClass: ScrutinioRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['periodo', 'classe'], message: 'field.unique')]
+class Scrutinio implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per lo scrutinio
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-  * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
+   * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
   private ?string $periodo = 'P';
 
   /**
-   * @var \DateTime|null $data Data dello scrutinio
-   *
-   * @ORM\Column(type="date", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data dello scrutinio
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $inizio Ora dell'apertura dello scrutinio
-   *
-   * @ORM\Column(type="time", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $inizio Ora dell'apertura dello scrutinio
    */
-  private ?\DateTime $inizio = null;
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $inizio = null;
 
   /**
-   * @var \DateTime|null $fine Ora della chiusura dello scrutinio
-   *
-   * @ORM\Column(type="time", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $fine Ora della chiusura dello scrutinio
    */
-  private ?\DateTime $fine = null;
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $fine = null;
 
   /**
    * @var string|null $stato Stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","C","1","2","3","4","5","6","7","8","9"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'C', '1', '2', '3', '4', '5', '6', '7', '8', '9'], strict: true, message: 'field.choice')]
   private ?string $stato = 'N';
 
   /**
    * @var Classe|null $classe Classe dello scrutinio
    *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
   /**
    * @var array|null $dati Lista dei dati dello scrutinio
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dati = [];
 
   /**
-   * @var \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   *
-   * @ORM\Column(type="datetime", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    */
-  private ?\DateTime $visibile = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $visibile = null;
 
   /**
    * @var string|null $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
    *
-   * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"E","C","V","B"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: true)]
+  #[Assert\Choice(choices: ['E', 'C', 'V', 'B'], strict: true, message: 'field.choice')]
   private ?string $sincronizzazione = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -171,18 +161,18 @@ class Scrutinio {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -210,20 +200,20 @@ class Scrutinio {
   /**
    * Restituisce la data dello scrutinio
    *
-   * @return \DateTime|null Data dello scrutinio
+   * @return DateTime|null Data dello scrutinio
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dello scrutinio
    *
-   * @param \DateTime|null $data Data dello scrutinio
+   * @param DateTime|null $data Data dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setData(?\DateTime $data): self {
+  public function setData(?DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -231,20 +221,20 @@ class Scrutinio {
   /**
    * Restituisce l'ora dell'apertura dello scrutinio
    *
-   * @return \DateTime|null Ora dell'apertura dello scrutinio
+   * @return DateTime|null Ora dell'apertura dello scrutinio
    */
-  public function getInizio(): ?\DateTime {
+  public function getInizio(): ?DateTime {
     return $this->inizio;
   }
 
   /**
    * Modifica l'ora dell'apertura dello scrutinio
    *
-   * @param \DateTime|null $inizio Ora dell'apertura dello scrutinio
+   * @param DateTime|null $inizio Ora dell'apertura dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setInizio(?\DateTime $inizio): self {
+  public function setInizio(?DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -252,20 +242,20 @@ class Scrutinio {
   /**
    * Restituisce l'ora della chiusura dello scrutinio
    *
-   * @return \DateTime|null Ora della chiusura dello scrutinio
+   * @return DateTime|null Ora della chiusura dello scrutinio
    */
-  public function getFine(): ?\DateTime {
+  public function getFine(): ?DateTime {
     return $this->fine;
   }
 
   /**
    * Modifica l'ora della chiusura dello scrutinio
    *
-   * @param \DateTime|null $fine Ora della chiusura dello scrutinio
+   * @param DateTime|null $fine Ora della chiusura dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setFine(?\DateTime $fine): self {
+  public function setFine(?DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }
@@ -340,20 +330,20 @@ class Scrutinio {
   /**
    * Restituisce la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
-   * @return \DateTime|null Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   * @return DateTime|null Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    */
-  public function getVisibile(): ?\DateTime {
+  public function getVisibile(): ?DateTime {
     return $this->visibile;
   }
 
   /**
    * Modifica la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
-   * @param \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   * @param DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
    * @return self Oggetto modificato
    */
-  public function setVisibile(?\DateTime $visibile): self {
+  public function setVisibile(?DateTime $visibile): self {
     $this->visibile = $visibile;
     return $this;
   }
@@ -390,10 +380,7 @@ class Scrutinio {
    * @return mixed|null Valore del dato o null se non esiste
    */
   public function getDato(string $nome) {
-    if (isset($this->dati[$nome])) {
-      return $this->dati[$nome];
-    }
-    return null;
+    return $this->dati[$nome] ?? null;
   }
 
   /**
@@ -404,7 +391,7 @@ class Scrutinio {
    *
    * @return self Oggetto modificato
    */
-  public function addDato(string $nome, $valore): self {
+  public function addDato(string $nome, mixed $valore): self {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
       // clona array per forzare update su doctrine
       $valore = unserialize(serialize($valore));

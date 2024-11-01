@@ -32,33 +32,33 @@ class SedeType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
-      ->add('nome', TextType::class, array('label' => 'label.nome_sede',
-        'required' => true))
-      ->add('nomeBreve', TextType::class, array('label' => 'label.nome_breve_sede',
+      ->add('nome', TextType::class, ['label' => 'label.nome_sede',
+        'required' => true])
+      ->add('nomeBreve', TextType::class, ['label' => 'label.nome_breve_sede',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('citta', TextType::class, array('label' => 'label.citta',
+        'required' => true])
+      ->add('citta', TextType::class, ['label' => 'label.citta',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('indirizzo1', TextType::class, array('label' => 'label.indirizzo',
+        'required' => true])
+      ->add('indirizzo1', TextType::class, ['label' => 'label.indirizzo',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('indirizzo2', TextType::class, array('label' => 'label.indirizzo_cap',
+        'required' => true])
+      ->add('indirizzo2', TextType::class, ['label' => 'label.indirizzo_cap',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('telefono', TelType::class, array('label' => 'label.telefono',
+        'required' => true])
+      ->add('telefono', TelType::class, ['label' => 'label.telefono',
         'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('ordinamento', IntegerType::class, array('label' => 'label.ordinamento',
+        'required' => true])
+      ->add('ordinamento', IntegerType::class, ['label' => 'label.ordinamento',
         'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]));
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['return_url']."'"]]);
   }
 
   /**
@@ -66,11 +66,11 @@ class SedeType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('return_url');
-    $resolver->setDefaults(array(
+    $resolver->setDefaults([
       'return_url' => null,
-      'data_class' => Sede::class));
+      'data_class' => Sede::class]);
   }
 
 }

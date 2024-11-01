@@ -8,14 +8,16 @@
 
 namespace App\MessageHandler;
 
-use App\Entity\Alunno;
-use App\Entity\Ata;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Throwable;
+use App\Entity\Configurazione;
+use App\Entity\Sede;
+use App\Entity\Circolare;
 use App\Entity\CircolareUtente;
 use App\Entity\Docente;
 use App\Message\UtenteActionMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 
 /**
@@ -23,20 +25,8 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  *
  * @author Antonello Dessì
  */
-class UtenteActionMessageHandler implements MessageHandlerInterface {
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private EntityManagerInterface $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private LoggerInterface $logger;
-
+#[AsMessageHandler]
+class UtenteActionMessageHandler {
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -46,9 +36,10 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $logger) {
-    $this->em = $em;
-    $this->logger = $logger;
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private readonly LoggerInterface $logger)
+  {
   }
 
   /**
@@ -114,7 +105,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
           // errore
           $this->logger->warning('ACTION ERROR: undefined class', [$action->getTag()]);
       }
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
       // errore
       $this->logger->error('ACTION ERROR: '.$e->getMessage(), [$action->getTag()]);
     }
@@ -130,19 +121,20 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
    */
   public function docenteAdd(Docente $user) {
     // imposta circolari
-    $anno = substr($this->em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
-    $numSedi = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
+    $anno = substr((string) $this->em->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
+    $numSedi = $this->em->getRepository(Sede::class)->createQueryBuilder('s')
       ->select('COUNT(s.id)')
       ->getQuery()
       ->getSingleScalarResult();
 
 
-    $esistenti = $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $esistenti = $this->em->getRepository(CircolareUtente::class)->createQueryBuilder('cu')
       ->select('cu.id')
       ->where("cu.circolare=c.id AND cu.utente=:utente");
-    $circolari = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+    $circolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
       ->where("c.pubblicata=1 AND c.anno=:anno AND c.docenti='T' AND NOT EXISTS (".$esistenti.')')
-      ->setParameters(['anno' => $anno, 'utente' => $user])
+      ->setParameter('anno', $anno)
+      ->setParameter('utente', $user)
       ->getQuery()
       ->getResult();
 
@@ -156,7 +148,7 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
     // imposta utenti
     foreach ($listaId as $id) {
       $obj = (new CircolareUtente())
-        ->setCircolare($this->em->getReference('App\Entity\Circolare', $id))
+        ->setCircolare($this->em->getReference(Circolare::class, $id))
         ->setUtente($user)
         ->setLetta($user->getCreato());
       $this->em->persist($obj);
@@ -169,6 +161,5 @@ class UtenteActionMessageHandler implements MessageHandlerInterface {
 
 
   }
-
 
 }

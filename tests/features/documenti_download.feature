@@ -274,4 +274,4 @@ Scenario: accesso pagina scaricamento documenti senza utente
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"

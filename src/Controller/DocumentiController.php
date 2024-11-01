@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
@@ -19,12 +20,11 @@ use App\Entity\Materia;
 use App\Form\DocumentoType;
 use App\Util\DocumentiUtil;
 use App\Util\LogHandler;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -42,19 +42,17 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/programmi", name="documenti_programmi",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmiAction(DocumentiUtil $doc): Response {
+  #[Route(path: '/documenti/programmi', name: 'documenti_programmi', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function programmi(DocumentiUtil $doc): Response {
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     // recupera dati
     $dati = $doc->programmiDocente($this->getUser(), $programmiQuinte);
     // mostra la pagina di risposta
-    return $this->render('documenti/programmi.html.twig', array(
+    return $this->render('documenti/programmi.html.twig', [
       'pagina_titolo' => 'page.documenti_programmi',
-      'dati' => $dati));
+      'dati' => $dati]);
   }
 
   /**
@@ -69,14 +67,11 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/programmi/add/{classe}/{materia}", name="documenti_programmi_add",
-   *    requirements={"classe": "\d+", "materia": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmiAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                     LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+  #[Route(path: '/documenti/programmi/add/{classe}/{materia}', name: 'documenti_programmi_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function programmiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                               LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
@@ -86,7 +81,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'P',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'P',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -121,7 +116,7 @@ class DocumentiController extends BaseController {
         // imposta destinatari
         $doc->impostaDestinatari($documento);
         // conversione pfd
-        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
@@ -133,11 +128,11 @@ class DocumentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('documenti/programmi_add.html.twig', array(
+    return $this->render('documenti/programmi_add.html.twig', [
       'pagina_titolo' => 'page.documenti_programmi',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_programma',
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -149,13 +144,10 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/delete/{documento}", name="documenti_delete",
-   *    requirements={"documento": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
+  #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function delete(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
     // controllo permessi
     if (!$doc->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
@@ -179,29 +171,13 @@ class DocumentiController extends BaseController {
       unlink($dir.'/'.$allegato->getFile().'.'.$allegato->getEstensione());
     }
     // redirezione
-    switch ($documento->getTipo()) {
-      case 'P':
-        // programmi finali
-        $pagina = 'documenti_programmi';
-        break;
-      case 'R':
-        // relazioni finali
-        $pagina = 'documenti_relazioni';
-        break;
-      case 'M':
-        // documento 15 maggio
-        $pagina = 'documenti_maggio';
-        break;
-      case 'B':
-      case 'H':
-      case 'D':
-        // documenti bes
-        $pagina = 'documenti_bes';
-        break;
-      default:
-        // piani di lavoro
-        $pagina = 'documenti_piani';
-    }
+    $pagina = match ($documento->getTipo()) {
+        'P' => 'documenti_programmi',
+        'R' => 'documenti_relazioni',
+        'M' => 'documenti_maggio',
+        'B', 'H', 'D' => 'documenti_bes',
+        default => 'documenti_piani',
+    };
     return $this->redirectToRoute($pagina);
   }
 
@@ -212,18 +188,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/relazioni", name="documenti_relazioni",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioniAction(DocumentiUtil $doc): Response {
+  #[Route(path: '/documenti/relazioni', name: 'documenti_relazioni', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function relazioni(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->relazioniDocente($this->getUser());
     // mostra la pagina di risposta
-    return $this->render('documenti/relazioni.html.twig', array(
+    return $this->render('documenti/relazioni.html.twig', [
       'pagina_titolo' => 'page.documenti_relazioni',
-      'dati' => $dati));
+      'dati' => $dati]);
   }
 
   /**
@@ -239,16 +213,12 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/relazioni/add/{classe}/{materia}/{alunno}", name="documenti_relazioni_add",
-   *    requirements={"classe": "\d+", "materia": "\d+", "alunno": "\d+"},
-   *    defaults={"alunno": "0"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioniAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                     LogHandler $dblogger, Classe $classe, Materia $materia,
-                                     Alunno $alunno=null): Response {
+  #[Route(path: '/documenti/relazioni/add/{classe}/{materia}/{alunno}', name: 'documenti_relazioni_add', requirements: ['classe' => '\d+', 'materia' => '\d+', 'alunno' => '\d+'], defaults: ['alunno' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function relazioniAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                               LogHandler $dblogger, Classe $classe, Materia $materia,
+                               Alunno $alunno=null): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_relazioni_add/files';
@@ -257,7 +227,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'R',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'R',
       'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'docente' => $this->getUser()]);
     if ($documentoEsistente) {
       // errore
@@ -294,7 +264,7 @@ class DocumentiController extends BaseController {
         // imposta destinatari
         $doc->impostaDestinatari($documento);
         // conversione pfd
-        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
@@ -306,11 +276,11 @@ class DocumentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('documenti/relazioni_add.html.twig', array(
+    return $this->render('documenti/relazioni_add.html.twig', [
       'pagina_titolo' => 'page.documenti_relazioni',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuova_relazione',
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -320,18 +290,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/piani", name="documenti_piani",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiAction(DocumentiUtil $doc): Response {
+  #[Route(path: '/documenti/piani', name: 'documenti_piani', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function piani(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->pianiDocente($this->getUser());
     // mostra la pagina di risposta
-    return $this->render('documenti/piani.html.twig', array(
+    return $this->render('documenti/piani.html.twig', [
       'pagina_titolo' => 'page.documenti_piani',
-      'dati' => $dati));
+      'dati' => $dati]);
   }
 
   /**
@@ -346,14 +314,11 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/piani/add/{classe}/{materia}", name="documenti_piani_add",
-   *    requirements={"classe": "\d+", "materia": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                 LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+  #[Route(path: '/documenti/piani/add/{classe}/{materia}', name: 'documenti_piani_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function pianiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                           LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_piani_add/files';
@@ -362,7 +327,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'L',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'L',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -397,7 +362,7 @@ class DocumentiController extends BaseController {
         // imposta destinatari
         $doc->impostaDestinatari($documento);
         // conversione pfd
-        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
@@ -409,11 +374,11 @@ class DocumentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('documenti/piani_add.html.twig', array(
+    return $this->render('documenti/piani_add.html.twig', [
       'pagina_titolo' => 'page.documenti_piani',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_piano',
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -423,18 +388,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/maggio", name="documenti_maggio",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function maggioAction(DocumentiUtil $doc): Response {
+  #[Route(path: '/documenti/maggio', name: 'documenti_maggio', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function maggio(DocumentiUtil $doc): Response {
     // recupera dati
     $dati = $doc->maggioDocente($this->getUser());
     // mostra la pagina di risposta
-    return $this->render('documenti/maggio.html.twig', array(
+    return $this->render('documenti/maggio.html.twig', [
       'pagina_titolo' => 'page.documenti_maggio',
-      'dati' => $dati));
+      'dati' => $dati]);
   }
 
   /**
@@ -448,14 +411,11 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/maggio/add/{classe}", name="documenti_maggio_add",
-   *    requirements={"classe": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function maggioAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                  LogHandler $dblogger, Classe $classe): Response {
+  #[Route(path: '/documenti/maggio/add/{classe}', name: 'documenti_maggio_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function maggioAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                            LogHandler $dblogger, Classe $classe): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_maggio_add/files';
@@ -464,7 +424,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $this->em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'M',
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'M',
       'classe' => $classe]);
     if ($documentoEsistente) {
       // errore
@@ -497,7 +457,7 @@ class DocumentiController extends BaseController {
         // imposta destinatari
         $doc->impostaDestinatari($documento);
         // conversione pfd
-        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
@@ -509,11 +469,11 @@ class DocumentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('documenti/maggio_add.html.twig', array(
+    return $this->render('documenti/maggio_add.html.twig', [
       'pagina_titolo' => 'page.documenti_maggio',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_maggio',
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -525,15 +485,11 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/download/{documento}/{allegato}", name="documenti_download",
-   *    requirements={"documento": "\d+", "allegato": "\d+"},
-   *    defaults={"allegato": "0"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(DocumentiUtil $doc, Documento $documento,
-                                 File $allegato = null): Response {
+  #[Route(path: '/documenti/download/{documento}/{allegato}', name: 'documenti_download', requirements: ['documento' => '\d+', 'allegato' => '\d+'], defaults: ['allegato' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function download(DocumentiUtil $doc, Documento $documento,
+                           File $allegato = null): Response {
     // controlla allegato
     if ($allegato && !$documento->getAllegati()->contains($allegato)) {
       // errore
@@ -565,19 +521,15 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/docenti/{pagina}", name="documenti_docenti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function docentiAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  #[Route(path: '/documenti/docenti/{pagina}', name: 'documenti_docenti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function docenti(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
-    $criteri['classe'] = $this->em->getRepository('App\Entity\Classe')->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -587,7 +539,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'docenti',
       'values' => [$criteri['filtro'], $criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -606,18 +558,18 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->docenti($criteri, $this->getUser()->getSede(), $pagina);
+    $dati = $doc->docenti($criteri, $pagina, $this->getUser()->getSede());
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     $info['tipo'] = $criteri['tipo'];
     // mostra la pagina di risposta
-    return $this->render('documenti/docenti.html.twig', array(
+    return $this->render('documenti/docenti.html.twig', [
       'pagina_titolo' => 'page.documenti_docenti',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -629,14 +581,10 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/bes/{pagina}", name="documenti_bes",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  #[Route(path: '/documenti/bes/{pagina}', name: 'documenti_bes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function bes(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -651,9 +599,9 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/tipo', '');
-    $criteri['classe'] = $this->em->getRepository('App\Entity\Classe')->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -663,7 +611,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
       'values' => [$criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -683,13 +631,13 @@ class DocumentiController extends BaseController {
     $dati = $doc->besDocente($criteri, $this->getUser(), $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
-    return $this->render('documenti/bes.html.twig', array(
+    return $this->render('documenti/bes.html.twig', [
       'pagina_titolo' => 'page.documenti_bes',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -703,15 +651,11 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/bes/add/{alunno}", name="documenti_bes_add",
-   *    requirements={"alunno": "\d+"},
-   *    defaults={"alunno": 0},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAddAction(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
-                                LogHandler $dblogger, Alunno $alunno = null): Response {
+  #[Route(path: '/documenti/bes/add/{alunno}', name: 'documenti_bes_add', requirements: ['alunno' => '\d+'], defaults: ['alunno' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function besAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+                         LogHandler $dblogger, Alunno $alunno = null): Response {
     // inizializza
     $info = [];
     $classe = null;
@@ -733,7 +677,7 @@ class DocumentiController extends BaseController {
     // controlla azione
     $listaTipi = ['B', 'H', 'D'];
     if ($alunno) {
-      $documentiEsistenti = $this->em->getRepository('App\Entity\Documento')->findBy(['alunno' => $alunno]);
+      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno]);
       $tipiEsistenti = [];
       foreach ($documentiEsistenti as $des) {
         $tipiEsistenti[] = $des->getTipo();
@@ -768,7 +712,7 @@ class DocumentiController extends BaseController {
     // form di inserimento
     $opzioniClassi = null;
     if (!$alunno) {
-      $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+      $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
         $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
     }
     $opzioniTipi = [];
@@ -784,11 +728,11 @@ class DocumentiController extends BaseController {
       $allegati = $this->reqstack->getSession()->get($varSessione, []);
       $tipo = $form->get('tipo')->getData();
       $alunnoIndividuale = $alunno ? null :
-        $this->em->getRepository('App\Entity\Alunno')->findOneBy(['abilitato' => 1,
+        $this->em->getRepository(Alunno::class)->findOneBy(['abilitato' => 1,
         'id' => $form->get('alunno')->getData()]);
       if (!$alunno) {
         $controllaTipi = ($tipo == 'H' || $tipo == 'D') ? ['H', 'D'] : ['B'];
-        $documentiEsistenti = $this->em->getRepository('App\Entity\Documento')->findBy(['alunno' => $alunnoIndividuale,
+        $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunnoIndividuale,
           'tipo' => $controllaTipi]);
       }
       if (count($allegati) < 1) {
@@ -823,7 +767,7 @@ class DocumentiController extends BaseController {
         // imposta destinatari
         $doc->impostaDestinatari($documento);
         // conversione pfd
-        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // protegge documento
@@ -842,11 +786,11 @@ class DocumentiController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('documenti/bes_add.html.twig', array(
+    return $this->render('documenti/bes_add.html.twig', [
       'pagina_titolo' => 'page.documenti_bes',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => 'title.nuovo_documento_bes',
-      'info' => $info));
+      'info' => $info]);
   }
 
   /**
@@ -858,18 +802,14 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/alunni/{pagina}", name="documenti_alunni",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function alunniAction(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  #[Route(path: '/documenti/alunni/{pagina}', name: 'documenti_alunni', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function alunni(Request $request, DocumentiUtil $doc, int $pagina): Response {
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/tipo', '');
-    $criteri['classe'] = $this->em->getRepository('App\Entity\Classe')->find(
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -879,7 +819,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null, false);
     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'alunni',
       'values' => [$criteri['tipo'], $criteri['classe'], $opzioniClassi]]);
@@ -896,17 +836,17 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->alunni($criteri, $this->getUser()->getSede(), $pagina);
+    $dati = $doc->alunni($criteri, $pagina, $this->getUser()->getSede());
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
-    return $this->render('documenti/alunni.html.twig', array(
+    return $this->render('documenti/alunni.html.twig', [
       'pagina_titolo' => 'page.documenti_alunni',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_success' => null,
       'form_help' => null,
       'dati' => $dati,
-      'info' => $info));
+      'info' => $info]);
   }
 
    /**
@@ -917,16 +857,12 @@ class DocumentiController extends BaseController {
     *
     * @return Response Pagina di risposta
     *
-    * @Route("/documenti/bacheca/{pagina}", name="documenti_bacheca",
-    *    requirements={"pagina": "\d+"},
-    *    defaults={"pagina": 0},
-    *    methods={"GET","POST"})
-    *
-    * @IsGranted("ROLE_UTENTE")
     */
-   public function bachecaAction(Request $request, int $pagina): Response {
+   #[Route(path: '/documenti/bacheca/{pagina}', name: 'documenti_bacheca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+   #[IsGranted('ROLE_UTENTE')]
+   public function bacheca(Request $request, int $pagina): Response {
      // recupera criteri dalla sessione
-     $criteri = array();
+     $criteri = [];
      $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/tipo', '');
      $criteri['titolo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/titolo', '');
      if ($pagina == 0) {
@@ -963,17 +899,17 @@ class DocumentiController extends BaseController {
        $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
      }
      // recupera dati
-     $dati = $this->em->getRepository('App\Entity\Documento')->lista($criteri, $this->getUser(), $pagina);
+     $dati = $this->em->getRepository(Documento::class)->lista($criteri, $this->getUser(), $pagina);
      // informazioni di visualizzazione
      $info['pagina'] = $pagina;
      // mostra la pagina di risposta
-     return $this->render('documenti/bacheca.html.twig', array(
-       'pagina_titolo' => 'page.documenti_bacheca',
-       'form' => $form->createView(),
-       'form_success' => null,
-       'form_help' => null,
-       'dati' => $dati,
-       'info' => $info));
+     return $this->render('documenti/bacheca.html.twig', [
+      'pagina_titolo' => 'page.documenti_bacheca',
+      'form' => $form,
+      'form_success' => null,
+      'form_help' => null,
+      'dati' => $dati,
+      'info' => $info]);
    }
 
 }

@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Richiesta;
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Genitore;
@@ -40,11 +42,12 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
-      ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
+      ->leftJoin(Richiesta::class, 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
       ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere($sql)
-      ->setParameters(['utente' => $utente instanceOf Genitore ? $utente->getAlunno() : $utente,
-        'stati' => ['I', 'G'], 'sedi' => $sedi])
+      ->setParameter('utente', $utente instanceOf Genitore ? $utente->getAlunno() : $utente)
+      ->setParameter('stati', ['I', 'G'])
+      ->setParameter('sedi', $sedi)
       ->orderBy('dr.nome', 'ASC')
       ->addOrderBy('r.data', 'DESC')
       ->addOrderBy('r.inviata', 'DESC')
@@ -55,7 +58,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     $dati['multiple'] = [];
     $dati['richieste'] = [];
     $moduloPrec = null;
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     foreach ($richieste as $richiesta) {
       $modulo = $richiesta['id'];
       if (!$moduloPrec || $moduloPrec != $modulo) {
@@ -94,10 +97,11 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     // legge richieste
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio,(r.utente) AS utente_id')
-      ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
+      ->leftJoin(Richiesta::class, 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
       ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere("FIND_IN_SET('DN', dr.richiedenti) > 0")
-      ->setParameters(['classe' => $classe, 'sedi' => $sedi])
+      ->setParameter('classe', $classe)
+      ->setParameter('sedi', $sedi)
       ->orderBy('dr.nome', 'ASC')
       ->addOrderBy('r.data', 'DESC')
       ->addOrderBy('r.inviata', 'DESC')
@@ -108,7 +112,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     $dati['multiple'] = [];
     $dati['richieste'] = [];
     $moduloPrec = null;
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     foreach ($richieste as $richiesta) {
       $modulo = $richiesta['id'];
       if (!$moduloPrec || $moduloPrec != $modulo) {

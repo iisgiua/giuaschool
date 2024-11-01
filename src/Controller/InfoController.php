@@ -10,7 +10,7 @@ namespace App\Controller;
 
 use App\Util\ConfigLoader;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -26,11 +26,9 @@ class InfoController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/info/note-legali/", name="info_noteLegali",
-   *    methods={"GET"})
    */
-  public function noteLegaliAction(ConfigLoader $config): Response {
+  #[Route(path: '/info/note-legali/', name: 'info_noteLegali', methods: ['GET'])]
+  public function noteLegali(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'noteLegali');
@@ -42,11 +40,9 @@ class InfoController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/info/privacy/", name="info_privacy",
-   *    methods={"GET"})
    */
-  public function privacyAction(ConfigLoader $config): Response {
+  #[Route(path: '/info/privacy/', name: 'info_privacy', methods: ['GET'])]
+  public function privacy(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'privacy');
@@ -58,11 +54,9 @@ class InfoController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/info/cookie/", name="info_cookie",
-   *    methods={"GET"})
    */
-  public function cookieAction(ConfigLoader $config): Response {
+  #[Route(path: '/info/cookie/', name: 'info_cookie', methods: ['GET'])]
+  public function cookie(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'cookie');
@@ -74,11 +68,9 @@ class InfoController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/info/credits/", name="info_credits",
-   *    methods={"GET"})
    */
-  public function creditsAction(ConfigLoader $config): Response {
+  #[Route(path: '/info/credits/', name: 'info_credits', methods: ['GET'])]
+  public function credits(ConfigLoader $config): Response {
     // carica configurazione di sistema
     $config->carica();
     return $this->renderHtml('info', 'credits');

@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Docente;
 use App\Entity\Genitore;
@@ -29,7 +30,7 @@ class RichiestaColloquioRepository extends BaseRepository {
    */
   public function storico(Docente $docente): array {
     $dati = [];
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     // legge dati richieste
     $richieste = $this->createQueryBuilder('rc')
       ->select('c.id,c.abilitato,c.tipo,c.data,c.inizio,c.fine,c.luogo,rc.appuntamento,rc.stato,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
@@ -38,7 +39,9 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->leftJoin('a.classe', 'cl')
       ->where('c.docente=:docente AND (c.abilitato=:disabilitato OR c.data<:oggi)')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['docente' => $docente, 'disabilitato' => 0, 'oggi' => $oggi->format('Y-m-d')])
+      ->setParameter('docente', $docente)
+      ->setParameter('disabilitato', 0)
+      ->setParameter('oggi', $oggi->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // imposta dati da restituire
@@ -76,7 +79,7 @@ class RichiestaColloquioRepository extends BaseRepository {
    * @return array Dati delle richieste
    */
   public function richiesteAlunno(Alunno $alunno, Genitore $genitore): array {
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     // legge dati richieste
     $richieste = $this->createQueryBuilder('rc')
       ->select('rc.id,rc.appuntamento,rc.stato,rc.messaggio,c.id AS colloquio_id,c.tipo,c.data,c.luogo,(c.docente) AS docente_id')
@@ -84,8 +87,10 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'abilitato' => 1,
-        'oggi' => $oggi->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('genitore', $genitore)
+      ->setParameter('abilitato', 1)
+      ->setParameter('oggi', $oggi->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce i dati
@@ -95,14 +100,14 @@ class RichiestaColloquioRepository extends BaseRepository {
   /**
    * Restituisce gli appuntamenti confermati per i colloqui dell'alunno nel periodo indicato
    *
-   * @param \DateTime $inizio Data dell'inizio del periodo da controllare
-   * @param \DateTime $fine Data della fine del periodo da controllare
+   * @param DateTime $inizio Data dell'inizio del periodo da controllare
+   * @param DateTime $fine Data della fine del periodo da controllare
    * @param Alunno $alunno Alunno a cui sono riferite le richieste di colloquio
    * @param Genitore $genitore Genitore che ha richiesto il colloquio
    *
    * @return array Dati delle richieste
    */
-  public function colloquiGenitore(\DateTime $inizio, \DateTime $fine, Alunno $alunno, Genitore $genitore): array {
+  public function colloquiGenitore(DateTime $inizio, DateTime $fine, Alunno $alunno, Genitore $genitore): array {
     // legge dati colloqui
     $colloqui = $this->createQueryBuilder('rc')
       ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,d.nome,d.cognome,d.sesso')
@@ -111,8 +116,12 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('c.docente', 'd')
       ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND rc.stato=:stato AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'stato' => 'C', 'abilitato' => 1,
-          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('alunno', $alunno)
+      ->setParameter('genitore', $genitore)
+      ->setParameter('stato', 'C')
+      ->setParameter('abilitato', 1)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce i dati
@@ -122,13 +131,13 @@ class RichiestaColloquioRepository extends BaseRepository {
   /**
    * Restituisce gli appuntamenti confermati per i colloqui con il docente indicato e nel periodo specificato
    *
-   * @param \DateTime $inizio Data dell'inizio del periodo da controllare
-   * @param \DateTime $fine Data della fine del periodo da controllare
+   * @param DateTime $inizio Data dell'inizio del periodo da controllare
+   * @param DateTime $fine Data della fine del periodo da controllare
    * @param Docente $docente Docente che deve fare i colloqui
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloquiDocente(\DateTime $inizio, \DateTime $fine, Docente $docente): array {
+  public function colloquiDocente(DateTime $inizio, DateTime $fine, Docente $docente): array {
     // legge dati colloqui
     $colloqui = $this->createQueryBuilder('rc')
       ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,a.nome,a.cognome,a.sesso,a.dataNascita,cl.anno,cl.sezione,cl.gruppo')
@@ -137,8 +146,11 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'C', 'docente' => $docente, 'abilitato' => 1,
-          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->setParameter('stato', 'C')
+      ->setParameter('docente', $docente)
+      ->setParameter('abilitato', 1)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // restituisce dati
@@ -159,8 +171,10 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'R', 'docente' => $docente, 'abilitato' => 1,
-        'oggi' => (new \DateTime())->format('Y-m-d')])
+      ->setParameter('stato', 'R')
+      ->setParameter('docente', $docente)
+      ->setParameter('abilitato', 1)
+      ->setParameter('oggi', (new DateTime())->format('Y-m-d'))
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati

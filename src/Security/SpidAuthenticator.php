@@ -8,6 +8,10 @@
 
 namespace App\Security;
 
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use App\Entity\Spid;
+use App\Entity\Utente;
+use DateTime;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +23,6 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -38,34 +41,6 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   use AuthenticatorTrait;
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RouterInterface $router Gestore delle URL
-   */
-  private $router;
-
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private $dblogger;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private $config;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -77,13 +52,12 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger,
-                              LogHandler $dblogger, ConfigLoader $config) {
-    $this->router = $router;
-    $this->em = $em;
-    $this->logger = $logger;
-    $this->dblogger = $dblogger;
-    $this->config = $config;
+  public function __construct(
+      private RouterInterface $router,
+      private EntityManagerInterface $em,
+      private LoggerInterface $logger,
+      private LogHandler $dblogger,
+      private ConfigLoader $config) {
   }
 
   /**
@@ -110,7 +84,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function authenticate(Request $request): Passport {
     // crea e restituisce il passaporto
     return new SelfValidatingPassport(
-      new UserBadge($request->attributes->get('responseId'), [$this, 'getUser']));
+      new UserBadge($request->attributes->get('responseId'), $this->getUser(...)));
   }
 
   /**
@@ -125,7 +99,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function getUser(string $responseId): ?UserInterface {
     $user = null;
     // trova utente SPID
-    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $responseId, 'state' => 'A']);
+    $spid = $this->em->getRepository(Spid::class)->findOneBy(['responseId' => $responseId, 'state' => 'A']);
     if (!$spid) {
       // errore nei dati identificativi della risposta
       $this->logger->error('Autenticazione Spid non valida per mancanza di dati.', ['responseId' => $responseId]);
@@ -134,8 +108,8 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
     // autenticato su SPID: controlla se esiste nel registro ed abilitato all'accesso SPID
     $nome = $spid->getAttrName();
     $cognome = $spid->getAttrFamilyName();
-    $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
-    $user = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+    $codiceFiscale = substr((string) $spid->getAttrFiscalNumber(), 6);
+    $user = $this->em->getRepository(Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
     if (empty($user)) {
       // utente non esiste nel registro
       $spid->setState('E');
@@ -175,17 +149,17 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
-      $token->getUser()->setUltimoAccesso(new \DateTime());
+      $token->getUser()->setUltimoAccesso(new DateTime());
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
     }
     // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Login', array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', [
       'Login' => 'SPID',
       'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
-      'Lista profili' => $token->getUser()->getListaProfili()));
+      'Lista profili' => $token->getUser()->getListaProfili()]);
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare
@@ -202,7 +176,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
    */
    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }
@@ -220,7 +194,7 @@ class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationE
   public function start(Request $request, AuthenticationException $authException = null): Response {
     // eccezione che ha richiesto l'autenticazione
     $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }

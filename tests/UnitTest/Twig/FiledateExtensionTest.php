@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Twig;
 
+use DateTime;
 use App\Twig\FiledateExtension;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\TwigFunction;
@@ -50,7 +51,7 @@ class FiledateExtensionTest extends KernelTestCase {
     $ext = new FiledateExtension();
     // nome funzione
     $res = $ext->getFunctions();
-    $func = new TwigFunction('filedate', [$ext, 'getFileDate']);
+    $func = new TwigFunction('filedate', $ext->getFileDate(...));
     $this->assertCount(1, $res);
     $this->assertEquals($func, $res[0]);
   }
@@ -64,10 +65,10 @@ class FiledateExtensionTest extends KernelTestCase {
     $ext = new FiledateExtension();
     // file inesistente
     $res = $ext->getFileDate('NESSUN-FILE.NON.ESISTE');
-    $this->assertSame(null, $res);
+    $this->assertNull($res);
     // file esistente
     $res = $ext->getFileDate(__FILE__);
-    $tm = new \DateTime('@'.\filemtime(__FILE__));
+    $tm = new DateTime('@'.\filemtime(__FILE__));
     $this->assertEquals($tm, $res);
   }
 

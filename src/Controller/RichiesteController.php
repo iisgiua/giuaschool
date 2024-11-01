@@ -8,6 +8,15 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
+use App\Entity\DefinizioneRichiesta;
+use DateTime;
+use App\Entity\Alunno;
+use IntlDateFormatter;
+use App\Entity\Presenza;
+use App\Entity\Assenza;
+use App\Entity\Sede;
 use App\Entity\Classe;
 use App\Entity\Genitore;
 use App\Entity\Richiesta;
@@ -18,14 +27,12 @@ use App\Form\UscitaType;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\RichiesteUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -41,16 +48,14 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/lista", name="richieste_lista",
-   *    methods={"GET"})
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function listaAction(): Response {
+  #[Route(path: '/richieste/lista', name: 'richieste_lista', methods: ['GET'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
+  public function lista(): Response {
     // inizializza
     $info = [];
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->lista($this->getUser());
+    $dati = $this->em->getRepository(DefinizioneRichiesta::class)->lista($this->getUser());
     // pagina di risposta
     return $this->renderHtml('richieste', 'lista', $dati, $info);
   }
@@ -66,14 +71,11 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/add/{modulo}", name="richieste_add",
-   *    requirements={"modulo": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function addAction(Request $request, TranslatorInterface $trans,
-                            RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
+  #[Route(path: '/richieste/add/{modulo}', name: 'richieste_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
+  public function add(Request $request, TranslatorInterface $trans,
+                      RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -84,7 +86,7 @@ class RichiesteController extends BaseController {
     }
     $utente = ($this->getUser() instanceOf Genitore) ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla modulo richiesta
-    $definizioneRichiesta = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findOneBy([
+    $definizioneRichiesta = $this->em->getRepository(DefinizioneRichiesta::class)->findOneBy([
       'id' => $modulo, 'abilitata' => 1]);
     if (!$definizioneRichiesta) {
       // errore
@@ -105,7 +107,7 @@ class RichiesteController extends BaseController {
     }
     if ($definizioneRichiesta->getUnica()) {
       // controlla se esiste già una richiesta
-      $altraRichiesta = $this->em->getRepository('App\Entity\Richiesta')->findOneBy([
+      $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
         'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G']]);
       if ($altraRichiesta) {
         // errore: esiste già altra richiesta
@@ -127,7 +129,7 @@ class RichiesteController extends BaseController {
       'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      $invio = new \DateTime();
+      $invio = new DateTime();
       $valori = [];
       // controllo errori
       foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
@@ -146,7 +148,7 @@ class RichiesteController extends BaseController {
           $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
         } else {
           // controlla se richiesta esiste già per la data
-          $altra = $this->em->getRepository('App\Entity\Richiesta')->findOneBy([
+          $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
             'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G'],
             'data' => $form->get('data')->getData()]);
           if ($altra) {
@@ -157,7 +159,7 @@ class RichiesteController extends BaseController {
             // controlla scadenza
             $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
             $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr($oraScadenza, 0, 2).' hour +'.substr($oraScadenza, 3, 2).' minute');
+            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
             if ($invio > $scadenza) {
               // richiesta inviata oltre i termini
               $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
@@ -176,7 +178,7 @@ class RichiesteController extends BaseController {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
         // crea documento PDF
-        list($documento, $documentoId) = $ric->creaPdf($definizioneRichiesta, $utente,
+        [$documento, $documentoId] = $ric->creaPdf($definizioneRichiesta, $utente,
           $utente->getClasse(), $valori, $data, $invio);
         // imposta eventuali allegati
         $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
@@ -209,17 +211,14 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/delete/{id}", name="richieste_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function deleteAction(LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
+  public function delete(LogHandler $dblogger, int $id): Response {
     // inizializza
     $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->findOneBy(['id' => $id,
+    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $id,
       'utente' => $utente, 'stato' => ['I', 'G']]);
     if (!$richiesta) {
       // errore
@@ -238,7 +237,7 @@ class RichiesteController extends BaseController {
     // cambia stato
     $richiestaVecchia = clone $richiesta;
     $richiesta
-      ->setInviata(new \DateTime())
+      ->setInviata(new DateTime())
       ->setGestita(null)
       ->setStato('A');
     // memorizzazione e log
@@ -255,16 +254,12 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/download/{id}/{documento}", name="richieste_download",
-   *    requirements={"id": "\d+", "documento": "\d+"},
-   *    defaults={"documento": "0"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function downloadAction(int $id, int $documento): Response {
+  #[Route(path: '/richieste/download/{id}/{documento}', name: 'richieste_download', requirements: ['id' => '\d+', 'documento' => '\d+'], defaults: ['documento' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function download(int $id, int $documento): Response {
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
+    $richiesta = $this->em->getRepository(Richiesta::class)->find($id);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -316,34 +311,30 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}", name="richieste_uscita",
-   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "richiesta": "\d+", "posizione": "\d+"},
-   *    defaults={"posizione": "0"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function uscitaAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                               LogHandler $dblogger, string $data, int $alunno, int $richiesta,
-                               int $posizione): Response {
+  #[Route(path: '/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}', name: 'richieste_uscita', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'richiesta' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function uscita(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                         LogHandler $dblogger, string $data, int $alunno, int $richiesta,
+                         int $posizione): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno]);
     if (!$alunno || !$alunno->getClasse()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla data
-    $data = \DateTime::createFromFormat('Y-m-d', $data);
+    $data = DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data, $alunno->getClasse()->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->findOneBy(['id' => $richiesta,
+    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $richiesta,
       'utente' => $alunno, 'data' => $data]);
     if ($richiesta && (!in_array($richiesta->getStato(), ['I', 'G'], true) ||
         $richiesta->getDefinizioneRichiesta()->getUnica() ||
@@ -356,7 +347,7 @@ class RichiesteController extends BaseController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data, $alunno->getClasse()->getSede());
     // controlla uscita
-    $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alunno,
+    $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno,
       'data' => $data]);
     if ($uscita) {
       // edit
@@ -375,11 +366,11 @@ class RichiesteController extends BaseController {
       if ($richiesta) {
         $ora = $richiesta->getValori()['ora'];
       } else {
-        $ora = new \DateTime();
+        $ora = new DateTime();
         if ($data->format('Y-m-d') != date('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
             $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
           // data non odierna o ora attuale fuori da orario
-          $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
+          $ora = DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
         }
       }
       $uscita = (new Uscita())
@@ -398,7 +389,7 @@ class RichiesteController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // info da visualizzare
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data'] =  $formatter->format($data);
     $info['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
@@ -412,7 +403,7 @@ class RichiesteController extends BaseController {
       'values' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      $presenza = $this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+      $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data]);
       if (!isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
         // uscita non esiste, niente da fare
@@ -435,7 +426,7 @@ class RichiesteController extends BaseController {
           $this->em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['data' => $data,
+          $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['data' => $data,
             'alunno' => $alunno]);
           if ($assenza) {
             // cancella assenza
@@ -450,7 +441,7 @@ class RichiesteController extends BaseController {
         if ($richiesta || $form->get('giustificazione')->getData() === false) {
           // gestione autorizzazione
           $uscita
-            ->setGiustificato(new \DateTime('today'))
+            ->setGiustificato(new DateTime('today'))
             ->setDocenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
@@ -460,7 +451,7 @@ class RichiesteController extends BaseController {
         // log azione
         if (isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
             'Uscita' => $uscitaId,
             'Alunno' => $uscita->getAlunno()->getId(),
             'Data' => $uscita->getData()->format('Y-m-d'),
@@ -469,35 +460,31 @@ class RichiesteController extends BaseController {
             'Valido' => $uscita->getValido(),
             'Giustificato' => ($uscita->getGiustificato() ? $uscita->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $uscita->getDocente()->getId(),
-            'DocenteGiustifica' => ($uscita->getDocenteGiustifica() ? $uscita->getDocenteGiustifica()->getId() : null)
-          ));
+            'DocenteGiustifica' => ($uscita->getDocenteGiustifica() ? $uscita->getDocenteGiustifica()->getId() : null)]);
         } elseif (isset($uscita_old)) {
           // modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica uscita', array(
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita', [
             'Uscita' => $uscita->getId(),
             'Ora' => $uscitaOld->getOra()->format('H:i'),
             'Note' => $uscitaOld->getNote(),
             'Valido' => $uscitaOld->getValido(),
             'Giustificato' => ($uscitaOld->getGiustificato() ? $uscitaOld->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $uscitaOld->getDocente()->getId(),
-            'DocenteGiustifica' => ($uscitaOld->getDocenteGiustifica() ? $uscitaOld->getDocenteGiustifica()->getId() : null)
-          ));
+            'DocenteGiustifica' => ($uscitaOld->getDocenteGiustifica() ? $uscitaOld->getDocenteGiustifica()->getId() : null)]);
         } else {
           // nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea uscita', array(
-            'Uscita' => $uscita->getId()
-          ));
+          $dblogger->logAzione('ASSENZE', 'Crea uscita', [
+            'Uscita' => $uscita->getId()]);
         }
         if (isset($assenzaId)) {
           // cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
             'Assenza' => $assenzaId,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
             'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)
-          ));
+            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
         }
         // redirezione
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
@@ -515,26 +502,22 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/gestione/{pagina}", name="richieste_gestione",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, int $pagina): Response {
+  #[Route(path: '/richieste/gestione/{pagina}', name: 'richieste_gestione', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function gestione(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
     $dati = [];
     // criteri di ricerca
-    $criteri = array();
+    $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo', '');
     $criteri['stato'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'I');
-    $sede = $this->em->getRepository('App\Entity\Sede')->find(
+    $sede = $this->em->getRepository(Sede::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/sede', 0));
     $criteri['sede'] = $sede ? $sede->getId() : 0;
-    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+    $classe = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/classe', 0));
     $criteri['classe'] = $classe ? $classe->getId() : 0;
     $criteri['residenza'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/residenza', '');
@@ -550,12 +533,12 @@ class RichiesteController extends BaseController {
     // lista sedi
     if ($this->getUser()->getSede()) {
       // sede definita
-      $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
+      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
       $criteri['sede'] = $sede->getId();
       $opzioniSedi[$sede->getNomeBreve()] = $sede;
     } else {
       // crea lista
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
       if (!$criteri['sede']) {
         // definisce sempre una sede
         $sede = $opzioniSedi[array_key_first($opzioniSedi)];
@@ -567,7 +550,7 @@ class RichiesteController extends BaseController {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'richieste',
       'values' => [$criteri['tipo'], $criteri['stato'], $sede, $opzioniSedi, $classe,
@@ -594,7 +577,7 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Richiesta')->lista($this->getUser(), $criteri, $pagina);
+    $dati = $this->em->getRepository(Richiesta::class)->lista($this->getUser(), $criteri, $pagina);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
@@ -610,18 +593,15 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/remove/{id}", name="richieste_remove",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function removeAction(Request $request, LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/richieste/remove/{id}', name: 'richieste_remove', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function remove(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
+    $richiesta = $this->em->getRepository(Richiesta::class)->find($id);
     if (!$richiesta || $richiesta->getStato() == 'R') {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -647,7 +627,7 @@ class RichiesteController extends BaseController {
         // cambia stato
         $richiestaVecchia = clone $richiesta;
         $richiesta
-          ->setGestita(new \DateTime())
+          ->setGestita(new DateTime())
           ->setStato('R')
           ->setMessaggio($form->get('messaggio')->getData());
       // memorizzazione e log
@@ -668,18 +648,15 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/manage/{id}", name="richieste_manage",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function manageAction(Request $request, LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/richieste/manage/{id}', name: 'richieste_manage', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function manage(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
+    $richiesta = $this->em->getRepository(Richiesta::class)->find($id);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -718,25 +695,28 @@ class RichiesteController extends BaseController {
       // cambia stato
       $richiestaVecchia = clone $richiesta;
       $richiesta
-        ->setGestita(new \DateTime())
+        ->setGestita(new DateTime())
         ->setStato('G')
         ->setMessaggio($form->get('messaggio')->getData());
       // memorizzazione e log
       $dblogger->logModifica('RICHIESTE', 'Gestisce richiesta', $richiestaVecchia, $richiesta);
       if (isset($derogaVecchia)) {
-        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
-          'Username' => $richiesta->getUtente()->getUsername(),
-          ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia));
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
+          'Username' => $richiesta->getUtente()->getUserIdentifier(),
+            ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia]);
       }
       // controlla unicità
       if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchia->getStato() == 'R') {
         // richiesta gestita deve essere una sola
-        $this->em->getRepository('App\Entity\Richiesta')->createQueryBuilder('r')
+        $this->em->getRepository(Richiesta::class)->createQueryBuilder('r')
           ->update()
           ->set('r.stato', ':rimossa')
           ->where('r.definizioneRichiesta=:modulo AND r.utente=:alunno AND r.stato=:gestita AND r.id!=:richiesta')
-          ->setParameters(['rimossa' => 'R', 'modulo' => $richiesta->getDefinizioneRichiesta(),
-            'alunno' => $richiesta->getUtente(), 'gestita' => 'G', 'richiesta' => $richiesta->getId()])
+          ->setParameter('rimossa', 'R')
+          ->setParameter('modulo', $richiesta->getDefinizioneRichiesta())
+          ->setParameter('alunno', $richiesta->getUtente())
+          ->setParameter('gestita', 'G')
+          ->setParameter('richiesta', $richiesta->getId())
           ->getQuery()
           ->getResult();
       }
@@ -754,17 +734,14 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/{classe}", name="richieste_classe",
-   *   requirements={"classe": "\d+"},
-   *   methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(Classe $classe): Response {
+  #[Route(path: '/richieste/classe/{classe}', name: 'richieste_classe', requirements: ['classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function classe(Classe $classe): Response {
     // inizializza
     $info = [];
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->listaClasse($classe);
+    $dati = $this->em->getRepository(DefinizioneRichiesta::class)->listaClasse($classe);
     foreach ($dati['richieste'] as $modulo => $lista) {
       if (!empty($lista['nuove'])) {
         foreach ($lista['nuove'] as $key => $richiesta) {
@@ -788,17 +765,14 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/delete/{classe}/{id}", name="richieste_classe_delete",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeDeleteAction(LogHandler $dblogger, Classe $classe, int $id): Response {
+  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function classeDelete(LogHandler $dblogger, Classe $classe, int $id): Response {
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
-    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->findOneBy($criteri);
+    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy($criteri);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -817,7 +791,7 @@ class RichiesteController extends BaseController {
     // cambia stato
     $richiestaVecchia = clone $richiesta;
     $richiesta
-      ->setInviata(new \DateTime())
+      ->setInviata(new DateTime())
       ->setGestita(null)
       ->setStato('A')
       ->setMessaggio('');
@@ -839,15 +813,12 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/classe/add/{classe}/{modulo}", name="richieste_classe_add",
-   *    requirements={"modulo": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAddAction(Request $request, TranslatorInterface $trans,
-                                  RichiesteUtil $ric, LogHandler $dblogger,
-                                  Classe $classe, int $modulo): Response {
+  #[Route(path: '/richieste/classe/add/{classe}/{modulo}', name: 'richieste_classe_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function classeAdd(Request $request, TranslatorInterface $trans,
+                            RichiesteUtil $ric, LogHandler $dblogger,
+                            Classe $classe, int $modulo): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -858,7 +829,7 @@ class RichiesteController extends BaseController {
     }
     $utente = ($this->getUser() instanceOf Genitore) ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla modulo richiesta
-    $definizioneRichiesta = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findOneBy([
+    $definizioneRichiesta = $this->em->getRepository(DefinizioneRichiesta::class)->findOneBy([
       'id' => $modulo, 'abilitata' => 1]);
     if (!$definizioneRichiesta) {
       // errore
@@ -878,7 +849,7 @@ class RichiesteController extends BaseController {
     }
     if ($definizioneRichiesta->getUnica()) {
       // controlla se esiste già una richiesta
-      $altraRichiesta = $this->em->getRepository('App\Entity\Richiesta')->findOneBy([
+      $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
         'definizioneRichiesta' => $modulo, 'classe' => $classe, 'stato' => ['I', 'G']]);
       if ($altraRichiesta) {
         // errore: esiste già altra richiesta
@@ -896,13 +867,13 @@ class RichiesteController extends BaseController {
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     $info['classe'] = $classe;
     $info['valore_classe'] = $classe.' - '.$classe->getSede()->getNomeBreve();
-    $info['valore_data'] = (new \DateTime())->format('Y-m-d');
+    $info['valore_data'] = (new DateTime())->format('Y-m-d');
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      $invio = new \DateTime();
+      $invio = new DateTime();
       $valori = [];
       // controllo errori
       foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
@@ -924,7 +895,7 @@ class RichiesteController extends BaseController {
           $form->addError(new FormError($trans->trans('exception.campo_data_successivo_oggi')));
         } else {
           // controlla se richiesta esiste già per la data
-          $altra = $this->em->getRepository('App\Entity\Richiesta')->findOneBy([
+          $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
             'definizioneRichiesta' => $modulo, 'stato' => ['I', 'G'], 'classe' => $classe,
             'data' => $form->get('data')->getData()]);
           if ($altra) {
@@ -935,7 +906,7 @@ class RichiesteController extends BaseController {
             // controlla scadenza
             $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
             $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr($oraScadenza, 0, 2).' hour +'.substr($oraScadenza, 3, 2).' minute');
+            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
             if ($invio > $scadenza) {
               // richiesta inviata oltre i termini
               $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
@@ -954,7 +925,7 @@ class RichiesteController extends BaseController {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
         // crea documento PDF
-        list($documento, $documentoId) = $ric->creaPdf($definizioneRichiesta, $utente, $classe,
+        [$documento, $documentoId] = $ric->creaPdf($definizioneRichiesta, $utente, $classe,
           $valori, $data, $invio);
         // imposta eventuali allegati
         $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
@@ -987,24 +958,20 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/modulo/evacuazione/{formato}/{pagina}", name="richieste_modulo_evacuazione",
-   *    requirements={"formato": "H|C", "pagina": "\d+"},
-   *    defaults={"formato": "H", "pagina": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function moduloEvacuazioneAction(Request $request, string $formato, int $pagina): Response {
+  #[Route(path: '/richieste/modulo/evacuazione/{formato}/{pagina}', name: 'richieste_modulo_evacuazione', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function moduloEvacuazione(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
     $dati = [];
     // criteri di ricerca
-    $criteri = array();
-    $sede = $this->em->getRepository('App\Entity\Sede')->find(
+    $criteri = [];
+    $sede = $this->em->getRepository(Sede::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_evacuazione/sede', 0));
     $criteri['sede'] = $sede ? $sede->getId() : 0;
-    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+    $classe = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_evacuazione/classe', 0));
     $criteri['classe'] = $classe ? $classe->getId() : 0;
     if ($pagina == 0) {
@@ -1017,19 +984,19 @@ class RichiesteController extends BaseController {
     // lista sedi
     if ($this->getUser()->getSede()) {
       // sede definita
-      $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
+      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
       $criteri['sede'] = $sede->getId();
       $opzioniSedi[$sede->getNomeBreve()] = $sede;
     } else {
       // crea lista
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
     // cambio sede
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
     // form filtro
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'evacuazione',
       'values' => [$sede, $opzioniSedi, $classe, $opzioniClassi]]);
@@ -1045,16 +1012,16 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_evacuazione/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Richiesta')->listaClasse($this->getUser(), 'V',
+    $dati = $this->em->getRepository(Richiesta::class)->listaClasse($this->getUser(), 'V',
       $criteri, $formato == 'C' ? -1 : $pagina);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_evacuazione.csv.twig', array(
+      $csv = $this->renderView('richieste/modulo_evacuazione.csv.twig', [
         'dati' => $dati,
-        'info' => $info));
+        'info' => $info]);
       // invia il documento
       $nomefile = 'prove-evacuazione.csv';
       $response = new Response($csv);
@@ -1076,25 +1043,21 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/richieste/modulo/lista/{formato}/{pagina}", name="richieste_modulo_lista",
-   *    requirements={"formato": "H|C", "pagina": "\d+"},
-   *    defaults={"formato": "H", "pagina": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function moduloListaAction(Request $request, string $formato, int $pagina): Response {
+  #[Route(path: '/richieste/modulo/lista/{formato}/{pagina}', name: 'richieste_modulo_lista', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function moduloLista(Request $request, string $formato, int $pagina): Response {
     // inizializza
     $info = [];
     $info['sedi'] = [];
     $dati = [];
     // criteri di ricerca
-    $criteri = array();
+    $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/tipo', '');
-    $sede = $this->em->getRepository('App\Entity\Sede')->find(
+    $sede = $this->em->getRepository(Sede::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/sede', 0));
     $criteri['sede'] = $sede ? $sede->getId() : 0;
-    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+    $classe = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/classe', 0));
     $criteri['classe'] = $classe ? $classe->getId() : 0;
     $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/richieste_modulo_lista/cognome', '');
@@ -1107,24 +1070,24 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/pagina', $pagina);
     }
     // lista tipi
-    $opzioniTipi = $this->em->getRepository('App\Entity\DefinizioneRichiesta')
+    $opzioniTipi = $this->em->getRepository(DefinizioneRichiesta::class)
       ->opzioniModuli($this->getUser());
     // lista sedi
     if ($this->getUser()->getSede()) {
       // sede definita
-      $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
+      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
       $criteri['sede'] = $sede->getId();
       $opzioniSedi[$sede->getNomeBreve()] = $sede;
     } else {
       // crea lista
-      $opzioniSedi = $this->em->getRepository('App\Entity\Sede')->opzioni();
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
     }
     // cambio sede
     foreach ($opzioniSedi as $s) {
       $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
     // lista classi
-    $opzioniClassi = $this->em->getRepository('App\Entity\Classe')->opzioni(
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
     // form filtro
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'moduli',
@@ -1148,16 +1111,16 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_lista/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Richiesta')
+    $dati = $this->em->getRepository(Richiesta::class)
       ->listaModuliAlunni($this->getUser(), $criteri, $formato == 'C' ? -1 : $pagina);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_lista.csv.twig', array(
+      $csv = $this->renderView('richieste/modulo_lista.csv.twig', [
         'dati' => $dati,
-        'info' => $info));
+        'info' => $info]);
       // invia il documento
       $nomefile = 'modulo.csv';
       $response = new Response($csv);

@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\MenuOpzione;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +20,13 @@ use App\Tests\EntityTestCase;
  */
 class MenuOpzioneTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\MenuOpzione';
+    $this->entity = MenuOpzione::class;
     // campi da testare
     $this->fields = ['ruolo', 'funzione', 'nome', 'descrizione', 'url', 'ordinamento', 'abilitato', 'icona', 'menu', 'sottoMenu'];
     $this->noStoredFields = [];
@@ -39,6 +39,8 @@ class MenuOpzioneTest extends EntityTestCase {
     $this->canWrite = ['gs_menu_opzione' => ['id', 'creato', 'modificato', 'ruolo', 'funzione', 'nome', 'descrizione', 'url', 'ordinamento', 'abilitato', 'icona', 'menu_id', 'sotto_menu_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -51,7 +53,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -78,17 +80,17 @@ class MenuOpzioneTest extends EntityTestCase {
           ($field == 'menu' ? $this->getReference("menu_UTENTE") :
           ($field == 'sottoMenu' ? $this->getReference("menu_ALUNNI") :
           null))))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -101,14 +103,14 @@ class MenuOpzioneTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -130,7 +132,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // ruolo
-    $property = $this->getPrivateProperty('App\Entity\MenuOpzione', 'ruolo');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'ruolo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ruolo - NOT BLANK');
@@ -148,7 +150,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setFunzione(str_repeat('*', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Funzione - VALID MAX LENGTH');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\MenuOpzione', 'nome');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -160,7 +162,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // descrizione
-    $property = $this->getPrivateProperty('App\Entity\MenuOpzione', 'descrizione');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'descrizione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Descrizione - NOT BLANK');
@@ -184,7 +186,7 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setIcona(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Icona - VALID MAX LENGTH');
     // menu
-    $property = $this->getPrivateProperty('App\Entity\MenuOpzione', 'menu');
+    $property = $this->getPrivateProperty(MenuOpzione::class, 'menu');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Menu - NOT BLANK');

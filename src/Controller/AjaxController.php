@@ -8,11 +8,13 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Docente;
+use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Staff;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 
@@ -33,31 +35,27 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/docenti/{cognome}/{nome}/{sede}/{pagina}", name="ajax_docenti",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"cognome": "-", "nome": "-", "sede": "-", "pagina": "1"},
-   *    methods={"POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function docentiAjaxAction(string $cognome, string $nome, string $sede,
-                                    string $pagina): JsonResponse {
+  #[Route(path: '/ajax/docenti/{cognome}/{nome}/{sede}/{pagina}', name: 'ajax_docenti', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function docentiAjax(string $cognome, string $nome, string $sede,
+                              string $pagina): JsonResponse {
     // inizializza
-    $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => array());
-    $dati = array();
+    $search = ['cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => []];
+    $dati = [];
     // controlla sede
     if ($this->getUser()->getSede()) {
-      $search['sede'] = array($this->getUser()->getSede()->getId());
+      $search['sede'] = [$this->getUser()->getSede()->getId()];
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $docenti = $this->em->getRepository('App\Entity\Docente')->cercaSede($search, $pagina, 20);
+    $docenti = $this->em->getRepository(Docente::class)->cercaSede($search, $pagina, 20);
     foreach ($docenti as $doc) {
-      $dati['lista'][] = array(
+      $dati['lista'][] = [
         'id' => $doc->getId(),
-        'nome' => $doc->getCognome().' '.$doc->getNome());
+        'nome' => $doc->getCognome().' '.$doc->getNome()];
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;
@@ -87,32 +85,27 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/alunni/{cognome}/{nome}/{classe}/{sede}/{pagina}", name="ajax_alunni",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"cognome": "-", "nome": "-", "classe": "-", "sede": "-", "pagina": "1"},
-   *    methods={"POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function alunniAjaxAction(string $cognome, string $nome, string $classe, string $sede,
-                                   string $pagina): JsonResponse {
+  #[Route(path: '/ajax/alunni/{cognome}/{nome}/{classe}/{sede}/{pagina}', name: 'ajax_alunni', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'classe' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function alunniAjax(string $cognome, string $nome, string $classe, string $sede,
+                             string $pagina): JsonResponse {
     // inizializza
-    $search = array('cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1),
-      'sede' => array());
-    $dati = array();
+    $search = ['cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'classe' => substr($classe, 1), 'sede' => []];
+    $dati = [];
     // controlla sede
     if ($this->getUser() instanceOf Staff && $this->getUser()->getSede()) {
-      $search['sede'] = array($this->getUser()->getSede()->getId());
+      $search['sede'] = [$this->getUser()->getSede()->getId()];
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $alunni = $this->em->getRepository('App\Entity\Alunno')->iscritti($search, $pagina, 20);
+    $alunni = $this->em->getRepository(Alunno::class)->iscritti($search, $pagina, 20);
     foreach ($alunni as $alu) {
-      $dati['lista'][] = array(
+      $dati['lista'][] = [
         'id' => $alu->getId(),
-        'nome' => ''.$alu.' '.$alu->getClasse());
+        'nome' => ''.$alu.' '.$alu->getClasse()];
     }
     // imposta paginazione
     $dati['pagina'] = $pagina;
@@ -138,14 +131,11 @@ class AjaxController extends BaseController {
    * @param string $id Identificativo per il token da generare
    *
    * @return JsonResponse Informazioni di risposta
-   *
-   * @Route("/ajax/token/{id}", name="ajax_token",
-   *    requirements={"id": "authenticate"},
-   *    methods={"GET"})
    */
-  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
+  #[Route(path: '/ajax/token/{id}', name: 'ajax_token', requirements: ['id' => 'authenticate'], methods: ['GET'])]
+  public function tokenAjax(CsrfTokenManagerInterface $tokenManager, string $id): JsonResponse {
     // genera token
-    $dati = array();
+    $dati = [];
     $dati[$id] = $tokenManager->getToken($id)->getValue();
     // restituisce dati
     return new JsonResponse($dati);
@@ -156,12 +146,10 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/sessione", name="ajax_sessione",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function sessioneAjaxAction(): JsonResponse {
+  #[Route(path: '/ajax/sessione', name: 'ajax_sessione', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function sessioneAjax(): JsonResponse {
     // restituisce dati
     return new JsonResponse(['ok']);
   }
@@ -173,16 +161,12 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/ajax/classe/{classe}", name="ajax_classe",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
-   *    methods={"POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAjaxAction(Classe $classe): JsonResponse {
+  #[Route(path: '/ajax/classe/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function classeAjax(Classe $classe): JsonResponse {
     // legge alunni
-    $dati = $this->em->getRepository('App\Entity\Alunno')->classe($classe->getId());
+    $dati = $this->em->getRepository(Alunno::class)->classe($classe->getId());
     // restituisce dati
     return new JsonResponse($dati);
   }

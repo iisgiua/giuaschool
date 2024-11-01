@@ -8,15 +8,18 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Avviso;
+use App\Entity\StoricoEsito;
+use App\Entity\Assenza;
 use App\Util\BachecaUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -35,21 +38,18 @@ class FileController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/file/upload/{pagina}/{param}", name="file_upload",
-   *    requirements={"pagina": "\w+", "param": "\w+"},
-   *    methods={"POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function uploadAction(Request $request, string $pagina, string $param): Response {
-    $risposta = array();
+  #[Route(path: '/file/upload/{pagina}/{param}', name: 'file_upload', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function upload(Request $request, string $pagina, string $param): Response {
+    $risposta = [];
     // legge file
     $files = $request->files->get($param);
     // imposta directory temporanea
     $dir = $this->getParameter('dir_tmp');
     // controlla upload
     foreach ($files as $k=>$file) {
-      $nomefile = md5(uniqid()).'-'.rand(1,1000).'.'.$file->getClientOriginalExtension();
+      $nomefile = md5(uniqid()).'-'.random_int(1, 1000).'.'.$file->getClientOriginalExtension();
       if ($file->isValid() && $file->move($dir, $nomefile)) {
         // file caricato senza errori
         $risposta[$k]['type'] = 'uploaded';
@@ -60,7 +60,7 @@ class FileController extends BaseController {
         $risposta[$k]['size'] = $fl->getSize();
       } else {
         // errore
-        $res = new Response('Errore nel caricamento del file', 500);
+        $res = new Response('Errore nel caricamento del file', Response::HTTP_INTERNAL_SERVER_ERROR);
         return $res;
       }
     }
@@ -80,13 +80,10 @@ class FileController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    *
-   * @Route("/file/remove/{pagina}/{param}", name="file_remove",
-   *    requirements={"pagina": "\w+", "param": "\w+"},
-   *    methods={"POST"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function removeAction(Request $request, string $pagina, string $param): Response {
+  #[Route(path: '/file/remove/{pagina}/{param}', name: 'file_remove', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function remove(Request $request, string $pagina, string $param): Response {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
@@ -125,15 +122,12 @@ class FileController extends BaseController {
    *
    * @return Response Documento inviato in risposta
    *
-   * @Route("/file/avviso/{avviso}/{allegato}", name="file_avviso",
-   *    requirements={"avviso": "\d+", "allegato": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_UTENTE")
    */
-  public function avvisoAction(BachecaUtil $bac, int $avviso, int $allegato): Response {
+  #[Route(path: '/file/avviso/{avviso}/{allegato}', name: 'file_avviso', requirements: ['avviso' => '\d+', 'allegato' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($avviso);
+    $avviso = $this->em->getRepository(Avviso::class)->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -165,15 +159,12 @@ class FileController extends BaseController {
    *
    * @return Response Documento inviato in risposta
    *
-   * @Route("/file/download/segreteria/{tipo}/{id}", name="file_download_segreteria",
-   *    requirements={"tipo": "V|VS|VX|R|RS|RX|C|CS|CX", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_ATA")
    */
-  public function downloadSegreteriaAction(string $tipo, int $id): Response {
+  #[Route(path: '/file/download/segreteria/{tipo}/{id}', name: 'file_download_segreteria', requirements: ['tipo' => 'V|VS|VX|R|RS|RX|C|CS|CX', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_ATA')]
+  public function downloadSegreteria(string $tipo, int $id): Response {
     // controllo
-    $storico = $this->em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
+    $storico = $this->em->getRepository(StoricoEsito::class)->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -236,17 +227,14 @@ class FileController extends BaseController {
    *
    * @return Response Certificato inviato in risposta
    *
-   * @Route("/file/certificato/{tipo}/{id}", name="file_certificato",
-   *    requirements={"tipo": "D", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function certificatoAction(string $tipo, int $id): Response {
+  #[Route(path: '/file/certificato/{tipo}/{id}', name: 'file_certificato', requirements: ['tipo' => 'D', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function certificato(string $tipo, int $id): Response {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $this->em->getRepository('App\Entity\Assenza')->find($id);
+      $assenza = $this->em->getRepository(Assenza::class)->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

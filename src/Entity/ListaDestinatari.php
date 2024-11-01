@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\ListaDestinatariRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,159 +22,145 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ListaDestinatari - dati per la gestione dei destinatari di un qualsiasi documento
  *
- * @ORM\Entity(repositoryClass="App\Repository\ListaDestinatariRepository")
- * @ORM\Table(name="gs_lista_destinatari")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class ListaDestinatari {
+#[ORM\Table(name: 'gs_lista_destinatari')]
+#[ORM\Entity(repositoryClass: ListaDestinatariRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class ListaDestinatari implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var Collection|null $sedi Sedi scolastiche di destinazione (usato come filtro principale)
    *
-   * @ORM\ManyToMany(targetEntity="Sede")
-   * @ORM\JoinTable(name="gs_lista_destinatari_sede",
-   *    joinColumns={@ORM\JoinColumn(name="lista_destinatari_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private ?Collection $sedi = null;
+  #[ORM\JoinTable(name: 'gs_lista_destinatari_sede')]
+  #[ORM\JoinColumn(name: 'lista_destinatari_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Sede::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?Collection $sedi;
 
   /**
    * @var bool $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $dsga = false;
 
   /**
    * @var bool $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $ata = false;
 
   /**
    * @var string|null $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
   private ?string $docenti = 'N';
 
   /**
    * @var array|null $filtroDocenti Lista dei filtri per i docenti
-   *
-   * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
-  private ?array $filtroDocenti = array();
+  #[ORM\Column(name: 'filtro_docenti', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroDocenti = [];
 
   /**
    * @var string|null $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C'], strict: true, message: 'field.choice')]
   private ?string $coordinatori = 'N';
 
   /**
    * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
-   *
-   * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
-  private ?array $filtroCoordinatori = array();
+  #[ORM\Column(name: 'filtro_coordinatori', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroCoordinatori = [];
 
   /**
    * @var bool $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $staff = false;
 
   /**
    * @var string|null $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $genitori = 'N';
 
   /**
    * @var array $filtroGenitori Lista dei filtri per i genitori
-   *
-   * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
-  private ?array $filtroGenitori = array();
+  #[ORM\Column(name: 'filtro_genitori', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroGenitori = [];
 
   /**
    * @var string|null $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'T', 'C', 'U'], strict: true, message: 'field.choice')]
   private ?string $alunni = 'N';
 
   /**
    * @var array $filtroAlunni Lista dei filtri per gli alunni
-   *
-   * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
-  private ?array $filtroAlunni = array();
+  #[ORM\Column(name: 'filtro_alunni', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtroAlunni = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -187,18 +178,18 @@ class ListaDestinatari {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -512,7 +503,7 @@ class ListaDestinatari {
    */
   public function datiVersione(): array {
     $dati = [
-      'sedi' => array_map(function($ogg) { return $ogg->getId(); }, $this->sedi->toArray()),
+      'sedi' => array_map(fn($ogg) => $ogg->getId(), $this->sedi->toArray()),
       'dsga' => $this->dsga,
       'ata' => $this->ata,
       'docenti' => $this->docenti,

@@ -437,7 +437,7 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  E vedi pagina "documenti_bes"
+  E vedi la pagina "documenti_bes"
   E vedi la tabella:
     | classe | alunno           | documento        | azione            |
     | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
@@ -476,7 +476,7 @@ Scenario: accesso pagina cancellazione documenti senza utente
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina cancellazione documenti con altri utenti
   Data ricerca istanze di tipo "Materia":

@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use App\Entity\AvvisoUtente;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +21,13 @@ use App\Tests\EntityTestCase;
  */
 class AvvisoUtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\AvvisoUtente';
+    $this->entity = AvvisoUtente::class;
     // campi da testare
     $this->fields = ['avviso', 'utente', 'letto'];
     $this->noStoredFields = [];
@@ -41,6 +42,8 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -53,7 +56,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -74,17 +77,17 @@ class AvvisoUtenteTest extends EntityTestCase {
           ($field == 'utente' ? $this->getReference("genitore1_1B_1") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -97,20 +100,21 @@ class AvvisoUtenteTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
   /**
    * Test altri metodi
    */
+  #[DoesNotPerformAssertions]
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
@@ -125,14 +129,14 @@ class AvvisoUtenteTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // avviso
     $temp = $existent->getAvviso();
-    $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'avviso');
+    $property = $this->getPrivateProperty(AvvisoUtente::class, 'avviso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
     $existent->setAvviso($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'utente');
+    $property = $this->getPrivateProperty(AvvisoUtente::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
@@ -142,7 +146,7 @@ class AvvisoUtenteTest extends EntityTestCase {
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertFalse(in_array('field.unique', $msgs, true), $this->entity.'::Utente - VALID NOT BLANK');
+    $this->assertNotContains('field.unique', $msgs, $this->entity.'::Utente - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Letto - VALID NULL');
@@ -159,16 +163,16 @@ class AvvisoUtenteTest extends EntityTestCase {
     $objects[1]->setAvviso($avvisoSaved);
     $objects[1]->setUtente($utenteSaved);
     // unique
-    $newObject = new \App\Entity\AvvisoUtente();
+    $newObject = new AvvisoUtente();
     foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+      $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }
     $err = $this->val->validate($newObject);
     $msgs = [];
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

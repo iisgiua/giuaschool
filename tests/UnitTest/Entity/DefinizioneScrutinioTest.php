@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\DefinizioneScrutinio;
+use ReflectionClass;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +21,13 @@ use App\Tests\EntityTestCase;
  */
 class DefinizioneScrutinioTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\DefinizioneScrutinio';
+    $this->entity = DefinizioneScrutinio::class;
     // campi da testare
     $this->fields = ['periodo', 'dataProposte', 'struttura', 'classiVisibili', 'data', 'argomenti', 'dati'];
     $this->noStoredFields = [];
@@ -39,6 +40,8 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     $this->canWrite = ['gs_definizione_consiglio' => ['periodo', 'data_proposte', 'struttura', 'classi_visibili', 'id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -51,7 +54,7 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -72,20 +75,20 @@ class DefinizioneScrutinioTest extends EntityTestCase {
           ($field == 'struttura' ? $this->faker->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'classiVisibili' ? $this->faker->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'data' ? $this->faker->dateTime() :
-          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'argomenti' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -98,14 +101,14 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -133,13 +136,13 @@ class DefinizioneScrutinioTest extends EntityTestCase {
     $existent->setPeriodo('P');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // dataProposte
-    $existent->setDataProposte(new \DateTime());
+    $existent->setDataProposte(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataProposte - VALID TYPE');
-    $property = $this->getPrivateProperty('App\Entity\DefinizioneScrutinio', 'dataProposte');
+    $property = $this->getPrivateProperty(DefinizioneScrutinio::class, 'dataProposte');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::DataProposte - NOT BLANK');
-    $existent->setDataProposte(new \DateTime());
+    $existent->setDataProposte(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataProposte - VALID NOT BLANK');
   }
 

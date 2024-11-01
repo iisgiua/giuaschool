@@ -8,6 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\File;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +20,13 @@ use App\Tests\EntityTestCase;
  */
 class FileTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\File';
+    $this->entity = File::class;
     // campi da testare
     $this->fields = ['titolo', 'nome', 'estensione', 'dimensione', 'file'];
     $this->noStoredFields = [];
@@ -39,6 +39,8 @@ class FileTest extends EntityTestCase {
     $this->canWrite = ['gs_file' => ['id', 'creato', 'modificato', 'titolo', 'nome', 'estensione', 'dimensione', 'file']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -51,7 +53,7 @@ class FileTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -73,17 +75,17 @@ class FileTest extends EntityTestCase {
           ($field == 'dimensione' ? $this->faker->randomNumber(4, false) :
           ($field == 'file' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           null)))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -96,14 +98,14 @@ class FileTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -136,7 +138,7 @@ class FileTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // titolo
-    $property = $this->getPrivateProperty('App\Entity\File', 'titolo');
+    $property = $this->getPrivateProperty(File::class, 'titolo');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Titolo - NOT BLANK');
@@ -148,7 +150,7 @@ class FileTest extends EntityTestCase {
     $existent->setTitolo(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Titolo - VALID MAX LENGTH');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\File', 'nome');
+    $property = $this->getPrivateProperty(File::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -160,7 +162,7 @@ class FileTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // estensione
-    $property = $this->getPrivateProperty('App\Entity\File', 'estensione');
+    $property = $this->getPrivateProperty(File::class, 'estensione');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Estensione - NOT BLANK');
@@ -181,7 +183,7 @@ class FileTest extends EntityTestCase {
     $existent->setDimensione(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Dimensione - VALID POSITIVE');
     // file
-    $property = $this->getPrivateProperty('App\Entity\File', 'file');
+    $property = $this->getPrivateProperty(File::class, 'file');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::File - NOT BLANK');

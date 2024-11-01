@@ -8,11 +8,17 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Cattedra;
+use App\Entity\Configurazione;
+use App\Entity\Alunno;
+use App\Entity\VotoScrutinio;
+use App\Entity\Classe;
+use DateTime;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -34,19 +40,16 @@ class SchedaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/scheda/voti/materia/{cattedra}/{alunno}/{periodo}", name="scheda_voti_materia",
-   *    requirements={"cattedra": "\d+", "alunno": "\d+", "periodo": "P|S|F|G|R|X"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiMateriaAction(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
-                                    int $alunno, string $periodo): Response {
+  #[Route(path: '/scheda/voti/materia/{cattedra}/{alunno}/{periodo}', name: 'scheda_voti_materia', requirements: ['cattedra' => '\d+', 'alunno' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function votiMateria(RegistroUtil $reg, TranslatorInterface $trans, int $cattedra,
+                              int $alunno, string $periodo): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
     // controllo cattedra
-    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -60,14 +63,14 @@ class SchedaController extends BaseController {
     // valutazioni
     $materiaTipo = $cattedra->getMateria()->getTipo();
     $valutazioni[$materiaTipo] = unserialize(
-      $this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_'.$materiaTipo));
-    $listaValori = explode(',', $valutazioni[$materiaTipo]['valori']);
-    $listaVoti = explode(',', $valutazioni[$materiaTipo]['votiAbbr']);
+      $this->em->getRepository(Configurazione::class)->getParametro('voti_finali_'.$materiaTipo));
+    $listaValori = explode(',', (string) $valutazioni[$materiaTipo]['valori']);
+    $listaVoti = explode(',', (string) $valutazioni[$materiaTipo]['votiAbbr']);
     foreach ($listaValori as $key=>$val) {
       $valutazioni['lista'][$val] = trim($listaVoti[$key], '"');
     }
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno]);
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -88,7 +91,7 @@ class SchedaController extends BaseController {
       $periodoNome = $periodi[2]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'P',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -103,7 +106,7 @@ class SchedaController extends BaseController {
       $periodoNome = $periodi[3]['nome'];
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'P',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'P',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -115,7 +118,7 @@ class SchedaController extends BaseController {
       }
       // voto secondo periodo
       $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
-      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'S',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'S',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -130,7 +133,7 @@ class SchedaController extends BaseController {
       $periodoNome = $trans->trans('label.periodo_G');
       // voto finale
       $dati['scrutini'][0]['nome'] = $trans->trans('label.periodo_F');
-      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->voti($cattedra->getClasse(), 'F',
+      $voti = $this->em->getRepository(VotoScrutinio::class)->voti($cattedra->getClasse(), 'F',
         [$alunno->getId()], [$cattedra->getMateria()->getId()], 'C');
       if (empty($voti[$alunno->getId()][$cattedra->getMateria()->getId()])) {
         // valutazione non presente
@@ -151,10 +154,9 @@ class SchedaController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('schede/voti_materia.html.twig', array(
+    return $this->render('schede/voti_materia.html.twig', [
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -167,34 +169,30 @@ class SchedaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/scheda/note/{classe}/{inizio}/{fine}", name="scheda_note",
-   *    requirements={"classe": "\d+", "inizio": "\d\d\d\d-\d\d-\d\d", "fine": "\d\d\d\d-\d\d-\d\d"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function noteAction(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
+  #[Route(path: '/scheda/note/{classe}/{inizio}/{fine}', name: 'scheda_note', requirements: ['classe' => '\d+', 'inizio' => '\d\d\d\d-\d\d-\d\d', 'fine' => '\d\d\d\d-\d\d-\d\d'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function note(StaffUtil $staff, int $classe, string $inizio, string $fine): Response {
     // inizializza variabili
     $info = null;
     $dati = null;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(['id' => $classe]);
+    $classe = $this->em->getRepository(Classe::class)->findOneBy(['id' => $classe]);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo date
-    $dataInizio = \DateTime::createFromFormat('Y-m-d', $inizio);
-    $dataFine = \DateTime::createFromFormat('Y-m-d', $fine);
+    $dataInizio = DateTime::createFromFormat('Y-m-d', $inizio);
+    $dataFine = DateTime::createFromFormat('Y-m-d', $fine);
     // informazioni
     $info['classe'] = $classe;
     // legge dati
     $dati = $staff->note($classe, $dataInizio, $dataFine);
     // visualizza pagina
-    return $this->render('schede/note.html.twig', array(
+    return $this->render('schede/note.html.twig', [
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
 }

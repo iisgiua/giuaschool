@@ -243,7 +243,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
 Scenario: mostra errore all'accesso pagina inserimento documenti BES senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_bes"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso pagina inserimento documenti BES con altri utenti
   Dato logout utente

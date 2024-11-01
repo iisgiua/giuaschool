@@ -31,7 +31,7 @@ Scenario: visualizza pagina inserimento di programma non presente
     | $c1 | #logged | si     | $m1     | $cl1    | N    |
   Quando pagina attiva "documenti_programmi"
   E click su "Aggiungi"
-  Allora vedi pagina "documenti_programmi_add" con parametri:
+  Allora vedi la pagina "documenti_programmi_add" con parametri:
     | classe  | materia |
     | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il programma svolto/"
@@ -114,7 +114,7 @@ Scenario: inserisce programma e lo visualizza su lista cattedre
     | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_programmi"
+  Allora vedi la pagina "documenti_programmi"
   E vedi la tabella:
     | classe e materia                                 | documento                           | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Programma svolto.*1B.*Informatica/ | Cancella |
@@ -135,7 +135,7 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
     | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
-  Allora vedi pagina "documenti_programmi"
+  Allora vedi la pagina "documenti_programmi"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
@@ -185,7 +185,7 @@ Scenario: accesso pagina inserimento programmi di lavoro senza utente
   Quando vai alla pagina "documenti_programmi_add" con parametri:
     | classe        | materia        |
     | $c1:classe.id | $c1:materia.id |
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina inserimento programmi di lavoro con altri utenti
   Date istanze di tipo "Cattedra":

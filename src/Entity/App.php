@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\AppRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,128 +21,117 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * App - dati per gestire l'uso di app o altri servizi esterni
  *
- * @ORM\Entity(repositoryClass="App\Repository\AppRepository")
- * @ORM\Table(name="gs_app")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="token", message="field.unique", entityClass="App\Entity\App")
  *
  * @author Antonello Dessì
  */
-class App {
+#[ORM\Table(name: 'gs_app')]
+#[ORM\Entity(repositoryClass: AppRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'token', message: 'field.unique', entityClass: \App\Entity\App::class)]
+class App implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per le istanze della classe
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $nome Nome dell'app
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\Length(min=3,max=255,minMessage="field.minlength",maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+  #[Assert\Length(min: 3, max: 255, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $token Token univoco per l'app
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\Length(min=16,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
+  #[Assert\Length(min: 16, max: 128, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
   private ?string $token = '';
 
   /**
    * @var bool $attiva Indica se l'app è attiva o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $attiva = false;
 
   /**
    * @var bool $css Indica se l'app deve caricare un proprio CSS o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $css = false;
 
   /**
    * @var string|null $notifica Tipo di notifica utilizzata dall'app [N=nessuna, E=email, G=Google, T=Telegram]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"N","E","G","T"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'E', 'G', 'T'], strict: true, message: 'field.choice')]
   private ?string $notifica = '';
 
   /**
    * @var string|null $download Estensione del file da scaricare, o null se nessun file è previsto
-   *
-   * @ORM\Column(type="string", length=64, nullable=true)
    */
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
   private ?string $download = '';
 
   /**
    * @var string|null $abilitati Indica gli utenti abilitati all'uso dell'app [A=alunni,G=genitori,D=docenti,T=ata,N=nessuno]
    *
-   * @ORM\Column(type="string", length=4, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\Column(type: Types::STRING, length: 4, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $abilitati = '';
 
   /**
    * @var array|null $dati Lista di dati aggiuntivi necessari per le funzionalità dell'app
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dati = [];
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
-   $this->creato = new \DateTime();
+   $this->creato = new DateTime();
    $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -155,18 +149,18 @@ class App {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -351,7 +345,7 @@ class App {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nome;
+    return (string) $this->nome;
   }
 
 }

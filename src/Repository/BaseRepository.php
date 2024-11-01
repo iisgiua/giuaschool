@@ -26,7 +26,7 @@ class BaseRepository extends EntityRepository {
   /**
    * @var int LIMITE_PER_PAGINA Numero massimo di elementi per pagina
    */
-   const LIMITE_PER_PAGINA = 20;
+   public const LIMITE_PER_PAGINA = 20;
 
 
   //==================== METODI DELLA CLASSE ====================

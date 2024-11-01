@@ -32,41 +32,40 @@ class ScansioneOrariaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
-      ->add('visibile', HiddenType::class, array('label' => false,
+      ->add('visibile', HiddenType::class, ['label' => false,
         'required' => true,
-        'mapped' => false))
-      ->add('ora', TextType::class, array('label' => 'label.ora',
+        'mapped' => false])
+      ->add('ora', TextType::class, ['label' => 'label.ora',
         'attr' => ['widget' => 'gs-row-start', 'class' => 'border-0 pl-1 pr-1 text-center'],
         'row_attr' => ['class' => 'col-1'],
         'disabled' => true,
-        'required' => true))
-      ->add('inizio', TimeType::class, array('label' => 'label.ora_inizio',
+        'required' => true])
+      ->add('inizio', TimeType::class, ['label' => 'label.ora_inizio',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'mt-2'],
-        'required' => true))
-      ->add('fine', TimeType::class, array('label' => 'label.ora_fine',
+        'required' => true])
+      ->add('fine', TimeType::class, ['label' => 'label.ora_fine',
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'mt-2'],
-        'required' => true))
-      ->add('durata', ChoiceType::class, array('label' => 'label.durata',
-        'choices' => array('1' => 1.0, '0,5' => 0.5, '1,5' => 1.5),
+        'required' => true])
+      ->add('durata', ChoiceType::class, ['label' => 'label.durata',
+        'choices' => ['1' => 1.0, '0,5' => 0.5, '1,5' => 1.5],
         'choice_translation_domain' => false,
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'col-2'],
-        'required' => true))
-      ->add('delete', ButtonType::class, array('label' => 'label.minus',
+        'required' => true])
+      ->add('delete', ButtonType::class, ['label' => 'label.minus',
         'attr' => ['widget' => 'gs-row-end',
           'class' => 'btn-danger btn-xs gs-remove-item',
           'title' => 'label.cancella_elemento'],
-        'row_attr' => ['class' => 'col-1']
-      ));
+        'row_attr' => ['class' => 'col-1']]);
   }
 
   /**
@@ -74,7 +73,7 @@ class ScansioneOrariaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefaults([
       'data_class' => ScansioneOraria::class]);
   }

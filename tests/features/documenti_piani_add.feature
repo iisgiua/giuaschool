@@ -31,7 +31,7 @@ Scenario: visualizza pagina inserimento di piano di lavoro non presente
     | $c1 | #logged | si     | $m1     | $cl1    | N    |
   Quando pagina attiva "documenti_piani"
   E click su "Aggiungi"
-  Allora vedi pagina "documenti_piani_add" con parametri:
+  Allora vedi la pagina "documenti_piani_add" con parametri:
     | classe  | materia |
     | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il piano di lavoro/"
@@ -112,7 +112,7 @@ Scenario: inserisce piano di lavoro e lo visualizza su lista cattedre
     | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_piani"
+  Allora vedi la pagina "documenti_piani"
   E vedi la tabella:
     | classe e materia                                 | documento                          | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Piano di lavoro.*1B.*Informatica/ | Cancella |
@@ -133,7 +133,7 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
     | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
-  Allora vedi pagina "documenti_piani"
+  Allora vedi la pagina "documenti_piani"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
@@ -183,7 +183,7 @@ Scenario: accesso pagina inserimento piani di lavoro senza utente
   Quando vai alla pagina "documenti_piani_add" con parametri:
     | classe        | materia        |
     | $c1:classe.id | $c1:materia.id |
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina inserimento piani di lavoro con altri utenti
   Date istanze di tipo "Cattedra":

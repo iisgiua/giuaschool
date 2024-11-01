@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\FestivitaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,98 +20,88 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Festivita - entità
  *
- * @ORM\Entity(repositoryClass="App\Repository\FestivitaRepository")
- * @ORM\Table(name="gs_festivita")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class Festivita {
+#[ORM\Table(name: 'gs_festivita')]
+#[ORM\Entity(repositoryClass: FestivitaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class Festivita implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la festività
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data della festività
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
+   * @var DateTimeInterface|null $data Data della festività
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?DateTime $data = null;
 
   /**
    * @var string|null $descrizione Descrizione della festività
    *
-   * @ORM\Column(type="string", length=128, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $descrizione = '';
 
   /**
    * @var string|null $tipo Tipo di festività [F=festivo, A=assemblea di Istituto]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"F","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['F', 'A'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'F';
 
   /**
    * @var Sede|null $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
-   *
-   * @ORM\ManyToOne(targetEntity="Sede")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Sede::class)]
   private ?Sede $sede = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -124,38 +119,38 @@ class Festivita {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data della festività
    *
-   * @return \DateTime|null Data della festività
+   * @return DateTime|null Data della festività
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data della festività
    *
-   * @param \DateTime $data Data della festività
+   * @param DateTime $data Data della festività
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }

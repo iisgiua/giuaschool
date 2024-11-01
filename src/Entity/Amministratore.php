@@ -8,17 +8,17 @@
 
 namespace App\Entity;
 
+use App\Repository\AmministratoreRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Amministratore - dati dell'amministratore
  *
- * @ORM\Entity(repositoryClass="App\Repository\AmministratoreRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: AmministratoreRepository::class)]
 class Amministratore extends Utente {
 
 

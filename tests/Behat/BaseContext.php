@@ -8,6 +8,8 @@
 
 namespace App\Tests\Behat;
 
+use DateTime;
+use stdClass;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
 use Behat\Behat\Context\Context;
@@ -25,7 +27,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
-use Faker\Factory;
+use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
 use Symfony\Component\Filesystem\Filesystem;
@@ -50,9 +52,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Generatore automatico di dati fittizi
    *
-   * @var Factory $faker Generatore automatico di dati fittizi
+   * @var Generator|null $faker Generatore automatico di dati fittizi
    */
-  protected $faker;
+  protected ?Generator $faker = null;
 
   /**
    * Generatore personalizzato di dati fittizi
@@ -62,67 +64,25 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected ?CustomProvider $customProvider = null;
 
   /**
-   * Servizio per la gestione delle funzionalità http del kernel
-   *
-   * @var KernelInterface $kernel Gestore delle funzionalità http del kernel
-   */
-  protected $kernel;
-
-  /**
-   * Servizio per l'utilizzo delle entità su database
-   *
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  protected $em;
-
-  /**
-   * Servizio per la gestione del routing delle pagine
-   *
-   * @var RouterInterface $router Gestore delle URL
-   */
-  protected $router;
-
-  /**
-   * Servizio per la codifica delle password
-   *
-   * @var UserPasswordHasherInterface|null $hasher Gestore della codifica delle password
-   */
-  protected ?UserPasswordHasherInterface $hasher = null;
-
-  /**
-   * Generatore di fixtures con memmorizzazione su database
-   *
-   * @var PurgerLoader|null $alice Generatore di fixtures con memmorizzazione su database
-   */
-  protected ?PurgerLoader $alice = null;
-
-  /**
    * Servizio per la gestione della sessione di navigazione HTTP
    *
-   * @var Session $session Gestore della sessione di navigazione HTTP
+   * @var Session|null $session Gestore della sessione di navigazione HTTP
    */
-  protected $session;
-
-  /**
-   * Servizio per la gestione della modifica delle stringhe in slug
-   *
-   * @var SluggerInterface|null $slugger Gestore della modifica delle stringhe in slug
-   */
-  protected ?SluggerInterface $slugger = null;
+  protected ?Session $session = null;
 
   /**
    * Lista di variabili definite nell'esecuzione, impostate da sistema o da fixtures
    *
    * @var array $vars Lista di variabili
    */
-  protected $vars;
+  protected array $vars;
 
   /**
    * Lista dei file usati nei test
    *
    * @var array $files Lista dei percorsi dei file usati per i test
    */
-  protected $files;
+  protected array $files;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -130,44 +90,44 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Testo visualizzato nell'output dell'ultimo comando eseguito
    *
-   * @var string $cmdOutput Output del comando
+   * @var array $cmdOutput Output del comando
    */
-  private $cmdOutput;
+  private array $cmdOutput;
 
   /**
    * Codice di uscita dell'ultimo comando eseguito
    *
    * @var int $cmdStatus Codice di uscita del comando
    */
-  private $cmdStatus;
+  private int $cmdStatus;
 
   /**
    * Log delle azioni da registrare
    *
    * @var array $log Lista delle azioni da registrare
    */
-  private $log;
+  private array $log;
 
   /**
    * Indica se la modalità debug è attiva
    *
    * @var bool $debug Vero per attivare la modalità debug
    */
-  private $debug;
+  private bool $debug;
 
   /**
    * Indica se la modalità step-by-step è attiva
    *
    * @var bool $stepper Vero per attivare la modalità step-by-step
    */
-  private $stepper;
+  private bool $stepper;
 
   /**
    * Indica il numero di screenshot eseguiti
    *
    * @var int $numScreenshots Numero di screenshots eseguiti
    */
-  private $numScreenshots;
+  private int $numScreenshots;
 
   /**
    * Indica il nome del file con i dati di test
@@ -187,19 +147,19 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param RouterInterface $router Gestore delle URL
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
+   * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
-  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
-                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
-    $this->kernel = $kernel;
-    $this->em = $em;
-    $this->router = $router;
-    $this->hasher = $hasher;
-    $this->slugger = $slugger;
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+  public function __construct(
+      protected KernelInterface $kernel,
+      protected EntityManagerInterface $em,
+      protected RouterInterface $router,
+      protected UserPasswordHasherInterface $hasher,
+      protected SluggerInterface $slugger,
+      protected PurgerLoader $alice) {
+    $this->faker = $kernel->getContainer()->get(Generator::class);
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
     // inizializza variabili
@@ -226,7 +186,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   public static function beforeFeature(BeforeFeatureScope $scope) {
     self::$fixtures = '';
     $descrizione = $scope->getFeature()->getDescription();
-    if (preg_match('/^\s*Utilizzando\s+"([^"]+)"\s*$/im', $descrizione, $matches) === 1) {
+    if (preg_match('/^\s*Utilizzando\s+"([^"]+)"\s*$/im', (string) $descrizione, $matches) === 1) {
       // usa i dati del file indicato
       self::$fixtures = $matches[1];
     }
@@ -259,7 +219,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->initDatabase();
       // cancella file caricati
       $finder = new Finder();
-      $finder->in(dirname(dirname(__DIR__)).'/FILES')->files();
+      $finder->in(dirname(__DIR__, 2).'/FILES')->files();
       foreach ($finder as $fl) {
         $fs->remove($fl);
       }
@@ -318,7 +278,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     if ($this->session->getDriver()->isStarted() &&
         ($this->debug || !$scope->getTestResult()->isPassed())) {
       // url relativa
-      $url = substr($this->session->getCurrentUrl(), strlen($this->getMinkParameter('base_url')));
+      $url = substr($this->session->getCurrentUrl(), strlen((string) $this->getMinkParameter('base_url')));
       // crea nome file da url
       $filename = str_replace('/', '_', trim($url, '/'));
       $filename = ($filename ?: 'error');
@@ -427,10 +387,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       $this->assertNotEmpty($istanza);
       $listaId[] = $istanza->getId();
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
+          $istanza->{'set'.ucfirst((string) $key)}($this->convertText($val));
         }
       }
     }
@@ -468,7 +428,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       $this->assertNotEmpty($istanza);
       $listaId[] = $istanza->getId();
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
     }
   }
 
@@ -490,11 +450,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->em->persist($istanza);
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
+          $istanza->{'set'.ucfirst((string) $key)}($this->convertText($val));
         }
       }
       $this->assertNotEmpty($istanza);
-      $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
+      $this->vars['exec'][trim(substr((string) $row['id'], 1))] = $istanza;
     }
     $this->em->flush();
   }
@@ -516,7 +476,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
         if ($key[0] != '#' && !empty($val)) {
           $cerca[$key] = $this->convertText($val);
         } elseif ($key[0] == '#' && !empty($val)) {
-          $modifica[trim(substr($key, 1))] = $this->convertText($val);
+          $modifica[trim(substr((string) $key, 1))] = $this->convertText($val);
         }
       }
       $oggetti = $this->em->getRepository("App\\Entity\\".$classe)->findBy($cerca);
@@ -560,7 +520,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     foreach ($tabella->getHash() as $row) {
       foreach ($row as $key=>$val) {
         $var = $this->convertText($val);
-        $valore->{'set'.ucfirst($key)}($var);
+        $valore->{'set'.ucfirst((string) $key)}($var);
       }
     }
     $this->em->flush();
@@ -628,7 +588,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $objectMap = [];
       foreach ($this->vars['obj'] as $name => $object) {
         // determina classe e numero di istanza
-        $objectMap[$name] = [get_class($object), $object->getId()];
+        $objectMap[$name] = [$object::class, $object->getId()];
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));
@@ -660,7 +620,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function assertTrue($condition, $message=null): void {
     if (!$condition) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that condition is true').$info."\n".
+      $msg = ($message ?: 'Failed asserting that condition is true').$info."\n".
         '+++ Actual: '.var_export($condition, true)."\n";
       throw new ExpectationException($msg, $this->session);
     }
@@ -675,7 +635,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function assertFalse($condition, $message=null): void {
     if ($condition) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that condition is false').$info."\n".
+      $msg = ($message ?: 'Failed asserting that condition is false').$info."\n".
         '+++ Actual: '.var_export($condition, true)."\n";
       throw new ExpectationException($msg, $this->session);
     }
@@ -688,10 +648,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore effettivo da confrontare
    * @param string $message Messaggio di errore
    */
-  protected function assertEquals($expected, $actual, $message=null) {
+  protected function assertEquals(mixed $expected, mixed $actual, $message=null) {
     if ($expected != $actual) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that expected and actual values are equal').$info."\n".
+      $msg = ($message ?: 'Failed asserting that expected and actual values are equal').$info."\n".
         '--- Expected: '.var_export($expected, true)."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -705,10 +665,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore effettivo da confrontare
    * @param string $message Messaggio di errore
    */
-  protected function assertNotEquals($expected, $actual, $message=null) {
+  protected function assertNotEquals(mixed $expected, mixed $actual, $message=null) {
     if ($expected == $actual) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that expected and actual values are not equal').$info."\n".
+      $msg = ($message ?: 'Failed asserting that expected and actual values are not equal').$info."\n".
         '--- Expected: '.var_export($expected, true)."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -722,10 +682,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore effettivo da confrontare
    * @param string $message Messaggio di errore
    */
-  protected function assertSame($expected, $actual, $message=null) {
+  protected function assertSame(mixed $expected, mixed $actual, $message=null) {
     if ($expected !== $actual) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that expected and actual values are identical').$info."\n".
+      $msg = ($message ?: 'Failed asserting that expected and actual values are identical').$info."\n".
         '--- Expected: '.var_export($expected, true)."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -739,10 +699,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore effettivo da confrontare
    * @param string $message Messaggio di errore
    */
-  protected function assertNotSame($expected, $actual, $message=null) {
+  protected function assertNotSame(mixed $expected, mixed $actual, $message=null) {
     if ($expected === $actual) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that expected and actual values are not identical').$info."\n".
+      $msg = ($message ?: 'Failed asserting that expected and actual values are not identical').$info."\n".
         '--- Expected: '.var_export($expected, true)."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -755,10 +715,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertEmpty($actual, $message=null) {
+  protected function assertEmpty(mixed $actual, $message=null) {
     if (!empty($actual)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that value is empty').$info."\n".
+      $msg = ($message ?: 'Failed asserting that value is empty').$info."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
     }
@@ -770,10 +730,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param mixed $actual Valore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertNotEmpty($actual, $message=null) {
+  protected function assertNotEmpty(mixed $actual, $message=null) {
     if (empty($actual)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that value is not empty').$info."\n".
+      $msg = ($message ?: 'Failed asserting that value is not empty').$info."\n".
         '+++ Actual: '.var_export($actual, true)."\n";
       throw new ExpectationException($msg, $this->session);
     }
@@ -786,10 +746,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param array $array Vettore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertArrayKey($key, $array, $message=null) {
+  protected function assertArrayKey(mixed $key, $array, $message=null) {
     if (!isset($array[$key])) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that an array has the key '.var_export($key, true)).
+      $msg = ($message ?: 'Failed asserting that an array has the key '.var_export($key, true)).
         $info."\n".
         '+++ Actual: '.var_export($array, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -803,10 +763,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param array $array Vettore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertArrayNotKey($key, $array, $message=null) {
+  protected function assertArrayNotKey(mixed $key, $array, $message=null) {
     if (isset($array[$key])) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that an array has not the key '.var_export($key, true)).
+      $msg = ($message ?: 'Failed asserting that an array has not the key '.var_export($key, true)).
         $info."\n".
         '+++ Actual: '.var_export($array, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -823,7 +783,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function assertArrayCount($count, $array, $message=null) {
     if ($count != count($array)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that actual size matches expected size').
+      $msg = ($message ?: 'Failed asserting that actual size matches expected size').
         $info."\n".
         '--- Expected: '.$count."\n".
         '+++ Actual: '.count($array)."\n";
@@ -841,7 +801,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function assertArrayNotCount($count, $array, $message=null) {
     if ($count == count($array)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that actual size doesn\'t match expected size').
+      $msg = ($message ?: 'Failed asserting that actual size doesn\'t match expected size').
         $info."\n".
         '--- Expected: '.$count."\n".
         '+++ Actual: '.count($array)."\n";
@@ -856,10 +816,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param array $array Vettore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertArrayContains($element, $array, $message=null) {
+  protected function assertArrayContains(mixed $element, $array, $message=null) {
     if (!in_array($element, $array, true)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that an array contains expected element').
+      $msg = ($message ?: 'Failed asserting that an array contains expected element').
         $info."\n".
         '--- Expected: '.var_export($element, true)."\n".
         '+++ Actual: '.var_export($array, true)."\n";
@@ -874,10 +834,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param array $array Vettore da controllare
    * @param string $message Messaggio di errore
    */
-  protected function assertArrayNotContains($element, $array, $message=null) {
+  protected function assertArrayNotContains(mixed $element, $array, $message=null) {
     if (in_array($element, $array, true)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that an array doesn\'t contain expected element').
+      $msg = ($message ?: 'Failed asserting that an array doesn\'t contain expected element').
         $info."\n".
         '--- Expected: '.var_export($element, true)."\n".
         '+++ Actual: '.var_export($array, true)."\n";
@@ -893,9 +853,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param string $message Messaggio di errore
    */
   protected function assertContains($search, $text, $message=null) {
-    if (strpos($text, $search) === false) {
+    if (!str_contains($text, $search)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that text contains expected string').
+      $msg = ($message ?: 'Failed asserting that text contains expected string').
         $info."\n".
         '--- Expected: '.var_export($search, true)."\n".
         '+++ Actual: '.var_export($text, true)."\n";
@@ -911,9 +871,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param string $message Messaggio di errore
    */
   protected function assertNotContains($search, $text, $message=null) {
-    if (strpos($text, $search) !== false) {
+    if (str_contains($text, $search)) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that text doesn\'t contain expected string').
+      $msg = ($message ?: 'Failed asserting that text doesn\'t contain expected string').
         $info."\n".
         '--- Expected: '.var_export($search, true)."\n".
         '+++ Actual: '.var_export($text, true)."\n";
@@ -944,14 +904,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function execCommand($cmd): void {
     // esegue il comando
-    $process = new Process(is_array($cmd) ? $cmd : array($cmd));
+    $process = new Process(is_array($cmd) ? $cmd : [$cmd]);
     $process->setTimeout(0);
     $process->run();
     // memorizza stato
     $this->cmdOutput = array_merge(explode("\n", $process->getOutput()),
       explode("\n", $process->getErrorOutput()));
     $this->cmdOutput = array_filter($this->cmdOutput,
-      function($v) { return $v !== '' && $v !== null; });
+      fn($v) => $v !== '' && $v !== null);
     $this->cmdStatus = $process->getExitCode();
   }
 
@@ -1015,19 +975,19 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
-        $dtm = (new \Datetime())
+        $dtm = (new Datetime())
           ->setDate($dt[3], $dt[2], $dt[1])
           ->setTime($dt[4], $dt[5], $dt[6], 0);
         return $dtm;
       } elseif (preg_match('/^#dtm\(\)$/', $var, $dt)) {
         // crea variabile DateTime
-        $dtm = new \Datetime();
+        $dtm = new Datetime();
         return $dtm;
       }
       // controlla funzione date e time
       if ($fn[1] == 'dat' || $fn[1] == 'tim') {
         $var = substr(substr($var, 5), 0 , -1);
-        $val = $var == '' ? new \DateTime() : $this->getVar($var);
+        $val = $var == '' ? new DateTime() : $this->getVar($var);
         return ($fn[1] == 'dat') ? $val->format('d/m/Y') : $val->format('H:i');
       }
       // controlla funzione ArrayCollection
@@ -1043,7 +1003,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione strtoupper
       if ($fn[1] == 'upr') {
         $var = substr(substr($var, 5), 0 , -1);
-        return strtoupper($this->getVar($var));
+        return strtoupper((string) $this->getVar($var));
       }
       // controlla funzione upper slug
       if ($fn[1] == 'slg') {
@@ -1092,14 +1052,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // controlla funzione stringa non presente
       if ($fn[1] == 'nos') {
         $var = substr(substr($var, 5), 0 , -1);
-        $obj = new \stdClass();
+        $obj = new stdClass();
         $obj->str = $var;
         $obj->func = 'nos';
         return $obj;
       }
       // controlla funzione cifra non presente
       if ($fn[1] == 'noc') {
-        $obj = new \stdClass();
+        $obj = new stdClass();
         $obj->func = 'noc';
         return $obj;
       }
@@ -1117,7 +1077,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $var_name = $var_parts[0];
     $this->assertTrue(isset($this->vars[$type][$var_name]) && is_object($this->vars[$type][$var_name]), 'Error in var: '.$var_name);
     $var_attrs = explode(',', $var_parts[1]);
-    $attrs = array();
+    $attrs = [];
     foreach ($var_attrs as $attr) {
       // restituisce attributi
       $val = $this->vars[$type][$var_name];
@@ -1170,7 +1130,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
           $values[] = $value;
         }
       }
-      return implode($values);
+      return implode('', $values);
     }
     // array di valori o valore singolo
     $var_list = explode(' ', $vars);
@@ -1206,7 +1166,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       return strtolower($text) == 'si' ? true : (strtolower($text) == 'no' ? false : null);
     } elseif (preg_match('/^[+-]?\d+(\.\d+)?$/', $text)) {
       // valore numerico
-      return strpos($text, '.') === false ? (int) $text : (float) $text;
+      return !str_contains($text, '.') ? (int) $text : (float) $text;
     } else {
       // stringa di testo
       return (string) $text;
@@ -1226,7 +1186,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertSearch($search) {
-    if (strpos($search, '?') !== false) {
+    if (str_contains($search, '?')) {
       // ricerca non ordinata di variabili
       if ($search[0] == '?') {
         // ricerca non ordinata di tutte le variabili
@@ -1240,7 +1200,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $first = '';
         $init = true;
         foreach ($value as $val) {
-          $first .= (!$init ? '.*' : '').preg_quote($val, '/');
+          $first .= (!$init ? '.*' : '').preg_quote((string) $val, '/');
           $init = false;
         }
       }
@@ -1248,9 +1208,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($varList as $var) {
         $value = $this->getVars($var);
         if (is_array($value)) {
-          $value = implode('.*', array_map(fn($v) => preg_quote($v, '/'), $value));
+          $value = implode('.*', array_map(fn($v) => preg_quote((string) $v, '/'), $value));
         } else {
-          $value = preg_quote($value, '/');
+          $value = preg_quote((string) $value, '/');
         }
         $values[] = $value;
       }
@@ -1266,7 +1226,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $regex = '';
       $first = true;
       foreach ($value as $val) {
-        if (is_object($val) && get_class($val) == 'stdClass') {
+        if (is_object($val) && $val::class == 'stdClass') {
           // espressioni regolari speciali
           if ($val->func == 'nos') {
             $delimiter = (ctype_alnum((''.$val->str)[0]) && ctype_alnum(substr($val->str, -1))) ? '\b' : '';
@@ -1275,7 +1235,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
             $regex .= '(?!.*\d)';
           }
         } else {
-          $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
+          $regex .= (!$first ? '.*' : '').preg_quote((string) $val, '/');
         }
         $first = false;
       }
@@ -1301,7 +1261,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del testo
    */
   protected function convertTextParam($text) {
-    $val = preg_replace_callback('/{{([^}]+)}}/', function($match) { return $this->getVar($match[1]); },
+    $val = preg_replace_callback('/{{([^}]+)}}/', fn($match) => $this->getVar($match[1]),
       $text);
     return $val;
   }
@@ -1316,7 +1276,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->execCommand($cmd);
     if ($this->cmdStatus != 0) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that command succeeded').
+      $msg = ($message ?: 'Failed asserting that command succeeded').
         $info."\n".
         '+++ Command status: '.$this->cmdStatus."\n".
         '+++ Command output: '.var_export($this->cmdOutput, true)."\n";
@@ -1334,7 +1294,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->execCommand($cmd);
     if ($this->cmdStatus == 0) {
       $info = $this->trace();
-      $msg = ($message ? $message : 'Failed asserting that command failed').
+      $msg = ($message ?: 'Failed asserting that command failed').
         $info."\n".
         '+++ Command output: '.var_export($this->cmdOutput, true)."\n";
       throw new ExpectationException($msg, $this->session);
@@ -1348,7 +1308,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param string $action Descrizione dell'azione
    */
   protected function log($type, $action) {
-    $now = new \DateTime();
+    $now = new DateTime();
     $this->log[] = $now->format('d/m/Y H:i:s.u').' - '.strtoupper(trim($type)).' - '.$action."\n";
   }
 

@@ -29,33 +29,31 @@ class ScrutinioAssenzaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
       ->add('alunno', HiddenType::class)
       ->add('sesso', HiddenType::class)
-      ->add('scrutinabile', ChoiceType::class, array(
+      ->add('scrutinabile', ChoiceType::class, [
         'choices' => ['label.no_scrutinabile_assenze' => 'A', 'label.scrutinabile_deroga' => 'D'],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'gs-text-normal'],
-        'required' => true))
-      ->add('motivazione', MessageType::class, array(
+        'required' => true])
+      ->add('motivazione', MessageType::class, [
         'attr' => ['rows' => 4],
         'trim' => true,
-        'required' => false))
-      ->add('testo', ChoiceType::class, array(
+        'required' => false])
+      ->add('testo', ChoiceType::class, [
         'choices' => ['label.deroga_salute' => 'S', 'label.deroga_famiglia' => 'F', 'label.deroga_sport' => 'P',
           'label.deroga_religione' => 'R', 'label.deroga_lavoratori' => 'L'],
         'placeholder' => 'label.inserisci_motivazione',
         'expanded' => false,
         'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],
         'required' => false,
-        'mapped' => false));
+        'mapped' => false]);
   }
 
   /**
@@ -63,8 +61,9 @@ class ScrutinioAssenzaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => ScrutinioAssenza::class));
+  public function configureOptions(OptionsResolver $resolver): void {
+    $resolver->setDefaults([
+      'data_class' => ScrutinioAssenza::class]);
   }
 
 }

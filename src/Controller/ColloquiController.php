@@ -8,6 +8,12 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use DateTime;
+use App\Entity\Festivita;
+use App\Entity\Docente;
+use App\Entity\ScansioneOraria;
+use App\Entity\Cattedra;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
 use App\Form\ColloquioType;
@@ -16,11 +22,10 @@ use App\Form\PrenotazioneType;
 use App\Form\RichiestaColloquioType;
 use App\Util\ColloquiUtil;
 use App\Util\LogHandler;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -36,18 +41,16 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/richieste", name="colloqui_richieste",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function richiesteAction(): Response {
+  #[Route(path: '/colloqui/richieste', name: 'colloqui_richieste', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function richieste(): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controllo fine colloqui
-    $oggi = new \DateTime('today');
-    $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
+    $oggi = new DateTime('today');
+    $fine = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
     $fine->modify('-30 days');
     if ($oggi > $fine) {
@@ -55,7 +58,7 @@ class ColloquiController extends BaseController {
       $info['errore'] = 'exception.colloqui_sospesi';
     } else {
       // richieste valide
-      $dati = $this->em->getRepository('App\Entity\Colloquio')->richiesteValide($this->getUser());
+      $dati = $this->em->getRepository(Colloquio::class)->richiesteValide($this->getUser());
     }
     // pagina di risposta
     return $this->renderHtml('colloqui', 'richieste', $dati, $info);
@@ -66,17 +69,15 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/storico", name="colloqui_storico",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function storicoAction(): Response {
+  #[Route(path: '/colloqui/storico', name: 'colloqui_storico', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function storico(): Response {
     // inizializza
     $info = [];
     $dati = [];
     // storico richieste
-    $dati['storico'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->storico($this->getUser());
+    $dati['storico'] = $this->em->getRepository(RichiestaColloquio::class)->storico($this->getUser());
     // pagina di risposta
     return $this->renderHtml('colloqui', 'storico', $dati, $info);
   }
@@ -90,18 +91,15 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/conferma/{id}", name="colloqui_conferma",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function confermaAction(Request $request, LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/colloqui/conferma/{id}', name: 'colloqui_conferma', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function conferma(Request $request, LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
       // errore
@@ -139,19 +137,16 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/rifiuta/{id}", name="colloqui_rifiuta",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function rifiutaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
-                                int $id): Response {
+  #[Route(path: '/colloqui/rifiuta/{id}', name: 'colloqui_rifiuta', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function rifiuta(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                          int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
       // errore
@@ -194,19 +189,16 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/modifica/{id}", name="colloqui_modifica",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function modificaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
-                                 int $id): Response {
+  #[Route(path: '/colloqui/modifica/{id}', name: 'colloqui_modifica', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function modifica(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                           int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    $richiesta = $this->em->getRepository(RichiestaColloquio::class)->find($id);
     if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
         !$richiesta->getColloquio()->getAbilitato() || !in_array($richiesta->getStato(), ['C', 'N'], true)) {
       // errore
@@ -240,23 +232,19 @@ class ColloquiController extends BaseController {
   /**
    * Gestione dell'inserimento dei giorni di colloquio
    *
-   * @param Request $request Pagina richiesta
-   *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/gestione/", name="colloqui_gestione",
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function gestioneAction(): Response {
+  #[Route(path: '/colloqui/gestione/', name: 'colloqui_gestione', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function gestione(): Response {
     // inizializza
     $info = [];
     $dati = [];
-    $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
+    $inizio = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
     // legge dati
-    $dati = $this->em->getRepository('App\Entity\Colloquio')->ricevimenti($this->getUser(), $inizio);
+    $dati = $this->em->getRepository(Colloquio::class)->ricevimenti($this->getUser(), $inizio);
     // pagina di risposta
     return $this->renderHtml('colloqui', 'gestione', $dati, $info);
   }
@@ -272,23 +260,19 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/edit/{id}", name="colloqui_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function editAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
-                             LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/colloqui/edit/{id}', name: 'colloqui_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function edit(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                       LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $oggi = new \DateTime('today');
-      $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+      $oggi = new DateTime('today');
+      $colloquio = $this->em->getRepository(Colloquio::class)->findOneBy(['id' => $id,
         'docente' => $this->getUser()]);
       if (!$colloquio || $colloquio->getData() < $oggi) {
         // errore
@@ -299,30 +283,30 @@ class ColloquiController extends BaseController {
       // azione add
       $colloquio = (new Colloquio())
         ->setDocente($this->getUser())
-        ->setData(new \DateTime('today'))
-        ->setInizio(new \DateTime('08:30'))
-        ->setFine(new \DateTime('09:30'))
+        ->setData(new DateTime('today'))
+        ->setInizio(new DateTime('08:30'))
+        ->setFine(new DateTime('09:30'))
         ->setDurata(10);
       $this->em->persist($colloquio);
     }
     // informazioni per la visualizzazione
-    $inizio = \DateTime::createFromFormat('Y-m-d',
+    $inizio = DateTime::createFromFormat('Y-m-d',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
-    $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
+    $fine = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
     $info['fine'] = $fine->modify('-30 days')->format('d/m/Y');
-    $info['festivi'] = $this->em->getRepository('App\Entity\Festivita')->listaFestivi();
+    $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
     // lista sedi
-    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
     if (isset($listaSedi[''])) {
       // elimina opzione vuota
       unset($listaSedi['']);
     }
     // lista sedi
     foreach ($listaSedi as $idSede) {
-      $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
+      $info['orario'][$idSede] = $this->em->getRepository(ScansioneOraria::class)->orarioSede($idSede);
     }
     $listaOre = [];
     for ($i = 1; $i <= 10; $i++) {
@@ -331,7 +315,6 @@ class ColloquiController extends BaseController {
     // determina l'ora di lezione
     $info['ora'] = 1;
     if ($id > 0) {
-      // $sede = $colloquio->get
       $giorno = $colloquio->getData()->format('w');
       $sede = $listaSedi[array_key_first($listaSedi)];
       $info['ora'] = 1;
@@ -356,13 +339,13 @@ class ColloquiController extends BaseController {
       $oraFine = $info['orario'][$sede][$giorno][$ora]->getFine();
       $colloquio->setInizio($oraInizio);
       $colloquio->setFine($oraFine);
-      if ($this->em->getRepository('App\Entity\Festivita')->giornoFestivo($data) || $data < $oggi ||
+      if ($this->em->getRepository(Festivita::class)->giornoFestivo($data) || $data < $oggi ||
           $data > $fine) {
         // errore: data non valida
         $form->addError(new FormError($trans->trans('exception.colloquio_data_invalida')));
       }
       // controlla se esite già
-      if ($this->em->getRepository('App\Entity\Colloquio')->sovrapposizione($this->getUser(), $data,
+      if ($this->em->getRepository(Colloquio::class)->sovrapposizione($this->getUser(), $data,
           $inizio, $fine, $id)) {
         // errore: sovrapposizione
         $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
@@ -370,11 +353,11 @@ class ColloquiController extends BaseController {
       // controlla link
       if ($colloquio->getTipo() == 'D') {
         $link = $colloquio->getLuogo();
-        if (substr($link, -16) == 'meet.google.com/' || substr($link, -15) == 'meet.google.com') {
+        if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (substr($link, 0, 8) != 'https://' && substr($link, 0, 7) != 'http://') {
+        if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
           $colloquio->setLuogo('https://'.$link);
         }
       }
@@ -404,23 +387,20 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/enable/{id}/{stato}", name="colloqui_enable",
-   *    requirements={"id": "\d+", "stato": "0|1"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function enableAction(LogHandler $dblogger, int $id, int $stato): Response {
+  #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function enable(LogHandler $dblogger, int $id, int $stato): Response {
     // controlla colloquio
-    $oggi = new \DateTime('today');
-    $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+    $oggi = new DateTime('today');
+    $colloquio = $this->em->getRepository(Colloquio::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$colloquio || $colloquio->getData() < $oggi) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla se presenti richieste
-    if ($this->em->getRepository('App\Entity\Colloquio')->numeroRichieste($colloquio) > 0) {
+    if ($this->em->getRepository(Colloquio::class)->numeroRichieste($colloquio) > 0) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -444,32 +424,30 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/create", name="colloqui_create",
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function createAction(Request $request, ColloquiUtil $col, LogHandler $dblogger,
-                               TranslatorInterface $trans): Response {
+  #[Route(path: '/colloqui/create', name: 'colloqui_create', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function create(Request $request, ColloquiUtil $col, LogHandler $dblogger,
+                         TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
     $dati = [];
     // imposta colloquio fittizio
     $colloquio = (new Colloquio())
       ->setDocente($this->getUser())
-      ->setData(new \DateTime('today'))
-      ->setInizio(new \DateTime('08:30'))
-      ->setFine(new \DateTime('09:30'))
+      ->setData(new DateTime('today'))
+      ->setInizio(new DateTime('08:30'))
+      ->setFine(new DateTime('09:30'))
       ->setDurata(10);
     // lista sedi
-    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
     if (isset($listaSedi[''])) {
       // elimina opzione vuota
       unset($listaSedi['']);
     }
     // informazioni per la visualizzazione
     foreach ($listaSedi as $idSede) {
-      $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
+      $info['orario'][$idSede] = $this->em->getRepository(ScansioneOraria::class)->orarioSede($idSede);
     }
     $listaOre = [];
     for ($i = 1; $i <= 10; $i++) {
@@ -492,11 +470,11 @@ class ColloquiController extends BaseController {
       $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
       // controlla link
       if ($form->get('tipo')->getData() == 'D') {
-        if (substr($luogo, -16) == 'meet.google.com/' || substr($luogo, -15) == 'meet.google.com') {
+        if (str_ends_with((string) $luogo, 'meet.google.com/') || str_ends_with((string) $luogo, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (substr($luogo, 0, 8) != 'https://' && substr($luogo, 0, 7) != 'http://') {
+        if (!str_starts_with((string) $luogo, 'https://') && !str_starts_with((string) $luogo, 'http://')) {
           $luogo = 'https://'.$luogo;
         }
     }
@@ -524,12 +502,10 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/genitori", name="colloqui_genitori",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_GENITORE")
    */
-  public function genitoriAction(ColloquiUtil $col, TranslatorInterface $trans): Response {
+  #[Route(path: '/colloqui/genitori', name: 'colloqui_genitori', methods: ['GET'])]
+  #[IsGranted('ROLE_GENITORE')]
+  public function genitori(ColloquiUtil $col, TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -555,18 +531,13 @@ class ColloquiController extends BaseController {
   /**
    * Invia la disdetta del genitore alla richiesta di colloquio.
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/colloqui/disdetta/{id}", name="colloqui_disdetta")
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_GENITORE")
    */
-  public function disdettaAction(Request $request, LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta')]
+  #[IsGranted('ROLE_GENITORE')] // requirements={"id": "\d+"},
+  public function disdetta(LogHandler $dblogger, int $id): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -583,7 +554,7 @@ class ColloquiController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['id' => $id,
+    $richiesta = $this->em->getRepository(RichiestaColloquio::class)->findOneBy(['id' => $id,
       'alunno' => $alunno, 'stato' => ['R', 'C']]);
     if (!$richiesta) {
       // errore
@@ -610,20 +581,16 @@ class ColloquiController extends BaseController {
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/colloqui/prenota/{docente}", name="colloqui_prenota")
-   *    requirements={"docente": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_GENITORE")
    */
-  public function prenotaAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
-                                LogHandler $dblogger, int $docente): Response {
+  #[Route(path: '/colloqui/prenota/{docente}', name: 'colloqui_prenota')]
+  #[IsGranted('ROLE_GENITORE')] // requirements={"docente": "\d+"},
+  public function prenota(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                          LogHandler $dblogger, int $docente): Response {
     // inizializza
     $info = [];
     $dati = [];
     // controlla docente
-    $docente = $this->em->getRepository('App\Entity\Docente')->findOneBy(['id' => $docente, 'abilitato' => 1]);
+    $docente = $this->em->getRepository(Docente::class)->findOneBy(['id' => $docente, 'abilitato' => 1]);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -644,7 +611,7 @@ class ColloquiController extends BaseController {
     $dati = $col->dateRicevimento($docente);
     // informazioni per la visualizzazione
     $info['docente'] = "".$docente;
-    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente, 'Q');
+    $cattedre = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'Q');
     $info['materie'] = [];
     foreach ($cattedre as $cattedra) {
       if ($cattedra->getClasse() == $classe) {
@@ -658,14 +625,14 @@ class ColloquiController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       $colloquioId = $form->get('data')->getData();
       // controlla duplicati
-      $prenotazione = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy([
+      $prenotazione = $this->em->getRepository(RichiestaColloquio::class)->findOneBy([
         'colloquio' => $colloquioId, 'alunno' => $alunno, 'stato' => ['R', 'C']]);
       if (!empty($prenotazione)) {
         // esiste già richiesta
         $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
       } else {
         // nuova richiesta
-        $appuntamento = $this->em->getRepository('App\Entity\Colloquio')->
+        $appuntamento = $this->em->getRepository(Colloquio::class)->
           nuovoAppuntamento($dati['validi'][$colloquioId]['ricevimento']);
         $richiesta = (new RichiestaColloquio)
           ->setColloquio($dati['validi'][$colloquioId]['ricevimento'])
@@ -693,20 +660,16 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/cerca/{pagina}", name="colloqui_cerca",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
    */
-  public function cercaAction(Request $request, int $pagina): Response {
+  #[Route(path: '/colloqui/cerca/{pagina}', name: 'colloqui_cerca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function cerca(Request $request, int $pagina): Response {
     // inizializza
     $info = [];
     $dati = [];
     // criteri di ricerca
-    $criteri = array();
-    $docente = $this->em->getRepository('App\Entity\Docente')->find(
+    $criteri = [];
+    $docente = $this->em->getRepository(Docente::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/colloqui_cerca/docente', 0));
     $criteri['docente'] = $docente ? $docente->getId() : 0;
     if ($pagina == 0) {
@@ -717,7 +680,7 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // form di ricerca
-    $opzioniDocenti = $this->em->getRepository('App\Entity\Docente')->opzioni();
+    $opzioniDocenti = $this->em->getRepository(Docente::class)->opzioni();
     $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'colloqui',
       'values' => [$docente, $opzioniDocenti]]);
     $form->handleRequest($request);
@@ -730,7 +693,7 @@ class ColloquiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
     }
     // recupera dati
-    $dati = $this->em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);
+    $dati = $this->em->getRepository(Colloquio::class)->cerca($criteri, $pagina);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
@@ -745,17 +708,14 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/delete/{tipo}", name="colloqui_delete",
-   *    requirements={"tipo": "D|T"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(LogHandler $dblogger, string $tipo): Response {
+  #[Route(path: '/colloqui/delete/{tipo}', name: 'colloqui_delete', requirements: ['tipo' => 'D|T'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function delete(LogHandler $dblogger, string $tipo): Response {
     // legge ricevimenti
-    $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
+    $inizio = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
-    $ricevimenti = $this->em->getRepository('App\Entity\Colloquio')->cancellabili($this->getUser(),
+    $ricevimenti = $this->em->getRepository(Colloquio::class)->cancellabili($this->getUser(),
       ($tipo == 'D' ? false : null));
     // controlla richieste e li elimina
     foreach ($ricevimenti as $ricevimento) {

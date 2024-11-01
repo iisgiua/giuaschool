@@ -8,6 +8,9 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use App\Entity\CircolareUtente;
+use ReflectionClass;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +21,13 @@ use App\Tests\EntityTestCase;
  */
 class CircolareUtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\CircolareUtente';
+    $this->entity = CircolareUtente::class;
     // campi da testare
     $this->fields = ['circolare', 'utente', 'letta', 'confermata'];
     $this->noStoredFields = [];
@@ -40,6 +41,8 @@ class CircolareUtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_circolare_utente' => ['id', 'creato', 'modificato', 'circolare_id', 'utente_id', 'letta', 'confermata']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -52,7 +55,7 @@ class CircolareUtenteTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -73,17 +76,17 @@ class CircolareUtenteTest extends EntityTestCase {
           ($field == 'letta' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'confermata' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -96,20 +99,21 @@ class CircolareUtenteTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
   /**
    * Test altri metodi
    */
+  #[DoesNotPerformAssertions]
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
@@ -124,14 +128,14 @@ class CircolareUtenteTest extends EntityTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // circolare
     $temp = $existent->getCircolare();
-    $property = $this->getPrivateProperty('App\Entity\CircolareUtente', 'circolare');
+    $property = $this->getPrivateProperty(CircolareUtente::class, 'circolare');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Circolare - NOT BLANK');
     $existent->setCircolare($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Circolare - VALID NOT BLANK');
     // utente
-    $property = $this->getPrivateProperty('App\Entity\CircolareUtente', 'utente');
+    $property = $this->getPrivateProperty(CircolareUtente::class, 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
@@ -156,16 +160,16 @@ class CircolareUtenteTest extends EntityTestCase {
     $objects[1]->setCircolare($circolareSaved);
     $objects[1]->setUtente($utenteSaved);
     // unique
-    $newObject = new \App\Entity\CircolareUtente();
+    $newObject = new CircolareUtente();
     foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+      $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }
     $err = $this->val->validate($newObject);
     $msgs = [];
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

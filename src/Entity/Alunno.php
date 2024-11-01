@@ -8,6 +8,9 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use App\Repository\AlunnoRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,12 +21,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Alunno - dati degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\AlunnoRepository")
  *
- * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Alunno")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: AlunnoRepository::class)]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Alunno::class)]
 class Alunno extends Utente {
 
 
@@ -32,123 +35,108 @@ class Alunno extends Utente {
   /**
    * @var int FOTO_MAXSIZE Dimensione massima della foto (in pixel)
    */
-  const FOTO_MAXSIZE = 100;
+  public const FOTO_MAXSIZE = 100;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro] 
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
-   *
-   * @Assert\Choice(choices={"N","H","D","B","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['N', 'H', 'D', 'B', 'A'], strict: true, message: 'field.choice')]
   private ?string $bes = 'N';
 
   /**
    * @var string|null $noteBes Note sull'alunno BES
-   *
-   * @ORM\Column(name="note_bes", type="text", nullable=true)
    */
+  #[ORM\Column(name: 'note_bes', type: Types::TEXT, nullable: true)]
   private ?string $noteBes = '';
 
   /**
    * @var string|null $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
-   * @ORM\Column(name="autorizza_entrata", type="string", length=2048, nullable=true)
    *
-   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'autorizza_entrata', type: Types::STRING, length: 2048, nullable: true)]
+  #[Assert\Length(max: 2048, maxMessage: 'field.maxlength')]
   private ?string $autorizzaEntrata = '';
 
   /**
    * @var string|null $autorizzaUscita Autorizzazione all'uscita in anticipo
    *
-   * @ORM\Column(name="autorizza_uscita", type="string", length=2048, nullable=true)
    *
-   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'autorizza_uscita', type: Types::STRING, length: 2048, nullable: true)]
+  #[Assert\Length(max: 2048, maxMessage: 'field.maxlength')]
   private ?string $autorizzaUscita = '';
 
   /**
    * @var string|null $note Note sulle autorizzazioni
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $note = '';
 
   /**
    * @var bool $frequenzaEstero Indica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
-   *
-   * @ORM\Column(name="frequenza_estero", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'frequenza_estero', type: Types::BOOLEAN, nullable: false)]
   private bool $frequenzaEstero = false;
 
   /**
    * @var string|null $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"S","U","I","D","A"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['S', 'U', 'I', 'D', 'A'], strict: true, message: 'field.choice')]
   private ?string $religione = 'S';
 
   /**
    * @var int $credito3 Punteggio di credito per la classe terza (se presente)
-   *
-   * @ORM\Column(type="smallint", nullable=true)
    */
+  #[ORM\Column(type: Types::SMALLINT, nullable: true)]
   private ?int $credito3 = 0;
 
   /**
    * @var int $credito4 Punteggio di credito per la classe quarta (se presente)
-   *
-   * @ORM\Column(type="smallint", nullable=true)
    */
+  #[ORM\Column(type: Types::SMALLINT, nullable: true)]
   private ?int $credito4 = 0;
 
   /**
    * @var bool $giustificaOnline Indica se l'alunno può effettuare la giustificazione online oppure no
-   *
-   * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'giustifica_online', type: Types::BOOLEAN, nullable: false)]
   private bool $giustificaOnline = true;
 
   /**
    * @var bool $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
-   *
-   * @ORM\Column(name="richiesta_certificato", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'richiesta_certificato', type: Types::BOOLEAN, nullable: false)]
   private bool $richiestaCertificato = false;
 
   /**
    * @var string|null $foto Fotografia dell'alunno
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Image(allowSquare=true, allowLandscape=false, allowPortrait=false,
-   *               maxWidth=Alunno::FOTO_MAXSIZE, maxHeight=Alunno::FOTO_MAXSIZE, detectCorrupted=true,
-   *               mimeTypesMessage="image.type", maxWidthMessage="image.width", maxHeightMessage="image.height",
-   *               allowLandscapeMessage="image.notsquare", allowPortraitMessage="image.notsquare",
-   *               corruptedMessage="image.corrupted")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  #[Assert\Image(allowSquare: true, allowLandscape: false, allowPortrait: false, maxWidth: Alunno::FOTO_MAXSIZE, maxHeight: Alunno::FOTO_MAXSIZE, detectCorrupted: true, mimeTypesMessage: 'image.type', maxWidthMessage: 'image.width', maxHeightMessage: 'image.height', allowLandscapeMessage: 'image.notsquare', allowPortraitMessage: 'image.notsquare', corruptedMessage: 'image.corrupted')]
   private ?string $foto = '';
 
   /**
    * @var Classe $classe Classe attuale dell'alunno (se esiste)
-   *
-   * @ORM\ManyToOne(targetEntity="Classe")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Classe::class)]
   private ?Classe $classe = null;
 
   /**
    * @var Collection|null $genitori Genitori dell'alunno
-   *
-   * @ORM\OneToMany(targetEntity="Genitore", mappedBy="alunno")
    */
-  private ?Collection $genitori = null;
+  #[ORM\OneToMany(targetEntity: \Genitore::class, mappedBy: 'alunno')]
+  private ?Collection $genitori;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -515,7 +503,7 @@ class Alunno extends Utente {
   public function getCodiceFunzioni(): array {
     $lista = $this->getRappresentante() ?? [];
     // determina se è maggiorenne
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     if ($oggi->diff($this->getDataNascita())->format('%y') >= 18) {
       $lista[] = 'M';
     }

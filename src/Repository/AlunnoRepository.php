@@ -8,6 +8,12 @@
 
 namespace App\Repository;
 
+use DateTime;
+use App\Entity\CambioClasse;
+use App\Entity\Assenza;
+use App\Entity\Entrata;
+use App\Entity\Uscita;
+use App\Entity\Presenza;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Sede;
@@ -21,32 +27,32 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class AlunnoRepository extends BaseRepository {
 
-  /**
-   * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
-   *
-   * @param array $search Lista dei criteri di ricerca
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function findAll($search=null, $page=1, $limit=10): Paginator {
-    // crea query base
-    $query = $this->createQueryBuilder('a')
-      ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
-      ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
-      ->setParameter(':nome', $search['nome'].'%')
-      ->setParameter(':cognome', $search['cognome'].'%');
-    if ($search['classe'] > 0) {
-      $query->join('a.classe', 'cl')
-        ->andwhere('cl.id=:classe')->setParameter('classe', $search['classe']);
-    } elseif ($search['classe'] == -1) {
-      $query->andwhere('a.classe IS NULL');
-    }
-    // crea lista con pagine
-    $res = $this->paginazione($query->getQuery(), $page);
-    return $res['lista'];
-  }
+  // /**
+  //  * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
+  //  *
+  //  * @param array $search Lista dei criteri di ricerca
+  //  * @param int $page Pagina corrente
+  //  * @param int $limit Numero di elementi per pagina
+  //  *
+  //  * @return Paginator Oggetto Paginator
+  //  */
+  // public function findAll($search=null, $page=1, $limit=10): Paginator {
+  //   // crea query base
+  //   $query = $this->createQueryBuilder('a')
+  //     ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
+  //     ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
+  //     ->setParameter(':nome', $search['nome'].'%')
+  //     ->setParameter(':cognome', $search['cognome'].'%');
+  //   if ($search['classe'] > 0) {
+  //     $query->join('a.classe', 'cl')
+  //       ->andwhere('cl.id=:classe')->setParameter('classe', $search['classe']);
+  //   } elseif ($search['classe'] == -1) {
+  //     $query->andwhere('a.classe IS NULL');
+  //   }
+  //   // crea lista con pagine
+  //   $res = $this->paginazione($query->getQuery(), $page);
+  //   return $res['lista'];
+  // }
 
   /**
    * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
@@ -90,12 +96,14 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
-      ->leftJoin('App\Entity\Classe', 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
+      ->leftJoin(Classe::class, 'cl2', 'WITH', 'cl2.id!=cl.id AND cl2.anno=cl.anno AND cl2.sezione=cl.sezione AND cl2.gruppo IS NULL')
       ->where('a.abilitato=:abilitato AND a.frequenzaEstero=0 AND a.classe IS NOT NULL AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->andWhere('cl.sede IN (:sede)')
       ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
-      ->setParameters(['abilitato' => 1, 'nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
-        'sede' => $search['sede']]);
+      ->setParameter('abilitato', 1)
+      ->setParameter('nome', $search['nome'].'%')
+      ->setParameter('cognome', $search['cognome'].'%')
+      ->setParameter('sede', $search['sede']);
     if ($search['classe'] > 0) {
       $query
         ->andWhere('cl.id=:classe OR cl2.id=:classe')
@@ -122,8 +130,9 @@ class AlunnoRepository extends BaseRepository {
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.frequenzaEstero=0 AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
-        'abilitato' => 1]);
+      ->setParameter('nome', $search['nome'].'%')
+      ->setParameter('cognome', $search['cognome'].'%')
+      ->setParameter('abilitato', 1);
     if ($sede) {
       $query
         ->andwhere('cl.sede=:sede')
@@ -154,7 +163,9 @@ class AlunnoRepository extends BaseRepository {
       ->select('a.id')
       ->join('a.classe', 'cl')
       ->where('a.id IN (:lista) AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
-      ->setParameters(['lista' => $lista, 'abilitato' => 1, 'sedi' => $sedi])
+      ->setParameter('lista', $lista)
+      ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();
     $lista_alunni = array_column($alunni, 'id');
@@ -177,7 +188,10 @@ class AlunnoRepository extends BaseRepository {
       ->select("CONCAT('<span id=',:quote,:attr,a.id,:quote,'>',a.cognome,' ',a.nome,' (',DATE_FORMAT(a.dataNascita,'%d/%m/%Y'),') ',c.anno,'ª ',c.sezione) AS nome,c.gruppo")
       ->join('a.classe', 'c')
       ->where('a.id IN (:lista) AND a.abilitato=:abilitato')
-      ->setParameters(['lista' => $lista, 'abilitato' => 1, 'attr' => $attr, 'quote' => '\\"'])
+      ->setParameter('lista', $lista)
+      ->setParameter('abilitato', 1)
+      ->setParameter('attr', $attr)
+      ->setParameter('quote', '\\"')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -201,7 +215,8 @@ class AlunnoRepository extends BaseRepository {
       ->select('DISTINCT a.id')
       ->leftJoin('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND (cl.id IS NULL OR cl.sede IN (:sedi))')
-      ->setParameters(['abilitato' => 1, 'sedi' => $sedi]);
+      ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi);
     if ($tipo == 'C') {
       // filtro classi
       $alunni
@@ -221,38 +236,41 @@ class AlunnoRepository extends BaseRepository {
   /**
    * Restituisce la lista degli alunni della classe indicata alla data indicata.
    *
-   * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
+   * @param DateTime $data Giorno in cui si desidera effettuare il controllo
    * @param Classe $classe Classe scolastica
    *
    * @return array Vettore con i dati degli alunni
    */
-  public function alunniInData(\DateTime $data, Classe $classe): array {
+  public function alunniInData(DateTime $data, Classe $classe): array {
     if ($data->format('Y-m-d') >= date('Y-m-d')) {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
         ->where('a.classe=:classe AND a.abilitato=:abilitato AND a.frequenzaEstero=0')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
+        ->setParameter('classe', $classe)
+        ->setParameter('abilitato', 1)
         ->getQuery()
         ->getArrayResult();
     } else {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
-      $cambio = $this->_em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
+      $cambio = $this->getEntityManager()->getRepository(CambioClasse::class)->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND a.frequenzaEstero=0 AND NOT EXISTS ('.$cambio->getDQL().')')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('classe', $classe)
         ->getQuery()
         ->getArrayResult();
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni_id2 = $this->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+        ->join(CambioClasse::class, 'cc', 'WITH', 'a.id=cc.alunno')
         ->where('a.frequenzaEstero=0 AND :data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('classe', $classe)
         ->getQuery()
         ->getArrayResult();
       $alunni_id = array_column(array_merge($alunni_id1, $alunni_id2), 'id');
@@ -261,7 +279,7 @@ class AlunnoRepository extends BaseRepository {
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $alunni_id])
+        ->setParameter('lista', $alunni_id)
         ->getQuery()
         ->getArrayResult();
     }
@@ -282,7 +300,8 @@ class AlunnoRepository extends BaseRepository {
     $query = $this->createQueryBuilder('a')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['nome' => $criteri['nome'].'%', 'cognome' => $criteri['cognome'].'%']);
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
     if (isset($criteri['abilitato'])) {
       $query->andwhere('a.abilitato=:abilitato')->setParameter('abilitato', $criteri['abilitato']);
     }
@@ -310,7 +329,8 @@ class AlunnoRepository extends BaseRepository {
       ->select('a.id,a.cognome,a.nome,a.dataNascita')
       ->where('a.abilitato=:abilitato AND a.classe=:classe')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['abilitato' => 1, 'classe' => $classe])
+      ->setParameter('abilitato', 1)
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     // restituisce lista
@@ -331,8 +351,9 @@ class AlunnoRepository extends BaseRepository {
       ->join('a.classe', 'c')
       ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('c.anno,c.sezione,c.gruppo,a.cognome,a.nome')
-      ->setParameters(['abilitato' => 1, 'nome' => $criteri['nome'].'%',
-        'cognome' => $criteri['cognome'].'%']);
+      ->setParameter('abilitato', 1)
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
     // controlla tipo
     if (empty($criteri['tipo'])) {
       // tutti i rappresentanti
@@ -355,20 +376,21 @@ class AlunnoRepository extends BaseRepository {
    * Restituisce la situazione delle entrate/uscite/assenze/fc per l'alunno e la data indicata
    *
    * @param Alunno $alunno Alunno per il quale controllare le assenze
-   * @param \DateTime $data Data di riferimento per le assenze
+   * @param DateTime $data Data di riferimento per le assenze
    *
    * @return array Array associativo con la lista dei dati
    */
-  public function assenzeInData(Alunno $alunno, \DateTime $data): array {
+  public function assenzeInData(Alunno $alunno, DateTime $data): array {
     // dati alunni/assenze/ritardi/uscite
     $assenze = $this->createQueryBuilder('a')
       ->select('a.id AS id_alunno,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita,p.id AS id_presenza,p.oraInizio,p.oraFine')
-      ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
-      ->leftJoin('App\Entity\Presenza', 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
+      ->leftJoin(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin(Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin(Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id=:alunno')
-      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->setParameter('alunno', $alunno->getId())
+      ->setParameter('data', $data->format('Y-m-d'))
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -454,9 +476,9 @@ class AlunnoRepository extends BaseRepository {
     // legge alunni attuali
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id,cc.note')
-      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.classe=:classe')
-      ->setParameters(['classe' => $classe])
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alunno) {
@@ -465,9 +487,9 @@ class AlunnoRepository extends BaseRepository {
     // legge alunni trasferiti
     $alunni = $this->createQueryBuilder('a')
       ->select('a.id,cc.note')
-      ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->join(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('cc.classe=:classe')
-      ->setParameters(['classe' => $classe])
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alunno) {
@@ -490,10 +512,11 @@ class AlunnoRepository extends BaseRepository {
     // crea query base
     $query = $this->createQueryBuilder('a')
       ->leftJoin('a.classe', 'cl')
-      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      ->leftJoin(CambioClasse::class, 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome AND (cl.id IS NOT NULL OR cc.id IS NOT NULL)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%']);
+      ->setParameter('nome', $search['nome'].'%')
+      ->setParameter('cognome', $search['cognome'].'%');
     if ($search['classe'] > 0) {
       $query
         ->andwhere('cl.id=:classe OR cc.classe=:classe')

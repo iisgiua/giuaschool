@@ -11,7 +11,7 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -60,11 +60,9 @@ class SpidController extends BaseController {
    * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/metadata", name="spid_metadata",
-   *    methods={"GET"})
    */
-  public function metadataAction(Request $request): Response {
+  #[Route(path: '/metadata', name: 'spid_metadata', methods: ['GET'])]
+  public function metadata(Request $request): Response {
     if ($request->query->get('debug') == 'yes') {
       // rigenera metadata
       return $this->redirect('/spid/module.php/saml/sp/metadata.php/service');
@@ -83,22 +81,18 @@ class SpidController extends BaseController {
    * Inizia la procedura di login tramite SPID
    *
    * @param string $idp Nome idendificativo dell'Identity Provider
-   *
-   * @Route("/spid/login/{idp}", name="spid_login",
-   *    methods={"GET"})
    */
-  public function loginAction(string $idp): Response {
-    $code = isset($this->idp[$idp]) ? $this->idp[$idp] : $idp;
-    return $this->redirect('/spid-login.php?idp='.urlencode($code));
+  #[Route(path: '/spid/login/{idp}', name: 'spid_login', methods: ['GET'])]
+  public function login(string $idp): Response {
+    $code = $this->idp[$idp] ?? $idp;
+    return $this->redirect('/spid-login.php?idp='.urlencode((string) $code));
   }
 
   /**
    * Esegue il login sull'applicazione al termine dell'autenticazione SPID
-   *
-   * @Route("/spid/acs/{responseId}", name="spid_acs",
-   *    methods={"GET"})
    */
-  public function acsAction() {
+  #[Route(path: '/spid/acs/{responseId}', name: 'spid_acs', methods: ['GET'])]
+  public function acs() {
     // la procedura viene eseguita nella classe SpidAuthenticator
   }
 

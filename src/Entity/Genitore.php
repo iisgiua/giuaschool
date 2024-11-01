@@ -8,34 +8,33 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use App\Repository\GenitoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 
 /**
  * Genitore - entità
  *
- * @ORM\Entity(repositoryClass="App\Repository\GenitoreRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: GenitoreRepository::class)]
 class Genitore extends Utente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var bool $giustificaOnline Indica se il genitore può effettuare la giustificazione online oppure no
-   *
-   * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
    */
+  #[ORM\Column(name: 'giustifica_online', type: Types::BOOLEAN, nullable: false)]
   private bool $giustificaOnline = true;
 
   /**
    * @var Alunno|null $alunno Alunno figlio o di cui si è tutori
-   *
-   * @ORM\ManyToOne(targetEntity="Alunno", inversedBy="genitori")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class, inversedBy: 'genitori')]
   private ?Alunno $alunno = null;
 
 

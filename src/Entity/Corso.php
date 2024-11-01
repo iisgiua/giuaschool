@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\CorsoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,84 +21,77 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Corso - dati di un corso scolastico
  *
- * @ORM\Entity(repositoryClass="App\Repository\CorsoRepository")
- * @ORM\Table(name="gs_corso")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="nome", message="field.unique")
- * @UniqueEntity(fields="nomeBreve", message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Corso {
+#[ORM\Table(name: 'gs_corso')]
+#[ORM\Entity(repositoryClass: CorsoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'nome', message: 'field.unique')]
+#[UniqueEntity(fields: 'nomeBreve', message: 'field.unique')]
+class Corso implements Stringable {
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per il corso
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $nome Nome per il corso
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $nomeBreve Nome breve per il corso
    *
-   * @ORM\Column(name="nome_breve", type="string", length=32, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 32, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -111,18 +109,18 @@ class Corso {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -177,7 +175,7 @@ class Corso {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nomeBreve;
+    return (string) $this->nomeBreve;
   }
 
 }

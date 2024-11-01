@@ -8,6 +8,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Avviso;
+use ReflectionClass;
+use App\Entity\Sede;
+use App\Entity\Annotazione;
+use DateTime;
+use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +25,13 @@ use App\Tests\EntityTestCase;
  */
 class AvvisoTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\Avviso';
+    $this->entity = Avviso::class;
     // campi da testare
     $this->fields = ['tipo', 'anno', 'data', 'ora', 'oraFine', 'cattedra', 'materia', 'oggetto', 'testo', 'allegati', 'destinatariAta', 'destinatariSpeciali', 'destinatari', 'filtroTipo', 'filtro', 'docente'];
     $this->noStoredFields = ['annotazioni', 'sedi'];
@@ -42,6 +47,8 @@ class AvvisoTest extends EntityTestCase {
     $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'anno', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari_speciali', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -54,7 +61,7 @@ class AvvisoTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -79,25 +86,25 @@ class AvvisoTest extends EntityTestCase {
           ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
           ($field == 'oggetto' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'testo' ? $this->faker->text() :
-          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'destinatariSpeciali' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'destinatariSpeciali' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'destinatari' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'filtroTipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'filtro' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           null))))))))))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -110,14 +117,14 @@ class AvvisoTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -129,7 +136,7 @@ class AvvisoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addSedi
     $items = $existent->getSedi()->toArray();
-    $item = new \App\Entity\Sede();
+    $item = new Sede();
     $existent->addSedi($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::addSedi');
     $existent->addSedi($item);
@@ -143,8 +150,8 @@ class AvvisoTest extends EntityTestCase {
     $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::removeSedi');
     // addAnnotazioni
     $items = $existent->getAnnotazioni()->toArray();
-    $item = new \App\Entity\Annotazione();
-    $item->setData(new \DateTime());
+    $item = new Annotazione();
+    $item->setData(new DateTime());
     $existent->addAnnotazioni($item);
     $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getAnnotazioni()->toArray()), $this->entity.'::addAnnotazioni');
     $existent->addAnnotazioni($item);
@@ -158,9 +165,9 @@ class AvvisoTest extends EntityTestCase {
     $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getAnnotazioni()->toArray()), $this->entity.'::removeAnnotazioni');
     // addAllegato
     $existent->setAllegati([]);
-    $fl1 = new \Symfony\Component\HttpFoundation\File\File(__FILE__);
+    $fl1 = new File(__FILE__);
     $existent->addAllegato($fl1);
-    $fl2 = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image2.png');
+    $fl2 = new File(__DIR__.'/../../data/image2.png');
     $existent->addAllegato($fl2);
     $existent->addAllegato($fl1);
     $this->assertSame([$fl1->getBasename(), $fl2->getBasename()], $existent->getAllegati(), $this->entity.'::addAllegato');
@@ -226,28 +233,28 @@ class AvvisoTest extends EntityTestCase {
     $existent->setTipo('U');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
     // sedi
-    $property = $this->getPrivateProperty('\App\Entity\Avviso', 'sedi');
+    $property = $this->getPrivateProperty(Avviso::class, 'sedi');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
-    $existent->setSedi(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]));
+    $existent->setSedi(new ArrayCollection([$this->getReference("sede_1")]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // data
-    $property = $this->getPrivateProperty('App\Entity\Avviso', 'data');
+    $property = $this->getPrivateProperty(Avviso::class, 'data');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
-    $existent->setData(new \DateTime());
+    $existent->setData(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
     // ora
-    $existent->setOra(new \DateTime());
+    $existent->setOra(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID TYPE');
     $existent->setOra(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID NULL');
     // oraFine
-    $existent->setOraFine(new \DateTime());
+    $existent->setOraFine(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::OraFine - VALID TYPE');
     $existent->setOraFine(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::OraFine - VALID NULL');
@@ -270,7 +277,7 @@ class AvvisoTest extends EntityTestCase {
     $existent->setFiltroTipo('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::FiltroTipo - VALID CHOICE');
     // docente
-    $property = $this->getPrivateProperty('App\Entity\Avviso', 'docente');
+    $property = $this->getPrivateProperty(Avviso::class, 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');

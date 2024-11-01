@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\AvvisoRepository;
+use Stringable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,211 +23,188 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Avviso - dati per la gestione di un avviso
  *
- * @ORM\Entity(repositoryClass="App\Repository\AvvisoRepository")
- * @ORM\Table(name="gs_avviso")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class Avviso {
+#[ORM\Table(name: 'gs_avviso')]
+#[ORM\Entity(repositoryClass: AvvisoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class Avviso implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'avviso
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"U","E","V","P","A","I","C","D","O"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['U', 'E', 'V', 'P', 'A', 'I', 'C', 'D', 'O'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'U';
 
   /**
    * @var Collection|null $sedi Sedi a cui è destinato l'avviso
    *
-   * @ORM\ManyToMany(targetEntity="Sede")
-   * @ORM\JoinTable(name="gs_avviso_sede",
-   *    joinColumns={@ORM\JoinColumn(name="avviso_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private ?Collection $sedi = null;
+  #[ORM\JoinTable(name: 'gs_avviso_sede')]
+  #[ORM\JoinColumn(name: 'avviso_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Sede::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?Collection $sedi;
 
   /**
    * @var int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
-   *
-   * @ORM\Column(type="integer", nullable=false)
    */
+  #[ORM\Column(type: Types::INTEGER, nullable: false)]
   private int $anno = 0;
 
   /**
-   * @var \DateTime|null $data Data dell'evento associato all'avviso
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data dell'evento associato all'avviso
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $ora Ora associata all'evento dell'avviso
-   *
-   * @ORM\Column(type="time", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $ora Ora associata all'evento dell'avviso
    */
-  private ?\DateTime $ora = null;
+  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $ora = null;
 
   /**
-   * @var \DateTime|null $oraFine Ora finale associata all'evento dell'avviso
-   *
-   * @ORM\Column(name="ora_fine", type="time", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $oraFine Ora finale associata all'evento dell'avviso
    */
-  private ?\DateTime $oraFine = null;
+  #[ORM\Column(name: 'ora_fine', type: Types::TIME_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $oraFine = null;
 
   /**
    * @var Cattedra|null $cattedra Cattedra associata ad una verifica (o per altri usi)
-   *
-   * @ORM\ManyToOne(targetEntity="Cattedra")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Cattedra::class)]
   private ?Cattedra $cattedra = null;
 
   /**
    * @var Materia $materia Materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
-   *
-   * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
   private ?Materia $materia = null;
 
   /**
    * @var string|null $oggetto Oggetto dell'avviso
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $oggetto = '';
 
   /**
    * @var string|null $testo Testo dell'avviso
-   *
-   * @ORM\Column(type="text", nullable=false)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   private ?string $testo = '';
 
   /**
    * @var array|null $allegati Lista di file allegati all'avviso
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $allegati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $allegati = [];
 
   /**
-   * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
-   *
-   * @ORM\Column(name="destinatari_ata", type="simple_array", nullable=true)
-   */
-   private ?array $destinatariAta = array();
+    * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+    */
+   #[ORM\Column(name: 'destinatari_ata', type: Types::SIMPLE_ARRAY, nullable: true)]
+   private ?array $destinatariAta = [];
 
   /**
-   * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
-   *
-   * @ORM\Column(name="destinatari_speciali", type="simple_array", nullable=true)
-   */
-   private ?array $destinatariSpeciali = array();
+    * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
+    */
+   #[ORM\Column(name: 'destinatari_speciali', type: Types::SIMPLE_ARRAY, nullable: true)]
+   private ?array $destinatariSpeciali = [];
 
   /**
-   * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
-   *
-   * @ORM\Column(type="simple_array", nullable=true)
-   */
-   private ?array $destinatari = array();
+    * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
+    */
+   #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
+   private ?array $destinatari = [];
 
   /**
-   * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
-   *
-   * @ORM\Column(name="filtro_tipo", type="string", length=1, nullable=false)
-   *
-   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
-   */
+    * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
+    *
+    *
+    */
+   #[ORM\Column(name: 'filtro_tipo', type: Types::STRING, length: 1, nullable: false)]
+   #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
    private ?string $filtroTipo = 'N';
 
   /**
    * @var array|null $filtro Lista degli ID per il tipo di filtro specificato
-   *
-   * @ORM\Column(name="filtro", type="simple_array", nullable=true)
    */
-  private ?array $filtro = array();
+  #[ORM\Column(name: 'filtro', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $filtro = [];
 
   /**
    * @var Docente|null $docente Docente che ha scritto l'avviso
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Collection|null $annotazioni Annotazioni associate all'avviso
-   *
-   * @ORM\OneToMany(targetEntity="Annotazione", mappedBy="avviso")
    */
-  private ?Collection $annotazioni = null;
+  #[ORM\OneToMany(targetEntity: \Annotazione::class, mappedBy: 'avviso')]
+  private ?Collection $annotazioni;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
-   $this->creato = new \DateTime();
+   $this->creato = new DateTime();
    $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -240,18 +222,18 @@ class Avviso {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -347,20 +329,20 @@ class Avviso {
   /**
    * Restituisce la data dell'evento associato all'avviso
    *
-   * @return \DateTime|null Data dell'evento associato all'avviso
+   * @return DateTime|null Data dell'evento associato all'avviso
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'evento associato all'avviso
    *
-   * @param \DateTime|null $data Data dell'evento associato all'avviso
+   * @param DateTime|null $data Data dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setData(?\DateTime $data): self {
+  public function setData(?DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -368,20 +350,20 @@ class Avviso {
   /**
    * Restituisce l'ora associata all'evento dell'avviso
    *
-   * @return \DateTime|null Ora dell'evento associato all'avviso
+   * @return DateTime|null Ora dell'evento associato all'avviso
    */
-  public function getOra(): ?\DateTime {
+  public function getOra(): ?DateTime {
     return $this->ora;
   }
 
   /**
    * Modifica l'ora associata all'evento dell'avviso
    *
-   * @param \DateTime|null $ora Ora dell'evento associato all'avviso
+   * @param DateTime|null $ora Ora dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setOra(?\DateTime $ora): self {
+  public function setOra(?DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -389,20 +371,20 @@ class Avviso {
   /**
    * Restituisce l'ora finale dell'evento associato all'avviso
    *
-   * @return \DateTime|null Ora finale dell'evento associato all'avviso
+   * @return DateTime|null Ora finale dell'evento associato all'avviso
    */
-  public function getOraFine(): ?\DateTime {
+  public function getOraFine(): ?DateTime {
     return $this->oraFine;
   }
 
   /**
    * Modifica l'ora finale dell'evento associato all'avviso
    *
-   * @param \DateTime|null $oraFine Ora finale dell'evento associato all'avviso
+   * @param DateTime|null $oraFine Ora finale dell'evento associato all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setOraFine(?\DateTime $oraFine): self {
+  public function setOraFine(?DateTime $oraFine): self {
     $this->oraFine = $oraFine;
     return $this;
   }

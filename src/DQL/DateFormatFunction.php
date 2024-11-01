@@ -8,7 +8,8 @@
 
 namespace App\DQL;
 
-use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\TokenType;
+use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\SqlWalker;
@@ -23,9 +24,8 @@ class DateFormatFunction extends FunctionNode {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
-   * @var \Doctrine\ORM\Query\AST\Node $date La data da considerare
+   * @var Node $date La data da considerare
    */
   public $date = null;
 
@@ -43,12 +43,12 @@ class DateFormatFunction extends FunctionNode {
    * @param Parser $parser Oggetto Parser
    */
   public function parse(Parser $parser): void {
-    $parser->match(Lexer::T_IDENTIFIER);
-    $parser->match(Lexer::T_OPEN_PARENTHESIS);
+    $parser->match(TokenType::T_IDENTIFIER);
+    $parser->match(TokenType::T_OPEN_PARENTHESIS);
     $this->date = $parser->ArithmeticPrimary();
-    $parser->match(Lexer::T_COMMA);
+    $parser->match(TokenType::T_COMMA);
     $this->format = $parser->StringPrimary();
-    $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+    $parser->match(TokenType::T_CLOSE_PARENTHESIS);
   }
 
   /**
@@ -58,7 +58,7 @@ class DateFormatFunction extends FunctionNode {
    *
    * @return string Stringa con la funzione SQL
    */
-  public function getSql(SqlWalker $sqlWalker) {
+  public function getSql(SqlWalker $sqlWalker): string {
     return 'DATE_FORMAT('.
       $this->date->dispatch($sqlWalker).', '.
       $this->format->dispatch($sqlWalker).')';

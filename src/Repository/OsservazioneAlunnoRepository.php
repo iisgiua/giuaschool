@@ -8,13 +8,14 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
 
 /**
  * OsservazioneAlunno - repository
  *
  * @author Antonello Dessì
  */
-class OsservazioneAlunnoRepository extends \Doctrine\ORM\EntityRepository {
+class OsservazioneAlunnoRepository extends EntityRepository {
 
 }
 

@@ -8,8 +8,12 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\RaggruppamentoRepository;
+use Stringable;
+use DateTime;
 use App\Entity\Alunno;
-use App\Entity\Classe;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,87 +23,81 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Raggruppamento - dati di un raggruppamento di alunni di varie classi (gruppo interclasse)
- * 
- * @ORM\Entity(repositoryClass="App\Repository\RaggruppamentoRepository")
- * @ORM\Table(name="gs_raggruppamento", uniqueConstraints={@ORM\UniqueConstraint(columns={"nome"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"nome"}, message="field.unique")
+ *
  *
  * @author Antonello Dessì
  */
-class Raggruppamento {
+#[ORM\Table(name: 'gs_raggruppamento')]
+#[ORM\UniqueConstraint(columns: ['nome'])]
+#[ORM\Entity(repositoryClass: RaggruppamentoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['nome'], message: 'field.unique')]
+class Raggruppamento implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
- 
   /**
    * @var int|null $id Identificativo univoco
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome del raggruppamento di alunni 
+   * @var string $nome Nome del raggruppamento di alunni
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private string $nome = '';
 
  /**
-   * @var Collection|null $alunni Alunni da cui è composto il raggruppamento 
+   * @var Collection|null $alunni Alunni da cui è composto il raggruppamento
    *
-   * @ORM\ManyToMany(targetEntity="Alunno")
-   * @ORM\JoinTable(name="gs_raggruppamento_alunno",
-   *    joinColumns={@ORM\JoinColumn(name="raggruppamento_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="alunno_id", nullable=false)})
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private ?Collection $alunni = null;
+  #[ORM\JoinTable(name: 'gs_raggruppamento_alunno')]
+  #[ORM\JoinColumn(name: 'raggruppamento_id', nullable: false)]
+  #[ORM\InverseJoinColumn(name: 'alunno_id', nullable: false)]
+  #[ORM\ManyToMany(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?Collection $alunni;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -117,18 +115,18 @@ class Raggruppamento {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

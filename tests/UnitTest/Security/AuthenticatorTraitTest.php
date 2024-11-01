@@ -8,6 +8,10 @@
 
 namespace App\Tests\UnitTest\Security;
 
+use Iterator;
+use DateTime;
+use App\Entity\Configurazione;
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Security\AuthenticatorTrait;
 use App\Tests\DatabaseTestCase;
 use Psr\Log\LoggerInterface;
@@ -70,7 +74,11 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->mockedLogger->method('error')->willReturnCallback(
       function($text, $a) { $this->logs['error'][] = [$text, $a]; });
     // Authenticator trait
-    $this->testedTrait = $this->getMockForTrait(AuthenticatorTrait::class);
+    $this->testedTrait = new class {
+        public $em;
+        public $logger;
+        use AuthenticatorTrait;
+      };
     $this->testedTrait->em = $this->em;
     $this->testedTrait->logger = $this->mockedLogger;
 	}
@@ -83,10 +91,10 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     // init
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
-    $inizio = (new \DateTime())->modify('-1 min');
-    $fine = (new \DateTime())->modify('+1 min');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $inizio = (new DateTime())->modify('-1 min');
+    $fine = (new DateTime())->modify('+1 min');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     try {
       $exception = null;
@@ -109,36 +117,36 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     // periodo nullo
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', '');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', '');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', '');
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
     $this->assertCount(0, $this->logs);
     // periodo trascorso
-    $inizio = (new \DateTime())->modify('-1 hour');
-    $fine = (new \DateTime())->modify('-1 min');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $inizio = (new DateTime())->modify('-1 hour');
+    $fine = (new DateTime())->modify('-1 min');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
     $this->assertCount(0, $this->logs);
     // periodo futuro
-    $inizio = (new \DateTime())->modify('+1 min');
-    $fine = (new \DateTime())->modify('+1 hour');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $inizio = (new DateTime())->modify('+1 min');
+    $fine = (new DateTime())->modify('+1 hour');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
     $this->assertCount(0, $this->logs);
     // periodo di manutenzione con amministratore
     $utente = $this->getReference('amministratore');
-    $inizio = (new \DateTime())->modify('-1 hour');
-    $fine = (new \DateTime())->modify('+1 hour');
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
-    $this->em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
+    $inizio = (new DateTime())->modify('-1 hour');
+    $fine = (new DateTime())->modify('+1 hour');
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', $inizio->format('Y-m-d H:i'));
+    $this->em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', $fine->format('Y-m-d H:i'));
     // esegue
     $this->testedTrait->controllaManutenzione($utente);
     // controlla
@@ -193,8 +201,8 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
   /**
    * Test di utente con profilo unico.
    *
-   * @dataProvider profiliProvider
    */
+  #[DataProvider('profiliProvider')]
   public function testProfili(array $utenti, string $risposta, array $lista): void {
     // init
     $this->logs = [];
@@ -222,32 +230,30 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
    * Dati per test dei profili.
    *
    */
-  public function profiliProvider(): array {
-    return [
-      // profilo unico
-      [['amministratore'], 'amministratore', []],
-      [['ata_A'], 'ata_A', []],
-      [['docente_curricolare_1'], 'docente_curricolare_1', []],
-      [['staff_1'], 'staff_1', []],
-      [['preside'], 'preside', []],
-      [['genitore1_1A_1'], 'genitore1_1A_1', []],
-      [['alunno_2A_1'], 'alunno_2A_1', []],
-      [['utente_1'], 'utente_1', []],
-      // profilo multiplo
-      [['genitore1_1A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_3A_1']],
-      [['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1']],
-      [['docente_curricolare_1', 'genitore1_1A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1']],
-      [['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1']],
-      [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']],
-      [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']],
-      [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']],
-      [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []],
-      [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []],
-    ];
+  public static function profiliProvider(): Iterator {
+    // profilo unico
+    yield [['amministratore'], 'amministratore', []];
+    yield [['ata_A'], 'ata_A', []];
+    yield [['docente_curricolare_1'], 'docente_curricolare_1', []];
+    yield [['staff_1'], 'staff_1', []];
+    yield [['preside'], 'preside', []];
+    yield [['genitore1_1A_1'], 'genitore1_1A_1', []];
+    yield [['alunno_2A_1'], 'alunno_2A_1', []];
+    yield [['utente_1'], 'utente_1', []];
+    // profilo multiplo
+    yield [['genitore1_1A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_3A_1']];
+    yield [['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'genitore1_2A_1', 'genitore1_3A_1']];
+    yield [['docente_curricolare_1', 'genitore1_1A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1']];
+    yield [['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1'], 'docente_curricolare_1', ['docente_curricolare_1', 'genitore1_1A_1', 'genitore1_2A_1']];
+    yield [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']];
+    yield [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']];
+    yield [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']];
+    yield [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []];
   }
 
 }

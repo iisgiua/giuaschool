@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\ConfigurazioneRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,107 +21,98 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Configurazione - dati per la configurazione dei parametri dell'applicazione
  *
- * @ORM\Entity(repositoryClass="App\Repository\ConfigurazioneRepository")
- * @ORM\Table(name="gs_configurazione")
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="parametro", message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Configurazione {
+#[ORM\Table(name: 'gs_configurazione')]
+#[ORM\Entity(repositoryClass: ConfigurazioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'parametro', message: 'field.unique')]
+class Configurazione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la configurazione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $categoria Categoria a cui appartiene la configurazione
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $categoria = '';
 
   /**
    * @var string|null $parametro Parametro della configurazione
    *
-   * @ORM\Column(type="string", length=64, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 64, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $parametro = '';
 
   /**
-  * @var string|null $descrizione Descrizione dell'utilizzo del parametro
+   * @var string|null $descrizione Descrizione dell'utilizzo del parametro
    *
-   * @ORM\Column(type="string", length=1024, nullable=false)
    *
-   * @Assert\Length(max=1024,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: false)]
+  #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $descrizione = '';
 
   /**
    * @var string|null $valore Valore della configurazione
-   *
-   * @ORM\Column(type="text", nullable=false)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: false)]
   private ?string $valore = '';
 
   /**
-  * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
-   *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $gestito = false;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -134,18 +130,18 @@ class Configurazione {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

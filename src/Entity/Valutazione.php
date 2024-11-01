@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\ValutazioneRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,144 +20,131 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Valutazione - dati di una valutazione scolastica
  *
- * @ORM\Entity(repositoryClass="App\Repository\ValutazioneRepository")
- * @ORM\Table(name="gs_valutazione")
- * @ORM\HasLifecycleCallbacks
  *
  * @author Antonello Dessì
  */
-class Valutazione {
+#[ORM\Table(name: 'gs_valutazione')]
+#[ORM\Entity(repositoryClass: ValutazioneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class Valutazione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la lezione
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $tipo Tipo di valutazione [S=scritto, O=orale, p=pratico]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"S","O","P"}, strict=true, message="field.choice")
    */
+  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
+  #[Assert\Choice(choices: ['S', 'O', 'P'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'O';
 
   /**
    * @var bool $visibile Indica se la valutazione è visibile ai genitori o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $visibile = true;
 
   /**
    * @var bool $media Indica se la valutazione entra nella media di riepilogo o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
    */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $media = true;
 
   /**
    * @var float|null $voto Voto numerico della valutazione [0|null=non presente, 1, 1.25, 1.50, 1.75, 2, ...]
-   *
-   * @ORM\Column(type="float", nullable=true)
    */
+  #[ORM\Column(type: Types::FLOAT, nullable: true)]
   private ?float $voto = null;
 
   /**
    * @var string|null $giudizio Giudizio della valutazione
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $giudizio = null;
 
   /**
    * @var string|null $argomento Argomento relativo alla valutazione
-   *
-   * @ORM\Column(type="text", nullable=true)
    */
+  #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $argomento = null;
 
   /**
    * @var Docente|null $docente Docente che inserisce la valutazione
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce la valutazione
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Lezione|null $lezione Lezione a cui si riferisce la valutazione
-   *
-   * @ORM\ManyToOne(targetEntity="Lezione")
-   * @ORM\JoinColumn(nullable=false)
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Lezione::class)]
   private ?Lezione $lezione = null;
 
   /**
    * @var Materia|null $materia Materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
    *
-   * @ORM\ManyToOne(targetEntity="Materia")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Materia $materia = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -170,18 +162,18 @@ class Valutazione {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 

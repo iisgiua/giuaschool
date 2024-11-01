@@ -8,151 +8,141 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\AssenzaRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * Assenza - dati per le assenze degli alunni
  *
- * @ORM\Entity(repositoryClass="App\Repository\AssenzaRepository")
- * @ORM\Table(name="gs_assenza", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Assenza {
+#[ORM\Table(name: 'gs_assenza')]
+#[ORM\UniqueConstraint(columns: ['data', 'alunno_id'])]
+#[ORM\Entity(repositoryClass: AssenzaRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['data', 'alunno'], message: 'field.unique')]
+class Assenza implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per l'assenza
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data dell'assenza
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $data Data dell'assenza
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $data = null;
 
   /**
-   * @var \DateTime|null $giustificato Data della giustificazione
-   *
-   * @ORM\Column(type="date", nullable=true)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
+   * @var DateTimeInterface|null $giustificato Data della giustificazione
    */
-  private ?\DateTime $giustificato = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  private ?DateTime $giustificato = null;
 
   /**
    * @var string|null $motivazione Motivazione dell'assenza
    *
-   * @ORM\Column(type="string", length=1024, nullable=true)
    *
-   * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
+  #[Assert\Length(max: 1024, maxMessage: 'field.maxlength')]
   private ?string $motivazione = '';
 
   /**
    * @var array|null $dichiarazione Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dichiarazione = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dichiarazione = [];
 
   /**
    * @var array|null $certificati Lista di file allegati per i certificati medici
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $certificati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $certificati = [];
 
   /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
   /**
    * @var Docente|null $docente Docente che rileva l'assenza
    *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: false)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Docente $docente = null;
 
   /**
    * @var Docente|null $docenteGiustifica Docente che giustifica l'assenza
-   *
-   * @ORM\ManyToOne(targetEntity="Docente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Docente::class)]
   private ?Docente $docenteGiustifica = null;
 
   /**
    * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'assenza
-   *
-   * @ORM\ManyToOne(targetEntity="Utente")
-   * @ORM\JoinColumn(nullable=true)
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Utente::class)]
   private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -170,38 +160,38 @@ class Assenza {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'assenza
    *
-   * @return \DateTime|null Data dell'assenza
+   * @return DateTime|null Data dell'assenza
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dell'assenza
    *
-   * @param \DateTime $data Data dell'assenza
+   * @param DateTime $data Data dell'assenza
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -209,20 +199,20 @@ class Assenza {
   /**
    * Restituisce la data della giustificazione
    *
-   * @return \DateTime|null Data della giustificazione
+   * @return DateTime|null Data della giustificazione
    */
-  public function getGiustificato(): ?\DateTime {
+  public function getGiustificato(): ?DateTime {
     return $this->giustificato;
   }
 
   /**
    * Modifica la data della giustificazione
    *
-   * @param \DateTime|null $giustificato Data della giustificazione
+   * @param DateTime|null $giustificato Data della giustificazione
    *
    * @return self Oggetto modificato
    */
-  public function setGiustificato(?\DateTime $giustificato): self {
+  public function setGiustificato(?DateTime $giustificato): self {
     $this->giustificato = $giustificato;
     return $this;
   }

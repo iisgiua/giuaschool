@@ -8,6 +8,14 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Utente;
+use ReflectionClass;
+use App\Entity\Genitore;
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Amministratore;
+use App\Entity\Docente;
+use DateTime;
 use App\Tests\EntityTestCase;
 
 
@@ -18,15 +26,13 @@ use App\Tests\EntityTestCase;
  */
 class UtenteTest extends EntityTestCase {
 
-  /**
-   * Costruttore
+ /**
    * Definisce dati per i test.
    *
    */
-  public function __construct() {
-    parent::__construct();
+  protected function setUp(): void {
     // nome dell'entità
-    $this->entity = '\App\Entity\Utente';
+    $this->entity = Utente::class;
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante'];
     $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
@@ -39,6 +45,8 @@ class UtenteTest extends EntityTestCase {
     $this->canWrite = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'provincia_nascita', 'codice_fiscale', 'citta', 'provincia', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rspp', 'rappresentante']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
+    // esegue il setup predefinito
+    parent::setUp();
   }
 
   /**
@@ -51,7 +59,7 @@ class UtenteTest extends EntityTestCase {
     $obj = new $this->entity();
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
-      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+      $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
         $this->entity.' - Initializated');
     }
   }
@@ -89,21 +97,21 @@ class UtenteTest extends EntityTestCase {
           ($field == 'citta' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 32)) :
           ($field == 'provincia' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2)) :
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
-          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null)))))))))))))))))))))))));
-        $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
+        $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
       foreach ($this->generatedFields as $field) {
-        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
-        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
@@ -116,14 +124,14 @@ class UtenteTest extends EntityTestCase {
     for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach ($this->fields as $field) {
-        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-          $this->entity.'::get'.ucfirst($field));
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst((string) $field)}(),
+          $this->entity.'::get'.ucfirst((string) $field));
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
-      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+      $this->assertFalse($rc->hasMethod('set'.ucfirst((string) $field)), $this->entity.'::set'.ucfirst((string) $field).' - Setter for generated property');
     }
   }
 
@@ -135,9 +143,9 @@ class UtenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
-          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
-          !($obj instanceOf \App\Entity\Docente)) {
+      if (!($obj instanceOf Genitore) && !($obj instanceOf Alunno) &&
+          !($obj instanceOf Ata) && !($obj instanceOf Amministratore) &&
+          !($obj instanceOf Docente)) {
         $existent = $obj;
         break;
       }
@@ -145,7 +153,7 @@ class UtenteTest extends EntityTestCase {
     // getUserIdentifier
     $this->assertSame($existent->getUsername(), $existent->getUserIdentifier(), $this->entity.'::getUserIdentifier');
     // getSalt
-    $this->assertSame(null, $existent->getSalt(), $this->entity.'::getSalt');
+    $this->assertNull($existent->getSalt(), $this->entity.'::getSalt');
     // getRoles
     $this->assertSame(['ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // eraseCredentials
@@ -153,12 +161,12 @@ class UtenteTest extends EntityTestCase {
     $existent->eraseCredentials();
     $this->assertSame('', $existent->getPasswordNonCifrata(), $this->entity.'::eraseCredentials');
     // serialize
-    $this->assertSame(serialize(array($existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato())), $existent->serialize(), $this->entity.'::serialize');
+    $this->assertSame(['id' => $existent->getId(), 'username' => $existent->getUsername(), 'password' => $existent->getPassword(), 'email' => $existent->getEmail(), 'abilitato' => $existent->getAbilitato()], $existent->__serialize(), $this->entity.'::serialize');
     // unserialize
-    $s = $existent->serialize();
-    $o = new \App\Entity\Utente();
-    $o->unserialize($s);
-    $this->assertSame(serialize(array($o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato())), $o->serialize(), $this->entity.'::serialize');
+    $s = ['id' => 99999, 'username' => 'unserialize.test', 'password' => '123456', 'email' => 'unserialize.test@noemail.local', 'abilitato' => true];
+    $o = new Utente();
+    $o->__unserialize($s);
+    $this->assertSame($s, ['id' => $o->getId(), 'username' => $o->getUsername(), 'password' => $o->getPassword(), 'email' => $o->getEmail(), 'abilitato' => $o->getAbilitato()], $this->entity.'::unserialize');
     // getCodiceRuolo
     $this->assertSame('U', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo
@@ -175,11 +183,11 @@ class UtenteTest extends EntityTestCase {
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getUsername().')', (string) $existent, $this->entity.'::toString');
     // creaToken
-    $ora = new \DateTime();
+    $ora = new DateTime();
     $existent->setToken('');
     $existent->setTokenCreato(null);
     $existent->creaToken();
-    $this->assertTrue(strlen($existent->getToken()) >= 16 && $existent->getTokenCreato() >= $ora, $this->entity.'::creaToken');
+    $this->assertTrue(strlen((string) $existent->getToken()) >= 16 && $existent->getTokenCreato() >= $ora, $this->entity.'::creaToken');
     // cancellaToken
     $existent->cancellaToken();
     $this->assertTrue($existent->getToken() === '' && $existent->getTokenCreato() === null, $this->entity.'::cancellaToken');
@@ -193,9 +201,9 @@ class UtenteTest extends EntityTestCase {
     $existent = null;
     $objects = $this->em->getRepository($this->entity)->findBy([]);
     foreach ($objects as $obj) {
-      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
-          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
-          !($obj instanceOf \App\Entity\Docente)) {
+      if (!($obj instanceOf Genitore) && !($obj instanceOf Alunno) &&
+          !($obj instanceOf Ata) && !($obj instanceOf Amministratore) &&
+          !($obj instanceOf Docente)) {
         $existent = $obj;
         break;
       }
@@ -218,14 +226,14 @@ class UtenteTest extends EntityTestCase {
     $existent->setUsername($this->faker->unique()->regexify('^[a-zA-Z][a-zA-Z0-9\._\-]+[a-zA-Z0-9]$'));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID REGEX');
     // password
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'password');
+    $property = $this->getPrivateProperty(Utente::class, 'password');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Password - NOT BLANK');
     $existent->setPassword($this->faker->randomLetter());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Password - VALID NOT BLANK');
     // email
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'email');
+    $property = $this->getPrivateProperty(Utente::class, 'email');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Email - NOT BLANK');
@@ -254,7 +262,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setUltimoAccesso(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UltimoAccesso - VALID NULL');
     // nome
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'nome');
+    $property = $this->getPrivateProperty(Utente::class, 'nome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
@@ -266,7 +274,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setNome(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // cognome
-    $property = $this->getPrivateProperty('App\Entity\Utente', 'cognome');
+    $property = $this->getPrivateProperty(Utente::class, 'cognome');
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cognome - NOT BLANK');
@@ -284,7 +292,7 @@ class UtenteTest extends EntityTestCase {
     $existent->setSesso('M');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sesso - VALID CHOICE');
     // dataNascita
-    $existent->setDataNascita(new \DateTime());
+    $existent->setDataNascita(new DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID TYPE');
     $existent->setDataNascita(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID NULL');
@@ -351,16 +359,16 @@ class UtenteTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::email - UNIQUE');
     $objects[1]->setEmail($emailSaved);
     // unique
-    $newObject = new \App\Entity\Utente();
+    $newObject = new Utente();
     foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+      $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }
     $err = $this->val->validate($newObject);
     $msgs = [];
     foreach ($err as $e) {
       $msgs[] = $e->getMessageTemplate();
     }
-    $this->assertEquals(array_fill(0, 2, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
+    $this->assertSame(array_fill(0, 2, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

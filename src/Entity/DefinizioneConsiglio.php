@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\DefinizioneConsiglioRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,88 +20,77 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DefinizioneConsiglio - dati per lo svolgimento dei consigli di classe
  *
- * @ORM\Entity(repositoryClass="App\Repository\DefinizioneConsiglioRepository")
- * @ORM\Table(name="gs_definizione_consiglio")
- * @ORM\HasLifecycleCallbacks
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="tipo", type="string", length=1)
- * @ORM\DiscriminatorMap({"C"="DefinizioneConsiglio", "S"="DefinizioneScrutinio"})
  *
  * @author Antonello Dessì
  */
-class DefinizioneConsiglio {
+#[ORM\Table(name: 'gs_definizione_consiglio')]
+#[ORM\Entity(repositoryClass: DefinizioneConsiglioRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'tipo', type: 'string', length: 1)]
+#[ORM\DiscriminatorMap(['C' => 'DefinizioneConsiglio', 'S' => 'DefinizioneScrutinio'])]
+class DefinizioneConsiglio implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per lo scrutinio
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $data Data per lo svolgimento della riunione
-   *
-   * @ORM\Column(type="date", nullable=false)
-   *
-   * @Assert\Type(type="\DateTime", message="field.type")
-   * @Assert\NotBlank(message="field.notblank")
+   * @var DateTimeInterface|null $data Data per lo svolgimento della riunione
    */
-  private ?\DateTime $data = null;
+  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
+  #[Assert\Type(type: '\DateTime', message: 'field.type')]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  private ?DateTime $data = null;
 
   /**
    * @var array|null $argomenti Lista degli argomenti dell'ordine del giorno [array($id_numerico => $stringa_argomento, ...)]
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $argomenti = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $argomenti = [];
 
   /**
    * @var array|null $dati Lista di dati utili per la verbalizzazione
-   *
-   * @ORM\Column(type="array", nullable=true)
    */
-  private ?array $dati = array();
+  #[ORM\Column(type: Types::ARRAY, nullable: true)]
+  private ?array $dati = [];
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -114,38 +108,38 @@ class DefinizioneConsiglio {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data per lo svolgimento della riunione
    *
-   * @return \DateTime|null Data per lo svolgimento della riunione
+   * @return DateTime|null Data per lo svolgimento della riunione
    */
-  public function getData(): ?\DateTime {
+  public function getData(): ?DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data per lo svolgimento della riunione
    *
-   * @param \DateTime $data Data per lo svolgimento della riunione
+   * @param DateTime $data Data per lo svolgimento della riunione
    *
    * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data): self {
+  public function setData(DateTime $data): self {
     $this->data = $data;
     return $this;
   }

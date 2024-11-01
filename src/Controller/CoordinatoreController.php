@@ -8,6 +8,13 @@
 
 namespace App\Controller;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Classe;
+use DateTime;
+use App\Entity\Alunno;
+use App\Entity\CambioClasse;
+use App\Entity\Cattedra;
+use App\Entity\Utente;
 use App\Entity\Annotazione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
@@ -26,13 +33,12 @@ use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use Doctrine\Common\Collections\ArrayCollection;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -49,15 +55,13 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore", name="coordinatore",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function coordinatoreAction(): Response {
+  #[Route(path: '/coordinatore', name: 'coordinatore', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function coordinatore(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (count($classi) == 1) {
         // coordinatore di una sola classe: vai
         $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classi[0]);
@@ -80,33 +84,31 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/classe/", name="coordinatore_classe",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function classeAction(): Response {
+  #[Route(path: '/coordinatore/classe/', name: 'coordinatore_classe', methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function classe(): Response {
     // lista classi coordinatore
-    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+    $classi = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
-      ->setParameters(['lista' => explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'))])
+      ->setParameter('lista', explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')))
       ->getQuery()
       ->getResult();
     // lista tutte le classi
-    $tutte = array();
+    $tutte = [];
     if ($this->getUser() instanceOf Staff) {
       if ($this->getUser()->getSede()) {
         // solo classi della sede
-        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
           ->where('c.sede=:sede')
           ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
-          ->setParameters(['sede' => $this->getUser()->getSede()])
+          ->setParameter('sede', $this->getUser()->getSede())
           ->getQuery()
           ->getResult();
       } else {
         // tutte le classi
-        $lista = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
           ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
           ->getQuery()
           ->getResult();
@@ -122,11 +124,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/classe.html.twig', array(
+    return $this->render('coordinatore/classe.html.twig', [
       'pagina_titolo' => 'page.coordinatore_classe',
       'classi' => $classi,
-      'tutte' => $tutte,
-    ));
+      'tutte' => $tutte]);
   }
 
   /**
@@ -139,14 +140,10 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/note/{classe}/{tipo}", name="coordinatore_note",
-   *    requirements={"classe": "\d+", "tipo": "V|P"},
-   *    defaults={"classe": 0, "tipo": "V"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
+  #[Route(path: '/coordinatore/note/{classe}/{tipo}', name: 'coordinatore_note', requirements: ['classe' => '\d+', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function note(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -159,7 +156,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -167,7 +164,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -180,10 +177,9 @@ class CoordinatoreController extends BaseController {
         // crea documento PDF
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Note disciplinari della classe '.$classe);
-        $html = $this->renderView('pdf/note_classe.html.twig', array(
+        $html = $this->renderView('pdf/note_classe.html.twig', [
           'classe' => $classe,
-          'dati' => $dati,
-          ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'note-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -191,11 +187,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/note.html.twig', array(
+    return $this->render('coordinatore/note.html.twig', [
       'pagina_titolo' => 'page.coordinatore_note',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -208,14 +203,10 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/assenze/{classe}/{tipo}", name="coordinatore_assenze",
-   *    requirements={"classe": "\d+", "tipo": "V|P"},
-   *    defaults={"classe": 0, "tipo": "V"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function assenzeAction(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
+  #[Route(path: '/coordinatore/assenze/{classe}/{tipo}', name: 'coordinatore_assenze', requirements: ['classe' => '\d+', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function assenze(StaffUtil $staff, PdfManager $pdf, int $classe, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -228,7 +219,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -236,7 +227,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -248,10 +239,9 @@ class CoordinatoreController extends BaseController {
         // crea documento PDF
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Assenze della classe '.$classe);
-        $html = $this->renderView('pdf/assenze_classe.html.twig', array(
+        $html = $this->renderView('pdf/assenze_classe.html.twig', [
           'classe' => $classe,
-          'dati' => $dati,
-          ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'assenze-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -259,11 +249,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/assenze.html.twig', array(
+    return $this->render('coordinatore/assenze.html.twig', [
       'pagina_titolo' => 'page.coordinatore_assenze',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -278,15 +267,11 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/voti/{classe}/{periodo}/{tipo}", name="coordinatore_voti",
-   *    requirements={"classe": "\d+", "periodo": "1|2|3|0", "tipo": "V|P"},
-   *    defaults={"classe": 0, "periodo": 0, "tipo": "V"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function votiAction(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
-                             int $periodo, string $tipo): Response {
+  #[Route(path: '/coordinatore/voti/{classe}/{periodo}/{tipo}', name: 'coordinatore_voti', requirements: ['classe' => '\d+', 'periodo' => '1|2|3|0', 'tipo' => 'V|P'], defaults: ['classe' => 0, 'periodo' => 0, 'tipo' => 'V'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function voti(RegistroUtil $reg, StaffUtil $staff, PdfManager $pdf, int $classe,
+                       int $periodo, string $tipo): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
@@ -302,7 +287,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -310,7 +295,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -323,7 +308,7 @@ class CoordinatoreController extends BaseController {
       // seleziona periodo se non indicato
       if ($periodo == 0) {
         // seleziona periodo in base alla data
-        $datiPeriodo = $reg->periodo(new \DateTime());
+        $datiPeriodo = $reg->periodo(new DateTime());
         $periodo = $datiPeriodo['periodo'];
       } else {
         $datiPeriodo = $listaPeriodi[$periodo];
@@ -340,10 +325,9 @@ class CoordinatoreController extends BaseController {
         $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Medie dei voti della classe '.$classe);
         $pdf->getHandler()->setPageOrientation('L', true, 20);
-        $html = $this->renderView('pdf/voti_classe.html.twig', array(
+        $html = $this->renderView('pdf/voti_classe.html.twig', [
           'info' => $info,
-          'dati' => $dati,
-        ));
+          'dati' => $dati]);
         $pdf->createFromHtml($html);
         // invia il documento
         $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'.pdf';
@@ -351,11 +335,10 @@ class CoordinatoreController extends BaseController {
       }
     }
     // visualizza pagina
-    return $this->render('coordinatore/voti.html.twig', array(
+    return $this->render('coordinatore/voti.html.twig', [
       'pagina_titolo' => 'page.coordinatore_voti',
       'info' => $info,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -366,14 +349,10 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/situazione/{classe}", name="coordinatore_situazione",
-   *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAction(StaffUtil $staff, int $classe): Response {
+  #[Route(path: '/coordinatore/situazione/{classe}', name: 'coordinatore_situazione', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function situazione(StaffUtil $staff, int $classe): Response {
     // inizializza variabili
     $dati = null;
     // parametro classe
@@ -386,7 +365,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -394,7 +373,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -404,11 +383,10 @@ class CoordinatoreController extends BaseController {
       $dati = $staff->alunni($classe);
     }
     // visualizza pagina
-    return $this->render('coordinatore/situazione.html.twig', array(
+    return $this->render('coordinatore/situazione.html.twig', [
       'pagina_titolo' => 'page.coordinatore_situazione',
       'classe' => $classe,
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -422,19 +400,16 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/situazione/alunno/{alunno}/{tipo}/{formato}", name="coordinatore_situazione_alunno",
-   *    requirements={"alunno": "\d+", "tipo": "V|S|A|N|O|T", "formato": "H|P"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function situazioneAlunnoAction(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
-                                         string $formato): Response {
+  #[Route(path: '/coordinatore/situazione/alunno/{alunno}/{tipo}/{formato}', name: 'coordinatore_situazione_alunno', requirements: ['alunno' => '\d+', 'tipo' => 'V|S|A|N|O|T', 'formato' => 'H|P'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function situazioneAlunno(StaffUtil $staff, PdfManager $pdf, int $alunno, string $tipo,
+                                   string $formato): Response {
     // inizializza variabili
     $dati = null;
     $info = null;
     // controllo alunno
-    $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
+    $alunno = $this->em->getRepository(Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -442,7 +417,7 @@ class CoordinatoreController extends BaseController {
     // controllo classe
     $classe = $alunno->getClasse();
     if (!$classe) {
-      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->findOneBy(['alunno' => $alunno]);
+      $cambio = $this->em->getRepository(CambioClasse::class)->findOneBy(['alunno' => $alunno]);
       if (!$cambio) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -452,7 +427,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -471,26 +446,24 @@ class CoordinatoreController extends BaseController {
       // crea documento PDF
       $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
-      $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
+      $html = $this->renderView('pdf/situazione_alunno.html.twig', [
         'classe' => $classe,
         'alunno' => $alunno,
         'dati' => $dati,
-        'info' => $info,
-        ));
+        'info' => $info]);
       $pdf->createFromHtml($html);
       // invia il documento
       $nomefile = 'situazione-alunno-'.$alunno->getCognome().'-'.$alunno->getNome();
       return $pdf->send($pdf->normalizzaNome($nomefile));
     }
     // visualizza pagina
-    return $this->render('coordinatore/situazione_alunno.html.twig', array(
+    return $this->render('coordinatore/situazione_alunno.html.twig', [
       'pagina_titolo' => 'page.coordinatore_situazione',
       'classe' => $classe,
       'alunno' => $alunno,
       'tipo' => $tipo,
       'dati' => $dati,
-      'info' => $info,
-    ));
+      'info' => $info]);
   }
 
   /**
@@ -502,14 +475,10 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/avvisi/{classe}/{pagina}", name="coordinatore_avvisi",
-   *    requirements={"classe": "\d+", "pagina": "\d+"},
-   *    defaults={"classe": 0, "pagina": "0"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(BachecaUtil $bac, int $classe, int $pagina): Response {
+  #[Route(path: '/coordinatore/avvisi/{classe}/{pagina}', name: 'coordinatore_avvisi', requirements: ['classe' => '\d+', 'pagina' => '\d+'], defaults: ['classe' => 0, 'pagina' => '0'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function avvisi(BachecaUtil $bac, int $classe, int $pagina): Response {
     // inizializza variabili
     $dati = null;
     $limite = 20;
@@ -532,7 +501,7 @@ class CoordinatoreController extends BaseController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -540,7 +509,7 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -551,13 +520,12 @@ class CoordinatoreController extends BaseController {
       $maxPages = ceil($dati['lista']->count() / $limite);
     }
     // visualizza pagina
-    return $this->render('coordinatore/avvisi.html.twig', array(
+    return $this->render('coordinatore/avvisi.html.twig', [
       'pagina_titolo' => 'page.coordinatore_avvisi',
       'classe' => $classe,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => $maxPages,
-    ));
+      'maxPages' => $maxPages]);
   }
 
   /**
@@ -574,18 +542,14 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/avvisi/edit/{classe}/{id}", name="coordinatore_avviso_edit",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoEditAction(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                   BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
-                                   int $classe, int $id): Response {
+  #[Route(path: '/coordinatore/avvisi/edit/{classe}/{id}', name: 'coordinatore_avviso_edit', requirements: ['classe' => '\d+', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function avvisoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
+                             BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
+                             int $classe, int $id): Response {
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -594,7 +558,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -603,7 +567,7 @@ class CoordinatoreController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -614,11 +578,11 @@ class CoordinatoreController extends BaseController {
       $avviso = (new Avviso())
         ->setTipo('O')
         ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto', ['classe' => ''.$classe]))
-        ->setData(new \DateTime('today'))
+        ->setData(new DateTime('today'))
         ->addSedi($classe->getSede());
       $this->em->persist($avviso);
       // imposta classe tramite cattedra
-      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['attiva' => 1, 'classe' => $classe]);
       $avviso->setCattedra($cattedra);
     }
     // imposta autore dell'avviso
@@ -631,7 +595,7 @@ class CoordinatoreController extends BaseController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $this->em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $this->em->getRepository(Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // controllo errori
@@ -644,10 +608,10 @@ class CoordinatoreController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
       }
       // controlla filtro
-      $lista = array();
+      $lista = [];
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $this->em->getRepository('App\Entity\Alunno')
+        $lista = $this->em->getRepository(Alunno::class)
           ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -677,16 +641,16 @@ class CoordinatoreController extends BaseController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
-          $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+          $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
-            ->setParameters(['avviso' => $avviso])
+            ->setParameter('avviso', $avviso)
             ->getQuery()
             ->execute();
         }
@@ -703,18 +667,18 @@ class CoordinatoreController extends BaseController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($this->em->getReference('App\Entity\Utente', $u));
+            ->setUtente($this->em->getReference(Utente::class, $u));
           $this->em->persist($obj);
         }
         // imposta classe
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($this->em->getReference('App\Entity\Classe', $c));
+            ->setClasse($this->em->getReference(Classe::class, $c));
           $this->em->persist($obj);
         }
         // annotazione
-        $log_annotazioni['delete'] = array();
+        $log_annotazioni['delete'] = [];
         if ($id) {
           // cancella annotazioni
           foreach ($avviso->getAnnotazioni() as $a) {
@@ -747,15 +711,12 @@ class CoordinatoreController extends BaseController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', [
             'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-          ));
+            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         } else {
           // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', [
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
             'Destinatari' => $avviso_old->getDestinatari(),
@@ -763,22 +724,18 @@ class CoordinatoreController extends BaseController {
             'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(function ($a) {
-                return $a->getId();
-              }, $avviso->getAnnotazioni()->toArray())),
-          ));
+            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
         }
         // redirezione
         return $this->redirectToRoute('coordinatore_avvisi');
       }
     }
     // mostra la pagina di risposta
-    return $this->render('coordinatore/avviso_edit.html.twig', array(
+    return $this->render('coordinatore/avviso_edit.html.twig', [
       'pagina_titolo' => 'page.coordinatore_avvisi',
-      'form' => $form->createView(),
+      'form' => $form,
       'form_title' => ($id > 0 ? 'title.modifica_avviso_coordinatore' : 'title.nuovo_avviso_coordinatore'),
-      'dati' => $dati,
-    ));
+      'dati' => $dati]);
   }
 
   /**
@@ -790,23 +747,20 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/avvisi/dettagli/{classe}/{id}", name="coordinatore_avviso_dettagli",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDettagliAction(BachecaUtil $bac, int $classe, int $id): Response {
+  #[Route(path: '/coordinatore/avvisi/dettagli/{classe}/{id}', name: 'coordinatore_avviso_dettagli', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function avvisoDettagli(BachecaUtil $bac, int $classe, int $id): Response {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
+    $avviso = $this->em->getRepository(Avviso::class)->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -814,7 +768,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -827,15 +781,13 @@ class CoordinatoreController extends BaseController {
     // legge dati
     $dati = $bac->dettagliAvviso($avviso);
     // visualizza pagina
-    return $this->render('coordinatore/scheda_avviso.html.twig', array(
-      'dati' => $dati,
-    ));
+    return $this->render('coordinatore/scheda_avviso.html.twig', [
+      'dati' => $dati]);
   }
 
   /**
    * Cancella avviso
    *
-   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -844,22 +796,19 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/avvisi/delete/{classe}/{id}", name="coordinatore_avviso_delete",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisoDeleteAction(Request $request, LogHandler $dblogger, BachecaUtil $bac,
-                                     RegistroUtil $reg, int $classe, int $id): Response {
+  #[Route(path: '/coordinatore/avvisi/delete/{classe}/{id}', name: 'coordinatore_avviso_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function avvisoDelete(LogHandler $dblogger, BachecaUtil $bac,
+                               RegistroUtil $reg, int $classe, int $id): Response {
     // controllo avviso
-    $avviso = $this->em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+    $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -867,7 +816,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -886,22 +835,22 @@ class CoordinatoreController extends BaseController {
       }
     }
     // cancella annotazioni
-    $log_annotazioni = array();
+    $log_annotazioni = [];
     foreach ($avviso->getAnnotazioni() as $a) {
       $log_annotazioni[] = $a->getId();
       $this->em->remove($a);
     }
     // cancella destinatari
-    $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+    $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
-    $this->em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
+    $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
-      ->setParameters(['avviso' => $avviso])
+      ->setParameter('avviso', $avviso)
       ->getQuery()
       ->execute();
     // cancella avviso
@@ -912,7 +861,7 @@ class CoordinatoreController extends BaseController {
     // rimuove notifica
     NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
     // log azione
-    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
+    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', [
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
@@ -921,8 +870,7 @@ class CoordinatoreController extends BaseController {
       'Filtro' => $avviso->getFiltro(),
       'Classe' => $avviso->getCattedra()->getCLasse()->getId(),
       'Docente' => $avviso->getDocente()->getId(),
-      'Annotazioni' => implode(', ', $log_annotazioni),
-      ));
+      'Annotazioni' => implode(', ', $log_annotazioni)]);
     // redirezione
     return $this->redirectToRoute('coordinatore_avvisi');
   }
@@ -936,14 +884,10 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/presenze/{classe}/{pagina}", name="coordinatore_presenze",
-   *    requirements={"classe": "\d+", "pagina": "\d+"},
-   *    defaults={"classe": 0, "pagina": 0},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeAction(Request $request, int $classe, int $pagina): Response {
+  #[Route(path: '/coordinatore/presenze/{classe}/{pagina}', name: 'coordinatore_presenze', requirements: ['classe' => '\d+', 'pagina' => '\d+'], defaults: ['classe' => 0, 'pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function presenze(Request $request, int $classe, int $pagina): Response {
     // init
     $dati = [];
     $info = [];
@@ -959,22 +903,22 @@ class CoordinatoreController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // recupera criteri dalla sessione
-    $criteri = array();
+    $criteri = [];
     $criteri['alunno'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/alunno', 0);
     $criteri['inizio'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/inizio', null);
     $criteri['fine'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/fine', null);
     $alunno = ($criteri['alunno'] > 0 ?
-      $this->em->getRepository('App\Entity\Alunno')->find($criteri['alunno']) : null);
+      $this->em->getRepository(Alunno::class)->find($criteri['alunno']) : null);
     if ($criteri['inizio']) {
-      $inizio = \DateTime::createFromFormat('Y-m-d', $criteri['inizio']);
+      $inizio = DateTime::createFromFormat('Y-m-d', $criteri['inizio']);
     } else {
-      $inizio = new \DateTime('tomorrow');
+      $inizio = new DateTime('tomorrow');
       $criteri['inizio'] = $inizio->format('Y-m-d');
     }
     if ($criteri['fine']) {
-      $fine = \DateTime::createFromFormat('Y-m-d', $criteri['fine']);
+      $fine = DateTime::createFromFormat('Y-m-d', $criteri['fine']);
     } else {
-      $fine = \DateTime::createFromFormat('Y-m-d',
+      $fine = DateTime::createFromFormat('Y-m-d',
         $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
       $criteri['fine'] = $fine->format('Y-m-d');
     }
@@ -987,7 +931,7 @@ class CoordinatoreController extends BaseController {
     }
     if ($classe > 0) {
       // controllo classe
-      $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -995,14 +939,14 @@ class CoordinatoreController extends BaseController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
         }
       }
       // form di ricerca
-      $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+      $opzioniAlunni = $this->em->getRepository(Alunno::class)->opzioni(true, true,
         $classe->getId());
       $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'presenze',
         'values' => [$alunno, $opzioniAlunni, $inizio, $fine]]);
@@ -1020,15 +964,15 @@ class CoordinatoreController extends BaseController {
         $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
       }
       // lista fuori classe
-      $dati = $this->em->getRepository('App\Entity\Presenza')->fuoriClasse($classe, $criteri, $pagina);
+      $dati = $this->em->getRepository(Presenza::class)->fuoriClasse($classe, $criteri, $pagina);
       // imposta informazioni
       $info['classe'] = $classe;
       $info['pagina'] = $pagina;
-      $info['oggi'] = new \DateTime('today');
+      $info['oggi'] = new DateTime('today');
       $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
-      $info['annoInizio'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+      $info['annoInizio'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
       $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-      $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+      $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     }
     // mostra la pagina di risposta
     return $this->renderHtml('coordinatore', 'presenze', $dati, $info, [
@@ -1047,32 +991,29 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/presenze/edit/{id}/{classe}", name="coordinatore_presenze_edit",
-   *    requirements={"id": "\d+", "classe": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeEditAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                     LogHandler $dblogger, int $id, int $classe): Response {
+  #[Route(path: '/coordinatore/presenze/edit/{id}/{classe}', name: 'coordinatore_presenze_edit', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function presenzeEdit(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                               LogHandler $dblogger, int $id, int $classe): Response {
     // init
     $dati = [];
     $info = [];
     // controlla presenza
-    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    $presenza = $this->em->getRepository(Presenza::class)->find($id);
     if (!$presenza) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     $vecchiaPresenza = clone $presenza;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo data futura
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     if ($presenza->getData() <= $oggi) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1080,7 +1021,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1088,9 +1029,9 @@ class CoordinatoreController extends BaseController {
     }
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     // form
-    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+    $opzioniAlunni = $this->em->getRepository(Alunno::class)->opzioni(true, true,
       $classe->getId());
     $form = $this->createForm(PresenzaType::class, $presenza, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'edit',
@@ -1147,29 +1088,26 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/presenze/delete/{id}/{classe}", name="coordinatore_presenze_delete",
-   *    requirements={"id": "\d+", "classe": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeDeleteAction(RegistroUtil $reg, LogHandler $dblogger, int $id,
-                                       int $classe): Response {
+  #[Route(path: '/coordinatore/presenze/delete/{id}/{classe}', name: 'coordinatore_presenze_delete', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function presenzeDelete(RegistroUtil $reg, LogHandler $dblogger, int $id,
+                                 int $classe): Response {
     // controlla presenza
-    $presenza = $this->em->getRepository('App\Entity\Presenza')->find($id);
+    $presenza = $this->em->getRepository(Presenza::class)->find($id);
     if (!$presenza) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     $vecchiaPresenza = clone $presenza;
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo data futura
-    $oggi = new \DateTime('today');
+    $oggi = new DateTime('today');
     if ($presenza->getData() <= $oggi) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1177,7 +1115,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1209,19 +1147,16 @@ class CoordinatoreController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/presenze/add/{classe}", name="coordinatore_presenze_add",
-   *    requirements={"classe": "\d+"},
-   *    methods={"GET","POST"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
    */
-  public function presenzeAddAction(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
-                                    LogHandler $dblogger, int $classe): Response {
+  #[Route(path: '/coordinatore/presenze/add/{classe}', name: 'coordinatore_presenze_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function presenzeAdd(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                              LogHandler $dblogger, int $classe): Response {
     // init
     $dati = [];
     $info = [];
     // controllo classe
-    $classe = $this->em->getRepository('App\Entity\Classe')->find($classe);
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1229,7 +1164,7 @@ class CoordinatoreController extends BaseController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1237,9 +1172,9 @@ class CoordinatoreController extends BaseController {
     }
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    $info['annoFine'] = substr($dataYMD, 8, 2).'/'.substr($dataYMD, 5, 2).'/'.substr($dataYMD, 0, 4);
+    $info['annoFine'] = substr((string) $dataYMD, 8, 2).'/'.substr((string) $dataYMD, 5, 2).'/'.substr((string) $dataYMD, 0, 4);
     // form
-    $opzioniAlunni = $this->em->getRepository('App\Entity\Alunno')->opzioni(true, true,
+    $opzioniAlunni = $this->em->getRepository(Alunno::class)->opzioni(true, true,
       $classe->getId());
     $form = $this->createForm(PresenzaType::class, null, [
       'return_url' => $this->generateUrl('coordinatore_presenze'), 'form_mode' => 'add',
@@ -1255,7 +1190,7 @@ class CoordinatoreController extends BaseController {
         // errore alunni non indicati
         $form->addError(new FormError($trans->trans('exception.presenze_alunni_mancanti')));
       }
-      $oggi = new \DateTime('today');
+      $oggi = new DateTime('today');
       if ($dataInizio <= $oggi) {
         // errore data non è futura
         $form->addError(new FormError($trans->trans('exception.presenze_data_non_futura')));
@@ -1310,7 +1245,7 @@ class CoordinatoreController extends BaseController {
         // ok: memorizzazione e log
         foreach ($alunni as $alunno) {
           foreach ($listaDate as $data) {
-            if ($this->em->getRepository('App\Entity\Presenza')->findOneBy(['alunno' => $alunno,
+            if ($this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
                 'data' => $data])) {
               // salta fuori classe esistente
               continue;

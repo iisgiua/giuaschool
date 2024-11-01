@@ -62,7 +62,7 @@ Scenario: visualizza lista cattedre di coordinatore con documenti
 Scenario: mostra errore all'accesso pagina lista cattedre senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_maggio"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso pagina lista cattedre con altri utenti
   Dato logout utente

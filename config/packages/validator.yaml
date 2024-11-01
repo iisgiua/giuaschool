@@ -3,8 +3,7 @@
 framework:
   validation:
     enabled: true
-    enable_annotations: true
+    enable_attributes: true
     email_validation_mode: 'html5'
     not_compromised_password:
       enabled: false
-      

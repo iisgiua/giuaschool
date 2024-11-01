@@ -18,3 +18,7 @@ services:
   Fidry\AliceDataFixtures\Loader\PurgerLoader:
     alias: fidry_alice_data_fixtures.doctrine.purger_loader
     public: true
+
+  validator.traceable_validator:
+    class: Symfony\Component\Validator\Validator\TraceableValidator
+    public: true

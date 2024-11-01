@@ -8,6 +8,7 @@
 
 namespace App\Twig;
 
+use DateTime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -26,7 +27,7 @@ class FiledateExtension extends AbstractExtension {
    */
   public function getFunctions() {
     return [
-      new TwigFunction('filedate', [$this, 'getFileDate']),
+      new TwigFunction('filedate', $this->getFileDate(...)),
     ];
   }
 
@@ -35,12 +36,12 @@ class FiledateExtension extends AbstractExtension {
    *
    * @param string $nomefile File di cui restituire la data di modifica
    *
-   * @return \DateTime|null Data dell'ultima modifica del file indicato
+   * @return DateTime|null Data dell'ultima modifica del file indicato
    */
   public function getFileDate($nomefile) {
     if (file_exists($nomefile)) {
       // restituisce data
-      return new \DateTime('@'.filemtime($nomefile));
+      return new DateTime('@'.filemtime($nomefile));
     }
     // errore
     return null;

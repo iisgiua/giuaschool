@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use App\Repository\OsservazioneAlunnoRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,23 +16,22 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * OsservazioneAlunno - dati per le osservazioni sugli alunni riportate sul registro
  *
- * @ORM\Entity(repositoryClass="App\Repository\OsservazioneAlunnoRepository")
  *
  * @author Antonello Dessì
  */
+#[ORM\Entity(repositoryClass: OsservazioneAlunnoRepository::class)]
 class OsservazioneAlunno extends OsservazioneClasse {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var Alunno $alunno Alunno a cui si riferisce l'osservazione
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
    *
-   * @Assert\NotBlank(message="field.notblank")
    */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \Alunno::class)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?Alunno $alunno = null;
 
 

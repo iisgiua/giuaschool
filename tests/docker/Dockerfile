@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:11.8 as system_builder
+FROM debian:12.6 AS system_builder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
@@ -8,13 +8,14 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 ### Install system
 RUN \
 # Source repositories
-  echo "deb http://deb.debian.org/debian bullseye main contrib non-free" > /etc/apt/sources.list && \
-  echo "deb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
-# Init APT
+  rm /etc/apt/sources.list.d/debian.sources && \
+  echo "deb http://deb.debian.org/debian bookworm main contrib non-free-firmware" > /etc/apt/sources.list && \
+  echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free-firmware" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free-firmware" >> /etc/apt/sources.list && \
+  # Init APT
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends --no-install-suggests install apt-utils && \
-# Set locale
+  # Set locale
   apt-get -yqq --no-install-recommends --no-install-suggests install locales && \
   sed -i -e "s/# it_IT.UTF-8/it_IT.UTF-8/" /etc/locale.gen && \
   echo "LANGUAGE=it_IT.UTF-8" > /etc/default/locale && \
@@ -28,8 +29,8 @@ RUN \
   curl wget ca-certificates debconf-utils lsb-release zip unzip git \
 # Install Apache and MariaDB
   apache2=2.4.* \
-  mariadb-common=1:10.5.* mariadb-server=1:10.5.* mariadb-client=1:10.5.* \
-# Install PHP 7.4
+  mariadb-common=1:10.11.* mariadb-server=1:10.11.* mariadb-client=1:10.11.* \
+# Install PHP 8.2
   php php-curl php-gd php-intl php-mbstring php-mysql php-xml php-zip \
 # Install external dependencies: libreoffice, unoconv and PDF utils
   libreoffice-nogui unoconv poppler-utils && \
@@ -44,9 +45,9 @@ RUN \
 # Configure Apache/PHP/MySQL
   a2enmod rewrite && \
   a2enmod ssl && \
-  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/apache2/php.ini && \
-  sed -r -i -e 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/7.4/apache2/php.ini && \
-  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/cli/php.ini && \
+  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/apache2/php.ini && \
+  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/cli/php.ini && \
+  sed -r -i -e 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/8.2/apache2/php.ini && \
   rm -f /etc/apache2/sites-available/default-ssl.conf
 COPY ./tests/docker/apache2-certificate.crt /etc/ssl/cert/apache2-certificate.crt
 COPY ./tests/docker/apache2-certificate.key /etc/ssl/private/apache2-certificate.key
@@ -56,7 +57,7 @@ COPY ./tests/docker/50-client.cnf /etc/mysql/mariadb.conf.d/50-client.cnf
 
 
 ########## Second Step - Build Symfony framework
-FROM system_builder as symfony_builder
+FROM system_builder AS symfony_builder
 
 ### Install Symfony
 WORKDIR /var/www/giuaschool
@@ -67,7 +68,7 @@ RUN \
 
 
 ########## Third Step - Build Application for DEV environment
-FROM symfony_builder as application_dev
+FROM symfony_builder AS application_dev
 
 ### Build environment
 ARG DEBIAN_FRONTEND=noninteractive
@@ -86,22 +87,22 @@ RUN \
   php bin/console doctrine:schema:drop --dump-sql > src/Install/drop-db.sql && \
 # init database
   php bin/console app:alice:load _giuaschool --dump src/Install/init-db && \
-# install SPID library
-  mkdir vendor/italia && \
-  cd vendor/italia && \
-  tar -zxf ../../tests/docker/spid-php.tgz && \
-  cd spid-php && \
-  composer -q install --no-dev --no-progress --no-scripts && \
-  composer -q clear-cache && \
-  rm -r vendor/italia/spid-smart-button/.git && \
-  rm -r vendor/italia/spid-sp-access-button/.git && \
-  cd vendor/simplesamlphp/simplesamlphp/modules && \
-  tar -zxf /var/www/giuaschool/tests/docker/spid-theme.tgz && \
-  cd .. && \
-  mkdir log cert && \
-  cp ../../.gitkeep log/ && \
-  cp ../../.gitkeep cert/ && \
-  cd /var/www/giuaschool && \
+  # # install SPID library
+  # mkdir vendor/italia && \
+  # cd vendor/italia && \
+  # tar -zxf ../../tests/docker/spid-php.tgz && \
+  # cd spid-php && \
+  # composer -q install --no-dev --no-progress --no-scripts && \
+  # composer -q clear-cache && \
+  # rm -r vendor/italia/spid-smart-button/.git && \
+  # rm -r vendor/italia/spid-sp-access-button/.git && \
+  # cd vendor/simplesamlphp/simplesamlphp/modules && \
+  # tar -zxf /var/www/giuaschool/tests/docker/spid-theme.tgz && \
+  # cd .. && \
+  # mkdir log cert && \
+  # cp ../../.gitkeep log/ && \
+  # cp ../../.gitkeep cert/ && \
+  # cd /var/www/giuaschool && \
 # adjust file permissions
   chown -R www-data:www-data .
 
@@ -111,7 +112,7 @@ CMD tests/docker/entrypoint.sh
 
 
 ########## Fourth Step - Build Application for PROD environment
-FROM application_dev as application_prod
+FROM application_dev AS application_prod
 
 ### Configure application
 WORKDIR /var/www/giuaschool
@@ -125,7 +126,7 @@ RUN \
   rm -f -r src/Command/AliceLoadCommand.php src/DataFixtures/ src/Install/init-db.map && \
   rm -f -r tests/*.php tests/Behat/ tests/data/ tests/features/ tests/temp/ tests/UnitTest/ && \
   rm -f -r var/cache/* var/log/* var/sessions/* && \
-  rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml && \
+  rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
 # adjust file permissions
   chown -R www-data:www-data .
 
@@ -135,7 +136,7 @@ CMD tests/docker/entrypoint.sh
 
 
 ########## Fifth Step - Build Application for TEST environment
-FROM application_dev as application_test
+FROM application_dev AS application_test
 
 ### Build environment
 ARG DEBIAN_FRONTEND=noninteractive
@@ -152,11 +153,12 @@ RUN \
   mkdir -p /var/run/dbus && \
 # Install xdebug
   apt-get -yqq --no-install-recommends --no-install-suggests install php-xdebug && \
-  echo "xdebug.mode=coverage" >> /etc/php/7.4/mods-available/xdebug.ini && \
+  echo "xdebug.mode=coverage" >> /etc/php/8.2/mods-available/xdebug.ini && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
 # Set TEST environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
+  mkdir -p var/sessions/test && \
   service mariadb start && \
   php bin/console app:alice:load tests/features/_testFixtures.yml --dump tests/temp/_testFixtures && \
   chown -R www-data:www-data .

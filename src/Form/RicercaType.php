@@ -29,49 +29,49 @@ class RicercaType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     if ($options['form_mode'] == 'ata') {
       // form ata
       $builder
-        ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'choice_value' => (fn($c) => is_object($c) ? $c->getId() : (int) $c),
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
-          'required' => false))
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'required' => false])
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
           'data' => $options['values'][2],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
           'data' => $options['values'][3],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'docenti-alunni') {
       // form docenti/alunni
       $builder
-        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        ->add('classe', ChoiceType::class, ['label' => 'label.classe',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'choice_value' => (fn($c) => is_object($c) ? $c->getId() : (int) $c),
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false))
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'required' => false])
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
           'data' => $options['values'][2],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
           'data' => $options['values'][3],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'utenti') {
       // form utenti
       $builder
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
           'data' => $options['values'][0],
-          'required' => false))
-        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
           'data' => $options['values'][1],
-          'required' => false));
+          'required' => false]);
     } elseif ($options['form_mode'] == 'cattedre') {
       // form cattedre
       $builder
@@ -102,21 +102,21 @@ class RicercaType extends AbstractType {
     } elseif ($options['form_mode'] == 'rappresentanti') {
       // form rappresentanti
       $builder
-      ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
+      ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
         'data' => $options['values'][0],
         'choices' => $options['values'][1],
         'placeholder' => 'label.tutti',
-        'required' => false))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'required' => false])
+      ->add('cognome', TextType::class, ['label' => 'label.cognome',
         'data' => $options['values'][2],
-        'required' => false))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'required' => false])
+      ->add('nome', TextType::class, ['label' => 'label.nome',
         'data' => $options['values'][3],
-        'required' => false));
+        'required' => false]);
     }
     // pulsante filtro
     $builder
-      ->add('submit', SubmitType::class, array('label' => 'label.filtra'));
+      ->add('submit', SubmitType::class, ['label' => 'label.filtra']);
   }
 
   /**
@@ -124,7 +124,7 @@ class RicercaType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults([

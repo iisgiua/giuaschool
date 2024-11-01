@@ -8,13 +8,14 @@
 
 namespace App\Form;
 
+use Stringable;
 
 /**
  * VotoClasse - classe di utilità per la gestione dei voti di classe
  *
  * @author Antonello Dessì
  */
-class VotoClasse {
+class VotoClasse implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================

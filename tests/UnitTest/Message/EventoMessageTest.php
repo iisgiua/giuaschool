@@ -42,7 +42,7 @@ class EventoMessageTest extends KernelTestCase {
     parent::setUp();
     // inizializza i servizi
     $kernel = self::bootKernel();
-    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker = $kernel->getContainer()->get(Generator::class);
   }
 
   /**

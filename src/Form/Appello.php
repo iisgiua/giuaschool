@@ -8,13 +8,15 @@
 
 namespace App\Form;
 
+use Stringable;
+use DateTime;
 
 /**
  * Appello - classe di utilità per la gestione dell'appello
  *
  * @author Antonello Dessì
  */
-class Appello {
+class Appello implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -35,9 +37,9 @@ class Appello {
   private string $presenza = '';
 
   /**
-   * @var \DateTime|null $ora Ora di eventuale entrata in ritardo
+   * @var DateTime|null $ora Ora di eventuale entrata in ritardo
    */
-  private ?\DateTime $ora = null;
+  private ?DateTime $ora = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -108,20 +110,20 @@ class Appello {
   /**
    * Restituisce l'ora di eventuale entrata in ritardo
    *
-   * @return \DateTime|null Ora di eventuale entrata in ritardo
+   * @return DateTime|null Ora di eventuale entrata in ritardo
    */
-  public function getOra(): ?\DateTime {
+  public function getOra(): ?DateTime {
     return $this->ora;
   }
 
   /**
    * Modifica l'ora di eventuale entrata in ritardo
    *
-   * @param \DateTime $ora Ora di eventual entrata in ritardo
+   * @param DateTime $ora Ora di eventual entrata in ritardo
    *
    * @return Appello Oggetto modificato
    */
-  public function setOra(?\DateTime $ora): self {
+  public function setOra(?DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }

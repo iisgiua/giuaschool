@@ -8,6 +8,10 @@
 
 namespace App\Util;
 
+use App\Entity\Configurazione;
+use App\Entity\Sede;
+use App\Entity\Istituto;
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
@@ -23,7 +27,6 @@ use Google_Service_Classroom_Teacher as GTeacher;
 use Google_Service_Directory as GDirectory;
 use Google_Service_Directory_Member as GMember;
 use Google_Service_Directory_User as GUser;
-use Google_Service_Directory_UserPhoto as GPhoto;
 use GuzzleHttp\Client;
 
 
@@ -34,18 +37,8 @@ use GuzzleHttp\Client;
  */
 class AccountProvisioning {
 
-
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
-  /**
-   * @var EntityManagerInterface $em Gestore delle entità
-   */
-  private $em;
-
-  /**
-   * @var string $dirProgetto Percorso per i file dell'applicazione
-   */
-  private $dirProgetto;
 
   /**
    * @var array $serviceGsuite Lista di servizi per la gestione della GSuite
@@ -76,9 +69,9 @@ class AccountProvisioning {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
-  public function __construct(EntityManagerInterface $em, $dirProgetto) {
-    $this->em = $em;
-    $this->dirProgetto = $dirProgetto;
+  public function __construct(
+      private readonly EntityManagerInterface $em,
+      private $dirProgetto) {
     $this->serviceGsuite = null;
     $this->serviceMoodle = null;
     $this->log = [];
@@ -90,7 +83,7 @@ class AccountProvisioning {
    *
    */
   public function svuotaLog() {
-    $this->log = array();
+    $this->log = [];
   }
 
   /**
@@ -109,13 +102,13 @@ class AccountProvisioning {
    */
   public function inizializza() {
     // inizializza parametri configurazione
-    $this->conf['dominio'] = $this->em->getRepository('App\Entity\Configurazione')
+    $this->conf['dominio'] = $this->em->getRepository(Configurazione::class)
       ->getParametro('id_provider_dominio');
-    $this->conf['anno'] = substr($this->em->getRepository('App\Entity\Configurazione')
+    $this->conf['anno'] = substr((string) $this->em->getRepository(Configurazione::class)
       ->getParametro('anno_inizio'), 0, 4);
-    $this->conf['citta']  = ($this->em->getRepository('App\Entity\Sede')->findOneBy([], ['ordinamento' => 'ASC']))
+    $this->conf['citta']  = ($this->em->getRepository(Sede::class)->findOneBy([], ['ordinamento' => 'ASC']))
       ->getCitta();
-    $this->conf['istituto'] = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
+    $this->conf['istituto'] = $this->em->getRepository(Istituto::class)->findOneBy([]);
     // inizializza sistemi
     if (($errore = $this->inizializzaGsuite())) {
       // errore
@@ -181,7 +174,7 @@ class AccountProvisioning {
     try {
       $idutente = $this->idUtenteMoodle($utente->getUsername());
       $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       return $e->getMessage();
     }
@@ -258,13 +251,15 @@ class AccountProvisioning {
     }
     $this->log[] = 'aggiungeUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: aggiunge ai corsi della classe
-    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -304,13 +299,15 @@ class AccountProvisioning {
     }
     $this->log[] = 'rimuoveUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: rimuove dai corsi della classe
-    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -328,7 +325,7 @@ class AccountProvisioning {
       $this->log[] = 'idUtenteMoodle: '.$alunno->getUsername().' -> '.$idutente;
       $idgruppo = $this->idGruppoMoodle($gruppo);
       $this->log[] = 'idGruppoMoodle: '.$gruppo.' -> '.$idgruppo;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       return $e->getMessage();
     }
@@ -380,18 +377,20 @@ class AccountProvisioning {
     $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().$cattedra->getClasse()->getGruppo();
     $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
       ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
-    $docente_username = $cattedra->getDocente()->getUsername();
+    $docente_username = $cattedra->getDocente()->getUserIdentifier();
     $sede = $cattedra->getClasse()->getSede()->getNomeBreve();
     $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
     // gestione cattedra di sostegno
     if ($cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie
-      $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where("c.attiva=1 AND d.abilitato=1 AND m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione(), 'gruppo' => $cattedra->getClasse()->getGruppo()])
+        ->setParameter('anno', $cattedra->getClasse()->getAnno())
+        ->setParameter('sezione', $cattedra->getClasse()->getSezione())
+        ->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
         ->getQuery()
         ->getResult();
     } elseif ($cattedra->getMateria()->getTipo() != 'E') {
@@ -415,7 +414,7 @@ class AccountProvisioning {
       try {
         // lista studenti
         $students = $this->serviceGsuite['classroom']->courses_students->listCoursesStudents('d:'.$corso);
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $msg = json_decode($e->getMessage(), true);
         $errore = '[aggiungeCattedra] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -423,11 +422,12 @@ class AccountProvisioning {
       }
       if (count($students['students']) == 0) {
         // GSuite: aggiunge studenti al corso
-        $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->select('a.email')
           ->join('a.classe', 'cl')
           ->where('a.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione'.(empty($cattedra->getClasse()->getGruppo()) ? '' : (" AND cl.gruppo='".$cattedra->getClasse()->getGruppo()."'")))
-          ->setParameters(['anno' => $cattedra->getClasse()->getAnno(), 'sezione' => $cattedra->getClasse()->getSezione()])
+          ->setParameter('anno', $cattedra->getClasse()->getAnno())
+          ->setParameter('sezione', $cattedra->getClasse()->getSezione())
           ->getQuery()
           ->getArrayResult();
         foreach ($alunni as $alu) {
@@ -451,13 +451,13 @@ class AccountProvisioning {
           '&moodlewsrestformat=json';
         $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
           'value' => $corso]]);
-        $msg = json_decode($ris->getBody());
+        $msg = json_decode((string) $ris->getBody());
         if (isset($msg->exception)) {
           // errore
           $errore = '[aggiungeCattedra] '.$msg->message;
           return $errore;
         }
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         $errore = '[aggiungeCattedra] '.$e->getMessage();
         return $errore;
@@ -497,26 +497,32 @@ class AccountProvisioning {
     $docente_username = $docente->getUsername();
     $nomeclasse = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
     // controlla se ha altre materie nella classe
-    $altre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+    $altre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('COUNT(c.id)')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND d.id=:docente AND m.id!=:materia AND m.tipo!=:civica')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'docente' => $docente,
-        'materia' => $materia, 'civica' => 'E'])
+			->setParameter('attiva', 1)
+			->setParameter('classe', $classe)
+			->setParameter('abilitato', 1)
+			->setParameter('docente', $docente)
+			->setParameter('materia', $materia)
+			->setParameter('civica', 'E')
       ->getQuery()
       ->getSingleScalarResult();
     // gestione cattedra di sostegno
     if ($materia->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie (anche cattedre/docenti disabilitati)
-      $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->select('DISTINCT m.nomeBreve')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where("m.tipo NOT IN ('S', 'E') AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-        ->setParameters(['anno' => $classe->getAnno(), 'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
         ->getQuery()
         ->getArrayResult();
     } elseif ($materia->getTipo() == 'E') {
@@ -524,7 +530,7 @@ class AccountProvisioning {
       $cattedre = [];
     } else {
       // cattedra curricolare
-      $cattedre = array(['nomeBreve' => $materia->getNomeBreve()]);
+      $cattedre = [['nomeBreve' => $materia->getNomeBreve()]];
     }
     // rimuove docente da corsi
     foreach ($cattedre as $cat) {
@@ -542,7 +548,7 @@ class AccountProvisioning {
         $this->log[] = 'idUtenteMoodle: '.$docente_username.' -> '.$idutente;
         $idcorso = $this->idCorsoMoodle($corso);
         $this->log[] = 'idCorsoMoodle: '.$corso.' -> '.$idcorso;
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore
         return $e->getMessage();
       }
@@ -683,10 +689,10 @@ class AccountProvisioning {
       $client->addScope('https://www.googleapis.com/auth/admin.directory.group');
       $client->addScope('https://www.googleapis.com/auth/classroom.rosters');
       $client->addScope('https://www.googleapis.com/auth/classroom.courses');
-      $this->serviceGsuite = array();
+      $this->serviceGsuite = [];
       $this->serviceGsuite['directory'] = new GDirectory($client);
       $this->serviceGsuite['classroom'] = new GClassroom($client);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[inizializzaGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -717,7 +723,7 @@ class AccountProvisioning {
           'type' => 'USER']);
         $ris = $this->serviceGsuite['directory']->members->insert($gruppo, $member);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[aggiungeUtenteGruppoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -744,7 +750,7 @@ class AccountProvisioning {
         // rimuove utente
         $ris = $this->serviceGsuite['directory']->members->delete($gruppo, $utente);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveUtenteGruppoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -772,7 +778,7 @@ class AccountProvisioning {
     // controlla esistenza
     try {
       $esistente = $this->serviceGsuite['directory']->users->get($email);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // utente non esiste
       $esistente = null;
     }
@@ -824,7 +830,7 @@ class AccountProvisioning {
         // aggiunge docente a corso COLLEGIO DEI DOCENTI
         $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -852,7 +858,7 @@ class AccountProvisioning {
         'name' => ['givenName' => $nome, 'familyName' => $cognome],
         'gender' => ['type' => ($sesso == 'M' ? 'male' : 'female')]]);
       $ris = $this->serviceGsuite['directory']->users->update($email, $user);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[modificaUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -878,7 +884,7 @@ class AccountProvisioning {
         'password' => sha1($password),
         'hashFunction' => 'SHA-1']);
       $ris = $this->serviceGsuite['directory']->users->update($email, $user);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[passwordUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -930,7 +936,7 @@ class AccountProvisioning {
           $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[passwordUtenteGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -958,7 +964,7 @@ class AccountProvisioning {
       // controlla esistenza corso
       try {
         $corsoObj = $this->serviceGsuite['classroom']->courses->get('d:'.$corso);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         $corsoObj = null;
       }
       if (!$corsoObj) {
@@ -974,7 +980,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-        } catch (\Exception $e) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -987,7 +993,7 @@ class AccountProvisioning {
       }
       // aggiunge docente a gruppo classe
       $errore = $this->aggiungeUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$this->conf['dominio']);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1012,7 +1018,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $studente);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         // studente non presente
         $presente = false;
       }
@@ -1022,7 +1028,7 @@ class AccountProvisioning {
           'userId' => $studente]);
         $ris = $this->serviceGsuite['classroom']->courses_students->create('d:'.$corso, $student);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[aggiungeAlunnoCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1047,7 +1053,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $studente);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         // studente non presente
         $presente = false;
       }
@@ -1055,7 +1061,7 @@ class AccountProvisioning {
         // rimuove studente
         $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $studente);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveAlunnoCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1105,7 +1111,7 @@ class AccountProvisioning {
         // rimuove docente da gruppo classe
         $errore = $this->rimuoveUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$this->conf['dominio']);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveDocenteCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1133,7 +1139,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         // docente non presente
         $presente = false;
       }
@@ -1146,7 +1152,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
-        } catch (\Exception $e) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -1168,7 +1174,7 @@ class AccountProvisioning {
           'userId' => $docente]);
         $ris = $this->serviceGsuite['classroom']->courses_students->create('d:'.$corso, $student);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1195,7 +1201,7 @@ class AccountProvisioning {
       $presente = true;
       try {
         $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
-      } catch (\Exception $e) {
+      } catch (Exception) {
         // docente non presente
         $presente = false;
       }
@@ -1207,7 +1213,7 @@ class AccountProvisioning {
         $presente = true;
         try {
           $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
-        } catch (\Exception $e) {
+        } catch (Exception) {
           // docente non presente
           $presente = false;
         }
@@ -1216,7 +1222,7 @@ class AccountProvisioning {
           $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $docente);
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
@@ -1239,10 +1245,10 @@ class AccountProvisioning {
     try {
       $config = json_decode(file_get_contents($this->dirProgetto.'/config/secrets/registro-elettronico-utenti-moodle.json'));
       $client = new Client(['base_uri' => $config->domain]);
-      $this->serviceMoodle = array();
+      $this->serviceMoodle = [];
       $this->serviceMoodle['config'] = $config;
       $this->serviceMoodle['client'] = $client;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[inizializzaMoodle] '.$e->getMessage();
     }
@@ -1262,10 +1268,10 @@ class AccountProvisioning {
     $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
       '&moodlewsrestformat=json';
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'username', 'values' => [$utente]]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idUtenteMoodle] '.$msg->message);
+      throw new Exception('[idUtenteMoodle] '.$msg->message);
     }
     // restituisce id utente
     return $msg[0]->id;
@@ -1282,14 +1288,13 @@ class AccountProvisioning {
     $functionname = 'core_cohort_search_cohorts';
     $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
       '&moodlewsrestformat=json';
-    $context = array(
-      'contextlevel' => 'system',
-    );
+    $context = [
+      'contextlevel' => 'system'];
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['query' => $gruppo, 'context' => $context]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idGruppoMoodle] '.$msg->message);
+      throw new Exception('[idGruppoMoodle] '.$msg->message);
     }
     // restituisce id gruppo
     return $msg->cohorts[0]->id;
@@ -1305,7 +1310,7 @@ class AccountProvisioning {
    */
   private function idCategoriaMoodle($sede, $indirizzo) {
     // crea codice categoria
-    $indirizzi = array();
+    $indirizzi = [];
     $indirizzi['Ist. Tecn. Inf. Telecom.'] = 'BT';        // biennio tecnico
     $indirizzi['Ist. Tecn. Chim. Mat. Biotecn.'] = 'BT';  // biennio tecnico
     $indirizzi['Ist. Tecn. Art. Informatica'] = 'INF';    // tecnico articolazione informatica
@@ -1317,14 +1322,14 @@ class AccountProvisioning {
     $functionname = 'core_course_get_categories';
     $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
       '&moodlewsrestformat=json';
-    $criteria = array(
+    $criteria = [
       'key' => 'idnumber',
-      'value' => $categoria);
+      'value' => $categoria];
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['criteria' => [$criteria]]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idCategoriaMoodle] '.$msg->message);
+      throw new Exception('[idCategoriaMoodle] '.$msg->message);
     }
     // restituisce id categoria
     return $msg[0]->id;
@@ -1345,20 +1350,20 @@ class AccountProvisioning {
       $functionname = 'core_cohort_add_cohort_members';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $member = array(
+      $member = [
         'cohorttype' => [
           'type' => 'idnumber',
           'value' => $gruppo],
         'usertype' => [
           'type' => 'username',
-          'value' => $utente]);
+          'value' => $utente]];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['members' => [$member]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeUtenteGruppoMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[aggiungeUtenteGruppoMoodle] '.$e->getMessage();
     }
@@ -1381,16 +1386,16 @@ class AccountProvisioning {
       $functionname = 'core_cohort_delete_cohort_members';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $member = array(
+      $member = [
         'cohortid' => $idgruppo,
-        'userid' => $idutente);
+        'userid' => $idutente];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['members' => [$member]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[rimuoveUtenteGruppoMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[rimuoveUtenteGruppoMoodle] '.$e->getMessage();
     }
@@ -1425,7 +1430,7 @@ class AccountProvisioning {
       $functionname = 'core_user_create_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $user = array(
+      $user = [
         'firstname' => $nome,
         'lastname' => $cognome,
         'username' => $username,
@@ -1433,9 +1438,9 @@ class AccountProvisioning {
         'email' => $email,
         'mailformat' => 1,
         'city' => $this->conf['citta'],
-        'country' => 'IT');
+        'country' => 'IT'];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaUtenteMoodle] '.$msg->message;
@@ -1443,7 +1448,7 @@ class AccountProvisioning {
         // aggiunge a gruppo
         $errore = $this->aggiungeUtenteGruppoMoodle($username, $gruppo);
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[creaUtenteMoodle] '.$e->getMessage();
     }
@@ -1467,17 +1472,17 @@ class AccountProvisioning {
       $functionname = 'core_user_update_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $user = array(
+      $user = [
         'id' => $idutente,
         'firstname' => $nome,
-        'lastname' => $cognome);
+        'lastname' => $cognome];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[modificaUtenteMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[modificaUtenteMoodle] '.$e->getMessage();
     }
@@ -1500,16 +1505,16 @@ class AccountProvisioning {
       $functionname = 'core_user_update_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $user = array(
+      $user = [
         'id' => $idutente,
-        'password' => $password);
+        'password' => $password];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[passwordUtenteMoodle] '.$msg->message;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[passwordUtenteMoodle] '.$e->getMessage();
     }
@@ -1543,11 +1548,11 @@ class AccountProvisioning {
       $functionname = 'core_user_update_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $user = array(
+      $user = [
         'id' => $idutente,
-        'suspended' => $sospeso);
+        'suspended' => $sospeso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[sospendeUtenteMoodle] '.$msg->message;
@@ -1562,7 +1567,7 @@ class AccountProvisioning {
           $errore = $this->aggiungeUtenteGruppoMoodle($utente, $gruppo);
         }
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[sospendeUtenteMoodle] '.$e->getMessage();
     }
@@ -1594,7 +1599,7 @@ class AccountProvisioning {
         '&moodlewsrestformat=json';
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
         'value' => $corso]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaCorsoMoodle] '.$msg->message;
@@ -1606,12 +1611,12 @@ class AccountProvisioning {
         $functionname = 'core_course_create_courses';
         $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
           '&moodlewsrestformat=json';
-        $course = array(
+        $course = [
           'fullname' => $nomecorso,
           'shortname' => $corso,
-          'categoryid' => $idcategoria);
+          'categoryid' => $idcategoria];
         $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['courses' => [$course]]]);
-        $msg = json_decode($ris->getBody());
+        $msg = json_decode((string) $ris->getBody());
         if (isset($msg->exception)) {
           // errore
           $errore = '[creaCorsoMoodle] '.$msg->message;
@@ -1628,18 +1633,18 @@ class AccountProvisioning {
       $functionname = 'enrol_manual_enrol_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $enrolment = array(
-        'roleid' => 10,   // ruolo 10: docentegiua
-        'userid' => $iddocente,
-        'courseid' => $idcorso);
+      $enrolment = [
+          'roleid' => 10, // ruolo 10: docentegiua
+          'userid' => $iddocente,
+          'courseid' => $idcorso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['enrolments' => [$enrolment]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[creaCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[creaCorsoMoodle] '.$e->getMessage();
     }
@@ -1663,9 +1668,9 @@ class AccountProvisioning {
       $functionname = 'core_cohort_search_cohorts';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $context = array('contextlevel' => 'system');
+      $context = ['contextlevel' => 'system'];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['query' => $classe, 'context' => $context]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeClasseCorsoMoodle] '.$msg->message;
@@ -1676,18 +1681,18 @@ class AccountProvisioning {
       $functionname = 'local_ws_enrolcohort_add_instance';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $instance = array(
-        'roleid' => 11,   // ruolo 11: studentegiua
-        'courseid' => $idcorso,
-        'cohortid' => $idgruppo);
+      $instance = [
+          'roleid' => 11, // ruolo 11: studentegiua
+          'courseid' => $idcorso,
+          'cohortid' => $idgruppo];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['instance' => $instance]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[aggiungeClasseCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[aggiungeClasseCorsoMoodle] '.$e->getMessage();
     }
@@ -1710,17 +1715,17 @@ class AccountProvisioning {
       $functionname = 'enrol_manual_unenrol_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
-      $enrolment = array(
+      $enrolment = [
         'userid' => $idutente,
-        'courseid' => $idcorso);
+        'courseid' => $idcorso];
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['enrolments' => [$enrolment]]]);
-      $msg = json_decode($ris->getBody());
+      $msg = json_decode((string) $ris->getBody());
       if (isset($msg->exception)) {
         // errore
         $errore = '[rimuoveDocenteCorsoMoodle] '.$msg->message;
         return $errore;
       }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore
       $errore = '[rimuoveDocenteCorsoMoodle] '.$e->getMessage();
     }
@@ -1741,10 +1746,10 @@ class AccountProvisioning {
       '&moodlewsrestformat=json';
     $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
       'value' => $corso]]);
-    $msg = json_decode($ris->getBody());
+    $msg = json_decode((string) $ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception('[idCorsoMoodle] '.$msg->message);
+      throw new Exception('[idCorsoMoodle] '.$msg->message);
     }
     // restituisce id corso
     return $msg->courses[0]->id;

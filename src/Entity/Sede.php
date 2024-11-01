@@ -8,6 +8,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use DateTimeInterface;
+use App\Repository\SedeRepository;
+use Stringable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,136 +21,129 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Sede - dati per le sedi scolastiche
  *
- * @ORM\Entity(repositoryClass="App\Repository\SedeRepository")
- * @ORM\Table(name="gs_sede")
  *
- * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="nome", message="field.unique")
- * @UniqueEntity(fields="nomeBreve", message="field.unique")
  *
  * @author Antonello Dessì
  */
-class Sede {
+#[ORM\Table(name: 'gs_sede')]
+#[ORM\Entity(repositoryClass: SedeRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: 'nome', message: 'field.unique')]
+#[UniqueEntity(fields: 'nomeBreve', message: 'field.unique')]
+class Sede implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
   /**
    * @var int|null $id Identificativo univoco per la sede
-   *
-   * @ORM\Column(type="integer")
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="AUTO")
    */
+  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Id]
+  #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
-  private ?\DateTime $creato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $creato = null;
 
   /**
-   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
-   *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
-  private ?\DateTime $modificato = null;
+  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
+  private ?DateTime $modificato = null;
 
   /**
    * @var string|null $nome Nome per la sede scolastica
    *
-   * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 128, maxMessage: 'field.maxlength')]
   private ?string $nome = '';
 
   /**
    * @var string|null $nomeBreve Nome breve per la sede scolastica
    *
-   * @ORM\Column(name="nome_breve", type="string", length=32, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 32, unique: true, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
 
   /**
    * @var string|null $citta Città della sede scolastica
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $citta = '';
 
   /**
    * @var string|null $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $indirizzo1 = '';
 
   /**
    * @var string|null $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
    *
-   * @ORM\Column(type="string", length=64, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $indirizzo2 = '';
 
   /**
    * @var string|null $telefono Numero di telefono della sede scolastica
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Length(max=32,maxMessage="field.maxlength")
-   * @Assert\Regex(pattern="/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/",message="field.phone")
    */
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
+  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
+  #[Assert\Regex(pattern: '/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/', message: 'field.phone')]
   private ?string $telefono = '';
 
   /**
    * @var int $ordinamento Numero d'ordine per la visualizzazione delle sedi
    *
-   * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\PositiveOrZero(message="field.zeropositive")
    */
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
+  #[Assert\PositiveOrZero(message: 'field.zeropositive')]
   private int $ordinamento = 0;
 
 
   //==================== EVENTI ORM ====================
-
   /**
    * Simula un trigger onCreate
-   *
-   * @ORM\PrePersist
    */
+  #[ORM\PrePersist]
   public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
-    $this->creato = new \DateTime();
+    $this->creato = new DateTime();
     $this->modificato = $this->creato;
   }
 
   /**
    * Simula un trigger onUpdate
-   *
-   * @ORM\PreUpdate
    */
+  #[ORM\PreUpdate]
   public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
-    $this->modificato = new \DateTime();
+    $this->modificato = new DateTime();
   }
 
 
@@ -163,18 +161,18 @@ class Sede {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime|null Data/ora della creazione
+   * @return DateTime|null Data/ora della creazione
    */
-  public function getCreato(): ?\DateTime {
+  public function getCreato(): ?DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime|null Data/ora dell'ultima modifica
+   * @return DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): ?\DateTime {
+  public function getModificato(): ?DateTime {
     return $this->modificato;
   }
 
@@ -334,7 +332,7 @@ class Sede {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->nomeBreve;
+    return (string) $this->nomeBreve;
   }
 
 }

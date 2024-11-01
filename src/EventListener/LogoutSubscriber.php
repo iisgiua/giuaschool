@@ -8,11 +8,12 @@
 
 namespace App\EventListener;
 
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use App\Util\LogHandler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 
@@ -21,30 +22,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
  *
  * @author Antonello Dessì
  */
-class LogoutListener {
-
-
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var RouterInterface $router Gestore delle URL
-   */
-  private RouterInterface $router;
-
-  /**
-   * @var Security $security Gestore dell'autenticazione degli utenti
-   */
-  private Security $security;
-
-  /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private RequestStack $reqstack;
-
-  /**
-   * @var LogHandler $dblogger Gestore dei log su database
-   */
-  private LogHandler $dblogger;
+class LogoutSubscriber implements EventSubscriberInterface {
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -57,12 +35,12 @@ class LogoutListener {
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    */
-  public function __construct(RouterInterface $router, Security $security, RequestStack $reqstack,
-                              LogHandler $dblogger) {
-    $this->router = $router;
-    $this->security = $security;
-    $this->reqstack = $reqstack;
-    $this->dblogger = $dblogger;
+  public function __construct(
+      private readonly RouterInterface $router,
+      private readonly Security $security,
+      private readonly RequestStack $reqstack,
+      private readonly LogHandler $dblogger)
+  {
   }
 
   /**
@@ -90,12 +68,19 @@ class LogoutListener {
       // ditrugge la sessione
       $this->reqstack->getSession()->invalidate();
       // log azione
-      $this->dblogger->logAzione('ACCESSO', 'Logout', array(
+      $this->dblogger->logAzione('ACCESSO', 'Logout', [
         'Username' => $user->getUserIdentifier(),
-        'Ruolo' => $user->getRoles()[0]));
+        'Ruolo' => $user->getRoles()[0]]);
     }
     // reindirizza a nuova pagina
     $logoutEvent->setResponse($response);
+  }
+  /**
+   * @return array<string, mixed>
+   */
+  public static function getSubscribedEvents(): array
+  {
+    return [LogoutEvent::class => 'onLogoutEvent'];
   }
 
 }

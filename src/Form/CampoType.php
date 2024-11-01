@@ -29,31 +29,30 @@ class CampoType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
-      ->add('nome_campo', TextType::class, array('label' => 'label.nome_campo',
+      ->add('nome_campo', TextType::class, ['label' => 'label.nome_campo',
         'attr' => ['widget' => 'gs-row-start'],
         'row_attr' => ['class' => 'offset-1 col-4'],
-        'required' => true))
-      ->add('tipo_campo', ChoiceType::class, array('label' => 'label.tipo_campo',
+        'required' => true])
+      ->add('tipo_campo', ChoiceType::class, ['label' => 'label.tipo_campo',
         'choices' => ['label.tipo_string' => 'string', 'label.tipo_text' => 'text',
           'label.tipo_int' => 'int', 'label.tipo_float' => 'float', 'label.tipo_bool' => 'bool',
           'label.tipo_date' => 'date', 'label.tipo_time' => 'time'],
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'col-4'],
-        'required' => true))
-      ->add('campo_obbligatorio', ChoiceType::class, array('label' => 'label.campo_obbligatorio',
-        'choices' => array('label.si' => true, 'label.no' => false),
+        'required' => true])
+      ->add('campo_obbligatorio', ChoiceType::class, ['label' => 'label.campo_obbligatorio',
+        'choices' => ['label.si' => true, 'label.no' => false],
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'col-2'],
-        'required' => true))
-      ->add('delete', ButtonType::class, array('label' => 'label.minus',
+        'required' => true])
+      ->add('delete', ButtonType::class, ['label' => 'label.minus',
         'attr' => ['widget' => 'gs-row-end',
           'class' => 'btn-danger btn-xs gs-remove-item',
           'title' => 'label.cancella_elemento'],
-        'row_attr' => ['class' => 'col-1']
-      ));
+        'row_attr' => ['class' => 'col-1']]);
   }
 
   /**
@@ -61,7 +60,7 @@ class CampoType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
+  public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefaults([
       'data_class' => null]);
   }

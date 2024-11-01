@@ -28,17 +28,17 @@ class AppelloType extends AbstractType {
    * @param FormBuilderInterface $builder Gestore per la creazione del form
    * @param array $options Lista di opzioni per il form
    */
-  public function buildForm(FormBuilderInterface $builder, array $options) {
+  public function buildForm(FormBuilderInterface $builder, array $options): void {
     // aggiunge campi al form
     $builder
       ->add('id', HiddenType::class)
       ->add('alunno', HiddenType::class)
-      ->add('presenza', ChoiceType::class, array('label' => false,
+      ->add('presenza', ChoiceType::class, ['label' => false,
         'choices' => [ 'label.appello_P' => 'P', 'label.appello_A' => 'A'],
         'label_attr' => ['class' => 'gs-radio-inline col-sm-2'],
         'expanded' => true,
         'multiple' => false,
-        'required' => true));
+        'required' => true]);
   }
 
   /**
@@ -46,8 +46,8 @@ class AppelloType extends AbstractType {
    *
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => Appello::class));
+  public function configureOptions(OptionsResolver $resolver): void {
+    $resolver->setDefaults(['data_class' => Appello::class]);
   }
 
 }

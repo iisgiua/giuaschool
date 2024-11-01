@@ -157,7 +157,7 @@
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_name" class="required active" style="transition: none 0s ease 0s;">Nome database</label>
-                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo substr($page['database']['path'], 1); ?>">
+                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo substr((string) $page['database']['path'], 1); ?>">
                   </div>
                 </div>
                 <div class="form-group col text-center">

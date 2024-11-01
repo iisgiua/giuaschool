@@ -8,12 +8,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Configurazione;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
@@ -31,14 +33,11 @@ class CommandController extends BaseController {
    * @param int $time Tempo massimo di esecuzione dello script (in secondi)
    *
    * @return Response Pagina di risposta
-   *
-   * @Route("/command/notify/{token}/{time}", name="command_notify",
-   *    requirements={"token": "[\w\-\+=]+", "time": "\d+"},
-   *    methods={"GET"})
    */
-  public function notifyAction(KernelInterface $kernel, string $token, int $time): Response {
+  #[Route(path: '/command/notify/{token}/{time}', name: 'command_notify', requirements: ['token' => '[\w\-\+=]+', 'time' => '\d+'], methods: ['GET'])]
+  public function notify(KernelInterface $kernel, string $token, int $time): Response {
     // controlla token
-    $tok = $this->em->getRepository('App\Entity\Configurazione')->getParametro('comando_token');
+    $tok = $this->em->getRepository(Configurazione::class)->getParametro('comando_token');
     if (empty($tok) || $tok != $token) {
       // errore: codice di sicurezza errato
       throw $this->createNotFoundException('exception.not_allowed');
@@ -57,7 +56,7 @@ class CommandController extends BaseController {
     $output = new BufferedOutput();
     try {
       $status = $application->run($command, $output);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       // errore di esecuzione
       throw $this->createNotFoundException($e->getMessage());
     }

@@ -24,7 +24,7 @@ Scenario: visualizza pagina inserimento documento BES di nuovo alunno
   Quando pagina attiva "documenti_bes"
   E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E click su "Aggiungi"
-  Allora vedi pagina "documenti_bes_add"
+  Allora vedi la pagina "documenti_bes_add"
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento relativo all'alunno BES/"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) label" contiene "Classe"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Alunno"
@@ -48,7 +48,7 @@ Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alun
     | $d1 | $cl1   | $a1    | <tipo> |
   Quando pagina attiva "documenti_bes"
   E click su "Aggiungi" con indice "2"
-  Allora vedi pagina "documenti_bes_add" con parametri:
+  Allora vedi la pagina "documenti_bes_add" con parametri:
     | alunno |
     | $a1:id |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento relativo all'alunno BES/"
@@ -127,7 +127,7 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_bes"
+  Allora vedi la pagina "documenti_bes"
   E vedi la tabella:
     | classe | alunno           | documento | azione            |
     | /3ª A/ | $a1:cognome,nome | /<tipo>/  | Aggiungi Cancella |
@@ -151,7 +151,7 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
-  Allora vedi pagina "documenti_bes"
+  Allora vedi la pagina "documenti_bes"
   E non vedi la tabella:
     | classe | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
@@ -167,7 +167,7 @@ Scenario: errore inserimento documento BES senza selezione classe
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_bes_add"
+  Allora vedi la pagina "documenti_bes_add" con errore "422"
   E la sezione "#gs-main form .alert" contiene "/Non hai indicato l'alunno/i"
 
 Scenario: errore inserimento documento BES senza selezione alunno
@@ -176,7 +176,7 @@ Scenario: errore inserimento documento BES senza selezione alunno
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_bes_add"
+  Allora vedi la pagina "documenti_bes_add" con errore "422"
   E la sezione "#gs-main form .alert" contiene "/Non hai indicato l'alunno/i"
 
 Scenario: errore inserimento documento BES senza selezione tipo documento
@@ -191,7 +191,7 @@ Scenario: errore inserimento documento BES senza selezione tipo documento
   E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  Allora vedi pagina "documenti_bes_add"
+  Allora vedi la pagina "documenti_bes_add" con errore "422"
   E la sezione "#gs-main form .alert" contiene "/Non hai indicato il tipo di documento/i"
 
 Scenario: impedisce inserimento documento BES con più di un allegato
@@ -239,7 +239,7 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
-  E vedi pagina "documenti_bes"
+  E vedi la pagina "documenti_bes"
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
@@ -258,7 +258,7 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
 Scenario: mostra errore all'accesso pagina inserimento documenti BES senza utente
   Dato logout utente
   Quando vai alla pagina "documenti_bes_add"
-  Allora vedi pagina "login_form"
+  Allora vedi la pagina "login_form"
 
 Schema dello scenario: mostra errore all'accesso pagina inserimento documenti BES con altri utenti
   Dato logout utente

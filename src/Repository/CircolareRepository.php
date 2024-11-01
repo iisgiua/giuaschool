@@ -8,6 +8,14 @@
 
 namespace App\Repository;
 
+use App\Entity\Configurazione;
+use App\Entity\CircolareClasse;
+use App\Entity\CircolareUtente;
+use DateTime;
+use App\Entity\Ata;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Entity\Alunno;
 use App\Entity\Circolare;
 use App\Entity\Classe;
 use App\Entity\Utente;
@@ -30,12 +38,12 @@ class CircolareRepository extends EntityRepository {
    */
   public function prossimoNumero() {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // legge l'ultima circolare dell'A.S. in corso
     $numero = $this->createQueryBuilder('c')
       ->select('MAX(c.numero)')
       ->where('c.anno=:anno')
-      ->setParameters(['anno' => $anno])
+			->setParameter('anno', $anno)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce prossimo numero
@@ -53,7 +61,8 @@ class CircolareRepository extends EntityRepository {
     // legge la circolare in base e A.S.
     $trovato = $this->createQueryBuilder('c')
       ->where('c.numero=:numero AND c.anno=:anno')
-      ->setParameters(['numero' => $circolare->getNumero(), 'anno' => $circolare->getAnno()]);
+			->setParameter('numero', $circolare->getNumero())
+			->setParameter('anno', $circolare->getAnno());
     if ($circolare->getId() > 0) {
       // circolare in modifica, esclude suo id
       $trovato
@@ -78,14 +87,17 @@ class CircolareRepository extends EntityRepository {
    */
   public function pubblicate($search, $page, $limit) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->where('c.data BETWEEN :inizio AND :fine AND c.oggetto LIKE :oggetto AND c.pubblicata=:pubblicata AND c.anno=:anno')
       ->orderBy('c.data', 'DESC')
       ->addOrderBy('c.numero', 'DESC')
-      ->setParameters(['inizio' => $search['inizio'], 'fine' => $search['fine'], 'oggetto' => '%'.$search['oggetto'].'%',
-        'pubblicata' => 1, 'anno' => $anno]);
+			->setParameter('inizio', $search['inizio'])
+			->setParameter('fine', $search['fine'])
+			->setParameter('oggetto', '%'.$search['oggetto'].'%')
+			->setParameter('pubblicata', 1)
+			->setParameter('anno', $anno);
     // crea lista con pagine
     return $this->paginate($query->getQuery(), $page, $limit);
   }
@@ -101,7 +113,7 @@ class CircolareRepository extends EntityRepository {
       ->where('c.pubblicata=:bozza')
       ->orderBy('c.data', 'DESC')
       ->addOrderBy('c.numero', 'DESC')
-      ->setParameters(['bozza' => 0])
+			->setParameter('bozza', 0)
       ->getQuery()
       ->getResult();
     // restituisce lista
@@ -134,13 +146,15 @@ class CircolareRepository extends EntityRepository {
    */
   public function numeroCircolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
-      ->join('App\Entity\CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->join(CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
+			->setParameter('pubblicata', 1)
+			->setParameter('anno', $anno)
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -156,13 +170,15 @@ class CircolareRepository extends EntityRepository {
    */
   public function numeroCircolariUtente(Utente $utente) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
   // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
-      ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
+      ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
       ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cu.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'utente' => $utente])
+			->setParameter('pubblicata', 1)
+			->setParameter('anno', $anno)
+			->setParameter('utente', $utente)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -178,12 +194,14 @@ class CircolareRepository extends EntityRepository {
    */
   public function circolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
-      ->join('App\Entity\CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->join(CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
+			->setParameter('pubblicata', 1)
+			->setParameter('anno', $anno)
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getResult();
     // restituisce dati
@@ -200,16 +218,16 @@ class CircolareRepository extends EntityRepository {
    */
   public function firma(Circolare $circolare, Utente $utente) {
     // dati destinatario
-    $cu = $this->_em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare,
+    $cu = $this->getEntityManager()->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
       'utente' => $utente]);
     if ($cu && !$cu->getConfermata()) {
       // imposta conferma di lettura
-      $ora = new \DateTime();
+      $ora = new DateTime();
       $cu
         ->setConfermata($ora)
         ->setLetta($ora);
       // memorizza dati
-      $this->_em->flush();
+      $this->getEntityManager()->flush();
       // conferma inserita
       return true;
     }
@@ -226,12 +244,13 @@ class CircolareRepository extends EntityRepository {
    * @return array Lista delle circolari lette
    */
   public function firmaClasse(Classe $classe, $id) {
-    $firme = array();
+    $firme = [];
     // query
-    $circolari = $this->_em->getRepository('App\Entity\CircolareClasse')->createQueryBuilder('cc')
+    $circolari = $this->getEntityManager()->getRepository(CircolareClasse::class)->createQueryBuilder('cc')
       ->join('cc.circolare', 'c')
       ->where('cc.classe=:classe AND cc.letta IS NULL AND c.pubblicata=:pubblicata')
-      ->setParameters(['classe' => $classe, 'pubblicata' => 1]);
+			->setParameter('classe', $classe)
+			->setParameter('pubblicata', 1);
     if ($id > 0) {
       // singola circolare
       $circolari->andWhere('c.id=:id')->setParameter('id', $id);
@@ -241,10 +260,10 @@ class CircolareRepository extends EntityRepository {
       ->getQuery()
       ->getResult();
     // firma circolare
-    $ora = new \DateTime();
+    $ora = new DateTime();
     foreach ($circolari as $c) {
       $c->setLetta($ora);
-      $this->_em->flush();
+      $this->getEntityManager()->flush();
       $firme[] = $c->getCircolare();
     }
     // restituisce lista circolari firmate
@@ -259,31 +278,31 @@ class CircolareRepository extends EntityRepository {
    * @return array Dati formattati come array associativo
    */
   public function statistiche(Circolare $circolare) {
-    $dati = array();
-    $dati['ata'] = array(0, 0, []);
-    $dati['dsga'] = array(0, 0, []);
-    $dati['coordinatori'] = array(0, 0, []);
-    $dati['docenti'] = array(0, 0, []);
-    $dati['genitori'] = array(0, 0, []);
-    $dati['alunni'] = array(0, 0, []);
-    $dati['classi'] = array(0, 0, []);
+    $dati = [];
+    $dati['ata'] = [0, 0, []];
+    $dati['dsga'] = [0, 0, []];
+    $dati['coordinatori'] = [0, 0, []];
+    $dati['docenti'] = [0, 0, []];
+    $dati['genitori'] = [0, 0, []];
+    $dati['alunni'] = [0, 0, []];
+    $dati['classi'] = [0, 0, []];
     // utenti DSGA/ATA
     if ($circolare->getDsga() || $circolare->getAta()) {
       // dsga/ata
       $utenti = $this->createQueryBuilder('c')
         ->select('ata.tipo,COUNT(cu.id) AS tot,COUNT(cu.letta) AS letti')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Ata::class, 'ata', 'WITH', 'ata.id=cu.utente')
         ->where('c.id=:circolare')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->groupBy('ata.tipo')
         ->getQuery()
         ->getArrayResult();
-      $ata = array(0, 0, []);
+      $ata = [0, 0, []];
       foreach ($utenti as $u) {
         if ($u['tipo'] == 'D') {
           // dsga
-          $dati['dsga'] = array($u['tot'], $u['letti'], []);
+          $dati['dsga'] = [$u['tot'], $u['letti'], []];
         } else {
           // altri ata
           $ata[0] += $u['tot'];
@@ -296,10 +315,10 @@ class CircolareRepository extends EntityRepository {
       // dati di lettura
       $utenti = $this->createQueryBuilder('c')
         ->select('ata.cognome,ata.nome,ata.tipo,cu.letta')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Ata::class, 'ata', 'WITH', 'ata.id=cu.utente')
         ->where('c.id=:circolare AND cu.letta IS NOT NULL')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->orderBy('ata.cognome,ata.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -314,22 +333,22 @@ class CircolareRepository extends EntityRepository {
       // coordinatori
       $utenti = $this->createQueryBuilder('c')
         ->select('COUNT(cu.id) AS tot,COUNT(cu.letta) AS letti')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=cu.utente')
-        ->join('App\Entity\Classe', 'cl', 'WITH', 'cl.coordinatore=d.id')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
+        ->join(Classe::class, 'cl', 'WITH', 'cl.coordinatore=d.id')
         ->where('c.id=:circolare')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->getQuery()
         ->getArrayResult();
-      $dati['coordinatori'] = array($utenti[0]['tot'], $utenti[0]['letti'], []);
+      $dati['coordinatori'] = [$utenti[0]['tot'], $utenti[0]['letti'], []];
       // dati di lettura
       $utenti = $this->createQueryBuilder('c')
         ->select('d.cognome,d.nome,cl.anno,cl.sezione,cl.gruppo,cu.letta')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=cu.utente')
-        ->join('App\Entity\Classe', 'cl', 'WITH', 'cl.coordinatore=d.id')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
+        ->join(Classe::class, 'cl', 'WITH', 'cl.coordinatore=d.id')
         ->where('c.id=:circolare AND cu.letta IS NOT NULL')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -345,20 +364,20 @@ class CircolareRepository extends EntityRepository {
       // docenti
       $utenti = $this->createQueryBuilder('c')
         ->select('COUNT(cu.id) AS tot,COUNT(cu.letta) AS letti')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
         ->where('c.id=:circolare')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->getQuery()
         ->getArrayResult();
-      $dati['docenti'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['docenti'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('c')
         ->select('d.cognome,d.nome,cu.letta')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
         ->where('c.id=:circolare AND cu.letta IS NOT NULL')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -373,22 +392,22 @@ class CircolareRepository extends EntityRepository {
       // genitori
       $utenti = $this->createQueryBuilder('c')
         ->select('COUNT(cu.id) AS tot,COUNT(cu.letta) AS letti')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Genitore::class, 'g', 'WITH', 'g.id=cu.utente')
         ->where('c.id=:circolare')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->getQuery()
         ->getArrayResult();
-      $dati['genitori'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['genitori'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('c')
         ->select('a.cognome,a.nome,cl.anno,cl.sezione,cl.gruppo,g.cognome AS cognome_gen,g.nome AS nome_gen,cu.letta')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Genitore::class, 'g', 'WITH', 'g.id=cu.utente')
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')
         ->where('c.id=:circolare AND cu.letta IS NOT NULL')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -405,21 +424,21 @@ class CircolareRepository extends EntityRepository {
       // alunni
       $utenti = $this->createQueryBuilder('c')
         ->select('COUNT(cu.id) AS tot,COUNT(cu.letta) AS letti')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Alunno::class, 'a', 'WITH', 'a.id=cu.utente')
         ->where('c.id=:circolare')
-        ->setParameters(['circolare' => $circolare])
+			  ->setParameter('circolare', $circolare)
         ->getQuery()
         ->getArrayResult();
-      $dati['alunni'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['alunni'] = [$utenti[0]['tot'], $utenti[0]['letti']];
       // dati di lettura
       $utenti = $this->createQueryBuilder('c')
         ->select('a.cognome,a.nome,cl.anno,cl.sezione,cl.gruppo,cu.letta')
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id')
-        ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=cu.utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id')
+        ->join(Alunno::class, 'a', 'WITH', 'a.id=cu.utente')
         ->join('a.classe', 'cl')
         ->where('c.id=:circolare AND cu.letta IS NOT NULL')
-        ->setParameters(['circolare' => $circolare])
+  			->setParameter('circolare', $circolare)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -434,20 +453,20 @@ class CircolareRepository extends EntityRepository {
     $sql = "SELECT COUNT(*) AS tot,COUNT(cc.letta) AS lette ".
       "FROM gs_circolare AS c, gs_circolare_classe AS cc, gs_classe AS cl ".
       "WHERE c.id=:id AND c.id=cc.circolare_id AND cl.id=cc.classe_id";
-    $query = $this->_em->getConnection()->prepare($sql);
+    $query = $this->getEntityManager()->getConnection()->prepare($sql);
     $stat = $query->executeQuery(['id' => $circolare->getId()]);
     $stat = $stat->fetchAllAssociative();
     if ($stat[0]['tot'] > 0) {
-      $dati['classi'] = array($stat[0]['tot'], $stat[0]['lette'], []);
+      $dati['classi'] = [$stat[0]['tot'], $stat[0]['lette'], []];
     }
     if ($stat[0]['tot'] > $stat[0]['lette']) {
       // lista classi in cui va letta
       $classi = $this->createQueryBuilder('c')
         ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome,cl.gruppo")
-        ->join('App\Entity\CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id')
+        ->join(CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id')
         ->join('cc.classe', 'cl')
         ->where('c.id=:id AND cc.letta IS NULL')
-        ->setParameters(['id' => $circolare->getId()])
+			  ->setParameter('id', $circolare->getId())
         ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
         ->getQuery()
         ->getScalarResult();
@@ -467,11 +486,12 @@ class CircolareRepository extends EntityRepository {
    */
   public function notifica(Circolare $circolare) {
     // legge destinatari
-    $destinatari = $this->_em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+    $destinatari = $this->getEntityManager()->getRepository(CircolareUtente::class)->createQueryBuilder('cu')
       ->select('(cu.utente) AS utente')
       ->join('cu.circolare', 'c')
       ->where('c.id=:circolare AND c.pubblicata=:pubblicata AND cu.letta IS NULL')
-      ->setParameters(['circolare' => $circolare, 'pubblicata' => 1])
+			->setParameter('circolare', $circolare)
+			->setParameter('pubblicata', 1)
       ->getQuery()
       ->getArrayResult();
     // restituisce lista utenti
@@ -489,14 +509,14 @@ class CircolareRepository extends EntityRepository {
    * @return array Dati formattati come array associativo
    */
   public function lista($cerca, $pagina, $limite, Utente $utente) {
-    $dati = array();
+    $dati = [];
     // A.S.
     if (isset($cerca['anno'])) {
       // legge A.S. da criteri di ricerca
       $anno = $cerca['anno'];
     } else {
       // A.S. in corso
-      $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+      $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     }
     // legge circolari
     $query = $this->createQueryBuilder('c')
@@ -508,7 +528,7 @@ class CircolareRepository extends EntityRepository {
     if ($cerca['visualizza'] != 'T') {
       // solo circolari destinate all'utente
       $query
-        ->join('App\Entity\CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
+        ->join(CircolareUtente::class, 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
         ->setParameter('utente', $utente);
       if ($cerca['visualizza'] == 'D') {
         // solo quelle da leggere
@@ -531,7 +551,7 @@ class CircolareRepository extends EntityRepository {
     $dati['lista'] = $this->paginate($query->getQuery(), $pagina, $limite);
     // aggiunge dati di lettura
     foreach ($dati['lista'] as $c) {
-      $dati['stato'][$c->getId()] = $this->_em->getRepository('App\Entity\CircolareUtente')->findOneBy([
+      $dati['stato'][$c->getId()] = $this->getEntityManager()->getRepository(CircolareUtente::class)->findOneBy([
         'circolare' => $c, 'utente' => $utente]);
     }
     // restituisce dati
@@ -547,12 +567,14 @@ class CircolareRepository extends EntityRepository {
    */
   public function listaCircolariClasse(Classe $classe) {
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
-      ->join('App\Entity\CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->join(CircolareClasse::class, 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
+			->setParameter('pubblicata', 1)
+			->setParameter('anno', $anno)
+			->setParameter('classe', $classe)
       ->orderBy('c.data', 'ASC')
       ->addOrderBy('c.numero', 'ASC')
       ->getQuery()
@@ -570,12 +592,12 @@ class CircolareRepository extends EntityRepository {
     // inizializza
     $dati = [];
     // A.S. in corso
-    $anno = (int) substr($this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    $anno = (int) substr((string) $this->_em->getRepository(Configurazione::class)->getParametro('anno_scolastico'), 0, 4);
     // legge anni
     $anni = $this->createQueryBuilder('c')
       ->select('DISTINCT c.anno')
       ->where('c.pubblicata=:pubblicata')
-      ->setParameters(['pubblicata' => 1])
+			->setParameter('pubblicata', 1)
       ->orderBy('c.anno', 'DESC')
       ->getQuery()
       ->getArrayResult();

@@ -154,7 +154,7 @@ Scenario: controllo foglio firme registro dei voti per la classe articolata
   E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in una riga
   E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome+ +@docente_religione_1:nome" in PDF analizzato in una riga
   E vedi testo "@materia_itp_2:nome @materia_EDCIVICA:nome @docente_itp_2:cognome,nome" in PDF analizzato in una riga
-@debug
+
 Scenario: controllo verbale
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |

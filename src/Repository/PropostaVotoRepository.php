@@ -11,7 +11,9 @@ namespace App\Repository;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Scrutinio;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Parameter;
 
 
 /**
@@ -32,9 +34,10 @@ class PropostaVotoRepository extends EntityRepository {
    */
   public function proposteEdCivica(Classe $classe, string $periodo, array $alunni) {
     // dati valutazioni
-    $scrutinio = $this->_em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->getEntityManager()->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+			->setParameter('classe', $classe)
+			->setParameter('periodo', $periodo)
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -46,13 +49,16 @@ class PropostaVotoRepository extends EntityRepository {
       ->join('pv.docente', 'd')
       ->join('pv.classe', 'cl')
       ->where("pv.periodo=:periodo AND pv.unico IS NOT NULL AND pv.alunno IN (:lista) AND m.tipo='E' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameters(['periodo' => $periodo, 'lista' => $alunni, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()])
+			->setParameter('periodo', $periodo)
+			->setParameter('lista', $alunni)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo())
       ->orderBY('d.cognome,d.nome')
       ->getQuery()
       ->getArrayResult();
     // formatta i dati
-    $dati = array();
+    $dati = [];
     foreach ($proposte as $prop) {
       // proposta di voto di un alunno
       $docente = ($prop['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ').$prop['nome'].' '.$prop['cognome'];
@@ -63,8 +69,7 @@ class PropostaVotoRepository extends EntityRepository {
           ($dati[$prop['id_alunno']]['debito']."\n") : '').$prop['debito'];
       }
       // somma voti per media
-      $dati[$prop['id_alunno']]['media'] = (isset($dati[$prop['id_alunno']]['media']) ?
-        $dati[$prop['id_alunno']]['media'] : 0) + ($prop['unico'] == $valutazioni['min'] ? 0 : $prop['unico']);
+      $dati[$prop['id_alunno']]['media'] = ($dati[$prop['id_alunno']]['media'] ?? 0) + ($prop['unico'] == $valutazioni['min'] ? 0 : $prop['unico']);
     }
     // calcola medie
     foreach ($dati as $id_alunno=>$prop) {
@@ -91,8 +96,10 @@ class PropostaVotoRepository extends EntityRepository {
     $query = $this->createQueryBuilder('pv')
       ->join('pv.classe', 'c')
       ->where("pv.periodo=:periodo AND c.anno=:anno AND c.sezione=:sezione AND (c.gruppo=:gruppo OR c.gruppo='' OR c.gruppo IS NULL)")
-      ->setParameters(['periodo' => $periodo, 'anno' => $classe->getAnno(),
-        'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo()]);
+			->setParameter('periodo', $periodo)
+			->setParameter('anno', $classe->getAnno())
+			->setParameter('sezione', $classe->getSezione())
+			->setParameter('gruppo', $classe->getGruppo());
     // filtro alunno
     if (!empty($alunni)) {
       $query->andWhere('pv.alunno IN (:alunni)')->setParameter('alunni', $alunni);
@@ -131,10 +138,15 @@ class PropostaVotoRepository extends EntityRepository {
       $filtroDocente = '';
       unset($fields['docente']);
     }
+    // imposta parametri
+    $params = [];
+    foreach ($fields as $field => $value) {
+      $params[] = new Parameter($field, $value);
+    }
     // legge dati
     $dati = $this->createQueryBuilder('pv')
       ->where('pv.periodo=:periodo AND pv.alunno=:alunno AND pv.materia=:materia'.$filtroDocente)
-      ->setParameters($fields)
+      ->setParameters(new ArrayCollection($params))
       ->getQuery()
       ->getResult();
     return $dati;
