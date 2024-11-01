@@ -47,7 +47,7 @@ class ProvisioningCommand extends Command {
    * Configura la sintassi del comando
    *
    */
-  protected function configure() {
+  protected function configure(): void {
     // descrizione completa (mostrata con l'opzione "--help")
     $this->setHelp("Il comando esegue il provisioning sui sistemi esterni.");
     // argomenti del comando
@@ -60,7 +60,7 @@ class ProvisioningCommand extends Command {
    * @param InputInterface $input Oggetto che gestisce l'input
    * @param OutputInterface $output Oggetto che gestisce l'output
    */
-  protected function initialize(InputInterface $input, OutputInterface $output) {
+  protected function initialize(InputInterface $input, OutputInterface $output): void {
   }
 
   /**
@@ -69,7 +69,7 @@ class ProvisioningCommand extends Command {
    * @param InputInterface $input Oggetto che gestisce l'input
    * @param OutputInterface $output Oggetto che gestisce l'output
    */
-  protected function interact(InputInterface $input, OutputInterface $output) {
+  protected function interact(InputInterface $input, OutputInterface $output): void {
   }
 
   /**
@@ -78,7 +78,7 @@ class ProvisioningCommand extends Command {
    * @param InputInterface $input Oggetto che gestisce l'input
    * @param OutputInterface $output Oggetto che gestisce l'output
    *
-   * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
+   * @return int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
     // inizio
@@ -99,7 +99,7 @@ class ProvisioningCommand extends Command {
    *
    * @return int Numero di comandi eseguiti
    */
-  private function esegueProvisioning() {
+  private function esegueProvisioning(): int {
     // inizializza
     $num = 0;
     // comandi in attesa

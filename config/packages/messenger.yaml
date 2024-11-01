@@ -2,7 +2,6 @@
 
 framework:
   messenger:
-    reset_on_message: true
     failure_transport: errore
     transports:
       errore:
