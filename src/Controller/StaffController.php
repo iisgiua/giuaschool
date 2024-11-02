@@ -1768,7 +1768,8 @@ class StaffController extends BaseController {
     $form = $this->createForm(EntrataType::class, $entrata, ['form_mode' => 'staff']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+      $mode = isset($request->request->all()['entrata']['delete']) ? 'DELETE' : 'EDIT';
+      if (!isset($entrata_old) && $mode == 'DELETE') {
         // ritardo non esiste, niente da fare
         return $this->redirectToRoute('staff_studenti_autorizza');
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
@@ -1776,7 +1777,7 @@ class StaffController extends BaseController {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
-        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+        if (isset($entrata_old) && $mode == 'DELETE') {
           // cancella ritardo esistente
           $id_entrata = $entrata->getId();
           $this->em->remove($entrata);
@@ -1805,7 +1806,7 @@ class StaffController extends BaseController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+        if (isset($entrata_old) && $mode == 'DELETE') {
           // log cancella
           $dblogger->logAzione('ASSENZE', 'Cancella entrata', [
             'Entrata' => $id_entrata,
@@ -1967,7 +1968,8 @@ class StaffController extends BaseController {
       'values' => [$chiediGiustificazione]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+      $mode = isset($request->request->all()['uscita']['delete']) ? 'DELETE' : 'EDIT';
+      if (!isset($uscita_old) && $mode == 'DELETE') {
         // ritardo non esiste, niente da fare
         return $this->redirectToRoute('staff_studenti_autorizza');
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
@@ -1975,7 +1977,7 @@ class StaffController extends BaseController {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
-        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscita_old) && $mode == 'DELETE') {
           // cancella uscita esistente
           $id_uscita = $uscita->getId();
           $this->em->remove($uscita);
@@ -2003,7 +2005,7 @@ class StaffController extends BaseController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscita_old) && $mode == 'DELETE') {
           // cancella
           $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
             'Uscita' => $id_uscita,

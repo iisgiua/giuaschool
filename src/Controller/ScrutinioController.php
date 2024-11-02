@@ -389,7 +389,7 @@ class ScrutinioController extends BaseController {
     return $this->render($template, [
       'pagina_titolo' => 'page.coordinatore_scrutinio',
       'classe' => $classe,
-      'periodo' => $scrutinio['periodo'],
+      'periodo' => $scrutinio['periodo'] ?? '',
       'dati' => $dati,
       'form' => ($form ? $form->createView() : null),
       'posizione' => $posizione]);

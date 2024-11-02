@@ -405,7 +405,8 @@ class RichiesteController extends BaseController {
     if ($form->isSubmitted()) {
       $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data]);
-      if (!isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
+      $mode = isset($request->request->all()['uscita']['delete']) ? 'DELETE' : 'EDIT';
+      if (!isset($uscitaOld) && $mode == 'DELETE') {
         // uscita non esiste, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
@@ -420,7 +421,7 @@ class RichiesteController extends BaseController {
         // errore coerenza fc con orario uscita
         $form->addError(new FormError($trans->trans('exception.presenze_uscita_incoerente')));
       } elseif ($form->isValid()) {
-        if (isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscitaOld) && $mode == 'DELETE') {
           // cancella uscita esistente
           $uscitaId = $uscita->getId();
           $this->em->remove($uscita);
@@ -449,7 +450,7 @@ class RichiesteController extends BaseController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data, $alunno);
         // log azione
-        if (isset($uscitaOld) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscitaOld) && $mode == 'DELETE') {
           // cancella
           $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
             'Uscita' => $uscitaId,
@@ -461,7 +462,7 @@ class RichiesteController extends BaseController {
             'Giustificato' => ($uscita->getGiustificato() ? $uscita->getGiustificato()->format('Y-m-d') : null),
             'Docente' => $uscita->getDocente()->getId(),
             'DocenteGiustifica' => ($uscita->getDocenteGiustifica() ? $uscita->getDocenteGiustifica()->getId() : null)]);
-        } elseif (isset($uscita_old)) {
+        } elseif (isset($uscitaOld)) {
           // modifica
           $dblogger->logAzione('ASSENZE', 'Modifica uscita', [
             'Uscita' => $uscita->getId(),

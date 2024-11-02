@@ -444,7 +444,8 @@ class AssenzeController extends BaseController {
     if ($form->isSubmitted()) {
       $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data_obj]);
-      if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+      $mode = isset($request->request->all()['entrata']['delete']) ? 'DELETE' : 'EDIT';
+      if (!isset($entrata_old) && $mode == 'DELETE') {
         // ritardo non esiste, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
@@ -459,7 +460,7 @@ class AssenzeController extends BaseController {
         // errore coerenza fc con orario entrata
         $form->addError(new FormError($trans->trans('exception.presenze_ritardo_incoerente')));
       } elseif ($form->isValid()) {
-        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+        if (isset($entrata_old) && $mode == 'DELETE') {
           // cancella ritardo esistente
           $id_entrata = $entrata->getId();
           $this->em->remove($entrata);
@@ -488,7 +489,7 @@ class AssenzeController extends BaseController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
+        if (isset($entrata_old) && $mode == 'DELETE') {
           // log cancella
           $dblogger->logAzione('ASSENZE', 'Cancella entrata', [
             'Entrata' => $id_entrata,
@@ -644,7 +645,8 @@ class AssenzeController extends BaseController {
     if ($form->isSubmitted()) {
       $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
         'data' => $data_obj]);
-      if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+      $mode = isset($request->request->all()['uscita']['delete']) ? 'DELETE' : 'EDIT';
+      if (!isset($uscita_old) && $mode == 'DELETE') {
         // uscita non esiste, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
@@ -659,7 +661,7 @@ class AssenzeController extends BaseController {
         // errore coerenza fc con orario uscita
         $form->addError(new FormError($trans->trans('exception.presenze_uscita_incoerente')));
       } elseif ($form->isValid()) {
-        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscita_old) && $mode == 'DELETE') {
           // cancella ritardo esistente
           $id_uscita = $uscita->getId();
           $this->em->remove($uscita);
@@ -677,7 +679,7 @@ class AssenzeController extends BaseController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+        if (isset($uscita_old) && $mode == 'DELETE') {
           // cancella
           $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
             'Uscita' => $id_uscita,
@@ -1213,7 +1215,7 @@ class AssenzeController extends BaseController {
       'form_mode' => 'registro']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (isset($vecchiaPresenza) && isset($request->request->get('presenza')['delete'])) {
+      if (isset($vecchiaPresenza) && isset($request->request->all()['presenza']['delete'])) {
         // cancella presenza esistente
         $this->em->remove($presenza);
       } else {
@@ -1263,7 +1265,7 @@ class AssenzeController extends BaseController {
       }
       if ($form->isValid()) {
         // ok: memorizzazione e log
-        if (isset($vecchiaPresenza) && isset($request->request->get('presenza')['delete'])) {
+        if (isset($vecchiaPresenza) && isset($request->request->all()['presenza']['delete'])) {
           // log cancella
           $dblogger->logRimozione('PRESENZE', 'Cancella presenza', $vecchiaPresenza);
         } elseif (isset($vecchiaPresenza)) {

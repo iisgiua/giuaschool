@@ -25,6 +25,9 @@ doctrine:
         dir: '%kernel.project_dir%/src/Entity'
         prefix: 'App\Entity'
         alias: App
+    controller_resolver:
+      enabled: true
+      auto_mapping: true
     dql:
       numeric_functions:
         day: App\DQL\DayFunction
