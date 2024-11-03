@@ -66,7 +66,7 @@ class AvvisoClasseTest extends EntityTestCase {
    * Sono esclusi gli attributi ereditati.
    *
    */
-  public function testProperties() {
+  public function testProperties(): void {
     // crea nuovi oggetti
     $lista = ['U', 'E', 'A', 'I', 'V'];
     for ($i = 0; $i < 5; $i++) {
@@ -114,8 +114,7 @@ class AvvisoClasseTest extends EntityTestCase {
   /**
    * Test altri metodi
    */
-  #[DoesNotPerformAssertions]
-  public function testMethods() {
+  public function testMethods(): void {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
   }
@@ -123,7 +122,7 @@ class AvvisoClasseTest extends EntityTestCase {
   /**
    * Test validazione dei dati
    */
-  public function testValidation() {
+  public function testValidation(): void {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');

@@ -113,7 +113,6 @@ class CircolareUtenteTest extends EntityTestCase {
   /**
    * Test altri metodi
    */
-  #[DoesNotPerformAssertions]
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);

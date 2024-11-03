@@ -193,7 +193,7 @@ class SedeTest extends EntityTestCase {
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Telefono - NOT BLANK');
-    $existent->setTelefono($this->faker->regexify('/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/'));
+    $existent->setTelefono('+39 123 456 7890');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Telefono - VALID NOT BLANK ['.$err[0]->getMessageTemplate().']');
     $existent->setTelefono(str_repeat('1', 33));
     $err = $this->val->validate($existent);
