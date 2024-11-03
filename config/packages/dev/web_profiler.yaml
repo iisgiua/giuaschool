@@ -1,0 +1,11 @@
+# config/packages/dev/web_profiler.yaml
+
+framework:
+  profiler:
+    enabled: true
+    collect: true
+    only_exceptions: false
+    collect_serializer_data: true
+web_profiler:
+  toolbar: true
+  intercept_redirects: false
