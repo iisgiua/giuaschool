@@ -1,5 +1,8 @@
 <?php
 
+if (version_compare(PHP_VERSION, '8.2', '<')) {
+  die("*** ERRORE CRITICO<br>L'applicazione richiede PHP 8.2")
+}
 require dirname(__DIR__, 2).'/src/Install/Updater.php';
 use App\Install\Updater;
 
