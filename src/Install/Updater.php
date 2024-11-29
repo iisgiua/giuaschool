@@ -116,7 +116,7 @@ class Updater {
    * @param string $token Codice di sicurezza
    * @param int $step Passo della procedura
    */
-  public function update(string $token, int $step) {
+  public function update(string $token, int $step): void {
     try {
       // inizializza
       $this->initUpdate($token);
@@ -143,7 +143,7 @@ class Updater {
    * @param string $token Codice di sicurezza
    * @param int $step Passo della procedura
    */
-  public function install(string $token, int $step) {
+  public function install(string $token, int $step): void {
     try {
       // inizializza
       $this->initInstall($token);
@@ -171,7 +171,7 @@ class Updater {
    * Legge la configurazione dal file .env
    *
    */
-  private function readEnv() {
+  private function readEnv(): void {
     $path = $this->projectPath.'/.env';
     // legge .env e carica variabili di ambiente
     $this->env = parse_ini_file($path);
@@ -182,7 +182,7 @@ class Updater {
    *
    * @param array $toDelete Lista delle variabili da eliminare
    */
-  private function writeEnv(array $toDelete) {
+  private function writeEnv(array $toDelete): void {
     $vars = [
       'APP_ENV' => ['prod', 'definisce l\'ambiente correntemente utilizzato'],
       'APP_SECRET' => [bin2hex(random_bytes(20)), 'codice segreto univoco usato nella gestione della sicurezza'],
@@ -229,7 +229,7 @@ class Updater {
    * Legge la configurazione di sistema da file
    *
    */
-  private function readSys() {
+  private function readSys(): void {
     $path = $this->projectPath.'/.gs-updating';
     // legge file e carica variabili di ambiente
     $this->sys = parse_ini_file($path);
@@ -239,7 +239,7 @@ class Updater {
    * Scrive la configurazione di sistema su file
    *
    */
-  private function writeSys() {
+  private function writeSys(): void {
     // inserisce variabili di sistema
     $newSys = '';
     foreach ($this->sys as $key => $value) {
@@ -256,7 +256,7 @@ class Updater {
    *
    * @param string $token Codice di sicurezza
    */
-  private function initUpdate(string $token) {
+  private function initUpdate(string $token): void {
     // carica variabili di ambiente e di sistema
     $this->readEnv();
     $this->readSys();
@@ -296,7 +296,7 @@ class Updater {
    *
    * @param string $token Codice di sicurezza
    */
-  private function initInstall(string $token) {
+  private function initInstall(string $token): void {
     // carica variabili di ambiente
     $path = $this->projectPath.'/.env';
     if (!file_exists($path)) {
@@ -318,7 +318,7 @@ class Updater {
    *
    * @param boolean $noSchema Se vero non usa lo schema per la connessione
    */
-  private function connectDb(bool $noSchema=false) {
+  private function connectDb(bool $noSchema=false): void {
     // connessione al database
     $db = parse_url((string) $this->env['DATABASE_URL']);
     $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
@@ -360,7 +360,7 @@ class Updater {
    * @param string $parameter Nome del parametro
    * @param string $value Valore del parametro
    */
-  private function setParameter(string $parameter, string $value) {
+  private function setParameter(string $parameter, string $value): void {
     // inizializza
     if (!$this->pdo) {
       // connessione al db
@@ -468,7 +468,7 @@ class Updater {
    *
    * @param string $dir Percorso della directory da cancellare
    */
-  private function removeFiles(string $dir) {
+  private function removeFiles(string $dir): void {
     foreach(glob($dir.'/*') as $file) {
       if ($file == '.' || $file == '..') {
         // salta
@@ -489,7 +489,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function unzip(int $step) {
+  private function unzip(int $step): void {
     // apre file ZIP
     $zipPath = $this->projectPath.'/src/Install/v'.$this->sys['version'].
       ($this->sys['build'] == '0' ? '' : '-build').'.zip';
@@ -536,7 +536,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function fileUpdate(int $step) {
+  private function fileUpdate(int $step): void {
     // legge aggiornamenti
     $updates = $this->readUpdates();
     // copia file: usa pattern per sorgente e dir per destinatario, oppure path per entrambi
@@ -598,7 +598,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function schemaUpdate(int $step) {
+  private function schemaUpdate(int $step): void {
     // connessione al db
     if (!$this->pdo) {
       $this->connectDb();
@@ -652,7 +652,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function envUpdate(int $step) {
+  private function envUpdate(int $step): void {
     // legge aggiornamenti
     $updates = $this->readUpdates();
     // elimina le variabili indicate
@@ -671,7 +671,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function cleanUpdate(int $step) {
+  private function cleanUpdate(int $step): void {
     // cancella procedura di installazione iniziale (per sicurezza)
     unlink($this->projectPath.'/public/install/app.php');
     // cancella contenuto cache
@@ -708,7 +708,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function endUpdate(int $step) {
+  private function endUpdate(int $step): void {
     // imposta la nuova versione
     $this->setParameter('versione', $this->sys['version']);
     $this->setParameter('versione_build', $this->sys['build']);
@@ -950,22 +950,28 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function requirements(int $step) {
+  private function requirements(int $step): void {
     $req = $this->checkRequirements();
     $success = $req['check']['mandatory'];
     unset($req['check']);
     // visualizza pagina
-    $page['version'] = 'INSTALL';
+    if ($this->sys['build'] != '0') {
+      $page['version'] = $this->sys['version'].'#build';
+      $pageUrl = 'update.php';
+    } else {
+      $page['version'] = 'INSTALL';
+      $pageUrl = 'app.php';
+    }
     $page['step'] = $step.' - Requisiti di sistema';
     $page['title'] = 'Controllo dei requisiti di sistema';
     $page['requirements'] = $req;
     if ($success) {
       $page['success'] = 'Il sistema soddisfa tutti i requisiti tecnici indispensabili per il funzionameno dell\'applicazione.';
-      $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
+      $page['url'] = $pageUrl.'?token='.$this->sys['token'].'&step='.($step + 1);
     } else {
       $page['danger'] = "Non si può continuare con l'installazione.<br>".
         "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'applicazione.";
-      $page['error'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
+      $page['error'] = $pageUrl.'?token='.$this->sys['token'].'&step='.$step;
     }
     include($this->publicPath.'/install/update_page.php');
   }
@@ -975,7 +981,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function database(int $step) {
+  private function database(int $step): void {
     if (isset($_POST['install']['submit'])) {
       // salva configurazione
       $this->env['DATABASE_URL'] = 'mysql://'.$_POST['install']['db_user'].':'.
@@ -1010,7 +1016,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function schema(int $step) {
+  private function schema(int $step): void {
     // connessione al db
     if (!$this->pdo) {
       $this->connectDb();
@@ -1051,7 +1057,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function admin(int $step) {
+  private function admin(int $step): void {
     if (isset($_POST['install']['submit'])) {
       // controllo credenziali
       $username = trim((string) $_POST['install']['username']);
@@ -1107,7 +1113,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function spid(int $step) {
+  private function spid(int $step): void {
     if (isset($_POST['install']['submit'])) {
       // imposta l'utilizzo dello SPID
       $spid = $_POST['install']['spid'];
@@ -1153,7 +1159,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function spidData(int $step) {
+  private function spidData(int $step): void {
     // legge configurazione esistente
     $spid = json_decode(file_get_contents(
       $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
@@ -1289,7 +1295,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function spidConfig(int $step) {
+  private function spidConfig(int $step): void {
     // controlla pagina
     if (isset($_POST['install']['submit'])) {
       // legge metadata
@@ -1331,7 +1337,7 @@ class Updater {
    * Configura la libreria SPID-PHP
    *
    */
-  private function spidSetup() {
+  private function spidSetup(): void {
     // inizializza
     require $this->projectPath.'/vendor/symfony/filesystem/Filesystem.php';
     $fs = new Filesystem();
@@ -1510,7 +1516,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function clean(int $step) {
+  private function clean(int $step): void {
     // cancella contenuto cache
     $this->removeFiles($this->projectPath.'/var/cache');
     // cancella contenuto delle sessioni
@@ -1532,7 +1538,7 @@ class Updater {
    *
    * @param int $step Passo della procedura
    */
-  private function end(int $step) {
+  private function end(int $step): void {
     // elimina il file di sistema
     unlink($this->projectPath.'/.gs-updating');
     // elimina la procedura di installazione
