@@ -22,6 +22,7 @@ return [
     'config/packages/test/security.yaml',
     'config/packages/cache.yaml',
     'config/packages/sensio_framework_extra.yaml',
+    'vendor/symfony/cache/Adapter/DoctrineAdapter.php',
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_messenger_messages CHANGE created_at created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', CHANGE available_at available_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', CHANGE delivered_at delivered_at DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)';", ""],
