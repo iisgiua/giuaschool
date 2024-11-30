@@ -61,7 +61,7 @@ class LogHandler {
     // dati di navigazione
     $ip = $req->getClientIp();
     $origine = $req->attributes->get('_controller');
-    if (empty($origine) && $req->getRequestUri() === '/logout/') {
+    if (empty($origine) && $req->getPathInfo() === '/logout/') {
       $origine = 'App\Controller\LoginController::logout';
     }
     // scrive su db
