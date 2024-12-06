@@ -961,7 +961,7 @@ class RegistroUtil {
       $dati[$dataStr]['lista'] = $alunni;
       $dati[$dataStr]['genitori'] = $genitori;
     } else {
-      // vista settimanale/mensile
+      // vista mensile
       $lista_alunni = [];
       for ($data = clone $inizio; $data <= $fine; $data->modify('+1 day')) {
         $dataStr = $data->format('Y-m-d');
@@ -977,7 +977,7 @@ class RegistroUtil {
         $lista_alunni = array_unique(array_merge($lista_alunni, $lista));
         // dati assenze/ritardi/uscite
         $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->select('a.id AS id_alunno,ass.id AS id_assenza,ass.giustificato AS assenza_giust,(ass.docenteGiustifica) AS assenza_doc,e.id AS id_entrata,e.ora AS ora_entrata,e.ritardoBreve,e.note AS note_entrata,e.giustificato AS entrata_giust,(e.docenteGiustifica) AS entrata_doc,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
+          ->select('a.id AS id_alunno,ass.id AS id_assenza,ass.giustificato AS assenza_giust,(ass.docenteGiustifica) AS assenza_doc,ass.motivazione as assenza_mot,e.id AS id_entrata,e.ora AS ora_entrata,e.ritardoBreve,e.note AS note_entrata,e.giustificato AS entrata_giust,(e.docenteGiustifica) AS entrata_doc,e.motivazione as entrata_mot,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita,u.giustificato AS giust_uscita,(u.docenteGiustifica) AS doc_uscita,(u.utenteGiustifica) as ute_uscita,u.motivazione as mot_uscita')
           ->leftJoin(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->leftJoin(Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
           ->leftJoin(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')

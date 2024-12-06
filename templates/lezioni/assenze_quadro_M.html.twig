@@ -59,17 +59,29 @@
             {% if v.errore is not defined and v[va.id_alunno] is defined %}
         <td class="gs-pr-0 gs-pl-0 gs-pt-1 gs-pb-1">
               {% if v[va.id_alunno].assenza_doc %}
-          <span class="label label-default gs-pr-1 gs-pl-1">A</span>
+          <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Motivazione: {{ v[va.id_alunno].assenza_mot }}">A</span>
+              {% elseif v[va.id_alunno].assenza_giust %}
+          <span class="label label-warning gs-pr-1 gs-pl-1" title="Assenza da convalidare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Motivazione: {{ v[va.id_alunno].assenza_mot }}">A</span>
               {% elseif v[va.id_alunno].id_assenza %}
-          <span class="label label-danger gs-pr-1 gs-pl-1" title="Assenza da giustificare o convalidare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="">A</span>
+          <span class="label label-danger gs-pr-1 gs-pl-1" title="Assenza da giustificare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="">A</span>
               {% endif %}
-              {% if v[va.id_alunno].entrata_giust and (v[va.id_alunno].entrata_doc or v[va.id_alunno].ritardoBreve) %}
-          <span class="label label-default gs-pr-1 gs-pl-1" title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
+              {% if v[va.id_alunno].ritardoBreve %}
+          <span class="label label-primary gs-pr-1 gs-pl-1" title="Ritardo breve" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }}">R</span>
+              {% elseif v[va.id_alunno].entrata_doc %}
+          <span class="label label-default gs-pr-1 gs-pl-1" title="Ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}<br>Motivazione: {{ v[va.id_alunno].entrata_mot }}">R</span>
+              {% elseif v[va.id_alunno].entrata_giust %}
+          <span class="label label-warning gs-pr-1 gs-pl-1" title="Ritardo da convalidare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}<br>Motivazione: {{ v[va.id_alunno].entrata_mot }}">R</span>
               {% elseif v[va.id_alunno].id_entrata %}
-          <span class="label label-danger gs-pr-1 gs-pl-1" title="Note sul ritardo (da giustificare o convalidare)" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
+          <span class="label label-danger gs-pr-1 gs-pl-1" title="Ritardo da giustificare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
               {% endif %}
-              {% if v[va.id_alunno].id_uscita %}
-          <span class="label label-default gs-pr-1 gs-pl-1" title="Note sull'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}">U</span>
+              {% if v[va.id_alunno].doc_uscita and not v[va.id_alunno].ute_uscita %}
+          <span class="label label-primary gs-pr-1 gs-pl-1" title="Uscita anticipata autorizzata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}">U</span>
+              {% elseif v[va.id_alunno].doc_uscita and v[va.id_alunno].ute_uscita %}
+          <span class="label label-default gs-pr-1 gs-pl-1" title="Uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}<br>Motivazione: {{ v[va.id_alunno].mot_uscita }}">U</span>
+              {% elseif v[va.id_alunno].giust_uscita %}
+          <span class="label label-warning gs-pr-1 gs-pl-1" title="Uscita anticipata da convalidare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}<br>Motivazione: {{ v[va.id_alunno].mot_uscita }}">U</span>
+              {% elseif v[va.id_alunno].id_uscita %}
+          <span class="label label-danger gs-pr-1 gs-pl-1" title="Uscita anticipata da giustificare" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}">U</span>
               {% endif %}
         </td>
             {% elseif v.errore is not defined %}
@@ -124,7 +136,7 @@ $(document).ready(function() {
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });
-  $('[data-toggle="popover"]').popover();
+  $('[data-toggle="popover"]').popover({'html': true});
   $('#gs-modal-info').on('show.bs.modal', function (e) {
     var title = $(e.relatedTarget).data('title');
     var body = $('#'+$(e.relatedTarget).data('body')).html();
