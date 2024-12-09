@@ -549,6 +549,7 @@ class RegistroUtil {
       }
       $ann = [];
       $ann['id'] = $a->getId();
+      $ann['modificato'] = $a->getModificato();
       $ann['testo'] = $a->getTesto();
       $ann['visibile'] = $a->getVisibile();
       $ann['docente'] = $a->getDocente()->getNome().' '.$a->getDocente()->getCognome();

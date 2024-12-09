@@ -152,7 +152,7 @@
               <strong>Destinatari ({% for f in v.avviso.filtro %}{{ ('label.rappresentante_'~(f == 'I' ? 'istituto' : 'classe'))|trans }}{{ not loop.last ? ', ' }}{% endfor %})</strong><br>
         {% endif %}
             {{ v.testo|raw|nl2br }}<br>
-            <small><em>({{ v.docente }}, inserito in data {{ v.avviso.modificato|date('d/m/Y') }})</em></small>
+            <small><em>({{ v.docente }}, inserita in data {{ (v.avviso ? v.avviso.modificato : v.modificato)|date('d/m/Y') }})</em></small>
         {% if v.delete is defined and (not v.avviso or v.visibile) %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
         {% endif %}
