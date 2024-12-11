@@ -25,6 +25,10 @@
         <div class="col-sm-10">
           {{ form_widget(form.visibile) }}
           <div id="individuale" class="gs-mt-3" style="display:none">
+            <div class="gs-mb-3 gs-ml-5">
+              <button type="button" id="annotazione_edit_filtroIndividuale_tutti" name="annotazione_edit[filtroIndividuale][tutti]" class="btn-default btn btn-xs"><strong>Seleziona tutti</strong></button>
+              <button type="button" id="annotazione_edit_filtroIndividuale_nessuno" name="annotazione_edit[filtroIndividuale][nessuno]" class="btn-default btn btn-xs gs-ml-5"><strong>Deseleziona tutti</strong></button>
+            </div>
             {{ form_widget(form.filtroIndividuale) }}
           </div>
         </div>
@@ -52,6 +56,12 @@ $(document).ready(function() {
     } else {
       $('#individuale').hide();
     }
+  });
+  $('#annotazione_edit_filtroIndividuale_tutti').click(function () {
+    $('input[name="annotazione_edit[filtroIndividuale][]"]').prop('checked', true).change();
+  });
+  $('#annotazione_edit_filtroIndividuale_nessuno').click(function () {
+    $('input[name="annotazione_edit[filtroIndividuale][]"]').prop('checked', false).change();
   });
   // init
   if ($('input[name="annotazione_edit[visibile]"]:checked').val() == '1') {

@@ -28,6 +28,17 @@
       </div>
   {% endif %}
       {{ form_start(form) }}
+      {{ form_row(form.tipo) }}
+      <div class="form-group" style="">
+        <label class="gs-pt-1 checkbox-split-vertical col-sm-2 control-label required">Alunni</label>
+        <div class="col-sm-10">
+          <div class="gs-mb-3 gs-ml-4">
+            <button type="button" id="nota_edit_alunni_tutti" name="nota_edit[alunni][tutti]" class="btn-default btn btn-xs"><strong>Seleziona tutti</strong></button>
+            <button type="button" id="nota_edit_alunni_nessuno" name="nota_edit[alunni][nessuno]" class="btn-default btn btn-xs gs-ml-5"><strong>Deseleziona tutti</strong></button>
+          </div>
+          {{ form_widget(form.alunni)}}
+        </div>
+      </div>
       {{ form_end(form) }}
     </div>
   </div>
@@ -54,6 +65,12 @@ $(document).ready(function() {
     } else {
       $(this).parent().removeClass('active');
     }
+  });
+  $('#nota_edit_alunni_tutti').click(function () {
+    $('input[name="nota_edit[alunni][]"]').prop('checked', true).change();
+  });
+  $('#nota_edit_alunni_nessuno').click(function () {
+    $('input[name="nota_edit[alunni][]"]').prop('checked', false).change();
   });
   {% if label.materia.tipo == 'R' %}
   // init
