@@ -69,6 +69,7 @@ class AssenzeController extends BaseController {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
+    $info = [];
     $dati = [];
     $dati['filtro']['S'] = [];
     $dati['filtro']['A'] = [];

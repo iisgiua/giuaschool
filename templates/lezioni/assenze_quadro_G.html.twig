@@ -233,15 +233,21 @@ $(document).ready(function() {
         $('#gs-alunno-'+filtro[$(this).val()][i]).show();
       }
     }
+    sessionStorage.setItem('assenze_quadro_G.filtro', $(this).val());
   });
   // init
-  {% if posizione > 0 %}
-  $('html').scrollTop({{ posizione }});
-  {% endif %}
   var filtro = [];
   filtro['S'] = [{% for a in dati.filtro['S'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
   filtro['A'] = [{% for a in dati.filtro['A'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
   filtro['N'] = [{% for a in dati.filtro['N'] %}{{ a }}{{ not loop.last ? ',' }}{% endfor %}];
+  var fv = sessionStorage.getItem('assenze_quadro_G.filtro');
+  if (fv == null) {
+    fv = 'T';
+  }
+  $('#gs-filtro-alunni').val(fv).change();
+  {% if posizione > 0 %}
+  $('html').scrollTop({{ posizione }});
+  {% endif %}
 });
 </script>
 {% endblock %}
