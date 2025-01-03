@@ -11,6 +11,7 @@ namespace App\Controller;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Utente;
+use App\Entity\Log;
 use Exception;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
@@ -28,6 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -39,6 +41,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 
 /**
@@ -83,10 +87,10 @@ class LoginController extends BaseController {
 
   /**
    * Disconnessione dell'utente
+   *
    */
   #[Route(path: '/logout/', name: 'logout', methods: ['GET'])]
-  public function logout() {
-    // niente da fare
+  public function logout(): void {
   }
 
   /**
@@ -95,23 +99,37 @@ class LoginController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param NotificheUtil $notifiche Classe di utilità per la gestione delle notifiche
+   * @param LoggerInterface $logger Gestore dei log su file
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/', name: 'login_home', methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
-    if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
-      // redirezione alla scelta profilo
-      return $this->redirectToRoute('login_profilo');
-    }
+  public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche,
+                       LoggerInterface $logger): Response {
     if ($request->query->get('reload') == 'yes') {
       // ricarica configurazione di sistema
       $config->carica();
     }
+    if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('user')) {
+      // redirezione alla scelta profilo
+      return $this->redirectToRoute('login_profilo');
+    }
     // legge dati
     $dati = $notifiche->notificheHome($this->getUser());
+    // cerca di identificare l'app GiuaApp
+    if ($request->server->get('HTTP_HOST') === 'registro.giua.edu.it' &&
+        $request->headers->get('user-agent') === 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36') {
+      // connesso tramite GiuaApp: blocca accesso
+      $logger->warning('GiuaApp: blocked FORM login');
+      // dd('ERRORE: GiuaApp non è più supportata.');
+    } elseif ($request->server->get('HTTP_HOST') === 'registro.giua.edu.it' &&
+              $request->headers->get('user-agent') === 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36') {
+      // connesso tramite GiuaApp: blocca accesso
+      $logger->warning('GiuaApp: blocked GOOGLE login');
+      // dd('ERRORE: GiuaApp non è più supportata.');
+    }
     // visualizza pagina
     return $this->renderHtml('login', 'home', $dati);
   }
@@ -307,8 +325,8 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $utenteIniziale = $this->getUser();
       $profiloId = (int) $form->get('profilo')->getData();
+      $queryUrl = ['user' => $profiloId];
       if ($profiloId && (!$this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
           $this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
@@ -329,14 +347,32 @@ class LoginController extends BaseController {
         $disp->dispatch($event, SecurityEvents::INTERACTIVE_LOGIN);
         // memorizza profilo in uso
         $this->reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
+        // richiede caricamento dati
+        $queryUrl['reload'] = 'yes';
       }
       // redirezione alla pagina iniziale
-      return $this->redirectToRoute('login_home', ['reload' => 'yes']);
+      return $this->redirectToRoute('login_home', $queryUrl);
     }
     // visualizza pagina
     return $this->render('login/profilo.html.twig', [
       'pagina_titolo' => 'page.login_profilo',
       'form' => $form->createView()]);
+  }
+
+  /**
+   * Esegue il login tramite token
+   *
+   */
+  #[Route(path: '/login/token/', name: 'login_token', methods: ['POST'])]
+  public function token(): void {
+  }
+
+  /**
+   * Connette utente tramite token OTP, dopo aver eseguito la procedura di autenticazione con token
+   *
+   */
+  #[Route(path: '/login/connect/{token}', name: 'login_connect', methods: ['GET'])]
+  public function connect(): void {
   }
 
 }

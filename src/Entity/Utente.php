@@ -150,6 +150,12 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?string $ultimoOtp = '';
 
   /**
+   * @var string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  private ?string $dispositivo = '';
+
+  /**
    * @var string|null $nome Nome dell'utente
    *
    *
@@ -654,6 +660,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    */
   public function setUltimoOtp(?string $ultimoOtp): self {
     $this->ultimoOtp = $ultimoOtp;
+    return $this;
+  }
+
+/**
+   * Restituisce il codice univoco del dispositivo associato all'utente
+   *
+   * @return string|null Codice univoco del dispositivo associato all'utente
+   */
+  public function getDispositivo(): ?string {
+    return $this->dispositivo;
+  }
+
+  /**
+   * Modifica il codice univoco del dispositivo associato all'utente
+   *
+   * @param string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDispositivo(?string $dispositivo): self {
+    $this->dispositivo = $dispositivo;
     return $this;
   }
 

@@ -8,16 +8,15 @@
 
 namespace App\Security;
 
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
-use App\Entity\Utente;
-use App\Entity\App;
-use DateTime;
 use App\Entity\Alunno;
+use App\Entity\App;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -33,7 +32,7 @@ use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 
 /**
@@ -43,7 +42,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  *
  * @author Antonello Dessì
  */
-class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
+class AppAuthenticator extends AbstractAuthenticator {
 
   use AuthenticatorTrait;
 
@@ -255,24 +254,6 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
    * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
-    $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
-    // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_form'));
-  }
-
-  /**
-   * Restituisce una pagina che invita l'utente ad autenticarsi.
-   * Il metodo è eseguito quando un utente anonimo accede a risorse che richiedono l'autenticazione.
-   * Lo scopo del metodo è restituire una pagina che permetta all'utente di iniziare il processo di autenticazione.
-   *
-   * @param Request $request Pagina richiesta
-   * @param AuthenticationException $authException Eccezione che inizia il processo di autenticazione
-   *
-   * @return Response Pagina di risposta
-   */
-  public function start(Request $request, AuthenticationException $authException = null): Response {
-    // eccezione che ha richiesto l'autenticazione
-    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
     $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));

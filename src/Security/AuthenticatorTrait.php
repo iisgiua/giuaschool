@@ -8,13 +8,13 @@
 
 namespace App\Security;
 
-use DateTime;
-use App\Entity\Configurazione;
-use App\Entity\Utente;
 use App\Entity\Amministratore;
+use App\Entity\Configurazione;
 use App\Entity\Genitore;
-use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Utente;
+use DateTime;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 
 /**

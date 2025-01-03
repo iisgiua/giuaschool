@@ -24,7 +24,9 @@ security:
         - 'App\Security\SpidAuthenticator'
         - 'App\Security\FormAuthenticator'
         - 'App\Security\AppAuthenticator'
-      entry_point: 'App\Security\GSuiteAuthenticator'
+        - 'App\Security\TokenAuthenticator'
+        - 'App\Security\TokenConnectAuthenticator'
+      entry_point: 'App\Security\AuthenticationEntryPoint'
 
 
 when@test:
