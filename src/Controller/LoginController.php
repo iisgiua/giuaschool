@@ -124,11 +124,6 @@ class LoginController extends BaseController {
       // connesso tramite GiuaApp: blocca accesso
       $logger->warning('GiuaApp: blocked FORM login');
       // dd('ERRORE: GiuaApp non è più supportata.');
-    } elseif ($request->server->get('HTTP_HOST') === 'registro.giua.edu.it' &&
-              $request->headers->get('user-agent') === 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36') {
-      // connesso tramite GiuaApp: blocca accesso
-      $logger->warning('GiuaApp: blocked GOOGLE login');
-      // dd('ERRORE: GiuaApp non è più supportata.');
     }
     // visualizza pagina
     return $this->renderHtml('login', 'home', $dati);

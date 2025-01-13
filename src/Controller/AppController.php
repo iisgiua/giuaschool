@@ -152,20 +152,20 @@ class AppController extends BaseController {
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
-    // gestione app giuaReg
-    $giuaReg = null;
+    // gestione app giua@school-app
+    $giuaschoolApp = null;
     $finder = new Finder();
     $finder->files()->in($this->getParameter('kernel.project_dir').'/public/app')
-      ->name('giuaReg-*.apk')->sortByModifiedTime()->reverseSorting();
+      ->name('giuaschool-app-*.apk')->sortByModifiedTime()->reverseSorting();
     foreach ($finder as $file) {
-      $giuaReg = substr($file->getBasename(), 8, -4);
+      $giuaschoolApp = substr($file->getBasename(), 15, -4);
       break;
     }
     // mostra la pagina di risposta
     return $this->render('app/info.html.twig', [
       'pagina_titolo' => 'page.app_info',
       'applist' => $applist,
-      'giuaReg' => $giuaReg]);
+      'giuaschoolApp' => $giuaschoolApp]);
   }
 
   /**

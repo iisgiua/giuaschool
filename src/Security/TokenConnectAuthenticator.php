@@ -155,7 +155,8 @@ class TokenConnectAuthenticator extends AbstractAuthenticator {
         'username' => $user->getUserIdentifier(),
         'ruolo' => $user->getCodiceRuolo(),
         'ip' => $credentials['ip'],
-        'otp' => $credentials['otp']]);
+        'otp' => $credentials['otp'],
+        'hash' => $hashCheck]);
       throw new AuthenticationException('exception.invalid_user');
     }
     // controlla scadenza token OTP

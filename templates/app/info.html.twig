@@ -4,24 +4,24 @@
 <div class="container">
   <h1 class="gs-h1 text-center">Applicazioni e servizi disponibili per il Registro Elettronico</h1>
   <p class="gs-big">In questa pagina sono elencate le applicazioni e i servizi per smartphone disponibili per il Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}.</p>
-  <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il oro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
+  <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il loro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
 
-  {% if giuaReg is not null %}
-  <div class="alert alert-success gs-mt-5" role="alert">
-    <div class="row text-center"><strong class="gs-big">giuaReg {{ giuaReg }}</strong></div>
+  {% if giuaschoolApp is not null %}
+  <div id="giuaschool-app" class="alert alert-success gs-mt-5" role="alert">
+    <div class="row text-center"><strong class="gs-big">giua@school-app {{ giuaschoolApp }}</strong></div>
     <hr class="gs-mt-2 gs-mb-2">
     <div class="row text-center">
     </div>
     <div class="row gs-text-normal">
       <div class="col-sm-8">
-        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. Funziona anche con lo SPID.</p>
+        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. La possono usare tutti gli utenti.</p>
         <p><strong>Come si installa?</strong></p>
         <p>Scarica l'app sul tuo smartphone e procedi all'installazione, attivando l'opzione per l'<em>installazione da fonti sconosciute</em>
           e ignorando eventuali avvisi di sicurezza.<br>
         </p>
         <p><strong>Come si usa?</strong></p>
-        <p>Al termine dell'installazione, avvia l'app e configura la tua modalità di accesso.<br>
-          Per maggiori dettagli, leggi la pagina delle informazioni sull'utilizzo, presente nell'app.
+        <p>Al termine dell'installazione, avvia l'app e leggi la pagina delle informazioni
+          che descrive la procedura di configurazione.
         </p>
       </div>
       <div class="col-sm-4">
@@ -36,7 +36,7 @@
           </tbody>
         </table>
         <div class="row text-center">
-          <a class="btn btn-primary btn-sm" href="{{ asset('app/giuaReg-'~giuaReg~'.apk') }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+          <a class="btn btn-primary btn-sm" href="{{ asset('app/giuaschool-app-'~giuaschoolApp~'.apk') }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
         </div>
       </div>
     </div>

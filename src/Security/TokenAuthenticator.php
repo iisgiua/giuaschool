@@ -136,7 +136,8 @@ class TokenAuthenticator extends AbstractAuthenticator {
     $this->logger->error('Token non valido nella connessione token.', [
       'username' => $user->getUserIdentifier(),
       'ruolo' => $user->getCodiceRuolo(),
-      'ip' => $credentials['ip']]);
+      'ip' => $credentials['ip'],
+      'token' => $token]);
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
 
