@@ -15,6 +15,7 @@
 #   ultimoAccesso: data/ora dell'ultimo accesso
 #   otp: codice segreto per accesso con OTP (se vuoto non è attivato)
 #   ultimoOtp: codice OTP usato l'ultima volta (per evitare replay attack)
+#   dispositivo: codice dispositivo
 #   nome: nome dell'utente
 #   cognome: cognome dell'utente
 #   sesso: sesso dell'utente
@@ -49,6 +50,7 @@ App\Entity\Utente:
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
+    dispositivo: '<($preloginCreato ? md5($username) : "")>'
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     provinciaNascita: '50%? <stateAbbr()>: <strval("")>'

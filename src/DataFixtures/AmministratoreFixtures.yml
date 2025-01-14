@@ -22,6 +22,7 @@ App\Entity\Amministratore:
     ultimoAccesso: '<dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
+    dispositivo: '<($preloginCreato ? md5($username) : "")>'
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     provinciaNascita: '50%? <stateAbbr()>: <strval("")>'
