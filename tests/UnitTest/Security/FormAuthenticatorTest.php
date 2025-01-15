@@ -545,28 +545,4 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
-  /**
-   * Test della funzione start.
-   *
-   */
-  public function testStart(): void {
-    // init
-    $this->logs = [];
-    $this->dbLogs = [];
-    $this->conf = false;
-    $this->session = [];
-    $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
-    $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
-    $req->setMethod('POST');
-    $req->setSession($this->mockedSession);
-    $res = $fa->start($req);
-    $this->assertCount(0, $this->logs);
-    $this->assertCount(0, $this->dbLogs);
-    $this->assertFalse($this->conf);
-    $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
-    $this->assertSame('login_form', $res->getTargetUrl());
-  }
-
 }

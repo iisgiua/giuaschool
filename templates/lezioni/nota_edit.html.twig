@@ -26,9 +26,11 @@
         <div class="col-sm-2 text-right"><strong class="gs-big">Testo:</strong></div>
         <div class="col-sm-10"><em>{{ form.vars.value.testo }}</em></div>
       </div>
-  {% endif %}
-      {{ form_start(form) }}
-      {{ form_row(form.tipo) }}
+    {{ form_start(form) }}
+    {{ form_end(form) }}
+  {% else %}
+    {{ form_start(form) }}
+    {{ form_row(form.tipo) }}
       <div class="form-group" style="">
         <label class="gs-pt-1 checkbox-split-vertical col-sm-2 control-label required">Alunni</label>
         <div class="col-sm-10">
@@ -39,7 +41,8 @@
           {{ form_widget(form.alunni)}}
         </div>
       </div>
-      {{ form_end(form) }}
+    {{ form_end(form) }}
+  {% endif %}
     </div>
   </div>
 </div>

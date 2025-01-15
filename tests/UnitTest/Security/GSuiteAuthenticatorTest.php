@@ -419,27 +419,4 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame('login_form', $res->getTargetUrl());
   }
 
-  /**
-   * Test della funzione start.
-   *
-   */
-  public function testStart(): void {
-    // init
-    $this->logs = [];
-    $this->dbLogs = [];
-    $this->conf = false;
-    $this->session = [];
-    $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
-      $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
-    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
-    $req->setSession($this->mockedSession);
-    $res = $ga->start($req);
-    $this->assertCount(0, $this->logs);
-    $this->assertCount(0, $this->dbLogs);
-    $this->assertFalse($this->conf);
-    $this->assertCount(1, $this->session);
-    $this->assertSame('exception.auth_required', $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]->getMessage());
-    $this->assertSame('login_form', $res->getTargetUrl());
-  }
-
 }

@@ -33,6 +33,7 @@
 /public/bundles/
 /public/spid/
 /src/Command/Argo/
+/src/Controller/GiuaController.php
 /src/Controller/TestController.php
 /templates/argo/
 /tests/temp/*

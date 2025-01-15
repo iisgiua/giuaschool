@@ -1493,7 +1493,7 @@ class RegistroController extends BaseController
       if ($form->isValid()) {
         // ok: memorizza dati
         $this->em->flush();
-        // log azion
+        // log azione
         if (!$id) {
           // nuovo
           $dblogger->logAzione('REGISTRO', 'Crea nota', [
