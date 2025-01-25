@@ -156,9 +156,15 @@ class AppController extends BaseController {
     $giuaschoolApp = null;
     $finder = new Finder();
     $finder->files()->in($this->getParameter('kernel.project_dir').'/public/app')
-      ->name('giuaschool-app-*.apk')->sortByModifiedTime()->reverseSorting();
+      ->name('giuaschool-app-*.apk');
     foreach ($finder as $file) {
-      $giuaschoolApp = substr($file->getBasename(), 15, -4);
+      // considera solo il primo file trovato
+      $versione = substr($file->getBasename(), 15, -4);
+      if (str_starts_with($versione, 'CUSTOM-')) {
+        // versione personalizzata
+        $versione = substr($versione, 7);
+      }
+      $giuaschoolApp = [$file->getBasename(), $versione];
       break;
     }
     // mostra la pagina di risposta

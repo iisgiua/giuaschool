@@ -30,6 +30,7 @@
 !/PERSONAL/translations/.gitkeep
 /public/app/*
 !/public/app/.gitkeep
+!/public/app/giuaschool-app-v*
 /public/bundles/
 /public/spid/
 /src/Command/Argo/

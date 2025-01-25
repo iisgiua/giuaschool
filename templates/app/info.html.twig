@@ -8,7 +8,7 @@
 
   {% if giuaschoolApp is not null %}
   <div id="giuaschool-app" class="alert alert-success gs-mt-5" role="alert">
-    <div class="row text-center"><strong class="gs-big">giua@school-app {{ giuaschoolApp }}</strong></div>
+    <div class="row text-center"><strong class="gs-big">giua@school/app {{ giuaschoolApp[1] }}</strong></div>
     <hr class="gs-mt-2 gs-mb-2">
     <div class="row text-center">
     </div>
@@ -36,7 +36,7 @@
           </tbody>
         </table>
         <div class="row text-center">
-          <a class="btn btn-primary btn-sm" href="{{ asset('app/giuaschool-app-'~giuaschoolApp~'.apk') }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+          <a class="btn btn-primary btn-sm" href="{{ asset('app/'~giuaschoolApp[0]) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
         </div>
       </div>
     </div>
