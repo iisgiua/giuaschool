@@ -66,13 +66,44 @@ class AtaRepository extends BaseRepository {
    *
    * @return array Lista di ID degli utenti ATA
    */
-  public function getIdAta($sedi) {
+  public function getIdAta($sedi): array {
     $ata = $this->createQueryBuilder('a')
       ->select('a.id')
       ->where('a.abilitato=:abilitato')
       ->andWhere('a.tipo!=:dsga AND (a.sede IS NULL OR a.sede IN (:sedi))')
       ->setParameter('dsga', 'D')
       ->setParameter('abilitato', 1)
+      ->setParameter('sedi', $sedi)
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($ata, 'id');
+  }
+
+  /**
+   * Restituisce gli utenti ATA per le sedi indicate, in base alle categorie scelte
+   *
+   * @param array $categorie Categorie personale ATA
+   * @param array $sedi Sedi di servizio (lista ID di Sede)
+   *
+   * @return array Lista di ID degli utenti ATA
+   */
+  public function getIdCategorieAta($categorie, $sedi): array {
+    // imposta categorie ammesse
+    $cat = [];
+    foreach ($categorie as $c) {
+      if ($c == 'M') {
+        // codifica differente
+        $cat[] = 'A';
+      } elseif ($c == 'T' || $c == 'C') {
+        $cat[] = $c;
+      }
+    }
+    // legge utenti
+    $ata = $this->createQueryBuilder('a')
+      ->select('a.id')
+      ->where('a.abilitato=1 AND a.tipo IN (:categorie) AND (a.sede IS NULL OR a.sede IN (:sedi))')
+      ->setParameter('categorie', $cat)
       ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();

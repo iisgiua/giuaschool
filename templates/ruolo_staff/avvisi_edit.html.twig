@@ -389,6 +389,21 @@ $(document).ready(function() {
     $("#avviso_filtroTipo").val(old);
     $("#gs-modal-alunni").modal('hide');
   });
+  $("input[name='avviso[destinatariAta][]']").change(function() {
+    if ($(this).val() == 'A') {
+      if ($(this).is(":checked")) {
+        $("input[name='avviso[destinatariAta][]'][value='M']").prop("checked", true).parent().addClass('active');
+        $("input[name='avviso[destinatariAta][]'][value='T']").prop("checked", true).parent().addClass('active');
+        $("input[name='avviso[destinatariAta][]'][value='C']").prop("checked", true).parent().addClass('active');
+      } else {
+        $("input[name='avviso[destinatariAta][]'][value='M']").prop("checked", false).parent().removeClass('active');
+        $("input[name='avviso[destinatariAta][]'][value='T']").prop("checked", false).parent().removeClass('active');
+        $("input[name='avviso[destinatariAta][]'][value='C']").prop("checked", false).parent().removeClass('active');
+      }
+    } else if ($(this).val() != 'D') {
+      $("input[name='avviso[destinatariAta][]'][value='A']").prop("checked", false).parent().removeClass('active');
+    }
+  });
   $(document).on('keypress','.modal', function(e){
     return event.keyCode != 13;
   });

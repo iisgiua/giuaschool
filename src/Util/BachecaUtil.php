@@ -148,7 +148,7 @@ class BachecaUtil {
     } elseif ($azione == 'delete') {
       // azione di cancellazione
       if ($avviso) {
-        // esiste annotazione
+        // esiste avviso
         if ($docente->getId() == $avviso->getDocente()->getId()) {
           // stesso docente: ok
           return true;
@@ -554,8 +554,12 @@ class BachecaUtil {
     }
     // ata
     if (in_array('A', $avviso->getDestinatariAta())) {
-      // aggiunge ATA
+      // aggiunge tutto il personale ATA
       $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdAta($sedi));
+    } else if (in_array('M', $avviso->getDestinatariAta()) || in_array('T', $avviso->getDestinatariAta()) ||
+               in_array('C', $avviso->getDestinatariAta())) {
+      // aggiunge categorie ATA
+      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdCategorieAta($avviso->getDestinatariAta(), $sedi));
     }
     // RSPP
     if (in_array('S', $avviso->getDestinatariSpeciali())) {

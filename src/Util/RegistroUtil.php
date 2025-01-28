@@ -287,6 +287,10 @@ class RegistroUtil {
           // stesso docente: ok
           return true;
         }
+        if (in_array('ROLE_STAFF', $annotazione->getDocente()->getRoles()) && in_array('ROLE_STAFF', $docente->getRoles())) {
+          // docente è dello staff come anche chi ha scritto avviso: ok
+          return true;
+        }
       }
     }
     // non consentito

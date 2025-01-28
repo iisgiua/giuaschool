@@ -68,7 +68,8 @@ class AvvisoType extends AbstractType {
 					'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
 					'required' => true])
         ->add('destinatariAta', ChoiceType::class, ['label' => 'label.destinatari_ATA',
-					'choices' => ['label.dsga' => 'D', 'label.ata' => 'A'],
+					'choices' => ['label.dsga' => 'D', 'label.ata' => 'A', 'label.ata_amministrativi' => 'M',
+						'label.ata_tecnici' => 'T', 'label.ata_collaboratori' => 'C'],
 					'placeholder' => false,
 					'expanded' => true,
 					'multiple' => true,

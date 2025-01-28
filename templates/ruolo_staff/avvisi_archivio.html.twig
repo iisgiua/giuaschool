@@ -38,7 +38,13 @@
             {% if 'S' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_S'|trans }}</span>{% endif %}
             {% if 'P' in a.destinatari %}<span class="gs-mr-2">{{ 'label.rappresentanti_P'|trans }}</span>{% endif %}
             {% if 'D' in a.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
-            {% if 'A' in a.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
+            {% if 'A' in a.destinatariAta %}
+              <span class="gs-mr-2">ATA</span>
+            {% else %}
+              {% if 'M' in a.destinatariAta %}<span class="gs-mr-2">Amministrativi</span>{% endif %}
+              {% if 'T' in a.destinatariAta %}<span class="gs-mr-2">Tecnici</span>{% endif %}
+              {% if 'C' in a.destinatariAta %}<span class="gs-mr-2">Coll.scolast.</span>{% endif %}
+            {% endif %}
             {% if 'S' in a.destinatariSpeciali %}<span class="gs-mr-2">RSPP</span>{% endif %}
           </small>
         </td>

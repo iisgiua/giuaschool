@@ -138,7 +138,7 @@ class Avviso implements Stringable {
   private ?array $allegati = [];
 
   /**
-    * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+    * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
     */
    #[ORM\Column(name: 'destinatari_ata', type: Types::SIMPLE_ARRAY, nullable: true)]
    private ?array $destinatariAta = [];
