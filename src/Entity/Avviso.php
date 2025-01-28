@@ -499,12 +499,24 @@ class Avviso implements Stringable {
   }
 
   /**
-   * Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+   * Indica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
    *
    * @return array|null Personale ATA destinatario dell'avviso
    */
   public function getDestinatariAta(): ?array {
     return $this->destinatariAta;
+  }
+
+  /**
+   * Modifica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
+   *
+   * @param array|null $destinatariAta Personale ATA destinatario dell'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDestinatariAta(?array $destinatariAta): self {
+    $this->destinatariAta = $destinatariAta;
+    return $this;
   }
 
   /**
@@ -526,18 +538,6 @@ class Avviso implements Stringable {
    */
   public function getDestinatariSpeciali(): ?array {
     return $this->destinatariSpeciali;
-  }
-
-  /**
-   * Modifica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
-   *
-   * @param array|null $destinatariAta Personale ATA destinatario dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDestinatariAta(?array $destinatariAta): self {
-    $this->destinatariAta = $destinatariAta;
-    return $this;
   }
 
   /**

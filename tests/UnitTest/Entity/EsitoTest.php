@@ -94,7 +94,7 @@ class EsitoTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['credito'] = $this->faker->randomNumber(4, false);
+      $data[$i]['credito'] = $data[$i]['credito'] + 1;
       $o[$i]->setCredito($data[$i]['credito']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
