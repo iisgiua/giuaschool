@@ -8,7 +8,6 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use App\Entity\CircolareClasse;
 use ReflectionClass;
 use App\Tests\EntityTestCase;

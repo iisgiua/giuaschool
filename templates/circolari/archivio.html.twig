@@ -47,7 +47,15 @@
                 <div class="gs-mt-2">
                   <div><strong>Destinatari:</strong></div>
                   {% if a.dsga %}<div class="gs-ml-5">DSGA</div>{% endif %}
-                  {% if a.ata %}<div class="gs-ml-5">ATA</div>{% endif %}
+                  {% if a.ata %}
+                  <div class="gs-ml-5">ATA</div>
+                  {% elseif 'A' in circolare.destinatariAta or 'T' in circolare.destinatariAta or 'C' in circolare.destinatariAta %}
+                  <div class="gs-ml-5">
+                    {% if 'A' in circolare.destinatariAta %}Amministrativi{% endif %}
+                    {% if 'T' in circolare.destinatariAta %}Tecnici{% endif %}
+                    {% if 'C' in circolare.destinatariAta %}Coll.scolast.{% endif %}
+                  </div>
+                  {% endif %}
                   {% if a.coordinatori != 'N' %}<div class="gs-ml-5">COORDINATORI {{ dati.info[a.id].coordinatori|raw }}</div>{% endif %}
                   {% if a.docenti != 'N' %}<div class="gs-ml-5">DOCENTI {{ dati.info[a.id].docenti|raw }}</div>{% endif %}
                   {% if a.genitori != 'N' %}<div class="gs-ml-5">GENITORI {{ dati.info[a.id].genitori|raw }}</div>{% endif %}

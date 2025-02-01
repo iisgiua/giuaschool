@@ -89,21 +89,11 @@ class AtaRepository extends BaseRepository {
    * @return array Lista di ID degli utenti ATA
    */
   public function getIdCategorieAta($categorie, $sedi): array {
-    // imposta categorie ammesse
-    $cat = [];
-    foreach ($categorie as $c) {
-      if ($c == 'M') {
-        // codifica differente
-        $cat[] = 'A';
-      } elseif ($c == 'T' || $c == 'C') {
-        $cat[] = $c;
-      }
-    }
     // legge utenti
     $ata = $this->createQueryBuilder('a')
       ->select('a.id')
       ->where('a.abilitato=1 AND a.tipo IN (:categorie) AND (a.sede IS NULL OR a.sede IN (:sedi))')
-      ->setParameter('categorie', $cat)
+      ->setParameter('categorie', $categorie)
       ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();

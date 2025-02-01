@@ -1803,18 +1803,6 @@ class ScrutinioUtil {
       }
     }
     if (empty($errore)) {
-      // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($scrutinio->getPeriodo());
-      $scrutinio_dati = $scrutinio->getDati();
-      $scrutinio_dati['verbale'] = [];
-      foreach ($def->getStruttura() as $step=>$args) {
-        if ($args[0] == 'Argomento') {
-          // resetta validazione
-          $scrutinio_dati['verbale'][$step]['validato'] = false;
-        }
-      }
-      // memorizza dati scrutinio
-      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('6');
       $this->em->flush();
@@ -2011,7 +1999,8 @@ class ScrutinioUtil {
       } else {
         foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
           // solo elementi da validare
-          if (isset($args['validato']) && !$args['validato']) {
+          if (isset($args['validato']) && !$args['validato'] && (empty($def->getStruttura()[$step][2]['classi']) ||
+              in_array($classe->getAnno().$classe->getSezione(), $def->getStruttura()[$step][2]['classi']))) {
             // errore di validazione
             $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
               ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
@@ -4020,8 +4009,8 @@ class ScrutinioUtil {
       } else {
         foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
           // solo elementi da validare
-          if (isset($args['validato']) && !$args['validato'] && (empty($args['classe']) ||
-              $args['classe'] == $classe->getAnno())) {
+          if (isset($args['validato']) && !$args['validato'] && (empty($def->getStruttura()[$step][2]['classi']) ||
+              in_array($classe->getAnno().$classe->getSezione(), $def->getStruttura()[$step][2]['classi']))) {
             // errore di validazione
             $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
               ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
@@ -5024,7 +5013,8 @@ class ScrutinioUtil {
       } else {
         foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
           // solo elementi da validare
-          if (isset($args['validato']) && !$args['validato']) {
+          if (isset($args['validato']) && !$args['validato'] && (empty($def->getStruttura()[$step][2]['classi']) ||
+              in_array($classe->getAnno().$classe->getSezione(), $def->getStruttura()[$step][2]['classi']))) {
             // errore di validazione
             $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
               ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
@@ -5339,7 +5329,7 @@ class ScrutinioUtil {
           $struttura[$step]['argomento'] = $def->getArgomenti()[$num_arg];
           $struttura[$step]['inizio'] = $args[2]['inizio'] ?? '';
           $struttura[$step]['fine'] = $args[2]['fine'] ?? '';
-          $struttura[$step]['classe'] = $args[2]['classe'] ?? '';
+          $struttura[$step]['classi'] = $args[2]['classi'] ?? [];
           $struttura[$step]['testo'] = $scrutinio->getDati()['argomento'][$num_arg] ?? $args[2]['default'] ?? '';
         }
       }

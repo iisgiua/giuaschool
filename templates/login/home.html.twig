@@ -100,7 +100,6 @@
   <p><em>{{ 'message.login_docente'|trans({'url': path('utenti_profilo')})|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione dei manuali:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_accesso_docenti.pdf') }}">Modalità di accesso per i docenti (aggiornato al {{ filedate('doc/giuaschool_accesso_docenti.pdf')|date('d/m/Y') }})</a></li>
     <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{ filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% elseif is_granted('ROLE_GENITORE') %}

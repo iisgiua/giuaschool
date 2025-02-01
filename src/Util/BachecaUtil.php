@@ -558,8 +558,18 @@ class BachecaUtil {
       $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdAta($sedi));
     } else if (in_array('M', $avviso->getDestinatariAta()) || in_array('T', $avviso->getDestinatariAta()) ||
                in_array('C', $avviso->getDestinatariAta())) {
+      // imposta categorie ammesse
+      $cat = [];
+      foreach ($avviso->getDestinatariAta() as $c) {
+        if ($c == 'M') {
+          // codifica differente
+          $cat[] = 'A';
+        } elseif ($c == 'T' || $c == 'C') {
+          $cat[] = $c;
+        }
+      }
       // aggiunge categorie ATA
-      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdCategorieAta($avviso->getDestinatariAta(), $sedi));
+      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdCategorieAta($cat, $sedi));
     }
     // RSPP
     if (in_array('S', $avviso->getDestinatariSpeciali())) {

@@ -20,7 +20,7 @@
     </div>
   </div>
     {% for step,args in dati.verbale.struttura %}
-      {% if args.tipo == 'Argomento' and (args.classe is empty or args.classe == classe.anno) %}
+      {% if args.tipo == 'Argomento' and (args.classi is empty or (classe.anno~classe.sezione) in args.classi) %}
   <div class="gs-mb-5">
     <div class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> {{ args.sezione }}. {{ args.argomento }}</div>
     <div class="gs-big gs-pr-4 gs-pl-4">{{ args.inizio|nl2br }}</div>

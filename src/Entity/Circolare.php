@@ -112,10 +112,16 @@ class Circolare implements Stringable {
   private ?array $allegati = [];
 
   /**
-   * @var bool $ata Indica se il personale ATA è destinatario della circolare o no
+   * @var bool $ata Indica se tutto il personale ATA è destinatario della circolare o no
    */
   #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
   private bool $ata = false;
+
+  /**
+   * @var array|null $destinatariAta Indica le categorie del personale ATA destinatarie dell'avviso [A=amministrativi, T=tecnici, C=collaboratori scolastici]
+   */
+  #[ORM\Column(name: 'destinatari_ata', type: Types::SIMPLE_ARRAY, nullable: true)]
+  private ?array $destinatariAta = [];
 
   /**
    * @var bool $dsga Indica se il DSGA è destinatario della circolare o no
@@ -453,6 +459,27 @@ class Circolare implements Stringable {
    */
   public function setAta(?bool $ata): self {
     $this->ata = ($ata == true);
+    return $this;
+  }
+
+  /**
+   * Indica le categorie del personale ATA destinatarie dell'avviso [A=amministrativi, T=tecnici, C=collaboratori scolastici]
+   *
+   * @return array|null Categorie del personale ATA destinatarie dell'avviso
+   */
+  public function getDestinatariAta(): ?array {
+    return $this->destinatariAta;
+  }
+
+  /**
+   * Modifica le categorie del personale ATA destinatarie dell'avviso [A=amministrativi, T=tecnici, C=collaboratori scolastici]
+   *
+   * @param array|null $destinatariAta Categorie del personale ATA destinatarie dell'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDestinatariAta(?array $destinatariAta): self {
+    $this->destinatariAta = $destinatariAta;
     return $this;
   }
 

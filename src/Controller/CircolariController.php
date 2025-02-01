@@ -212,9 +212,9 @@ class CircolariController extends BaseController {
         // sedi non definite
         $form->addError(new FormError($trans->trans('exception.circolare_sede_nulla')));
       }
-      if (!$circolare->getDsga() && !$circolare->getAta() && $circolare->getCoordinatori() == 'N' &&
-          $circolare->getDocenti() == 'N' && $circolare->getGenitori() == 'N' && $circolare->getAlunni() == 'N' &&
-          empty($circolare->getAltri())) {
+      if (!$circolare->getDsga() && !$circolare->getAta() && empty($circolare->getDestinatariAta()) &&
+          $circolare->getCoordinatori() == 'N' && $circolare->getDocenti() == 'N' &&
+          $circolare->getGenitori() == 'N' && $circolare->getAlunni() == 'N' && empty($circolare->getAltri())) {
         // destinatari non definiti
         $form->addError(new FormError($trans->trans('exception.circolare_destinatari_nulli')));
       }
@@ -369,7 +369,7 @@ class CircolariController extends BaseController {
             'Allegati' => $circolare_old->getAllegati(),
             'Sedi' => implode(', ', array_map(fn($s) => $s->getId(), $circolare_old->getSedi()->toArray())),
             'Destinatari DSGA' => $circolare_old->getDsga(),
-            'Destinatari ATA' => $circolare_old->getAta(),
+            'Destinatari ATA' => ($circolare_old->getAta() ? '1' : '0').','. implode(',', $circolare_old->getDestinatariAta()),
             'Destinatari Coordinatori' => $circolare_old->getCoordinatori(),
             'Filtro Coordinatori' => $circolare_old->getFiltroCoordinatori(),
             'Destinatari Docenti' => $circolare_old->getDocenti(),
@@ -447,7 +447,7 @@ class CircolariController extends BaseController {
       'Allegati' => $circolare->getAllegati(),
       'Sedi' => $circolare_sedi,
       'Destinatari DSGA' => $circolare->getDsga(),
-      'Destinatari ATA' => $circolare->getAta(),
+      'Destinatari ATA' => ($circolare->getAta() ? '1' : '0').','. implode(',', $circolare->getDestinatariAta()),
       'Destinatari Coordinatori' => $circolare->getCoordinatori(),
       'Filtro Coordinatori' => $circolare->getFiltroCoordinatori(),
       'Destinatari Docenti' => $circolare->getDocenti(),
@@ -934,7 +934,8 @@ class CircolariController extends BaseController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = [];
-    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza', 'T');
+    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza',
+      ($this->getUser() instanceof Staff) ? 'T' : 'P');
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/oggetto', '');
     if ($pagina == 0) {
@@ -952,12 +953,15 @@ class CircolariController extends BaseController {
     for ($i=1; $i<=8; $i++) {
       $lista_mesi[$mesi[$i]] = $i;
     }
+    // lista visualizzazione
+    $listaVisualizzazione = ($this->getUser() instanceof Staff) ?
+      ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P', 'label.circolari_tutte' => 'T'] :
+      ['label.circolari_da_leggere' => 'D', 'label.circolari_tutte' => 'P'];
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_docenti', FormType::class)
       ->add('visualizza', ChoiceType::class, ['label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
-        'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
-          'label.circolari_tutte' => 'T'],
+        'choices' => $listaVisualizzazione,
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
@@ -1028,7 +1032,7 @@ class CircolariController extends BaseController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = [];
-    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
+    $cerca['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/visualizza', 'P');
     $cerca['mese'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/mese', null);
     $cerca['oggetto'] = $this->reqstack->getSession()->get('/APP/ROUTE/circolari_ata/oggetto', '');
     if ($pagina == 0) {
@@ -1050,8 +1054,7 @@ class CircolariController extends BaseController {
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_ata', FormType::class)
       ->add('visualizza', ChoiceType::class, ['label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
-        'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
-          'label.circolari_tutte' => 'T'],
+        'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_tutte' => 'P'],
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
         'attr' => ['class' => 'gs-placeholder'],

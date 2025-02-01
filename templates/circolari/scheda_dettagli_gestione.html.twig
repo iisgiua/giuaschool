@@ -17,7 +17,12 @@
     <div class="col-sm-2"><strong>Destinatari:</strong></div>
     <div class="col-sm-10">
   {% if circolare.dsga %}DSGA<br>{% endif %}
-  {% if circolare.ata %}ATA<br>{% endif %}
+  {% if circolare.ata %}ATA<br>{% elseif 'A' in circolare.destinatariAta or 'T' in circolare.destinatariAta or 'C' in circolare.destinatariAta %}
+    {% if 'A' in circolare.destinatariAta %}Amministrativi{% endif %}
+    {% if 'T' in circolare.destinatariAta %}Tecnici{% endif %}
+    {% if 'C' in circolare.destinatariAta %}Coll.scolast.{% endif %}
+    <br>
+  {% endif %}
   {% if circolare.coordinatori != 'N' %}COORDINATORI {{ dati.coordinatori|raw }}<br>{% endif %}
   {% if circolare.docenti != 'N' %}DOCENTI {{ dati.docenti|raw }}<br>{% endif %}
   {% if circolare.genitori != 'N' %}GENITORI {{ dati.genitori|raw }}<br>{% endif %}

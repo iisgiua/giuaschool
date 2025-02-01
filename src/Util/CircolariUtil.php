@@ -116,7 +116,7 @@ class CircolariUtil {
    *
    * @return array Dati formattati come array associativo
    */
-  public function listaCircolari($ricerca, $pagina, $limite, Staff $docente) {
+  public function listaCircolari($ricerca, $pagina, $limite, Staff $docente): array {
     $dati = [];
     // legge circolari in bozza
     $dati['bozza'] = $this->em->getRepository(Circolare::class)->bozza();
@@ -175,8 +175,12 @@ class CircolariUtil {
     }
     // ata
     if ($circolare->getAta()) {
-      // aggiunge ATA
+      // aggiunge tutto il personale ATA
       $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdAta($sedi));
+    } else if (in_array('A', $circolare->getDestinatariAta()) || in_array('T', $circolare->getDestinatariAta()) ||
+               in_array('C', $circolare->getDestinatariAta())) {
+      // aggiunge categorie ATA
+      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdCategorieAta($circolare->getDestinatariAta(), $sedi));
     }
     // coordinatori
     if ($circolare->getCoordinatori() != 'N') {
@@ -275,8 +279,8 @@ class CircolariUtil {
    * @return boolean Restituisce True se l'utente è autorizzato alla lettura, False altrimenti
    */
   public function permessoLettura(Circolare $circolare, Utente $utente) {
-    if (($utente instanceOf Docente) || ($utente instanceOf Ata)) {
-      // staff/docente/ata: tutte le circolari
+    if ($utente instanceOf Staff) {
+      // solo staff: tutte le circolari
       return true;
     }
     // altri: solo destinatari

@@ -31,16 +31,16 @@ class CircolareTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Circolare::class;
     // campi da testare
-    $this->fields = ['anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni', 'coordinatori', 'filtroCoordinatori', 'docenti', 'filtroDocenti', 'altri', 'firma', 'notifica', 'pubblicata'];
+    $this->fields = ['anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'destinatariAta', 'dsga', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni', 'coordinatori', 'filtroCoordinatori', 'docenti', 'filtroDocenti', 'altri', 'firma', 'notifica', 'pubblicata'];
     $this->noStoredFields = ['sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_circolare' => ['id', 'creato', 'modificato', 'anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'altri', 'firma', 'notifica', 'pubblicata'],
+    $this->canRead = ['gs_circolare' => ['id', 'creato', 'modificato', 'anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'destinatari_ata', 'dsga', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'altri', 'firma', 'notifica', 'pubblicata'],
       'gs_sede' => '*'];
     // SQL write
-    $this->canWrite = ['gs_circolare' => ['id', 'creato', 'modificato', 'anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'dsga', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'altri', 'firma', 'notifica', 'pubblicata']];
+    $this->canWrite = ['gs_circolare' => ['id', 'creato', 'modificato', 'anno', 'numero', 'data', 'oggetto', 'documento', 'allegati', 'ata', 'destinatari_ata', 'dsga', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'altri', 'firma', 'notifica', 'pubblicata']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -80,6 +80,7 @@ class CircolareTest extends EntityTestCase {
           ($field == 'documento' ? $this->faker->fileObj() :
           ($field == 'allegati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'ata' ? $this->faker->boolean() :
+          ($field == 'destinatariAta' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
           ($field == 'dsga' ? $this->faker->boolean() :
           ($field == 'genitori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
@@ -93,7 +94,7 @@ class CircolareTest extends EntityTestCase {
           ($field == 'firma' ? $this->faker->boolean() :
           ($field == 'notifica' ? $this->faker->boolean() :
           ($field == 'pubblicata' ? $this->faker->boolean() :
-          null))))))))))))))))))));
+          null)))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

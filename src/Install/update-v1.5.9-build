@@ -28,7 +28,8 @@ return [
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_messenger_messages CHANGE created_at created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', CHANGE available_at available_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', CHANGE delivered_at delivered_at DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)';", ""],
-    ["ALTER TABLE gs_utente ADD dispositivo VARCHAR(255) DEFAULT NULL;", ""],
+    ["ALTER TABLE gs_utente ADD dispositivo VARCHAR(255) DEFAULT NULL;", "SELECT dispositivo FROM gs_utente;"],
+    ["ALTER TABLE gs_circolare ADD destinatari_ata LONGTEXT DEFAULT NULL COMMENT '(DC2Type:simple_array)';", "SELECT destinatari_ata FROM gs_circolare;"],
   ],
   'envDelete' => [
   ]

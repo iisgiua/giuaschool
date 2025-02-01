@@ -10,6 +10,7 @@
 #   documento: documento della circolare
 #   allegati: lista di file allegati alla circolare
 #   ata: indica se il personale ATA è destinatario della circolare o no
+#   destinatariAta: indica le categorie del personale ATA destinatarie dell'avviso [A=amministrativi, T=tecnici, C=collaboratori scolastici]
 #   dsga: indica se il DSGA è destinatario della circolare o no
 #   genitori: indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
 #   filtroGenitori: lista dei filtri per i genitori
@@ -45,6 +46,7 @@ App\Entity\Circolare:
     documento: '<fileObj()>'
     allegati: '<(array())>'
     ata: false
+    destinatariAta: []
     dsga: false
     genitori: 'C'
     filtroGenitori: '<arrayId(circolare_perclasse, filtroGenitori, @circolare_perclasse, @classe_2A)>'
@@ -67,6 +69,7 @@ App\Entity\Circolare:
     documento: '<fileObj()>'
     allegati: '<(array())>'
     ata: false
+    destinatariAta: []
     dsga: false
     genitori: 'N'
     filtroGenitori: []
@@ -89,6 +92,7 @@ App\Entity\Circolare:
     documento: '<fileObj()>'
     allegati: '<words()>'
     ata: true
+    destinatariAta: []
     dsga: true
     genitori: 'N'
     filtroGenitori: []
@@ -111,6 +115,7 @@ App\Entity\Circolare:
     documento: '<fileObj()>'
     allegati: '<(array())>'
     ata: false
+    destinatariAta: []
     dsga: false
     genitori: 'N'
     filtroGenitori: []

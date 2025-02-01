@@ -63,7 +63,15 @@ class CircolareType extends AbstractType {
         'label_attr' => ['class' => 'gs-checkbox-inline'],
         'required' => false])
       ->add('ata', CheckboxType::class, ['label' => 'label.ata',
-        'label_attr' => ['class' => 'gs-checkbox-inline'],
+        'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
+        'required' => false])
+      ->add('destinatariAta', ChoiceType::class, ['label' => 'label.destinatari_ATA',
+        'choices' => ['label.ata_amministrativi' => 'A', 'label.ata_tecnici' => 'T',
+          'label.ata_collaboratori' => 'C'],
+        'placeholder' => false,
+        'expanded' => true,
+        'multiple' => true,
+        'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
         'required' => false])
       ->add('coordinatori', ChoiceType::class, ['label' => 'label.coordinatori',
         'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T', 'label.filtro_classe' => 'C'],

@@ -32,7 +32,10 @@
         <div class="col-sm-10">
           <div class="form-group gs-mb-2 gs-vertical-center">
             <div class="col-sm-2 text-right">{{ form_widget(form.dsga) }}</div>
-            <div class="col-sm-2">{{ form_widget(form.ata) }}</div>
+            <div class="col-sm-10">
+              {{ form_widget(form.ata) }}
+              {{ form_widget(form.destinatariAta) }}
+            </div>
           </div>
           <div class="form-group gs-mb-2 gs-vertical-center">
             <div class="col-sm-2 text-right">{{ 'label.coordinatori'|trans|upper }}</div>
@@ -643,6 +646,20 @@ $(document).ready(function() {
     var old = $("#circolare_"+caller).data('previous');
     $("#circolare_"+caller).val(old);
     $("#gs-modal-alunni").modal('hide');
+  });
+  $("#circolare_ata").change(function() {
+    if ($(this).is(":checked")) {
+      $("input[name='circolare[destinatariAta][]'][value='A']").prop("checked", true).parent().addClass('active');
+      $("input[name='circolare[destinatariAta][]'][value='T']").prop("checked", true).parent().addClass('active');
+      $("input[name='circolare[destinatariAta][]'][value='C']").prop("checked", true).parent().addClass('active');
+    } else {
+      $("input[name='circolare[destinatariAta][]'][value='A']").prop("checked", false).parent().removeClass('active');
+      $("input[name='circolare[destinatariAta][]'][value='T']").prop("checked", false).parent().removeClass('active');
+      $("input[name='circolare[destinatariAta][]'][value='C']").prop("checked", false).parent().removeClass('active');
+    }
+  });
+  $("input[name='circolare[destinatariAta][]']").change(function() {
+    $("#circolare_ata").prop("checked", false).parent().removeClass('active');
   });
   $(document).on('keypress','.modal', function(e){
     return event.keyCode != 13;
