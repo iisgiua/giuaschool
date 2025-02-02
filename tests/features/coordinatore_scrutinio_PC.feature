@@ -54,8 +54,6 @@ Scenario: visualizzazione procedura completa
   E click su "Conferma"
   E click su "Conferma"
   E click su "Conferma"
-  E click su "Conferma"
-  E click su "Conferma" con indice "2"
   E click su "Chiudi lo scrutinio"
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E vedi la tabella:
