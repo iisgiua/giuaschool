@@ -872,7 +872,7 @@ class RegistroUtil {
           $noAppello = true;
         }
         // gestione pulsanti
-        $pulsanti = $this->azioneAssenze($inizio, $docente, null, null, ($cattedra ? $cattedra->getMateria() : null));
+        $pulsanti = $this->azioneAssenze($inizio, $docente, null, $classe, ($cattedra ? $cattedra->getMateria() : null));
         if ($pulsanti && $alu['id_classe'] > 0) {
           // url pulsanti
           if ($alu['id_assenza'] > 0) {

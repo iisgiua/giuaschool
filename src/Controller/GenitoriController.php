@@ -779,7 +779,7 @@ class GenitoriController extends BaseController {
     }
     // controlla assenza e possibilità di giustificare
     if ($assenza->getAlunno() !== $alunno || !$alunno->getAbilitato() || !$alunno->getClasse() ||
-        !$gen->giusticazioneOnline($this->getUser()) || $assenza->getDocenteGiustifica()) {
+        !$gen->giusticazioneOnline($this->getUser()) ) {
       // errore
       throw $this->createNotFoundException('exception.invalid_params');
     }
