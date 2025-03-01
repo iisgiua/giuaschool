@@ -8,17 +8,18 @@
 
 namespace App\Util;
 
-use DateTime;
-use App\Entity\Genitore;
-use App\Entity\Classe;
 use App\Entity\Alunno;
-use App\Entity\Materia;
-use App\Entity\CircolareUtente;
 use App\Entity\Ata;
 use App\Entity\Circolare;
+use App\Entity\CircolareClasse;
+use App\Entity\CircolareUtente;
+use App\Entity\Classe;
 use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Entity\Materia;
 use App\Entity\Staff;
 use App\Entity\Utente;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -283,9 +284,23 @@ class CircolariUtil {
       // solo staff: tutte le circolari
       return true;
     }
-    // altri: solo destinatari
+    // legge destinatari
     $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare, 'utente' => $utente]);
-    return ($cu != null);
+    if ($cu) {
+      // destinatario della circolare
+      return true;
+    }
+    // controlla se è docente
+    if ($utente instanceOf Docente) {
+      // controlla se circolare è destinata a classe
+      $cc = $this->em->getRepository(CircolareClasse::class)->findOneByCircolare($circolare);
+      if (!empty($cc)) {
+        // docente può leggere circolari destinate alle classi
+        return true;
+      }
+    }
+    // permesso negato
+    return false;
   }
 
 }
