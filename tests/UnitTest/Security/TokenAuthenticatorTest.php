@@ -299,13 +299,15 @@ class TokenAuthenticatorTest extends DatabaseTestCase {
     $req = new Request([], [], ['_route' => 'login_token'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], json_encode(['token' => 'AB-12', 'device' => 'DEV1']));
     $req->setMethod('POST');
     $utente = $this->getReference('genitore1_2A_1');
+    $data = DateTime::createFromFormat('Y-m-d 00:00:00', '2020-01-01 00:00:00');
+    $utente->setUltimoAccesso($data);
+    $this->em->flush();
     $tok = new UsernamePasswordToken($utente, 'fw', []);
-    $adesso = new DateTime();
     $res = $ta->onAuthenticationSuccess($req, $tok, 'fw');
     $this->assertCount(0, $this->logs);
     $this->assertCount(1, $this->dbLogs);
     $this->assertSame(['Login', ['Login' => 'Token', 'Username' => $utente->getUsername(), 'Ruolo' => 'ROLE_GENITORE']], $this->dbLogs['ACCESSO'][0]);
-    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
+    $this->assertSame($data, $utente->getUltimoAccesso());
     $this->assertSame('application/json', $res->headers->get('content-type'));
     $this->assertSame(200, $res->getStatusCode());
     $this->assertSame(true, json_decode($res->getContent())->success);

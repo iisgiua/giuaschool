@@ -9,9 +9,10 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\Entity\Lezione;
-use ReflectionClass;
-use DateTime;
+use App\Entity\ModuloFormativo;
 use App\Tests\EntityTestCase;
+use DateTime;
+use ReflectionClass;
 
 
 /**
@@ -29,17 +30,17 @@ class LezioneTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Lezione::class;
     // campi da testare
-    $this->fields = ['data', 'ora', 'classe','gruppo', 'tipoGruppo', 'materia', 'argomento', 'attivita'];
+    $this->fields = ['data', 'ora', 'classe','gruppo', 'tipoGruppo', 'materia', 'argomento', 'attivita', 'moduloFormativo'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita'],
+    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita', 'modulo_formativo_id'],
       'gs_materia' => '*',
       'gs_classe' => '*'];
     // SQL write
-    $this->canWrite = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita']];
+    $this->canWrite = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'gruppo', 'tipo_gruppo', 'materia_id', 'argomento', 'attivita', 'modulo_formativo_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -75,12 +76,13 @@ class LezioneTest extends EntityTestCase {
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'ora' ? $this->faker->randomNumber(4, false) :
           ($field == 'classe' ? $this->getReference("classe_1A") :
-          ($field == 'gruppo' ? $this->faker->optional($weight = 50, $default = '')->word() :
+          ($field == 'gruppo' ? $this->faker->optional(50, '')->word() :
           ($field == 'tipoGruppo' ? $this->faker->randomElement(['N', 'C', 'R']) :
           ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
-          ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          null))))))));
+          ($field == 'argomento' ? $this->faker->optional(50, '')->text() :
+          ($field == 'attivita' ? $this->faker->optional(50, '')->text() :
+          ($field == 'moduloFormativo' ? $this->faker->optional(50, null)->passthrough($this->getReference("modulo_formativo_1")) :
+          null)))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -132,7 +134,8 @@ class LezioneTest extends EntityTestCase {
       'tipoGruppo' => $existent->getTipoGruppo(),
       'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
       'argomento' => $existent->getArgomento(),
-      'attivita' => $existent->getAttivita()];
+      'attivita' => $existent->getAttivita(),
+      'moduloFormativo' => $existent->getModuloFormativo() ? $existent->getModuloFormativo()->getId() : null];
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 

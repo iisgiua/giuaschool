@@ -157,8 +157,7 @@ class TokenAuthenticator extends AbstractAuthenticator {
     // legge dati
     $userId = $token->getUser()->getId();
     $ip = $request->getClientIp();
-    // aggiorna ultimo accesso
-    $token->getUser()->setUltimoAccesso(new DateTime());
+    // non aggiorna ultimo accesso
     // crea otp+userId
     $otp = bin2hex(openssl_random_pseudo_bytes(64));
     $risposta['otp'] = $otp.'-'.$userId;

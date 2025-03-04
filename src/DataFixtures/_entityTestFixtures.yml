@@ -43,6 +43,7 @@ include:
   - ListaDestinatariUtenteFixtures.yml
   - LogFixtures.yml
   - MateriaFixtures.yml
+  - ModuloFormativoFixtures.yml
   - MenuFixtures.yml
   - MenuOpzioneFixtures.yml
   - NotaFixtures.yml

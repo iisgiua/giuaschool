@@ -8,7 +8,6 @@
 
 namespace App\Tests\UnitTest\Security;
 
-use App\Entity\Configurazione;
 use App\Security\TokenConnectAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
@@ -20,7 +19,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -29,7 +27,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
 /**
- * Unit test per l'autenticazione tramite token
+ * Unit test per l'autenticazione tramite token/connect
  *
  * @author Antonello Dessì
  */

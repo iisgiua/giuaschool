@@ -10,6 +10,7 @@
 #   attivita: Attività della lezione
 #   gruppo: Nome dell'eventuale gruppo a cui è riferita la lezione
 #   tipoGruppo: Tipo di gruppo utilizzato [N=nessuno, C=gruppo classe, R=gruppo religione]
+#   moduloFormativo: Modulo formativo associato alla lezione
 ####################
 
 
@@ -30,6 +31,7 @@ App\Entity\Lezione:
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     gruppo:
     tipoGruppo: 'N'
+    moduloFormativo:
 
   # ----- lezioni di religione -----
   lezione_religione_{1..5}:
@@ -41,6 +43,7 @@ App\Entity\Lezione:
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     gruppo:
     tipoGruppo: 'N'
+    moduloFormativo:
 
   # ----- lezioni di sostegno -----
   lezione_sostegno_{1..5}:
@@ -52,6 +55,7 @@ App\Entity\Lezione:
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     gruppo:
     tipoGruppo: 'N'
+    moduloFormativo:
 
   # ----- lezioni di sostituzione -----
   lezione_supplenza_{1..5}:
@@ -63,3 +67,4 @@ App\Entity\Lezione:
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     gruppo:
     tipoGruppo: 'N'
+    moduloFormativo:
