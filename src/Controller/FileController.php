@@ -85,7 +85,7 @@ class FileController extends BaseController {
   #[IsGranted('ROLE_UTENTE')]
   public function remove(Request $request, string $pagina, string $param): Response {
     // legge file
-    $file = $request->request->get($param);
+    $file = $request->request->all($param);
     // imposta directory temporanea
     $dir = $this->getParameter('dir_tmp');
     // rimuove file
