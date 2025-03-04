@@ -8,35 +8,36 @@
 
 namespace App\Util;
 
-use DateTime;
-use App\Entity\Entrata;
-use App\Entity\Uscita;
-use App\Entity\CambioClasse;
-use App\Entity\Assenza;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use App\Entity\Genitore;
-use App\Entity\Utente;
 use App\Entity\Alunno;
+use App\Entity\Annotazione;
+use App\Entity\Assenza;
+use App\Entity\AssenzaLezione;
+use App\Entity\CambioClasse;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Docente;
-use App\Entity\Materia;
-use App\Entity\Scrutinio;
-use App\Entity\StoricoEsito;
-use App\Entity\Annotazione;
-use App\Entity\AssenzaLezione;
-use App\Entity\Cattedra;
+use App\Entity\Entrata;
 use App\Entity\Esito;
 use App\Entity\Festivita;
 use App\Entity\FirmaSostegno;
+use App\Entity\Genitore;
 use App\Entity\Lezione;
+use App\Entity\Materia;
 use App\Entity\Nota;
 use App\Entity\OsservazioneAlunno;
+use App\Entity\Presenza;
+use App\Entity\Scrutinio;
+use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
+use App\Entity\Uscita;
+use App\Entity\Utente;
 use App\Entity\Valutazione;
 use App\Entity\VotoScrutinio;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -534,6 +535,27 @@ class GenitoriUtil {
       if ($u['valido']) {
         $num_uscite_valide[$numperiodo]++;
       }
+    }
+    // legge FC
+    $fc = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      ->select('p.data,p.oraInizio,p.oraFine,p.tipo,p.descrizione,p.id')
+      ->join(Presenza::class, 'p', 'WITH', 'a.id=p.alunno')
+      ->where('a.id=:alunno')
+      ->orderBy('p.data', 'DESC')
+			->setParameter('alunno', $alunno)
+      ->getQuery()
+      ->getArrayResult();
+    // imposta array associativo per FC
+    foreach ($fc as $fuori) {
+      $data = $fuori['data']->format('Y-m-d');
+      $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
+      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
+      $dati_periodo[$numperiodo][$data]['fc']['data'] = $data_str;
+      $dati_periodo[$numperiodo][$data]['fc']['inizio'] = $fuori['oraInizio'];
+      $dati_periodo[$numperiodo][$data]['fc']['fine'] = $fuori['oraFine'];
+      $dati_periodo[$numperiodo][$data]['fc']['tipo'] = $fuori['tipo'];
+      $dati_periodo[$numperiodo][$data]['fc']['descrizione'] = $fuori['descrizione'];
+      $dati_periodo[$numperiodo][$data]['fc']['id'] = $fuori['id'];
     }
     // ordina periodi
     for ($k = 3; $k >= 1; $k--) {

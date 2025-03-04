@@ -120,7 +120,7 @@
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
         </td>
-          {% else %}
+          {% elseif tipo == 'uscita' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Uscita anticipata</strong> ({{ e.ora|date('H:i') }})</td>
         <td>
@@ -137,6 +137,13 @@
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
         </td>
+          {% elseif tipo == 'fc' %}
+        <td><strong>{{ e.data }}</strong></td>
+        <td><strong>Fuori classe</strong> ({% if e.inizio %}dalle {{ e.inizio|date('H:i') }}{% if e.fine %} alle {{ e.fine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %})</td>
+        <td>
+          <small>{{ ('label.presenza_tipo_'~e.tipo)|trans }}: {{e.descrizione}}</small>
+        </td>
+        <td>&nbsp;</td>
           {% endif %}
       </tr>
         {% endfor %}
