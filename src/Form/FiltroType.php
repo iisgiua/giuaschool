@@ -186,6 +186,27 @@ class FiltroType extends AbstractType {
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false]);
+    } elseif ($options['form_mode'] == 'moduliFormativi') {
+      // form moduli formativi
+      $builder
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'placeholder' => 'label.qualsiasi_tipo',
+          'choice_translation_domain' => false,
+          'attr' => ['title' => 'label.filtro_tipo_modulo_formativo', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'required' => false])
+        ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_modulo_formativo',
+          'choice_translation_domain' => false,
+          'attr' => ['title' => 'label.filtro_modulo_formativo', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'required' => false]);
     }
     // pulsante filtro
     $builder

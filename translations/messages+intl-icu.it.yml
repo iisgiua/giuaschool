@@ -81,6 +81,11 @@ label.citta: Città
 label.provincia: Provincia
 label.classe: Classe
 label.classi: Classi
+label.classi_1: Classi prime
+label.classi_2: Classi seconde
+label.classi_3: Classi terze
+label.classi_4: Classi quarte
+label.classi_5: Classi quinte
 label.close: Chiudi
 label.codice_fiscale: Codice fiscale
 label.cognome: Cognome
@@ -514,6 +519,7 @@ label.scrutinio_visibile_classe_5: Pubblicazione esiti classi quinte
 label.tipo_istituto: Tipo di istituto (es. Istituto di Istruzione Superiore)
 label.sigla_tipo_istituto: Tipo di istituto (es. I.I.S.)
 label.nome_istituto: Nome dell'istituto
+label.nome_breve: Nome breve
 label.nome_breve_istituto: Nome breve dell'istituto
 label.email_istituto: Indirizzo email dell'istituto
 label.pec_istituto: Indirizzo PEC dell'istituto
@@ -652,6 +658,13 @@ label.gruppo_religione_S: Gruppo Religione
 label.gruppo_religione_A: Gruppo Mat. Alt.
 label.gruppo_religione_N: Gruppo N.A.
 label.RSPP: RSPP
+label.modulo_formativo: Modulo formativo
+label.modulo_formativo_tipo_O: Orientamento formativo
+label.modulo_formativo_tipo_P: PCTO
+label.filtro_tipo_modulo_formativo: Filtro sul tipo del modulo formativo
+label.filtro_modulo_formativo: Filtro sul modulo formativo
+label.qualsiasi_tipo: Qualsiasi tipo
+label.qualsiasi_modulo_formativo: Qualsiasi modulo formativo
 
 
 ##### PAGINE #####
@@ -834,7 +847,12 @@ page.docenti.rspp: Configura RSPP
 title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
 page.circolari_archivio: Archivio Circolari
 title.circolari_archivio: Archivio delle circolari degli anni passati
-
+page.scuola.moduliFormativi: Moduli Formativi
+title.scuola.moduliFormativi: Gestione dei moduli formativi per l'orientamento/PCTO
+title.scuola.moduliFormativi_edit: Modifica di un modulo formativo per l'orientamento/PCTO
+page.coordinatore.moduliFormativi: Moduli Formativi
+title.coordinatore.moduliFormativi: Moduli formativi svolti nella classe
+title.coordinatore.moduliFormativi_alunni: Moduli formativi seguiti dagli alunni della classe
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -1116,6 +1134,7 @@ message.cattedra_mancante: Devi prima scegliere la classe o la materia per poter
 message.cancella_lezione: Verrà cancellata la firma e, se sei l'unico docente, anche l'intera lezione. Vuoi continuare?
 message.cancella_annotazione: Verrà cancellata l'annotazione sul registro. Vuoi continuare?
 message.cancella_nota: Verrà cancellata la nota disciplinare. Vuoi continuare?
+message.cancella_moduloFormativo: Verrà cancellato il modulo formativo. Vuoi continuare?
 message.annulla_nota: Verrà formalmente annullata la nota disciplinare. Vuoi continuare?
 message.voti_supplenza: Non è possibile inserire valutazioni per una supplenza.
 message.argomenti_supplenza: Non è possibile visualizzare gli argomenti per una supplenza.

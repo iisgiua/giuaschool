@@ -8,23 +8,21 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Configurazione;
-use DateTime;
-use App\Entity\Scrutinio;
 use App\Entity\Amministratore;
-use Exception;
-use App\Entity\Docente;
 use App\Entity\Classe;
+use App\Entity\Configurazione;
 use App\Entity\Corso;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\DefinizioneScrutinio;
+use App\Entity\Docente;
 use App\Entity\Festivita;
 use App\Entity\Istituto;
 use App\Entity\Materia;
+use App\Entity\ModuloFormativo;
 use App\Entity\Orario;
 use App\Entity\Preside;
 use App\Entity\ScansioneOraria;
+use App\Entity\Scrutinio;
 use App\Entity\Sede;
 use App\Form\AmministratoreType;
 use App\Form\ClasseType;
@@ -34,16 +32,20 @@ use App\Form\DefinizioneScrutinioType;
 use App\Form\FestivitaType;
 use App\Form\IstitutoType;
 use App\Form\MateriaType;
+use App\Form\ModuloFormativoType;
 use App\Form\OrarioType;
 use App\Form\PresideType;
 use App\Form\ScansioneOrariaSettimanaleType;
 use App\Form\SedeType;
+use DateTime;
+use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -1118,6 +1120,103 @@ class ScuolaController extends BaseController {
     $this->addFlash('success', 'message.update_ok');
     // redirezione
     return $this->redirectToRoute('scuola_moduli');
+  }
+
+  /**
+   * Gestione dei moduli formativi per l'orientamento/PCTO
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/scuola/moduliFormativi', name: 'scuola_moduliFormativi', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function moduliFormativi(): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera dati
+    $dati = $this->em->getRepository(ModuloFormativo::class)->findBY([], ['tipo' => 'ASC', 'nomeBreve' => 'ASC']);
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'moduliFormativi', $dati, $info);
+  }
+
+  /**
+   * Modifica dati dei moduli formativi
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $id Identificativo del modulo formativo
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/scuola/moduliFormativi/edit/{id}', name: 'scuola_moduliFormativi_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function moduliFormativiEdit(Request $request, int $id): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $moduloFormativo = $this->em->getRepository(ModuloFormativo::class)->find($id);
+      if (!$moduloFormativo) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+    } else {
+      // azione add
+      $moduloFormativo = new ModuloFormativo();
+      $this->em->persist($moduloFormativo);
+    }
+    // form
+    $form = $this->createForm(ModuloFormativoType::class, $moduloFormativo, ['return_url' => $this->generateUrl('scuola_moduliFormativi')]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // riordina classi
+      $classi = $moduloFormativo->getClassi();
+      sort($classi);
+      $moduloFormativo->setClassi($classi);
+      // memorizza modifiche
+      $this->em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.update_ok');
+      // redirect
+      return $this->redirectToRoute('scuola_moduliFormativi');
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'moduliFormativi_edit', $dati, $info, [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
+   * Cancella un modulo formativo
+   *
+   * @param int $id Identificativo del modulo formativo
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/scuola/moduliFormativi/delete/{id}', name: 'scuola_moduliFormativi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function moduliFormativiDelete(int $id): Response {
+    // controlla esistenza
+    $moduloFormativo = $this->em->getRepository(ModuloFormativo::class)->find($id);
+    if (!$moduloFormativo) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    try {
+      // cancella modulo formativo
+      $this->em->remove($moduloFormativo);
+      // memorizza modifiche
+      $this->em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.delete_ok');
+    } catch (Exception) {
+      // errore: violazione vincolo di integrità referenziale
+      $this->addFlash('danger', 'exception.delete_errors');
+    }
+    // redirect
+    return $this->redirectToRoute('scuola_moduliFormativi');
   }
 
 }

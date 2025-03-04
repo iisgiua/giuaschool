@@ -476,6 +476,17 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_SCUOLA'
     sottoMenu:
+  menu_opzione_SCUOLA12:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Moduli&nbsp;formativi'
+    descrizione: 'Configura i moduli formativi per l''orientamento/PCTO'
+    url: 'scuola_moduliFormativi'
+    ordinamento: 12
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
 
   # ----- opzioni sottomenu ATA - AMMINISTRATORE -----
   menu_opzione_ATA1:

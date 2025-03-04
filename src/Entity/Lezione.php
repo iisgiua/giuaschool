@@ -8,20 +8,18 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use DateTimeInterface;
 use App\Repository\LezioneRepository;
-use Stringable;
 use DateTime;
+use DateTimeInterface;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * Lezione - dati delle ore di lezione
- *
- *
  *
  * @author Antonello Dessì
  */
@@ -118,8 +116,16 @@ class Lezione implements Stringable {
   #[ORM\Column(type: Types::TEXT, nullable: true)]
   private ?string $attivita = '';
 
+  /**
+   * @var ModuloFormativo|null $moduloFormativo Modulo formativo associato alla lezione
+   */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: \ModuloFormativo::class)]
+  private ?ModuloFormativo $moduloFormativo = null;
+
 
   //==================== EVENTI ORM ====================
+
   /**
    * Simula un trigger onCreate
    */
@@ -337,6 +343,27 @@ class Lezione implements Stringable {
     return $this;
   }
 
+  /**
+   * Restituisce il modulo formativo associato alla lezione
+   *
+   * @return ModuloFormativo|null Modulo formativo
+   */
+  public function getModuloFormativo(): ?ModuloFormativo {
+    return $this->moduloFormativo;
+  }
+
+  /**
+   * Modifica il modulo formativo associato alla lezione
+   *
+   * @param ModuloFormativo|null $moduloFormativo Modulo formativo
+   *
+   * @return self Oggetto modificato
+   */
+  public function setModuloFormativo(?ModuloFormativo $moduloFormativo): self {
+    $this->moduloFormativo = $moduloFormativo;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -363,7 +390,8 @@ class Lezione implements Stringable {
       'tipoGruppo' => $this->tipoGruppo,
       'materia' => $this->materia ? $this->materia->getId() : null,
       'argomento' => $this->argomento,
-      'attivita' => $this->attivita];
+      'attivita' => $this->attivita,
+      'moduloFormativo' => $this->moduloFormativo ? $this->moduloFormativo->getId() : null];
     return $dati;
   }
 

@@ -1,0 +1,79 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not info.classe %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore.moduliFormativi_alunni'|trans }} {{ info.classe }}</h1>
+  <div class="row gs-mt-2 gs-mb-3">
+    <div class="col-sm-offset-8 col-sm-4 text-right">
+      <a class="btn btm-sm btn-success" href="{{ path('coordinatore_moduliFormativi', {classe: info.classe.id}) }}" role="button" title="Lista dei moduli formativi svolti nella classe"><strong>Situazione classe</strong></a>
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-4">Alunno</th>
+        <th class="col-sm-4">Ore</th>
+        <th class="col-sm-4">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for a in dati.alunni %}
+      <tr>
+        <td><strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong></td>
+        <td>
+          {% if a.O.ore > 0 %}{{ 'label.modulo_formativo_tipo_O'|trans }}: {{ a.O.ore }}<br>{% endif %}
+          {% if a.P.ore > 0 %}{{ 'label.modulo_formativo_tipo_P'|trans }}: {{ a.P.ore }}<br>{% endif %}
+        </td>
+        <td>
+          <button type="button" class="btn btn-xs btn-primary" title="Dettagli della situazione dell'alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ a.id }}"><strong>{{ 'label.show'|trans }}</strong></button>
+          <div id="alunno-{{ a.id }}" style="display:none">
+            <h3 class="gs-h3 text-center gs-mt-1 text-primary">Moduli formativi svolti</h3>
+      {% if a.O.ore > 0 %}
+        {% for m in a.O.moduli %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p><strong>Lezione:</strong> {{ dati.moduli[m].data|date('d/m/Y') }} dalle {{ dati.moduli[m].inizio|date('H:i') }} alle {{ dati.moduli[m].fine|date('H:i') }}</p>
+                <p><strong>{{ 'label.modulo_formativo_tipo_O'|trans }}:</strong> {{ dati.moduli[m].modulo }}</p>
+              </div>
+            </div>
+        {% endfor %}
+      {% endif %}
+      {% if a.P.ore > 0 %}
+        {% for m in a.P.moduli %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p><strong>Lezione:</strong> {{ dati.moduli[m].data|date('d/m/Y') }} dalle {{ dati.moduli[m].inizio|date('H:i') }} alle {{ dati.moduli[m].fine|date('H:i') }}</p>
+                <p><strong>{{ 'label.modulo_formativo_tipo_P'|trans }}:</strong> {{ dati.moduli[m].modulo }}</p>
+              </div>
+            </div>
+        {% endfor %}
+      {% endif %}
+          </div>
+        </td>
+      </tr>
+     {% endfor %}
+    </tbody>
+  </table>
+  {% include 'include/modal-info.html.twig' %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var body = $('#'+$(e.relatedTarget).data('body')).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(body);
+  });
+});
+</script>
+{% endblock %}

@@ -8,41 +8,41 @@
 
 namespace App\Util;
 
-use DateTime;
-use App\Entity\Festivita;
-use App\Entity\Configurazione;
-use App\Entity\ScansioneOraria;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\ParameterType;
-use Doctrine\ORM\Query\Parameter;
-use Exception;
-use App\Entity\Firma;
-use App\Entity\AvvisoUtente;
-use App\Entity\Genitore;
-use App\Entity\Entrata;
-use App\Entity\Uscita;
-use App\Entity\Presenza;
-use App\Entity\Richiesta;
-use App\Entity\CambioClasse;
-use App\Entity\Valutazione;
-use App\Entity\Scrutinio;
 use App\Entity\Alunno;
 use App\Entity\Annotazione;
 use App\Entity\Assenza;
 use App\Entity\AssenzaLezione;
+use App\Entity\AvvisoUtente;
+use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
+use App\Entity\Configurazione;
 use App\Entity\Docente;
+use App\Entity\Entrata;
+use App\Entity\Festivita;
+use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
+use App\Entity\Genitore;
 use App\Entity\Lezione;
 use App\Entity\Materia;
+use App\Entity\ModuloFormativo;
 use App\Entity\Nota;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
+use App\Entity\Presenza;
+use App\Entity\Richiesta;
+use App\Entity\ScansioneOraria;
+use App\Entity\Scrutinio;
 use App\Entity\Sede;
+use App\Entity\Uscita;
+use App\Entity\Valutazione;
 use App\Form\Appello;
 use App\Form\VotoClasse;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Parameter;
+use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -1904,7 +1904,7 @@ class RegistroUtil {
     }
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'cl')
-      ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente,so.durata')
+      ->select('l.id,l.data,l.ora,l.argomento,l.attivita,(l.moduloFormativo) AS mf,d.id AS docente,so.durata')
       ->leftJoin(Firma::class, 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->leftJoin('f.docente', 'd')
       ->join(ScansioneOraria::class, 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
@@ -1955,17 +1955,20 @@ class RegistroUtil {
           $dati[$periodo][$data_prec][$num]['argomento'] = '';
           $dati[$periodo][$data_prec][$num]['attivita'] = '';
           $dati[$periodo][$data_prec][$num]['firme'] = '';
+          $dati[$periodo][$data_prec][$num]['lezioneId'] = 0;
+          $dati[$periodo][$data_prec][$num]['moduloFormativo'] = '';
         } else {
           // fa ripartire contatore
           $num = 0;
         }
       }
-      if (trim($l['argomento'].$l['attivita']) != '' || $firme != '') {
+      if (trim($l['argomento'].$l['attivita']) != '' || $firme != '' || $l['mf']) {
         // argomento presente o altro docente
         if ($num == 0 || $firme != '' ||
             strcasecmp((string) $l['argomento'], (string) $dati[$periodo][$data][$num-1]['argomento']) ||
-            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$num-1]['attivita'])) {
-          // evita ripetizioni identiche degli argomenti
+            strcasecmp((string) $l['attivita'], (string) $dati[$periodo][$data][$num-1]['attivita']) ||
+            $l['mf']) {
+          // evita ripetizioni identiche degli argomenti (escluso se presente modulo formativo)
           $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
             ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
           $dataStr = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))];
@@ -1973,6 +1976,10 @@ class RegistroUtil {
           $dati[$periodo][$data][$num]['argomento'] = $l['argomento'];
           $dati[$periodo][$data][$num]['attivita'] = $l['attivita'];
           $dati[$periodo][$data][$num]['firme'] = $firme;
+          $moduloFormativo = $this->em->getRepository(ModuloFormativo::class)->find((int) $l['mf']);
+          $dati[$periodo][$data][$num]['lezioneId'] = $moduloFormativo ? $l['id'] : 0;
+          $dati[$periodo][$data][$num]['moduloFormativo'] = $moduloFormativo ?
+            $this->trans->trans('label.modulo_formativo_tipo_'.$moduloFormativo->getTipo()).': '.$moduloFormativo->getNomeBreve() : '';
           $num++;
         }
       }
@@ -1990,6 +1997,8 @@ class RegistroUtil {
       $dati[$periodo][$data_prec][$num]['argomento'] = '';
       $dati[$periodo][$data_prec][$num]['attivita'] = '';
       $dati[$periodo][$data_prec][$num]['firme'] = '';
+      $dati[$periodo][$data_prec][$num]['lezioneId'] = 0;
+      $dati[$periodo][$data_prec][$num]['moduloFormativo'] = '';
     }
     // restituisce dati come array associativo
     $d = [];

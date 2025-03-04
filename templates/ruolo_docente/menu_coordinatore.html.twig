@@ -6,6 +6,7 @@
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,17) == 'coordinatore_note' ? ' class="active"' }}><a href="{{ path('coordinatore_note') }}" title="Controllo delle note disciplinari">Note</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,17) == 'coordinatore_voti' ? ' class="active"' }}><a href="{{ path('coordinatore_voti') }}" title="Controllo delle valutazioni">Voti</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,23) == 'coordinatore_situazione' ? ' class="active"' }}><a href="{{ path('coordinatore_situazione') }}" title="Controllo della situazione generale di un alunno">Situazione</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,28) == 'coordinatore_moduliFormativi' ? ' class="active"' }}><a href="{{ path('coordinatore_moduliFormativi') }}" title="Controllo dei moduli formativi per l'orientamento/PCTO">Moduli formativi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,18) == 'coordinatore_avvis' ? ' class="active"' }}><a href="{{ path('coordinatore_avvisi') }}" title="Gestione degli avvisi per la classe">Avvisi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,22) == 'coordinatore_scrutinio' ? ' class="active"' }}><a href="{{ path('coordinatore_scrutinio') }}" title="Gestione dello scrutinio">Scrutinio</a></li>
   </ul>

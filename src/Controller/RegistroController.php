@@ -8,34 +8,34 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use DateTime;
-use IntlDateFormatter;
-use App\Entity\Cattedra;
-use App\Entity\Classe;
-use App\Entity\Materia;
-use App\Entity\Festivita;
-use App\Entity\ScansioneOraria;
-use App\Entity\Circolare;
-use App\Entity\Valutazione;
-use App\Entity\AssenzaLezione;
 use App\Entity\Alunno;
-use App\Entity\Utente;
 use App\Entity\Annotazione;
+use App\Entity\AssenzaLezione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
+use App\Entity\Cattedra;
+use App\Entity\Circolare;
+use App\Entity\Classe;
+use App\Entity\Festivita;
 use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
 use App\Entity\Lezione;
+use App\Entity\Materia;
+use App\Entity\ModuloFormativo;
 use App\Entity\Nota;
+use App\Entity\ScansioneOraria;
+use App\Entity\Utente;
+use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
+use IntlDateFormatter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -47,6 +47,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -319,6 +320,8 @@ class RegistroController extends BaseController
     $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
     $oraFine = $dati['fine'];
+    // lista moduli formativi
+    $opzioniModuloFormativo = $this->em->getRepository(ModuloFormativo::class)->opzioni($classe->getAnno());
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_add', FormType::class)
       ->add('fine', ChoiceType::class, ['label' => 'label.ora_fine',
@@ -344,9 +347,22 @@ class RegistroController extends BaseController
       ->add('attivita', MessageType::class, ['label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'data' => empty($controllo['compresenza']) ? '' : $controllo['compresenza']->getAttivita(),
         'trim' => true,
-        'required' => false])
+        'required' => false]);
+    if ($cattedra && $materia->getTipo() != 'S') {
+      // no supplenza, no sostegno
+      $form = $form
+        ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
+          'data' => empty($controllo['compresenza']) ? null : $controllo['compresenza']->getModuloFormativo(),
+          'choices' => $opzioniModuloFormativo,
+          'placeholder' => 'label.nessuno',
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
+          'choice_translation_domain' => false,
+          'required' => false]);
+    }
+    $form = $form
       ->add('submit', SubmitType::class, ['label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']])
+        'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
       ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$this->generateUrl('lezioni_registro_firme')."'"]])
       ->getForm();
@@ -397,10 +413,13 @@ class RegistroController extends BaseController
               ->setGruppo('')
               ->setTipoGruppo('N');
           } else {
-            // lezione curricolare: aggiunge argomenti/attività
+            // lezione curricolare: aggiunge argomenti/attività/modulo
             $lezione
               ->setArgomento($form->get('argomento')->getData())
               ->setAttivita($form->get('attivita')->getData());
+            if ($cattedra) {
+              $lezione->setModuloFormativo($form->get('moduloFormativo')->getData());
+            }
           }
           $this->em->persist($lezione);
           if ($numOra == $ora && !empty($trasformazione['modifica'])) {
@@ -423,8 +442,12 @@ class RegistroController extends BaseController
                 }
               }
             }
-            $lezione->setArgomento($form->get('argomento')->getData());
-            $lezione->setAttivita($form->get('attivita')->getData());
+            $lezione
+              ->setArgomento($form->get('argomento')->getData())
+              ->setAttivita($form->get('attivita')->getData());
+            if ($cattedra) {
+              $lezione->setModuloFormativo($form->get('moduloFormativo')->getData());
+            }
             if ($logModifica) {
               $trasformazione['log']['modifica'][] = [$logModifica, $lezione];
             }
@@ -595,6 +618,8 @@ class RegistroController extends BaseController
       // sostegno
       $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
+    // lista moduli formativi di orientamento/PCTO
+    $opzioniModuloFormativo = $this->em->getRepository(ModuloFormativo::class)->opzioni($classe->getAnno());
     // form di modifica
     $altreMaterie = [];
     $altreMaterie['cattedre'] = [];
@@ -665,7 +690,20 @@ class RegistroController extends BaseController
       ->add('attivita', MessageType::class, ['label' => ($firmaDocente instanceOf FirmaSostegno) ? 'label.attivita_sostegno' : 'label.attivita',
         'data' => ($firmaDocente instanceOf FirmaSostegno) ? $firmaDocente->getAttivita() : $lezioneDocente->getAttivita(),
         'trim' => true,
-        'required' => false])
+        'required' => false]);
+    if ($cattedra && $materia->getTipo() != 'S') {
+      // no supplenza e no sostegno
+      $form = $form
+        ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
+          'data' => $lezioneDocente->getModuloFormativo(),
+          'choices' => $opzioniModuloFormativo,
+          'placeholder' => 'label.nessuno',
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
+          'choice_translation_domain' => false,
+          'required' => false]);
+    }
+    $form = $form
       ->add('submit', SubmitType::class, ['label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']])
       ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
@@ -675,7 +713,7 @@ class RegistroController extends BaseController
     if ($form->isSubmitted() && $form->isValid()) {
       $vecchiaLezione = clone $lezioneDocente;
       $vecchiaFirma = clone $firmaDocente;
-      // modifica argomento/attività
+      // modifica argomento/attività/modulo formativo
       if ($firmaDocente instanceOf FirmaSostegno) {
         $firmaDocente
           ->setArgomento($form->get('argomenti')->getData())
@@ -686,6 +724,9 @@ class RegistroController extends BaseController
           ->setArgomento($form->get('argomenti')->getData())
           ->setAttivita($form->get('attivita')->getData());
         $log['modifica'] = [$vecchiaLezione, $lezioneDocente];
+      }
+      if ($cattedra && $materia->getTipo() != 'S') {
+        $lezioneDocente->setModuloFormativo($form->get('moduloFormativo')->getData());
       }
       // altre modifiche
       if (count($altreMaterie['cattedre']) > 1) {

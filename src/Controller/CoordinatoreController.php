@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ModuloFormativo;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Classe;
 use DateTime;
@@ -1270,6 +1271,122 @@ class CoordinatoreController extends BaseController {
     // mostra la pagina di risposta
     return $this->renderHtml('coordinatore', 'presenze_add', $dati, $info, [$form->createView(),
       'message.required_fields']);
+  }
+
+  /**
+   * Controllo moduli formativi svolti: situazione della classe
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/coordinatore/moduliFormativi/{classe}', name: 'coordinatore_moduliFormativi', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function moduliFormativi(Request $request, int $classe): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // parametro classe
+    if ($classe == 0) {
+      // recupera parametri da sessione
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+    } else {
+      // memorizza su sessione
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+    }
+    // recupera criteri dalla sessione
+    $criteri = [];
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_moduliFormativi/tipo', null);
+    $criteri['moduloFormativo'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_moduliFormativi/moduloFormativo', 0);
+    // controllo classe
+    if ($classe > 0) {
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // controllo accesso alla funzione
+      if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+        // coordinatore
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        if (!in_array($classe->getId(), $classi)) {
+          // errore
+          throw $this->createNotFoundException('exception.invalid_params');
+        }
+      }
+      // informazioni sulla pagina
+      $info['classe'] = $classe;
+      // form filtro
+      $criteri['classe'] = $classe;
+      $criteri['sede'] = $classe->getSede();
+      $opzioniTipi = $this->em->getRepository(ModuloFormativo::class)->opzioniTipiClasse($classe);
+      $opzioniModuli = $this->em->getRepository(ModuloFormativo::class)->opzioniModuliClasse($classe);
+      $form = $this->createForm(FiltroType::class, null, ['form_mode' => 'moduliFormativi',
+        'values' => [$criteri['tipo'], $opzioniTipi, $criteri['moduloFormativo'], $opzioniModuli]]);
+      $form->handleRequest($request);
+      if ($form->isSubmitted() && $form->isValid()) {
+        // imposta criteri di ricerca
+        $criteri['tipo'] = $form->get('tipo')->getData();
+        $criteri['moduloFormativo'] = $form->get('moduloFormativo')->getData();
+        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_moduliFormativi/tipo', $criteri['tipo']);
+        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_moduliFormativi/moduloFormativo', $criteri['moduloFormativo']);
+      }
+      // legge dati
+      $dati = $this->em->getRepository(ModuloFormativo::class)->cerca($criteri);
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('coordinatore', 'moduliFormativi', $dati, $info,
+      [isset($form) ? $form->createView() : null]);
+  }
+
+  /**
+   * Controllo moduli formativi svolti: situazione degli alunni
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/coordinatore/moduliFormativi/alunni/{classe}', name: 'coordinatore_moduliFormativi_alunni', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function moduliFormativiAlunni(int $classe): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // parametro classe
+    if ($classe == 0) {
+      // recupera parametri da sessione
+      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+    } else {
+      // memorizza su sessione
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+    }
+    // controllo classe
+    if ($classe > 0) {
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // controllo accesso alla funzione
+      if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+        // coordinatore
+        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+        if (!in_array($classe->getId(), $classi)) {
+          // errore
+          throw $this->createNotFoundException('exception.invalid_params');
+        }
+      }
+      // informazioni sulla pagina
+      $info['classe'] = $classe;
+      // legge dati
+      $dati = $this->em->getRepository(ModuloFormativo::class)->alunni($classe);
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('coordinatore', 'moduliFormativi_alunni', $dati, $info, []);
   }
 
 }
