@@ -80,7 +80,7 @@ class Updater {
     'update' => [
       1 => 'unzip',
       2 => 'fileUpdate',
-      3 => 'requirements',
+      3 => 'requirementsUpdate',
       4 => 'schemaUpdate',
       5 => 'envUpdate',
       6 => 'cleanUpdate',
@@ -88,6 +88,7 @@ class Updater {
 
 
   //==================== METODI DELLA CLASSE ====================
+
   /**
    * Costruttore
    *
@@ -572,7 +573,7 @@ class Updater {
         if (str_ends_with($file, '/')) {
           // rimuove directory
           if (!str_ends_with($file, '/./') && !str_ends_with($file, '/../')) {
-            $success = rmdir($file);
+            $this->removeFiles($file);
           }
         } else {
           // cancella file
@@ -955,13 +956,34 @@ class Updater {
     $success = $req['check']['mandatory'];
     unset($req['check']);
     // visualizza pagina
-    if ($this->sys['build'] != '0') {
-      $page['version'] = $this->sys['version'].'#build';
-      $pageUrl = 'update.php';
+    $page['version'] = 'INSTALL';
+    $pageUrl = 'app.php';
+    $page['step'] = $step.' - Requisiti di sistema';
+    $page['title'] = 'Controllo dei requisiti di sistema';
+    $page['requirements'] = $req;
+    if ($success) {
+      $page['success'] = 'Il sistema soddisfa tutti i requisiti tecnici indispensabili per il funzionameno dell\'applicazione.';
+      $page['url'] = $pageUrl.'?token='.$this->sys['token'].'&step='.($step + 1);
     } else {
-      $page['version'] = 'INSTALL';
-      $pageUrl = 'app.php';
+      $page['danger'] = "Non si può continuare con l'installazione.<br>".
+        "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'applicazione.";
+      $page['error'] = $pageUrl.'?token='.$this->sys['token'].'&step='.$step;
     }
+    include($this->publicPath.'/install/update_page.php');
+  }
+
+  /**
+   * Controlla i requisiti di sistema per l'aggiornamento
+   *
+   * @param int $step Passo della procedura
+   */
+  private function requirementsUpdate(int $step): void {
+    $req = $this->checkRequirements();
+    $success = $req['check']['mandatory'];
+    unset($req['check']);
+    // visualizza pagina
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
+    $pageUrl = 'update.php';
     $page['step'] = $step.' - Requisiti di sistema';
     $page['title'] = 'Controllo dei requisiti di sistema';
     $page['requirements'] = $req;
