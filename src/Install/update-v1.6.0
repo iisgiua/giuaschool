@@ -23,7 +23,7 @@ return [
     'config/packages/cache.yaml',
     'config/packages/sensio_framework_extra.yaml',
     'src/EventListener/LogoutListener.php',
-    'vendor/symfony/sension/',
+    'vendor/symfony/sensio/',
     'vendor/doctrine/annotations/',
     'vendor/symfony/cache/Adapter/DoctrineAdapter.php',
   ],

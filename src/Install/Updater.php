@@ -574,6 +574,7 @@ class Updater {
           // rimuove directory
           if (!str_ends_with($file, '/./') && !str_ends_with($file, '/../')) {
             $this->removeFiles($file);
+            $success = rmdir($file);
           }
         } else {
           // cancella file
