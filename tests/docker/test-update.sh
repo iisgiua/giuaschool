@@ -19,7 +19,7 @@ if [ $retval -ne 0 ]; then
   exit 1
 fi
 composer -q install --no-progress --no-scripts
-rm -r var/cache/*
+rm -r var/cache/test/*
 rm -r tests/temp/*
 
 # test other steps
@@ -28,7 +28,7 @@ retval=$?
 if [ $retval -ne 0 ]; then
   exit 1
 fi
-rm -r var/cache/*
+rm -r var/cache/test/*
 rm -r tests/temp/*
 
 # smoke test
