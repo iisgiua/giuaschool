@@ -26,8 +26,6 @@ RUN \
   cp tests/docker/*.feature tests/features/ && \
   rm -r var/cache/* && \
   rm -r tests/temp/* && \
-  mkdir -p var/cache/prod && \
-  mkdir -p var/sessions/prod && \
   chown -R www-data:www-data src/* public/* tests/* var/* && \
   echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
   service mariadb start && \
