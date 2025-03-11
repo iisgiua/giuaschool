@@ -1056,15 +1056,14 @@ class Updater {
     // crea nuovo db
     $sqlCommands = file($this->projectPath.'/src/Install/create-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($sqlCommands as $sql) {
-      // crea tabella
-      $this->pdo->exec($sql);
+      if (!empty($sql)) {
+        // crea tabella
+        $this->pdo->exec($sql);
+      }
     }
     // inizializza db
-    $sqlCommands = file($this->projectPath.'/src/Install/init-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($sqlCommands as $sql) {
-      // crea tabella
-      $this->pdo->exec($sql);
-    }
+    $sql = file_get_contents($this->projectPath.'/src/Install/init-db.sql');
+    $this->pdo->exec($sql);
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');
     // imposta dati della pagina
     $page['version'] = 'INSTALL';
