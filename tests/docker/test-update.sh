@@ -8,8 +8,6 @@ google-chrome --headless --disable-gpu --disable-software-rasterizer --disable-d
 
 # Make sure test/prod directories exist
 mkdir -p var/sessions/test
-mkdir -p var/cache/prod
-mkdir -p var/sessions/prod
 chown -R www-data:www-data var/*
 
 # test step 1: unzip files
