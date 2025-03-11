@@ -65,9 +65,9 @@ class ModuloFormativo implements Stringable {
   /**
    * @var string|null $nomeBreve Nome breve del modulo formativo
    */
-  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 64, unique: true, nullable: false)]
+  #[ORM\Column(name: 'nome_breve', type: Types::STRING, length: 80, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
+  #[Assert\Length(max: 80, maxMessage: 'field.maxlength')]
   private ?string $nomeBreve = '';
 
   /**

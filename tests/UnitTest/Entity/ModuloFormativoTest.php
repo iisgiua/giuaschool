@@ -149,10 +149,10 @@ class ModuloFormativoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::NomeBreve - NOT BLANK');
     $existent->setNomeBreve($this->faker->randomLetter());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::NomeBreve - VALID NOT BLANK');
-    $existent->setNomeBreve(str_repeat('*', 65));
+    $existent->setNomeBreve(str_repeat('*', 81));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::NomeBreve - MAX LENGTH');
-    $existent->setNomeBreve(str_repeat('*', 64));
+    $existent->setNomeBreve(str_repeat('*', 80));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::NomeBreve - VALID MAX LENGTH');
     // tipo
     $existent->setTipo('*');
