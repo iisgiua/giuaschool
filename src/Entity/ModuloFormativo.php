@@ -81,6 +81,7 @@ class ModuloFormativo implements Stringable {
    * @var array $classi Lista degli classi (prime, seconde, ecc.) a cui è destinato il modulo
    */
   #[ORM\Column(type: Types::ARRAY, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private array $classi = [];
 
 
