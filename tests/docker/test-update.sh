@@ -9,8 +9,6 @@ google-chrome --headless --disable-gpu --disable-software-rasterizer --disable-d
 # Make sure test/prod directories exist
 mkdir -p var/sessions/test
 chown -R www-data:www-data var/*
-echo `ls -la var/sessions/prod`
-echo `ls -la var/cache/prod`
 
 # test step 1: unzip files
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-1.feature --stop-on-failure -f progress" www-data
@@ -21,8 +19,6 @@ fi
 composer -q install --no-progress --no-scripts
 rm -r var/cache/test/*
 rm -r tests/temp/*
-echo `ls -la var/sessions/prod`
-echo `ls -la var/cache/prod`
 
 # test other steps
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-2.feature --stop-on-failure -f progress" www-data

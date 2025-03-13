@@ -15,9 +15,10 @@ Schema dello scenario: esegue i passi successivi della procedura di aggiornament
   Allora vedi la url "/install/update.php"
   Allora la sezione "main .alert" contiene "<messaggio>"
   Esempi:
-    | passo | messaggio       |
-    | 2     | /correttamente/ |
-    | 3     | /correttamente/ |
-    | 4     | /correttamente/ |
-    | 5     | /correttamente/ |
-    | 6     | /con successo/  |
+    | passo | messaggio                                       |
+    | 2     | /correttamente/                                 |
+    | 3     | /Il sistema soddisfa tutti i requisiti tecnici/ |
+    | 4     | /correttamente/                                 |
+    | 5     | /correttamente/                                 |
+    | 6     | /correttamente/                                 |
+    | 7     | /successo/                                      |
