@@ -272,9 +272,51 @@ class AssenzeController extends BaseController {
         ->setAlunno($alunno)
         ->setDocente($this->getUser());
       $this->em->persist($assenza);
+      // legge assenze precedenti e annulla giustificazione se consecutive
+      $assenzePrec = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
+        ->where('ass.alunno=:alunno AND ass.data<:data')
+        ->orderBy('ass.data', 'DESC')
+        ->setParameter('alunno', $alunno)
+        ->setParameter('data', $data)
+        ->getQuery()
+        ->getResult();
+      $dataConsecutiva = clone $data_obj;
+      foreach ($assenzePrec as $assenza) {
+        $dataConsecutiva = $this->em->getRepository(Festivita::class)->giornoPrecedente($dataConsecutiva);
+        if ($assenza->getData()->format('Y-m-d') === $dataConsecutiva->format('Y-m-d')) {
+          // assenza consecutiva: annulla giustificazione
+          $assenza->setGiustificato(null);
+          $assenza->setUtenteGiustifica(null);
+          $assenza->setDocenteGiustifica(null);
+        } else {
+          // fine giorni consecutivi di assenza
+          break;
+        }
+      }
+      // legge assenze successive e annulla giustificazione se consecutive
+      $assenzeSucc = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
+        ->where('ass.alunno=:alunno AND ass.data>:data')
+        ->orderBy('ass.data', 'ASC')
+        ->setParameter('alunno', $alunno)
+        ->setParameter('data', $data)
+        ->getQuery()
+        ->getResult();
+      $dataConsecutiva = clone $data_obj;
+      foreach ($assenzeSucc as $assenza) {
+        $dataConsecutiva = $this->em->getRepository(Festivita::class)->giornoSuccessivo($dataConsecutiva);
+        if ($assenza->getData()->format('Y-m-d') === $dataConsecutiva->format('Y-m-d')) {
+          // assenza consecutiva: annulla giustificazione
+          $assenza->setGiustificato(null);
+          $assenza->setUtenteGiustifica(null);
+          $assenza->setDocenteGiustifica(null);
+        } else {
+          // fine giorni consecutivi di assenza
+          break;
+        }
+      }
       // controlla esistenza ritardo
       $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno,
-	'data' => $data_obj]);
+	      'data' => $data_obj]);
       if ($entrata) {
         // rimuove ritardo
         $id_entrata = $entrata->getId();
@@ -282,7 +324,7 @@ class AssenzeController extends BaseController {
       }
       // controlla esistenza uscita
       $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno,
-	'data' => $data_obj]);
+	      'data' => $data_obj]);
       if ($uscita) {
         // rimuove uscita
         $id_uscita = $uscita->getId();
