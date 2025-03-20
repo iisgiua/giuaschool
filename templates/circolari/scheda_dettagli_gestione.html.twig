@@ -53,7 +53,11 @@
     <div class="col-sm-2"><strong>Allegati:</strong></div>
     <div class="col-sm-10">
     {% for n,a in circolare.allegati %}
+      {% if a[0:10] == 'Circolare-'  %}
+      <a target="_blank" href="{{ path('circolari_download', {'id': circolare.id, 'doc': n+1}) }}" title="Scarica l'allegato"><strong>Allegato {{ a[('Circolare-'~circolare.numero~'-Allegato-')|length:] }}</strong></a><br>
+      {% else %}
       <a target="_blank" href="{{ path('circolari_download', {'id': circolare.id, 'doc': n+1}) }}" title="Scarica l'allegato"><strong>Allegato {{ n+1 }}</strong></a><br>
+      {% endif %}
     {% endfor %}
     </div>
   </div>

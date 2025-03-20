@@ -326,31 +326,47 @@ class CircolariController extends BaseController {
       $circolare->setFirma(false);
       // modifica dati
       if ($form->isValid()) {
-        // documento
+        // rimuove documenti cancellati
         foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
-          if ($f['type'] == 'uploaded') {
-            // aggiunge documento
-            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.
-              $f['temp'].'.'.$f['ext']);
-            $circolare->setDocumento(new File($this->getParameter('dir_circolari').'/'.$f['temp'].'.'.$f['ext']));
-          } elseif ($f['type'] == 'removed') {
+          if ($f['type'] == 'removed') {
             // rimuove documento
             $fs->remove($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']);
           }
         }
-        // allegati
         foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
-          if ($f['type'] == 'uploaded') {
-            // aggiunge allegato
-            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.
-              $f['temp'].'.'.$f['ext']);
-            $circolare->addAllegato(new File($this->getParameter('dir_circolari').'/'.$f['temp'].'.'.$f['ext']));
-          } elseif ($f['type'] == 'removed') {
+          if ($f['type'] == 'removed') {
             // rimuove allegato
             $circolare->removeAllegato(new File($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']));
             $fs->remove($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']);
           }
         }
+        // documento
+        foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
+          if ($f['type'] == 'uploaded') {
+            // aggiunge documento
+            $nomefile = 'Circolare-'. $circolare->getNumero();
+            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'],
+              $this->getParameter('dir_circolari').'/'.$nomefile.'.'.$f['ext']);
+            $circolare->setDocumento(new File($this->getParameter('dir_circolari').'/'.$nomefile.'.'.$f['ext']));
+          }
+        }
+        // aggiunge nuovi allegati
+        foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
+          if ($f['type'] == 'uploaded') {
+            // aggiunge allegato
+            $nomefile = 'Circolare-'. $circolare->getNumero().'-Allegato-'.
+              mb_strtoupper(substr((string) $f['name'], 0, - strlen($f['ext'])), 'UTF-8');
+            $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
+                                    ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
+            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'],
+              $this->getParameter('dir_circolari').'/'.$nomefile.$f['ext']);
+            $circolare->addAllegato(new File($this->getParameter('dir_circolari').'/'.$nomefile.$f['ext']));
+          }
+        }
+        // ordina per evitare indici non successivi
+        $docs = $circolare->getAllegati();
+        sort($docs);
+        $circolare->setAllegati($docs);
         // ok: memorizza dati
         $this->em->flush();
         // log azione
@@ -700,14 +716,20 @@ class CircolariController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // file
-    $nome = 'circolare-'.$circolare->getNumero();
+    $nome = 'Circolare-'.$circolare->getNumero();
     if ($doc == 0) {
       // documento principale
       $file = new File($dir.$circolare->getDocumento());
     } else {
       // allegato
       $file = new File($dir.$circolare->getAllegati()[$doc - 1]);
-      $nome .= '-allegato-'.$doc;
+      //TODO: rimuovere gestione temporanea per documenti pre-esistenti a modifica nomi allegati
+      if (str_starts_with($circolare->getAllegati()[$doc - 1], 'Circolare-')) {
+        // nuova gestione
+        $nome = $circolare->getAllegati()[$doc - 1];
+      } else {
+        $nome .= '-Allegato-'.$doc;
+      }
     }
     $nome .= '.'.$file->getExtension();
     // segna lettura implicita
@@ -815,70 +837,70 @@ class CircolariController extends BaseController {
       'mesi' => $mesi]);
   }
 
-  /**
-   * Mostra i dettagli di una circolare ai destinatari
-   *
-   * @param CircolariUtil $circ Funzioni di utilità per le circolari
-   * @param int $id ID della circolare
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/circolari/dettagli/destinatari/{id}', name: 'circolari_dettagli_destinatari', requirements: ['id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_UTENTE')]
-  public function dettagliDestinatari(CircolariUtil $circ, int $id): Response {
-    // inizializza
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $dati = null;
-    // controllo circolare
-    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
-    if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // dati destinatario
-    $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
-      'utente' => $this->getUser()]);
-    // visualizza pagina
-    return $this->render('circolari/scheda_dettagli_destinatari.html.twig', [
-      'circolare' => $circolare,
-      'circolare_utente' => $cu,
-      'mesi' => $mesi]);
-  }
+  // /**
+  //  * Mostra i dettagli di una circolare ai destinatari
+  //  *
+  //  * @param CircolariUtil $circ Funzioni di utilità per le circolari
+  //  * @param int $id ID della circolare
+  //  *
+  //  * @return Response Pagina di risposta
+  //  *
+  //  */
+  // #[Route(path: '/circolari/dettagli/destinatari/{id}', name: 'circolari_dettagli_destinatari', requirements: ['id' => '\d+'], methods: ['GET'])]
+  // #[IsGranted('ROLE_UTENTE')]
+  // public function dettagliDestinatari(CircolariUtil $circ, int $id): Response {
+  //   // inizializza
+  //   $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  //   $dati = null;
+  //   // controllo circolare
+  //   $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+  //   if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
+  //     // errore
+  //     throw $this->createNotFoundException('exception.id_notfound');
+  //   }
+  //   // dati destinatario
+  //   $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
+  //     'utente' => $this->getUser()]);
+  //   // visualizza pagina
+  //   return $this->render('circolari/scheda_dettagli_destinatari.html.twig', [
+  //     'circolare' => $circolare,
+  //     'circolare_utente' => $cu,
+  //     'mesi' => $mesi]);
+  // }
 
-  /**
-   * Mostra i dettagli di una circolare allo staff
-   *
-   * @param CircolariUtil $circ Funzioni di utilità per le circolari
-   * @param int $id ID della circolare
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/circolari/dettagli/staff/{id}', name: 'circolari_dettagli_staff', requirements: ['id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_STAFF')]
-  public function dettagliStaff(CircolariUtil $circ, int $id): Response {
-    // inizializza
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $dati = null;
-    // controllo circolare
-    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
-    if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // dati circolare
-    $dati = $circ->dettagli($circolare);
-    // dati destinatario
-    $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
-      'utente' => $this->getUser()]);
-    // visualizza pagina
-    return $this->render('circolari/scheda_dettagli_staff.html.twig', [
-      'circolare' => $circolare,
-      'circolare_utente' => $cu,
-      'mesi' => $mesi,
-      'dati' => $dati]);
-  }
+  // /**
+  //  * Mostra i dettagli di una circolare allo staff
+  //  *
+  //  * @param CircolariUtil $circ Funzioni di utilità per le circolari
+  //  * @param int $id ID della circolare
+  //  *
+  //  * @return Response Pagina di risposta
+  //  *
+  //  */
+  // #[Route(path: '/circolari/dettagli/staff/{id}', name: 'circolari_dettagli_staff', requirements: ['id' => '\d+'], methods: ['GET'])]
+  // #[IsGranted('ROLE_STAFF')]
+  // public function dettagliStaff(CircolariUtil $circ, int $id): Response {
+  //   // inizializza
+  //   $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  //   $dati = null;
+  //   // controllo circolare
+  //   $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+  //   if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
+  //     // errore
+  //     throw $this->createNotFoundException('exception.id_notfound');
+  //   }
+  //   // dati circolare
+  //   $dati = $circ->dettagli($circolare);
+  //   // dati destinatario
+  //   $cu = $this->em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
+  //     'utente' => $this->getUser()]);
+  //   // visualizza pagina
+  //   return $this->render('circolari/scheda_dettagli_staff.html.twig', [
+  //     'circolare' => $circolare,
+  //     'circolare_utente' => $cu,
+  //     'mesi' => $mesi,
+  //     'dati' => $dati]);
+  // }
 
   /**
    * Conferma la lettura della circolare da parte dell'utente
@@ -1101,32 +1123,32 @@ class CircolariController extends BaseController {
       'mesi' => $mesi]);
   }
 
-  /**
-   * Mostra le circolari destinate agli alunni della classe
-   *
-   * @param int $classe ID della classe
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/circolari/classi/{classe}', name: 'circolari_classi', requirements: ['classe' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function classi(int $classe): Response {
-    // inizializza
-    $dati = null;
-    // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // legge dati
-    $dati = $this->em->getRepository(Circolare::class)->circolariClasse($classe);
-    // visualizza pagina
-    return $this->render('circolari/scheda_dettagli_classe.html.twig', [
-      'dati' => $dati,
-      'classe' => $classe]);
-  }
+  // /**
+  //  * Mostra le circolari destinate agli alunni della classe
+  //  *
+  //  * @param int $classe ID della classe
+  //  *
+  //  * @return Response Pagina di risposta
+  //  *
+  //  */
+  // #[Route(path: '/circolari/classi/{classe}', name: 'circolari_classi', requirements: ['classe' => '\d+'], methods: ['GET'])]
+  // #[IsGranted('ROLE_DOCENTE')]
+  // public function classi(int $classe): Response {
+  //   // inizializza
+  //   $dati = null;
+  //   // controllo classe
+  //   $classe = $this->em->getRepository(Classe::class)->find($classe);
+  //   if (!$classe) {
+  //     // errore
+  //     throw $this->createNotFoundException('exception.id_notfound');
+  //   }
+  //   // legge dati
+  //   $dati = $this->em->getRepository(Circolare::class)->circolariClasse($classe);
+  //   // visualizza pagina
+  //   return $this->render('circolari/scheda_dettagli_classe.html.twig', [
+  //     'dati' => $dati,
+  //     'classe' => $classe]);
+  // }
 
   /**
    * Conferma la lettura della circolare alla classe
@@ -1185,6 +1207,7 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/archivio/{pagina}', name: 'circolari_archivio', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
+  //TODO: gestione nomi degli allegati
   public function archivio(Request $request, CircolariUtil $circ, int $pagina): Response {
     // inizializza
     $limite = 20;

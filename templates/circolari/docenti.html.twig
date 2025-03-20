@@ -55,9 +55,9 @@
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <div class="gs-mt-3 gs-mb-3">
-                  <strong>Documento:</strong>
-                  <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
-                  <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+                  <strong>Documento:</strong> Circolare n. {{ a.numero }}
+                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
                 </div>
               </div>
             </div>
@@ -66,9 +66,13 @@
             <div class="list-group-item-text">
         {% for n,d in a.allegati %}
               <div class="gs-mt-3 gs-mb-3">
-                <strong>Allegato{{ a.allegati|length > 1 ? ' '~loop.index }}:</strong>
-                <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': loop.index, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
-                <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': loop.index, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+          {% if d[0:10] == 'Circolare-'  %}
+                <strong>Allegato:</strong> {{ d[('Circolare-'~a.numero~'-Allegato-')|length:] }}
+          {% else %}
+                <strong>Allegato {{ n+1 }}:</strong>
+          {% endif %}
+                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': n+1, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': n+1, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
               </div>
         {% endfor %}
             </div>

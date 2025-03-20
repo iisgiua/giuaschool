@@ -5,6 +5,9 @@ return [
   ],
   'fileDelete' => [
     'public/install/app.php',
+    'templates/circolari/scheda_dettagli_classe.html.twig',
+    'templates/circolari/scheda_dettagli_destinatari.html.twig',
+    'templates/circolari/scheda_dettagli_staff.html.twig',
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_modulo_formativo CHANGE nome_breve nome_breve VARCHAR(80) NOT NULL;", ""],
