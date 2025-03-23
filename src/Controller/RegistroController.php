@@ -606,6 +606,10 @@ class RegistroController extends BaseController
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
+    //TODO: da rimuovere, permette modifica modulo formativo
+    if ($reg->bloccoScrutinio($dataObj, $classe)) {
+      return $this->edit2($request, $trans, $reg, $dblogger, $cattedra ? $cattedra->getId() : 0, $classe->getId(), $data, $ora);
+    }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
@@ -1656,6 +1660,160 @@ class RegistroController extends BaseController
       'Alunni' => implode(',', array_map(fn($a) => $a->getId(), $nota->getAlunni()->toArray()))]);
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
+  }
+
+  /**
+   * Modifica solo modulo formativo della lezione
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
+   * @param int $classe Identificativo della classe
+   * @param string $data Data del giorno
+   * @param int $ora Ora di lezione del giorno
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  private function edit2(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
+                       LogHandler $dblogger, int $cattedra, int $classe, string $data,
+                       int $ora): Response {
+    // inizializza
+    $label = [];
+    // controlla classe
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla cattedra
+    if ($cattedra > 0) {
+      // lezioni di una cattedra esistente
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'classe' => $classe, 'attiva' => 1]);
+      if (!$cattedra) {
+        // errore: non esiste la cattedra
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+      $materia = $cattedra->getMateria();
+    } else {
+      // supplenza o sostegno
+      $cattedra = null;
+      $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
+      if (!$materia) {
+        // errore: dati inconsistenti
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controlla data
+    $dataObj = DateTime::createFromFormat('Y-m-d', $data);
+    $errore = $reg->controlloData($dataObj, $classe->getSede());
+    if ($errore) {
+      // errore: festivo
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge lezioni e firme esistenti
+    $firmaDocente = null;
+    $lezioneDocente = null;
+    $tipoLezione = null;
+    $docentiId = [];
+    $firmeLezioni = [];
+    $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+      ->join('l.classe', 'c')
+      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameter('data', $data)
+      ->setParameter('ora', $ora)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->orderBy('l.gruppo')
+      ->getQuery()
+      ->getResult();
+    foreach ($lezioni as $lezione) {
+      // legge firme
+      $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
+      $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
+        ->join('f.docente', 'd')
+        ->where('f.lezione=:lezione')
+        ->setParameter('lezione', $lezione)
+        ->getQuery()
+        ->getResult();
+      // docenti
+      $firmeLezioni[$gruppo] = $firme;
+      foreach ($firme as $firma) {
+        $docentiId[$gruppo][] = $firma->getDocente()->getId();
+        if ($this->getUser()->getId() == $firma->getDocente()->getId()) {
+          // lezione firmata dal docente
+          $firmaDocente = $firma;
+          $lezioneDocente = $firma->getLezione();
+          $tipoLezione = $gruppo;
+        }
+      }
+    }
+    // controlla esistenza di lezione/firma
+    if (empty($lezioni) || empty($firmaDocente) || empty($lezioneDocente) || empty($tipoLezione)) {
+      // errore: lezione/firma non esiste
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla permessi
+    if (!$reg->azioneLezione('edit', $dataObj, $this->getUser(), $classe, $docentiId)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    if ($lezioneDocente->getMateria()->getTipo() == 'U' || $lezioneDocente->getMateria()->getTipo() == 'S') {
+      // mostra errore
+      $this->addFlash('danger', 'Non è possibile modificare i moduli formativi di una lezione non curricolare.');
+      return $this->redirectToRoute('lezioni_registro_firme');
+    }
+    // dati in formato stringa
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $label['data'] = $formatter->format($dataObj);
+    $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
+    $label['classe'] = ''.$lezioneDocente->getClasse();
+    $label['materia'] = $lezioneDocente->getMateria()->getNomeBreve();
+    $label['ora'] = $lezioneDocente->getOra();
+    if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
+      // sostegno
+      $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
+    }
+    // lista moduli formativi di orientamento/PCTO
+    $opzioniModuloFormativo = $this->em->getRepository(ModuloFormativo::class)->opzioni($classe->getAnno());
+    // form di modifica
+    $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class)
+      ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
+        'data' => $lezioneDocente->getModuloFormativo(),
+        'choices' => $opzioniModuloFormativo,
+        'placeholder' => 'label.nessuno',
+        'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+        'attr' => ['class' => 'gs-placeholder'],
+        'choice_translation_domain' => false,
+        'required' => false])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']])
+      ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$this->generateUrl('lezioni_registro_firme')."'"]])
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $vecchiaLezione = clone $lezioneDocente;
+      // modifica modulo formativo
+      $lezioneDocente->setModuloFormativo($form->get('moduloFormativo')->getData());
+      // ok: memorizza dati
+      $this->em->flush();
+      // log azione
+      $dblogger->logAzione('REGISTRO', 'Modifica Lezione');
+      $dblogger->logModifica('REGISTRO', 'Modifica Lezione', $vecchiaLezione, $lezioneDocente);
+      // redirezione
+      return $this->redirectToRoute('lezioni_registro_firme');
+    }
+    // mostra la pagina di risposta
+    return $this->render('lezioni/registro_edit.html.twig', [
+      'pagina_titolo' => 'page.lezioni_registro',
+      'form' => $form->createView(),
+      'form_title' => 'title.modifica_lezione',
+      'label' => $label]);
   }
 
 }
