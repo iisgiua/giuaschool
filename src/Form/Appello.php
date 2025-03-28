@@ -119,7 +119,7 @@ class Appello implements Stringable {
   /**
    * Modifica l'ora di eventuale entrata in ritardo
    *
-   * @param DateTime $ora Ora di eventual entrata in ritardo
+   * @param DateTime|null $ora Ora di eventuale entrata in ritardo
    *
    * @return Appello Oggetto modificato
    */

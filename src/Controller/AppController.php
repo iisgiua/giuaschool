@@ -8,18 +8,18 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use DateTime;
-use App\Entity\Utente;
-use App\Entity\App;
-use Exception;
 use App\Entity\Alunno;
+use App\Entity\App;
 use App\Entity\Ata;
+use App\Entity\Cattedra;
 use App\Entity\Docente;
 use App\Entity\Genitore;
 use App\Entity\Log;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
+use DateTime;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -430,6 +431,64 @@ class AppController extends BaseController {
     $logger->warning('Registrazione dispositivo', ['device' => $params['device']]);
     // restituisce risposta
     return new JsonResponse($res);
+  }
+
+  /**
+   * API: restituisce informazioni sull'utente docente
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/api/info/docente/', name: 'api_info_docente', methods: ['POST'])]
+  public function infoDocente(Request $request, TranslatorInterface $trans): Response {
+    // inizializza
+    $dati = [];
+    $token = $request->headers->get('X-Giuaschool-Token');
+    $params = json_decode($request->getContent(), true);
+    $email = $params['email'];
+    // controlla servizio
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
+    if (!$app) {
+      // errore: servizio non esiste o non è abilitato
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_docente_no_app');
+      return new JsonResponse($dati);
+    }
+    // controlla ip
+    $ip = $app->getDati()['ip'];
+    if ($ip && $ip != $request->getClientIp()) {
+      // errore: IP non abilitato
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_docente_no_ip');
+      return new JsonResponse($dati);
+    }
+    // cerca utente
+    $docente = $this->em->getRepository(Docente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
+    if (!$docente) {
+      // errore: utente on valido
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_docente_no_user');
+      return new JsonResponse($dati);
+    }
+    // dati docente
+    $dati['nome'] = $docente->getNome();
+    $dati['cognome'] = $docente->getCognome();
+    $dati['sesso'] = $docente->getSesso();
+    // sedi di servizio
+    $sedi = $this->em->getRepository(Docente::class)->sedi($docente);
+    $dati['sedi'] = array_keys($sedi);
+    // classi della cattedra
+    $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'Q');
+    $datiClassi = [];
+    foreach ($classi as $c) {
+      $datiClassi[$c->getClasse()->getId()] = ''.$c->getClasse();
+    }
+    $dati['classi'] = array_values($datiClassi);
+    $dati['stato'] = 'OK';
+    // restituisce la risposta
+    return new JsonResponse($dati);
   }
 
 }

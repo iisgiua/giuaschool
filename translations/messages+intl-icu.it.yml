@@ -1687,6 +1687,9 @@ exception.documento_esistente: Il documento inserito esiste già per l'alunno se
 exception.info_studente_no_app: Il servizio richiesto non è attivo.
 exception.info_studente_no_ip: L'indirizzo IP non è valido.
 exception.info_studente_no_user: L'utente indicato non esiste.
+exception.info_docente_no_app: Il servizio richiesto non è attivo.
+exception.info_docente_no_ip: L'indirizzo IP non è valido.
+exception.info_docente_no_user: L'utente indicato non esiste.
 exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivolgiti alla Segreteria della scuola per risolvere il problema.
 exception.spid_blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
 exception.documento_errore_codifica: Si è verificato un errore durante la procedura di codifica del documento.
