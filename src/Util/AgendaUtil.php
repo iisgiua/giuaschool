@@ -8,21 +8,22 @@
 
 namespace App\Util;
 
-use App\Entity\RichiestaColloquio;
+use App\Entity\Alunno;
+use App\Entity\Annotazione;
+use App\Entity\Avviso;
+use App\Entity\AvvisoUtente;
 use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
+use App\Entity\Festivita;
+use App\Entity\Genitore;
+use App\Entity\RichiestaColloquio;
+use App\Entity\Utente;
+use App\Util\BachecaUtil;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Util\BachecaUtil;
-use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\Docente;
-use App\Entity\Annotazione;
-use App\Entity\Avviso;
-use App\Entity\AvvisoUtente;
-use App\Entity\Festivita;
-use App\Entity\Utente;
 
 
 /**
@@ -178,25 +179,10 @@ class AgendaUtil {
     foreach (array_merge($compiti1, $compiti2, $compiti3, $compiti4) as $c) {
       $dati[intval($c->getData()->format('j'))]['compiti'] = 1;
     }
-    // festività
-    $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
-      ->where('f.sede IS NULL AND f.tipo=:tipo AND MONTH(f.data)=:mese')
-			->setParameter('tipo', 'F')
-			->setParameter('mese', $mese->format('n'))
-      ->orderBy('f.data', 'ASC')
-      ->getQuery()
-      ->getResult();
-    foreach ($festivi as $f) {
-      $dati[intval($f->getData()->format('j'))]['festivo'] = 1;
-    }
-    // azione add
-    if ($this->azioneEvento('add', new DateTime(), $docente, null)) {
-      // pulsante add
-      $dati['azioni']['add'] = 1;
-    }
     // restituisce dati
     return $dati;
   }
+
   /**
    * Recupera i dettagli degli eventi per il docente indicato relativamente alla data indicata
    *

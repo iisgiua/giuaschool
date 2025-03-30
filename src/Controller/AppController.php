@@ -446,8 +446,7 @@ class AppController extends BaseController {
     // inizializza
     $dati = [];
     $token = $request->headers->get('X-Giuaschool-Token');
-    $params = json_decode($request->getContent(), true);
-    $email = $params['email'];
+    $email = $request->request->get('email');
     // controlla servizio
     $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {

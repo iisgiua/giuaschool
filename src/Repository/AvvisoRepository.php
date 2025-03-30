@@ -8,14 +8,17 @@
 
 namespace App\Repository;
 
-use App\Entity\AvvisoUtente;
-use App\Entity\Ata;
-use App\Entity\Docente;
-use App\Entity\Classe;
-use App\Entity\Genitore;
 use App\Entity\Alunno;
-use App\Entity\AvvisoClasse;
+use App\Entity\Ata;
 use App\Entity\Avviso;
+use App\Entity\AvvisoClasse;
+use App\Entity\AvvisoUtente;
+use App\Entity\Classe;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
@@ -349,6 +352,66 @@ class AvvisoRepository extends BaseRepository {
     // crea lista con pagine
     $dati = $this->paginazione($query->getQuery(), $pagina);
     return $dati['lista'];
+  }
+
+  /**
+   * Restituisce il numero delle verifiche della classe
+   *
+   * @param Classe $classe Classe di cui restituire le verifiche
+   * @param DateTime $mese Mese di riferemento delle verifiche
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function verificheClasse(Classe $classe, DateTime $mese): array {
+    $dati = [];
+    // legge le verifiche
+    $parametri = [new Parameter('mese', $mese->format('n')), new Parameter('anno', $classe->getAnno()),
+      new Parameter('sezione', $classe->getSezione())];
+    $sql = '';
+    if (!empty($classe->getGruppo())) {
+      $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
+      $parametri[] = new Parameter('gruppo', $classe->getGruppo());
+    }
+    $verifiche = $this->createQueryBuilder('a')
+      ->select('COUNT(a.id) as num,a.data')
+      ->join('a.cattedra', 'c')
+      ->join('c.classe', 'cl')
+      ->where("a.tipo='V' AND MONTH(a.data)=:mese AND cl.anno=:anno AND cl.sezione=:sezione".$sql)
+      ->groupBy('a.data')
+      ->setParameters(new ArrayCollection($parametri))
+      ->getQuery()
+      ->getResult();
+    foreach ($verifiche as $v) {
+      $dati[$v['data']->format('j')] = $v['num'];
+    }
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle verifiche della classe per la data indicata
+   *
+   * @param Classe $classe Classe di cui restituire le verifiche
+   * @param DateTime $data Giorno di riferemento delle verifiche
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function dettagliVerificheClasse(Classe $classe, DateTime $data): array {
+    // legge le verifiche
+    $parametri = [new Parameter('data', $data->format('Y-m-d')), new Parameter('anno', $classe->getAnno()),
+      new Parameter('sezione', $classe->getSezione())];
+    $sql = '';
+    if (!empty($classe->getGruppo())) {
+      $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
+      $parametri[] = new Parameter('gruppo', $classe->getGruppo());
+    }
+    $verifiche = $this->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('c.classe', 'cl')
+      ->where("a.tipo='V' AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione".$sql)
+      ->setParameters(new ArrayCollection($parametri))
+      ->getQuery()
+      ->getResult();
+    return $verifiche;
   }
 
 }

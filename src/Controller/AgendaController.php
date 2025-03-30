@@ -8,16 +8,13 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use DateTime;
-use IntlDateFormatter;
-use App\Entity\Festivita;
-use App\Entity\Cattedra;
 use App\Entity\Alunno;
-use App\Entity\Utente;
-use App\Entity\Classe;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
+use App\Entity\Utente;
 use App\Form\AvvisoType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
@@ -25,7 +22,9 @@ use App\Util\AgendaUtil;
 use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
+use IntlDateFormatter;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +32,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -52,11 +52,11 @@ class AgendaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/agenda/eventi/{mese}', name: 'agenda_eventi', requirements: ['mese' => '\d\d\d\d-\d\d'], defaults: ['mese' => '0000-00'], methods: ['GET'])]
+  #[Route(path: '/agenda/eventi/{mese}/{classe}', name: 'agenda_eventi', requirements: ['mese' => '\d\d\d\d-\d\d', 'classe' => '-?\d+'], defaults: ['mese' => '0000-00', 'classe' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function eventi(AgendaUtil $age, string $mese): Response {
-    $dati = null;
-    $info = null;
+  public function eventi(AgendaUtil $age, string $mese, int $classe): Response {
+    $dati = [];
+    $info = [];
     // parametro data
     if ($mese == '0000-00') {
       // mese non specificato
@@ -71,6 +71,25 @@ class AgendaController extends BaseController {
       // imposta data indicata e la memorizza in sessione
       $mese = DateTime::createFromFormat('Y-m-d', $mese.'-01');
       $this->reqstack->getSession()->set('/APP/ROUTE/agenda_eventi/mese', $mese->format('Y-m'));
+    }
+    // parametro classe
+    if ($classe == 0) {
+      // recupera classe da sessione
+      $classe = (int) $this->reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/classe', -1);
+    }
+    if ($classe > 0) {
+      // controlla esistenza classe
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // salva classe in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/agenda_eventi/classe', $classe->getId());
+    } else {
+      // visualizzazione normale
+      $classe = 0;
+      $this->reqstack->getSession()->set('/APP/ROUTE/agenda_eventi/classe', -1);
     }
     // nome/url mese
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
@@ -87,12 +106,43 @@ class AgendaController extends BaseController {
     $data_prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
-    $info['inizio'] = (intval($mese->format('w')) - 1);
+    $info['inizio'] = (int) $mese->format('w') - 1;
     $m = clone $mese;
     $info['ultimo_giorno'] = $m->modify('last day of this month')->format('j');
-    $info['fine'] = (intval($m->format('w')) == 0 ? 0 : 6 - intval($m->format('w')));
+    $info['fine'] = (int) $m->format('w') == 0 ? 0 : 6 - (int) $m->format('w');
     // recupera dati
-    $dati = $age->agendaEventi($this->getUser(), $mese);
+    if ($classe) {
+      // visualizzazione verifiche di classe
+      $info['classe'] = ''.$classe;
+      $info['classeId'] = $classe->getId();
+      $dati = $this->em->getRepository(Avviso::class)->verificheClasse($classe, $mese);
+    } else {
+      // visualizzazione normale
+      $info['classe'] = null;
+      $info['classeId'] = 0;
+      $dati = $age->agendaEventi($this->getUser(), $mese);
+    }
+    // festività
+    $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
+      ->where('f.sede IS NULL AND f.tipo=:tipo AND MONTH(f.data)=:mese')
+      ->setParameter('tipo', 'F')
+      ->setParameter('mese', $mese->format('n'))
+      ->orderBy('f.data', 'ASC')
+      ->getQuery()
+      ->getResult();
+    foreach ($festivi as $f) {
+      $dati[(int) $f->getData()->format('j')]['festivo'] = 1;
+    }
+    // filtro classi
+    $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($this->getUser(), 'Q');
+    foreach ($classi as $c) {
+      $dati['filtro'][$c->getClasse()->getId()] = ''.$c->getClasse();
+    }
+    // azione add
+    if ($age->azioneEvento('add', new DateTime(), $this->getUser(), null)) {
+      // pulsante add
+      $dati['azioni']['add'] = 1;
+    }
     // mostra la pagina di risposta
     return $this->render('agenda/eventi.html.twig', [
       'pagina_titolo' => 'page.agenda_eventi',
@@ -751,6 +801,50 @@ class AgendaController extends BaseController {
       'Docente' => $avviso->getDocente()->getId()]);
     // redirezione
     return $this->redirectToRoute('agenda_eventi');
+  }
+
+  /**
+   * Mostra i dettagli delle verifiche di una classe
+   *
+   * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param string $data Data dell'evento (AAAA-MM-GG)
+   * @param int $classe Identificatore della classe
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/agenda/verifiche/dettagli/{data}/{classe}', name: 'agenda_eventi_verifiche', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function eventiVerifiche(BachecaUtil $bac, AgendaUtil $age, string $data, int $classe): Response {
+    // inizializza
+    $dati = [];
+    // data
+    $data = DateTime::createFromFormat('Y-m-d', $data);
+    // controllo classe
+    $classe = $this->em->getRepository(Classe::class)->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // legge dati
+    $verifiche = $this->em->getRepository(Avviso::class)->dettagliVerificheClasse($classe, $data);
+    foreach ($verifiche as $k => $v) {
+      $dati['verifiche'][$k] = $bac->dettagliAvviso($v);
+      // edit
+      if ($age->azioneEvento('edit', $v->getData(), $this->getUser(), $v)) {
+        // pulsante edit
+        $dati['verifiche'][$k]['azioni']['edit'] = 1;
+      }
+      // delete
+      if ($age->azioneEvento('delete', $v->getData(), $this->getUser(), $v)) {
+        // pulsante delete
+        $dati['verifiche'][$k]['azioni']['delete'] = 1;
+      }
+    }
+    // visualizza pagina
+    return $this->render('agenda/scheda_evento_V.html.twig', [
+      'dati' => $dati,
+      'data' => $data]);
   }
 
 }
