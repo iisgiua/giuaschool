@@ -126,16 +126,16 @@ class CircolariController extends BaseController {
       if ($circolare->getDocumento()) {
         $f = new File($dir.$circolare->getDocumento());
         $documento[0]['type'] = 'existent';
-        $documento[0]['temp'] = $circolare->getId().'.ID';
-        $documento[0]['name'] = $f->getBasename('.'.$f->getExtension());
+        $documento[0]['temp'] = $f->getBasename();
+        $documento[0]['name'] = $f->getBasename();
         $documento[0]['ext'] = $f->getExtension();
         $documento[0]['size'] = $f->getSize();
       }
       foreach ($circolare->getAllegati() as $k=>$a) {
         $f = new File($dir.$a);
         $allegati[$k]['type'] = 'existent';
-        $allegati[$k]['temp'] = $circolare->getId().'-'.$k.'.ID';
-        $allegati[$k]['name'] = $f->getBasename('.'.$f->getExtension());
+        $allegati[$k]['temp'] = $f->getBasename();
+        $allegati[$k]['name'] = $f->getBasename();
         $allegati[$k]['ext'] = $f->getExtension();
         $allegati[$k]['size'] = $f->getSize();
       }
@@ -330,37 +330,60 @@ class CircolariController extends BaseController {
         foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
           if ($f['type'] == 'removed') {
             // rimuove documento
-            $fs->remove($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']);
+            $fs->remove($this->getParameter('dir_circolari').'/'.$f['name']);
           }
         }
         foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
           if ($f['type'] == 'removed') {
             // rimuove allegato
-            $circolare->removeAllegato(new File($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']));
-            $fs->remove($this->getParameter('dir_circolari').'/'.$f['name'].'.'.$f['ext']);
+            $circolare->removeAllegato(new File($this->getParameter('dir_circolari').'/'.$f['name']));
+            $fs->remove($this->getParameter('dir_circolari').'/'.$f['name']);
           }
         }
         // documento
         foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
-          if ($f['type'] == 'uploaded') {
+          $nomefile = 'Circolare-'. $circolare->getNumero().'.'.$f['ext'];
+          if ($f['type'] == 'uploaded' || ($f['type'] == 'existent' && $circolare->getDocumento() != $nomefile)) {
             // aggiunge documento
-            $nomefile = 'Circolare-'. $circolare->getNumero();
-            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'],
-              $this->getParameter('dir_circolari').'/'.$nomefile.'.'.$f['ext']);
-            $circolare->setDocumento(new File($this->getParameter('dir_circolari').'/'.$nomefile.'.'.$f['ext']));
+            $dir = ($f['type'] == 'uploaded') ? $this->getParameter('dir_tmp') :
+              $this->getParameter('dir_circolari');
+            if ($fs->exists($this->getParameter('dir_circolari').'/'.$nomefile)) {
+              // rimuove il file esistente
+              $fs->remove($this->getParameter('dir_circolari').'/'.$nomefile);
+            }
+            $fs->rename($dir.'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.$nomefile);
+            $circolare->setDocumento(new File($this->getParameter('dir_circolari').'/'.$nomefile));
           }
         }
         // aggiunge nuovi allegati
+        $circolare->setAllegati([]);
         foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
+          $prefisso = 'Circolare-'. $circolare->getNumero().'-Allegato-';
           if ($f['type'] == 'uploaded') {
             // aggiunge allegato
-            $nomefile = 'Circolare-'. $circolare->getNumero().'-Allegato-'.
-              mb_strtoupper(substr((string) $f['name'], 0, - strlen($f['ext'])), 'UTF-8');
+            $nomefile = $prefisso.
+              mb_strtoupper(substr((string) $f['name'], 0, - strlen($f['ext']) - 1), 'UTF-8');
+            $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
+                                  ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
+            $nomefile .= '.'.$f['ext'];
+            if ($fs->exists($this->getParameter('dir_circolari').'/'.$nomefile)) {
+              // rimuove il file esistente
+              $fs->remove($this->getParameter('dir_circolari').'/'.$nomefile);
+            }
+            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.$nomefile);
+            $circolare->addAllegato(new File($this->getParameter('dir_circolari').'/'.$nomefile));
+          } else if ($f['type'] == 'existent') {
+            // modifica allegato
+            $nomefile = $prefisso.
+              mb_strtoupper(substr((string) $f['name'], strlen($prefisso), - strlen($f['ext']) - 1), 'UTF-8');
             $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                                     ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
-            $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'],
-              $this->getParameter('dir_circolari').'/'.$nomefile.$f['ext']);
-            $circolare->addAllegato(new File($this->getParameter('dir_circolari').'/'.$nomefile.$f['ext']));
+            $nomefile .= '.'.$f['ext'];
+            if (!$fs->exists($this->getParameter('dir_circolari').'/'.$nomefile)) {
+              // rinomina il file esistente
+              $fs->rename($this->getParameter('dir_circolari').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.$nomefile);
+            }
+            $circolare->addAllegato(new File($this->getParameter('dir_circolari').'/'.$nomefile));
           }
         }
         // ordina per evitare indici non successivi
