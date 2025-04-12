@@ -1461,7 +1461,7 @@ class RegistroUtil {
   /**
    * Restituisce l'elenco dei voti e degli alunni per una valutazione di classe
    *
-   * @param DateTime $data Data del giorno in cui si fa la verifica
+   * @param string $data Data del giorno in cui si fa la verifica e numero d'ordine (per verifiche in stessa data)
    * @param Docente $docente Docente che attribuisce il voto
    * @param Classe $classe Classe in cui si attribuisce il voto
    * @param Materia $materia Materia per cui si attribuisce il voto
@@ -1472,13 +1472,22 @@ class RegistroUtil {
    *
    * @return array Lista degli alunni come istanze della classe VotoClasse
    */
-  public function elencoVoti(DateTime $data, Docente $docente, Classe $classe, Materia $materia,
-                              $tipo, $religione, &$argomento, &$visibile) {
+  public function elencoVoti(string $data, Docente $docente, Classe $classe, Materia $materia,
+                             string $tipo, string $religione, string &$argomento, bool &$visibile): array {
     $dati = [];
     $argomento = null;
     $visibile = null;
+    if ($data == '0000-00-00.0') {
+      // data non specificata
+      $dataObject = new DateTime('today');
+      $ordine = -1;
+    } else {
+      // data esistente
+      $dataObject = DateTime::createFromFormat('Y-m-d', substr($data, 0, 10));
+      $ordine = (int) substr($data, 11);
+    }
     // alunni della classe
-    $listaAlunni = $this->alunniInData($data, $classe);
+    $listaAlunni = $this->alunniInData($dataObject, $classe);
     // legge i dati degli alunni
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione')
@@ -1497,12 +1506,13 @@ class RegistroUtil {
     $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
       ->select('(v.alunno) AS alunno_id,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
       ->join('v.lezione', 'l')
-      ->where('v.alunno IN (:lista) AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia AND l.data=:data')
+      ->where('v.alunno IN (:lista) AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia AND v.ordine=:ordine AND l.data=:data')
 			->setParameter('lista', $listaAlunni)
 			->setParameter('docente', $docente)
 			->setParameter('tipo', $tipo)
 			->setParameter('materia', $materia)
-			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('ordine', $ordine)
+			->setParameter('data', $dataObject->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     foreach ($voti as $voto) {
@@ -1587,7 +1597,8 @@ class RegistroUtil {
    *
    * @return array Dati restituiti come array associativo
    */
-  public function quadroVoti(DateTime $inizio, DateTime $fine, Docente $docente, Cattedra $cattedra) {
+  public function quadroVoti(DateTime $inizio, DateTime $fine, Docente $docente, Cattedra $cattedra): array {
+    $mesi = ['', 'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
     $dati = [];
     $dati['classe']['S'] = [];
     $dati['classe']['O'] = [];
@@ -1613,6 +1624,13 @@ class RegistroUtil {
       $dati['voti'][$alu['id']]['S'] = [];
       $dati['voti'][$alu['id']]['O'] = [];
       $dati['voti'][$alu['id']]['P'] = [];
+      $dati['medie'][$alu['id']]['S'] = 0;
+      $dati['medie'][$alu['id']]['O'] = 0;
+      $dati['medie'][$alu['id']]['P'] = 0;
+      $dati['medie'][$alu['id']]['T'] = 0;
+      $cont[$alu['id']]['S'] = 0;
+      $cont[$alu['id']]['O'] = 0;
+      $cont[$alu['id']]['P'] = 0;
     }
     // legge i voti degli degli alunni
     $parametri = [new Parameter('alunni', $tutti), new Parameter('materia', $cattedra->getMateria()),
@@ -1625,13 +1643,14 @@ class RegistroUtil {
       $parametri[] = new Parameter('gruppo', $cattedra->getClasse()->getGruppo());
     }
     $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
-      ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
+      ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.ordine,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.alunno', 'a')
       ->join('v.lezione', 'l')
       ->join('v.docente', 'd')
       ->join('l.classe', 'c')
       ->where("a.id IN (:alunni) AND v.materia=:materia AND l.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione".$sql)
-      ->orderBy('l.data', 'ASC')
+      ->orderBy('l.data', 'DESC')
+      ->addOrderBy('v.ordine', 'DESC')
       ->setParameters(new ArrayCollection($parametri))
       ->getQuery()
       ->getArrayResult();
@@ -1641,16 +1660,28 @@ class RegistroUtil {
         $voto_dec = $v['voto'] - intval($v['voto']);
         $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
       }
-      $dati['voti'][$v['alunno_id']][$v['tipo']][] = $v;
-      if ($v['docente_id'] == $docente->getId()) {
-        // aggiunge valutazioni di classe
-        $data = $v['data']->format('Y-m-d');
-        if (!isset($dati['classe'][$v['tipo']][$data])) {
-          $dati['classe'][$v['tipo']][$data]['cont'] = 0;
-          $dati['classe'][$v['tipo']][$data]['arg'] = $v['argomento'];
-        }
-        $dati['classe'][$v['tipo']][$data]['cont']++;
+      $data = $mesi[(int) $v['data']->format('n')].' '.$v['data']->format('j').
+        ($v['data']->format('j') < 10 ? '  ' : ' ').$v['data']->format('Y-m-d');
+      $dati['lista'][$v['tipo']][$data.'.'.$v['ordine']] = 1;
+      $dati['voti'][$v['alunno_id']][$v['tipo']][$data.'.'.$v['ordine']] = $v;
+      if ($v['media']) {
+        $dati['medie'][$v['alunno_id']][$v['tipo']] += $v['voto'];
+        $cont[$v['alunno_id']][$v['tipo']]++;
       }
+    }
+    // calcola medie
+    foreach ($alunni as $alu) {
+      $tot = 0;
+      foreach (['S', 'O', 'P'] as $tipo) {
+        if ($cont[$alu['id']][$tipo] == 0) {
+          $dati['medie'][$alu['id']][$tipo] = '';
+        } else {
+          $dati['medie'][$alu['id']][$tipo] /= $cont[$alu['id']][$tipo];
+          $tot++;
+          $dati['medie'][$alu['id']]['T'] += $dati['medie'][$alu['id']][$tipo];
+        }
+      }
+      $dati['medie'][$alu['id']]['T'] = $tot > 0 ? $dati['medie'][$alu['id']]['T'] / $tot : '';
     }
     // restituisce dati
     return $dati;

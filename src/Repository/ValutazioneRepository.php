@@ -11,6 +11,7 @@ namespace App\Repository;
 use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
+use App\Entity\Materia;
 
 
 /**
@@ -45,6 +46,58 @@ class ValutazioneRepository extends BaseRepository {
     }
     // restituisce valore
     return $voti->getQuery()->getSingleScalarResult();
+  }
+
+  /**
+   * Restituisce il numero d'ordine della valutazione per distingure le valutazioni con stesso materia/alunno/tipo/data
+   *
+   * @param Materia $materia Materia della valutazione
+   * @param Alunno $alunno Alunno di cui si considerano le valutazioni
+   * @param string $tipo Tipo della valutazione [S=scritto, O=orale, P=pratico]
+   * @param DateTime $data Data della valutazione
+   *
+   * @return int Numero d'ordine della valutazione
+   */
+  public function numeroOrdine(Materia $materia, Alunno $alunno, string $tipo, DateTime $data): int {
+    // legge massimo numero d'ordine
+    $ordine = $this->createQueryBuilder('v')
+      ->select('MAX(v.ordine)')
+      ->join('v.lezione', 'l')
+      ->where('v.materia=:materia AND v.alunno=:alunno AND v.tipo=:tipo AND l.data=:data')
+      ->setParameter('materia', $materia)
+      ->setParameter('alunno', $alunno)
+      ->setParameter('tipo', $tipo)
+      ->setParameter('data', $data)
+      ->getQuery()
+      ->getSingleScalarResult();
+    return $ordine !== null ? $ordine + 1 : 0;
+  }
+
+  /**
+   * Restituisce il numero d'ordine della valutazione per distingure le valutazioni con stesso materia/alunno/tipo/data
+   *
+   * @param Materia $materia Materia della valutazione
+   * @param Classe $classe Classe di cui si considerano le valutazioni
+   * @param string $tipo Tipo della valutazione [S=scritto, O=orale, P=pratico]
+   * @param DateTime $data Data della valutazione
+   *
+   * @return int Numero d'ordine della valutazione
+   */
+  public function numeroOrdineClasse(Materia $materia, Classe $classe, string $tipo, DateTime $data): int {
+    // legge massimo numero d'ordine
+    $ordine = $this->createQueryBuilder('v')
+      ->select('MAX(v.ordine)')
+      ->join('v.lezione', 'l')
+      ->join('l.classe', 'c')
+      ->where('v.materia=:materia AND v.tipo=:tipo AND l.data=:data AND c.anno=:anno AND c.sezione=:sezione')
+      ->setParameter('materia', $materia)
+      ->setParameter('tipo', $tipo)
+      ->setParameter('data', $data)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->getQuery()
+      ->getSingleScalarResult();
+    return $ordine !== null ? $ordine + 1 : 0;
   }
 
 }

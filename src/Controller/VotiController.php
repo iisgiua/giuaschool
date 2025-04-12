@@ -8,14 +8,11 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Alunno;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Materia;
-use DateTime;
 use App\Entity\Lezione;
-use App\Entity\Alunno;
-use IntlDateFormatter;
+use App\Entity\Materia;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Form\VotoClasseType;
@@ -23,6 +20,8 @@ use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
+use DateTime;
+use IntlDateFormatter;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -35,6 +34,7 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -59,8 +59,7 @@ class VotiController extends BaseController {
    */
   #[Route(path: '/lezioni/voti/quadro/{cattedra}/{classe}/{periodo}', name: 'lezioni_voti_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => '1|2|3|0'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe,
-                             int $periodo): Response {
+  public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe, int $periodo): Response {
     // inizializza variabili
     $dati = [];
     $dati['alunni'] = [];
@@ -90,6 +89,8 @@ class VotiController extends BaseController {
       $classe = $cattedra->getClasse();
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
+      $info['religioneTipo'] = ($cattedra->getMateria()->getTipo() == 'R' and $cattedra->getTipo() == 'A') ? 'A' :
+        ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
       $info['alunno'] = $cattedra->getAlunno();
       // memorizza parametri in sessione
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
@@ -110,6 +111,7 @@ class VotiController extends BaseController {
       $cattedra = null;
       $info['materia'] = $materia->getNomeBreve();
       $info['religione'] = false;
+      $info['religioneTipo'] = '';
       $info['alunno'] = null;
     }
     if ($cattedra) {
@@ -172,7 +174,7 @@ class VotiController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/voti/classe/{cattedra}/{tipo}/{data}', name: 'lezioni_voti_classe', requirements: ['cattedra' => '\d+', 'tipo' => 'S|O|P', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['data' => '0000-00-00'], methods: ['GET', 'POST'])]
+  #[Route(path: '/lezioni/voti/classe/{cattedra}/{tipo}/{data}', name: 'lezioni_voti_classe', requirements: ['cattedra' => '\d+', 'tipo' => 'S|O|P', 'data' => '\d\d\d\d-\d\d-\d\d\.\d+'], defaults: ['data' => '0000-00-00.0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function votiClasse(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                              LogHandler $dblogger, int $cattedra, string $tipo,
@@ -180,8 +182,9 @@ class VotiController extends BaseController {
     // inizializza
     $label = [];
     $visibile = true;
-    $argomento = null;
+    $argomento = '';
     $elenco = null;
+    $elenco_precedente = null;
     $assenti = [];
     if ($request->isMethod('GET')) {
       // inizializza sessione
@@ -195,17 +198,18 @@ class VotiController extends BaseController {
     }
     // recupera classe
     $classe = $cattedra->getClasse();
-    // controlla data
-    if ($data == '0000-00-00') {
-      // data non specificata
-      $data = new DateTime();
-    } else {
-      // data esistente
-      $data = DateTime::createFromFormat('Y-m-d', $data);
-    }
-    // elenco di alunni
+    // controlla tipo religione
     $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
+    // controlla data
+    if ($data == '0000-00-00.0') {
+      // data non specificata
+      $dataObject = new DateTime('today');
+    } else {
+      // data esistente
+      $dataObject = DateTime::createFromFormat('Y-m-d', substr($data, 0, 10));
+    }
+    // elenco di alunni
     $elenco = $reg->elencoVoti($data, $this->getUser(), $classe, $cattedra->getMateria(),
       $tipo, $religione, $argomento, $visibile);
     $elenco_precedente = unserialize(serialize($elenco)); // clona oggetti
@@ -219,7 +223,7 @@ class VotiController extends BaseController {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
       ->add('data', DateType::class, ['label' => 'label.data',
-        'data' => $data,
+        'data' => $dataObject,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
@@ -298,6 +302,12 @@ class VotiController extends BaseController {
           $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
         } else {
           // alunni presenti
+          $ordine = (int) substr($data, 11);
+          // controllo verifiche su valutazionu con stessa materia/alunno/tipo/data
+          if (substr($data, 0, 10) != $form->get('data')->getData()->format('Y-m-d')) {
+            $ordine = $this->em->getRepository(Valutazione::class)
+              ->numeroOrdineClasse($cattedra->getMateria(), $classe, $tipo, $form->get('data')->getData());
+          }
           foreach ($form->get('lista')->getData() as $key=>$valutazione) {
             // correzione voto
             if ($valutazione->getVoto() > 0 && $valutazione->getVoto() < 1) {
@@ -322,7 +332,8 @@ class VotiController extends BaseController {
                 ->setMateria($cattedra->getMateria())
                 ->setAlunno($alunno)
                 ->setVoto($valutazione->getVoto())
-                ->setGiudizio($valutazione->getGiudizio());
+                ->setGiudizio($valutazione->getGiudizio())
+                ->setOrdine($ordine);
               $this->em->persist($voto);
               $log['create'][] = $voto;
             } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
@@ -342,7 +353,8 @@ class VotiController extends BaseController {
                 ->setLezione($lezione)
                 ->setArgomento($form->get('argomento')->getData())
                 ->setVoto($valutazione->getVoto())
-                ->setGiudizio($valutazione->getGiudizio());
+                ->setGiudizio($valutazione->getGiudizio())
+                ->setOrdine($ordine);
             }
           }
           // ok: memorizza dati
@@ -438,7 +450,7 @@ class VotiController extends BaseController {
         ->setMedia(true);
       $this->em->persist($valutazione);
       $valutazione_precedente = null;
-      $data = new DateTime();
+      $data = null;
     }
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
@@ -452,7 +464,7 @@ class VotiController extends BaseController {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
       ->add('data', DateType::class, ['label' => 'label.data',
-        'data' => $data,
+        'data' => $data ?? new DateTime('today'),
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
@@ -545,6 +557,12 @@ class VotiController extends BaseController {
           if (!$valutazione->getVisibile()) {
             // media non utilizzata se voto non visibile
             $valutazione->setMedia(false);
+          }
+          // controllo verifiche su valutazionu con stessa materia/alunno/tipo/data
+          if ($data != $valutazione->getLezione()->getData()) {
+            $ordine = $this->em->getRepository(Valutazione::class)
+              ->numeroOrdine($cattedra->getMateria(), $alunno, $tipo, $valutazione->getLezione()->getData());
+            $valutazione->setOrdine($ordine);
           }
           // ok: memorizza dati
           $this->em->flush();

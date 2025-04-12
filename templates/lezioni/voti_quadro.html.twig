@@ -38,145 +38,130 @@
     {% endif %}
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Alunno</th>
-    {% if edit %}
-        <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione scritta o grafica per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione scritta o grafica per la classe" data-body="gs-voti-scritto"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Scritto / Grafico</button></th>
-        <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione orale per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione orale per la classe" data-body="gs-voti-orale"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Orale</button></th>
-        <th><button type="button" class="btn btn-primary btn-xs" title="Aggiungi o modifica una valutazione pratica per la classe" data-toggle="modal" data-target="#gs-modal-info" data-title="Valutazione pratica per la classe" data-body="gs-voti-pratica"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Pratica</button></th>
-        <div id="gs-voti-scritto" style="display:none">
-      {% if dati.classe.S is defined  %}
-        {% for dt,v in dati.classe.S  %}
-          <div class="list-group-item">
-            <div class="list-group-item-text row gs-pr-3 gs-pl-3">
-              <strong>Scritto del {{ dt|date('d/m/Y') }}</strong><br>
-              <em><small>{{ v.arg }}</small></em>
-              <a class="btn btn-primary btn-xs pull-right" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': dt}) }}" role="button" title="Modifica la valutazione indicata"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
-            </div>
-          </div>
-        {% endfor %}
+  <div class="gs-table-sticky-wrapper">
+    <table class="gs-table-sticky">
+      <thead>
+        <tr>
+          <th rowspan="2" class="gs-col-sticky gs-color-1">Alunno</th>
+          <th colspan="{{ dati.lista.S|keys|length + 1 + edit }}" class="gs-color-2">Scritto/Grafico</th>
+          <th colspan="{{ dati.lista.O|keys|length + 1 + edit }}" class="gs-color-3">Orale</th>
+          <th colspan="{{ dati.lista.P|keys|length + 1 + edit }}" class="gs-color-4">Pratico</th>
+          <th rowspan="2" class="gs-color-1">Media</th>
+        </tr>
+        <tr>
+      {% if edit %}
+          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
       {% endif %}
-          <div class="list-group-item gs-pt-3 gs-pb-3">
-            <div class="list-group-item-text row text-right gs-pr-3 gs-pl-3">
-              <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Nuova valutazione scritta o grafica per la classe"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-            </div>
-          </div>
-        </div>
-        <div id="gs-voti-orale" style="display:none">
-      {% if dati.classe.O is defined  %}
-        {% for dt,v in dati.classe.O  %}
-          <div class="list-group-item">
-            <div class="list-group-item-text row gs-pr-3 gs-pl-3">
-              <strong>Orale del {{ dt|date('d/m/Y') }}</strong><br>
-              <em><small>{{ v.arg }}</small></em>
-              <a class="btn btn-primary btn-xs pull-right" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': dt}) }}" role="button" title="Modifica la valutazione indicata"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
-            </div>
-          </div>
-        {% endfor %}
+      {% for d in dati.lista.S|keys %}
+          <th class="gs-color-2">
+        {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Scritta/Grafica per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+        {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+        {% endif %}
+          </th>
+      {% endfor %}
+          <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
+      {% if edit %}
+          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
       {% endif %}
-          <div class="list-group-item">
-            <div class="list-group-item-text row text-right gs-pr-3 gs-pl-3">
-              <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O'}) }}" role="button" title="Nuova valutazione orale per la classe"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-            </div>
-          </div>
-        </div>
-        <div id="gs-voti-pratica" style="display:none">
-      {% if dati.classe.P is defined  %}
-        {% for dt,v in dati.classe.P  %}
-          <div class="list-group-item">
-            <div class="list-group-item-text row gs-pr-3 gs-pl-3">
-              <strong>Pratica del {{ dt|date('d/m/Y') }}</strong><br>
-              <em><small>{{ v.arg }}</small></em>
-              <a class="btn btn-primary btn-xs pull-right" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': dt}) }}" role="button" title="Modifica la valutazione indicata"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
-            </div>
-          </div>
-        {% endfor %}
-      {% endif  %}
-          <div class="list-group-item gs-pt-3 gs-pb-3">
-            <div class="list-group-item-text row text-right gs-pr-3 gs-pl-3">
-              <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P'}) }}" role="button" title="Nuova valutazione pratica per la classe"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-            </div>
-          </div>
-        </div>
-    {% else %}
-        <th>Scritto</th>
-        <th>Orale</th>
-        <th>Pratico</th>
-    {% endif %}
-        <th class="col-sm-2">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
-    {% for k,a in dati.alunni %}
-      {% if (cattedra.materia.tipo != 'R' or a.religione == tipo_rel) and dati.trasferiti[a.id] is not defined %}
-      <tr>
-        <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-          <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
-          {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
-        </td>
-        {% for tipo in ['S','O','P'] %}
-        <td>
-          {% for kv,v in dati.voti[k][tipo] %}
-            {% if v.docente_id != app.user.id %}
-          <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</button>
-            {% elseif v.voto > 0 and not v.visibile %}
-          <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
-            {% elseif v.voto > 0 and not v.media %}
-          <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
-            {% elseif v.voto > 0 %}
-          <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
-            {% else %}
-          <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
+      {% for d in dati.lista.O|keys %}
+          <th class="gs-color-3">
+        {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Orale per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+        {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+        {% endif %}
+          </th>
+      {% endfor %}
+          <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
+      {% if edit %}
+          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+      {% endif %}
+      {% for d in dati.lista.P|keys %}
+          <th class="gs-color-4">
+        {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Pratica per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+        {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+        {% endif %}
+          </th>
+      {% endfor %}
+          <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for k,a in dati.alunni %}
+        {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
+        <tr>
+          <td class="gs-col-sticky">
+            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <strong>{{ a.cognome }} {{ a.nome }}<br>({{ a.dataNascita|date('d/m/Y') }})</strong>
+            {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          </td>
+          {% for tipo in ['S','O','P'] %}
+            {% if edit %}
+          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
             {% endif %}
-          <div id="gs-voti-{{ v.id }}" style="display:none">
-            <div class="list-group-item">
-              <div class="list-group-item-text">
-                <p>
-            {% if not v.visibile %}
-                  <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
-            {% endif %}
-                  <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
-                </p>
-                <p><strong>Docente:</strong> {{ v.nome }} {{ v.cognome }}</p>
-                <p><strong>Valutazione:</strong> {{ ('label.voti_'~v.tipo)|trans }} <em>{{ not v.media ? '(non utilizzata nel calcolo della media)' }}</em></p>
-                <p><strong>Alunno:</strong> {{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</p>
-            {% if v.argomento is not empty %}
-                <p><strong>Argomenti o descrizione della prova:</strong><br>{{ v.argomento }}</p>
-            {% endif %}
-            {% if v.voto_str is defined %}
-                <p><strong>Voto:</strong> {{ v.voto_str }}</p>
-            {% endif %}
-            {% if v.giudizio is not empty %}
-                <p><strong>Giudizio:</strong><br>{{ v.giudizio }}</p>
-            {% endif %}
+            {% for d,dd in dati.lista[tipo] %}
+          <td>
+              {% if dati.voti[k][tipo][d] is defined %}
+                {% set v = dati.voti[k][tipo][d] %}
+                {% if v.docente_id != app.user.id %}
+            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</strong></button>
+                {% elseif v.voto > 0 and not v.visibile %}
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% elseif v.voto > 0 and not v.media %}
+            <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% elseif v.voto > 0 %}
+            <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% else %}
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><span class="glyphicon glyphicon-asterisk gs-big"></span></button>
+                {% endif %}
+            <div id="gs-voti-{{ v.id }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <p>
+                {% if not v.visibile %}
+                    <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+                {% endif %}
+                    <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
+                  </p>
+                  <p><strong>Docente:</strong> {{ v.nome }} {{ v.cognome }}</p>
+                  <p><strong>Valutazione:</strong> {{ ('label.voti_'~v.tipo)|trans }} <em>{{ not v.media ? '(non utilizzata nel calcolo della media)' }}</em></p>
+                  <p><strong>Alunno:</strong> {{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</p>
+                {% if v.argomento is not empty %}
+                  <p><strong>Argomenti o descrizione della prova:</strong><br>{{ v.argomento }}</p>
+                {% endif %}
+                {% if v.voto_str is defined %}
+                  <p><strong>Voto:</strong> {{ v.voto_str }}</p>
+                {% endif %}
+                {% if v.giudizio is not empty %}
+                  <p><strong>Giudizio:</strong><br>{{ v.giudizio }}</p>
+                {% endif %}
+                </div>
+                {% if v.docente_id == app.user.id and edit %}
+                <div class="list-group-item-text text-right">
+                  <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
+                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                </div>
+                {% endif %}
               </div>
-            {% if v.docente_id == app.user.id and edit %}
-              <div class="list-group-item-text text-right">
-                <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
-                <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
-              </div>
-            {% endif %}
             </div>
-          </div>
+              {% else %}
+            &nbsp;
+              {% endif %}
             {% endfor %}
-        </td>
+          </td>
+          <td class="{{ dati.medie[k][tipo] < 5.0 ? 'text-danger' : (dati.medie[k][tipo] < 6.0 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(1,',') }}</strong></td>
           {% endfor %}
-        <td>
-          {% if edit %}
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione scritta o grafica per l'alunno">S</a>
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione orale per l'alunno">O</a>
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione pratica per l'alunno">P</a>
-          {% endif %}
-        </td>
-      </tr>
-      {% endif %}
-    {% endfor %}
-    </tbody>
-  </table>
+          <td class="{{ dati.medie[k]['T'] < 5.0 ? 'text-danger' : (dati.medie[k]['T'] < 6.0 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(1,',') }}</strong></td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
     {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>
@@ -208,6 +193,22 @@ $(document).ready(function() {
         $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
       }
     });
+  });
+  $('.gs-table-sticky td').on('mouseenter', function() {
+    var index = $(this).index();
+    if (index > 0) {
+      $('.gs-table-sticky tr').each(function() {
+        $(this).find('td').eq(index).addClass('gs-hover');
+      });
+    }
+  });
+  $('.gs-table-sticky td').on('mouseleave', function() {
+    var index = $(this).index();
+    if (index > 0) {
+      $('.gs-table-sticky tr').each(function() {
+        $(this).find('td').eq(index).removeClass('gs-hover');
+      });
+    }
   });
 });
 </script>

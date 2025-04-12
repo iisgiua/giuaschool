@@ -573,3 +573,114 @@ button.btn.disabled:active, button.btn.disabled:focus {
   box-shadow: none;
   border-color: #000000;
 }
+
+
+/*** tabella con intestazioni fisse ***/
+.gs-color-1 {
+  background-color: #337ab7;
+  color: #ffffff;
+}
+.gs-color-2 {
+  background-color: #dff0d8;
+  color: #000000;
+}
+.gs-color-3 {
+  background-color: #d9edf7;
+  color: #000000;
+}
+.gs-color-4 {
+  background-color: #fcf8e3;
+  color: #000000;
+}
+.gs-color-5 {
+  color: #000099;
+}
+.gs-table-sticky-wrapper {
+  max-height: 500px;
+  overflow: auto;
+}
+.gs-table-sticky {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+.gs-table-sticky th,
+.gs-table-sticky td {
+  padding: 6px 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+  position: relative;
+}
+.gs-table-sticky td.gs-col-sticky {
+  text-align: left;
+  min-width: 200px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gs-table-sticky thead tr:nth-child(1) th.gs-color-1 {
+  position: sticky;
+  top: 0;
+  background-color: #337ab7;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(1) th.gs-color-2 {
+  position: sticky;
+  top: 0;
+  background-color: #dff0d8;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(1) th.gs-color-3 {
+  position: sticky;
+  top: 0;
+  background-color: #d9edf7;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(1) th.gs-color-4 {
+  position: sticky;
+  top: 0;
+  background-color: #fcf8e3;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(2) th.gs-color-2 {
+  position: sticky;
+  top: 33px;
+  background-color: #dff0d8;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(2) th.gs-color-3 {
+  position: sticky;
+  top: 33px;
+  background-color: #d9edf7;
+  z-index: 3;
+}
+.gs-table-sticky thead tr:nth-child(2) th.gs-color-4 {
+  position: sticky;
+  top: 33px;
+  background-color: #fcf8e3;
+  z-index: 3;
+}
+.gs-table-sticky th.gs-col-sticky,
+.gs-table-sticky td.gs-col-sticky {
+  position: sticky;
+  left: 0;
+  background-color: #337ab7;
+  color: #ffffff;
+  z-index: 2;
+}
+.gs-table-sticky thead  tr:nth-child(1) th.gs-col-sticky,
+.gs-table-sticky thead tr:nth-child(2) th.gs-col-sticky {
+  z-index: 5;
+  background-color: #337ab7;
+}
+.gs-table-sticky tbody tr:hover td {
+  background-color: #eeeeee;
+}
+.gs-table-sticky tbody tr:hover .gs-col-sticky {
+  color: #000000;
+}
+.gs-table-sticky td.gs-hover {
+  background-color: #eeeeee;
+}

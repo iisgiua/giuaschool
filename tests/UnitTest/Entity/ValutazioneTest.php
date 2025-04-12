@@ -28,16 +28,16 @@ class ValutazioneTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Valutazione::class;
     // campi da testare
-    $this->fields = ['tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente', 'alunno', 'lezione', 'materia'];
+    $this->fields = ['tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'ordine', 'docente', 'alunno', 'lezione', 'materia'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id'],
+    $this->canRead = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'ordine', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id'],
       'gs_utente' => '*'];
     // SQL write
-    $this->canWrite = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id']];
+    $this->canWrite = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'ordine', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -76,11 +76,12 @@ class ValutazioneTest extends EntityTestCase {
           ($field == 'voto' ? $this->faker->randomFloat() :
           ($field == 'giudizio' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'ordine' ? $this->faker->randomNumber(4, false) :
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'lezione' ? $this->getReference("lezione_1") :
           ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
-          null))))))))));
+          null)))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

@@ -8,6 +8,7 @@
 #   voto: voto numerico della valutazione [0|null=non presente, 1, 1.25, 1.50, 1.75, 2, ...]
 #   giudizio: giudizio della valutazione
 #   argomento: argomento relativo alla valutazione
+#   ordine: numero d'ordine del voto (per consentire più voti per stessi alunno/materia/tipo/data)
 #   docente: docente che inserisce la valutazione
 #   alunno: alunno a cui si attribuisce la valutazione
 #   lezione: lezione a cui si riferisce la valutazione
@@ -32,6 +33,7 @@ App\Entity\Valutazione:
     voto: '<($current + 1 + $current * 0.25)>'
     giudizio: '50%? <text()>: <strval("")>'
     argomento: '<text()>'
+    ordine: 0
     docente: '@docente_curricolare_*'
     alunno: '@alunno_*'
     lezione: '@lezione_*'
@@ -45,6 +47,7 @@ App\Entity\Valutazione:
     voto: 0
     giudizio: '<text()>'
     argomento: '<text()>'
+    ordine: 0
     docente: '@docente_curricolare_*'
     alunno: '@alunno_*'
     lezione: '@lezione_*'

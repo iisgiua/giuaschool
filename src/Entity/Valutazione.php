@@ -8,18 +8,17 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use DateTimeInterface;
 use App\Repository\ValutazioneRepository;
-use Stringable;
 use DateTime;
+use DateTimeInterface;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * Valutazione - dati di una valutazione scolastica
- *
  *
  * @author Antonello Dessì
  */
@@ -30,6 +29,7 @@ class Valutazione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco per la lezione
    */
@@ -90,9 +90,13 @@ class Valutazione implements Stringable {
   private ?string $argomento = null;
 
   /**
+   * @var int $ordinamento Numero d'ordine del voto (per consentire più voti per stessi alunno/materia/tipo/data)
+   */
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
+  private int $ordine = 0;
+
+  /**
    * @var Docente|null $docente Docente che inserisce la valutazione
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Docente::class)]
@@ -101,8 +105,6 @@ class Valutazione implements Stringable {
 
   /**
    * @var Alunno|null $alunno Alunno a cui si attribuisce la valutazione
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Alunno::class)]
@@ -118,8 +120,6 @@ class Valutazione implements Stringable {
 
   /**
    * @var Materia|null $materia Materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Materia::class)]
@@ -128,6 +128,7 @@ class Valutazione implements Stringable {
 
 
   //==================== EVENTI ORM ====================
+
   /**
    * Simula un trigger onCreate
    */
@@ -300,6 +301,27 @@ class Valutazione implements Stringable {
    */
   public function setArgomento(?string $argomento): self {
     $this->argomento = $argomento;
+    return $this;
+  }
+
+  /**
+   * Restituisce il numero d'ordine del voto (per consentire più voti per stessi alunno/materia/tipo/data)
+   *
+   * @return int Numero d'ordine del voto
+   */
+  public function getOrdine(): int {
+    return $this->ordine;
+  }
+
+  /**
+   * Modifica il numero d'ordine del voto (per consentire più voti per stessi alunno/materia/tipo/data)
+   *
+   * @param int $ordine Numero d'ordine del voto
+   *
+   * @return self Oggetto modificato
+   */
+  public function setOrdine(int $ordine): self {
+    $this->ordine = $ordine;
     return $this;
   }
 

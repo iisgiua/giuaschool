@@ -83,8 +83,9 @@ class Updater {
       3 => 'requirementsUpdate',
       4 => 'schemaUpdate',
       5 => 'envUpdate',
-      6 => 'cleanUpdate',
-      7 => 'endUpdate']];
+      6 => 'procedureUpdate',
+      7 => 'cleanUpdate',
+      8 => 'endUpdate']];
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -437,7 +438,8 @@ class Updater {
       'fileDelete' => [],
       'sqlCommand' => [],
       'sqlCheck' => [],
-      'envDelete' => []];
+      'envDelete' => [],
+      'procedure' => []];
     foreach ($updates as $update) {
       $info = include($update[0]);
       // comandi SQL e controllo: in array separati o in unico array
@@ -459,6 +461,7 @@ class Updater {
       $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $sqlCommand);
       $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $sqlCheck);
       $updateInfo['envDelete'] = array_merge($updateInfo['envDelete'], $info['envDelete']);
+      $updateInfo['procedure'] = array_merge($updateInfo['procedure'], $info['procedure']);
     }
     // restituisce dati
     return $updateInfo;
@@ -1572,6 +1575,31 @@ class Updater {
     $page['success'] = 'La procedura di installazione è terminata con successo.';
     $page['warning'] = 'Viene eliminata la pagina iniziale della procedura di installazione "install/app.php" per motivi di sicurezza.';
     $page['text'] = 'Ora puoi andare alla <a href="'.$this->urlPath.'/">pagina principale</a>.';
+    include($this->publicPath.'/install/update_page.php');
+  }
+
+  /**
+   * Esegue un'apposita procedura di aggiornamento
+   *
+   * @param int $step Passo della procedura
+   */
+  private function procedureUpdate(int $step): void {
+    // connessione al db
+    if (!$this->pdo) {
+      $this->connectDb();
+    }
+    // legge aggiornamenti
+    $updates = $this->readUpdates();
+    // esegue procedure di aggiornamento
+    foreach ($updates['procedure'] as $proc) {
+      eval($proc);
+    }
+    // visualizza pagina
+    $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
+    $page['step'] = $step.' - Aggiornamento dei dati';
+    $page['title'] = 'Procedura di aggiornamento dei dati';
+    $page['success'] = 'La procedura di aggiornamento dei dati è stata eseguita correttamente.';
+    $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
     include($this->publicPath.'/install/update_page.php');
   }
 

@@ -11,7 +11,38 @@ return [
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_modulo_formativo CHANGE nome_breve nome_breve VARCHAR(80) NOT NULL;", ""],
+    ["ALTER TABLE gs_valutazione ADD ordine SMALLINT NOT NULL;", "SELECT ordine FROM gs_valutazione UNION SELECT 1 FROM dual;"],
   ],
   'envDelete' => [
+  ],
+  'procedure' => [
+    <<<EOT
+      \$this->pdo->exec("UPDATE gs_valutazione SET ordine=0;");
+      \$stm = \$this->pdo->prepare('
+        SELECT v.alunno_id,v.materia_id,v.tipo,l.data, COUNT(*) cont
+        FROM gs_valutazione v, gs_lezione l
+        WHERE v.lezione_id=l.id
+        GROUP BY v.alunno_id,v.materia_id,v.tipo,l.data
+        HAVING COUNT(*) > 1
+        ');
+      \$stm->execute();
+      foreach (\$stm->fetchAll() as \$res) {
+        \$stm2 = \$this->pdo->prepare('
+        SELECT v.id
+        FROM gs_valutazione v, gs_lezione l
+        WHERE v.lezione_id=l.id
+        AND v.alunno_id=:alunno AND v.materia_id=:materia AND v.tipo=:tipo AND l.data=:data
+        ORDER BY l.ora,v.id
+        ');
+        \$stm2->execute(['alunno' => \$res['alunno_id'], 'materia' => \$res['materia_id'],
+          'tipo' => \$res['tipo'], 'data' => \$res['data']]);
+        \$cont = 0;
+        foreach (\$stm2->fetchAll() as \$res2) {
+          \$id = \$res2['id'];
+          \$this->pdo->exec("UPDATE gs_valutazione SET ordine=\$cont WHERE id=\$id;");
+          \$cont++;
+        }
+      }
+    EOT
   ]
 ];
