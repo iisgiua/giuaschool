@@ -21,4 +21,5 @@ Schema dello scenario: esegue i passi successivi della procedura di aggiornament
     | 4     | /correttamente/                                 |
     | 5     | /correttamente/                                 |
     | 6     | /correttamente/                                 |
-    | 7     | /successo/                                      |
+    | 7     | /correttamente/                                 |
+    | 8     | /successo/                                      |
