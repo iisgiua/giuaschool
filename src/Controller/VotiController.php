@@ -304,7 +304,9 @@ class VotiController extends BaseController {
           // alunni presenti
           $ordine = (int) substr($data, 11);
           // controllo verifiche su valutazionu con stessa materia/alunno/tipo/data
-          if (substr($data, 0, 10) != $form->get('data')->getData()->format('Y-m-d')) {
+          $altroDocente = $this->em->getRepository(Valutazione::class)
+            ->altroDocente($this->getUser(), $cattedra->getMateria(), $classe, $tipo, $data);
+          if (substr($data, 0, 10) != $form->get('data')->getData()->format('Y-m-d') || $altroDocente) {
             $ordine = $this->em->getRepository(Valutazione::class)
               ->numeroOrdineClasse($cattedra->getMateria(), $classe, $tipo, $form->get('data')->getData());
           }
@@ -355,6 +357,9 @@ class VotiController extends BaseController {
                 ->setVoto($valutazione->getVoto())
                 ->setGiudizio($valutazione->getGiudizio())
                 ->setOrdine($ordine);
+            } elseif ($voto) {
+              // valutazione non modificata
+              $voto->setOrdine($ordine);
             }
           }
           // ok: memorizza dati

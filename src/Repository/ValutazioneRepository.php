@@ -11,6 +11,7 @@ namespace App\Repository;
 use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\Materia;
 
 
@@ -98,6 +99,37 @@ class ValutazioneRepository extends BaseRepository {
       ->getQuery()
       ->getSingleScalarResult();
     return $ordine !== null ? $ordine + 1 : 0;
+  }
+
+  /**
+   * Restituisce vero se è presente una valutazione di un altro docente nella stessa materia/classe/tipo/data
+   *
+   * @param Docente $docente Docente che inserisce la valutazione
+   * @param Materia $materia Materia della valutazione
+   * @param Classe $classe Classe di cui si considerano le valutazioni
+   * @param string $tipo Tipo della valutazione [S=scritto, O=orale, P=pratico]
+   * @param string $data Data e numero d'ordine della valutazione
+   *
+   * @return bool Vero se è presente una valutazione di un altro docente
+   */
+  public function altroDocente(Docente $docente, Materia $materia, Classe $classe, string $tipo, string $data): bool {
+    $ordine = (int) substr($data, 11);
+    // legge massimo numero d'ordine
+    $num = $this->createQueryBuilder('v')
+      ->select('COUNT(v.id)')
+      ->join('v.lezione', 'l')
+      ->join('l.classe', 'c')
+      ->where('v.materia=:materia AND v.tipo=:tipo AND v.ordine=:ordine AND l.data=:data AND c.anno=:anno AND c.sezione=:sezione AND v.docente!=:docente')
+      ->setParameter('materia', $materia)
+      ->setParameter('tipo', $tipo)
+      ->setParameter('ordine', $ordine)
+      ->setParameter('data', substr($data, 0, 10))
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('docente', $docente)
+      ->getQuery()
+      ->getSingleScalarResult();
+    return $num > 0;
   }
 
 }
