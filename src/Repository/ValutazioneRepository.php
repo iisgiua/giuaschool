@@ -132,4 +132,45 @@ class ValutazioneRepository extends BaseRepository {
     return $num > 0;
   }
 
+  /**
+   * Restituisce le medie delle valutazioni della materia indicata per la lista di alunni nel periodo definito
+   *
+   * @param Materia $materia Materia della valutazione
+   * @param array $listaAlunni Lista degli ID degli alunni di cui calcolare le medie
+   * @param string $inizio Data iniziale delle valutazioni (formato YYYY-MM-DD)
+   * @param string $fine Data finale delle valutazioni (formato YYYY-MM-DD)
+   *
+   * @return array Vettore associativo con i dati elaborati
+   */
+  public function medie(Materia $materia, array $listaAlunni, string $inizio, string $fine): array {
+    $dati = [];
+    $cont = [];
+    // calcola medie
+    $medie = $this->createQueryBuilder('v')
+      ->select('(v.alunno) AS alunnoId,v.tipo,AVG(v.voto) AS media')
+      ->join('v.lezione', 'l')
+      ->where('v.materia=:materia AND v.alunno IN (:lista) AND v.media=1 AND v.voto IS NOT NULL AND v.voto > 0 AND l.data BETWEEN :inizio AND :fine')
+      ->setParameter('materia', $materia)
+      ->setParameter('lista', $listaAlunni)
+      ->setParameter('inizio', $inizio)
+      ->setParameter('fine', $fine)
+      ->groupBy('v.alunno,v.tipo')
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($medie as $media) {
+      if (!isset($dati[$media['alunnoId']])) {
+        $dati[$media['alunnoId']] = $media['media'];
+        $cont[$media['alunnoId']] = 1;
+      } else {
+        $dati[$media['alunnoId']] += $media['media'];
+        $cont[$media['alunnoId']]++;
+      }
+    }
+    foreach ($dati as $alunnoId => $media) {
+      $dati[$alunnoId] = (int) round($dati[$alunnoId] / $cont[$alunnoId]);
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }

@@ -8,25 +8,26 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Configurazione;
+use App\Entity\Alunno;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Alunno;
-use App\Entity\Materia;
-use App\Entity\Scrutinio;
-use App\Entity\VotoScrutinio;
-use App\Entity\Esito;
+use App\Entity\Configurazione;
 use App\Entity\DefinizioneScrutinio;
-use App\Entity\PropostaVoto;
-use DateTime;
+use App\Entity\Esito;
+use App\Entity\Materia;
 use App\Entity\Preside;
+use App\Entity\PropostaVoto;
+use App\Entity\Scrutinio;
 use App\Entity\Staff;
+use App\Entity\Valutazione;
+use App\Entity\VotoScrutinio;
 use App\Form\MessageType;
 use App\Form\PropostaVotoType;
 use App\Form\VotoScrutinioType;
 use App\Util\LogHandler;
+use App\Util\RegistroUtil;
 use App\Util\ScrutinioUtil;
+use DateTime;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -39,6 +40,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -2010,6 +2012,125 @@ class ScrutinioController extends BaseController {
     $this->em->flush();
     // restituisce dati
     return new JsonResponse($risposta);
+  }
+
+  /**
+   * Gestione delle proposte di voto
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $classe Identificativo della classe
+   * @param string $periodo Periodo relativo allo scrutinio
+   *
+   * @return Response Pagina di risposta
+   *
+   */
+  #[Route(path: '/lezioni/scrutinio/medie/{cattedra}/{periodo}', name: 'lezioni_scrutinio_medie', requirements: ['cattedra' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function medie(RegistroUtil $reg,  ScrutinioUtil $scr,
+                                 LogHandler $dblogger, int $cattedra, string $periodo): Response {
+    // inizializza variabili
+    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    // controllo cattedra
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
+    if (!$cattedra) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($cattedra->getTipo() == 'P' || $cattedra->getMateria()->getTipo() == 'S') {
+      // cattedra di potenziamento o sostegno: redirezione
+      return $this->redirectToRoute('lezioni_scrutinio_svolto', ['cattedra' => $cattedra->getId(),
+        'classe' => $cattedra->getClasse()->getId(), 'periodo' => $periodo]);
+    }
+    // controllo periodi
+    $listaPeriodi = $scr->periodiProposte($cattedra->getClasse());
+    if (!array_key_exists($periodo, $listaPeriodi) || !in_array($periodo, ['P', 'S', 'F'])) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // elenco alunni
+    $listaAlunni = $reg->alunniInData(new DateTime(), $cattedra->getClasse());
+    // calcola voto medio per il periodo
+    $infoPeriodi = $reg->infoPeriodi();
+    $inizio = '0000-00-00';
+    $fine = '0000-00-00';
+    foreach ($infoPeriodi as $info) {
+      if ($info['scrutinio'] == $periodo) {
+        $inizio = $info['inizio'];
+        $fine = $info['fine'];
+        break;
+      }
+    }
+    $medie = $this->em->getRepository(Valutazione::class)->medie($cattedra->getMateria(), $listaAlunni, $inizio, $fine);
+    // controlla limiti voti
+    $tipo = $cattedra->getmateria()->getTipo();
+    if ($tipo == 'R') {
+      // religione
+      foreach ($medie as $alunnoId => $media) {
+        if ($media < 4) {
+          // voto: insufficiente
+          $medie[$alunnoId] = 4;
+        }
+        // voto corrispondente: da insuff. (4) a ottimo (10)
+        $medie[$alunnoId] += 21 - 4;
+      }
+    } else {
+      // altre materie
+      foreach ($medie as $alunnoId => $media) {
+        if ($media <= $valutazioni[$tipo]['min']) {
+          // evita un voto <= NC
+          $medie[$alunnoId] = $valutazioni[$tipo]['min'] + 1;
+        }
+      }
+    }
+    // inserisce valutazioni
+    $log['create'] = [];
+    $log['edit'] = [];
+    foreach ($medie as $alunnoId => $media) {
+      if ($tipo == 'E') {
+        // legge proposta univoca per docente
+        $proposta = $this->em->getRepository(PropostaVoto::class)->findOneBy(['alunno' => $alunnoId,
+          'materia' => $cattedra->getMateria()->getId(), 'periodo' => $periodo, 'docente' => $this->getUser()]);
+      } else {
+        // legge proposta univoca
+        $proposta = $this->em->getRepository(PropostaVoto::class)->findOneBy(['alunno' => $alunnoId,
+          'materia' => $cattedra->getMateria()->getId(), 'periodo' => $periodo, 'docente' => $this->getUser()]);
+      }
+      if ($proposta && $proposta->getUnico() != $media) {
+        // proposta esistente
+        $log['edit'][] = clone $proposta;
+        $proposta
+          ->setDocente($this->getUser())
+          ->setUnico($media);
+      } elseif (!$proposta) {
+        $proposta = (new PropostaVoto())
+          ->setAlunno($this->em->getReference(Alunno::class, $alunnoId))
+          ->setClasse($cattedra->getClasse())
+          ->setMateria($cattedra->getMateria())
+          ->setDocente($this->getUser())
+          ->setPeriodo($periodo)
+          ->setUnico($media);
+        $this->em->persist($proposta);
+        $log['create'][] = $proposta;
+      }
+    }
+    // rende permanenti modifiche
+    $this->em->flush();
+    // log azione
+    $dblogger->logAzione('SCRUTINIO', 'Proposte automatiche', [
+      'Periodo' => $periodo,
+      'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
+      'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.
+        $e->getDocente()->getId().', Voto: '.$e->getUnico().']', $log['edit']))]);
+    // redirect
+    return $this->redirectToRoute('lezioni_scrutinio_proposte', ['cattedra' => $cattedra->getId(),
+      'classe' => $cattedra->getClasse()->getId(), 'periodo' => $periodo]);
   }
 
 }
