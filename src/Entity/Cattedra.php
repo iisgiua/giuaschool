@@ -30,6 +30,7 @@ class Cattedra implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco per la cattedra
    */
@@ -64,8 +65,6 @@ class Cattedra implements Stringable {
 
   /**
    * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa (religione)]
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'I', 'P', 'A'], strict: true, message: 'field.choice')]
@@ -73,8 +72,6 @@ class Cattedra implements Stringable {
 
   /**
    * @var Materia|null $materia Materia della cattedra
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Materia::class)]
@@ -83,8 +80,6 @@ class Cattedra implements Stringable {
 
   /**
    * @var Docente|null $docente Docente della cattedra
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Docente::class)]
@@ -93,8 +88,6 @@ class Cattedra implements Stringable {
 
   /**
    * @var Classe|null $classe Classe della cattedra
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Classe::class)]
@@ -108,8 +101,16 @@ class Cattedra implements Stringable {
   #[ORM\ManyToOne(targetEntity: \Alunno::class)]
   private ?Alunno $alunno = null;
 
+  /**
+   * @var Docente|null $docenteSupplenza Docente sostituito in una cattedra di supplenza
+   */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: Docente::class)]
+  private ?Docente $docenteSupplenza = null;
+
 
   //==================== EVENTI ORM ====================
+
   /**
    * Simula un trigger onCreate
    */
@@ -303,6 +304,27 @@ class Cattedra implements Stringable {
    */
   public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
+    return $this;
+  }
+
+  /**
+   * Restituisce il docente sostituito in una cattedra di supplenza
+   *
+   * @return Docente|null Docente sostituito in una cattedra di supplenza
+   */
+  public function getDocenteSupplenza(): ?Docente {
+    return $this->docenteSupplenza;
+  }
+
+  /**
+   * Modifica il docente sostituito in una cattedra di supplenza
+   *
+   * @param Docente|null $docenteSupplenza Docente sostituito in una cattedra di supplenza
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDocenteSupplenza(?Docente $docenteSupplenza): self {
+    $this->docenteSupplenza = $docenteSupplenza;
     return $this;
   }
 

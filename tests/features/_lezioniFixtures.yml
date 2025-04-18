@@ -16,6 +16,7 @@ App\Entity\Cattedra:
     docente: '@docente_nocattedra_2'
     classe: '@classe_<current()>'
     alunno:
+    docenteSupplenza:
   t_cattedra_2_{1A, 3CCHI}:
     attiva: true
     supplenza: '<boolean(50)>'
@@ -24,6 +25,7 @@ App\Entity\Cattedra:
     docente: '@docente_nocattedra_2'
     classe: '@classe_<current()>'
     alunno:
+    docenteSupplenza:
   t_cattedra_3_{1A, 3CAMB}:
     attiva: true
     supplenza: '<boolean(50)>'
@@ -32,6 +34,7 @@ App\Entity\Cattedra:
     docente: '@docente_nocattedra_3'
     classe: '@classe_<current()>'
     alunno:
+    docenteSupplenza:
   t_cattedra_4_{1A, 3CCHI}:
     attiva: true
     supplenza: '<boolean(50)>'
@@ -40,6 +43,7 @@ App\Entity\Cattedra:
     docente: '@docente_curricolare_3'
     classe: '@classe_<current()>'
     alunno:
+    docenteSupplenza:
 
 App\Entity\Lezione:
   # lezioni 2023-02-01: comuni, religione, sostegno, supplenza

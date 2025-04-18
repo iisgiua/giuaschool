@@ -95,6 +95,7 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6,7,8,9,10,11,12], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1,docente_nocattedra_2], docente_curricolare_<current()>)>'
     classe: '@classe_1A'
     alunno: '<case(<current()>, [9,10], [@alunno_sostegno_1,@alunno_sostegno_2], null)>'
+    docenteSupplenza:
   cattedra_1A_civica_{1..11}:
     attiva: true
     supplenza: false
@@ -103,6 +104,7 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6,7,8,9,10,11], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1], docente_curricolare_<current()>)>'
     classe: '@classe_1A'
     alunno:
+    docenteSupplenza:
   cattedra_3C_{1..6}:
     attiva: true
     supplenza: false
@@ -111,6 +113,7 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
     classe: '@classe_3C'
     alunno:
+    docenteSupplenza:
   cattedra_3C_civica_{1..6}:
     attiva: true
     supplenza: false
@@ -119,6 +122,7 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
     classe: '@classe_3C'
     alunno:
+    docenteSupplenza:
   cattedra_3CCHI_1:
     attiva: true
     supplenza: false
@@ -127,6 +131,7 @@ App\Entity\Cattedra:
     docente: '@docente_itp_3'
     classe: '@classe_3CCHI'
     alunno:
+    docenteSupplenza:
   cattedra_3CCHI_civica_1:
     attiva: true
     supplenza: false
@@ -135,6 +140,7 @@ App\Entity\Cattedra:
     docente: '@docente_itp_3'
     classe: '@classe_3CCHI'
     alunno:
+    docenteSupplenza:
   cattedra_3CAMB_1:
     attiva: true
     supplenza: false
@@ -143,6 +149,7 @@ App\Entity\Cattedra:
     docente: '@docente_itp_2'
     classe: '@classe_3CAMB'
     alunno:
+    docenteSupplenza:
   cattedra_3CAMB_civica_1:
     attiva: true
     supplenza: false
@@ -151,6 +158,7 @@ App\Entity\Cattedra:
     docente: '@docente_itp_2'
     classe: '@classe_3CAMB'
     alunno:
+    docenteSupplenza:
 
 App\Entity\Alunno:
   alunno_1A_6:

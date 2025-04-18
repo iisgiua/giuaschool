@@ -28,17 +28,17 @@ class CattedraTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Cattedra::class;
     // campi da testare
-    $this->fields = ['attiva', 'supplenza', 'tipo', 'materia', 'docente', 'classe', 'alunno'];
+    $this->fields = ['attiva', 'supplenza', 'tipo', 'materia', 'docente', 'classe', 'alunno', 'docenteSupplenza'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id'],
+    $this->canRead = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id', 'docente_supplenza_id'],
       'gs_materia' => '*',
       'gs_classe' => '*'];
     // SQL write
-    $this->canWrite = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id']];
+    $this->canWrite = ['gs_cattedra' => ['id', 'creato', 'modificato', 'attiva', 'supplenza', 'tipo', 'materia_id', 'docente_id', 'classe_id', 'alunno_id', 'docente_supplenza_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -78,7 +78,8 @@ class CattedraTest extends EntityTestCase {
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
           ($field == 'classe' ? $this->getReference("classe_1A") :
           ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
-          null)))))));
+          ($field == 'docenteSupplenza' ? $this->getReference("docente_curricolare_2") :
+          null))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

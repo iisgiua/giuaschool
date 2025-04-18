@@ -2736,14 +2736,14 @@ class RegistroUtil {
       $somma_tot = 0;
       $numero_tot = 0;
       foreach ($mp as $tipo=>$m) {
-        $media_periodo[$periodo][$tipo] = number_format($m['somma'] / $m['numero'], 2, ',', null);
+        $media_periodo[$periodo][$tipo] = number_format($m['somma'] / $m['numero'], 1, ',', null);
         $somma_sop += $m['somma'] / $m['numero'];
         $numero_sop++;
         $somma_tot += $m['somma'];
         $numero_tot += $m['numero'];
       }
-      $media_periodo[$periodo]['sop'] = number_format($somma_sop / $numero_sop, 2, ',', null);
-      $media_periodo[$periodo]['tot'] = number_format($somma_tot / $numero_tot, 2, ',', null);
+      $media_periodo[$periodo]['sop'] = number_format($somma_sop / $numero_sop, 1, ',', null);
+      $media_periodo[$periodo]['tot'] = number_format($somma_tot / $numero_tot, 1, ',', null);
     }
     // riordina periodi
     for ($k = 3; $k >= 1; $k--) {

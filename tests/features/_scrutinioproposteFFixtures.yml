@@ -32,6 +32,7 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
     classe: '@classe_5A'
     alunno:
+    docenteSupplenza:
   cattedra_5A_civica_{1..7}:
     attiva: true
     supplenza: false
@@ -40,3 +41,4 @@ App\Entity\Cattedra:
     docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
     classe: '@classe_5A'
     alunno:
+    docenteSupplenza:
