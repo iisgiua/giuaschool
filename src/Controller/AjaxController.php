@@ -8,16 +8,17 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Docente;
 use App\Entity\Alunno;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\Staff;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 /**
@@ -36,7 +37,6 @@ class AjaxController extends BaseController {
    * @param string $pagina Numero della pagina della lista
    *
    * @return JsonResponse Informazioni di risposta
-   *
    */
   #[Route(path: '/ajax/docenti/{cognome}/{nome}/{sede}/{pagina}', name: 'ajax_docenti', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -86,7 +86,6 @@ class AjaxController extends BaseController {
    * @param string $pagina Numero della pagina della lista
    *
    * @return JsonResponse Informazioni di risposta
-   *
    */
   #[Route(path: '/ajax/alunni/{cognome}/{nome}/{classe}/{sede}/{pagina}', name: 'ajax_alunni', requirements: ['pagina' => '\d+'], defaults: ['cognome' => '-', 'nome' => '-', 'classe' => '-', 'sede' => '-', 'pagina' => '1'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -165,7 +164,6 @@ class AjaxController extends BaseController {
    * @param Classe $classe Classe degli alunni
    *
    * @return JsonResponse Informazioni di risposta
-   *
    */
   #[Route(path: '/ajax/classe/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -173,6 +171,22 @@ class AjaxController extends BaseController {
     // legge alunni
     $dati = $this->em->getRepository(Alunno::class)->classe($classe->getId());
     // restituisce dati
+    return new JsonResponse($dati);
+  }
+
+  /**
+   * Restituisce la lista delle cattedre del docente indicato
+   *
+   * @param Docente $docente Docente di cui restituire le cattedre
+   *
+   * @return JsonResponse Informazioni di risposta
+   */
+  #[Route(path: '/ajax/cattedre/{docente}', name: 'ajax_cattedre', requirements: ['docente' => '\d+'], defaults: ['docente' => 0], methods: ['POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function cattedreAjax(Docente $docente): JsonResponse {
+    // legge cattedre
+    $dati = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'V');
+    // restituisce lista per checkbox
     return new JsonResponse($dati);
   }
 

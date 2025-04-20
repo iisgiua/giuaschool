@@ -37,7 +37,7 @@
           <td><small>{{ c.classe }}</small></td>
           <td><small>{{ c.materia.nomeBreve }}</small></td>
           <td><small>{{ c.docente.cognome }} {{ c.docente.nome }} ({{ c.docente.username }})</small></td>
-          <td><small>{{ ('label.tipo_'~c.tipo)|trans }}{{ c.supplenza ? ' (supplenza)' }}</small></td>
+          <td><small>{{ ('label.tipo_'~c.tipo)|trans }}{{ c.docenteSupplenza ? ' (supplente di '~c.docenteSupplenza.cognome~' '~c.docenteSupplenza.nome~')' }}</small></td>
           <td class="pb-0">
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_cattedre_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della cattedra">{{ 'label.edit'|trans }}</a>
     {% if c.attiva %}
@@ -52,7 +52,8 @@
       <tfoot>
         <tr>
           <td colspan="6">
-            <a class="btn btn-primary btn-sm" href="{{ path('docenti_cattedre_edit', {id: 0}) }}" role="button" title="Nuova cattedra">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm mr-3" href="{{ path('docenti_cattedre_edit', {id: 0}) }}" role="button" title="Nuova cattedra">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('docenti_cattedre_supplenza') }}" role="button" title="Nuova cattedra di supplenza">Aggiungi supplenza</a>
           </td>
         </tr>
       </tfoot>

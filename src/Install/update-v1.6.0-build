@@ -12,6 +12,7 @@ return [
   'sqlCommand' => [
     ["ALTER TABLE gs_modulo_formativo CHANGE nome_breve nome_breve VARCHAR(80) NOT NULL;", ""],
     ["ALTER TABLE gs_valutazione ADD ordine SMALLINT NOT NULL;", "SELECT ordine FROM gs_valutazione UNION SELECT 1 FROM dual;"],
+    ["ALTER TABLE gs_cattedra ADD docente_supplenza_id INT DEFAULT NULL; ALTER TABLE gs_cattedra ADD CONSTRAINT FK_292345CD60C9C226 FOREIGN KEY (docente_supplenza_id) REFERENCES gs_utente (id); CREATE INDEX IDX_292345CD60C9C226 ON gs_cattedra (docente_supplenza_id);", "SELECT docente_supplenza_id FROM gs_cattedra UNION SELECT 1 FROM dual;"],
   ],
   'envDelete' => [
   ],

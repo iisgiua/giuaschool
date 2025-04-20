@@ -8,16 +8,15 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Classe;
-use Exception;
-use App\Entity\Staff;
-use App\Entity\Sede;
-use App\Entity\Materia;
 use App\Entity\Alunno;
 use App\Entity\Cattedra;
+use App\Entity\Classe;
 use App\Entity\Docente;
+use App\Entity\Materia;
 use App\Entity\Provisioning;
+use App\Entity\Sede;
+use App\Entity\Staff;
+use App\Form\CattedraSupplenzaType;
 use App\Form\CattedraType;
 use App\Form\DocenteType;
 use App\Form\ImportaCsvType;
@@ -27,6 +26,7 @@ use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -39,6 +39,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -56,7 +57,6 @@ class DocentiController extends BaseController {
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/importa/', name: 'docenti_importa', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -115,7 +115,8 @@ class DocentiController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
-   */
+   * @return Response Pagina di risposta
+  */
   #[Route(path: '/docenti/modifica/{pagina}', name: 'docenti_modifica', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function modifica(Request $request, TranslatorInterface $trans, int $pagina): Response {
@@ -167,7 +168,6 @@ class DocentiController extends BaseController {
    * @param int $abilita Valore 1 per abilitare, valore 0 per disabilitare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/abilita/{id}/{abilita}', name: 'docenti_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -201,7 +201,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/modifica/edit/{id}', name: 'docenti_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -269,7 +268,6 @@ class DocentiController extends BaseController {
    * @param string $tipo Tipo di creazione del documento [E=email, P=Pdf]
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -351,7 +349,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/otp/{id}', name: 'docenti_reset', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -383,7 +380,6 @@ class DocentiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/staff/{pagina}', name: 'docenti_staff', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -429,7 +425,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/staff/edit/{id}', name: 'docenti_staff_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -484,7 +479,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/staff/delete/{id}', name: 'docenti_staff_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -512,7 +506,6 @@ class DocentiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/coordinatori/{pagina}', name: 'docenti_coordinatori', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -564,7 +557,6 @@ class DocentiController extends BaseController {
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/coordinatori/edit/{id}', name: 'docenti_coordinatori_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -630,7 +622,6 @@ class DocentiController extends BaseController {
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/coordinatori/delete/{id}', name: 'docenti_coordinatori_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -665,7 +656,6 @@ class DocentiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/segretari/{pagina}', name: 'docenti_segretari', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -717,7 +707,6 @@ class DocentiController extends BaseController {
    * @param int $id ID della classe
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/segretari/edit/{id}', name: 'docenti_segretari_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -783,7 +772,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/segretari/delete/{id}', name: 'docenti_segretari_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -817,6 +805,7 @@ class DocentiController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
+   * @return Response Pagina di risposta
    */
   #[Route(path: '/docenti/cattedre/{pagina}', name: 'docenti_cattedre', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -871,6 +860,7 @@ class DocentiController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $id ID della cattedra
    *
+   * @return Response Pagina di risposta
    */
   #[Route(path: '/docenti/cattedre/edit/{id}', name: 'docenti_cattedre_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -897,8 +887,9 @@ class DocentiController extends BaseController {
     $opzioniSostegno = $this->em->getRepository(Alunno::class)->opzioniSostegno();
     $opzioniDocenti = $this->em->getRepository(Docente::class)->opzioni();
     $form = $this->createForm(CattedraType::class, $cattedra, [
-      'return_url' => $this->generateUrl('docenti_cattedre'),
-      'values' => [$opzioniClassi, $opzioniMaterie, $opzioniSostegno, $opzioniDocenti]]);
+      'form_mode' => $id ? 'modifica' : 'normale',
+      'values' => [$opzioniClassi, $opzioniMaterie, $opzioniSostegno, $opzioniDocenti],
+      'return_url' => $this->generateUrl('docenti_cattedre')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       if ($cattedra->getMateria()->getTipo() == 'S') {
@@ -924,6 +915,8 @@ class DocentiController extends BaseController {
         }
       }
       if ($form->isValid()) {
+        // imposta supplenza
+        $cattedra->setSupplenza($cattedra->getDocenteSupplenza() !== null);
         // memorizza dati
         $this->em->flush();
         // provisioning
@@ -957,13 +950,86 @@ class DocentiController extends BaseController {
   }
 
   /**
+   * Crea una cattedra di supplenza
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/docenti/cattedre/supplenza', name: 'docenti_cattedre_supplenza', methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function cattedreSupplenza(Request $request, TranslatorInterface $trans): Response {
+    // imposta form
+    $opzioniDocenti = $this->em->getRepository(Docente::class)->opzioni();
+    $form = $this->createForm(CattedraSupplenzaType::class, null, [ 'values' => [$opzioniDocenti],
+      'return_url' => $this->generateUrl('docenti_cattedre')]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // legge dati
+      $docente = $form->get('docente')->getData();
+      $docenteSupplenza = $form->get('docenteSupplenza')->getData();
+      $lista = $form->get('lista')->getData();
+      if ($docente->getId() == $docenteSupplenza->getId()) {
+        // errore: docente è lo stesso di quello da sostituire
+        $form->get('docenteSupplenza')->addError(new FormError($trans->trans('exception.docente_supplenza_errato')));
+      }
+      if (count($lista) == 0) {
+        // errore: lista cattedre è vuota
+        $form->get('lista')->addError(new FormError($trans->trans('exception.lista_cattedre_vuota')));
+      }
+      if ($form->isValid()) {
+        // crea nuove cattedre
+        $avviso = false;
+        foreach ($lista as $supplenza) {
+          // controlla esistenza di cattedra
+          $esistenti = $this->em->getRepository(Cattedra::class)->findBy([
+            'docente' => $docente,
+            'classe' => $supplenza->getClasse(),
+            'materia' => $supplenza->getMateria(),
+            'alunno' => $supplenza->getAlunno()]);
+          if (count($esistenti) > 0) {
+            // cattedra esiste già
+            $avviso = true;
+          } else {
+            // crea nuova cattedra di supplenza
+            $cattedra = clone $supplenza;
+            $cattedra
+              ->setDocente($docente)
+              ->setSupplenza(true)
+              ->setDocenteSupplenza($docenteSupplenza);
+            $this->em->persist($cattedra);
+            $this->em->flush();
+            // provisioning
+            $provisioning = (new Provisioning())
+              ->setUtente($docente)
+              ->setFunzione('aggiungeCattedra')
+              ->setDati(['cattedra' => $cattedra->getId()]);
+            $this->em->persist($provisioning);
+            $this->em->flush();
+          }
+        }
+        // messaggio
+        if ($avviso) {
+          $this->addFlash('warning', 'message.cattedra_esistente_non_creata');
+        } else {
+          $this->addFlash('success', 'message.update_ok');
+        }
+        // redirect
+        return $this->redirectToRoute('docenti_cattedre');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('docenti', 'cattedre_supplenza', [], [], [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
    * Abilitazione o disabilitazione delle cattedre
    *
    * @param int $id ID della cattedra
    * @param int $abilita Valore 1 per abilitare, valore 0 per disabilitare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/cattedre/abilita/{id}/{abilita}', name: 'docenti_cattedre_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1009,7 +1075,6 @@ class DocentiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/responsabiliBes/{pagina}', name: 'docenti_responsabiliBes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1062,7 +1127,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/responsabiliBes/edit/{id}', name: 'docenti_responsabiliBes_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1116,7 +1180,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/responsabiliBes/delete/{id}', name: 'docenti_responsabiliBes_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1145,7 +1208,6 @@ class DocentiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/rappresentanti/{pagina}', name: 'docenti_rappresentanti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1196,7 +1258,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/rappresentanti/edit/{id}', name: 'docenti_rappresentanti_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1258,7 +1319,6 @@ class DocentiController extends BaseController {
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/rappresentanti/delete/{id}', name: 'docenti_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1285,7 +1345,6 @@ class DocentiController extends BaseController {
    * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/docenti/rspp', name: 'docenti_rspp', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]

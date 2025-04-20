@@ -11,7 +11,6 @@ namespace App\Form;
 use App\Entity\Cattedra;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -68,11 +67,20 @@ class CattedraType extends AbstractType {
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true])
-      ->add('supplenza', CheckboxType::class, ['label' => 'label.supplenza',
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => false])
+        'required' => true]);
+    if ($options['form_mode'] == 'modifica') {
+      // modifica cattedra
+      $builder
+        ->add('docenteSupplenza', ChoiceType::class, ['label' => 'label.docente_supplenza',
+          'choices' => $options['values'][3],
+          'choice_value' => 'id',
+          'placeholder' => 'label.nessuno',
+          'choice_translation_domain' => false,
+          'attr' => ['widget' => 'search'],
+          'required' => false]);
+    }
+    // pulsanti
+    $builder
       ->add('submit', SubmitType::class, ['label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']])
       ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
@@ -86,10 +94,12 @@ class CattedraType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver): void {
     $resolver->setDefined('return_url');
+    $resolver->setDefined('form_mode');
     $resolver->setDefined('values');
     $resolver->setDefaults([
-      'return_url' => null,
+      'form_mode' => 'normale',
       'values' => [],
+      'return_url' => null,
       'data_class' => Cattedra::class]);
   }
 

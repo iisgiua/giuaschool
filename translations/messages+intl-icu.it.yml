@@ -651,6 +651,8 @@ label.tipo_archivio: Tipo di documenti da archiviare
 label.selezione_archivio: Elementi da archiviare
 label.docente_curricolare: Docente curricolare
 label.docente_sostegno: Docente di sostegno
+label.docente_supplenza: Docente sostituito (per le supplenze)
+label.docente_supplenza_lista: Lista delle classi/materie della supplenza
 label.classe_gruppo: Gruppo classe
 label.tipo_supplenza: Gruppo alunni
 label.gruppo_religione_T: Tutta la classe
@@ -717,6 +719,7 @@ title.docenti.segretari_edit: Modifica i dati del segretario del Consiglio di Cl
 page.docenti.cattedre: Configura Cattedre
 title.docenti.cattedre: Configura le cattedre dei docenti
 title.docenti.cattedre_edit: Modifica i dati di una cattedra
+title.docenti.cattedre_supplenza: Aggiunge una cattedra di supplenza
 page.docenti.colloqui: Imposta Colloqui
 title.docenti.colloqui: Imposta colloqui dei docenti
 title.docenti.colloqui_edit: Modifica icolloqui dei docenti
@@ -1462,6 +1465,7 @@ message.telegram_webhook_ok: La configurazione Telegram è stata eseguita con su
 message.recupero_debito_NC: Tutto il programma svolto.
 message.lezione_sostegno_NA_con_religione: "Non è possibile firmare la lezione della {ora}ª ora.<br>Non è consentito utilizzare il sostegno per il gruppo N.A."
 message.lezione_incompatibile: "Non è possibile firmare la lezione della {ora}ª ora.<br>La materia o il gruppo è incompatibile con la lezione esistente."
+message.cattedra_esistente_non_creata: Alcune cattedre non sono state inserite perché risultano già esistenti.
 
 
 ##### ERRORI #####
@@ -1753,3 +1757,5 @@ exception.no_sostegno: Non ha selezionato il docente di sostegno.
 exception.no_classe: Non ha selezionato la classe.
 exception.no_circolare: Non ha selezionato la circolare.
 exception.nota_classe_non_prevista: Non è possibile inserire una nota a tutta la classe.
+exception.docente_supplenza_errato: Il docente sostituito è identico a chi lo sostituisce
+exception.lista_cattedre_vuota: La lista delle classi/materie per la supplenza è vuota

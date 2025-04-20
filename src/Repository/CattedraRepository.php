@@ -15,6 +15,7 @@ use App\Entity\Classe;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
 use App\Entity\Materia;
+use phpDocumentor\Reflection\Types\Object_;
 
 
 /**
@@ -23,36 +24,6 @@ use App\Entity\Materia;
  * @author Antonello Dessì
  */
 class CattedraRepository extends BaseRepository {
-
-  // /**
-  //  * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
-  //  *
-  //  * @param array $search Lista dei criteri di ricerca
-  //  * @param int $page Pagina corrente
-  //  * @param int $limit Numero di elementi per pagina
-  //  *
-  //  * @return Paginator Oggetto Paginator
-  //  */
-  // public function findAll($search=null, $page=1, $limit=10) {
-  //   // crea query base
-  //   $query = $this->createQueryBuilder('c')
-  //     ->join('c.classe', 'cl')
-  //     ->join('c.materia', 'm')
-  //     ->join('c.docente', 'd')
-  //     ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,d.cognome,d.nome', 'ASC');
-  //   if ($search['classe'] > 0) {
-  //     $query->where('cl.id=:classe')->setParameter('classe', $search['classe']);
-  //   }
-  //   if ($search['materia'] > 0) {
-  //     $query->andwhere('m.id=:materia')->setParameter('materia', $search['materia']);
-  //   }
-  //   if ($search['docente'] > 0) {
-  //     $query->andwhere('d.id=:docente')->setParameter('docente', $search['docente']);
-  //   }
-  //   // crea lista con pagine
-  //   $res = $this->paginazione($query->getQuery(), $page);
-  //   return $res['lista'];
-  // }
 
   /**
    * Restituisce la lista delle cattedre del docente indicato
@@ -73,24 +44,36 @@ class CattedraRepository extends BaseRepository {
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
       ->setParameter('docente', $docente)
       ->setParameter('attiva', 1)
-      ->getQuery()
-      ->getResult();
+      ->getQuery();
     // formato dati
     if ($tipo == 'Q') {
-      // risultato query
-      $dati = $cattedre;
+      // risultato query (vettore di oggetti)
+      $dati = $cattedre->getResult();
     } elseif ($tipo == 'C') {
       // form ChoiceType
-      foreach ($cattedre as $cat) {
+      foreach ($cattedre->getResult() as $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati[$label] = $cat;
+      }
+    } elseif ($tipo == 'V') {
+      // vettore di dati
+      $dati['lista'] = [];
+      $dati['label'] = [];
+      foreach ($cattedre->getResult() as $idx => $cat) {
+        $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
+        ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
+        $dati['lista'][$idx] = ['id' => $cat->getId(), 'tipo' => $cat->getTipo(),
+          'docente' => $cat->getDocente()->getNome().' '.$cat->getDocente()->getCognome(),
+          'docenteSupplenza' => $cat->getDocenteSupplenza() ?
+          $cat->getDocenteSupplenza()->getNome().' '.$cat->getDocenteSupplenza()->getCognome() : ''];
+        $dati['label'][$idx] = $label;
       }
     } else {
       // array associativo
       $dati['choice'] = [];
       $dati['lista'] = [];
-      foreach ($cattedre as $cat) {
+      foreach ($cattedre->getResult() as $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati['choice'][$label] = $cat;

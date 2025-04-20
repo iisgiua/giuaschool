@@ -1,0 +1,36 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#cattedra_supplenza_docenteSupplenza').change(function() {
+    if ($(this).val()) {
+      $.post("{{ path('ajax_cattedre') }}/"+$(this).val(), function (data) {
+          var l = '';
+          if (data.lista.length > 0) {
+            $.each(data.lista, function(idx, item) {
+              l += '<div class="form-check"><input type="checkbox" id="cattedra_supplenza_lista_'+idx+
+                '" name="cattedra_supplenza[lista][]" class="form-check-input" value="'+item.id+
+                '"><label class="form-check-label" for="cattedra_supplenza_lista_'+idx+'">'+data.label[idx]+'</label></div>';
+              });
+          } else {
+            l = '<strong class="ml-3">NESSUNA OPZIONE DISPONIBILE</strong>';
+          }
+          $('#cattedra_supplenza_lista').html(l);
+          $('#cattedra_supplenza_lista input[name="cattedra_supplenza[lista][]"]').prop('checked', true);
+        }, 'json');
+    } else {
+      $('#cattedra_supplenza_lista').html('<strong class="ml-3">NESSUNA OPZIONE DISPONIBILE</strong>');
+    }
+  }).change();
+});
+</script>
+{% endblock %}
