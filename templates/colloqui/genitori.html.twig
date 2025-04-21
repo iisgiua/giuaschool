@@ -51,10 +51,10 @@
   <div class="panel panel-info">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ 'title.ore_colloqui'|trans }}</h3></div>
     <ul class="list-group">
-    {% for docente,d in dati.docenti %}
+    {% for docente,c in dati.docenti %}
       <li class="list-group-item container-fluid">
-        <div class="col-sm-4 gs-big"><strong>{{ d.info }}</strong></div>
-        <div class="col-sm-6 gs-big"><em>{% for m in d.materie %}{{ m }}{{ not loop.last ? '<br>' }}{% endfor %}</em></div>
+        <div class="col-sm-4 gs-big"><strong>{{ c[0].docente }}</strong></div>
+        <div class="col-sm-6 gs-big"><em>{% for m in c %}{{ m.tipo == 'I' ? 'Lab. ' }}{{ m.materia }}{{ not loop.last ? '<br>' }}{% endfor %}</em></div>
         <div class="col-sm-2"><a class="btn btn-primary btn-xs" href="{{ path('colloqui_prenota', {docente: docente}) }}" role="button" title="Prenota il colloquio con il docente"><span class="glyphicon glyphicon-time gs-mr-2"></span><strong>Prenota</strong></a></div>
       </li>
     {% endfor %}

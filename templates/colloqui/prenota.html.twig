@@ -14,9 +14,9 @@
     <div class="panel-body gs-pt-0">
       <div class="row bg-success gs-mb-3 gs-pt-2 gs-pb-2">
         <div class="col-sm-2 control-label gs-pt-0"><strong class="gs-big">Docente:</strong></div>
-        <div class="col-sm-4"><span class="gs-big">{{ info.docente }}</span></div>
+        <div class="col-sm-2"><span class="gs-big">{{ info.docente }}</span></div>
         <div class="col-sm-2 control-label gs-pt-0"><strong class="gs-big">Materia:</strong></div>
-        <div class="col-sm-4">
+        <div class="col-sm-6">
           <span class="gs-big">
   {% for m in info.materie %}
           {{ loop.index > 1 ? '<br>'}}{{ m }}

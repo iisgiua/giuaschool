@@ -34,7 +34,7 @@
         {% else %}
             <span>{{ cc.tipo == 'I' ? 'Lab. '}}{{ cc.materia.nome }}</span>
         {% endif %}
-            {% if cc.supplenza %} - <strong>SUPPLENZA</strong>{% endif %}<br>
+            {% if cc.supplenza %} - <strong>SUPPLENTE di {{ cc.docenteSupplenza.cognome }} {{ cc.docenteSupplenza.nome }}</strong>{% endif %}<br>
       {% endfor %}
           </td>
           <td class="gs-big">

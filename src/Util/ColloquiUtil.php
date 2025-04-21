@@ -184,29 +184,8 @@ class ColloquiUtil {
    */
   public function colloquiGenitori(Classe $classe, Alunno $alunno, Genitore $genitore): array {
     $dati = [];
-    $dati['docenti'] = [];
     // legge cattedre
-    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.materia', 'm')
-      ->join('c.docente', 'd')
-      ->where("c.attiva=1 AND c.tipo!='P' AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione")
-      ->andWhere("cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL")
-      ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameter('anno', $classe->getAnno())
-      ->setParameter('sezione', $classe->getSezione())
-      ->setParameter('gruppo', $classe->getGruppo())
-      ->getQuery()
-      ->getResult();
-    // imposta i dati
-    foreach ($cattedre as $cattedra) {
-      $id = $cattedra->getDocente()->getId();
-      if (!isset($dati['docenti'][$id])) {
-        $dati['docenti'][$id]['info'] = ''.$cattedra->getDocente();
-      }
-      $dati['docenti'][$id]['materie'][] = ($cattedra->getTipo() == 'I' ? 'Lab. ' : '').
-        $cattedra->getMateria()->getNome();
-    }
+    $dati['docenti'] = $this->em->getRepository(Cattedra::class)->cattedreClasse($classe, false);
     // legge richieste
     $dati['richieste'] = $this->em->getRepository(RichiestaColloquio::class)->richiesteAlunno($alunno,
       $genitore);

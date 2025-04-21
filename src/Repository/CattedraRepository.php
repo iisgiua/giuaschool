@@ -322,8 +322,31 @@ class CattedraRepository extends BaseRepository {
       ->getQuery()
       ->getResult();
     // distingue per docente
+    $supplenza = [];
     foreach ($cattedre as $cattedra) {
       $dati[$cattedra->getDocente()->getId()][] = $cattedra;
+      if ($cattedra->getDocenteSupplenza()) {
+        // dati supplenza
+        $supplenza[] = [$cattedra->getDocenteSupplenza()->getId(), $cattedra->getClasse()->getId(),
+          $cattedra->getMateria()->getId(), $cattedra->getAlunno() ? $cattedra->getAlunno()->getId() : 0,
+          $cattedra->getTipo()];
+      }
+    }
+    // elimina docenti sotituiti da supplenza
+    foreach ($supplenza as $supp) {
+      foreach ($dati[$supp[0]] as $key => $cattedra) {
+        if ($cattedra->getClasse()->getId() == $supp[1] && $cattedra->getMateria()->getId() == $supp[2] &&
+            ($cattedra->getAlunno() ? $cattedra->getAlunno()->getId() : 0) == $supp[3] &&
+            $cattedra->getTipo() == $supp[4]) {
+          // rimuove cattedra
+          unset($dati[$supp[0]][$key]);
+          if (count($dati[$supp[0]]) == 0) {
+            // rimuove docente
+            unset($dati[$supp[0]]);
+          }
+          break;
+        }
+      }
     }
     // restituisce dati
     return $dati;

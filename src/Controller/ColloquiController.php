@@ -615,7 +615,7 @@ class ColloquiController extends BaseController {
     $info['materie'] = [];
     foreach ($cattedre as $cattedra) {
       if ($cattedra->getClasse() == $classe) {
-        $info['materie'][] = $cattedra->getMateria()->getNome();
+        $info['materie'][] = ($cattedra->getTipo() == 'I' ? 'Lab. ' : '').$cattedra->getMateria()->getNome();
       }
     }
     // form di inserimento

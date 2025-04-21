@@ -728,15 +728,15 @@ title.alunni.importa: Importa i dati degli alunni e dei genitori
 page.alunni.modifica: Modifica Alunni
 title.alunni.modifica: Modifica i dati degli alunni e dei genitori
 title.alunni.modifica_edit: Modifica i dati degli alunni e dei genitori
-page.alunni.classe: Cambio classe Alunni
+page.alunni.classe: Cambio Classe
 title.alunni.classe: Cambia la classe degli alunni ad anno iniziato
 title.alunni.classe_edit: Cambia la classe degli alunni ad anno iniziato
-page.documenti_docenti: Documenti docenti
+page.documenti_docenti: Documenti Docenti
 title.documenti_docenti: Visualizza i documenti dei docenti
 page.documenti_bes: Documenti BES
 title.documenti_bes: Inserimento documenti relativi agli alunni BES
 title.nuovo_documento_bes: Inserisci il documento relativo all'alunno BES
-page.documenti_alunni: Documenti alunni
+page.documenti_alunni: Documenti Alunni
 title.documenti_alunni: Visualizza i documenti degli alunni
 page.documenti_bacheca: Bacheca documenti
 title.documenti_bacheca: Documenti per {utente}
@@ -804,7 +804,7 @@ page.colloqui.genitori: Colloqui Genitori
 title.colloqui.genitori: Prenotazione dei colloqui individuali
 page.colloqui.prenota: Prenota Colloquio
 title.colloqui.prenota: Prenota un colloquio
-page.colloqui.cerca: Cerca Colloquio
+page.colloqui.cerca: Mostra Colloqui
 title.colloqui.cerca: Mostra le ore di colloquio individuale dei docenti
 page.sistema.aggiorna: Aggiorna Sistema
 title.sistema.aggiorna: Aggiornamento dell'applicazione
@@ -836,7 +836,7 @@ title.utenti.notifiche: Imposta le modalità per l'invio delle notifiche
 title.utenti.notifiche_configura: Configura il canale per l'invio delle notifiche
 page.sistema.telegram: Configura Telegram
 title.sistema.telegram: Configurazione per le notifiche via Telegram
-page.staff.cdc: Staff CdC
+page.staff.cdc: Consigli di Classe
 title.staff.cdc: Composizione del Consiglio di Classe
 page.richieste.classe: Moduli Classe
 title.richieste.classe: Moduli per la classe {classe}
@@ -844,7 +844,7 @@ title.richieste.classe_add: Inserimento di un nuovo modulo
 page.richieste.modulo: Gestione Moduli
 title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
 title.richieste.modulo_lista: Moduli inviati
-page.ruolo_staff.studenti: Gestione Alunni
+page.ruolo_staff.studenti: Statistiche Condotta
 title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
 page.docenti.rspp: Configura RSPP
 title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
@@ -955,7 +955,7 @@ page.staff_avvisi: Avvisi Generici
 page.staff_avvisi_archivio: Archivio Avvisi
 page.staff_circolari: Gestione Circolari
 page.staff_colloqui: Ore Colloqui
-page.staff_deroghe: Deroghe Ingressi e Uscite
+page.staff_deroghe: Gestione Deroghe
 page.staff_maggio: Documenti 15 Maggio
 page.staff_password: Genera Password
 page.staff_piani: Inserimento Piani
