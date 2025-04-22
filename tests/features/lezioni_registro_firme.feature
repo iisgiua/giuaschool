@@ -105,7 +105,7 @@ Schema dello scenario: Vista mensile area a gruppi con lezioni
     | cattedra      | classe      | data       | vista |
     | <cattedra>:id | <classe>:id | 2023-02-01 | M     |
   Allora vedi nella riga "1" della tabella i dati:
-    | data | eventi | 1ª                  | 2ª       | 3ª          | 4ª       | 5   ª        | 6ª | 7ª | 8ª |
+    | data | eventi | 1ª                  | 2ª       | 3ª          | 4ª       | 5ª           | 6ª | 7ª | 8ª |
     | Me 1 |        | Informatica Inglese | Italiano | Informatica | Sostegno | Sostituzione |    |    |    |
   Esempi:
     | docente                        | cattedra            | classe        |
