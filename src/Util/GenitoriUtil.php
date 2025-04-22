@@ -564,7 +564,7 @@ class GenitoriUtil {
         $dati['lista'][$periodi[$k]['nome']] = $dati_periodo[$k];
       }
     }
-    // totale ore di assenza (escluso sostegno/supplenza/religione)
+    // totale ore di assenza (escluso sostegno/sostituzione/religione)
     $totale = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
       ->select('SUM(al.ore)')
       ->join('al.lezione', 'l')

@@ -105,7 +105,7 @@ class LezioniController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
-   * @param int $classe Identificativo della classe (supplenza)
+   * @param int $classe Identificativo della classe (sostituzione)
    *
    * @return Response Pagina di risposta
    *
@@ -128,7 +128,7 @@ class LezioniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -143,7 +143,7 @@ class LezioniController extends BaseController {
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -272,7 +272,7 @@ class LezioniController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -286,7 +286,7 @@ class LezioniController extends BaseController {
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore

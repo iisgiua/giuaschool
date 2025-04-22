@@ -229,7 +229,7 @@ class CsvImporter {
    * @return array|null Lista delle cattedtre importate
    */
   public function importaCattedre(Form $form, ?File $file) {
-    $header = ['usernameDocente', 'classe', 'materia', 'usernameAlunno', 'tipo', 'supplenza'];
+    $header = ['usernameDocente', 'classe', 'materia', 'usernameAlunno', 'tipo', 'usernameSupplenza'];
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($header, $file);
@@ -272,7 +272,7 @@ class CsvImporter {
         iconv('UTF-8', 'ASCII//TRANSLIT', (string) $fields['materia'])));
       $fields['usernameAlunno'] = strtolower(trim((string) $fields['usernameAlunno']));
       $fields['tipo'] = strtoupper(trim((string) $fields['tipo']));
-      $fields['supplenza'] = strtoupper(trim((string) $fields['supplenza']));
+      $fields['usernameSupplenza'] = strtolower(trim((string) $fields['usernameSupplenza']));
       // controlla campi obbligatori
       if (empty($fields['usernameDocente']) || empty($fields['classe']) || empty($fields['materia'])) {
         // errore
@@ -332,12 +332,8 @@ class CsvImporter {
       }
       $materia = $lista[0];
       // controlla esistenza di alunno
-      if (!empty($fields['usernameAlunno']) && $fields['usernameAlunno'] != '---') {
+      if (!empty($fields['usernameAlunno'])) {
         $lista = $this->em->getRepository(Alunno::class)->findByUsername($fields['usernameAlunno']);
-      } elseif ($fields['usernameAlunno'] == '---') {
-        // alunno da rimuovere
-        $lista = null;
-        $alunno = null;
       } else {
         // alunno non specificato
         $empty_fields['usernameAlunno'] = true;
@@ -359,19 +355,33 @@ class CsvImporter {
       } elseif ($lista !== null) {
         $alunno = $lista[0];
       }
+      // controlla esistenza di docente di supplenza
+      if (empty($fields['usernameSupplenza'])) {
+        // nessuna supplenza
+        $supplenza = null;
+      } else {
+        // controllo esistenza docente
+        $lista = $this->em->getRepository(Docente::class)->findByUsername($fields['usernameSupplenza']);
+        if (count($lista) == 0) {
+          // errore: docente non esiste
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_docente_supplenza', ['num' => $count])));
+          return $imported;
+        } elseif (count($lista) > 1) {
+          // errore: docente non esiste
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['num' => $count])));
+          return $imported;
+        }
+        $supplenza = $lista[0];
+      }
       // controlla altri campi
       if (empty($fields['tipo'])) {
         // default: normale
         $empty_fields['tipo'] = true;
         $fields['tipo'] = 'N';
-      }
-      if (empty($fields['supplenza'])) {
-        // default: no
-        $empty_fields['supplenza'] = true;
-        $fields['supplenza'] = false;
-      } else {
-        // imposta valore
-        $fields['supplenza'] = ($fields['supplenza'] == 'S');
       }
       // controlli incrociati su sostegno
       if ($materia->getTipo() == 'S' && $fields['tipo'] == 'N') {
@@ -396,7 +406,7 @@ class CsvImporter {
         // cattedra esiste
         if ($filtro == 'T' || $filtro == 'E') {
           // modifica cattedra
-          $error = $this->modificaCattedra($cattedra, $fields, $empty_fields, $alunno);
+          $error = $this->modificaCattedra($cattedra, $fields, $empty_fields, $alunno, $supplenza);
           if ($error) {
             // errore
             fclose($this->fh);
@@ -413,7 +423,7 @@ class CsvImporter {
         // cattedra non esiste
         if ($filtro == 'T' || $filtro == 'N') {
           // crea nuova cattedra
-          $error = $this->nuovaCattedra($fields, $docente, $classe, $materia, $alunno);
+          $error = $this->nuovaCattedra($fields, $docente, $classe, $materia, $alunno, $supplenza);
           if ($error) {
             // errore
             fclose($this->fh);
@@ -492,10 +502,10 @@ class CsvImporter {
       $fields['sesso'] = strtoupper(trim((string) $fields['sesso']));
       $fields['dataNascita'] = trim((string) $fields['dataNascita']);
       $fields['comuneNascita'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['comuneNascita']))));
-      $fields['provinciaNascita'] = substr(strtoupper(trim((string) $fields['provinciaNascita'])), 0, 2);      
+      $fields['provinciaNascita'] = substr(strtoupper(trim((string) $fields['provinciaNascita'])), 0, 2);
       $fields['codiceFiscale'] = strtoupper(trim((string) $fields['codiceFiscale']));
       $fields['citta'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['citta']))));
-      $fields['provincia'] = substr(strtoupper(trim((string) $fields['provincia'])), 0, 2);      
+      $fields['provincia'] = substr(strtoupper(trim((string) $fields['provincia'])), 0, 2);
       $fields['indirizzo'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim((string) $fields['indirizzo']))));
       $fields['bes'] = strtoupper(trim((string) $fields['bes']));
       $fields['noteBes'] = trim(str_replace(["\t","\r","\n",'  '], ['','','',' ',],$fields['noteBes']));
@@ -1160,44 +1170,40 @@ class CsvImporter {
       }
       // controlla esistenza di classe
       $classe = null;
-      if ($fields['classe'] != '---') {
-        $classeAnno = (int) $fields['classe'][0];
-        $classeSezione = trim(substr($fields['classe'], 1));
-        $classeGruppo = '';
-        if (($pos = strpos($classeSezione, '-')) !== false) {
-          $classeGruppo = substr($classeSezione, $pos + 1);
-          $classeSezione = substr($classeSezione, 0, $pos);
-        }
-        $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
-          ->where('c.anno=:anno AND c.sezione=:sezione AND '.
-            ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
-          ->setParameter('anno', $classeAnno)
-          ->setParameter('sezione', $classeSezione)
-          ->setParameter('gruppo', $classeGruppo)
-          ->setMaxResults(1)
-          ->getQuery()
-          ->getOneOrNullResult();
-        if (!$classe) {
-          // errore: classe
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
-          return $imported;
-        }
+      $classeAnno = (int) $fields['classe'][0];
+      $classeSezione = trim(substr($fields['classe'], 1));
+      $classeGruppo = '';
+      if (($pos = strpos($classeSezione, '-')) !== false) {
+        $classeGruppo = substr($classeSezione, $pos + 1);
+        $classeSezione = substr($classeSezione, 0, $pos);
+      }
+      $classe = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
+        ->where('c.anno=:anno AND c.sezione=:sezione AND '.
+          ($classeGruppo ? 'c.gruppo=:gruppo' : '(c.gruppo IS NULL OR c.gruppo=:gruppo)'))
+        ->setParameter('anno', $classeAnno)
+        ->setParameter('sezione', $classeSezione)
+        ->setParameter('gruppo', $classeGruppo)
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+      if (!$classe) {
+        // errore: classe
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
+        return $imported;
       }
       // controlla esistenza di materia
       $materia = null;
-      if ($fields['materia'] != '---') {
-        $lista = $this->em->getRepository(Materia::class)->findByNomeNormalizzato($fields['materia']);
-        if (count($lista) != 1) {
-          // errore: materia
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_materia', ['num' => $count])));
-          return $imported;
-        }
-        $materia = $lista[0];
+      $lista = $this->em->getRepository(Materia::class)->findByNomeNormalizzato($fields['materia']);
+      if (count($lista) != 1) {
+        // errore: materia
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_materia', ['num' => $count])));
+        return $imported;
       }
+      $materia = $lista[0];
       // controlla esistenza cattedra
       if ($classe && $materia) {
         $lista = $this->em->getRepository(Cattedra::class)->findBy(['docente' => $docente,
@@ -1422,20 +1428,23 @@ class CsvImporter {
    * @param Docente $docente Docente esistente
    * @param Classe $classe Classe esistente
    * @param Materia $materia Materia esistente
-   * @param Alunno $alunno Alunno esistente (opzionale, usato per sostegno)
+   * @param Alunno|null $alunno Alunno esistente (opzionale, usato per sostegno)
+   * @param Docente|null $supplenza Docente sostituito nel caso di supplenza
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function nuovaCattedra($fields, Docente $docente, Classe $classe, Materia $materia, Alunno $alunno=null) {
+  private function nuovaCattedra(array $fields, Docente $docente, Classe $classe, Materia $materia,
+                                 ?Alunno $alunno, ?Docente $supplenza): ?string {
     // crea oggetto cattedra
     $cattedra = (new Cattedra())
       ->setAttiva(true)
-      ->setSupplenza($fields['supplenza'])
       ->setTipo($fields['tipo'])
       ->setMateria($materia)
       ->setDocente($docente)
       ->setClasse($classe)
-      ->setAlunno($alunno);
+      ->setAlunno($alunno)
+      ->setSupplenza($supplenza !== null)
+      ->setDocenteSupplenza($supplenza);
     // valida dati
     $errors = $this->validator->validate($cattedra);
     if (count($errors) > 0) {
@@ -1857,10 +1866,12 @@ class CsvImporter {
    * @param array $fields Lista dei dati dell'utente
    * @param array $empty_fields Lista dei dati nulli
    * @param Alunno|null $alunno Alunno da modificare
+   * @param Docente|null $supplenza Docente sostituito nel caso di supplenza
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function modificaCattedra(Cattedra $cattedra, array &$fields, array $empty_fields, ?Alunno $alunno=null) {
+  private function modificaCattedra(Cattedra $cattedra, array &$fields, array $empty_fields, ?Alunno $alunno,
+                                    ?Docente $supplenza): ?string {
     // modifica dati opzionali solo se specificati
     if (!isset($empty_fields['usernameAlunno'])) {
       $cattedra->setAlunno($alunno);
@@ -1872,11 +1883,8 @@ class CsvImporter {
     } else {
       unset($fields['tipo']);
     }
-    if (!isset($empty_fields['supplenza'])) {
-      $cattedra->setSupplenza($fields['supplenza']);
-    } else {
-      unset($fields['supplenza']);
-    }
+    $cattedra->setSupplenza($supplenza !== null);
+    $cattedra->setDocenteSupplenza($supplenza);
     // valida dati
     $errors = $this->validator->validate($cattedra);
     if (count($errors) > 0) {

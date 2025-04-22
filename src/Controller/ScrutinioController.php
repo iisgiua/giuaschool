@@ -58,7 +58,7 @@ class ScrutinioController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
    *
@@ -111,7 +111,7 @@ class ScrutinioController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -133,7 +133,7 @@ class ScrutinioController extends BaseController {
       // imposta sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -846,7 +846,7 @@ class ScrutinioController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
    *
@@ -871,7 +871,7 @@ class ScrutinioController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -887,7 +887,7 @@ class ScrutinioController extends BaseController {
       $info['materia_tipo'] = $cattedra->getMateria()->getTipo();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -2021,7 +2021,7 @@ class ScrutinioController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
    *

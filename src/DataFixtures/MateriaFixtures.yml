@@ -4,7 +4,7 @@
 # Dati delle materie scolastiche:
 #   nome: nome della materia scolastica
 #   nomeBreve: nome breve della materia scolastica
-#   tipo: tipo della materia [N=normale, R=religione, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
+#   tipo: tipo della materia [N=normale, R=religione, S=sostegno, C=condotta, E=ed.civica, U=sostituzione]
 #   valutazione: tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
 #   media: vero se la materia entra nel calcolo della media dei voti, falso altrimenti
 #   ordinamento: numero progressivo per la visualizzazione ordinata delle materie
@@ -14,9 +14,9 @@
 App\Entity\Materia:
 
   # ----- materie con gestione particolare  -----
-  materia_SUPPLENZA:
-    Nome: 'Supplenza'
-    NomeBreve: 'Supplenza'
+  materia_SOSTITUZIONE:
+    Nome: 'Sostituzione'
+    NomeBreve: 'Sostituzione'
     Tipo: 'U'
     Valutazione: 'A'
     Media: false

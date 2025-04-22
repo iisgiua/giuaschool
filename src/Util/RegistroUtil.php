@@ -410,7 +410,7 @@ class RegistroUtil {
    * @param DateTime $fine Data finale del registro
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
-   * @param Cattedra|null $cattedra Cattedra del docente (se nulla è supplenza)
+   * @param Cattedra|null $cattedra Cattedra del docente (se nulla è sostituzione)
    *
    * @return array Dati restituiti come array associativo
    */
@@ -421,7 +421,7 @@ class RegistroUtil {
       // lezioni di una cattedra esistente
       $materia = $cattedra->getMateria();
     } else {
-      // supplenza
+      // sostituzione
       $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
@@ -762,7 +762,7 @@ class RegistroUtil {
    * @param DateTime $fine Data finale del registro
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
-   * @param Cattedra|null $cattedra Cattedra del docente (se nulla è supplenza)
+   * @param Cattedra|null $cattedra Cattedra del docente (se nulla è sostituzione)
    *
    * @return array Dati restituiti come array associativo
    */
@@ -1137,7 +1137,7 @@ class RegistroUtil {
    * @param Docente $docente Docente della lezione
    * @param Alunno $alunno Alunno su cui si esegue l'azione (se nullo su tutta classe)
    * @param Classe $classe Classe della lezione (se nullo tutte le classi)
-   * @param Materia $materia Materia della lezione (se nulla è supplenza)
+   * @param Materia $materia Materia della lezione (se nulla è sostituzione)
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
@@ -1450,7 +1450,7 @@ class RegistroUtil {
         }
       }
       if ($materia && $this->esisteCattedra($docente, $classe, $materia)) {
-        // non è supplenza e esiste la cattedra (non di sostegno)
+        // non è sostituzione e esiste la cattedra (non di sostegno)
         return true;
       }
     }
@@ -3297,15 +3297,15 @@ class RegistroUtil {
       ->getQuery()
       ->getResult();
     // controlla sovrapposizione
-    $supplenzaNA = true;
+    $sostituzioneNA = true;
     if (!$cattedra && count($altre) > 0) {
-      // controlla supplenza NA su più classi
+      // controlla sostituzione NA su più classi
       foreach ($altre as $lezione) {
-        $supplenzaNA &= $lezione->getMateria()->getTipo() == 'U' && $lezione->getTipoGruppo() == 'R' &&
+        $sostituzioneNA &= $lezione->getMateria()->getTipo() == 'U' && $lezione->getTipoGruppo() == 'R' &&
           $lezione->getGruppo() == 'N';
       }
     }
-    if (count($altre) > 0 && ($cattedra || !$supplenzaNA)) {
+    if (count($altre) > 0 && ($cattedra || !$sostituzioneNA)) {
       // errore: sovrapposizione
       $stato['errore'] = $this->trans->trans('message.lezione_esiste_altra', ['ora' => $ora,
         'classe' => $altre[0]->getClasse()]);
@@ -3318,9 +3318,9 @@ class RegistroUtil {
     } else {
       // predispone tipi suppplenza
       if (count($altre) > 0) {
-        $stato['supplenza'] = ['label.gruppo_religione_N' => 'N'];
+        $stato['sostituzione'] = ['label.gruppo_religione_N' => 'N'];
       } else {
-        $stato['supplenza'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
+        $stato['sostituzione'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
           'label.gruppo_religione_A' => 'A', 'label.gruppo_religione_N' => 'N'];
       }
       if (empty($classe->getGruppo())) {
@@ -3332,26 +3332,26 @@ class RegistroUtil {
 			    ->setParameter('classe', $classe)
           ->getQuery()
           ->getSingleColumnResult();
-        // supplenza gruppo religione inesistente
+        // sostituzione gruppo religione inesistente
         if (!in_array('N', $cattedreReligione, true)) {
           // impedisce gruppo religione inesistente
-          unset($stato['supplenza']['label.gruppo_religione_S']);
+          unset($stato['sostituzione']['label.gruppo_religione_S']);
         }
         if (!in_array('A', $cattedreReligione, true)) {
           // impedisce gruppo mat.alt. inesistente
-          unset($stato['supplenza']['label.gruppo_religione_A']);
+          unset($stato['sostituzione']['label.gruppo_religione_A']);
         }
       } else {
         // impedisce gruppi religione se presente gruppo classe
-        unset($stato['supplenza']['label.gruppo_religione_S']);
-        unset($stato['supplenza']['label.gruppo_religione_A']);
-        unset($stato['supplenza']['label.gruppo_religione_N']);
+        unset($stato['sostituzione']['label.gruppo_religione_S']);
+        unset($stato['sostituzione']['label.gruppo_religione_A']);
+        unset($stato['sostituzione']['label.gruppo_religione_N']);
       }
       // tipo di cattedra docente
       $tipoCattedre = [];
-      foreach ($stato['supplenza'] as $supplenza) {
-        $tipoCattedre[] = 'U:'.($supplenza == 'T' ? (empty($classe->getGruppo()) ? 'N' : 'C') :
-          'R:'.$supplenza);
+      foreach ($stato['sostituzione'] as $sostituzione) {
+        $tipoCattedre[] = 'U:'.($sostituzione == 'T' ? (empty($classe->getGruppo()) ? 'N' : 'C') :
+          'R:'.$sostituzione);
       }
     }
     // legge tipi lezioni esistenti
@@ -3372,12 +3372,12 @@ class RegistroUtil {
         switch ($tipoCattedra) {
           case 'U:N':
           case 'U:C':
-            unset($stato['supplenza']['label.gruppo_religione_T']);
+            unset($stato['sostituzione']['label.gruppo_religione_T']);
             break;
           case 'U:R:S':
           case 'U:R:A':
           case 'U:R:N':
-            unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+            unset($stato['sostituzione']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
             break;
           default:
             // cattedra curricolare o sostegno: esce
@@ -3399,7 +3399,7 @@ class RegistroUtil {
               // errore: materia/gruppo incompatibile
               switch ($tipoCattedra) {
                 case 'U:N':
-                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  unset($stato['sostituzione']['label.gruppo_religione_T']);
                   break;
                 default:
                   // cattedra curricolare o sostegno: esce
@@ -3419,7 +3419,7 @@ class RegistroUtil {
                   $lezione->getMateria()->getId() == $materia->getId()) {
                 $compresenza = true;
                 if ($materia->getTipo() != 'U' || $lezione->getTipoGruppo() != 'R') {
-                  // non considera supplenza su religione per compresenza su argomenti
+                  // non considera sostituzione su religione per compresenza su argomenti
                   $stato['compresenza'] = $lezione;
                 }
               } elseif ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
@@ -3431,12 +3431,12 @@ class RegistroUtil {
               // errore: materia/gruppo incompatibile
               switch ($tipoCattedra) {
                 case 'U:C':
-                  unset($stato['supplenza']['label.gruppo_religione_T']);
+                  unset($stato['sostituzione']['label.gruppo_religione_T']);
                   break;
                 case 'U:R:S':
                 case 'U:R:A':
                 case 'U:R:N':
-                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  unset($stato['sostituzione']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
                   break;
                 default:
                   // cattedra curricolare o sostegno: esce
@@ -3470,7 +3470,7 @@ class RegistroUtil {
                 case 'U:R:S':
                 case 'U:R:A':
                 case 'U:R:N':
-                  unset($stato['supplenza']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
+                  unset($stato['sostituzione']['label.gruppo_religione_'.substr($tipoCattedra, 4, 1)]);
                   break;
                 default:
                   // cattedra curricolare o sostegno: esce
@@ -3486,8 +3486,8 @@ class RegistroUtil {
         $stato['trasforma'][$tipoCattedra] = $procedure[0];
       }
     }
-    if (!$cattedra && count($stato['supplenza']) == 0) {
-      // errore: supplenza impossibile
+    if (!$cattedra && count($stato['sostituzione']) == 0) {
+      // errore: sostituzione impossibile
       $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
       return $stato;
     }

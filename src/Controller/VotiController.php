@@ -50,7 +50,7 @@ class VotiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param int $periodo Periodo relativo allo scrutinio
    *
@@ -72,7 +72,7 @@ class VotiController extends BaseController {
       $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
       $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -96,7 +96,7 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
       $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -624,7 +624,7 @@ class VotiController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param int $alunno Identificativo dell'alunno (nullo se non ancora scelto)
    *
@@ -657,7 +657,7 @@ class VotiController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -672,7 +672,7 @@ class VotiController extends BaseController {
       $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -807,7 +807,7 @@ class VotiController extends BaseController {
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param PdfManager $pdf Gestore dei documenti PDF
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    *
@@ -885,7 +885,7 @@ class VotiController extends BaseController {
    * Esporta voti in formato CSV
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    *

@@ -25,6 +25,6 @@ App\Entity\Firma:
     docente: '@docente_religione_*'
 
   # ----- lezioni di sostituzione -----
-  firma_supplenza_{1..5}:
-    lezione: '@lezione_supplenza_<current()>'
+  firma_sostituzione_{1..5}:
+    lezione: '@lezione_sostituzione_<current()>'
     docente: '@docente_*'

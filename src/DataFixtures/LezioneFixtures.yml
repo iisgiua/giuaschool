@@ -58,11 +58,11 @@ App\Entity\Lezione:
     moduloFormativo:
 
   # ----- lezioni di sostituzione -----
-  lezione_supplenza_{1..5}:
+  lezione_sostituzione_{1..5}:
     data (unique): '<dateTimeBetween("-3 month", "now")>'
     ora: 4
     classe: '@classe_*'
-    materia: '@materia_SUPPLENZA'
+    materia: '@materia_SOSTITUZIONE'
     argomento: '<paragraph(2, false)>: <strval("")>'
     attivita: '50%? <paragraph(2, false)>: <strval("")>'
     gruppo:

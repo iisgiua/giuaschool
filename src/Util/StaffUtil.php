@@ -313,7 +313,7 @@ class StaffUtil {
         $dati['statistiche'][$u['id']]['conta-uscite']++;
       }
     }
-    // ore di assenza (escluso sostegno/supplenza/religione)
+    // ore di assenza (escluso sostegno/sostituzione/religione)
     $ore_N = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')

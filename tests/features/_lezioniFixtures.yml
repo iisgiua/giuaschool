@@ -46,7 +46,7 @@ App\Entity\Cattedra:
     docenteSupplenza:
 
 App\Entity\Lezione:
-  # lezioni 2023-02-01: comuni, religione, sostegno, supplenza
+  # lezioni 2023-02-01: comuni, religione, sostegno, sostituzione
   t_lezione_1:
     data: '<date_create("2023-02-01")>'
     ora: '1'
@@ -107,7 +107,7 @@ App\Entity\Lezione:
     classe: '@classe_1A'
     gruppo: ''
     tipoGruppo: 'N'
-    materia: '@materia_SUPPLENZA'
+    materia: '@materia_SOSTITUZIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
   # lezioni 2023-02-01: gruppo, comuni, compresenza, sostegno
@@ -162,7 +162,7 @@ App\Entity\Lezione:
     classe: '@classe_3CCHI'
     gruppo: 'CHI'
     tipoGruppo: 'C'
-    materia: '@materia_SUPPLENZA'
+    materia: '@materia_SOSTITUZIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
 

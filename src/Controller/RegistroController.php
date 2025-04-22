@@ -66,7 +66,7 @@ class RegistroController extends BaseController
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
-   * @param int $classe Identificativo della classe (supplenza)
+   * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
    * @param string $vista Tipo di vista del registro (giornaliera/mensile)
    *
@@ -130,7 +130,7 @@ class RegistroController extends BaseController
       $data_succ = null;
       $data_prec = null;
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -144,7 +144,7 @@ class RegistroController extends BaseController
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -219,7 +219,7 @@ class RegistroController extends BaseController
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
+   * @param int $cattedra Identificativo della cattedra (se nulla è sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $ora Ora di lezione del giorno
@@ -250,7 +250,7 @@ class RegistroController extends BaseController
       }
       $materia = $cattedra->getMateria();
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
       $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
@@ -329,10 +329,10 @@ class RegistroController extends BaseController
         'translation_domain' => false,
         'required' => true]);
     if (empty($classe->getGruppo()) && !$cattedra) {
-      // area comune: supplenza su gruppi religione
-      $opzioni = $controllo['supplenza'];
+      // area comune: sostituzione su gruppi religione
+      $opzioni = $controllo['sostituzione'];
       $form = $form
-        ->add('tipoSupplenza', ChoiceType::class, ['label' => 'label.tipo_supplenza',
+        ->add('tipoSostituzione', ChoiceType::class, ['label' => 'label.tipo_sostituzione',
           'data' => in_array('T', $opzioni, true) ? 'T' : null,
           'choices' => $opzioni,
           'expanded' => true,
@@ -349,7 +349,7 @@ class RegistroController extends BaseController
         'trim' => true,
         'required' => false]);
     if ($cattedra && $materia->getTipo() != 'S') {
-      // no supplenza, no sostegno
+      // no sostituzione, no sostegno
       $form = $form
         ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
           'data' => empty($controllo['compresenza']) ? null : $controllo['compresenza']->getModuloFormativo(),
@@ -370,9 +370,9 @@ class RegistroController extends BaseController
     if ($form->isSubmitted() && $form->isValid()) {
       // legge gruppo e tipo
       if (!$cattedra && empty($classe->getGruppo())) {
-        // supplenza
-        $tipoGruppo = $form->get('tipoSupplenza')->getData() == 'T' ? 'N' : 'R';
-        $gruppo = $tipoGruppo == 'N' ? '' : $form->get('tipoSupplenza')->getData();
+        // sostituzione
+        $tipoGruppo = $form->get('tipoSostituzione')->getData() == 'T' ? 'N' : 'R';
+        $gruppo = $tipoGruppo == 'N' ? '' : $form->get('tipoSostituzione')->getData();
       } elseif ($cattedra && $cattedra->getMateria()->getTipo() == 'R') {
         // religione
         $tipoGruppo = 'R';
@@ -512,7 +512,7 @@ class RegistroController extends BaseController
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
+   * @param int $cattedra Identificativo della cattedra (se nulla è sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $ora Ora di lezione del giorno
@@ -544,7 +544,7 @@ class RegistroController extends BaseController
       }
       $materia = $cattedra->getMateria();
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
       $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
@@ -696,7 +696,7 @@ class RegistroController extends BaseController
         'trim' => true,
         'required' => false]);
     if ($cattedra && $materia->getTipo() != 'S') {
-      // no supplenza e no sostegno
+      // no sostituzione e no sostegno
       $form = $form
         ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
           'data' => $lezioneDocente->getModuloFormativo(),
@@ -1372,7 +1372,7 @@ class RegistroController extends BaseController
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
+   * @param int $cattedra Identificativo della cattedra (se nulla è sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $id Identificativo della nota (se nullo aggiunge)
@@ -1399,7 +1399,7 @@ class RegistroController extends BaseController
       }
       $materia = $cattedra->getMateria();
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
       $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
@@ -1669,7 +1669,7 @@ class RegistroController extends BaseController
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
+   * @param int $cattedra Identificativo della cattedra (se nulla è sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
    * @param int $ora Ora di lezione del giorno
@@ -1699,7 +1699,7 @@ class RegistroController extends BaseController
       }
       $materia = $cattedra->getMateria();
     } else {
-      // supplenza o sostegno
+      // sostituzione o sostegno
       $cattedra = null;
       $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {

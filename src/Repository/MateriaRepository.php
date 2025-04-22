@@ -34,7 +34,7 @@ class MateriaRepository extends EntityRepository {
 
   /**
    * Restituisce la lista degli ID di materia corretti o l'errore nell'apposito parametro.
-   * Sono escluse la condotta e la supplenza.
+   * Sono escluse la condotta e la sostituzione.
    *
    * @param array $lista Lista di ID delle materie, separata da virgole
    * @param bool $errore Viene impostato a vero se è presente un errore
@@ -45,9 +45,9 @@ class MateriaRepository extends EntityRepository {
     // legge materie valide
     $materie = $this->createQueryBuilder('m')
       ->select('m.id')
-      ->where('m.id IN (:lista) AND m.tipo!=:supplenza AND m.tipo!=:condotta')
+      ->where('m.id IN (:lista) AND m.tipo!=:sostituzione AND m.tipo!=:condotta')
       ->setParameter('lista', $lista)
-      ->setParameter('supplenza', 'U')
+      ->setParameter('sostituzione', 'U')
       ->setParameter('condotta', 'C')
       ->getQuery()
       ->getArrayResult();
@@ -59,7 +59,7 @@ class MateriaRepository extends EntityRepository {
 
   /**
    * Restituisce la rappresentazione testuale della lista delle materie.
-   * Sono escluse la condotta e la supplenza.
+   * Sono escluse la condotta e la sostituzione.
    *
    * @param array $lista Lista di ID delle materie
    *
@@ -69,9 +69,9 @@ class MateriaRepository extends EntityRepository {
     // legge materie valide
     $materie = $this->createQueryBuilder('m')
       ->select('m.nome')
-      ->where('m.id IN (:lista) AND m.tipo!=:supplenza AND m.tipo!=:condotta')
+      ->where('m.id IN (:lista) AND m.tipo!=:sostituzione AND m.tipo!=:condotta')
       ->setParameter('lista', $lista)
-      ->setParameter('supplenza', 'U')
+      ->setParameter('sostituzione', 'U')
       ->setParameter('condotta', 'C')
       ->orderBy('m.nome', 'ASC')
       ->getQuery()

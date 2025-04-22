@@ -914,6 +914,10 @@ class DocentiController extends BaseController {
           $form->addError(new FormError($trans->trans('exception.cattedra_esiste')));
         }
       }
+      if ($cattedra->getDocente()->getId() == $cattedra->getDocenteSupplenza()->getId()) {
+        // errore: docente è lo stesso di quello da sostituire
+        $form->get('docenteSupplenza')->addError(new FormError($trans->trans('exception.docente_supplenza_errato')));
+      }
       if ($form->isValid()) {
         // imposta supplenza
         $cattedra->setSupplenza($cattedra->getDocenteSupplenza() !== null);

@@ -53,7 +53,7 @@ class AssenzeController extends BaseController {
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
-   * @param int $classe Identificativo della classe (supplenza)
+   * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
    * @param string $vista Tipo di vista del registro (giornaliera/mensile)
    * @param int $posizione Posizione per lo scrolling verticale della finestra
@@ -120,7 +120,7 @@ class AssenzeController extends BaseController {
       $data_inizio = $data_obj;
       $data_fine = $data_obj;
     }
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -135,7 +135,7 @@ class AssenzeController extends BaseController {
       $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -196,7 +196,7 @@ class AssenzeController extends BaseController {
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
@@ -220,7 +220,7 @@ class AssenzeController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
     }
     // controlla classe
@@ -388,7 +388,7 @@ class AssenzeController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
@@ -412,7 +412,7 @@ class AssenzeController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
     }
     // controlla classe
@@ -590,7 +590,7 @@ class AssenzeController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
@@ -614,7 +614,7 @@ class AssenzeController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
     }
     // controlla classe
@@ -779,7 +779,7 @@ class AssenzeController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    * @param int $alunno Identificativo dell'alunno
@@ -804,7 +804,7 @@ class AssenzeController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
     }
     // controlla classe
@@ -993,7 +993,7 @@ class AssenzeController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno (AAAA-MM-GG)
    *
@@ -1015,7 +1015,7 @@ class AssenzeController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     } else {
-      // supplenza
+      // sostituzione
       $cattedra = null;
     }
     // controlla classe

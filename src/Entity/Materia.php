@@ -74,7 +74,7 @@ class Materia implements Stringable {
   private ?string $nomeBreve = '';
 
   /**
-   * @var string|null $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
+   * @var string|null $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=sostituzione]
    *
    *
    */
@@ -197,7 +197,7 @@ class Materia implements Stringable {
   }
 
   /**
-   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
+   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=sostituzione]
    *
    * @return string|null Tipo della materia
    */
@@ -206,7 +206,7 @@ class Materia implements Stringable {
   }
 
   /**
-   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
+   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=sostituzione]
    *
    * @param string|null $tipo Tipo della materia
    *

@@ -35,7 +35,7 @@
       </tbody>
     </table>
   </div>
-  <h2 class="text-primary text-center gs-h2 gs-mb-1 gs-mt-5">Lista delle altre classi per le supplenze</h2>
+  <h2 class="text-primary text-center gs-h2 gs-mb-1 gs-mt-5">Lista delle altre classi per le sostituzioni</h2>
   <div class="container-fluid">
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
@@ -57,7 +57,7 @@
           <td>
     {% for k1,v1 in v %}
       {% if v1.id in cattedre|keys %}
-            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{v1}} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come supplente in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1 }}</strong></button>
+            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{v1}} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1 }}</strong></button>
       {% else %}
             <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nome }}"><strong>{{ v1 }}</strong></a>
       {% endif %}
@@ -80,7 +80,6 @@ $(document).ready(function() {
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
     $(this).find('#gs-modal-confirm-yes').attr('href', href);
-
     var text = $(event.relatedTarget).data('text');
     $(this).find('#gs-modal-confirm-msg').text(text);
   });

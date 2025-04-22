@@ -359,7 +359,6 @@ label.start: Inizia
 label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
-label.supplenza: Supplenza
 label.testo: Testo
 label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
@@ -543,7 +542,7 @@ label.tipo_materia_R: Religione
 label.tipo_materia_E: Ed. civica
 label.tipo_materia_S: Sostegno
 label.tipo_materia_C: Condotta
-label.tipo_materia_U: Supplenza
+label.tipo_materia_U: Sostituzione
 label.valutazione_materia: Tipo di valutazione
 label.valutazione_materia_N: Numerica
 label.valutazione_materia_G: Giudizio
@@ -654,7 +653,7 @@ label.docente_sostegno: Docente di sostegno
 label.docente_supplenza: Docente sostituito (per le supplenze)
 label.docente_supplenza_lista: Lista delle classi/materie della supplenza
 label.classe_gruppo: Gruppo classe
-label.tipo_supplenza: Gruppo alunni
+label.tipo_sostituzione: Gruppo alunni
 label.gruppo_religione_T: Tutta la classe
 label.gruppo_religione_S: Gruppo Religione
 label.gruppo_religione_A: Gruppo Mat. Alt.
@@ -1131,7 +1130,7 @@ message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbliga
 message.update_ok: La modifica è stata memorizzata correttamente.
 message.delete_ok: La cancellazione è stata effettuata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, Supplenza\".
+  \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, UsernameSupplenza\".
   Verranno inserite solo le cattedre che non risultano già presenti."
 message.nuova_password_classe: Verranno cambiate le password di tutti gli alunni della classe. Vuoi continuare?
 message.cattedra_mancante: Devi prima scegliere la classe o la materia per poter visualizzare questa pagina.
@@ -1140,10 +1139,10 @@ message.cancella_annotazione: Verrà cancellata l'annotazione sul registro. Vuoi
 message.cancella_nota: Verrà cancellata la nota disciplinare. Vuoi continuare?
 message.cancella_moduloFormativo: Verrà cancellato il modulo formativo. Vuoi continuare?
 message.annulla_nota: Verrà formalmente annullata la nota disciplinare. Vuoi continuare?
-message.voti_supplenza: Non è possibile inserire valutazioni per una supplenza.
-message.argomenti_supplenza: Non è possibile visualizzare gli argomenti per una supplenza.
+message.voti_sostituzione: Non è possibile inserire valutazioni per una sostituzione.
+message.argomenti_sostituzione: Non è possibile visualizzare gli argomenti per una sostituzione.
 message.nessun_dato: Non sono presenti dati da visualizzare
-message.osservazioni_supplenza: Non è possibile inserire osservazioni per una supplenza.
+message.osservazioni_sostituzione: Non è possibile inserire osservazioni per una sostituzione.
 message.cancella_osservazione: Verrà cancellata l'osservazione inserita. Vuoi continuare?
 message.recovery_ok: Procedura eseguita senza errori. Tra qualche minuto riceverai, all'indirizzo indicato, un'email con le nuove credenziali di accesso al Registro Elettronico.
 message.no_proposte: Non è ancora possibile inserire le proposte di voto
@@ -1275,7 +1274,7 @@ message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare 
 message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore."
 message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}."
 message.autorizza_uscita_richiesta: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, come da richiesta preventivamente formalizzata."
-message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
+message.conferma_sostituzione: "Confermando la scelta entrerai come SOSTITUTO in una tua classe. Vuoi continuare?"
 message.presenti_compiti_oggi: "{num, plural, one {È presente un compito assegnato per oggi} other {Sono presenti # compiti assegnati per oggi}}"
 message.presenti_compiti_domani: "{num, plural, one {È presente un compito assegnato per domani} other {Sono presenti # compiti assegnati per domani}}"
 message.attivazione_ok: "Procedura eseguita senza errori.<br>Riceverai un'email all'indirizzo indicato con ulteriori istruzioni."
@@ -1304,16 +1303,15 @@ message.importa_ata: "Il file CSV da importare deve avere la struttura seguente 
   </small>"
 message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
   <span class=\"ml-4\"><strong>Utenti</strong>: \"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email\"</span><br>
-  <span class=\"ml-4\"><strong>Cattedre</strong>: \"*UsernameDocente, *Classe, *Materia, UsernameAlunno, Tipo, Supplenza\"</span><br>
+  <span class=\"ml-4\"><strong>Cattedre</strong>: \"*UsernameDocente, *Classe, *Materia, UsernameAlunno, Tipo, UsernameSupplenza\"</span><br>
   <span class=\"ml-4\"><strong>Orario</strong>: \"*Username, *Sede, *Giorno, *Ora, *Classe, *Materia\"</span><br>
   <small>
     <span class=\"ml-5\">* campi obbligatori</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
     <span class=\"ml-5\">Tipo: N=normale, I=itp, P=potenziamento</span><br>
-    <span class=\"ml-5\">Supplenza: S=si, N=no</span><br>
+    <span class=\"ml-5\">UsernameSupplenza: username del docente da sostituire in caso di supplenza</span><br>
     <span class=\"ml-5\">Sede: nome breve della sede</span><br>
     <span class=\"ml-5\">Giorno: LU=lunedì, MA=martedì, ME=mercoledì, GI=giovedì, VE=venerdì, SA=sabato</span><br>
-    <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
 message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
   <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, ProvinciaNascita, *CodiceFiscale, Citta, Provincia, Indirizzo, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, **Username, Password, Email, Genitore1Cognome, Genitore1Nome, Genitore1CodiceFiscale, Genitore1Telefono, **Genitore1Username, Genitore1Password, Genitore1Email, Genitore2Cognome, Genitore2Nome, Genitore2CodiceFiscale, Genitore2Telefono, **Genitore2Username, Genitore2Password, Genitore2Email\"</span><br>
@@ -1520,6 +1518,7 @@ exception.file_data: I campi del file non corrispondono a quanto previsto nel re
 exception.file_date: "La data \"{data}\" non è valida nel record {num}."
 exception.file_docente_duplicato: Il docente indicato nel record {num} è presente più volte nel sistema.
 exception.file_docente_mancante: Il docente indicato nel record {num} non è presente nel sistema.
+exception.file_docente_supplenza: Il docente da sostituire indicato nel record {num} non è presente nel sistema.
 exception.file_duplicated: Username generata automaticamente già esistente nel record {num}.
 exception.file_field: I campi di intestazione del file non corrispondono a quanto previsto.
 exception.file_format: Formato del file non valido.
@@ -1529,8 +1528,8 @@ exception.file_mancante: Non hai caricato nessun documento.
 exception.file_materia: La materia non è corretta nel record {num}.
 exception.file_ora: L'ora non è valida nel record {num}.
 exception.file_orario: Impossibile trovare l'orario attuale della sede presente nel record {num}.
-exception.file_read: Impossibile aprire il file.
 exception.file_required: Valore obbligatorio mancante nel record {num}.
+exception.file_read: Impossibile aprire il file.
 exception.file_sede: La sede non è corretta nel record {num}.
 exception.file_tipo: Il tipo indicato nel record {num} è incongruente con gli altri dati.
 exception.file_upload: Errore di caricamento del file.

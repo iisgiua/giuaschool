@@ -43,7 +43,7 @@ class OsservazioniController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
-   * @param int $classe Identificativo della classe (supplenza)
+   * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
@@ -93,7 +93,7 @@ class OsservazioniController extends BaseController {
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -107,7 +107,7 @@ class OsservazioniController extends BaseController {
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
@@ -335,7 +335,7 @@ class OsservazioniController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
-   * @param int $classe Identificativo della classe (supplenza)
+   * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
@@ -381,7 +381,7 @@ class OsservazioniController extends BaseController {
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
-    // controllo cattedra/supplenza
+    // controllo cattedra/sostituzione
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -395,7 +395,7 @@ class OsservazioniController extends BaseController {
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
-      // supplenza
+      // sostituzione
       $classe = $this->em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore

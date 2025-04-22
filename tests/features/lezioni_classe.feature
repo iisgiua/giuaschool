@@ -40,7 +40,7 @@ Scenario: Visualizzazione classi per docente con cattedra
 ################################################################################
 # Bisogna visualizzare il registro delle cattedre e classi disponibili
 
-Scenario: Visualizza registro supplenza classe
+Scenario: Visualizza registro sostituzione classe
   Dato login utente "@docente_nocattedra_1:username"
   Quando pagina attiva "lezioni_classe"
   E premi pulsante "1ª A"
@@ -48,7 +48,7 @@ Scenario: Visualizza registro supplenza classe
     | cattedra | classe        |
     | 0        | @classe_1A:id |
   E la sezione "#gs-main h1" contiene "Registro della classe 1ª A"
-  E la sezione "#gs-main h2" contiene "Supplenza"
+  E la sezione "#gs-main h2" contiene "Sostituzione"
 
 Scenario: Visualizza registro cattedra classe
   Dato login utente "@docente_nocattedra_2:username"
