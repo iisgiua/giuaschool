@@ -56,6 +56,7 @@ App\Entity\Lezione:
     materia: '@materia_curricolare_1'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_2:
     data: '<date_create("2023-02-01")>'
     ora: '2'
@@ -65,6 +66,7 @@ App\Entity\Lezione:
     materia: '@materia_curricolare_3'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_3:
     data: '<date_create("2023-02-01")>'
     ora: '3'
@@ -74,6 +76,7 @@ App\Entity\Lezione:
     materia: '@materia_SOSTEGNO'
     argomento: ''
     attivita: ''
+    sostituzione: false
   t_lezione_4:
     data: '<date_create("2023-02-01")>'
     ora: '4'
@@ -83,6 +86,7 @@ App\Entity\Lezione:
     materia: '@materia_RELIGIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_5:
     data: '<date_create("2023-02-01")>'
     ora: '4'
@@ -92,6 +96,7 @@ App\Entity\Lezione:
     materia: '@materia_RELIGIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_6:
     data: '<date_create("2023-02-01")>'
     ora: '4'
@@ -101,6 +106,7 @@ App\Entity\Lezione:
     materia: '@materia_RELIGIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_7:
     data: '<date_create("2023-02-01")>'
     ora: '5'
@@ -110,7 +116,8 @@ App\Entity\Lezione:
     materia: '@materia_SOSTITUZIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
-  # lezioni 2023-02-01: gruppo, comuni, compresenza, sostegno
+    sostituzione: true
+  # lezioni 2023-02-01: gruppo, comuni, compresenza, sostegno, sostituzione
   t_lezione_8:
     data: '<date_create("2023-02-01")>'
     ora: '1'
@@ -120,6 +127,7 @@ App\Entity\Lezione:
     materia: '@materia_curricolare_3'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_9:
     data: '<date_create("2023-02-01")>'
     ora: '1'
@@ -129,6 +137,7 @@ App\Entity\Lezione:
     materia: '@materia_itp_1'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_10:
     data: '<date_create("2023-02-01")>'
     ora: '2'
@@ -138,6 +147,7 @@ App\Entity\Lezione:
     materia: '@materia_curricolare_1'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_11:
     data: '<date_create("2023-02-01")>'
     ora: '3'
@@ -147,6 +157,7 @@ App\Entity\Lezione:
     materia: '@materia_itp_1'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: false
   t_lezione_12:
     data: '<date_create("2023-02-01")>'
     ora: '4'
@@ -156,6 +167,7 @@ App\Entity\Lezione:
     materia: '@materia_SOSTEGNO'
     argomento: ''
     attivita: ''
+    sostituzione: false
   t_lezione_13:
     data: '<date_create("2023-02-01")>'
     ora: '5'
@@ -165,6 +177,7 @@ App\Entity\Lezione:
     materia: '@materia_SOSTITUZIONE'
     argomento: '<paragraph(2, false)>'
     attivita: '<paragraph(1, false)>'
+    sostituzione: true
 
 App\Entity\Firma:
   # firma lezioni 1A 2023-02-01

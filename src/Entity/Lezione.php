@@ -30,8 +30,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['data', 'ora', 'classe', 'gruppo'], message: 'field.unique')]
 class Lezione implements Stringable {
 
-
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco per la lezione
    */
@@ -122,6 +122,12 @@ class Lezione implements Stringable {
   #[ORM\JoinColumn(nullable: true)]
   #[ORM\ManyToOne(targetEntity: \ModuloFormativo::class)]
   private ?ModuloFormativo $moduloFormativo = null;
+
+  /**
+   * @var bool $sostituzione Indica se la lezione è una sostituzione o no
+   */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
+  private bool $sostituzione = false;
 
 
   //==================== EVENTI ORM ====================
@@ -364,6 +370,27 @@ class Lezione implements Stringable {
     return $this;
   }
 
+  /**
+   * Indica se la lezione è una sostituzione o no
+   *
+   * @return bool Indica se la lezione è una sostituzione o no
+   */
+  public function getSostituzione(): bool {
+    return $this->sostituzione;
+  }
+
+  /**
+   * Modifica se la lezione è una sostituzione o no
+   *
+   * @param bool|null $sostituzione Indica se la lezione è una sostituzione o no
+   *
+   * @return self Oggetto modificato
+   */
+  public function setSostituzione(bool $sostituzione): self {
+    $this->sostituzione = ($sostituzione == true);
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -391,7 +418,8 @@ class Lezione implements Stringable {
       'materia' => $this->materia ? $this->materia->getId() : null,
       'argomento' => $this->argomento,
       'attivita' => $this->attivita,
-      'moduloFormativo' => $this->moduloFormativo ? $this->moduloFormativo->getId() : null];
+      'moduloFormativo' => $this->moduloFormativo ? $this->moduloFormativo->getId() : null,
+      'sostituzione' => $this->sostituzione];
     return $dati;
   }
 
