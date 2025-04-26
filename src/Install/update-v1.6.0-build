@@ -15,7 +15,7 @@ return [
     ["ALTER TABLE gs_cattedra ADD docente_supplenza_id INT DEFAULT NULL; ALTER TABLE gs_cattedra ADD CONSTRAINT FK_292345CD60C9C226 FOREIGN KEY (docente_supplenza_id) REFERENCES gs_utente (id); CREATE INDEX IDX_292345CD60C9C226 ON gs_cattedra (docente_supplenza_id);", "SELECT docente_supplenza_id FROM gs_cattedra UNION SELECT 1 FROM dual;"],
     ["UPDATE gs_materia SET nome='Sostituzione',nome_breve='Sostituzione' WHERE tipo='U';", ""],
     ["ALTER TABLE gs_lezione ADD sostituzione TINYINT(1) NOT NULL;", "SELECT sostituzione FROM gs_lezione UNION SELECT 1 FROM dual;"],
-    ["UPDATE gs_lezione SET sostituzione=1 WHERE id IN (SELECT l.id FROM gs_lezione AS l, gs_materia AS m WHERE l.materia_id=m.id AND m.tipo='U');", ""],
+    ["UPDATE gs_lezione l, gs_materia m SET l.sostituzione=1 WHERE l.materia_id=m.id AND m.tipo='U';", ""],
   ],
   'envDelete' => [
   ],
