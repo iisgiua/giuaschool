@@ -18,7 +18,7 @@
         <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
       {% if form.materia is not defined %}
         <div class="col-sm-2 text-right"><strong class="gs-big">Materia:</strong></div>
-        <div class="col-sm-4"><span class="gs-big">{{ label.materia }}</span></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.materiaNome }}</span></div>
       {% endif %}
       </div>
       {{ form_start(form) }}
@@ -32,6 +32,7 @@
         </div>
       </div>
       {{ form_widget(form) }}
+      <input type="hidden" id="gs-materia" name="gs_materia" value="">
       {{ form_end(form) }}
     </div>
   </div>
@@ -48,6 +49,9 @@ $(document).ready(function() {
       $(this).parent().addClass('active');
     }
   }).change();
+  $('#registro_add input[name="registro_add[tipoSostituzione]"]').change(function() {
+    $('#registro_add_materia').val('{{ label.materia.id }}').prop('disabled', $(this).val() != 'T');
+  });
 });
 </script>
 {% endblock %}

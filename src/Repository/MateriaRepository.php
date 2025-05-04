@@ -8,7 +8,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Classe;
+use App\Entity\Cattedra;
 use Doctrine\ORM\EntityRepository;
+
 
 /**
  * Materia - repository
@@ -108,6 +111,65 @@ class MateriaRepository extends EntityRepository {
       $dati[$breve ? $materia->getNomeBreve() : $materia->getNome()] = $materia;
     }
     // restituisce lista opzioni
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle materie per la classe indicata
+   *
+   * @param Classe $classe Classe di cui recuperare le cattedre
+   * @param bool $curricolari Se vero verranno restituite solo le materie curricolari (escluso sostegno e potenziamento)
+   * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo,V=vettore di dati]
+   *
+   * @return array Dati formattati in un array associativo
+   */
+  public function materieClasse(Classe $classe, bool $curricolari=true, string $tipo='A'): array {
+    $dati = [];
+    // lista materie
+    $materie = $this->createQueryBuilder('m')
+      ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
+      ->join('c.classe', 'cl')
+      ->join('c.docente', 'd')
+      ->where("c.attiva=1 AND d.abilitato=1 AND cl.id=:classe")
+      ->orderBy('m.nome', 'ASC')
+      ->setParameter('classe', $classe);
+    if ($curricolari) {
+      $materie = $materie
+        ->andWhere("m.tipo!='S' AND c.tipo!='P'");
+    }
+    $materie = $materie
+      ->getQuery()
+      ->getResult();
+    // formato dati
+    if ($tipo == 'Q') {
+      // risultato query (vettore di oggetti)
+      $dati = $materie;
+    } elseif ($tipo == 'C') {
+      // form ChoiceType
+      foreach ($materie as $mat) {
+        $dati[$mat->getNome()] = $mat;
+      }
+    } elseif ($tipo == 'V') {
+      // vettore di dati
+      $dati['lista'] = [];
+      $dati['label'] = [];
+      foreach ($materie as $idx => $mat) {
+        $dati['lista'][$idx] = ['id' => $mat->getId(), 'tipo' => $mat->getTipo(),
+          'nome' => $mat->getNome(), 'nomeBreve' => $mat->getNomeBreve(), 'valutazione' => $mat->getValutazione(),
+          'media' => $mat->getMedia(), 'ordinamento' => $mat->getOrdinamento()];
+        $dati['label'][$idx] = $mat->getNome();
+      }
+    } else {
+      // array associativo
+      $dati['choice'] = [];
+      $dati['lista'] = [];
+      foreach ($materie as $mat) {
+        $dati['choice'][$mat->getNome()] = $mat;
+        $dati['lista'][$mat->getId()]['object'] = $mat;
+        $dati['lista'][$mat->getId()]['label'] = $mat->getNome();
+      }
+    }
+    // restituisce dati
     return $dati;
   }
 

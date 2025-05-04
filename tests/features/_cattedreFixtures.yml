@@ -1,0 +1,284 @@
+####################
+# _cattedreFixtures - dati per i test su cattedre e lezioni
+####################
+
+
+include:
+  - _testFixtures.yml
+
+
+App\Entity\Cattedra:
+  cattedra_1A_{1..12}:
+    attiva: true
+    supplenza: '<($current==1)>'
+    tipo: '<case(<current()>, [8,11], ["I","A"], "N")>'
+    materia: '@<case(<current()>, [6,7,8,9,10,11,12], [materia_RELIGIONE,materia_itp_1,materia_itp_1,materia_SOSTEGNO,materia_SOSTEGNO,materia_RELIGIONE,materia_curricolare_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7,8,9,10,11,12], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1,docente_nocattedra_2], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno: '<case(<current()>, [9,10], [@alunno_sostegno_1,@alunno_sostegno_2], null)>'
+    docenteSupplenza:
+  cattedra_1A_civica_{1..11}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7,8,9,10,11], [docente_religione_1,docente_itp_1,docente_itp_2,docente_sostegno_1,docente_sostegno_2,docente_nocattedra_1], docente_curricolare_<current()>)>'
+    classe: '@classe_1A'
+    alunno:
+    docenteSupplenza:
+  cattedra_2A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_2A'
+    alunno:
+    docenteSupplenza:
+  cattedra_2A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_2A'
+    alunno:
+    docenteSupplenza:
+  cattedra_3A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3A'
+    alunno:
+    docenteSupplenza:
+  cattedra_3A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3A'
+    alunno:
+    docenteSupplenza:
+  cattedra_4A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_4A'
+    alunno:
+    docenteSupplenza:
+  cattedra_4A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_4A'
+    alunno:
+    docenteSupplenza:
+  cattedra_5A_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_5A'
+    alunno:
+    docenteSupplenza:
+  cattedra_5A_civica_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_5A'
+    alunno:
+    docenteSupplenza:
+  cattedra_1B_{1..7}:
+    attiva: true
+    supplenza: false
+    tipo: '<($current==8 ? "I" : "N")>'
+    materia: '@<case(<current()>, [6,7], [materia_RELIGIONE,materia_itp_1], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6,7], [docente_religione_1,docente_itp_1], docente_curricolare_<current()>)>'
+    classe: '@classe_1B'
+    alunno:
+    docenteSupplenza:
+  cattedra_3C_{1..6}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@<case(<current()>, [6], [materia_RELIGIONE], materia_curricolare_<current()>)>'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3C'
+    alunno:
+    docenteSupplenza:
+  cattedra_3C_civica_{1..6}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@<case(<current()>, [6], [docente_religione_1], docente_curricolare_<current()>)>'
+    classe: '@classe_3C'
+    alunno:
+    docenteSupplenza:
+  cattedra_3CCHI_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_3'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+    docenteSupplenza:
+  cattedra_3CCHI_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_3'
+    classe: '@classe_3CCHI'
+    alunno:
+    docenteSupplenza:
+  cattedra_3CAMB_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_itp_2'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+    docenteSupplenza:
+  cattedra_3CAMB_civica_1:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_EDCIVICA'
+    docente: '@docente_itp_2'
+    classe: '@classe_3CAMB'
+    alunno:
+    docenteSupplenza:
+
+App\Entity\Lezione:
+  # lezioni 2023-02-02: curricolari su area comune
+  lezione_1A_{1..6}:
+    data: '<date_create("2023-02-02")>'
+    ora: '<current()>'
+    classe: '@classe_1A'
+    gruppo: '<case(<current()>, [3,6], [S,A], "")>'
+    tipoGruppo: '<case(<current()>, [3,6], [R,R], "N")>'
+    materia: '@<case(<current()>, [2,3,4,5,6], [materia_EDCIVICA,materia_RELIGIONE,materia_itp_1,materia_itp_1,materia_RELIGIONE], materia_curricolare_<current()>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: false
+  # lezioni 2023-02-03: curricolari su gruppi
+  lezione_3C_{1..3}:
+    data: '<date_create("2023-02-03")>'
+    ora: '<current()>'
+    classe: '@classe_3C'
+    gruppo: '<case(<current()>, [3], [S], "")>'
+    tipoGruppo: '<case(<current()>, [3], [R], "N")>'
+    materia: '@<case(<current()>, [2,3], [materia_EDCIVICA,materia_RELIGIONE], materia_curricolare_<current()>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: false
+  lezione_3CCHI_{4..5}:
+    data: '<date_create("2023-02-03")>'
+    ora: '<current()>'
+    classe: '@classe_3CCHI'
+    gruppo: 'CHI'
+    tipoGruppo: 'C'
+    materia: '@<case(<current()>, [4,5], [materia_itp_3,materia_EDCIVICA], materia_curricolare_<current()>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: false
+  # lezioni 2023-02-04: sostegno e sostituzione
+  lezione_1A_11:
+    data: '<date_create("2023-02-04")>'
+    ora: '1'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@materia_SOSTEGNO'
+    argomento: ''
+    attivita: ''
+    sostituzione: false
+  lezione_1A_{12..13}:
+    data: '<date_create("2023-02-04")>'
+    ora: '<($current-10)>'
+    classe: '@classe_1A'
+    gruppo: ''
+    tipoGruppo: 'N'
+    materia: '@<case(<current()>, [12], [materia_SOSTITUZIONE], materia_curricolare_<($current-10)>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: true
+  lezione_1A_{14}:
+    data: '<date_create("2023-02-04")>'
+    ora: '<($current-10)>'
+    classe: '@classe_1A'
+    gruppo: 'N'
+    tipoGruppo: 'R'
+    materia: '@<case(<current()>, [14], [materia_SOSTITUZIONE], materia_curricolare_<($current-10)>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: true
+  lezione_3C_{15..16}:
+    data: '<date_create("2023-02-04")>'
+    ora: '<($current-10)>'
+    classe: '@classe_3CCHI'
+    gruppo: 'CHI'
+    tipoGruppo: 'C'
+    materia: '@<case(<current()>, [15,16], [materia_SOSTITUZIONE,materia_itp_3], materia_curricolare_<($current-10)>)>'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    sostituzione: true
+
+App\Entity\Firma:
+  # firma lezioni 1A 2023-02-02
+  firma_1A_{1..6}:
+    lezione: '@lezione_1A_<current()>'
+    docente: '@<case(<current()>, [2,3,4,5,6], [docente_curricolare_1,docente_religione_1,docente_itp_1,docente_itp_2,docente_nocattedra_1], docente_curricolare_<current()>)>'
+  # firma lezioni 1A 2023-02-03
+  firma_3C_{1..3}:
+    lezione: '@lezione_3C_<current()>'
+    docente: '@<case(<current()>, [2,3], [docente_curricolare_1,docente_religione_1], docente_curricolare_<current()>)>'
+  firma_3CCHI_{4..5}:
+    lezione: '@lezione_3CCHI_<current()>'
+    docente: '@<case(<current()>, [4,5], [docente_itp_3,docente_itp_3], docente_curricolare_<current()>)>'
+  # firma lezioni 1A 2023-02-04
+  firma_1A_{12..13}:
+    lezione: '@lezione_1A_<current()>'
+    docente: '@<case(<current()>, [12,13], [docente_itp_3,docente_itp_3], docente_curricolare_<($current-10)>)>'
+  firma_1A_{14}:
+    lezione: '@lezione_1A_<current()>'
+    docente: '@<case(<current()>, [14], [docente_itp_3], docente_curricolare_<($current-10)>)>'
+  firma_3C_{15..16}:
+    lezione: '@lezione_3C_<current()>'
+    docente: '@<case(<current()>, [15,16], [docente_itp_1,docente_itp_1], docente_curricolare_<($current-10)>)>'
+
+App\Entity\FirmaSostegno:
+  # firma lezioni 1A 2023-02-04
+  firma_sostegno_1:
+    lezione: '@lezione_1A_11'
+    docente: '@docente_sostegno_1'
+    argomento: '<paragraph(1, false)>'
+    attivita: '<paragraph(1, false)>'
+    alunno: '@alunno_sostegno_1'
+
+App\Entity\Scrutinio:
+  scrutinio_1B_P:
+    periodo: 'P'
+    data:
+    inizio:
+    fine:
+    stato: '1'
+    classe: '@classe_1B'
+    dati:
+      alunni:
+      valutazioni:
+    visibile:
+    sincronizzazione:

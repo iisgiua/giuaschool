@@ -469,7 +469,9 @@ class RegistroUtil {
           // esistono lezioni
           foreach ($lezioni as $lezione) {
             $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
-            $datiLezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve();
+            $datiLezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve().
+              ($lezione->getSostituzione() && $lezione->getMateria()->getTipo() != 'U' ? ' ('.
+              $this->trans->trans('label.tipo_materia_U').')' : '');
             $separatore = (!empty($lezione->getArgomento()) && !empty($lezione->getAttivita())) ? ' - ' : '';
             $datiLezioni[$ora]['argomenti'][$gruppo] = $lezione->getArgomento().$separatore.$lezione->getAttivita();
             // legge firme
@@ -3261,7 +3263,7 @@ class RegistroUtil {
     $controllo['N:N']['N:N'] = 'materia';
     $controllo['S:N']['E:N'] = $controllo['S:N']['N:N'] = $controllo['S:N']['U:N'] = 'sostegno';
     $controllo['S:C']['E:N'] = $controllo['S:C']['N:N'] = $controllo['S:C']['U:N'] = 'sostegno';
-    $controllo['U:N']['U:N'] = 'materia';
+    $controllo['U:N']['U:N'] = 'ok';
     $controllo['E:C']['E:C'] = $controllo['E:C']['N:C'] = $controllo['E:C']['U:C'] = 'gruppo';
     $controllo['N:C']['E:C'] = $controllo['N:C']['N:C'] = $controllo['N:C']['U:C'] = 'gruppo';
     $controllo['S:N']['E:C'] = $controllo['S:N']['N:C'] = $controllo['S:N']['U:C'] = 'sostegno';
@@ -3297,15 +3299,17 @@ class RegistroUtil {
       ->getQuery()
       ->getResult();
     // controlla sovrapposizione
+    $sostituzioneMultipla = true;
     $sostituzioneNA = true;
     if (!$cattedra && count($altre) > 0) {
       // controlla sostituzione NA su più classi
       foreach ($altre as $lezione) {
-        $sostituzioneNA &= $lezione->getMateria()->getTipo() == 'U' && $lezione->getTipoGruppo() == 'R' &&
+        $sostituzioneNA &= $lezione->getSostituzione() && $lezione->getTipoGruppo() == 'R' &&
           $lezione->getGruppo() == 'N';
+        $sostituzioneMultipla &= $lezione->getSostituzione();
       }
     }
-    if (count($altre) > 0 && ($cattedra || !$sostituzioneNA)) {
+    if (count($altre) > 0 && ($cattedra || (!$sostituzioneNA && !$sostituzioneMultipla))) {
       // errore: sovrapposizione
       $stato['errore'] = $this->trans->trans('message.lezione_esiste_altra', ['ora' => $ora,
         'classe' => $altre[0]->getClasse()]);
@@ -3317,34 +3321,39 @@ class RegistroUtil {
         ($materia->getTipo() == 'R' ? 'R:'.($cattedra->getTipo() == 'N' ? 'S' : 'A') : 'N'))];
     } else {
       // predispone tipi suppplenza
-      if (count($altre) > 0) {
+      if (count($altre) > 0 && $sostituzioneNA) {
         $stato['sostituzione'] = ['label.gruppo_religione_N' => 'N'];
+        $stato['sostituzioneNA'] = $altre[0]->getMateria();
+      } elseif (count($altre) > 0 && $sostituzioneMultipla) {
+        $stato['sostituzione'] = ['label.gruppo_religione_T' => 'T'];
+        $stato['sostituzioneMultipla'] = $altre[0]->getMateria();
       } else {
-        $stato['sostituzione'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
-          'label.gruppo_religione_A' => 'A', 'label.gruppo_religione_N' => 'N'];
+        // $stato['sostituzione'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_S' => 'S',
+        //   'label.gruppo_religione_A' => 'A', 'label.gruppo_religione_N' => 'N'];
+        $stato['sostituzione'] = ['label.gruppo_religione_T' => 'T', 'label.gruppo_religione_N' => 'N'];
       }
       if (empty($classe->getGruppo())) {
-        // cattedre di gruppo religione
-        $cattedreReligione = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
-          ->select('DISTINCT c.tipo')
-          ->join('c.materia', 'm')
-          ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
-			    ->setParameter('classe', $classe)
-          ->getQuery()
-          ->getSingleColumnResult();
-        // sostituzione gruppo religione inesistente
-        if (!in_array('N', $cattedreReligione, true)) {
-          // impedisce gruppo religione inesistente
-          unset($stato['sostituzione']['label.gruppo_religione_S']);
-        }
-        if (!in_array('A', $cattedreReligione, true)) {
-          // impedisce gruppo mat.alt. inesistente
-          unset($stato['sostituzione']['label.gruppo_religione_A']);
-        }
+        // // cattedre di gruppo religione
+        // $cattedreReligione = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+        //   ->select('DISTINCT c.tipo')
+        //   ->join('c.materia', 'm')
+        //   ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
+			  //   ->setParameter('classe', $classe)
+        //   ->getQuery()
+        //   ->getSingleColumnResult();
+        // // sostituzione gruppo religione inesistente
+        // if (!in_array('N', $cattedreReligione, true)) {
+        //   // impedisce gruppo religione inesistente
+        //   unset($stato['sostituzione']['label.gruppo_religione_S']);
+        // }
+        // if (!in_array('A', $cattedreReligione, true)) {
+        //   // impedisce gruppo mat.alt. inesistente
+        //   unset($stato['sostituzione']['label.gruppo_religione_A']);
+        // }
       } else {
         // impedisce gruppi religione se presente gruppo classe
-        unset($stato['sostituzione']['label.gruppo_religione_S']);
-        unset($stato['sostituzione']['label.gruppo_religione_A']);
+        // unset($stato['sostituzione']['label.gruppo_religione_S']);
+        // unset($stato['sostituzione']['label.gruppo_religione_A']);
         unset($stato['sostituzione']['label.gruppo_religione_N']);
       }
       // tipo di cattedra docente
@@ -3357,7 +3366,8 @@ class RegistroUtil {
     // legge tipi lezioni esistenti
     $tipiLezioni = count($lezioni) == 0 ? ['-:-'] : [];
     foreach ($lezioni as $lezione) {
-      $tipiLezioni[] = $lezione->getMateria()->getTipo().':'.$lezione->getTipoGruppo();
+      $tipiLezioni[] = ($lezione->getSostituzione() ? 'U' : $lezione->getMateria()->getTipo()).':'.
+        $lezione->getTipoGruppo();
     }
     // controlla cattedre
     foreach ($tipoCattedre as $tipoCattedra) {
@@ -3416,9 +3426,10 @@ class RegistroUtil {
             foreach ($lezioni as $lezione) {
               $gruppi[] = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
               if ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
-                  $lezione->getMateria()->getId() == $materia->getId()) {
+                  ($lezione->getSostituzione() && !$cattedra) ||
+                  (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId())) {
                 $compresenza = true;
-                if ($materia->getTipo() != 'U' || $lezione->getTipoGruppo() != 'R') {
+                if ($cattedra || $lezione->getTipoGruppo() != 'R') {
                   // non considera sostituzione su religione per compresenza su argomenti
                   $stato['compresenza'] = $lezione;
                 }
@@ -3512,7 +3523,7 @@ class RegistroUtil {
                                  string $gruppo, array $controllo, array $lezioni, array $firme): array  {
     // init
     $stato = [];
-    $tipoCattedra = $materia->getTipo().':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
+    $tipoCattedra = (!$cattedra ? 'U' : $materia->getTipo()).':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
     $procedura = $controllo['trasforma'][$tipoCattedra];
     if (count($lezioni) > 0) {
       // trasformazione
@@ -3520,7 +3531,8 @@ class RegistroUtil {
         case 'gruppo':  // trasforma lezione gruppo classe o religione
           foreach ($lezioni as $lezione) {
             if ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
-                $lezione->getMateria()->getId() == $materia->getId()) {
+                ($lezione->getSostituzione() && !$cattedra) ||
+                (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId())) {
               // compresenza: firma lezione esistente
               $stato['lezione'] = $lezione;
               break;

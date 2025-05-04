@@ -29,7 +29,7 @@ class CattedraRepository extends BaseRepository {
    * Restituisce la lista delle cattedre del docente indicato
    *
    * @param Docente $docente Docente di cui recuperare le cattedre
-   * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo]
+   * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo,V=vettore di dati]
    *
    * @return array Dati formattati in un array associativo
    */
@@ -44,14 +44,15 @@ class CattedraRepository extends BaseRepository {
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome', 'ASC')
       ->setParameter('docente', $docente)
       ->setParameter('attiva', 1)
-      ->getQuery();
+      ->getQuery()
+      ->getResult();
     // formato dati
     if ($tipo == 'Q') {
       // risultato query (vettore di oggetti)
-      $dati = $cattedre->getResult();
+      $dati = $cattedre;
     } elseif ($tipo == 'C') {
       // form ChoiceType
-      foreach ($cattedre->getResult() as $cat) {
+      foreach ($cattedre as $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati[$label] = $cat;
@@ -60,7 +61,7 @@ class CattedraRepository extends BaseRepository {
       // vettore di dati
       $dati['lista'] = [];
       $dati['label'] = [];
-      foreach ($cattedre->getResult() as $idx => $cat) {
+      foreach ($cattedre as $idx => $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
         ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati['lista'][$idx] = ['id' => $cat->getId(), 'tipo' => $cat->getTipo(),
@@ -73,7 +74,7 @@ class CattedraRepository extends BaseRepository {
       // array associativo
       $dati['choice'] = [];
       $dati['lista'] = [];
-      foreach ($cattedre->getResult() as $cat) {
+      foreach ($cattedre as $cat) {
         $label = $cat->getClasse().' - '.$cat->getMateria()->getNomeBreve().
           ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
         $dati['choice'][$label] = $cat;

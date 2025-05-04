@@ -225,7 +225,6 @@ class RegistroController extends BaseController
    * @param int $ora Ora di lezione del giorno
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/registro/add/{cattedra}/{classe}/{data}/{ora}', name: 'lezioni_registro_add', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -312,10 +311,11 @@ class RegistroController extends BaseController
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
-    $label['materia'] = $materia->getNomeBreve();
+    $label['materia'] = $materia;
+    $label['materiaNome'] = $materia->getNomeBreve();
     if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
-      $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
+      $label['materiaNome'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
     $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
@@ -339,6 +339,20 @@ class RegistroController extends BaseController
           'label_attr' => ['class' => 'radio-inline col-sm-2'],
           'required' => true]);
     }
+    if (!$cattedra && empty($controllo['sostituzioneNA']) && empty($controllo['sostituzioneMultipla'])) {
+      // sostituzione: imposta materia
+      $materie = $this->em->getRepository(Materia::class)->materieClasse($classe, true, 'C');
+      $form = $form
+        ->add('materia', ChoiceType::class, ['label' => 'label.materia',
+          'data' => count($lezioni) > 0 ? $lezioni[0]->getMateria() : $materia,
+          'choices' => array_merge([$materia->getNome() => $materia], $materie),
+          'choice_value' => 'id',
+          'choice_attr' => fn(): array => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
+          'choice_translation_domain' => false,
+          'disabled' => false,
+          'required' => true]);
+    }
     $form = $form
       ->add('argomento', MessageType::class, ['label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'data' => empty($controllo['compresenza']) ? '' : $controllo['compresenza']->getArgomento(),
@@ -355,7 +369,7 @@ class RegistroController extends BaseController
           'data' => empty($controllo['compresenza']) ? null : $controllo['compresenza']->getModuloFormativo(),
           'choices' => $opzioniModuloFormativo,
           'placeholder' => 'label.nessuno',
-          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'choice_attr' => fn(): array => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
           'choice_translation_domain' => false,
           'required' => false]);
@@ -386,6 +400,10 @@ class RegistroController extends BaseController
       $trasformazione = $reg->trasformaNuovaLezione($cattedra, $materia, $tipoGruppo, $gruppo,
         $controllo, $lezioni, $firmeLezioni);
       // ciclo per ore successive
+      if (!empty($controllo['sostituzioneMultipla'])) {
+        // sostituzione multipla: materia
+        $materia = $controllo['sostituzioneMultipla'];
+      }
       for ($numOra = $ora; $numOra <= $form->get('fine')->getData(); $numOra++) {
         if ($numOra > $ora || empty($trasformazione['lezione'])) {
           // nuova lezione
@@ -395,7 +413,9 @@ class RegistroController extends BaseController
             ->setClasse($classe)
             ->setGruppo($gruppo)
             ->setTipoGruppo($tipoGruppo)
-            ->setMateria($materia);
+            ->setMateria(($cattedra || !$form->has('materia') || $form->get('materia')->getData() == null) ?
+              $materia : $form->get('materia')->getData())
+            ->setSostituzione(!$cattedra);
           if ($materia->getTipo() == 'S') {
             // nuova lezione di sostegno: sempre senza gruppi
             $classeComune = $classe;
@@ -445,6 +465,9 @@ class RegistroController extends BaseController
             $lezione
               ->setArgomento($form->get('argomento')->getData())
               ->setAttivita($form->get('attivita')->getData());
+            if ($form->has('materia') && $form->get('materia')->getData()) {
+              $lezione->setMateria($form->get('materia')->getData());
+            }
             if ($cattedra) {
               $lezione->setModuloFormativo($form->get('moduloFormativo')->getData());
             }
@@ -616,7 +639,9 @@ class RegistroController extends BaseController
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$lezioneDocente->getClasse();
-    $label['materia'] = $lezioneDocente->getMateria()->getNomeBreve();
+    $label['materia'] = $lezioneDocente->getMateria()->getNomeBreve().
+      ($lezioneDocente->getSostituzione() && $lezioneDocente->getMateria()->getTipo() != 'U' ?
+      ' ('.$trans->trans('label.tipo_materia_U').')' : '');
     $label['ora'] = $lezioneDocente->getOra();
     if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
@@ -1677,6 +1702,7 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
+  //TODO: da rimuovere, permette modifica modulo formativo
   private function edit2(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                        LogHandler $dblogger, int $cattedra, int $classe, string $data,
                        int $ora): Response {

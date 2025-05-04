@@ -1296,6 +1296,28 @@ class BrowserContext extends BaseContext {
     $this->assertTrue($field && strtolower($field->getValue()) != strtolower((string) $valore));
   }
 
+  /**
+   * Controlla che il campo non sia presente nel form
+   *  $testoParam: campo del form identificato tramite attributo id|name|label
+   *
+   * @Then il campo :testoParam non è presente
+   */
+  public function campoNonPresente($testoParam): void {
+    $field = $this->session->getPage()->findField($testoParam);
+    $this->assertTrue($field == null);
+  }
+
+  /**
+   * Controlla che il campo sia presente e visibile nel form
+   *  $testoParam: campo del form identificato tramite attributo id|name|label
+   *
+   * @Then il campo :testoParam è presente
+   */
+  public function campoPresente($testoParam): void {
+    $field = $this->session->getPage()->findField($testoParam);
+    $this->assertTrue($field && $field->isVisible());
+  }
+
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 
