@@ -6,7 +6,7 @@ Funzionalità: Aggiunge una nuova lezione al registro
   Bisogna controllare la visualizzazione degli errori sui parametri
   Bisogna controllare l'inserimento di una nuova lezione
   Bisogna controllare l'aggiunta di una firma ad una lezione esistente
-  Bisogna controllare l'inserimento di una lezione multiclasse
+  Bisogna controllare l'inserimento di una lezione pluriclasse
   Utilizzando "_cattedreFixtures.yml"
 
 
@@ -300,7 +300,7 @@ Schema dello scenario: Inserisce una nuova firma di supplenza su una lezione esi
 
 
 ################################################################################
-# Bisogna controllare l'inserimento di una lezione multiclasse
+# Bisogna controllare l'inserimento di una lezione pluriclasse
 
 Schema dello scenario: Inserisce una nuova lezione di supplenza in contemporanea su un'altra classe
   Dato login utente "<docente>"
