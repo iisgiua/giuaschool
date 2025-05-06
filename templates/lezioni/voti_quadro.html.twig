@@ -55,7 +55,7 @@
       {% for d in dati.lista.S|keys %}
           <th class="gs-color-2">
         {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Scritta/Grafica per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.S[d] is empty %}Modifica la valutazione Scritta/Grafica per la classe{% else %}Modifica la valutazione Scritta/Grafica: {{ dati.lista.S[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
         {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
         {% endif %}
@@ -68,7 +68,7 @@
       {% for d in dati.lista.O|keys %}
           <th class="gs-color-3">
         {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Orale per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.O[d] is empty %}Modifica la valutazione Orale per la classe{% else %}Modifica la valutazione Orale: {{ dati.lista.O[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
         {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
         {% endif %}
@@ -81,7 +81,7 @@
       {% for d in dati.lista.P|keys %}
           <th class="gs-color-4">
         {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': d[7:]}) }}" role="button" title="Modifica la valutazione Pratica per la classe"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.P[d] is empty %}Modifica la valutazione Pratica per la classe{% else %}Modifica la valutazione Pratica: {{ dati.lista.P[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
         {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
         {% endif %}

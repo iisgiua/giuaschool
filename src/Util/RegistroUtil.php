@@ -1664,7 +1664,7 @@ class RegistroUtil {
       }
       $data = $mesi[(int) $v['data']->format('n')].' '.$v['data']->format('j').
         ($v['data']->format('j') < 10 ? '  ' : ' ').$v['data']->format('Y-m-d');
-      $dati['lista'][$v['tipo']][$data.'.'.$v['ordine']] = 1;
+      $dati['lista'][$v['tipo']][$data.'.'.$v['ordine']] = $v['argomento'];
       $dati['voti'][$v['alunno_id']][$v['tipo']][$data.'.'.$v['ordine']] = $v;
       if ($v['media'] && $v['voto'] > 0) {
         $dati['medie'][$v['alunno_id']][$v['tipo']] += $v['voto'];
