@@ -40,7 +40,6 @@ class ColloquiController extends BaseController {
    * Visualizza le richieste di colloquio
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/richieste', name: 'colloqui_richieste', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -51,8 +50,7 @@ class ColloquiController extends BaseController {
     // controllo fine colloqui
     $oggi = new DateTime('today');
     $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
-    $fine->modify('-30 days');
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00');
     if ($oggi > $fine) {
       // visualizza errore
       $info['errore'] = 'exception.colloqui_sospesi';
@@ -68,7 +66,6 @@ class ColloquiController extends BaseController {
    * Visualizza le vecchie richieste di colloquio ricevute dal docente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/storico', name: 'colloqui_storico', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -90,7 +87,6 @@ class ColloquiController extends BaseController {
    * @param int $id Identificativo della richiesta di colloquio
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/conferma/{id}', name: 'colloqui_conferma', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -136,7 +132,6 @@ class ColloquiController extends BaseController {
    * @param int $id Identificativo della richiesta di colloquio
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/rifiuta/{id}', name: 'colloqui_rifiuta', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -188,7 +183,6 @@ class ColloquiController extends BaseController {
    * @param int $id Identificativo della richiesta di colloquio
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/modifica/{id}', name: 'colloqui_modifica', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -233,7 +227,6 @@ class ColloquiController extends BaseController {
    * Gestione dell'inserimento dei giorni di colloquio
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/gestione/', name: 'colloqui_gestione', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -259,7 +252,6 @@ class ColloquiController extends BaseController {
    * @param int $id Identificativo del ricevimento esistente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/edit/{id}', name: 'colloqui_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -295,8 +287,8 @@ class ColloquiController extends BaseController {
     $oggi = new DateTime('today');
     $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
     $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
-    $info['fine'] = $fine->modify('-30 days')->format('d/m/Y');
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00');
+    $info['fine'] = $fine->format('d/m/Y');
     $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
     // lista sedi
     $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
@@ -386,7 +378,6 @@ class ColloquiController extends BaseController {
    * @param int $id Ricevimento da cancellare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -423,7 +414,6 @@ class ColloquiController extends BaseController {
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/create', name: 'colloqui_create', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -477,7 +467,7 @@ class ColloquiController extends BaseController {
         if (!str_starts_with((string) $luogo, 'https://') && !str_starts_with((string) $luogo, 'http://')) {
           $luogo = 'https://'.$luogo;
         }
-    }
+      }
       if ($form->isValid()) {
         // genera date
         $avviso = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
@@ -501,7 +491,6 @@ class ColloquiController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/genitori', name: 'colloqui_genitori', methods: ['GET'])]
   #[IsGranted('ROLE_GENITORE')]
@@ -538,9 +527,6 @@ class ColloquiController extends BaseController {
   #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta')]
   #[IsGranted('ROLE_GENITORE')] // requirements={"id": "\d+"},
   public function disdetta(LogHandler $dblogger, int $id): Response {
-    // inizializza
-    $info = [];
-    $dati = [];
     // controlla alunno
     $alunno = $this->getUser()->getAlunno();
     if (!$alunno || !$alunno->getAbilitato()) {
@@ -659,7 +645,6 @@ class ColloquiController extends BaseController {
    * @param int $pagina Numero di pagina per la lista dei alunni
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/cerca/{pagina}', name: 'colloqui_cerca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
@@ -707,7 +692,6 @@ class ColloquiController extends BaseController {
    * @param string $tipo Tipo di cancellazione [D=disabilitati, T=tutti]
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/colloqui/delete/{tipo}', name: 'colloqui_delete', requirements: ['tipo' => 'D|T'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]

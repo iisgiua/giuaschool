@@ -281,6 +281,12 @@ App\Entity\Configurazione:
     descrizione: 'Indica se consentire il caricamento da parte dei docenti dei programmi finali delle classi quinte.\<br>[formato: S=si, N=no]'
     valore: 'N'
     gestito: false
+  configurazione_SCUOLA26:
+    categoria: 'SCUOLA'
+    parametro: 'fine_colloqui'
+    descrizione: 'Data finale per i colloqui individuali\<br>[formato: AAAA-MM-GG]'
+    valore: '2023-05-10'
+    gestito: false
 
   # ----- categoria ACCESSO -----
   configurazione_ACCESSO1:

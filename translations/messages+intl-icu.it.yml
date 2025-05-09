@@ -1489,7 +1489,7 @@ exception.cattedra_sostegno: Non puoi inserire una verifica per una cattedra di 
 exception.classe_errata: La classe non è corretta.
 exception.colloqui_errore: È presente un errore nell'impostazione dell'orario del colloquio del docente.
 exception.colloqui_esiste: Esiste già una richiesta per il colloquio con il docente.
-exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso negli ultimi 30 giorni di lezione.
+exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso sino al termine delle lezioni.
 exception.conferma_invalida: "Procedura terminata con errore:<br>&nbsp;&nbsp;Utente sconosciuto"
 exception.conferma_scaduta: "Procedura terminata con errore:<br>&nbsp;&nbsp;La richiesta di attivazione è stata inviata più di 48 ore fa.<br><br>Effettua una nuova richiesta di attivazione e confermala entro 48 ore."
 exception.contrari_condotta: Non sono stati indicati i docenti contrari per una o più delibere a maggioranza.

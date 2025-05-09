@@ -58,8 +58,8 @@ class ColloquiUtil {
    *  @param string $frequenza Frequenza del ricevimento [S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=ultima settimana]
    *  @param int $durata Durata di ogni colloquio
    *  @param int $giorno Giorno della settimana [0=domenica, 1=lunedì ... 6=sabato]
-   * @param DateTime $inizio Ora inizio ricevimento
-   * @param DateTime $fine Ora fine ricevimento
+   *  @param DateTime $inizio Ora inizio ricevimento
+   *  @param DateTime $fine Ora fine ricevimento
    *  @param string $luogo Luogo/link del colloquio
    *
    *  @return string|null Avviso su colloqui duplicati o null se tutto ok
@@ -72,7 +72,7 @@ class ColloquiUtil {
     // inizio e fine colloqui
     $dataInizio = new DateTime('tomorrow');
     $dataFine = (DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00'))->modify('-30 days');
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00'));
     if ($dataInizio > $dataFine) {
       // errore: date oltre il limite
       return 'exception.colloqui_sospesi';
