@@ -877,7 +877,7 @@ class VotiController extends BaseController {
     $pdf->createFromHtml($html);
     // invia il documento
     $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
-      strtoupper(str_replace(' ', '-', $info['materia'])).'.pdf';
+      strtoupper(str_replace(' ', '-', str_replace(['/', '.', '\'', ','], '', $info['materia']))).'.pdf';
     return $pdf->send($nomefile);
   }
 
@@ -951,7 +951,7 @@ class VotiController extends BaseController {
       'dati' => $dati]);
     // invia il documento
     $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
-      strtoupper(str_replace(' ', '-', $info['materia'])).'.csv';
+      strtoupper(str_replace(' ', '-', str_replace(['/', '.', '\'', ','], '', $info['materia']))).'.csv';
     $response = new Response($csv);
     $disposition = HeaderUtils::makeDisposition(
         HeaderUtils::DISPOSITION_ATTACHMENT,
