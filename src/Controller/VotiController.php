@@ -20,6 +20,7 @@ use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
+use App\Util\StaffUtil;
 use DateTime;
 use IntlDateFormatter;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -83,7 +84,7 @@ class VotiController extends BaseController {
       }
       if ($cattedra->getMateria()->getTipo() == 'S') {
         // cattedra di sostegno: redirezione
-        return $this->redirectToRoute('lezioni_voti_sostegno', ['cattedra' => $cattedra->getId()]);
+        return $this->redirectToRoute('lezioni_voti_quadro_sostegno', ['cattedra' => $cattedra->getId()]);
       }
       // informazioni necessarie
       $classe = $cattedra->getClasse();
@@ -1007,6 +1008,62 @@ class VotiController extends BaseController {
       'Materia' => $vecchiaValutazione->getMateria()->getId()]);
     // redirezione
     return $this->redirectToRoute('lezioni_voti_quadro');
+  }
+
+  /**
+   * Medie dei voti della classe per il docente di sostegno
+   *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param StaffUtil $staff Funzioni di utilità per il personale
+   * @param int $classe Identificativo della classe
+   * @param int $periodo Periodo relativo allo scrutinio
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/lezioni/voti/quadro/sostegno/{cattedra}/{periodo}', name: 'lezioni_voti_quadro_sostegno', requirements: ['cattedra' => '\d+', 'periodo' => '1|2|3|0'], defaults: ['cattedra' => 0, 'periodo' => 0], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function votiQuadroSostegno(RegistroUtil $reg, StaffUtil $staff, int $cattedra, int $periodo): Response {
+    // inizializza variabili
+    $dati = null;
+    $info = null;
+    // parametro cattedra
+    if ($cattedra == 0) {
+      // recupera parametri da sessione
+      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+    }
+    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+    if (!$cattedra) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    $classe = $cattedra->getClasse();
+    if (!$this->em->getRepository(Cattedra::class)->docenteClasse($this->getUser(), $classe, true)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // periodo
+    $listaPeriodi = $reg->infoPeriodi();
+    // seleziona periodo se non indicato
+    if ($periodo == 0) {
+      // seleziona periodo in base alla data
+      $datiPeriodo = $reg->periodo(new DateTime());
+      $periodo = $datiPeriodo['periodo'];
+    } else {
+      $datiPeriodo = $listaPeriodi[$periodo];
+    }
+    // info da visualizzare
+    $info['periodo'] = $periodo;
+    $info['listaPeriodi'] = $listaPeriodi;
+    $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+    $info['alunno'] = $cattedra->getAlunno();
+    // legge voti
+    $dati = $staff->voti($classe, $datiPeriodo);
+    // visualizza pagina
+    return $this->render('lezioni/voti_quadro_sostegno.html.twig', [
+      'pagina_titolo' => 'page.lezioni_voti_sostegno',
+      'cattedra' => $cattedra,
+      'dati' => $dati,
+      'info' => $info]);
   }
 
 }

@@ -1,0 +1,127 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not cattedra %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_medie'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_medie'|trans }} {{ cattedra.classe }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno.cognome~' '~info.alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <div class="row gs-mb-1">
+    <div class="col-sm-4">
+      <strong class="gs-big">Periodo:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo"><strong>{{ info.periodo ? info.listaPeriodi[info.periodo].nome : 'Scegli' }}</strong><span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for p,d in info.listaPeriodi %}
+      {% if d.nome %}
+          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_voti_quadro_sostegno', {'classe': classe.id, 'periodo': p}) }}">{{ d.nome }}</a></li>
+      {% endif %}
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-4 text-center">
+      <button id="gs-filtro" class="btn btn-default btn-sm" role="button" title="Filtra gli alunni da visualizzare"><span class="glyphicon glyphicon-filter gs-mr-3"></span><strong>Visualizza solo il tuo alunno</strong></button>
+    </div>
+    <div class="col-sm-4 text-right">
+    {% if info.periodo %}
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_sostegno') }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli voti</strong></a>
+    {% endif %}
+    </div>
+  </div>
+  <div class="gs-table-sticky-wrapper">
+    <table id="gs-medie" class="gs-table-sticky">
+      <thead>
+        <tr>
+          <th class="gs-col-sticky gs-color-1">Alunno</th>
+    {% for m in dati.materie %}
+          <th class="gs-color-2">{{ m.nomeBreve }}</th>
+    {% endfor %}
+          <th class="gs-color-3">Media</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for ka,a in dati.alunni %}
+        <tr {{ ka == info.alunno.id ? 'id="gs-alunno"' : 'style="display: none;"' }}>
+          <td class="gs-col-sticky gs-pt-1 gs-pb-1">
+            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <span{{ ka == info.alunno.id ? ' style="display: none;"' }}><strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small></span>
+            {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          </td>
+    {% for km,m in dati.materie %}
+          <td><span class="gs-big label label-{{ dati.medie[ka][km] < 5.0 ? 'danger' : (dati.medie[ka][km] < 6.0 ? 'warning' : 'success') }}">{{ dati.medie[ka][km] ?: '--' }}</span></td>
+    {% endfor %}
+          <td class="gs-color-3"><span class="gs-big label label-{{ dati.medie[ka][0] < 5.0 ? 'danger' : (dati.medie[ka][0] < 6.0 ? 'warning' : 'success') }}">{{ dati.medie[ka][0] ?: '--' }}</span></td>
+        </tr>
+  {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% include 'include/modal-info.html.twig' %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('[data-toggle="popover"]').popover();
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
+    $('button.gs-show-hide').on('click', function (e) {
+      var el = $(this).parent().siblings('div');
+      if (el.is(':visible')) {
+        el.fadeOut();
+        $(this).attr('title', 'Apre la scheda con le informazioni riservate');
+        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+      } else {
+        el.fadeIn();
+        $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
+        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+      }
+    });
+  });
+  $('.gs-table-sticky td').on('mouseenter', function() {
+    var index = $(this).index();
+    if (index > 0) {
+      $('.gs-table-sticky tr').each(function() {
+        $(this).find('td').eq(index).addClass('gs-hover');
+      });
+    }
+  });
+  $('.gs-table-sticky td').on('mouseleave', function() {
+    var index = $(this).index();
+    if (index > 0) {
+      $('.gs-table-sticky tr').each(function() {
+        $(this).find('td').eq(index).removeClass('gs-hover');
+      });
+    }
+  });
+  $('#gs-filtro').on('click', function() {
+    var t = $(this).find('strong').text();
+    if (t == 'Visualizza tutti') {
+      $(this).find('strong').text('Visualizza solo il tuo alunno');
+      $('#gs-medie tbody tr').hide();
+      $('#gs-alunno > td:nth-child(1) > span').hide();
+      $('#gs-alunno').show();
+    } else {
+      $(this).find('strong').text('Visualizza tutti');
+      $('#gs-medie tbody tr').show();
+      $('#gs-alunno > td:nth-child(1) > span').show();
+    }
+  });
+});
+</script>
+{% endblock %}

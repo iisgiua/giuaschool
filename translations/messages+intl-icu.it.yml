@@ -919,6 +919,7 @@ page.lezioni_riepilogo: Riepilogo delle Lezioni
 page.lezioni_tabellone: Tabellone Scrutini
 page.lezioni_voti_dettagli: Dettagli Valutazioni
 page.lezioni_voti: Quadro Valutazioni
+page.lezioni_voti_sostegno: Medie Voti
 page.lezioni: Gestione Lezioni
 page.login_attivazione: Attivazione Alunni
 page.login_conferma: Conferma Attivazione
@@ -1035,6 +1036,7 @@ title.lezioni_riepilogo: Riepilogo delle lezioni della classe
 title.lezioni_tabellone: Tabellone dello scrutinio della classe
 title.lezioni_voti_dettagli: Dettagli delle valutazioni della classe
 title.lezioni_voti: Valutazioni della classe
+title.lezioni_medie: Medie dei voti della classe
 title.logout: Esci dal Registro Elettronico
 title.manutenzione: Impostazione della modalità manutenzione per il registro
 title.modifica_alunno: Modifica i dati di un alunno

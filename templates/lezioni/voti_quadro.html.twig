@@ -14,7 +14,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4"><em>{{ info.materia }}</em></h2>
   <div class="row text-center gs-big gs-mb-2"><em>Clicca su un voto per modificarlo o eliminarlo.</em></div>
   <div class="row gs-mb-1">
     <div class="col-sm-8">
@@ -94,9 +94,9 @@
       {% for k,a in dati.alunni %}
         {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
         <tr>
-          <td class="gs-col-sticky">
+          <td class="gs-col-sticky gs-pt-1 gs-pb-1">
             <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-            <strong>{{ a.cognome }} {{ a.nome }}<br>({{ a.dataNascita|date('d/m/Y') }})</strong>
+            <strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small>
             {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
           </td>
           {% for tipo in ['S','O','P'] %}

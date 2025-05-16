@@ -95,8 +95,8 @@ class CattedraRepository extends BaseRepository {
    */
   public function docentiScrutinio(Classe $classe) {
     // docenti del CdC (escluso potenziamento)
-    $docenti = $this->createQueryBuilder('c')
-      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.ordinamento,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
+    $cattedre = $this->createQueryBuilder('c')
+      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.ordinamento,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,(c.alunno) AS alunno,c.tipo,(c.docenteSupplenza) AS docenteSupplenza')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
       ->join('c.classe', 'cl')
@@ -107,32 +107,28 @@ class CattedraRepository extends BaseRepository {
       ->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getArrayResult();
-    // elimina docenti in più
-    $mat = [];
-    foreach ($docenti as $k=>$doc) {
-      if ($doc['tipo_materia'] == 'S' || $doc['tipo_materia'] == 'E') {
-        // non modifica cattedre di SOSTEGNO/Ed.Civica
-        continue;
+    // lista supplenze
+    $supplenze = [];
+    foreach ($cattedre as $cattedra) {
+      if ($cattedra['docenteSupplenza']) {
+        // dati del docente sostituito
+        $supplenze[] = [$cattedra['docenteSupplenza'], $cattedra['materia_id'], $cattedra['alunno'],
+          $cattedra['tipo']];
       }
-      if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
-        // memorizza materia e tipo di docente
-        $mat[$doc['materia_id']][$doc['tipo']]['id'] = $k;
-        $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
-      } else {
-        // elimina titolare di cattedra
-        if ($doc['supplenza']) {
-          // cancella titolare e lascia supplente
-          unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]['id']]);
-          $mat[$doc['materia_id']][$doc['tipo']]['id'] = $k;
-          $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
-        } elseif ($mat[$doc['materia_id']][$doc['tipo']]['supplenza'])  {
-          // cancella titolare e lascia supplente
-          unset($docenti[$k]);
+    }
+    // elimina docenti sotituiti da supplenza
+    foreach ($cattedre as $key => $cattedra) {
+      foreach ($supplenze as $supplenza) {
+        if ($cattedra['id'] == $supplenza[0] && $cattedra['materia_id'] == $supplenza[1] &&
+            $cattedra['alunno'] == $supplenza[2] && $cattedra['tipo'] == $supplenza[3]) {
+          // rimuove cattedra
+          unset($cattedre[$key]);
+          break;
         }
       }
     }
     // restituisce dati
-    return $docenti;
+    return $cattedre;
   }
 
   /**
@@ -351,6 +347,33 @@ class CattedraRepository extends BaseRepository {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce vero se il docente ha cattedre nella classe indicata
+   *
+   * @param Docente $docente Docente di cui recuperare le cattedre
+   * @param Classe $classe Classe di cui recuperare le cattedre
+   * @param bool $sostegno Se vero considera solo le cattedre di sostegno
+   *
+   * @return bool Vero se il docente ha cattedre nella classe, falso altrimenti
+   */
+  public function docenteClasse(Docente $docente, Classe $classe, bool $sostegno=false): bool {
+    // crea query
+    $query = $this->createQueryBuilder('c')
+      ->select('COUNT(c.id)')
+      ->join('c.materia', 'm')
+      ->where('c.classe=:classe AND c.docente=:docente AND c.attiva=1')
+      ->setParameter('docente', $docente)
+      ->setParameter('classe', $classe);
+    if ($sostegno) {
+      $query->andwhere("m.tipo='S'");
+    }
+    $query = $query
+      ->getQuery()
+      ->getSingleScalarResult();
+    // restituisce vero se il docente ha cattedre
+    return $query > 0;
   }
 
 }
