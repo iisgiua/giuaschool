@@ -3426,8 +3426,8 @@ class RegistroUtil {
             foreach ($lezioni as $lezione) {
               $gruppi[] = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
               if ($lezione->getTipoGruppo().':'.$lezione->getGruppo() == $gruppoClasse &&
-                  ($lezione->getSostituzione() && !$cattedra) ||
-                  (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId())) {
+                  (($lezione->getSostituzione() && !$cattedra) ||
+                  (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId()))) {
                 $compresenza = true;
                 if ($cattedra || $lezione->getTipoGruppo() != 'R') {
                   // non considera sostituzione su religione per compresenza su argomenti
@@ -3531,8 +3531,8 @@ class RegistroUtil {
         case 'gruppo':  // trasforma lezione gruppo classe o religione
           foreach ($lezioni as $lezione) {
             if ($lezione->getTipoGruppo() == $tipoGruppo && $lezione->getGruppo() == $gruppo &&
-                ($lezione->getSostituzione() && !$cattedra) ||
-                (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId())) {
+                (($lezione->getSostituzione() && !$cattedra) ||
+                (!$lezione->getSostituzione() && $cattedra && $lezione->getMateria()->getId() == $materia->getId()))) {
               // compresenza: firma lezione esistente
               $stato['lezione'] = $lezione;
               break;
