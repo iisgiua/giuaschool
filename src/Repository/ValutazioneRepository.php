@@ -139,10 +139,12 @@ class ValutazioneRepository extends BaseRepository {
    * @param array $listaAlunni Lista degli ID degli alunni di cui calcolare le medie
    * @param string $inizio Data iniziale delle valutazioni (formato YYYY-MM-DD)
    * @param string $fine Data finale delle valutazioni (formato YYYY-MM-DD)
+   * @param Docente|null $docente Docente di cui considerare le valutazioni
    *
    * @return array Vettore associativo con i dati elaborati
    */
-  public function medie(Materia $materia, array $listaAlunni, string $inizio, string $fine): array {
+  public function medie(Materia $materia, array $listaAlunni, string $inizio, string $fine,
+                        ?Docente $docente=null): array {
     $dati = [];
     $cont = [];
     // calcola medie
@@ -154,7 +156,12 @@ class ValutazioneRepository extends BaseRepository {
       ->setParameter('lista', $listaAlunni)
       ->setParameter('inizio', $inizio)
       ->setParameter('fine', $fine)
-      ->groupBy('v.alunno,v.tipo')
+      ->groupBy('v.alunno,v.tipo');
+    if ($docente) {
+      // solo valutazioni del docente indicato
+      $medie->andWhere('v.docente=:docente')->setParameter('docente', $docente);
+    }
+    $medie = $medie
       ->getQuery()
       ->getArrayResult();
     foreach ($medie as $media) {

@@ -2067,7 +2067,8 @@ class ScrutinioController extends BaseController {
         break;
       }
     }
-    $medie = $this->em->getRepository(Valutazione::class)->medie($cattedra->getMateria(), $listaAlunni, $inizio, $fine);
+    $medie = $this->em->getRepository(Valutazione::class)->medie($cattedra->getMateria(), $listaAlunni, $inizio,
+      $fine, $cattedra->getMateria()->getTipo() == 'E' ? $this->getUser() : null);
     // controlla limiti voti
     $tipo = $cattedra->getmateria()->getTipo();
     if ($tipo == 'R') {
@@ -2100,7 +2101,7 @@ class ScrutinioController extends BaseController {
       } else {
         // legge proposta univoca
         $proposta = $this->em->getRepository(PropostaVoto::class)->findOneBy(['alunno' => $alunnoId,
-          'materia' => $cattedra->getMateria()->getId(), 'periodo' => $periodo, 'docente' => $this->getUser()]);
+          'materia' => $cattedra->getMateria()->getId(), 'periodo' => $periodo]);
       }
       if ($proposta && $proposta->getUnico() != $media) {
         // proposta esistente

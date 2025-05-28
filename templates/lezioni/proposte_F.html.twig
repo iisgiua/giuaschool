@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="col-sm-4 text-center">
-    {% if cattedra and periodo in ['P', 'S', 'F'] %}
+    {% if cattedra and periodo in ['P', 'S', 'F'] and lista_periodi[periodo] == 'N' %}
       <a class="btn btn-default" href="{{ path('lezioni_scrutinio_medie', {'cattedra': cattedra.id, 'periodo': periodo}) }}" role="button" title="Inserisci le medie dei voti generate automaticamente"><strong>Inserisci media automatica</strong></a>
     {% endif %}
     </div>
