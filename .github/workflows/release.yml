@@ -16,8 +16,6 @@ jobs:
   release:
     name: Publish a new release
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     outputs:
       tag: ${{ steps.previous-release.outputs.release }}
     steps:
@@ -39,7 +37,7 @@ jobs:
       - name: Generate changelog from latest release
         id: changelog
         if: ${{ github.event.inputs.prerelease != 'TRUE' }}
-        uses: metcalfc/changelog-generator@v4.3.1
+        uses: metcalfc/changelog-generator@v4.6.2
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -53,14 +51,14 @@ jobs:
           name: "Versione ${{ github.event.inputs.version }}"
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish PROD image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -71,7 +69,7 @@ jobs:
             ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }}
 
       - name: Build and publish DEV image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -82,7 +80,7 @@ jobs:
             ghcr.io/iisgiua/giuaschool-dev:${{ github.event.inputs.version }}
 
       - name: Build and publish TEST image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: tests/docker/Dockerfile
@@ -177,8 +175,6 @@ jobs:
     needs: release
     name: Test update procedure
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
 
       - name: Check out the repo

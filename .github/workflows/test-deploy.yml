@@ -6,15 +6,14 @@ on:
     types: [opened, reopened, synchronize]
 
 env:
-  IMAGE_CACHE_DIR: '/tmp/cache/docker-image'
+  IMAGE_CACHE_DIR: /tmp/cache/docker-image
+  IMAGE_CACHE_KEY: ${{ runner.os }}-docker-image-${{ github.sha }}
 
 jobs:
 
   build:
     name: Build release
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     outputs:
       latest-release: ${{ steps.latest-release.outputs.release }}
     steps:
@@ -30,20 +29,24 @@ jobs:
           repository: "iisgiua/giuaschool"
           type: "stable"
 
-      - name: Create cache registry
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Restore image cache
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          key: ${{ env.IMAGE_CACHE_KEY }}
 
-      - name: Set up docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build docker image and cache it
-        run: |
-          docker build -t gs:test -f tests/docker/Dockerfile .
-          mkdir -p ${{ env.IMAGE_CACHE_DIR }}
-          docker save --output ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar gs:test
+      - name: Build image with cache and save tar
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: tests/docker/Dockerfile
+          tags: gs:test
+          outputs: type=docker,dest=${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Create archive for update code
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
@@ -71,20 +74,18 @@ jobs:
     name: PhpUnit tests
     needs: build
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
 
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Create cache registry
+      - name: Restore Docker image tar
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          key: ${{ env.IMAGE_CACHE_KEY }}
 
-      - name: Docker load
+      - name: Load Docker image
         run: |
           docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
@@ -103,8 +104,6 @@ jobs:
   feature-matrix:
     name: Create feature matrix
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -114,7 +113,7 @@ jobs:
 
       - name: Set matrix of features
         id: set-matrix
-        run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split(\"\\n\")[:-1]')" >> $GITHUB_OUTPUT
 
   test-behat:
     name: Behat tests
@@ -128,18 +127,18 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Create cache registry
+      - name: Restore Docker image tar
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          key: ${{ env.IMAGE_CACHE_KEY }}
 
       - name: Set swap space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 5
 
-      - name: Docker load
+      - name: Load Docker image
         run: |
           docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
@@ -152,14 +151,12 @@ jobs:
     needs: build
     name: Test update procedure
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
 
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Test update procedure
+      - name: Run test update procedure
         run: |
           TAG="${{ needs.build.outputs.latest-release }}"
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test -f tests/docker/TestUpdateDockerfile .
@@ -170,8 +167,6 @@ jobs:
     needs: [test-phpunit, test-behat, test-update]
     name: Deploy release
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
 
       - name: Check out the repo
@@ -179,7 +174,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
-        uses: metcalfc/changelog-generator@v4.3.1
+        uses: metcalfc/changelog-generator@v4.6.2
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
