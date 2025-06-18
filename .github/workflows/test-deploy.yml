@@ -76,6 +76,8 @@ jobs:
     name: PhpUnit tests
     needs: build
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     steps:
 
       - name: Check out the repo
@@ -121,6 +123,8 @@ jobs:
     name: Behat tests
     needs: [build, feature-matrix]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     strategy:
       matrix:
         feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
