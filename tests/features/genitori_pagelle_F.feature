@@ -199,9 +199,10 @@ Scenario: pagina dati per ammissione classe quinta
     | @materia_EDCIVICA:nome      |	#cas(@voto_F_5A_17:unico,2,NC,@voto_F_5A_17:unico)                                                                       | @voto_F_5A_17:assenze |
     | @materia_CONDOTTA:nome      |	#cas(@voto_F_5A_18:unico,4,NC,@voto_F_5A_18:unico)                                                                       |                       |
   E vedi la tabella "2" senza intestazioni:
-    | 1                               |	2                        |
-    | Comunicazione dei voti          | Scarica la comunicazione |
-    | esiti della classe              | Scarica la comunicazione |
+    | 1                                | 2                        |
+    | Elaborato di cittadinanza attiva | Scarica la comunicazione |
+    | Comunicazione dei voti           | Scarica la comunicazione |
+    | esiti della classe               | Scarica la comunicazione |
 
 
 ################################################################################
