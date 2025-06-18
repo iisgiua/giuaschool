@@ -35,6 +35,8 @@ jobs:
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}
+        run: |
+          mkdir -p ${{ env.IMAGE_CACHE_DIR }}
 
       - name: Build image with cache and save tar
         uses: docker/build-push-action@v5
