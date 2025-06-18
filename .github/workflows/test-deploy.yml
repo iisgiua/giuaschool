@@ -5,15 +5,14 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
-env:
-  IMAGE_CACHE_DIR: /tmp/cache/docker-image
-  IMAGE_CACHE_KEY: ${{ runner.os }}-docker-image-${{ github.sha }}
-
 jobs:
 
   build:
     name: Build release
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
+      IMAGE_CACHE_KEY: ${{ runner.os }}-docker-image-${{ github.sha }}
     outputs:
       latest-release: ${{ steps.latest-release.outputs.release }}
     steps:
