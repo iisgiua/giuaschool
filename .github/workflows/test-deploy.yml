@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_CACHE_DIR: /tmp/cache/docker-image
-      IMAGE_CACHE_KEY: ${{ runner.os }}-docker-image-${{ github.sha }}
     outputs:
       latest-release: ${{ steps.latest-release.outputs.release }}
     steps:
@@ -35,7 +34,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ env.IMAGE_CACHE_KEY }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
 
       - name: Build image with cache and save tar
         uses: docker/build-push-action@v5
@@ -82,7 +81,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ env.IMAGE_CACHE_KEY }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
 
       - name: Load Docker image
         run: |
@@ -130,7 +129,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ env.IMAGE_CACHE_KEY }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
 
       - name: Set swap space
         uses: pierotofy/set-swap-space@master
