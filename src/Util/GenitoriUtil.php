@@ -883,6 +883,11 @@ class GenitoriUtil {
         // non scrutinato
         $dati['estero'] = 1;
       }
+      // elaborato di cittadinanza attiva
+      if ($classe->getAnno() == 5 && $dati['esito']->getEsito() == 'A' &&
+          $dati['voti'][$condotta->getId()]['unico'] == 6) {
+        $dati['cittadinanza'] = true;
+      }
     } elseif ($periodo == 'G') {
       // scrutinato
       if ($dati['esito'] && $dati['esito']->getEsito() == 'X') {

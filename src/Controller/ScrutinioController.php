@@ -1120,8 +1120,8 @@ class ScrutinioController extends BaseController {
         // insufficienze con ammissione (escluse quinte)
         $errore['exception.insufficienze_ammissione_esito'] = true;
       }
-      if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0) {
-        // solo sufficienze con non ammissione
+      if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0 && $classe->getAnno() != 5) {
+        // solo sufficienze con non ammissione (escluse quinte)
         $errore['exception.sufficienze_non_ammissione_esito'] = true;
       }
       if ($form->get('esito')->getData() == 'S' && $insuff_cont == 0) {
@@ -1259,6 +1259,9 @@ class ScrutinioController extends BaseController {
       $m = ceil($dati['esito']->getMedia());
     }
     $dati['credito'] = $credito[$classe->getAnno()][$m];
+    // credito per condotta
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
+    $creditoCondotta = ($dati['voti'][$condotta->getId()]->getUnico() >= 9);
     // credito per quinta con insufficienze
     $creditoQuinta = true;
     if ($periodo == 'F' && $classe->getAnno() == 5) {
@@ -1295,11 +1298,14 @@ class ScrutinioController extends BaseController {
         'expanded' => true,
         'multiple' => true,
         'required' => false])
+      ->add('creditoCondotta', HiddenType::class, ['label' => null,
+        'data' => $creditoCondotta ? 1 : 0,
+        'required' => false])
       ->add('creditoSospeso', HiddenType::class, ['label' => null,
-        'data' => $creditoSospeso,
+        'data' => $creditoSospeso ? 1 : 0,
         'required' => false])
       ->add('creditoQuinta', HiddenType::class, ['label' => null,
-        'data' => $creditoQuinta,
+        'data' => $creditoQuinta ? 1 : 0,
         'required' => false])
       ->add('submit', SubmitType::class, ['label' => 'label.submit'])
       ->getForm();
@@ -2132,6 +2138,91 @@ class ScrutinioController extends BaseController {
     // redirect
     return $this->redirectToRoute('lezioni_scrutinio_proposte', ['cattedra' => $cattedra->getId(),
       'classe' => $cattedra->getClasse()->getId(), 'periodo' => $periodo]);
+  }
+
+  /**
+   * Compilazione della comunicazione sull'elaborato di cittadinanza attiva
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param int $alunno Identificativo dell'alunno
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/coordinatore/scrutinio/cittadinanza/{alunno}/{periodo}/{posizione}', name: 'coordinatore_scrutinio_cittadinanza', requirements: ['alunno' => '\d+', 'periodo' => 'P|S|F', 'posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function scrutinioCittadinanza(Request $request, TranslatorInterface $trans, ScrutinioUtil $scr, int $alunno,
+                                        string $periodo, int $posizione): Response {
+    // inizializza variabili
+    $dati = [];
+    // controllo alunno
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    if (!$alunno || !$alunno->getClasse()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($alunno->getClasse()->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controllo periodo
+    $lista_scrutinio = $scr->scrutinioAttivo($alunno->getClasse());
+    if ($periodo != $lista_scrutinio['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // recupera esito
+    $esito = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
+      ->join('e.scrutinio', 's')
+      ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
+      ->setParameter('alunno', $alunno)
+      ->setParameter('classe', $alunno->getClasse())
+      ->setParameter('periodo', $periodo)
+      ->getQuery()
+      ->setMaxResults(1)
+      ->getOneOrNullResult();
+    // recupera comunicazione
+    $dati = $esito->getDati();
+    // form di inserimento
+    $form = $this->container->get('form.factory')->createNamedBuilder('cittadinanza', FormType::class)
+      ->setAction($this->generateUrl('coordinatore_scrutinio_cittadinanza', ['alunno' => $alunno->getId(),
+        'periodo' => $periodo, 'posizione' => $posizione]))
+      ->add('argomento', MessageType::class, ['label' => false,
+        'data' => $dati['cittadinanza']['argomento'] ?? '',
+        'attr' => ['rows' => 6],
+        'trim' => true,
+        'required' => true])
+      ->add('modalita', MessageType::class, ['label' => false,
+        'data' => $dati['cittadinanza']['modalita'] ?? $trans->trans('message.comunicazione_cittadinanza'),
+        'attr' => ['rows' => 6],
+        'trim' => true,
+        'required' => true])
+      ->add('submit', SubmitType::class, ['label' => 'label.submit',
+	      'attr' => ['class' => 'btn-primary']])
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // memorizza dati
+      $dati['cittadinanza']['argomento'] = $form->get('argomento')->getData();
+      $dati['cittadinanza']['modalita'] = $form->get('modalita')->getData();
+      $esito->setDati($dati);
+      $this->em->flush();
+      // redirect
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
+    }
+    // visualizza pagina
+    return $this->render('coordinatore/cittadinanza_'.$periodo.'.html.twig', [
+      'alunno' => $alunno,
+      'dati' => $dati,
+      'form' => $form->createView()]);
   }
 
 }

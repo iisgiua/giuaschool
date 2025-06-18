@@ -1311,6 +1311,44 @@ class PagelleUtil {
           $dati['insuff5'][] = $ins['alunno'];
         }
       }
+      // controlla condotta < 9 per il triennio
+      $dati['condotta9'] = [];
+      if ( $dati['classe']->getAnno() >= 3 ) {
+        $condotta = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+          ->select('vs.id,(vs.alunno) AS alunno')
+          ->join('vs.materia', 'm')
+          ->join(Esito::class, 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
+          ->where("vs.scrutinio=:scrutinio AND m.tipo='C' AND vs.unico<9 AND e.esito='A'")
+          ->groupBy('vs.alunno')
+          ->setParameter('scrutinio', $dati['scrutinio'])
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($condotta as $cond) {
+          $dati['condotta9'][] = $cond['alunno'];
+        }
+      }
+      // controlla elaborato cittadinanza
+      if ($classe->getAnno() == 5) {
+        // alunni di quinta con 6 in condotta
+        $dati['cittadinanza'] = [];
+        $alunni5 = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+          ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito')
+          ->join(Esito::class, 'e', 'WITH', 'a.id=e.alunno')
+          ->join('e.scrutinio', 's')
+          ->join(VotoScrutinio::class, 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
+          ->join('vs.materia', 'm')
+          ->where("a.id in (:lista) AND e.esito='A' AND s.classe=:classe AND s.periodo='F' AND vs.unico=6 AND m.tipo='C'")
+          ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
+          ->setParameter('lista', $dati['scrutinati'])
+          ->setParameter('classe', $classe)
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($alunni5 as $alu) {
+          $dati['cittadinanza'][$alu['id']]['alunno'] = $alu;
+          $dati['cittadinanza'][$alu['id']]['esito'] =
+            $this->em->getRepository(Esito::class)->find($alu['esito']);
+        }
+      }
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {
       // legge materie
       $dati_materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
@@ -3080,6 +3118,97 @@ class PagelleUtil {
     }
     // errore
     return null;
+  }
+
+  /**
+   * Crea la comunicazione per l'elaborato di cittadinanza attiva
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param Alunno $alunno Alunno selezionato
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return string Percorso completo del file da inviare
+   */
+  public function elaboratoCittadinanza(Classe $classe, Alunno $alunno, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    $nomeClasse = $classe->getAnno() . $classe->getSezione() . $classe->getGruppo();
+    $percorso = $this->root . '/' . $this->directory[$periodo] . '/' . $nomeClasse;
+    if ( !$fs->exists($percorso) ) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
+    if ($periodo == 'F') {
+      // scrutinio finale
+      $nomefile = $nomeClasse . '-scrutinio-finale-cittadinanza-' . $alunno->getId() . '.pdf';
+      if ( !$fs->exists($percorso . '/' . $nomefile) ) {
+        // crea documento PDF
+        $this->pdf->configure(
+          $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio Finale - Comunicazione per l\'elaborato di cittadinanza attiva - Alunn' .
+          ($alunno->getSesso() == 'M' ? 'o' : 'a') . ' ' . $alunno->getCognome() . ' ' . $alunno->getNome()
+        );
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(['helvetica', '', 9]);
+        $this->pdf->getHandler()->setFooterData([0, 0, 0], [255, 255, 255]);
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = [
+          'div' => [0 => ['h' => 0, 'n' => 0], 1 => ['h' => 0, 'n' => 0]],
+          'p' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.1]],
+          'ul' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+          'ol' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+          'li' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+          'table' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.5]]];
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->elaboratoCittadinanzaDati($classe, $alunno, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_cittadinanza_' . $periodo . '.html.twig', [
+          'dati' => $dati]);
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso . '/' . $nomefile);
+      }
+      // restituisce nome del file
+      return $percorso . '/' . $nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Restituisce i dati per creare la comunicazione per l'elaborato di cittadinanza attiva
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param Alunno $alunno Alunno selezionato
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function elaboratoCittadinanzaDati(Classe $classe, Alunno $alunno, $periodo) {
+    $dati = [];
+    if ( $periodo == 'F' ) {
+      // scrutinio finale
+      $dati['scrutinio'] = $this->em->getRepository(Scrutinio::class)->findOneBy([
+        'classe' => $classe,
+        'periodo' => $periodo,
+        'stato' => 'C']);
+      $dati['classe'] = $classe;
+      $dati['alunno'] = $alunno;
+      $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
+      // legge esito
+      $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
+        ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
+        ->setParameter('alunno', $alunno)
+        ->setParameter('scrutinio', $dati['scrutinio'])
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

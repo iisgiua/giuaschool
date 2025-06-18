@@ -54,7 +54,7 @@ Scenario: visualizzazione passo precedente
     | classe        |
     | @classe_1A:id |
   Quando click su "Riapri lo scrutinio"
-  Allora la sezione "#gs-main h2" contiene "Passo 8"
+  Allora la sezione "#gs-main h2" contiene "Verbale e chiusura"
 
 Scenario: visualizzazione procedura completa
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -68,8 +68,10 @@ Scenario: visualizzazione procedura completa
   E click su "passo precedente"
   E click su "passo precedente"
   E click su "passo precedente"
+  E click su "passo precedente"
   E click su "Annulla apertura scrutinio"
   E click su "Apri lo scrutinio"
+  E click su "Conferma"
   E click su "Conferma"
   E click su "Conferma"
   E click su "Conferma"
@@ -129,8 +131,10 @@ Scenario: visualizzazione procedura completa
   E click su "passo precedente"
   E click su "passo precedente"
   E click su "passo precedente"
+  E click su "passo precedente"
   E click su "Annulla apertura scrutinio"
   E click su "Apri lo scrutinio"
+  E click su "Conferma"
   E click su "Conferma"
   E click su "Conferma"
   E click su "Conferma"

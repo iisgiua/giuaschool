@@ -19,7 +19,7 @@ Scenario: visualizzazione pagina passo 2
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
   E la sezione "#gs-main #gs-alunni-estero" contiene "@alunno_1A_6:cognome+ +@alunno_1A_6:nome+ (+#dat(@alunno_1A_6:dataNascita)+)"
   E vedi la tabella non ordinata:
     | Alunno                                                                       |	Note                          |	Ore di assenza |
@@ -37,7 +37,7 @@ Scenario: visualizzazione pagina passo 2 - aggiunta assenze
     | @classe_1A:id |
   Quando inserisci "100" nel campo "scrutinio_assenze_{{@alunno_1A_1:id}}"
   E click su "Aggiorna"
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
   E la sezione "#gs-main #gs-alunni-estero" contiene "@alunno_1A_6:cognome+ +@alunno_1A_6:nome+ (+#dat(@alunno_1A_6:dataNascita)+)"
   E vedi la tabella non ordinata:
     | Alunno                                                                       |	Note                          |	Ore di assenza |
@@ -53,7 +53,7 @@ Scenario: visualizzazione pagina passo 2 - senza dati
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_2A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
   E la sezione "#gs-main" non contiene "anno all'estero"
   E la sezione "#gs-main" non contiene "alunni trasferiti in corso d'anno"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "NESSUNO"
@@ -78,7 +78,7 @@ Scenario: visualizzazione passo precedente
     | classe        |
     | @classe_1A:id |
   Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 1"
+  Allora la sezione "#gs-main h2" contiene "Inizio dello scrutinio"
 
 Scenario: visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -93,7 +93,7 @@ Scenario: visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 3     |
-  E la sezione "#gs-main h2" contiene "Passo 3"
+  E la sezione "#gs-main h2" contiene "Voto di Educazione civica"
   E vedi la tabella "2" non ordinata senza intestazioni:
     | Alunno                                                     | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media |
     | @alunno_1A_2:cognome+ +@alunno_1A_2:nome                   | /.*/                  | /.*/     | /.*/   | /.*/    | /.*/       | /.*/        | /.*/        | /.*/       | /.*/     | /.*/  |
@@ -112,7 +112,7 @@ Scenario: memorizzazione dati e passo successivo
   E selezioni opzione "S" da lista "scrutinio_lista_{{@alunno_1A_2:id}}_testo"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
   E la sezione "#gs-main #gs-alunni-estero" contiene "@alunno_1A_6:cognome+ +@alunno_1A_6:nome+ (+#dat(@alunno_1A_6:dataNascita)+)"
   E vedi la tabella non ordinata:
     | Alunno                                                                       |	Note                          |	Ore di assenza |
@@ -132,7 +132,7 @@ Scenario: visualizzazione classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
   E la sezione "#gs-main" non contiene "anno all'estero"
   E la sezione "#gs-main" non contiene "alunni trasferiti in corso d'anno"
   E la sezione "#gs-main #gs-alunni-no-scrutinabili" contiene "NESSUNO"

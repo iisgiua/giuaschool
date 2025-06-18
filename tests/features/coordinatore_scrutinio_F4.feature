@@ -19,7 +19,7 @@ Scenario: visualizzazione pagina passo 4
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 4"
+  Allora la sezione "#gs-main h2" contiene "Voto di condotta"
   E vedi nella tabella "1" le colonne:
     | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media |
   E vedi la tabella "2" non ordinata senza intestazioni:
@@ -67,7 +67,7 @@ Scenario: visualizzazione passo precedente
     | classe        |
     | @classe_1A:id |
   Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 3"
+  Allora la sezione "#gs-main h2" contiene "Voto di Educazione civica"
 
 Scenario: visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -83,7 +83,7 @@ Scenario: visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 5     |
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
+  Allora la sezione "#gs-main h2" contiene "Requisiti di ammissione all'esame"
 
 Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -101,7 +101,7 @@ Scenario: memorizzazione dati e passo successivo
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 4"
+  Allora la sezione "#gs-main h2" contiene "Voto di condotta"
   E vedi la tabella "2" non ordinata senza intestazioni:
     | Alunno                                                     | Religione / Att. alt.                                                                                                    | Italiano                                           | Storia                                             | Inglese                                            | Matematica                                         | Informatica                                        | Sc. motorie                                        | Ed. civica                                         | Condotta | Media                                                                                                                                               |
     | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                   | NA                                                                                                                       | #cas(@voto_F_1A_0:unico,0,NC,@voto_F_1A_0:unico)   | #cas(@voto_F_1A_1:unico,0,NC,@voto_F_1A_1:unico)   | #cas(@voto_F_1A_2:unico,0,NC,@voto_F_1A_2:unico)   | #cas(@voto_F_1A_3:unico,0,NC,@voto_F_1A_3:unico)   | #cas(@voto_F_1A_5:unico,0,NC,@voto_F_1A_5:unico)   | #cas(@voto_F_1A_4:unico,0,NC,@voto_F_1A_4:unico)   | #cas(@voto_F_1A_6:unico,2,NC,@voto_F_1A_6:unico)   | 8        | #med(@voto_F_1A_0:unico,@voto_F_1A_1:unico,@voto_F_1A_2:unico,@voto_F_1A_3:unico,@voto_F_1A_4:unico,@voto_F_1A_5:unico,@voto_F_1A_6:unico,8)        |
@@ -117,7 +117,7 @@ Scenario: visualizzazione classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 4"
+  Allora la sezione "#gs-main h2" contiene "Voto di condotta"
   E vedi nella tabella "1" le colonne:
     | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Fisica | Sc. motorie | Ed. civica | Condotta | Media |
   E vedi la tabella "2" non ordinata senza intestazioni:

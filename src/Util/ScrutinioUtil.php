@@ -30,6 +30,7 @@ use App\Entity\PropostaVoto;
 use App\Entity\Scrutinio;
 use App\Entity\Staff;
 use App\Entity\VotoScrutinio;
+use App\Form\CriterioEsameType;
 use App\Form\MessageType;
 use App\Form\ScrutinioAssenza;
 use App\Form\ScrutinioAssenzaType;
@@ -446,10 +447,14 @@ class ScrutinioUtil {
           $dati = $this->quadroVoti($docente, $classe, $periodo);
           break;
         case '5':
+          // criteri ammissione esame (solo quinte)
+          $dati = $this->quadroEsame($docente, $classe, $periodo);
+          break;
+        case '6':
           // esito
           $dati = $this->quadroVoti($docente, $classe, $periodo);
           break;
-        case '6':
+        case '7':
           // credito o competenze
           if ($classe->getAnno() == 2) {
             // competenze
@@ -459,14 +464,17 @@ class ScrutinioUtil {
             $dati = $this->quadroCrediti($docente, $classe, $periodo);
           }
           break;
-        case '7':
+        case '8':
           // debiti e carenze
-          if ($classe->getAnno() != 5) {
-            // debiti e carenze, escluse le quinte
+          if ($classe->getAnno() == 5) {
+            // comunicazione elaborato cittadinanza (solo quinte)
+            $dati = $this->quadroCittadinanza($docente, $classe, $periodo);
+          } else {
+            // debiti e carenze (escluse le quinte)
             $dati = $this->quadroComunicazioni($docente, $classe, $periodo);
           }
           break;
-        case '8':
+        case '9':
           // verbale e fine
           $dati = $this->verbale($docente, $classe, $periodo);
           break;
@@ -590,21 +598,25 @@ class ScrutinioUtil {
               ['classe' => $classe->getId(), 'stato' => '5']));
           break;
         case '5':
-          // esito
-          $form->setAction($this->router->generate('coordinatore_scrutinio',
-              ['classe' => $classe->getId(), 'stato' => '6']));
+          // criteri ammissione esame (solo quinte)
+          $form = $this->esameForm($classe, $periodo, $form, $dati);
           break;
         case '6':
-          // credito o competenze
+          // esito
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '7']));
           break;
         case '7':
-          // debiti e carenze
+          // credito o competenze
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '8']));
           break;
         case '8':
+          // debiti e carenze
+          $form->setAction($this->router->generate('coordinatore_scrutinio',
+              ['classe' => $classe->getId(), 'stato' => '9']));
+          break;
+        case '9':
           // verbale e fine
           $form = $this->verbaleForm($classe, $periodo, $form, $dati);
           break;
@@ -2200,6 +2212,9 @@ class ScrutinioUtil {
           $dati['carenze'][] = $a;
         }
       }
+      // legge gli elaborati di cittadinanza attiva
+      $datiCittadinanza = $this->quadroCittadinanza($docente, $classe, $periodo);
+      $dati['cittadinanza'] = $datiCittadinanza['cittadinanza'];
     } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // legge i non ammessi
       $dati['non_ammessi'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
@@ -3075,7 +3090,34 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 3->4 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 4->3 per lo scrutinio del periodo F
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Request $request Pagina richiesta
+   * @param Form $form Form per lo scrutinio
+   * @param Classe $classe Classe di cui leggere i dati dello scrutinio
+   * @param Scrutinio $scrutinio Scrutinio da modificare
+   *
+   * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
+   */
+  public function passaggioStato_F_4_3(Docente $docente, Request $request, Form $form,
+                                        Classe $classe, Scrutinio $scrutinio) {
+    // aggiorna stato
+    $scrutinio->setStato('3');
+    $this->em->flush();
+    // log
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
+    'Scrutinio' => $scrutinio->getId(),
+	  'Classe' => $classe->getId(),
+    'Periodo' => $scrutinio->getPeriodo(),
+    'Stato iniziale' => '4',
+    'Stato finale' => '3']);
+    // ok
+    return true;
+  }
+
+  /**
+   * Esegue il passaggio di stato 4->5 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3086,7 +3128,7 @@ class ScrutinioUtil {
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
   public function passaggioStato_F_4_5(Docente $docente, Request $request, Form $form,
-                                        Classe $classe, Scrutinio $scrutinio) {
+                                       Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->reqstack->getSession()->getFlashBag()->clear();
     // legge condotta
@@ -3134,7 +3176,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 4->3 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 5->6 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3144,20 +3186,57 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_4_3(Docente $docente, Request $request, Form $form,
-                                        Classe $classe, Scrutinio $scrutinio) {
-    // aggiorna stato
-    $scrutinio->setStato('3');
-    $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-    'Scrutinio' => $scrutinio->getId(),
-	  'Classe' => $classe->getId(),
-    'Periodo' => $scrutinio->getPeriodo(),
-    'Stato iniziale' => '4',
-    'Stato finale' => '3']);
-    // ok
-    return true;
+  public function passaggioStato_F_5_6(Docente $docente, Request $request, Form $form,
+                                       Classe $classe, Scrutinio $scrutinio) {
+    // inizializza messaggi di errore
+    $this->reqstack->getSession()->getFlashBag()->clear();
+    if ($classe->getAnno() == 5) {
+      // legge dati form
+      $form->handleRequest($request);
+      if ($form->isSubmitted() && $form->isValid()) {
+        $datiScrutinio = $scrutinio->getDati();
+        $scrutinio->setDati([]);        // necessario per bug di aggiornamento
+        $this->em->flush();             // necessario per bug di aggiornamento
+        $datiScrutinio['requisitiEsame'] = $form->get('requisiti')->getData();
+        unset($datiScrutinio['requisitiAlunni']);
+        if ($datiScrutinio['requisitiEsame'] == 'A') {
+          // requisiti validi solo per alcuni alunni
+          foreach ($form->get('lista')->getData() as $alu => $requisito) {
+            $datiScrutinio['requisitiAlunni'][$alu]['invalsi'] = $requisito['invalsi'];
+            $datiScrutinio['requisitiAlunni'][$alu]['pcto'] = $requisito['pcto'];
+          }
+        }
+        // memorizza dati
+        $scrutinio->setDati($datiScrutinio);
+        // aggiorna stato
+        $scrutinio->setStato('6');
+        $this->em->flush();
+        // log
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
+          'Scrutinio' => $scrutinio->getId(),
+          'Classe' => $classe->getId(),
+          'Periodo' => $scrutinio->getPeriodo(),
+          'Stato iniziale' => '5',
+          'Stato finale' => '6']);
+        // ok
+        return true;
+      }
+    } else {
+      // aggiorna stato
+      $scrutinio->setStato('6');
+      $this->em->flush();
+      // log
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
+        'Scrutinio' => $scrutinio->getId(),
+        'Classe' => $classe->getId(),
+        'Periodo' => $scrutinio->getPeriodo(),
+        'Stato iniziale' => '5',
+        'Stato finale' => '6']);
+      // ok
+      return true;
+    }
+    // errori presenti
+    return false;
   }
 
   /**
@@ -3239,7 +3318,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 4->5 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 6->7 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3249,7 +3328,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_5_6(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_6_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $this->reqstack->getSession()->getFlashBag()->clear();
@@ -3335,8 +3414,8 @@ class ScrutinioUtil {
         // insufficienze con ammissione (escluse quinte)
         $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
-      if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0) {
-        // solo sufficienze con non ammissione
+      if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0 && $alunno->getClasse()->getAnno() != 5) {
+        // solo sufficienze con non ammissione (escluse quinte)
         $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
@@ -3387,15 +3466,15 @@ class ScrutinioUtil {
     }
     if (empty($errore) && empty($errore_condotta)) {
       // aggiorna stato
-      $scrutinio->setStato('6');
+      $scrutinio->setStato('7');
       $this->em->flush();
       // log
       $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '5',
-        'Stato finale' => '6']);
+        'Stato iniziale' => '6',
+        'Stato finale' => '7']);
       // ok
       return true;
     }
@@ -3443,6 +3522,33 @@ class ScrutinioUtil {
    */
   public function passaggioStato_F_6_5(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
+    // aggiorna stato
+    $scrutinio->setStato('5');
+    $this->em->flush();
+    // log
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
+      'Scrutinio' => $scrutinio->getId(),
+      'Classe' => $classe->getId(),
+      'Periodo' => $scrutinio->getPeriodo(),
+      'Stato iniziale' => '6',
+      'Stato finale' => '5']);
+    // ok
+    return true;
+  }
+
+  /**
+   * Esegue il passaggio di stato 7->6 per lo scrutinio del periodo F
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Request $request Pagina richiesta
+   * @param Form $form Form per lo scrutinio
+   * @param Classe $classe Classe di cui leggere i dati dello scrutinio
+   * @param Scrutinio $scrutinio Scrutinio da modificare
+   *
+   * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
+   */
+  public function passaggioStato_F_7_6(Docente $docente, Request $request, Form $form,
+                                        Classe $classe, Scrutinio $scrutinio) {
     // cancella medie
     $this->em->getConnection()
       ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL,credito_precedente=NULL WHERE scrutinio_id=:scrutinio")
@@ -3460,15 +3566,15 @@ class ScrutinioUtil {
       $this->em->flush();
     }
     // aggiorna stato
-    $scrutinio->setStato('5');
+    $scrutinio->setStato('6');
     $this->em->flush();
     // log
     $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '6',
-      'Stato finale' => '5']);
+      'Stato iniziale' => '7',
+      'Stato finale' => '6']);
     // ok
     return true;
   }
@@ -3564,7 +3670,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 5->6 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 7->8 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3574,7 +3680,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_6_7(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_7_8(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $errore = [];
@@ -3621,15 +3727,15 @@ class ScrutinioUtil {
     }
     if (empty($errore)) {
       // aggiorna stato
-      $scrutinio->setStato('7');
+      $scrutinio->setStato('8');
       $this->em->flush();
       // log
       $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '6',
-        'Stato finale' => '7']);
+        'Stato iniziale' => '7',
+        'Stato finale' => '8']);
       // ok
       return true;
     }
@@ -3744,7 +3850,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_7_6(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_8_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, 'F');
@@ -3764,15 +3870,15 @@ class ScrutinioUtil {
       $e->setDati($valori);
     }
     // aggiorna stato
-    $scrutinio->setStato('6');
+    $scrutinio->setStato('7');
     $this->em->flush();
     // log
     $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '7',
-      'Stato finale' => '6']);
+      'Stato iniziale' => '8',
+      'Stato finale' => '7']);
     // ok
     return true;
   }
@@ -3879,7 +3985,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 6->7 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 8->9 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3889,13 +3995,26 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_7_8(Docente $docente, Request $request, Form $form,
-                                        Classe $classe, Scrutinio $scrutinio) {
+  public function passaggioStato_F_8_9(Docente $docente, Request $request, Form $form,
+                                       Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $errore = [];
     $this->reqstack->getSession()->getFlashBag()->clear();
     // distingue per classe
-    if ($classe->getAnno() != 5) {
+    if ($classe->getAnno() == 5) {
+      // controllo comunicazioni cittadinanza
+      $dati = $this->quadroCittadinanza($docente, $classe, 'F');
+      foreach ($dati['esiti'] as $alu => $e) {
+        $datiEsito = $e->getDati();
+        if (isset($dati['cittadinanza'][$alu]) && (!isset($datiEsito['cittadinanza']) ||
+            empty($datiEsito['cittadinanza']['argomento']) || empty($datiEsito['cittadinanza']['modalita']))) {
+          // alunno senza comunicazione
+          $nome = $dati['cittadinanza'][$alu]['cognome'].' '.$dati['cittadinanza'][$alu]['nome'];
+          $sesso = ($dati['cittadinanza'][$alu]['sesso'] == 'M' ? 'o' : 'a');
+          $errore[] = $this->trans->trans('exception.no_comunicazione_cittadinanza', ['sex' => $sesso, 'alunno' => $nome]);
+        }
+      }
+    } else {
       // legge comunicazioni
       $dati = $this->quadroComunicazioni($docente, $classe, 'F');
       // controllo debiti
@@ -3925,15 +4044,15 @@ class ScrutinioUtil {
     }
     if (empty($errore)) {
       // aggiorna stato
-      $scrutinio->setStato('8');
+      $scrutinio->setStato('9');
       $this->em->flush();
       // log
       $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '7',
-        'Stato finale' => '8']);
+        'Stato iniziale' => '8',
+        'Stato finale' => '9']);
       // ok
       return true;
     }
@@ -3946,7 +4065,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 7->6 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 9->8 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3956,24 +4075,24 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_8_7(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_9_8(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // aggiorna stato
-    $scrutinio->setStato('7');
+    $scrutinio->setStato('8');
     $this->em->flush();
     // log
     $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '8',
-      'Stato finale' => '7']);
+      'Stato iniziale' => '9',
+      'Stato finale' => '8']);
     // ok
     return true;
   }
 
   /**
-   * Esegue il passaggio di stato 8->C per lo scrutinio del periodo P
+   * Esegue il passaggio di stato 9->C per lo scrutinio del periodo P
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3983,7 +4102,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_8_C(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_9_C(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->reqstack->getSession()->getFlashBag()->clear();
@@ -4033,7 +4152,7 @@ class ScrutinioUtil {
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '8',
+          'Stato iniziale' => '9',
           'Stato finale' => 'C']);
         // ok
         return true;
@@ -4049,7 +4168,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato C->7 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato C->9 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -4059,7 +4178,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_C_8(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_C_9(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // controlla se è possibile riapertura
     if (!($docente instanceOf Staff) || $scrutinio->getSincronizzazione()) {
@@ -4083,7 +4202,7 @@ class ScrutinioUtil {
       $fs->rename($file->getRealPath(), $percorso.'/BACKUP.'.$num.'/'.$file->getBasename());
     }
     // aggiorna stato
-    $scrutinio->setStato('8');
+    $scrutinio->setStato('9');
     $this->em->flush();
     // log
     $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
@@ -4091,7 +4210,7 @@ class ScrutinioUtil {
       'Classe' => $classe->getId(),
       'Periodo' => $scrutinio->getPeriodo(),
       'Stato iniziale' => 'C',
-      'Stato finale' => '8']);
+      'Stato finale' => '9']);
     // ok
     return true;
   }
@@ -5366,6 +5485,111 @@ class ScrutinioUtil {
         'required' => true]);
     // restituisce form
     return $form;
+  }
+
+  /**
+   * Restituisce il quadro per i criteri di ammissione all'esame
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Classe $classe Classe relativa alle proposte di voto
+   * @param string $periodo Periodo relativo allo scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function quadroEsame(Docente $docente, Classe $classe, $periodo) {
+    $dati = [];
+    $dati['requisitiAlunni'] = [];
+    // legge dati scrutinio
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
+    $datiScrutinio = $scrutinio->getDati();
+    $dati['requisitiEsame'] = $datiScrutinio['requisitiEsame'] ?? 'T';
+    // legge alunni
+    $lista = $this->alunniInScrutinio($classe, $periodo);
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      ->where('a.id in (:lista)')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+			->setParameter('lista', $lista)
+      ->getQuery()
+      ->getResult();
+    foreach ($alunni as $alu) {
+      $dati['alunni'][$alu->getId()] = $alu;
+      $dati['requisitiAlunni'][$alu->getId()]['invalsi'] = $datiScrutinio['requisitiAlunni'][$alu->getId()]['invalsi'] ?? true;
+      $dati['requisitiAlunni'][$alu->getId()]['pcto'] = $datiScrutinio['requisitiAlunni'][$alu->getId()]['pcto'] ?? true;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Gestione del form per i criteri di ammissione all'esame
+   *
+   * @param Classe $classe Classe relativa alle proposte di voto
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param FormBuilder $form Form per lo scrutinio
+   * @param array $dati Dati passati al form
+   *
+   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
+   */
+  public function EsameForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
+    // crea form
+    $form
+      ->setAction($this->router->generate('coordinatore_scrutinio',
+        ['classe' => $classe->getId(), 'stato' => '6']));
+    if ($periodo == 'F' && $classe->getAnno() == 5) {
+      $form
+        ->add('requisiti', ChoiceType::class, ['label' => 'label.esame_requisiti',
+          'data' => $dati['requisitiEsame'],
+          'choices' => ['label.esame_requisiti_tutti' => 'T', 'label.esame_requisiti_alunni' => 'A'],
+          'placeholder' => null,
+          'expanded' => true,
+          'multiple' => false,
+          'label_attr' => ['class' => 'radio-inline gs-mr-4'],
+          'required' => true])
+        ->add('lista', CollectionType::class, ['label' => false,
+          'data' => $dati['requisitiAlunni'],
+          'entry_type' => CriterioEsameType::class,
+          'entry_options' => ['label' => false]]);
+    }
+    // restituisce form
+    return $form;
+  }
+
+  /**
+   * Restituisce il quadro per le gestione dell'elaborato di cittadinanza attiva
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Classe $classe Classe relativa alle proposte di voto
+   * @param string $periodo Periodo relativo allo scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function quadroCittadinanza(Docente $docente, Classe $classe, $periodo) {
+    $dati = [];
+    $dati['cittadinanza'] = [];
+    // legge alunni
+    $lista = $this->alunniInScrutinio($classe, $periodo);
+    if ($periodo == 'F' && $classe->getAnno() == 5) {
+      // alunni di quinta con 6 in condotta
+      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito')
+        ->join(Esito::class, 'e', 'WITH', 'a.id=e.alunno')
+        ->join('e.scrutinio', 's')
+        ->join(VotoScrutinio::class, 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
+        ->join('vs.materia', 'm')
+        ->where("a.id in (:lista) AND e.esito='A' AND s.classe=:classe AND s.periodo=:periodo AND vs.unico=6 AND m.tipo='C'")
+        ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
+        ->setParameter('lista', $lista)
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($alunni as $alu) {
+        $dati['cittadinanza'][$alu['id']]  = $alu;
+        $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

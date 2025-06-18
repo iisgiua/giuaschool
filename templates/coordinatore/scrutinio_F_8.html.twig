@@ -8,99 +8,182 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 8: verbale e chiusura</h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
-  <div class="gs-mb-5">
-    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Numero del verbale</label>
-    <div class="form-group">
-      <div class="col-sm-3 gs-ml-5">
-        {{ form_widget(form.numeroVerbale) }}
-      </div>
-    </div>
+    {% if classe.anno == 5 %}
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Comunicazioni sull'elaborato di cittadinanza attiva</h2>
+  <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-3"><em>Clicca sul pulsante di modifica per inserire le comunicazioni, o su una comunicazione compilata per modificarla.</em></h3>
+      {% if dati.cittadinanza|length > 0 %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="gs-text-normal text-center gs-big gs-pb-0"><strong>Alunni con 6 in condotta</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6 gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">Alunno</th>
+        <th class="col-sm-6 gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">Comunicazione argomento, tempi e modalità di consegna</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for alunno,a in dati.cittadinanza %}
+      <tr>
+        <td class="gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          <strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          {% if a.bes != 'N' %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          {% endif %}
+        </td>
+        <td>
+          {% if dati.esiti[alunno].dati.cittadinanza.argomento is not defined or dati.esiti[alunno].dati.cittadinanza.argomento is empty or dati.esiti[alunno].dati.cittadinanza.modalita is not defined or dati.esiti[alunno].dati.cittadinanza.modalita is empty %}
+          <button type="button" class="btn btn-xs btn-primary gs-button-remote gs-ml-4" title="Compila la comunicazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_cittadinanza', {'alunno': alunno, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+          {% else %}
+          <button type="button" class="btn btn-sm btn-success gs-button-remote gs-ml-4" title="Modifica la comunicazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_cittadinanza', {'alunno': alunno, 'periodo': 'F'}) }}"><strong>COMPILATA</strong></button>
+          {% endif %}
+        </td>
+      </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+      {% endif %}
+    {% else %}
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Comunicazioni dei debiti e delle carenze</h2>
+  <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-3"><em>Clicca sul pulsante di modifica per inserire le comunicazioni, o su una comunicazione compilata per modificarla.</em></h2>
+      {% if dati.debiti|length > 0 %}
+  <div>
+    <table class="table table-bordered table-hover table-striped">
+      <caption class="gs-text-normal text-center gs-big gs-pb-0"><strong>Debiti formativi (alunni con giudizio sospeso)</strong></caption>
+      <thead class="bg-success">
+        <tr>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con debito formativo">Materie</span></small>
+          </th>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione dei debiti formativi">Comunicazione</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alunno,a in dati.debiti %}
+        <tr>
+          {% for materia,m in a %}
+            {% if loop.first %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ m.cognome }} {{ m.nome }}</strong><br><small>({{ m.dataNascita|date('d/m/Y') }})</small>
+              {% if m.bes != 'N' %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~m.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+              {% endif %}
+          </td>
+          <td>
+            {% endif %}
+            <strong>{{ m.materia }}{{ not loop.last ? ', ' }}</strong>
+            {% if loop.last %}
+          </td>
+          <td>
+              {% if dati.esiti[alunno].dati.debiti is defined and dati.esiti[alunno].dati.debiti %}
+            <button type="button" class="btn btn-sm btn-success gs-button-remote gs-ml-4" title="Modifica la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': 'F'}) }}"><strong>COMPILATA</strong></button>
+              {% else %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote gs-ml-4" title="Compila la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {'alunno': alunno, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+              {% endif %}
+          </td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-    {% for step,args in dati.verbale.struttura %}
-      {% if args.tipo == 'Argomento' and (args.classi is empty or (classe.anno~classe.sezione) in args.classi) %}
-  <div class="gs-mb-5">
-    <div class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> {{ args.sezione }}. {{ args.argomento }}</div>
-    <div class="gs-big gs-pr-4 gs-pl-4">{{ args.inizio|nl2br }}</div>
-    <div class="container-fluid alert alert-success">
-      <div class="col-sm-10"><em><strong>{{ args.testo|nl2br }}</strong></em></div>
-      <div class="col-sm-2">
-        {% if args.validato %}
-        <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'F', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></button>
-        {% else %}
-        <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Conferma il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'F', 'step': step}) }}"><span class="glyphicon glyphicon-check gs-mr-2"></span><strong>Conferma</strong></button>
-        {% endif %}
-      </div>
-    </div>
-    <div class="gs-big gs-pr-4 gs-pl-4">{{ args.fine|nl2br }}</div>
+      {% else %}
+  <div class="alert alert-success gs-mb-3" role="alert">
+    <strong>Non sono presenti debiti formativi</strong>
   </div>
       {% endif %}
-    {% endfor %}
-  <div class="gs-mb-5">
-    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Ora di chiusura</label>
-    <div class="form-group">
-      <div class="col-sm-3 gs-ml-5">
-        {{ form_widget(form.fine) }}
-      </div>
-    </div>
+      {% if dati.carenze|length > 0 %}
+  <div>
+    <table class="table table-bordered table-hover table-striped">
+      <caption class="gs-text-normal text-center gs-big gs-pb-0"><strong>Comunicazione carenze (recupero autonomo senza verifica finale)</strong></caption>
+      <thead class="bg-success">
+        <tr>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con carenze">Materie</span></small>
+          </th>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione delle carenze">Comunicazione</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alunno,a in dati.carenze %}
+        <tr>
+          {% for materia,m in a %}
+            {% if loop.first %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ m.cognome }} {{ m.nome }}</strong><br><small>({{ m.dataNascita|date('d/m/Y') }})</small>
+              {% if m.bes != 'N' %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~m.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+              {% endif %}
+          </td>
+          <td>
+            {% endif %}
+            <strong>{{ m.materia }}{{ not loop.last ? ', ' }}</strong>
+            {% if loop.last %}
+          </td>
+          <td>
+              {% if dati.esiti[alunno].dati.carenze is defined and dati.esiti[alunno].dati.carenze %}
+            <div class="col-sm-4">
+            <button type="button" class="btn btn-sm btn-success gs-button-remote" title="Modifica la comunicazione delle carenze" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_carenze', {'alunno': alunno, 'periodo': 'F'}) }}"><strong>COMPILATA</strong></button>
+            </div>
+            <div class="col-sm-8">
+                {% for cm in dati.esiti[alunno].dati.carenze_materie %}
+              <strong><em>{{ cm }}{{ not loop.last ? ', ' }}</em></strong>
+                {% else %}
+              <strong><em>NESSUNA</em></strong>
+                {% endfor %}
+            </div>
+              {% else %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la comunicazione delle carenze" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_carenze', {'alunno': alunno, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+              {% endif %}
+          </td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  <div class="alert alert-info text-center gs-big gs-mt-5 gs-mb-3">
-    <strong>Controllare i dati inseriti prima di chiudere lo scrutinio.<br>
-    Una volta chiuso, lo scrutinio potrà essere riaperto solo dalla Presidenza.</strong>
+      {% else %}
+  <div class="alert alert-success gs-mb-3" role="alert">
+    <strong>Non sono presenti carenze</strong>
   </div>
+      {% endif %}
+    {% endif %}
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
       <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '7'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button class="btn btn-primary" title="Termina la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Chiudi lo scrutinio</strong></button>
+      <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
-    {{ form_widget(form._token) }}
-    {{ form_end(form, {'render_rest': false}) }}
-    {% include 'include/modal-waiting.html.twig' %}
+    {{ form_end(form) }}
     {% include 'include/modal-remote.html.twig' %}
+    {% include 'include/modal-waiting.html.twig' %}
   {% endif %}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ parent() }}
-<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
-<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
-<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover({container: 'body'});
-  $('.input-group.time').datetimepicker({
-    format: "HH:mm",
-    useCurrent: false,
-    tooltips: {
-      incrementHour: 'Incrementa l\'ora',
-      pickHour: 'Imposta l\'ora',
-      decrementHour:'Decrementa l\'ora',
-      incrementMinute: 'Incrementa i minuti',
-      pickMinute: 'Imposta i minuti',
-      decrementMinute:'Decrementa i minuti'
-      },
-    widgetPositioning: { horizontal: 'left' },
-    allowInputToggle: true
-    });
-  $('.input-group.time').datetimepicker()
-    .on('dp.show', function(){
-      $(this).find('a.btn').addClass('btn-primary');
-  });
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
-    var url = $(event.relatedTarget).data('href');
+    var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
     $(this).find('#gs-modal-remote-content').load(url);
   });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
-    var dati = {numeroVerbale: $('#scrutinio_numeroVerbale').val(), fine: $('#scrutinio_fine').val()};
-    $.post("{{ path('coordinatore_scrutinio_aggiorna', {scrutinio: dati.scrutinio.id}) }}", dati);
   });
   $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
     $('form[name="scrutinio"]').submit();
@@ -109,7 +192,21 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
     return true;
   });
+  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
+    var c=floatContainer.find('thead');
+    if(isFloated){
+      c.hide();
+      c.removeClass("bg-success").addClass("bg-info");
+      c.fadeIn();
+    } else {
+      c.removeClass("bg-info").addClass("bg-success");
+    }
+  });
   // init
+  $('#gs-fixed-header table').floatThead({top: 60});
+  {% if posizione > 0 %}
+  $('html').scrollTop({{ posizione }});
+  {% endif %}
   {% for messaggio in app.flashes('errore') %}
     {% if loop.first %}
   var m = '';

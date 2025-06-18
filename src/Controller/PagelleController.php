@@ -236,6 +236,10 @@ class PagelleController extends BaseController {
           // tabellone esiti
           $nomefile = $pag->tabelloneEsiti($classe, $periodo);
           break;
+        case 'Z':
+          // elaborato di cittadinanza attiva
+          $nomefile = $pag->elaboratoCittadinanza($classe, $alunno, $periodo);
+          break;
     }
   } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio esame alunni sospesi

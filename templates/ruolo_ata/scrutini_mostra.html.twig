@@ -161,6 +161,12 @@
       </tr>
     </thead>
     <tbody>
+      {% if periodo == 'F' and dati.esito.esito == 'A' and dati.cittadinanza is defined and dati.cittadinanza %}
+      <tr>
+        <td><strong>Elaborato di cittadinanza attiva</strong></td>
+        <td><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'Z', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a></td>
+      </tr>
+      {% endif %}
       {% if dati.esito is defined and dati.esito.esito != 'N' %}
       <tr>
         <td><strong>Comunicazione dei voti</strong></td>

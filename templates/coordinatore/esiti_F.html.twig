@@ -37,7 +37,11 @@
       <label class="control-label col-sm-2" for="{{ form.esito.vars.id }}">Esito</label>
       <div class="col-sm-10">
     {% if alunno.classe.anno == 5 %}
+      {% if dati.scrutinio.dati.requisitiEsame == 'T' or (dati.scrutinio.dati.requisitiAlunni[alunno.id].invalsi and dati.scrutinio.dati.requisitiAlunni[alunno.id].pcto) %}
         {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }}
+      {% else %}
+        {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[1]]}) }}
+      {% endif %}
     {% else %}
         {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1],form.esito.vars.choices[2]]}) }}
     {% endif %}
@@ -143,7 +147,15 @@ $(document).ready(function() {
   $('#esito_esito').change(function() {
     if ($(this).val() == 'N') {
       if ($('#esito_giudizio').val() == '' || !inizio) {
-        $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': (alunno.classe.anno == 5 ? 'l\'Esame di Stato' : 'la classe successiva')})|raw }}");
+        {% if alunno.classe.anno == 5 %}
+          {% if dati.scrutinio.dati.requisitiEsame == 'T' or (dati.scrutinio.dati.requisitiAlunni[alunno.id].invalsi and dati.scrutinio.dati.requisitiAlunni[alunno.id].pcto) %}
+          $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': 'l\'Esame di Stato'})|raw }}");
+          {% else %}
+          $('#esito_giudizio').val("{{ ('message.giudizio_non_ammissione_'~(dati.scrutinio.dati.requisitiAlunni[alunno.id].invalsi ? 'pcto' : (dati.scrutinio.dati.requisitiAlunni[alunno.id].pcto ? 'invalsi' : 'invalsi_pcto')))|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}");
+          {% endif %}
+        {% else %}
+          $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': 'la classe successiva'})|raw }}");
+        {% endif %}
       }
       $('#gs-scrutinio-giudizio').fadeIn();
     } else if ($(this).val() == 'A' && AmmissioneQuinta())  {

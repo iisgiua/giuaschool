@@ -19,7 +19,7 @@ Scenario: visualizzazione pagina passo 1
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 1"
+  Allora la sezione "#gs-main h2" contiene "Inizio dello scrutinio"
   E vedi la tabella non ordinata:
     | Docente                                                      |	Materia                                                       |	Presenza         |
     | @docente_curricolare_1:cognome+ +@docente_curricolare_1:nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |
@@ -60,7 +60,7 @@ Scenario: visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 2     |
-  E la sezione "#gs-main h2" contiene "Passo 2"
+  E la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
 
 Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -78,7 +78,7 @@ Scenario: memorizzazione dati e passo successivo
   E selezioni opzione "@docente_curricolare_2:id" da lista "scrutinio_segretario"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 1"
+  Allora la sezione "#gs-main h2" contiene "Inizio dello scrutinio"
   E il campo "scrutinio_data" contiene "01/01/2020"
   E il campo "scrutinio_inizio" contiene "10:30"
   E il campo "scrutinio[lista][{{@docente_curricolare_1:id}}][presenza]" contiene "0"
@@ -98,7 +98,7 @@ Scenario: visualizzazione classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 1"
+  Allora la sezione "#gs-main h2" contiene "Inizio dello scrutinio"
   E vedi la tabella non ordinata:
     | Docente                                                      |	Materia                                                       |	Presenza         |
     | @docente_curricolare_1:cognome+ +@docente_curricolare_1:nome | ?@materia_curricolare_1:nomeBreve?@materia_EDCIVICA:nomeBreve | Presente Assente |

@@ -80,7 +80,7 @@ Scenario: visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 1     |
-  E la sezione "#gs-main h2" contiene "Passo 1"
+  E la sezione "#gs-main h2" contiene "Inizio dello scrutinio"
 
 Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:

@@ -19,7 +19,7 @@ Scenario: visualizzazione pagina passo 3
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 3"
+  Allora la sezione "#gs-main h2" contiene "Voto di Educazione civica"
   E vedi nella tabella "1" le colonne:
     | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media |
   E vedi la tabella "2" non ordinata senza intestazioni:
@@ -66,7 +66,7 @@ Scenario: visualizzazione passo precedente
     | classe        |
     | @classe_1A:id |
   Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 2"
+  Allora la sezione "#gs-main h2" contiene "Controllo del limite di assenze"
 
 Scenario: visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -82,7 +82,7 @@ Scenario: visualizzazione passo successivo
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_1A:id | 4     |
-  Allora la sezione "#gs-main h2" contiene "Passo 4"
+  Allora la sezione "#gs-main h2" contiene "Voto di condotta"
 
 Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -100,7 +100,7 @@ Scenario: memorizzazione dati e passo successivo
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 3"
+  Allora la sezione "#gs-main h2" contiene "Voto di Educazione civica"
   E vedi nella tabella "1" le colonne:
     | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media |
   E vedi la tabella "2" non ordinata senza intestazioni:
@@ -118,7 +118,7 @@ Scenario: visualizzazione classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 3"
+  Allora la sezione "#gs-main h2" contiene "Voto di Educazione civica"
   E vedi nella tabella "1" le colonne:
     | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Fisica | Sc. motorie | Ed. civica | Condotta | Media |
   E vedi la tabella "2" non ordinata senza intestazioni:

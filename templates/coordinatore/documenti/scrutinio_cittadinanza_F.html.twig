@@ -1,0 +1,38 @@
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
+  <tr nobr="true">
+    <td width="55%">&nbsp;</td>
+    <td width="45%" align="left">
+      <em>All'alunn{{ dati.sex }}</em><br>
+      {{ dati.alunno.cognome|upper }} {{ dati.alunno.nome|upper }}<br>
+      Classe {{ dati.classe }}
+    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<div style="text-align:justify;font-family:times;font-size:11pt">
+  <p><strong>OGGETTO: Scrutinio finale A.S.
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione argomento, tempi e modalità di consegna
+    dell'elaborato di cittadinanza attiva e solidale</strong></p>
+  <br>
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’Anno Scolastico
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
+    {{ dati.scrutinio.data|date('d/m/Y') }},
+    avendo assegnato all'alunn{{ dati.sex }} una valutazione del comportamento pari a sei decimi,
+    ha stabilito l'argomento oggetto dell'elaborato critico in materia di cittadinanza attiva e solidale,
+    i tempi e le modalità di consegna dello stesso, ai sensi della legge 150 del 2024 e dell'O.M. 67 del 31/03/2025.
+  </p>
+  <p>Si riporta nel prospetto seguente le indicazioni necessarie per la consegna dell'elaborato:
+  </p>
+  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="40%" align="center"><strong>ARGOMENTO</strong></td>
+      <td width="60%" align="center"><strong>Tempi e modalità di consegna</strong></td>
+    </tr>
+    <tr>
+      <td align="left"><strong>{{ dati.esito.dati.cittadinanza.argomento }}</strong></td>
+      <td align="left" style="font-size:9pt">{{ dati.esito.dati.cittadinanza.modalita|nl2br }}</td>
+    </tr>
+  </table>
+{{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
+</div>

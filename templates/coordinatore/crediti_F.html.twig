@@ -30,15 +30,16 @@
     <div class="form-group bg-success gs-mb-1">
       <label class="col-sm-4 control-label gs-big">{{ 'label.credito_scolastico'|trans }}</label>
       <div class="col-sm-8">
-  {% if form.creditoQuinta.vars.value %}
+  {% if form.creditoCondotta.vars.value and form.creditoQuinta.vars.value %}
     {% for f in form.creditoScolastico.children %}
           {{ form_widget(f) }}
     {% endfor %}
   {% else %}
     <div class="gs-pt-5 gs-pb-4 gs-ml-4 gs-pl-2">
-      <p><strong><em>{{ 'label.criterio_credito_quinta_no'|trans }}</em></strong></p>
+      <p><strong><em>{{ (form.creditoCondotta.vars.value == 0 ? 'label.criterio_credito_condotta_no' : 'label.criterio_credito_quinta_no')|trans }}</em></strong></p>
     </div>
   {% endif %}
+        {{ form_widget(form.creditoCondotta) }}
         {{ form_widget(form.creditoQuinta) }}
       </div>
     </div>

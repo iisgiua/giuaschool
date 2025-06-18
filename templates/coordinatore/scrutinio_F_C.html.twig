@@ -115,12 +115,26 @@
       {% endfor %}
           </td>
         </tr>
+    {% else %}
+        <tr>
+          <td><strong>Elaborato di cittadinanza attiva</strong></td>
+          <td>
+            Documento da inviare all'alunno con avviso sul registro elettronico, da parte della Vicepresidenza (<em>non stampare</em>).
+          </td>
+          <td>
+      {% for a in dati.cittadinanza %}
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'Z', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+      {% else %}
+            <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
+      {% endfor %}
+          </td>
+        </tr>
     {% endif %}
       </tbody>
     </table>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
-    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '8'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
+    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '9'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
   </div>
     {% endif %}
     {% include 'include/modal-remote.html.twig' %}

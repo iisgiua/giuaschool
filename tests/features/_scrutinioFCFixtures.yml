@@ -4,7 +4,7 @@
 
 
 include:
-  - _scrutinioF8Fixtures.yml
+  - _scrutinioF9Fixtures.yml
 
 
 parameters:
@@ -108,6 +108,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, scrutinabili, @scrutinio_1A_F, [@alunno_1A_1, @alunno_sostegno_1, @alunno_sostegno_2, @alunno_alternativa_1], ["ore", 310, "percentuale", 28.46648], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736], ["ore", 100, "percentuale", 9.182736])>'
       no_scrutinabili: '<arrayMulti2DataId(scrutinio_1A_F, dati, no_scrutinabili, @scrutinio_1A_F, [@alunno_1A_1, @alunno_1A_2], ["ore", 310, "percentuale", 28.46648, "deroga", "Vista la situazione di salute"], ["ore", 315, "percentuale", 28.92562])>'
       assenze_extra: '<arrayMultiDataId(scrutinio_1A_F, dati, assenze_extra, @scrutinio_1A_F, [@alunno_1A_1], [100])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -137,6 +138,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_2A_F, dati, scrutinabili, @scrutinio_2A_F, [@alunno_2A_1, @alunno_2A_2, @alunno_2A_3, @alunno_2A_4, @alunno_2A_5, @alunno_2A_6, @alunno_2A_7], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -166,6 +168,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_3A_F, dati, scrutinabili, @scrutinio_3A_F, [@alunno_3A_1, @alunno_3A_2, @alunno_3A_3, @alunno_3A_4, @alunno_3A_5, @alunno_3A_6, @alunno_3A_7], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -195,6 +198,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_4A_F, dati, scrutinabili, @scrutinio_4A_F, [@alunno_4A_1, @alunno_4A_2, @alunno_4A_3, @alunno_4A_4, @alunno_4A_5, @alunno_4A_6, @alunno_4A_7], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -224,6 +228,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_5A_F, dati, scrutinabili, @scrutinio_5A_F, [@alunno_5A_1, @alunno_5A_2, @alunno_5A_3, @alunno_5A_4, @alunno_5A_5, @alunno_5A_6, @alunno_5A_7], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -253,6 +258,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_3CAMB_F, dati, scrutinabili, @scrutinio_3CAMB_F, [@alunno_3CAMB_1, @alunno_3CAMB_2, @alunno_sostegno_4], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true
@@ -282,6 +288,7 @@ App\Entity\Scrutinio:
       scrutinabili: '<arrayMulti2DataId(scrutinio_3CCHI_F, dati, scrutinabili, @scrutinio_3CCHI_F, [@alunno_3CCHI_1, @alunno_3CCHI_2, @alunno_sostegno_3], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697], ["ore", 100, "percentuale", 9.469697])>'
       no_scrutinabili: '<([])>'
       assenze_extra: '<([])>'
+      requisitiEsame: 'T'
       verbale:
         3:
           validato: true

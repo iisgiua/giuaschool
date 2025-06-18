@@ -1,0 +1,16 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">Comunicazione dell'argomento, tempi e modalità di consegna dell'elaborato di cittadinanza attiva.</h3>
+    <h4 class="modal-title gs-h4">Alunn{{ alunno.sesso=='M' ? 'o' : 'a' }}: {{ alunno.cognome }} {{ alunno.nome }} ({{ alunno.dataNascita|date('d/m/Y') }})</h4>
+  </div>
+  <div class="modal-body">
+    <label class="control-label required text-primary gs-big" for="cittadinanza_argomento">Argomento dell'elaborato di cittadinanza attiva:</label>
+    {{ form_widget(form.argomento) }}
+    <label class="control-label required text-primary gs-big gs-mt-4" for="cittadinanza_modalita">Tempi e modalità di consegna dell'elaborato di cittadinanza attiva:</label>
+    {{ form_widget(form.modalita) }}
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit) }}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+{{ form_end(form) }}

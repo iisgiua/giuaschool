@@ -118,6 +118,7 @@ label.criterio_credito_desc_S: Attività sociali e sportive certificate da un en
 label.criterio_credito_sospeso_si: Almeno un voto superiore al 6 nelle materie con debito formativo
 label.criterio_credito_sospeso_no: Nessun voto superiore al 6 nelle materie con debito formativo
 label.criterio_credito_quinta_no: Presenza di voti insufficienti
+label.criterio_credito_condotta_no: Valutazione della condotta inferiore al nove
 label.criterio_credito_F: Frequenza
 label.criterio_credito_I: Interesse e impegno
 label.criterio_credito_L: Credito formativo (Lingue)
@@ -666,6 +667,9 @@ label.filtro_tipo_modulo_formativo: Filtro sul tipo del modulo formativo
 label.filtro_modulo_formativo: Filtro sul modulo formativo
 label.qualsiasi_tipo: Qualsiasi tipo
 label.qualsiasi_modulo_formativo: Qualsiasi modulo formativo
+label.esame_requisiti: Alunni che hanno i requisiti di ammissione all'esame
+label.esame_requisiti_tutti: Tutti gli alunni
+label.esame_requisiti_alunni: Solo alcuni
 
 
 ##### PAGINE #####
@@ -1255,6 +1259,9 @@ benché siano state svolte attività di recupero in orario curricolare ed extrac
 pur essendo stata informata la famiglia,\\n
 considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
 non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
+message.giudizio_non_ammissione_invalsi: "L'alunn{sex} non ha svolto i test INVALSI come previsto per l'ammissione all'Esame di Stato."
+message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di PCTO previsto per l'ammissione all'Esame di Stato."
+message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di PCTO e i test INVALSI, come previsto per l'ammissione all'Esame di Stato."
 message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
 con giudizio sospeso nello scrutinio finale di giugno,\\n
 benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
@@ -1466,6 +1473,7 @@ message.recupero_debito_NC: Tutto il programma svolto.
 message.lezione_sostegno_NA_con_religione: "Non è possibile firmare la lezione della {ora}ª ora.<br>Non è consentito utilizzare il sostegno per il gruppo N.A."
 message.lezione_incompatibile: "Non è possibile firmare la lezione della {ora}ª ora.<br>La materia o il gruppo è incompatibile con la lezione esistente."
 message.cattedra_esistente_non_creata: Alcune cattedre non sono state inserite perché risultano già esistenti.
+message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla scuola in formato PDF e inviato tramite email all'indirizzo ..., indicando come oggetto 'ELABORATO CITTADINANZA ATTIVA - CLASSE - COGNOME NOME', entro e non oltre il giorno ..."
 
 
 ##### ERRORI #####
@@ -1562,6 +1570,7 @@ exception.motivazione_condotta: Manca la motivazione per uno o più voti di cond
 exception.no_certificazione_esito: Non è stata compilata la certificazione delle competenze per l'alunn{sex} {alunno}.
 exception.no_comunicazione_carenze: Non è stata confermata la comunicazione delle carenze per l'alunn{sex} {alunno}.
 exception.no_comunicazione_debiti: Non è stata compilata la comunicazione dei debiti formativi per l'alunn{sex} {alunno}.
+exception.no_comunicazione_cittadinanza: Non è stata compilata la comunicazione per l'elaborato di cittadinanza attiva per l'alunn{sex} {alunno}.
 exception.no_credito_esito: Non è stato inserito il credito per l'alunn{sex} {alunno}.
 exception.no_debito_esito: Mancano gli argomenti da recuperare di una o più materie per l'alunn{sex} {alunno}.
 exception.no_debito: Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente.

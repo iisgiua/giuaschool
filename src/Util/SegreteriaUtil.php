@@ -271,6 +271,21 @@ class SegreteriaUtil {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
         }
+        // elaborato di cittadinanza attiva
+        if ($alunno->getClasse()->getAnno() == 5 && $dati['esito']->getEsito() == 'A') {
+          // legge voto di condotta
+          $voto = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+            ->join('vs.scrutinio', 's')
+            ->join('vs.materia', 'm')
+            ->where("s.id=:scrutinio AND vs.alunno=:alunno AND m.tipo='C' AND vs.unico=6")
+            ->setParameter('scrutinio', $scrutinio)
+            ->setParameter('alunno', $alunno)
+            ->getQuery()
+            ->getResult();
+          if (count($voto) > 0) {
+            $dati['cittadinanza'] =  true;
+          }
+        }
       } elseif ($scrutinio->getPeriodo() == 'G') {
         // dati esito
         $dati['esito'] = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio,

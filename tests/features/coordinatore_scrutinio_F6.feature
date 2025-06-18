@@ -3,9 +3,7 @@
 Funzionalità: sesto passo dello scrutinio finale
   Per svolgere il sesto passo dello scrutinio finale
   Come utente staff
-  Bisogna controllare visualizzazione della pagina per le prime
-  Bisogna controllare visualizzazione della pagina per le seconde
-  Bisogna controllare visualizzazione della pagina per il triennio
+  Bisogna controllare visualizzazione della pagina
   Bisogna controllare visualizzazione con la classe articolata
   Utilizzando "_scrutinioF6Fixtures.yml"
 
@@ -14,683 +12,438 @@ Contesto: login utente staff
 	Dato login utente con ruolo esatto "Staff"
 
 
-###############################################################################
-# Bisogna controllare visualizzazione della pagina per le prime
+################################################################################
+# Bisogna controllare visualizzazione della pagina
 
-Scenario: prime - visualizzazione pagina
+Scenario: visualizzazione pagina passo 6
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_1A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E la sezione "#gs-main .alert-success" contiene "non è previsto questo passaggio"
-  E non vedi la tabella:
-    | Alunno | Media | Certificazione |
-  E non vedi la tabella:
-    | Alunno | Media | Credito |
-  E non vedi la tabella:
-    | Alunno | Media | Credito anni precedenti | Credito |
-
-Scenario: prime - passo precedente
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_1A:id |
-  Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
-
-Scenario: prime - passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_1A:id |
-  Quando click su "Conferma"
-  Allora vedi la pagina "coordinatore_scrutinio" con parametri:
-    | classe        | stato |
-    | @classe_1A:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
-
-Scenario: prime - memorizzazione dati e passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_1A:id |
-  Quando click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E la sezione "#gs-main .alert-success" contiene "non è previsto questo passaggio"
-
-
-###############################################################################
-# Bisogna controllare visualizzazione della pagina per le seconde
-
-Scenario: seconde - visualizzazione pagina
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_2A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
+  Allora la sezione "#gs-main h2" contiene "Esito dello scrutinio"
   E vedi nella tabella "1" le colonne:
-    | Alunno | Media | Certificazione |
+    | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media | Esito |
   E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Certificazione |
-    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | |
-    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | |
-    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | |
-    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | |
-    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | |
+    | Alunno                                                     | Religione / Att. alt.                                                                                                    | Italiano                                           | Storia                                             | Inglese                                            | Matematica                                         | Informatica                                        | Sc. motorie                                        | Ed. civica                                         | Condotta                                           | Media                                                                                                                                                                 | Esito |
+    | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                   | NA                                                                                                                       | #cas(@voto_F_1A_0:unico,0,NC,@voto_F_1A_0:unico)   | #cas(@voto_F_1A_1:unico,0,NC,@voto_F_1A_1:unico)   | #cas(@voto_F_1A_2:unico,0,NC,@voto_F_1A_2:unico)   | #cas(@voto_F_1A_3:unico,0,NC,@voto_F_1A_3:unico)   | #cas(@voto_F_1A_5:unico,0,NC,@voto_F_1A_5:unico)   | #cas(@voto_F_1A_4:unico,0,NC,@voto_F_1A_4:unico)   | #cas(@voto_F_1A_6:unico,2,NC,@voto_F_1A_6:unico)   | #cas(@voto_F_1A_7:unico,4,NC,@voto_F_1A_7:unico)   | #med(@voto_F_1A_0:unico,@voto_F_1A_1:unico,@voto_F_1A_2:unico,@voto_F_1A_3:unico,@voto_F_1A_4:unico,@voto_F_1A_5:unico,@voto_F_1A_6:unico,@voto_F_1A_7:unico)         |       |
+    | @alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       | #cas(@voto_F_1A_26:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@voto_F_1A_20:unico,0,NC,@voto_F_1A_20:unico) | #cas(@voto_F_1A_21:unico,0,NC,@voto_F_1A_21:unico) | #cas(@voto_F_1A_22:unico,0,NC,@voto_F_1A_22:unico) | #cas(@voto_F_1A_23:unico,0,NC,@voto_F_1A_23:unico) | #cas(@voto_F_1A_25:unico,0,NC,@voto_F_1A_25:unico) | #cas(@voto_F_1A_24:unico,0,NC,@voto_F_1A_24:unico) | #cas(@voto_F_1A_27:unico,2,NC,@voto_F_1A_27:unico) | #cas(@voto_F_1A_28:unico,4,NC,@voto_F_1A_28:unico) | #med(@voto_F_1A_20:unico,@voto_F_1A_21:unico,@voto_F_1A_22:unico,@voto_F_1A_23:unico,@voto_F_1A_24:unico,@voto_F_1A_25:unico,@voto_F_1A_27:unico,@voto_F_1A_28:unico) |       |
+    | @alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome       | #cas(@voto_F_1A_36:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@voto_F_1A_30:unico,0,NC,@voto_F_1A_30:unico) | #cas(@voto_F_1A_31:unico,0,NC,@voto_F_1A_31:unico) | #cas(@voto_F_1A_32:unico,0,NC,@voto_F_1A_32:unico) | #cas(@voto_F_1A_33:unico,0,NC,@voto_F_1A_33:unico) | #cas(@voto_F_1A_35:unico,0,NC,@voto_F_1A_35:unico) | #cas(@voto_F_1A_34:unico,0,NC,@voto_F_1A_34:unico) | #cas(@voto_F_1A_37:unico,2,NC,@voto_F_1A_37:unico) | #cas(@voto_F_1A_38:unico,4,NC,@voto_F_1A_38:unico) | #med(@voto_F_1A_30:unico,@voto_F_1A_31:unico,@voto_F_1A_32:unico,@voto_F_1A_33:unico,@voto_F_1A_34:unico,@voto_F_1A_35:unico,@voto_F_1A_37:unico,@voto_F_1A_38:unico) |       |
+    | @alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome | #cas(@voto_F_1A_46:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@voto_F_1A_40:unico,0,NC,@voto_F_1A_40:unico) | #cas(@voto_F_1A_41:unico,0,NC,@voto_F_1A_41:unico) | #cas(@voto_F_1A_42:unico,0,NC,@voto_F_1A_42:unico) | #cas(@voto_F_1A_43:unico,0,NC,@voto_F_1A_43:unico) | #cas(@voto_F_1A_45:unico,0,NC,@voto_F_1A_45:unico) | #cas(@voto_F_1A_44:unico,0,NC,@voto_F_1A_44:unico) | #cas(@voto_F_1A_47:unico,2,NC,@voto_F_1A_47:unico) | #cas(@voto_F_1A_48:unico,4,NC,@voto_F_1A_48:unico) | #med(@voto_F_1A_40:unico,@voto_F_1A_41:unico,@voto_F_1A_42:unico,@voto_F_1A_43:unico,@voto_F_1A_44:unico,@voto_F_1A_45:unico,@voto_F_1A_47:unico,@voto_F_1A_48:unico) |       |
 
-Scenario: seconde - visualizzazione riquadro inserimento certificazione
+Scenario: visualizzazione riquadro inserimento lista voti Ed.Civica
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
-    | @classe_2A:id |
-  Quando click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Informatica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body > div > ul" contiene "/LIVELLO A - AVANZATO: .* LIVELLO B - INTERMEDIO: .* LIVELLO C - BASE: .* LIVELLO D - INIZIALE:/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3) > label" contiene "Competenza alfabetica funzionale"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(4) > label" contiene "Competenza multilinguistica"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(4) div:nth-child(4)" contiene "Inglese:"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(4) div:nth-child(6)" contiene "Francese:"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(5) > label" contiene "Competenza matematica e competenza in scienze, tecnologie e ingegneria"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(6) > label" contiene "Competenza digitale"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(7) > label" contiene "Competenza personale, sociale e capacità di imparare a imparare"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(8) > label" contiene "Competenza in materia di cittadinanza"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(9) > label" contiene "Competenza imprenditoriale"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(10) > label" contiene "Competenza in materia di consapevolezza ed espressione culturali"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(11) > label" contiene "ha inoltre mostrato significative competenze nello svolgimento di attività scolastiche e/o extrascolastiche, relativamente a:"
+    | @classe_1A:id |
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Ed. civica"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Educazione civica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome?@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
 
-Scenario: seconde - visualizzazione pagina con dati mancanti
+Scenario: visualizzazione riquadro inserimento lista voti Condotta
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
-    | @classe_2A:id |
+    | @classe_1A:id |
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Condotta"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Condotta"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome?@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
+
+Scenario: visualizzazione riquadro inserimento lista voti Religione
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Religione / Att. alt."
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Religione Cattolica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome?@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
+
+Scenario: visualizzazione riquadro inserimento lista voti altra materia
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "@materia_curricolare_1:nomeBreve"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "@materia_curricolare_1:nome"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome?@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Ed.Civica
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica la valutazione di Ed. Civica" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Educazione civica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Condotta
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica la valutazione della Condotta" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Condotta"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Religione
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica la valutazione della materia" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome" con indice "1"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Religione Cattolica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo altra materia
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica la valutazione della materia" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome" con indice "2"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "@materia_curricolare_1:nome"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - contrari a condotta
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "Modifica la valutazione della Condotta" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  E selezioni opzione "Maggioranza" da pulsanti radio "condotta_lista_{{@alunno_sostegno_1:id}}_unanimita"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "Non sono stati indicati i docenti contrari"
+
+Scenario: visualizzazione pagina con dati mancanti - tutti senza esito
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
   Quando click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_2A_2:cognome+ +@alunno_2A_2:nome?@alunno_2A_3:cognome+ +@alunno_2A_3:nome?@alunno_2A_4:cognome+ +@alunno_2A_4:nome?@alunno_2A_5:cognome+ +@alunno_2A_5:nome?@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome?@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
 
-Scenario: seconde - visualizzazione passo precedente
+Scenario: visualizzazione pagina con dati mancanti - contrari a esito
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  E selezioni opzione "A" da lista "esito_esito"
+  E selezioni opzione "Maggioranza" da pulsanti radio "esito_unanimita"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(nome dei docenti contrari all'esito dell'alunn)+#cas(@alunno_sostegno_1:sesso,M,o ,a )+@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - ammesso con insufficienze
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_2A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_7:cognome+ +@alunno_2A_7:nome"
+  E selezioni opzione "A" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(insufficienze con un esito di ammissione per l'alunn)+#cas(@alunno_2A_7:sesso,M,o ,a )+@alunno_2A_7:cognome+ +@alunno_2A_7:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - non ammesso senza insufficienze
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+  E selezioni opzione "N" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(solo voti sufficienti con un esito di non ammissione per l'alunn)+#cas(@alunno_2A_2:sesso,M,o ,a )+@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - sospeso senza insufficienze
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+  E selezioni opzione "S" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(solo voti sufficienti con un giudizio sospeso per l'alunn)+#cas(@alunno_2A_2:sesso,M,o ,a )+@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - sospeso con più di 3 insufficienze
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_1:cognome+ +@alunno_2A_1:nome"
+  E selezioni opzione "S" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(sospeso il giudizio con più di tre materie per l'alunn)+#cas(@alunno_2A_1:sesso,M,o ,a )+@alunno_2A_1:cognome+ +@alunno_2A_1:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - sospeso con religione insufficiente
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_2A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_7:cognome+ +@alunno_2A_7:nome"
+  E scorri cursore "1" di "-1" posizioni
+  E selezioni opzione "S" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(voto insufficiente di religione non è coerente con l'esito dell'alunn)+#cas(@alunno_2A_7:sesso,M,o ,a )+@alunno_2A_7:cognome+ +@alunno_2A_7:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - quinta ammesso con più di 1 insufficienza
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_5A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+  E scorri cursore "2" di "-1" posizioni
+  E selezioni opzione "A" da lista "esito_esito"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(più di una insufficienza con un esito di ammissione per l'alunn)+#cas(@alunno_5A_7:sesso,M,o ,a )+@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+
+Scenario: visualizzazione pagina con dati mancanti - quinta ammesso con insufficiente senza motivazione
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_5A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+  E selezioni opzione "A" da lista "esito_esito"
+  E inserisci "" nel campo "esito_giudizio"
+  E click su "Conferma"
+  Allora la sezione "#gs-modal-error .alert-danger" contiene "#str(motivazione dell'ammissione con una insufficienza per l'alunn)+#cas(@alunno_5A_7:sesso,M,o ,a )+@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+
+Scenario: visualizzazione passo precedente
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_1A:id |
   Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
+  Allora la sezione "#gs-main h2" contiene "Requisiti di ammissione all'esame"
 
-Scenario: seconde - visualizzazione passo successivo
+Scenario: visualizzazione passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_2A:id |
-  Quando click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_1:cognome+ +@alunno_2A_1:nome"
+  E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_4:cognome+ +@alunno_2A_4:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_5:cognome+ +@alunno_2A_5:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_4:cognome+ +@alunno_2A_4:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_5:cognome+ +@alunno_2A_5:nome"
+  E selezioni opzione "A" da lista "esito_esito"
+  E click su "Conferma"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
+  E selezioni opzione "A" da lista "esito_esito"
+  E click su "Conferma"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_7:cognome+ +@alunno_2A_7:nome"
+  E selezioni opzione "S" da lista "esito_esito"
   E click su "Conferma"
   E click su "Conferma"
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_2A:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
+  Allora la sezione "#gs-main h2" contiene "Certificazione competenze"
 
-Scenario: seconde - memorizzazione dati e passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_2A:id |
-  Quando click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_4:cognome+ +@alunno_2A_4:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_5:cognome+ +@alunno_2A_5:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Certificazione |
-    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | COMPILATA |
-    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | COMPILATA |
-    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | COMPILATA |
-    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | COMPILATA |
-    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | COMPILATA |
-
-Scenario: seconde - memorizzazione dati e passo successivo con dettagli
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_2A:id |
-  Quando click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  E selezioni opzione "A" da lista "certificazione_competenza_alfabetica"
-  E selezioni opzione "B" da lista "certificazione_competenza_linguistica1"
-  E selezioni opzione "C" da lista "certificazione_competenza_linguistica2"
-  E selezioni opzione "D" da lista "certificazione_competenza_matematica"
-  E selezioni opzione "A" da lista "certificazione_competenza_digitale"
-  E selezioni opzione "B" da lista "certificazione_competenza_personale"
-  E selezioni opzione "C" da lista "certificazione_competenza_cittadinanza"
-  E selezioni opzione "D" da lista "certificazione_competenza_imprenditoriale"
-  E selezioni opzione "A" da lista "certificazione_competenza_culturale"
-  E inserisci "Altra competenza" nel campo "certificazione_competenza_altro"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_3:cognome+ +@alunno_2A_3:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_4:cognome+ +@alunno_2A_4:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_5:cognome+ +@alunno_2A_5:nome"
-  E click su "Conferma"
-  E click su "Compila la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_6:cognome+ +@alunno_2A_6:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  E click su "Modifica la certificazione" in sezione "#gs-main form table tbody tr" che contiene "@alunno_2A_2:cognome+ +@alunno_2A_2:nome"
-  Allora opzione "A" selezionata da lista "certificazione_competenza_alfabetica"
-  E opzione "B" selezionata da lista "certificazione_competenza_linguistica1"
-  E opzione "C" selezionata da lista "certificazione_competenza_linguistica2"
-  E opzione "D" selezionata da lista "certificazione_competenza_matematica"
-  E opzione "A" selezionata da lista "certificazione_competenza_digitale"
-  E opzione "B" selezionata da lista "certificazione_competenza_personale"
-  E opzione "C" selezionata da lista "certificazione_competenza_cittadinanza"
-  E opzione "D" selezionata da lista "certificazione_competenza_imprenditoriale"
-  E opzione "A" selezionata da lista "certificazione_competenza_culturale"
-  E il campo "certificazione_competenza_altro" contiene "Altra competenza"
-
-
-###############################################################################
-# Bisogna controllare visualizzazione della pagina per il triennio
-
-Scenario: terze - visualizzazione pagina
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi nella tabella "1" le colonne:
-    | Alunno | Media | Credito |
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito |
-    | @alunno_3A_2:cognome+ +@alunno_3A_2:nome | 6,00 | |
-    | @alunno_3A_3:cognome+ +@alunno_3A_3:nome | 6,88 | |
-    | @alunno_3A_4:cognome+ +@alunno_3A_4:nome | 7,63 | |
-    | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | |
-    | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | |
-
-Scenario: quarte - visualizzazione pagina
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi nella tabella "1" le colonne:
-    | Alunno | Media | Credito anni precedenti | Credito |
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_4A_2:cognome+ +@alunno_4A_2:nome | 6,00 | @alunno_4A_2:credito3 | |
-    | @alunno_4A_3:cognome+ +@alunno_4A_3:nome | 6,88 | @alunno_4A_3:credito3 | |
-    | @alunno_4A_4:cognome+ +@alunno_4A_4:nome | 7,63 | @alunno_4A_4:credito3 | |
-    | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | |
-    | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | |
-
-Scenario: quinte - visualizzazione pagina
+Scenario: visualizzazione passo successivo - classe quinta
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
     | @classe_5A:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi nella tabella "1" le colonne:
-    | Alunno | Media | Credito anni precedenti | Credito |
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_5A_2:cognome+ +@alunno_5A_2:nome | 6,00 | #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) | |
-    | @alunno_5A_3:cognome+ +@alunno_5A_3:nome | 6,88 | #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) | |
-    | @alunno_5A_4:cognome+ +@alunno_5A_4:nome | 7,63 | #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) | |
-    | @alunno_5A_5:cognome+ +@alunno_5A_5:nome | 8,38 | #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) | |
-    | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | |
-    | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | |
-
-Scenario: terze - visualizzazione riquadro inserimento credito
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Informatica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 7 - 8/"
-
-Scenario: quarte - visualizzazione riquadro inserimento credito
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Informatica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 8 - 9/"
-
-Scenario: quinte - visualizzazione riquadro inserimento credito
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Informatica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 9 - 10/"
-
-Scenario: quinte - visualizzazione riquadro inserimento credito con insufficienza
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Informatica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 5/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 5,88 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/voti insufficienti/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 7 - 8/"
-
-Scenario: terze - visualizzazione pagina con dati mancanti
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Quando click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_3A_2:cognome+ +@alunno_3A_2:nome?@alunno_3A_3:cognome+ +@alunno_3A_3:nome?@alunno_3A_4:cognome+ +@alunno_3A_4:nome?@alunno_3A_5:cognome+ +@alunno_3A_5:nome?@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
-
-Scenario: quarte - visualizzazione pagina con dati mancanti
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_4A_2:cognome+ +@alunno_4A_2:nome?@alunno_4A_3:cognome+ +@alunno_4A_3:nome?@alunno_4A_4:cognome+ +@alunno_4A_4:nome?@alunno_4A_5:cognome+ +@alunno_4A_5:nome?@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
-
-Scenario: quinte - visualizzazione pagina con dati mancanti
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_5A_2:cognome+ +@alunno_5A_2:nome?@alunno_5A_3:cognome+ +@alunno_5A_3:nome?@alunno_5A_4:cognome+ +@alunno_5A_4:nome?@alunno_5A_5:cognome+ +@alunno_5A_5:nome?@alunno_5A_6:cognome+ +@alunno_5A_6:nome?@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-
-Scenario: terze - visualizzazione passo precedente
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
-
-Scenario: quarte - visualizzazione passo precedente
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
-
-Scenario: quinte - visualizzazione passo precedente
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
-
-Scenario: terze - visualizzazione passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_1:cognome+ +@alunno_5A_1:nome"
+  E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_3:cognome+ +@alunno_3A_3:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_4:cognome+ +@alunno_3A_4:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_5:cognome+ +@alunno_3A_5:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  Allora vedi la pagina "coordinatore_scrutinio" con parametri:
-    | classe        | stato |
-    | @classe_3A:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
-
-Scenario: quarte - visualizzazione passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_3:cognome+ +@alunno_4A_3:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_4:cognome+ +@alunno_4A_4:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_5:cognome+ +@alunno_4A_5:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  Allora vedi la pagina "coordinatore_scrutinio" con parametri:
-    | classe        | stato |
-    | @classe_4A:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
-
-Scenario: quinte - visualizzazione passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
   E click su "Conferma"
   Allora vedi la pagina "coordinatore_scrutinio" con parametri:
     | classe        | stato |
     | @classe_5A:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
+  Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
 
-Scenario: terze - memorizzazione dati e passo successivo - credito minimo
+Scenario: memorizzazione dati e passo successivo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe        |
-    | @classe_3A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
+    | @classe_1A:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_1A_1:cognome+ +@alunno_1A_1:nome"
+  E scorri cursore "1" di "-10" posizioni
+  E scorri cursore "2" di "-10" posizioni
+  E scorri cursore "3" di "-10" posizioni
+  E scorri cursore "4" di "-10" posizioni
+  E scorri cursore "5" di "-10" posizioni
+  E scorri cursore "6" di "-10" posizioni
+  E scorri cursore "7" di "-10" posizioni
+  E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_3:cognome+ +@alunno_3A_3:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
+  E scorri cursore "5" di "10" posizioni
+  E scorri cursore "6" di "10" posizioni
+  E scorri cursore "7" di "10" posizioni
+  E scorri cursore "8" di "10" posizioni
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_4:cognome+ +@alunno_3A_4:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
+  E scorri cursore "5" di "10" posizioni
+  E scorri cursore "6" di "10" posizioni
+  E scorri cursore "7" di "10" posizioni
+  E scorri cursore "8" di "10" posizioni
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_5:cognome+ +@alunno_3A_5:nome"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
+  E scorri cursore "5" di "10" posizioni
+  E scorri cursore "6" di "10" posizioni
+  E scorri cursore "7" di "-10" posizioni
+  E scorri cursore "8" di "10" posizioni
+  E selezioni opzione "S" da lista "esito_esito"
   E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
+  E click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Condotta"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
+  Allora la sezione "#gs-main h2" contiene "Esito dello scrutinio"
   E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito |
-    | @alunno_3A_2:cognome+ +@alunno_3A_2:nome | 6,00 | 7  |
-    | @alunno_3A_3:cognome+ +@alunno_3A_3:nome | 6,88 | 8  |
-    | @alunno_3A_4:cognome+ +@alunno_3A_4:nome | 7,63 | 9  |
-    | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | 10 |
-    | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | 11 |
-
-Scenario: terze - memorizzazione dati e passo successivo - credito massimo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_3A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_3:cognome+ +@alunno_3A_3:nome"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_4:cognome+ +@alunno_3A_4:nome"
-  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_5:cognome+ +@alunno_3A_5:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito |
-    | @alunno_3A_2:cognome+ +@alunno_3A_2:nome | 6,00 | 8  |
-    | @alunno_3A_3:cognome+ +@alunno_3A_3:nome | 6,88 | 9  |
-    | @alunno_3A_4:cognome+ +@alunno_3A_4:nome | 7,63 | 10 |
-    | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | 11 |
-    | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | 12 |
-
-Scenario: quarte - memorizzazione dati e passo successivo - credito minimo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_3:cognome+ +@alunno_4A_3:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_4:cognome+ +@alunno_4A_4:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_5:cognome+ +@alunno_4A_5:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_4A_2:cognome+ +@alunno_4A_2:nome | 6,00 | @alunno_4A_2:credito3 | 8  |
-    | @alunno_4A_3:cognome+ +@alunno_4A_3:nome | 6,88 | @alunno_4A_3:credito3 | 9  |
-    | @alunno_4A_4:cognome+ +@alunno_4A_4:nome | 7,63 | @alunno_4A_4:credito3 | 10 |
-    | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | 11 |
-    | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | 12 |
-
-Scenario: quarte - memorizzazione dati e passo successivo - credito massimo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_4A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_3:cognome+ +@alunno_4A_3:nome"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_4:cognome+ +@alunno_4A_4:nome"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_5:cognome+ +@alunno_4A_5:nome"
-  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_4A_2:cognome+ +@alunno_4A_2:nome | 6,00 | @alunno_4A_2:credito3 | 9  |
-    | @alunno_4A_3:cognome+ +@alunno_4A_3:nome | 6,88 | @alunno_4A_3:credito3 | 10 |
-    | @alunno_4A_4:cognome+ +@alunno_4A_4:nome | 7,63 | @alunno_4A_4:credito3 | 11 |
-    | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | 12 |
-    | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | 13 |
-
-Scenario: quinte - memorizzazione dati e passo successivo - credito minimo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_5A_2:cognome+ +@alunno_5A_2:nome | 6,00 | #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) | 9  |
-    | @alunno_5A_3:cognome+ +@alunno_5A_3:nome | 6,88 | #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) | 10 |
-    | @alunno_5A_4:cognome+ +@alunno_5A_4:nome | 7,63 | #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) | 11 |
-    | @alunno_5A_5:cognome+ +@alunno_5A_5:nome | 8,38 | #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) | 13 |
-    | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | 14 |
-    | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | 7  |
-
-Scenario: quinte - memorizzazione dati e passo successivo - credito massimo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe        |
-    | @classe_5A:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
-  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
-  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-  E click su "Conferma"
-  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-  E click su "Conferma"
-  E click su "Conferma"
-  E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
-  E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito anni precedenti | Credito |
-    | @alunno_5A_2:cognome+ +@alunno_5A_2:nome | 6,00 | #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) | 10 |
-    | @alunno_5A_3:cognome+ +@alunno_5A_3:nome | 6,88 | #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) | 11 |
-    | @alunno_5A_4:cognome+ +@alunno_5A_4:nome | 7,63 | #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) | 12 |
-    | @alunno_5A_5:cognome+ +@alunno_5A_5:nome | 8,38 | #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) | 14 |
-    | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | 15 |
-    | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | 7  |
+    | Alunno                                                     | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media | Esito |
+    | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                   | NA                    | NC       | NC     | NC      | NC         | NC          | NC          | NC         | 10       | 1,25  |       |
+    | @alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       | Ottimo                | 10       | 10     | 10      | 10         | 10          | 10          | 10         | 10       | 10,00 |       |
+    | @alunno_sostegno_2:cognome+ +@alunno_sostegno_2:nome       | Ottimo                | 10       | 10     | 10      | 10         | 10          | 10          | 10         | 10       | 10,00 |       |
+    | @alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome | Ottimo                | 10       | 10     | 10      | 10         | 10          | NC          | 10         | 10       | 8,75  |       |
 
 
-###############################################################################
+################################################################################
 # Bisogna controllare visualizzazione con la classe articolata
 
-Scenario: classe articolata - visualizzazione pagina
+Scenario: visualizzazione pagina passo 6 per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
+  Allora la sezione "#gs-main h2" contiene "Esito dello scrutinio"
   E vedi nella tabella "1" le colonne:
-    | Alunno | Media | Credito |
+    | Alunno | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Fisica | Sc. motorie | Ed. civica | Condotta | Media | Esito |
   E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito |
-    | @alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome | 8,13 | |
+    | Alunno                                               | Religione / Att. alt.                                                                                                       | Italiano                                                 | Storia                                                   | Inglese                                                  | Matematica                                               | Fisica                                                   | Sc. motorie                                              | Ed. civica                                               | Condotta                                                 | Media                                                                                                                                                                                         | Esito |
+    | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome       | NA                                                                                                                          | #cas(@voto_F_3CAMB_0:unico,0,NC,@voto_F_3CAMB_0:unico)   | #cas(@voto_F_3CAMB_1:unico,0,NC,@voto_F_3CAMB_1:unico)   | #cas(@voto_F_3CAMB_2:unico,0,NC,@voto_F_3CAMB_2:unico)   | #cas(@voto_F_3CAMB_3:unico,0,NC,@voto_F_3CAMB_3:unico)   | #cas(@voto_F_3CAMB_5:unico,0,NC,@voto_F_3CAMB_5:unico)   | #cas(@voto_F_3CAMB_4:unico,0,NC,@voto_F_3CAMB_4:unico)   | #cas(@voto_F_3CAMB_6:unico,2,NC,@voto_F_3CAMB_6:unico)   | #cas(@voto_F_3CAMB_7:unico,2,NC,@voto_F_3CAMB_7:unico)   | #med(@voto_F_3CAMB_0:unico,@voto_F_3CAMB_1:unico,@voto_F_3CAMB_2:unico,@voto_F_3CAMB_3:unico,@voto_F_3CAMB_4:unico,@voto_F_3CAMB_5:unico,@voto_F_3CAMB_6:unico,@voto_F_3CAMB_7:unico)         |       |
+    | @alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome       | #cas(@voto_F_3CAMB_15:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@voto_F_3CAMB_10:unico,0,NC,@voto_F_3CAMB_10:unico) | #cas(@voto_F_3CAMB_11:unico,0,NC,@voto_F_3CAMB_11:unico) | #cas(@voto_F_3CAMB_12:unico,0,NC,@voto_F_3CAMB_12:unico) | #cas(@voto_F_3CAMB_13:unico,0,NC,@voto_F_3CAMB_13:unico) | #cas(@voto_F_3CAMB_16:unico,0,NC,@voto_F_3CAMB_16:unico) | #cas(@voto_F_3CAMB_14:unico,0,NC,@voto_F_3CAMB_14:unico) | #cas(@voto_F_3CAMB_17:unico,2,NC,@voto_F_3CAMB_17:unico) | #cas(@voto_F_3CAMB_18:unico,2,NC,@voto_F_3CAMB_18:unico) | #med(@voto_F_3CAMB_10:unico,@voto_F_3CAMB_11:unico,@voto_F_3CAMB_12:unico,@voto_F_3CAMB_13:unico,@voto_F_3CAMB_14:unico,@voto_F_3CAMB_16:unico,@voto_F_3CAMB_17:unico,@voto_F_3CAMB_18:unico) |       |
+    | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome | #cas(@voto_F_3CAMB_25:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | #cas(@voto_F_3CAMB_20:unico,0,NC,@voto_F_3CAMB_20:unico) | #cas(@voto_F_3CAMB_21:unico,0,NC,@voto_F_3CAMB_21:unico) | #cas(@voto_F_3CAMB_22:unico,0,NC,@voto_F_3CAMB_22:unico) | #cas(@voto_F_3CAMB_23:unico,0,NC,@voto_F_3CAMB_23:unico) | #cas(@voto_F_3CAMB_26:unico,0,NC,@voto_F_3CAMB_26:unico) | #cas(@voto_F_3CAMB_24:unico,0,NC,@voto_F_3CAMB_24:unico) | #cas(@voto_F_3CAMB_27:unico,2,NC,@voto_F_3CAMB_27:unico) | #cas(@voto_F_3CAMB_18:unico,2,NC,@voto_F_3CAMB_28:unico) | #med(@voto_F_3CAMB_20:unico,@voto_F_3CAMB_21:unico,@voto_F_3CAMB_22:unico,@voto_F_3CAMB_23:unico,@voto_F_3CAMB_24:unico,@voto_F_3CAMB_26:unico,@voto_F_3CAMB_27:unico,@voto_F_3CAMB_28:unico) |       |
 
-Scenario: classe articolata - visualizzazione riquadro inserimento credito
+Scenario: visualizzazione riquadro inserimento lista voti Ed.Civica per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
-  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h3" contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(1) div" contiene "/Religione.*Sufficiente/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(2) div" contiene "/Italiano 10/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(3) div" contiene "/Storia 9/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(4) div" contiene "/Inglese 8/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(5) div" contiene "/Matematica 7/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(6) div" contiene "/Fisica 7/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(7) div" contiene "/Sc\. motorie 7/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 8/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 9/"
-  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 8,13 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 10 - 11/"
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Ed. civica"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Educazione civica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome?@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
 
-Scenario: classe articolata - visualizzazione pagina con dati mancanti
+Scenario: visualizzazione riquadro inserimento lista voti Condotta per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Quando click su "Conferma"
-  Allora la sezione "#gs-modal-error .alert-danger" contiene "?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Condotta"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Condotta"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome?@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
 
-Scenario: classe articolata - visualizzazione passo precedente
+Scenario: visualizzazione riquadro inserimento lista voti Religione per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Quando click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 5"
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Religione / Att. alt."
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Religione Cattolica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome?@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
 
-Scenario: classe articolata - visualizzazione passo successivo
+Scenario: visualizzazione riquadro inserimento lista voti altra materia per classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
     | classe           |
     | @classe_3CAMB:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
+  Quando click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "@materia_curricolare_1:nomeBreve"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "@materia_curricolare_1:nome"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection" contiene "?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome?@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Ed.Civica per classe articolata
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "Modifica la valutazione di Ed. Civica" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Educazione civica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Condotta per classe articolata
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "Modifica la valutazione della Condotta" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Condotta"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo Religione per classe articolata
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "Modifica la valutazione della materia" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome" con indice "1"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "Religione Cattolica"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+
+Scenario: visualizzazione riquadro inserimento voto singolo altra materia per classe articolata
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "Modifica la valutazione della materia" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome" con indice "2"
+  Allora la sezione "#gs-main #gs-modal-remote .modal-title.gs-h4" contiene "@materia_curricolare_1:nome"
+  E la sezione "#gs-main #gs-modal-remote #gs-form-collection li div" contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+
+Scenario: visualizzazione passo successivo per classe articolata
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe           |
+    | @classe_3CAMB:id |
+  Quando click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome"
+  E scorri cursore "1" di "-10" posizioni
+  E scorri cursore "2" di "-10" posizioni
+  E scorri cursore "3" di "-10" posizioni
+  E scorri cursore "4" di "-10" posizioni
+  E scorri cursore "5" di "-10" posizioni
+  E scorri cursore "6" di "-10" posizioni
+  E scorri cursore "7" di "-10" posizioni
+  E selezioni opzione "N" da lista "esito_esito"
   E click su "Conferma"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
+  E scorri cursore "5" di "10" posizioni
+  E scorri cursore "6" di "10" posizioni
+  E scorri cursore "7" di "10" posizioni
+  E scorri cursore "8" di "10" posizioni
+  E selezioni opzione "A" da lista "esito_esito"
   E click su "Conferma"
-  Allora vedi la pagina "coordinatore_scrutinio" con parametri:
-    | classe           | stato |
-    | @classe_3CAMB:id | 7     |
-  E la sezione "#gs-main h2" contiene "Passo 7"
-
-Scenario: classe articolata - memorizzazione dati e passo successivo
-  Data pagina attiva "coordinatore_scrutinio" con parametri:
-    | classe           |
-    | @classe_3CAMB:id |
-  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome"
-  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E click su "esito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
+  E scorri cursore "4" di "10" posizioni
+  E scorri cursore "5" di "10" posizioni
+  E scorri cursore "6" di "10" posizioni
+  E scorri cursore "7" di "-10" posizioni
+  E scorri cursore "8" di "10" posizioni
+  E selezioni opzione "S" da lista "esito_esito"
+  E click su "Conferma"
+  E click su "Modifica le valutazioni" in sezione "#gs-main form table thead th" che contiene "Condotta"
+  E scorri cursore "1" di "10" posizioni
+  E scorri cursore "2" di "10" posizioni
+  E scorri cursore "3" di "10" posizioni
   E click su "Conferma"
   E click su "Conferma"
   E click su "passo precedente"
-  Allora la sezione "#gs-main h2" contiene "Passo 6"
+  Allora la sezione "#gs-main h2" contiene "Esito dello scrutinio"
   E vedi la tabella "2" non ordinata senza intestazioni:
-    | Alunno | Media | Credito |
-    | @alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome | 8,13 | 10 |
+    | Alunno                                               | Religione / Att. alt. | Italiano | Storia | Inglese | Matematica | Informatica | Sc. motorie | Ed. civica | Condotta | Media | Esito |
+    | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome       | NA                    | NC       | NC     | NC      | NC         | NC          | NC          | NC         | 10       | 1,25  |       |
+    | @alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome       | Ottimo                | 10       | 10     | 10      | 10         | 10          | 10          | 10         | 10       | 10,00 |       |
+    | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome | Ottimo                | 10       | 10     | 10      | 10         | 10          | NC          | 10         | 10       | 8,75  |       |
