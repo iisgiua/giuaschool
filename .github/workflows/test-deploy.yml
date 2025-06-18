@@ -35,6 +35,8 @@ jobs:
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}
+
+      - name: Ensure image cache dir exists
         run: |
           mkdir -p ${{ env.IMAGE_CACHE_DIR }}
 
