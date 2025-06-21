@@ -47,7 +47,7 @@
         <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
         <td><small>{{ e.argomento }}</small></td>
         <td>
-          {% if e.voto > 0 %}<span class="label label-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
+          {% if e.voto > 0 %}<span class="label {{ not e.media ? 'gs-label-secondary' : (e.voto < 5 ? 'label-danger' : (e.voto < 6 ? 'label-warning' : 'label-success')) }} gs-big">{{ e.voto_str }}</span>{{ not e.media ? '<br><strong>NON IN MEDIA</strong>' }}{{ e.giudizio is not empty ? '<br>' }}{% endif %}
           <small>{{ e.giudizio }}</small>
         </td>
       </tr>

@@ -24,7 +24,7 @@
   <tr nobr="true">
     <td style="font-size:9pt">{{ e.data|date('d/m/Y') }}</td>
     <td style="font-size:9pt">{{ e.argomento }}</td>
-    <td style="text-align:center"><strong>{{ e.voto_str is defined ? e.voto_str }}</strong></td>
+    <td style="text-align:center"><strong>{{ e.voto_str is defined ? e.voto_str }}</strong>{{ not e.visibile ? '<br><small>NON VISIBILE</small>' : (not e.media ? '<br><small>NON IN MEDIA</small>' : '') }}</td>
     <td style="font-size:9pt">{{ e.giudizio }}</td>
   </tr>
       {% endfor %}

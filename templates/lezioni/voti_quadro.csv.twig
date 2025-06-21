@@ -3,7 +3,7 @@
   {%- for tipo in ['S','O','P'] %}
     {%- if dati.voti[alunno][tipo] is defined and dati.voti[alunno][tipo]|length > 0 %}
       {%- for e in dati.voti[alunno][tipo] %}
-"{{ a.cognome|raw }} {{ a.nome|raw }} ({{ a.dataNascita|date('d/m/Y') }})","{{ tipo == 'S' ? 'Scritto/Grafico' : (tipo == 'O' ? 'Orale' : 'Pratico') }}","{{ e.data|date('d/m/Y') }}","{{ (e.argomento|replace({'"': '""'}))|raw }}","{{ e.voto_str is defined ? e.voto_str }}","{{ (e.giudizio|replace({'"': '""'}))|raw }}"{{ '\n' }}
+"{{ a.cognome|raw }} {{ a.nome|raw }} ({{ a.dataNascita|date('d/m/Y') }})","{{ tipo == 'S' ? 'Scritto/Grafico' : (tipo == 'O' ? 'Orale' : 'Pratico') }}{{ not e.visibile ? ' (NON VISIBILE)' : (not e.media ? ' (NON IN MEDIA)' : '') }}","{{ e.data|date('d/m/Y') }}","{{ (e.argomento|replace({'"': '""'}))|raw }}","{{ e.voto_str is defined ? e.voto_str }}","{{ (e.giudizio|replace({'"': '""'}))|raw }}"{{ '\n' }}
       {%- endfor %}
     {%- endif %}
   {%- endfor %}

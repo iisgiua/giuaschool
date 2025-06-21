@@ -25,7 +25,7 @@
     <td style="font-size:9pt">{{ e.data }}</td>
     <td style="font-size:9pt">{{ e.tipo == 'S' ? 'Scritto / Grafico' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</td>
     <td style="font-size:9pt">{{ e.argomento }}</td>
-    <td style="text-align:center"><strong>{{ e.voto_str }}</strong></td>
+    <td style="text-align:center"><strong>{{ e.voto_str }}{{ not e.media ? '<br><small>NON IN MEDIA</small>' : '' }}</strong></td>
     <td style="font-size:9pt">{{ e.giudizio }}</td>
   </tr>
         {% endfor %}
