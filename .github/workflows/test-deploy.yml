@@ -139,10 +139,10 @@ jobs:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}
 
-      - name: Set swap space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 5
+      # - name: Set swap space
+      #   uses: pierotofy/set-swap-space@master
+      #   with:
+      #     swap-size-gb: 5
 
       - name: Load Docker image
         run: |
