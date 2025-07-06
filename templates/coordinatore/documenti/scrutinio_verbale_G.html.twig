@@ -69,8 +69,8 @@
   <p>Nessun docente risulta assente.</p>
 {% endif %}
   <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
-    (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
-    dichiarando aperta la seduta.
+    (D.P.R. 122/09, L. 169/08, L. 107/2015, L. 150/2024) e in particolare i criteri di valutazione
+    deliberati dal Collegio dei Docenti, dichiarando aperta la seduta.
   </p>
   <p>&nbsp;</p>
   <p><strong>Punto primo. Scrutinio per gli esami degli studenti con sospensione del giudizio{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %}.</strong></p>
@@ -116,9 +116,9 @@
   </p>
 {% endif %}
 {% if dati.classe.anno >= 3 and dati.ammessi > 0 %}
-  <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico
-    ai sensi del D.Lvo. 62 del 13 aprile 2017 e sulla base dei criteri stabiliti nel PTOF per
-    l'assegnazione del punteggio più alto relativo alla fascia di appartenenza.
+  <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico,
+    ai sensi del D.Lvo. 62 del 13 aprile 2017, ai sensi della legge 150 del 2024 e sulla base
+    dei criteri stabiliti nel PTOF per l'assegnazione del punteggio più alto relativo alla fascia di appartenenza.
     Tali delibere vengono sintetizzate nella seguente tabella:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
@@ -144,8 +144,15 @@
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
       <td align="center">{{ dati.esiti[kalu].media|number_format(2,',','') }}</td>
-      <td style="font-size:9pt">{% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% endfor %}{% if dati.esiti[kalu].dati['creditoScolastico']|length %}.{% endif %}
+      <td style="font-size:9pt">
+      {%- if kalu in dati.condotta9 -%}
+        <em>{{ 'label.criterio_credito_condotta_no'|trans }}.</em>
+      {%- elseif idalunno in dati.insuff5 -%}
+        <em>{{ 'label.criterio_credito_quinta_no'|trans }}.</em>
+      {% else %}
+        {% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% endfor %}{% if dati.esiti[kalu].dati['creditoScolastico']|length %}.{% endif %}
         <br><em>{{ (dati.creditoSospeso[kalu] ? 'label.criterio_credito_sospeso_si' : 'label.criterio_credito_sospeso_no')|trans }}.</em>
+      {% endif %}
       </td>
       <td align="center">{{ dati.esiti[kalu].credito }}</td>
       {% if dati.classe.anno == 4 %}
@@ -156,7 +163,7 @@
     {% endif %}
   {% endfor %}
   </table>
-  <p>Tutte le decisioni in merito all’attribuzione del credito scolastico dell’anno in corso vengono prese all’unanimità.</p>
+  <p>Tutte le decisioni in merito all'attribuzione del credito scolastico dell'anno in corso vengono prese all'unanimità.</p>
 {% endif %}
 {% if dati.non_ammessi > 0 %}
   <p>&nbsp;</p>
@@ -188,9 +195,9 @@
     {% endif %}
   {% endfor %}
   </table>
-  <p>Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati,
+  <p>Il Presidente fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati,
     deve dare comunicazione dell’esito di non ammissione alle famiglie degli alunni minorenni, mediante
-    fonogramma registrato. Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell'esito dello scrutinio.
+    fonogramma registrato. Il Consiglio di Classe predispone quindi le comunicazioni per le famiglie sull'esito dello scrutinio.
     Le famiglie potranno visualizzare queste comunicazioni direttamente sul
     registro elettronico, nel rispetto della normativa sulla privacy.
   </p>

@@ -4282,8 +4282,8 @@ class ScrutinioUtil {
         new Parameter('classe', $classe), new Parameter('periodo', 'F')];
       if ($periodo != 'G') {
         // alunni con scrutinio rinviato
-        $params[] = new Parameter('periodo', 'G');
-        $params[] = new Parameter('sospeso', 'X');
+        $params = [new Parameter('lista', $lista), new Parameter('sospeso', 'X'),
+          new Parameter('classe', $classe), new Parameter('periodo', 'G')];
       }
       $sospesi = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note')

@@ -1445,6 +1445,22 @@ class PagelleUtil {
           $dati['rinviati']++;
         }
       }
+      // controlla condotta < 9 per il triennio
+      $dati['condotta9'] = [];
+      if ( $dati['classe']->getAnno() >= 3 ) {
+        $condotta = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+          ->select('vs.id,(vs.alunno) AS alunno')
+          ->join('vs.materia', 'm')
+          ->join(Esito::class, 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
+          ->where("vs.scrutinio=:scrutinio AND m.tipo='C' AND vs.unico<9 AND e.esito='A'")
+          ->groupBy('vs.alunno')
+          ->setParameter('scrutinio', $dati['scrutinio'])
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($condotta as $cond) {
+          $dati['condotta9'][] = $cond['alunno'];
+        }
+      }
       // credito per sospensione giudizio
       foreach ($dati['alunni'] as $kalu => $alu) {
         if ( $dati['esiti'][$kalu]->getEsito() == 'A' ) {
