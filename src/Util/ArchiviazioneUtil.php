@@ -1316,7 +1316,9 @@ class ArchiviazioneUtil {
           // esistono lezioni
           foreach ($lezioni as $lezione) {
             $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
-            $dati['lezioni'][$ora]['materia'][$gruppo] = $lezione->getMateria()->getNome();
+            $dati['lezioni'][$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve().
+            ($lezione->getSostituzione() && $lezione->getMateria()->getTipo() != 'U' ? ' ('.
+              $this->trans->trans('label.tipo_materia_U').')' : '');
             $testo1 = $this->ripulisceTesto($lezione->getArgomento());
             $testo2 = $this->ripulisceTesto($lezione->getAttivita());
             $separatore = (!empty($testo1) && !empty($testo2)) ? ' - ' : '';
