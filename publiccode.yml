@@ -18,7 +18,7 @@ description:
       - gestione utenti docenti, coordinatori, segretari
       - gestione utenti ATA e di segreteria
       - gestione utente amministratore e preside
-      - gestione assenze e giustificazioni alunni
+      - gestione assenze, ritardi, uscite anticipate, fuori classe e giustificazioni alunni
       - gestione valutazioni, note, osservazioni
       - gestione prenotazione colloqui
       - invio notifiche per diversi eventi
@@ -36,7 +36,7 @@ description:
 
       Il software permette di gestire ogni aspetto della vita scolastica, grazie
       anche all'esperienza quotidiana di questo Istituto che lo ha in uso
-      dall'anno scolstico 2017/2018.
+      dall'anno scolastico 2017/2018.
 
 
       Seppure inizialmente incentrato esclusivamente sulle esigenze
@@ -78,7 +78,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2025-03-08'
+releaseDate: '2025-07-09'
 softwareType: standalone/web
-softwareVersion: 1.6.0
+softwareVersion: 1.6.1
 url: 'https://github.com/iisgiua/giuaschool'
