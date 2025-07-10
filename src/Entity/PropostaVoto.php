@@ -206,7 +206,7 @@ class PropostaVoto implements Stringable {
   }
 
   /**
-   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, R=ripresa scrutinio, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @return string|null Periodo dello scrutinio
    */
@@ -215,7 +215,7 @@ class PropostaVoto implements Stringable {
   }
 
   /**
-   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, R=ripresa scrutinio, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @param string|null $periodo Periodo dello scrutinio
    *

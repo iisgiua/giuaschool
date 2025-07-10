@@ -129,6 +129,12 @@ App\Entity\Configurazione:
     descrizione: 'Indica se la certificazione delle competenze, compilata nello scrutinio finale della classe seconda, deve essere scaricabile da alunni e genitori.\<br>[formato: S=si, N=no]'
     valore: 'N'
     gestito: false
+  configurazione_SISTEMA13:
+    categoria: 'SISTEMA'
+    parametro: 'precisione_media'
+    descrizione: 'Indica il numero di decimali utilizzati per le medie dei voti.\<br>[numero intero]'
+    valore: '1'
+    gestito: false
 
   # ----- categoria SCUOLA -----
   configurazione_SCUOLA1:
@@ -182,7 +188,7 @@ App\Entity\Configurazione:
   configurazione_SCUOLA9:
     categoria: 'SCUOLA'
     parametro: 'ritardo_breve'
-    descrizione: 'Numero di minuti per la definizione di ritardo breve (non richiede giustificazione)\<br>[intero]'
+    descrizione: 'Numero di minuti per la definizione di ritardo breve (non richiede giustificazione)\<br>[numero intero]'
     valore: '10'
     gestito: false
   configurazione_SCUOLA10:
@@ -200,7 +206,7 @@ App\Entity\Configurazione:
   configurazione_SCUOLA12:
     categoria: 'SCUOLA'
     parametro: 'nota_modifica'
-    descrizione: 'Indica il numero di minuti entro cui si può modificare una nota; 0 permette la modifica senza limitazioni.\<br>[intero]'
+    descrizione: 'Indica il numero di minuti entro cui si può modificare una nota; 0 permette la modifica senza limitazioni.\<br>[numero intero]'
     valore: '30'
     gestito: false
   configurazione_SCUOLA13:

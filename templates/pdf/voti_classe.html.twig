@@ -21,7 +21,7 @@
   {% for materia,m in dati.materie %}
     <td>
     {% if dati.medie[alunno][materia] is defined %}
-      {{ dati.medie[alunno][materia] }}
+      {{ dati.medie[alunno][materia]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}
     {% else %}
       --
     {% endif %}
@@ -29,7 +29,7 @@
   {% endfor %}
     <td>
   {% if dati.medie[alunno][0] is defined %}
-    <strong>{{ dati.medie[alunno][0] }}</strong>
+    <strong>{{ dati.medie[alunno][0]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong>
   {% else %}
     --
   {% endif %}

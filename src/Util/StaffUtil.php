@@ -392,7 +392,7 @@ class StaffUtil {
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.ordinamento')
       ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
-      ->where("m.valutazione='N' AND m.media=1 AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo IS NULL)")
+      ->where("m.valutazione='N' AND m.media=1 AND c.attiva=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.ordinamento', 'ASC')
 			->setParameter('anno', $classe->getAnno())
 			->setParameter('sezione', $classe->getSezione())
@@ -409,12 +409,12 @@ class StaffUtil {
     $dati['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitori($listaAlunni);
     // legge medie
     $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
-      ->select('(v.alunno) AS alunno,(v.materia) AS materia,v.tipo,AVG(v.voto) AS media')
+      ->select('(v.alunno) AS alunno,(v.materia) AS materia,AVG(v.voto) AS media')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
       ->join('l.classe', 'cl')
       ->where("v.alunno IN (:lista) AND v.media=1 AND v.voto>0 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL) AND l.data BETWEEN :inizio AND :fine AND m.media=1")
-      ->groupBy('v.alunno,v.materia,v.tipo')
+      ->groupBy('v.alunno,v.materia')
 			->setParameter('lista', $listaAlunni)
 			->setParameter('anno', $classe->getAnno())
 			->setParameter('sezione', $classe->getSezione())
@@ -424,27 +424,18 @@ class StaffUtil {
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per gli alunni
-    $medie = [];
     foreach ($voti as $v) {
-      if (!isset($medie[$v['alunno']][$v['materia']])) {
-        $medie[$v['alunno']][$v['materia']]['somma'] = $v['media'];
-        $medie[$v['alunno']][$v['materia']]['num'] = 1;
-      } else {
-        $medie[$v['alunno']][$v['materia']]['somma'] += $v['media'];
-        $medie[$v['alunno']][$v['materia']]['num']++;
-      }
+      $dati['medie'][$v['alunno']][$v['materia']] = $v['media'];
     }
-    $somma = [];
-    $numero = [];
-    foreach ($medie as $alu=>$v) {
-      $somma[$alu] = 0;
-      $numero[$alu] = 0;
-      foreach ($v as $mat=>$m) {
-        $dati['medie'][$alu][$mat] = number_format($m['somma'] / $m['num'], 1, ',', null);
-        $somma[$alu] += $m['somma'] / $m['num'];
-        $numero[$alu]++;
+    // media complessiva
+    foreach ($dati['medie'] as $idAlunno => $datiAlunno) {
+      $somma = 0;
+      $numero = 0;
+      foreach ($datiAlunno as $mm) {
+        $somma += $mm;
+        $numero++;
       }
-      $dati['medie'][$alu][0] = number_format($somma[$alu] / $numero[$alu], 1, ',', null);
+      $dati['medie'][$idAlunno][0] = $somma / $numero;
     }
     // dati alunni
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')

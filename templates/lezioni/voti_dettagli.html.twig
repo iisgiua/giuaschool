@@ -67,7 +67,7 @@
             {% if dati.media[periodo][tipo] is defined %}
       <tr>
         <td colspan="2" class="bg-success text-right gs-big"><strong><em>Media {{ ('label.voti_'~tipo)|trans }}</em></strong></td>
-        <td class="bg-success"><strong class="gs-big"><em>{{ dati.media[periodo][tipo] }}</em></strong></td>
+        <td class="bg-success"><strong class="gs-big"><em>{{ dati.media[periodo][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></strong></td>
       </tr>
             {% endif %}
     </tbody>
@@ -78,17 +78,16 @@
   <div class="alert alert-warning _row" role="alert">
     <div class="text-center"><strong class="gs-big">{{ periodo }}</strong></div>
           {% if dati.media[periodo]['tot'] is defined %}
-    <div class="row">
-      <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media di tutti i voti:</em></strong></div>
-      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['tot'] }}</strong></div>
+    <div class="row text-center">
+      <strong class="gs-big"><em>Media</em> {{ dati.media[periodo]['tot']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong>
     </div>
           {% endif %}
-          {% if dati.media[periodo]['sop'] is defined %}
+          {# {% if dati.media[periodo]['sop'] is defined %}
     <div class="row">
       <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media delle medie Scritto/Orale/Pratico:</em></strong></div>
-      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['sop'] }}</strong></div>
+      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['sop']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></div>
     </div>
-          {% endif %}
+          {% endif %} #}
   </div>
         {% endif %}
       {% else %}

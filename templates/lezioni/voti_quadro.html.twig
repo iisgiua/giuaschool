@@ -153,9 +153,9 @@
               {% endif %}
             {% endfor %}
           </td>
-          <td class="{{ dati.medie[k][tipo] < 5.0 ? 'text-danger' : (dati.medie[k][tipo] < 6.0 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(1,',') }}</em></td>
+          <td class="{{ dati.medie[k][tipo] < 5 ? 'text-danger' : (dati.medie[k][tipo] < 6 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></td>
           {% endfor %}
-          <td class="{{ dati.medie[k]['T'] < 5.0 ? 'text-danger' : (dati.medie[k]['T'] < 6.0 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(1,',') }}</strong></td>
+          <td class="{{ dati.medie[k]['T'] < 5 ? 'text-danger' : (dati.medie[k]['T'] < 6 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></td>
         </tr>
         {% endif %}
       {% endfor %}

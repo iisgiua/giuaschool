@@ -2,7 +2,7 @@
 # PropostaVotoFixtures - dati di test
 #
 # Dati per le proposte di voto dei docenti agli scrutini:
-#   periodo: periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+#   periodo: periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
 #   orale: proposta di voto per la valutazione orale
 #   scritto: proposta di voto per la valutazione scritta
 #   pratico: proposta di voto per la valutazione pratica

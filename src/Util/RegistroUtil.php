@@ -1633,6 +1633,7 @@ class RegistroUtil {
       $cont[$alu['id']]['S'] = 0;
       $cont[$alu['id']]['O'] = 0;
       $cont[$alu['id']]['P'] = 0;
+      $cont[$alu['id']]['T'] = 0;
     }
     // legge i voti degli degli alunni
     $parametri = [new Parameter('alunni', $tutti), new Parameter('materia', $cattedra->getMateria()),
@@ -1669,21 +1670,19 @@ class RegistroUtil {
       if ($v['media'] && $v['voto'] > 0) {
         $dati['medie'][$v['alunno_id']][$v['tipo']] += $v['voto'];
         $cont[$v['alunno_id']][$v['tipo']]++;
+        $dati['medie'][$v['alunno_id']]['T'] += $v['voto'];
+        $cont[$v['alunno_id']]['T']++;
       }
     }
     // calcola medie
     foreach ($alunni as $alu) {
-      $tot = 0;
-      foreach (['S', 'O', 'P'] as $tipo) {
+      foreach (['S', 'O', 'P', 'T'] as $tipo) {
         if ($cont[$alu['id']][$tipo] == 0) {
           $dati['medie'][$alu['id']][$tipo] = '';
         } else {
           $dati['medie'][$alu['id']][$tipo] /= $cont[$alu['id']][$tipo];
-          $tot++;
-          $dati['medie'][$alu['id']]['T'] += $dati['medie'][$alu['id']][$tipo];
         }
       }
-      $dati['medie'][$alu['id']]['T'] = $tot > 0 ? $dati['medie'][$alu['id']]['T'] / $tot : '';
     }
     // restituisce dati
     return $dati;
@@ -2738,14 +2737,14 @@ class RegistroUtil {
       $somma_tot = 0;
       $numero_tot = 0;
       foreach ($mp as $tipo=>$m) {
-        $media_periodo[$periodo][$tipo] = number_format($m['somma'] / $m['numero'], 1, ',', null);
+        $media_periodo[$periodo][$tipo] = $m['somma'] / $m['numero'];
         $somma_sop += $m['somma'] / $m['numero'];
         $numero_sop++;
         $somma_tot += $m['somma'];
         $numero_tot += $m['numero'];
       }
-      $media_periodo[$periodo]['sop'] = number_format($somma_sop / $numero_sop, 1, ',', null);
-      $media_periodo[$periodo]['tot'] = number_format($somma_tot / $numero_tot, 1, ',', null);
+      $media_periodo[$periodo]['sop'] = $somma_sop / $numero_sop;
+      $media_periodo[$periodo]['tot'] = $somma_tot / $numero_tot;
     }
     // riordina periodi
     for ($k = 3; $k >= 1; $k--) {

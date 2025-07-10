@@ -2036,8 +2036,8 @@ class ScrutinioController extends BaseController {
    */
   #[Route(path: '/lezioni/scrutinio/medie/{cattedra}/{periodo}', name: 'lezioni_scrutinio_medie', requirements: ['cattedra' => '\d+', 'periodo' => 'P|S|F|G|R|X'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function medie(RegistroUtil $reg,  ScrutinioUtil $scr,
-                                 LogHandler $dblogger, int $cattedra, string $periodo): Response {
+  public function medie(RegistroUtil $reg, ScrutinioUtil $scr,
+                        LogHandler $dblogger, int $cattedra, string $periodo): Response {
     // inizializza variabili
     $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
@@ -2073,8 +2073,9 @@ class ScrutinioController extends BaseController {
         break;
       }
     }
+    $precisione = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/precisione_media');
     $medie = $this->em->getRepository(Valutazione::class)->medie($cattedra->getMateria(), $listaAlunni, $inizio,
-      $fine, $cattedra->getMateria()->getTipo() == 'E' ? $this->getUser() : null);
+      $fine, $cattedra->getMateria()->getTipo() == 'E' ? $this->getUser() : null, $precisione);
     // controlla limiti voti
     $tipo = $cattedra->getmateria()->getTipo();
     if ($tipo == 'R') {

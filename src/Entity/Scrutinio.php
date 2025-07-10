@@ -55,9 +55,7 @@ class Scrutinio implements Stringable {
   private ?DateTime $modificato = null;
 
   /**
-   * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
-   *
-   *
+   * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['P', 'S', 'F', 'G', 'R', 'X'], strict: true, message: 'field.choice')]
@@ -177,7 +175,7 @@ class Scrutinio implements Stringable {
   }
 
   /**
-   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @return string|null Periodo dello scrutinio
    */
@@ -186,7 +184,7 @@ class Scrutinio implements Stringable {
   }
 
   /**
-   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @param string|null $periodo Periodo dello scrutinio
    *

@@ -53,9 +53,9 @@
             {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
           </td>
     {% for km,m in dati.materie %}
-          <td><span class="gs-big label label-{{ dati.medie[ka][km] < 5.0 ? 'danger' : (dati.medie[ka][km] < 6.0 ? 'warning' : 'success') }}">{{ dati.medie[ka][km] ?: '--' }}</span></td>
+          <td><span class="gs-big label label-{{ dati.medie[ka][km] < 5 ? 'danger' : (dati.medie[ka][km] < 6 ? 'warning' : 'success') }}">{{ dati.medie[ka][km] ? dati.medie[ka][km]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') : '--' }}</span></td>
     {% endfor %}
-          <td class="gs-color-3"><span class="gs-big label label-{{ dati.medie[ka][0] < 5.0 ? 'danger' : (dati.medie[ka][0] < 6.0 ? 'warning' : 'success') }}">{{ dati.medie[ka][0] ?: '--' }}</span></td>
+          <td class="gs-color-3"><span class="gs-big label label-{{ dati.medie[ka][0] < 5 ? 'danger' : (dati.medie[ka][0] < 6 ? 'warning' : 'success') }}">{{ dati.medie[ka][0] ? dati.medie[ka][0]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') : '--' }}</span></td>
         </tr>
   {% endfor %}
       </tbody>

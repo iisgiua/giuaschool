@@ -140,23 +140,23 @@ class ValutazioneRepository extends BaseRepository {
    * @param string $inizio Data iniziale delle valutazioni (formato YYYY-MM-DD)
    * @param string $fine Data finale delle valutazioni (formato YYYY-MM-DD)
    * @param Docente|null $docente Docente di cui considerare le valutazioni
+   * @param int $precisione Numero di cifre decimali da considerare per il calcolo della media
    *
    * @return array Vettore associativo con i dati elaborati
    */
   public function medie(Materia $materia, array $listaAlunni, string $inizio, string $fine,
-                        ?Docente $docente=null): array {
+                        ?Docente $docente=null, int $precisione=1): array {
     $dati = [];
-    $cont = [];
     // calcola medie
     $medie = $this->createQueryBuilder('v')
-      ->select('(v.alunno) AS alunnoId,v.tipo,AVG(v.voto) AS media')
+      ->select('(v.alunno) AS alunnoId,AVG(v.voto) AS media')
       ->join('v.lezione', 'l')
       ->where('v.materia=:materia AND v.alunno IN (:lista) AND v.media=1 AND v.voto IS NOT NULL AND v.voto > 0 AND l.data BETWEEN :inizio AND :fine')
       ->setParameter('materia', $materia)
       ->setParameter('lista', $listaAlunni)
       ->setParameter('inizio', $inizio)
       ->setParameter('fine', $fine)
-      ->groupBy('v.alunno,v.tipo');
+      ->groupBy('v.alunno');
     if ($docente) {
       // solo valutazioni del docente indicato
       $medie->andWhere('v.docente=:docente')->setParameter('docente', $docente);
@@ -165,16 +165,8 @@ class ValutazioneRepository extends BaseRepository {
       ->getQuery()
       ->getArrayResult();
     foreach ($medie as $media) {
-      if (!isset($dati[$media['alunnoId']])) {
-        $dati[$media['alunnoId']] = $media['media'];
-        $cont[$media['alunnoId']] = 1;
-      } else {
-        $dati[$media['alunnoId']] += $media['media'];
-        $cont[$media['alunnoId']]++;
-      }
-    }
-    foreach ($dati as $alunnoId => $media) {
-      $dati[$alunnoId] = (int) round($dati[$alunnoId] / $cont[$alunnoId]);
+      // round() viene chiamato due volte per evitare problemi di arrotondamento con i numeri in virgola mobile
+      $dati[$media['alunnoId']] = (int) round(round($media['media'], $precisione));
     }
     // restituisce dati
     return $dati;
