@@ -420,6 +420,17 @@ class SistemaController extends BaseController {
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
         case 2: // gestione esiti
+          // conserva temporaneamente alunni abilitati ma senza esito finale
+          $sqlCommands = [
+            "UPDATE gs_utente a ".
+            "  SET a.abilitato = 2 ".
+            "  WHERE a.ruolo = 'ALU' AND a.abilitato = 1 ".
+            "  AND NOT EXISTS (".
+            "    SELECT e.id FROM gs_esito e, gs_scrutinio s ".
+            "    WHERE e.scrutinio_id = s.id AND e.alunno_id = a.id AND s.periodo='F');"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
           // scrutini finali
           $scrutini = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
             ->where('s.periodo=:finale')
@@ -688,6 +699,14 @@ class SistemaController extends BaseController {
             "  INNER JOIN gs_utente a ON a.id = g.alunno_id ".
             "  SET g.abilitato = 0, g.alunno_id = null ".
             "  WHERE g.ruolo = 'GEN' AND a.ruolo = 'ALU' AND a.abilitato = 0;"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
+          // evita che vengano cancellati alunni abilitati ma senza esito finale
+          $sqlCommands = [
+            "UPDATE gs_utente a ".
+            "  SET a.abilitato = 1 ".
+            "  WHERE a.ruolo = 'ALU' AND a.abilitato = 2 "];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
           }
