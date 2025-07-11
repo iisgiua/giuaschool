@@ -456,12 +456,12 @@ class Updater {
         $sqlCommand = $info['sqlCommand'];
         $sqlCheck = $info['sqlCheck'];
       }
-      $updateInfo['fileCopy'] = array_merge($updateInfo['fileCopy'], $info['fileCopy']);
-      $updateInfo['fileDelete'] = array_merge($updateInfo['fileDelete'], $info['fileDelete']);
-      $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $sqlCommand);
-      $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $sqlCheck);
-      $updateInfo['envDelete'] = array_merge($updateInfo['envDelete'], $info['envDelete']);
-      $updateInfo['procedure'] = array_merge($updateInfo['procedure'], $info['procedure']);
+      $updateInfo['fileCopy'] = array_merge($updateInfo['fileCopy'], $info['fileCopy'] ?? []);
+      $updateInfo['fileDelete'] = array_merge($updateInfo['fileDelete'], $info['fileDelete'] ?? []);
+      $updateInfo['sqlCommand'] = array_merge($updateInfo['sqlCommand'], $sqlCommand ?? []);
+      $updateInfo['sqlCheck'] = array_merge($updateInfo['sqlCheck'], $sqlCheck ?? []);
+      $updateInfo['envDelete'] = array_merge($updateInfo['envDelete'], $info['envDelete'] ?? []);
+      $updateInfo['procedure'] = array_merge($updateInfo['procedure'], $info['procedure'] ?? []);
     }
     // restituisce dati
     return $updateInfo;
