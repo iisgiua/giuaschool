@@ -30,6 +30,7 @@ class File implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco
    */
@@ -52,8 +53,6 @@ class File implements Stringable {
 
   /**
    * @var string|null $titolo Nome da visualizzare per il file
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -62,8 +61,6 @@ class File implements Stringable {
 
   /**
    * @var string|null $nome Nome per il salvataggio del file sul client
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -72,8 +69,6 @@ class File implements Stringable {
 
   /**
    * @var string|null $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 16, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -82,8 +77,6 @@ class File implements Stringable {
 
   /**
    * @var int $dimensione Dimensione del file
-   *
-   *
    */
   #[ORM\Column(type: Types::INTEGER, nullable: false)]
   #[Assert\Positive(message: 'field.positive')]
@@ -91,8 +84,6 @@ class File implements Stringable {
 
   /**
    * @var string|null $file File memorizzato sul server
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -101,6 +92,7 @@ class File implements Stringable {
 
 
   //==================== EVENTI ORM ====================
+
   /**
    * Simula un trigger onCreate
    */

@@ -1602,6 +1602,9 @@ class RegistroUtil {
   public function quadroVoti(DateTime $inizio, DateTime $fine, Docente $docente, Cattedra $cattedra): array {
     $mesi = ['', 'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
     $dati = [];
+    $dati['lista']['S'] = [];
+    $dati['lista']['O'] = [];
+    $dati['lista']['P'] = [];
     $dati['classe']['S'] = [];
     $dati['classe']['O'] = [];
     $dati['classe']['P'] = [];

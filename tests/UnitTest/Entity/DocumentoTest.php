@@ -30,18 +30,18 @@ class DocumentoTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Documento::class;
     // campi da testare
-    $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma'];
+    $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma', 'stato', 'titolo', 'anno'];
     $this->noStoredFields = ['allegati'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma'],
+    $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma', 'stato', 'titolo', 'anno'],
       'gs_sede' => '*',
       'gs_file' => '*',
       'gs_lista_destinatari' => '*'];
     // SQL write
-    $this->canWrite = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma']];
+    $this->canWrite = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma', 'stato', 'titolo', 'anno']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -51,7 +51,6 @@ class DocumentoTest extends EntityTestCase {
   /**
    * Test sull'inizializzazione degli attributi.
    * Controlla errore "Typed property must not be accessed before initialization"
-   *
    */
   public function testInitialized(): void {
     // crea nuovo oggetto
@@ -66,7 +65,6 @@ class DocumentoTest extends EntityTestCase {
   /**
    * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
    * Sono esclusi gli attributi ereditati.
-   *
    */
   public function testProperties() {
     // crea nuovi oggetti
@@ -82,7 +80,10 @@ class DocumentoTest extends EntityTestCase {
           ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'cifrato' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'firma' ? $this->faker->boolean() :
-          null))))))));
+          ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1))  :
+          ($field == 'titolo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'anno' ? $this->faker->randomNumber(4, false) :
+          null)))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -145,7 +146,10 @@ class DocumentoTest extends EntityTestCase {
       'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
       'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
       'cifrato' => $existent->getCifrato(),
-      'firma' => $existent->getFirma()];
+      'firma' => $existent->getFirma(),
+      'stato' => $existent->getStato(),
+      'titolo' => $existent->getTitolo(),
+      'anno' =>  $existent->getAnno()];
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
     $dt['tipo'] = 'P';
     $existent->setTipo('P');
@@ -209,6 +213,18 @@ class DocumentoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Cifrato - MAX LENGTH');
     $existent->setCifrato(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Cifrato - VALID MAX LENGTH');
+    // stato
+    $existent->setStato('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Stato - CHOICE');
+    $existent->setStato('P');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Stato - VALID CHOICE');
+    // titolo
+    $existent->setTitolo(str_repeat('*', 256));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Titolo - MAX LENGTH');
+    $existent->setTitolo(str_repeat('*', 255));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Titolo - VALID MAX LENGTH');
   }
 
 }

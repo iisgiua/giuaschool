@@ -89,12 +89,16 @@ $(document).ready(function() {
   var opt = '<option value="">Qualsiasi modulo formativo</option>';
   var opt_O = opt;
   var opt_P = opt;
-  {% for o in form[0].moduloFormativo.vars.choices['O'].choices %}
+  {% if form[0].moduloFormativo.vars.choices['O'].choices is defined %}
+    {% for o in form[0].moduloFormativo.vars.choices['O'].choices %}
   opt_O += '<option value="{{ o.value }}">{{ o.label }}</option>';
-  {% endfor %}
-  {% for o in form[0].moduloFormativo.vars.choices['P'].choices %}
+    {% endfor %}
+  {% endif %}
+  {% if form[0].moduloFormativo.vars.choices['P'].choices is defined %}
+    {% for o in form[0].moduloFormativo.vars.choices['P'].choices %}
   opt_P += '<option value="{{ o.value }}">{{ o.label }}</option>';
-  {% endfor -%}
+    {% endfor -%}
+  {% endif %}
   $('#filtro_tipo').change();
   {% if form[0].moduloFormativo.vars.value %}
   $('#filtro_moduloFormativo').val({{ form[0].moduloFormativo.vars.value }});

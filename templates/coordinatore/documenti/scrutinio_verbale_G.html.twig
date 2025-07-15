@@ -147,8 +147,6 @@
       <td style="font-size:9pt">
       {%- if kalu in dati.condotta9 -%}
         <em>{{ 'label.criterio_credito_condotta_no'|trans }}.</em>
-      {%- elseif idalunno in dati.insuff5 -%}
-        <em>{{ 'label.criterio_credito_quinta_no'|trans }}.</em>
       {% else %}
         {% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% endfor %}{% if dati.esiti[kalu].dati['creditoScolastico']|length %}.{% endif %}
         <br><em>{{ (dati.creditoSospeso[kalu] ? 'label.criterio_credito_sospeso_si' : 'label.criterio_credito_sospeso_no')|trans }}.</em>

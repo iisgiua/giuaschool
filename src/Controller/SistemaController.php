@@ -19,6 +19,7 @@ use App\Entity\StoricoEsito;
 use App\Entity\Materia;
 use App\Entity\Cattedra;
 use App\Entity\VotoScrutinio;
+use App\Entity\CambioClasse;
 use App\Entity\Circolare;
 use App\Entity\CircolareUtente;
 use App\Entity\Avviso;
@@ -363,37 +364,38 @@ class SistemaController extends BaseController {
           // cancella tabelle
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_annotazione;",
-            "TRUNCATE gs_assenza;",
-            "TRUNCATE gs_assenza_lezione;",
-            "TRUNCATE gs_cambio_classe;",
-            "TRUNCATE gs_colloquio;",
-            "TRUNCATE gs_definizione_consiglio;",
-            "TRUNCATE gs_deroga_assenza;",
-            "TRUNCATE gs_entrata;",
-            "TRUNCATE gs_festivita;",
-            "TRUNCATE gs_firma;",
-            "TRUNCATE gs_lezione;",
-            "TRUNCATE gs_log;",
-            "TRUNCATE gs_messenger_messages;",
-            "TRUNCATE gs_nota;",
-            "TRUNCATE gs_nota_alunno;",
-            "TRUNCATE gs_orario;",
-            "TRUNCATE gs_orario_docente;",
-            "TRUNCATE gs_osservazione;",
-            "TRUNCATE gs_presenza;",
-            "TRUNCATE gs_proposta_voto;",
-            "TRUNCATE gs_provisioning;",
-            "TRUNCATE gs_raggruppamento;",
-            "TRUNCATE gs_raggruppamento_alunno;",
-            "TRUNCATE gs_richiesta;",
-            "TRUNCATE gs_richiesta_colloquio;",
-            "TRUNCATE gs_scansione_oraria;",
-            "TRUNCATE gs_spid;",
-            "TRUNCATE gs_storico_esito;",
-            "TRUNCATE gs_storico_voto;",
-            "TRUNCATE gs_uscita;",
-            "TRUNCATE gs_valutazione;",
+            "TRUNCATE TABLE gs_annotazione;",
+            "TRUNCATE TABLE gs_assenza;",
+            "TRUNCATE TABLE gs_assenza_lezione;",
+            "TRUNCATE TABLE gs_colloquio;",
+            "TRUNCATE TABLE gs_definizione_consiglio;",
+            "TRUNCATE TABLE gs_definizione_richiesta;",
+            "TRUNCATE TABLE gs_deroga_assenza;",
+            "TRUNCATE TABLE gs_entrata;",
+            "TRUNCATE TABLE gs_festivita;",
+            "TRUNCATE TABLE gs_firma;",
+            "TRUNCATE TABLE gs_lezione;",
+            "TRUNCATE TABLE gs_log;",
+            "TRUNCATE TABLE gs_messenger_messages;",
+            "TRUNCATE TABLE gs_modulo_formativo;",
+            "TRUNCATE TABLE gs_nota;",
+            "TRUNCATE TABLE gs_nota_alunno;",
+            "TRUNCATE TABLE gs_orario;",
+            "TRUNCATE TABLE gs_orario_docente;",
+            "TRUNCATE TABLE gs_osservazione;",
+            "TRUNCATE TABLE gs_presenza;",
+            "TRUNCATE TABLE gs_proposta_voto;",
+            "TRUNCATE TABLE gs_provisioning;",
+            "TRUNCATE TABLE gs_raggruppamento;",
+            "TRUNCATE TABLE gs_raggruppamento_alunno;",
+            "TRUNCATE TABLE gs_richiesta;",
+            "TRUNCATE TABLE gs_richiesta_colloquio;",
+            "TRUNCATE TABLE gs_scansione_oraria;",
+            "TRUNCATE TABLE gs_spid;",
+            "TRUNCATE TABLE gs_storico_esito;",
+            "TRUNCATE TABLE gs_storico_voto;",
+            "TRUNCATE TABLE gs_uscita;",
+            "TRUNCATE TABLE gs_valutazione;",
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
@@ -411,6 +413,7 @@ class SistemaController extends BaseController {
             ->update()
             ->set('a.autorizzaEntrata', ':no')
             ->set('a.autorizzaUscita', ':no')
+            ->set('a.note', ':no')
             ->set('a.frequenzaEstero', ':falso')
             ->setParameter('no', null)
             ->setParameter('falso', 0)
@@ -448,7 +451,7 @@ class SistemaController extends BaseController {
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
                 'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione().
-                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : ('-'.$scrutinio->getClasse()->getGruppo())),
+                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : $scrutinio->getClasse()->getGruppo()),
                 'lista' => $noScrutinabili], ['lista' => ArrayParameterType::INTEGER]);
             }
             // anno all'estero
@@ -460,13 +463,13 @@ class SistemaController extends BaseController {
                 "WHERE a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1;";
               $connection->executeStatement($sql, [
                 'classe' => $scrutinio->getClasse()->getAnno().$scrutinio->getClasse()->getSezione().
-                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : ('-'.$scrutinio->getClasse()->getGruppo())),
+                  (empty($scrutinio->getClasse()->getGruppo()) ? '' : $scrutinio->getClasse()->getGruppo()),
                 'lista' => $estero], ['lista' => ArrayParameterType::INTEGER]);
             }
             // alunni scrutinati
             $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
             $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
+              "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', c.gruppo)), e.esito, 'F', e.media, e.credito, e.credito_precedente, e.dati ".
               "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
               "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
               "AND a.id IN (:lista) AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -492,7 +495,7 @@ class SistemaController extends BaseController {
           }
           // scrutini sospesi
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', c.gruppo)), e.esito, 'G', e.media, e.credito, e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id ".
             "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
@@ -509,11 +512,11 @@ class SistemaController extends BaseController {
           $connection->executeStatement($sql);
           // esiti scrutini rinviati al nuovo A.S.
           $sql = "INSERT INTO gs_storico_esito (creato, modificato, alunno_id, classe, esito, periodo, media, credito, credito_precedente, dati) ".
-            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', CONCAT('-',c.gruppo))), e.esito, 'X', e.media, e.credito, ".
+            "SELECT NOW(), NOW(), a.id, CONCAT(c.anno, c.sezione, IF((c.gruppo IS NULL OR c.gruppo=''), '', c.gruppo)), e.esito, 'X', e.media, e.credito, ".
             "  e.credito_precedente, e.dati ".
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_scrutinio s2 ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id AND e2.scrutinio_id = s2.id AND s2.classe_id = c.id ".
-            "AND a.ruolo = 'ALU' ".
+            "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
             "AND e.esito = 'S' AND s.periodo = 'F' AND e2.esito = 'X' AND s2.periodo = 'G' ".
             "AND NOT EXISTS (SELECT ee.id FROM gs_esito ee, gs_scrutinio ss WHERE ee.alunno_id = e.alunno_id AND ee.scrutinio_id=ss.id AND ee.esito IN ('A', 'N') AND ss.periodo = 'R');";
           $connection->executeStatement($sql);
@@ -523,7 +526,7 @@ class SistemaController extends BaseController {
             "FROM gs_esito e, gs_utente a, gs_scrutinio s, gs_classe c, gs_esito e2, gs_scrutinio s2, gs_voto_scrutinio vs ".
             "WHERE e.alunno_id = a.id AND e.scrutinio_id = s.id AND s.classe_id = c.id AND e2.alunno_id = a.id AND e2.scrutinio_id = s2.id AND s2.classe_id = c.id ".
             "AND vs.scrutinio_id = s.id AND vs.alunno_id = a.id ".
-            "AND a.ruolo = 'ALU' ".
+            "AND a.ruolo = 'ALU' AND a.abilitato = 1 ".
             "AND e.esito = 'S' AND s.periodo = 'F' AND e2.esito = 'X' AND s2.periodo = 'G' ".
             "AND NOT EXISTS (SELECT ee.id FROM gs_esito ee, gs_scrutinio ss WHERE ee.alunno_id = e.alunno_id AND ee.scrutinio_id=ss.id AND ee.esito IN ('A', 'N') AND ss.periodo = 'R');";
           $connection->executeStatement($sql);
@@ -628,10 +631,10 @@ class SistemaController extends BaseController {
           $connection = $this->em->getConnection();
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_cattedra;",
-            "TRUNCATE gs_esito;",
-            "TRUNCATE gs_scrutinio;",
-            "TRUNCATE gs_voto_scrutinio;",
+            "TRUNCATE TABLE gs_cattedra;",
+            "TRUNCATE TABLE gs_esito;",
+            "TRUNCATE TABLE gs_scrutinio;",
+            "TRUNCATE TABLE gs_voto_scrutinio;",
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
@@ -786,9 +789,9 @@ class SistemaController extends BaseController {
           // svuota tabelle dati destinatari
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_circolare_classe;",
-            "TRUNCATE gs_circolare_sede;",
-            "TRUNCATE gs_circolare_utente;",
+            "TRUNCATE TABLE gs_circolare_classe;",
+            "TRUNCATE TABLE gs_circolare_sede;",
+            "TRUNCATE TABLE gs_circolare_utente;",
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
@@ -872,9 +875,9 @@ class SistemaController extends BaseController {
           // svuota tabelle dati destinatari
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_avviso_classe;",
-            "TRUNCATE gs_avviso_sede;",
-            "TRUNCATE gs_avviso_utente;",
+            "TRUNCATE TABLE gs_avviso_classe;",
+            "TRUNCATE TABLE gs_avviso_sede;",
+            "TRUNCATE TABLE gs_avviso_utente;",
             "SET FOREIGN_KEY_CHECKS = 1;"];
           foreach ($sqlCommands as $sql) {
             $connection->executeStatement($sql);
@@ -915,20 +918,90 @@ class SistemaController extends BaseController {
           // directory da svuotare
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
-          // gestione documenti BES (alunni abilitati)
+          // crea nuova directory
+          $fs->mkdir($path.'/upload/documenti/'.$info['vecchioAnno'], 0770);
+          // gestione documenti BES: alunni abilitati
           $documenti = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
+            ->select('d as doc, se.classe')
             ->join('d.alunno', 'a')
             ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
             ->where('d.tipo IN (:tipi)')
-            ->setParameter('tipi', ['B', 'D', 'H'])
+            ->setParameter('tipi', ['B', 'D', 'H', 'C'])
             ->getQuery()
             ->getResult();
           foreach ($documenti as $documento) {
             // vecchio percorso
-            $file = $documento->getAllegati()[0]->getFile().'.'.
-              $documento->getAllegati()[0]->getEstensione();
-            $percorso1 = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().
-              '/riservato/';
+            $file = $documento['doc']->getAllegati()[0]->getFile().'.'.
+              $documento['doc']->getAllegati()[0]->getEstensione();
+            $percorso1 = $documento['classe'].'/riservato/';
+            // rimuove dati della classe
+            $documento['doc']->setClasse(null);
+            $documento['doc']->getListaDestinatari()->setFiltroDocenti([0]);
+            if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
+              // sposta documento
+              $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
+              $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
+                $path.'/upload/documenti/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
+              $documento['doc']->getAllegati()[0]->setFile($nomefile);
+            } else {
+              // cerca eventuale cambio sezione
+              $trasferito = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+                ->join('cc.alunno', 'a')
+                ->where('a.id=:alunno AND cc.classe IS NOT NULL')
+                ->setParameter('alunno', $documento['doc']->getAlunno())
+                ->getQuery()
+                ->getOneOrNullResult();
+              if ($trasferito) {
+                $percorso1 = $trasferito->getClasse()->getAnno().$trasferito->getClasse()->getSezione().
+                  $trasferito->getClasse()->getGruppo().'/riservato/';
+                if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
+                  // sposta documento
+                  $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
+                  $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
+                    $path.'/upload/documenti/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
+                  $documento['doc']->getAllegati()[0]->setFile($nomefile);
+                } else {
+                  // segna per la cancellazione
+                  $documento['doc']->setTipo('*');
+                  $documento['doc']->setAlunno(null);
+                }
+              } else {
+                // segna per la cancellazione
+                $documento['doc']->setTipo('*');
+                $documento['doc']->setAlunno(null);
+              }
+            }
+          }
+          $this->em->flush();
+          // gestione documenti BES: altri alunni
+          $documenti = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
+            ->join('d.alunno', 'a')
+            ->leftJoin(StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
+            ->where('d.tipo IN (:tipi) AND se.id IS NULL')
+            ->setParameter('tipi', ['B', 'D', 'H', 'C'])
+            ->getQuery()
+            ->getResult();
+          foreach ($documenti as $documento) {
+            // vecchio percorso
+            $file = $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
+            $percorso1 = '/riservato/';
+            if ($documento->getAlunno()->getClasse()) {
+              // alunno abilitato
+              $percorso1 = $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
+                $documento->getAlunno()->getClasse()->getGruppo().'/riservato/';
+            } else {
+              // alunno trasferito
+              $trasferito = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+                ->join('cc.alunno', 'a')
+                ->where('a.id=:alunno AND cc.classe IS NOT NULL')
+                ->setParameter('alunno', $documento->getAlunno())
+                ->getQuery()
+                ->getOneOrNullResult();
+              if ($trasferito) {
+                $percorso1 = $trasferito->getClasse()->getAnno().$trasferito->getClasse()->getSezione().
+                  $trasferito->getClasse()->getGruppo().'/riservato/';
+              }
+            }
             // rimuove dati della classe
             $documento->setClasse(null);
             $documento->getListaDestinatari()->setFiltroDocenti([0]);
@@ -936,25 +1009,31 @@ class SistemaController extends BaseController {
               // sposta documento
               $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
               $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
+                $path.'/upload/documenti/'.$info['vecchioAnno'].'/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
               $documento->getAllegati()[0]->setFile($nomefile);
+              $documento->setStato('A');
+              $documento->setAnno($info['vecchioAnno']);
+              $documento->setTitolo($documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome().
+                ' - C.F. '.$documento->getAlunno()->getCodiceFiscale());
             } else {
               // segna per la cancellazione
-              $documento->setAlunno(null);
+              $documento->setTipo('*');
             }
+            // elimina il riferimento all'alunno disabilitato
+            $documento->setAlunno(null);
           }
           $this->em->flush();
           // cancella dati documenti
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
-            "TRUNCATE gs_lista_destinatari_classe;",
-            "TRUNCATE gs_lista_destinatari_sede;",
-            "TRUNCATE gs_lista_destinatari_utente;",
+            "TRUNCATE TABLE gs_lista_destinatari_classe;",
+            "TRUNCATE TABLE gs_lista_destinatari_sede;",
+            "TRUNCATE TABLE gs_lista_destinatari_utente;",
+            "TRUNCATE TABLE gs_cambio_classe;",
             "SET FOREIGN_KEY_CHECKS = 1;",
             "DELETE df FROM gs_documento_file df ".
             "  INNER JOIN gs_documento d ON d.id = df.documento_id ".
-            "  WHERE d.tipo NOT IN ('B', 'D', 'H') OR d.alunno_id IS NULL ".
-            "  OR NOT EXISTS (SELECT id FROM gs_storico_esito WHERE d.alunno_id = alunno_id);",
+            "  WHERE d.tipo NOT IN ('B', 'D', 'H', 'C') OR d.tipo='*';",
             "DELETE d FROM gs_documento d ".
             "  WHERE NOT EXISTS (SELECT file_id FROM gs_documento_file WHERE documento_id = d.id);",
             "DELETE f FROM gs_file f ".
@@ -971,7 +1050,7 @@ class SistemaController extends BaseController {
             "SET doc.docente_id = :preside ".
             "WHERE d.abilitato = 0;";
           $connection->executeStatement($sql, ['preside' => $preside->getId()]);
-          // svuota archivio documenti
+          // svuota archivio documenti di classe
           $finder = new Finder();
           $finder->in($path.'/archivio/classi')->notName('.gitkeep');
           $fs->remove($finder);
@@ -1031,7 +1110,7 @@ class SistemaController extends BaseController {
           // cancella cache
           $commands = [
             new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),
-            new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => true, '-n' => true, '-q' => true]),
+            new ArrayInput(['command' => 'doctrine:cache:clear-query', '-n' => true, '-q' => true]),
             new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => true, '-n' => true, '-q' => true]),
           ];
           // esegue comandi
@@ -1130,6 +1209,8 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // assicura che lo script non sia interrotto
       ini_set('max_execution_time', 0);
+      // aumenta il limite di memoria\
+      ini_set('memory_limit', '1G');
       // form inviato
       $tipo = $form->get('tipo')->getData();
       $selezione = $form->get('selezione')->getData();

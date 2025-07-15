@@ -8,6 +8,7 @@ return [
   ],
   'sqlCommand' => [
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'precisione_media', 'Indica il numero di decimali utilizzati per le medie dei voti.<br>[numero intero]', '1', 0);", "SELECT id FROM gs_configurazione WHERE parametro='precisione_media'"],
+    ["ALTER TABLE gs_documento ADD stato VARCHAR(1) NOT NULL, ADD titolo VARCHAR(255) DEFAULT NULL, ADD anno INT NOT NULL; UPDATE gs_documento SET stato='P',anno=0,titolo='';", "SELECT stato FROM gs_documento"],
   ],
   'envDelete' => [
   ],

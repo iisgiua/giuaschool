@@ -475,16 +475,14 @@ class AppController extends BaseController {
     $dati['nome'] = $docente->getNome();
     $dati['cognome'] = $docente->getCognome();
     $dati['sesso'] = $docente->getSesso();
-    // sedi di servizio
-    $sedi = $this->em->getRepository(Docente::class)->sedi($docente);
-    $dati['sedi'] = array_keys($sedi);
     // classi della cattedra
-    $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'Q');
-    $datiClassi = [];
-    foreach ($classi as $c) {
-      $datiClassi[$c->getClasse()->getId()] = ''.$c->getClasse();
+    $cattedre = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'Q');
+    $datiCattedre = [];
+    foreach ($cattedre as $c) {
+      $datiCattedre[] = [$c->getClasse()->getSede()->getNomeBreve(), ''.$c->getClasse(),
+        $c->getMateria()->getNomeBreve()];
     }
-    $dati['classi'] = array_values($datiClassi);
+    $dati['cattedre'] = $datiCattedre;
     $dati['stato'] = 'OK';
     // restituisce la risposta
     return new JsonResponse($dati);
