@@ -29,9 +29,10 @@ Scenario: visualizza pagina inserimento documento BES di nuovo alunno
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) label" contiene "Classe"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Alunno"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) label" contiene "Tipo di documenti"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "certificazione"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "Diagnosi"
-  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.E.I."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.D.P."
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.E.I."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(4) label" contiene "Documento"
   E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
   E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
@@ -56,18 +57,20 @@ Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alun
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) label" contiene "Tipo di documenti"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" contiene "<opzione1>"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" contiene "<opzione2>"
-  Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione3>"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" contiene "<opzione3>"
   Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione4>"
+  Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione5>"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Documento"
   E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
   E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Classe"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Alunno"
   Esempi:
-    | tipo | opzione1 | opzione2 | opzione3 | opzione4 |
-    | B    | P.E.I.   | P.D.P.   | Diagnosi | Diagnosi |
-    | H    | Diagnosi | Diagnosi | P.E.I.   | P.D.P.   |
-    | D    | Diagnosi | Diagnosi | P.E.I.   | P.D.P.   |
+    | tipo | opzione1 | opzione2       | opzione3       | opzione4       | opzione5       |
+    | B    | P.E.I.   | P.D.P.         | certificazione | Diagnosi       | Diagnosi       |
+    | C    | P.E.I.   | P.D.P.         | Diagnosi       | certificazione | certificazione |
+    | H    | Diagnosi | certificazione | certificazione | P.D.P.         | P.E.I.         |
+    | D    | Diagnosi | certificazione | certificazione | P.D.P.         | P.E.I.         |
 
 Schema dello scenario: impedisce visualizzazione pagina inserimento quando documenti BES già inseriti
   Data ricerca istanze di tipo "Classe":
@@ -77,18 +80,20 @@ Schema dello scenario: impedisce visualizzazione pagina inserimento quando docum
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo    |
-    | $d1 | $cl1   | $a1    | <tipo1> |
-    | $d2 | $cl1   | $a1    | <tipo2> |
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | B      |
+    | $d2 | $cl1   | $a1    | C      |
+    | $d3 | $cl1   | $a1    | <tipo> |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella non ordinata:
-    | classe                              | alunno | documento       | azione       |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | /^Cancella$/ |
-    |                                     |        | Documento Pdf   | /^Cancella$/ |
+    | classe                              | alunno | documento       | azione            |
+    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Word  | Archivia Cancella |
+    |                                     |        | Documento Excel | Archivia Cancella |
+    |                                     |        | Documento Pdf   | Archivia Cancella |
   Esempi:
-    | tipo1 | tipo2 |
-    | B     | H     |
-    | B     | D     |
+    | tipo |
+    | H    |
+    | D    |
 
 Schema dello scenario: visualizza errore per pagina inserimento documenti BES già inseriti
   Data ricerca istanze di tipo "Classe":
@@ -98,17 +103,18 @@ Schema dello scenario: visualizza errore per pagina inserimento documenti BES gi
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo    |
-    | $d1 | $cl1   | $a1    | <tipo1> |
-    | $d2 | $cl1   | $a1    | <tipo2> |
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | B      |
+    | $d2 | $cl1   | $a1    | C      |
+    | $d3 | $cl1   | $a1    | <tipo> |
   Quando vai alla pagina "documenti_bes_add" con parametri:
     | alunno |
     | $a1:id |
   Allora vedi errore pagina "404"
   Esempi:
-    | tipo1 | tipo2 |
-    | B     | H     |
-    | B     | D     |
+    | tipo |
+    | H    |
+    | D    |
 
 
 ################################################################################
@@ -129,14 +135,14 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
   E premi pulsante "Conferma"
   Allora vedi la pagina "documenti_bes"
   E vedi la tabella:
-    | classe | alunno           | documento | azione            |
-    | /3ª A/ | $a1:cognome,nome | /<tipo>/  | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
+    | classe | alunno           | documento | azione                     |
+    | /3ª A/ | $a1:cognome,nome | <tipo>    | Aggiungi Archivia Cancella |
   Esempi:
-    | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | alunno                 |
+    | certificazione | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | $a1:cognome+ +$a1:nome |
 
 Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza modifiche
   Data ricerca istanze di tipo "Classe":
@@ -155,12 +161,12 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
   E non vedi la tabella:
     | classe | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-  E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
-    | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | alunno                 |
+    | certificazione | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | $a1:cognome+ +$a1:nome |
 
 Scenario: errore inserimento documento BES senza selezione classe
   Quando pagina attiva "documenti_bes_add"
@@ -244,12 +250,13 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" con password "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | tipodoc | alunno                 |
+    | certificazione | C       | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | B       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | H       | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | D       | $a1:cognome+ +$a1:nome |
 
 
 ################################################################################

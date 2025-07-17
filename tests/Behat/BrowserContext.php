@@ -642,6 +642,7 @@ class BrowserContext extends BaseContext {
    */
   public function vediInPDF($ricerca, $testoParam, $valore=null): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
+    $this->log('PDF', 'File: '.$nomefile);
     $convertito = substr($nomefile, 0, -3).'txt';
     $testo = null;
     try {

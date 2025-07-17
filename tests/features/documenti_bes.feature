@@ -43,11 +43,12 @@ Schema dello scenario: visualizza solo lista documenti della sede del responsabi
     | $d2 | $cl2   | $a2    | <tipo> |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella:
-    | classe               | alunno | documento       | azione            |
-    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Cancella |
+    | classe               | alunno | documento       | azione                     |
+    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Archivia Cancella |
   Esempi:
     | tipo |
     | B    |
+    | C    |
     | H    |
     | D    |
 
@@ -70,12 +71,13 @@ Schema dello scenario: visualizza tutti i documenti per il responsabile della sc
     | $d2 | $cl2   | $a2    | <tipo> |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella non ordinata:
-    | classe               | alunno | documento       | azione            |
-    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Cancella |
-    | $cl2 $cl2:corso,sede | $a2    | Documento Pdf   | Aggiungi Cancella |
+    | classe               | alunno | documento       | azione                     |
+    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Archivia Cancella |
+    | $cl2 $cl2:corso,sede | $a2    | Documento Pdf   | Aggiungi Archivia Cancella |
   Esempi:
     | tipo |
     | B    |
+    | C    |
     | H    |
     | D    |
 
@@ -96,9 +98,9 @@ Scenario: visualizza più documenti per alunno BES
     | $d2 | $a1:classe | $a1    | H    |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella non ordinata:
-    | classe                              | alunno | documento       | azione   |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | Cancella |
-    |                                     |        | Documento PDf   | Cancella |
+    | classe                              | alunno | documento       | azione            |
+    | $a1:classe,classe.corso,classe.sede | $a1    | Documento PDF   | Archivia Cancella |
+    |                                     |        | Documento Excel | Archivia Cancella |
 
 
 ################################################################################
@@ -122,19 +124,22 @@ Schema dello scenario: visualizza filtri classi e tipo documenti
   E selezioni opzione "<classe_id>" da lista "documento_classe"
   E premi pulsante "Filtra"
   Allora vedi la tabella:
-    | classe   | alunno   | documento   | azione            |
-    | <classe> | <alunno> | <documento> | Aggiungi Cancella |
+    | classe   | alunno   | documento   | azione                     |
+    | <classe> | <alunno> | <documento> | Aggiungi Archivia Cancella |
   Esempi:
-    | tipo | tipo2 | tipo_id  | classe_id  | classe               | alunno | documento       |
-    | B    | B     | Tutti    | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
-    | B    | B     | Tutti    | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
-    | B    | D     | Diagnosi | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
-    | H    | H     | Tutti    | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
-    | H    | H     | Tutti    | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
-    | H    | B     | P.E.I.   | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
-    | D    | D     | Tutti    | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
-    | D    | D     | Tutti    | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
-    | D    | B     | P.D.P.   | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | tipo | tipo2 | tipo_id        | classe_id  | classe               | alunno | documento       |
+    | B    | B     | Tutti          | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | B    | B     | Tutti          | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
+    | B    | D     | Diagnosi       | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | C    | C     | Tutti          | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | C    | C     | Tutti          | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
+    | C    | D     | certificazione | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel  |
+    | H    | H     | Tutti          | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | H    | H     | Tutti          | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
+    | H    | B     | P.E.I.         | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | D    | D     | Tutti          | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | D    | D     | Tutti          | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
+    | D    | B     | P.D.P.         | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
 
 Schema dello scenario: visualizza solo documenti di sede del responsabile
   Data ricerca istanze di tipo "Sede":
@@ -161,11 +166,12 @@ Schema dello scenario: visualizza solo documenti di sede del responsabile
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
   Allora vedi la tabella:
-    | classe               | alunno | documento       | azione            |
-    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Cancella |
+    | classe               | alunno | documento       | azione                     |
+    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Archivia Cancella |
   Esempi:
     | tipo |
     | B    |
+    | C    |
     | H    |
     | D    |
 
@@ -193,16 +199,18 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
   Quando vai alla pagina "login_home"
   E vai alla pagina "documenti_bes"
   Allora vedi la tabella:
-    | classe               | alunno | documento       | azione            |
-    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Cancella |
+    | classe               | alunno | documento       | azione                     |
+    | $cl1 $cl1:corso,sede | $a1    | Documento Excel | Aggiungi Archivia Cancella |
   Esempi:
-    | tipo | tipo2 | tipo_id  | classe_id |
-    | B    | B     | Diagnosi | $cl1:id   |
-    | B    | H     | Diagnosi | Tutte     |
-    | H    | H     | P.E.I.   | $cl1:id   |
-    | H    | B     | P.E.I.   | Tutte     |
-    | D    | D     | P.D.P.   | $cl1:id   |
-    | D    | B     | P.D.P.   | Tutte     |
+    | tipo | tipo2 | tipo_id        | classe_id |
+    | B    | B     | Diagnosi       | $cl1:id   |
+    | B    | H     | Diagnosi       | Tutte     |
+    | C    | C     | certificazione | $cl1:id   |
+    | C    | H     | certificazione | Tutte     |
+    | H    | H     | P.E.I.         | $cl1:id   |
+    | H    | B     | P.E.I.         | Tutte     |
+    | D    | D     | P.D.P.         | $cl1:id   |
+    | D    | B     | P.D.P.         | Tutte     |
 
 
 ################################################################################
@@ -229,12 +237,13 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" con password "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | tipodoc | alunno                 |
+    | certificazione | C       | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | B       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | H       | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | D       | $a1:cognome+ +$a1:nome |
 
 
 ################################################################################

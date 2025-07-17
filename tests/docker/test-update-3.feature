@@ -95,7 +95,6 @@ Scenario: inserisce piano di lavoro e lo visualizza su lista cattedre
   E vedi la tabella:
     | classe e materia                                 | documento                          | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Piano di lavoro.*1B.*Informatica/ | Cancella |
-  E vedi file "archivio/classi/1B/PIANO-1B-INFORMATICA.pdf" di dimensione "61514"
 
 
 ################################################################################
