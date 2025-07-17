@@ -525,8 +525,10 @@ class GenitoriController extends BaseController {
           $dati['valutazioni'] = $this->em->getRepository(Scrutinio::class)
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
-          // imposta presa visione
-          $this->em->getRepository(Esito::class)->presaVisione($dati['esito'], $this->getUser());
+          if ($this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso', '') != 'alias') {
+            // imposta presa visione
+            $this->em->getRepository(Esito::class)->presaVisione($dati['esito'], $this->getUser());
+          }
         }
       }
     } else {
