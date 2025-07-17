@@ -200,10 +200,10 @@ class SedeTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Telefono - MAX LENGTH');
     $existent->setTelefono(str_repeat('1', 32));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Telefono - VALID MAX LENGTH');
-    $existent->setTelefono($this->faker->regexify('^(?!\+?[0-9\(][0-9\.\-\(\) ]*[0-9])$'));
+    $existent->setTelefono('123-');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.phone', $this->entity.'::Telefono - REGEX');
-    $existent->setTelefono($this->faker->regexify('^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$'));
+    $existent->setTelefono('+39 346.123.7890');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Telefono - VALID REGEX');
     // ordinamento
     $existent->setOrdinamento(-5);
