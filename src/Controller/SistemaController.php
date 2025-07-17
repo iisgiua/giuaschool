@@ -919,7 +919,9 @@ class SistemaController extends BaseController {
           $finder->in($path.'/upload/documenti')->notName('.gitkeep');
           $fs->remove($finder);
           // crea nuova directory
+          $fs->mkdir($path.'/upload/documenti/riservato', 0770);
           $fs->mkdir($path.'/upload/documenti/'.$info['vecchioAnno'], 0770);
+          $fs->mkdir($path.'/upload/documenti/'.$info['vecchioAnno'].'/riservato', 0770);
           // gestione documenti BES: alunni abilitati
           $documenti = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
             ->select('d as doc, se.classe')
@@ -941,7 +943,7 @@ class SistemaController extends BaseController {
               // sposta documento
               $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
               $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
+                $path.'/upload/documenti/riservato/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
               $documento['doc']->getAllegati()[0]->setFile($nomefile);
             } else {
               // cerca eventuale cambio sezione
@@ -958,7 +960,7 @@ class SistemaController extends BaseController {
                   // sposta documento
                   $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
                   $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                    $path.'/upload/documenti/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
+                    $path.'/upload/documenti/riservato/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
                   $documento['doc']->getAllegati()[0]->setFile($nomefile);
                 } else {
                   // segna per la cancellazione
@@ -1009,7 +1011,7 @@ class SistemaController extends BaseController {
               // sposta documento
               $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
               $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/'.$info['vecchioAnno'].'/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
+                $path.'/upload/documenti/'.$info['vecchioAnno'].'/riservato/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
               $documento->getAllegati()[0]->setFile($nomefile);
               $documento->setStato('A');
               $documento->setAnno($info['vecchioAnno']);

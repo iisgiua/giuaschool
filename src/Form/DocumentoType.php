@@ -70,8 +70,8 @@ class DocumentoType extends AbstractType {
       $builder
         ->add('tipo', ChoiceType::class, ['label' => 'label.tipo_documenti',
           'data' => $options['values'][0],
-          'choices' => ['label.documenti_bes_B' => 'B', 'label.documenti_bes_H' => 'H',
-            'label.documenti_bes_D' => 'D'],
+          'choices' => ['label.documenti_bes_H' => 'H', 'label.documenti_bes_D' => 'D',
+            'label.documenti_bes_B' => 'B', 'label.documenti_bes_C' => 'C'],
           'placeholder' => 'label.tutti_tipi_documento',
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
@@ -104,17 +104,14 @@ class DocumentoType extends AbstractType {
           'required' => false])
         ->add('titolo', TextType::class, ['label' => 'label.titolo_documento',
           'data' => $options['values'][2],
-          'attr' => ['placeholder' =>
-          'label.titolo_documento',
-          'class' => 'gs-placeholder',
-          'style' => 'width:30em'],
+          'attr' => ['placeholder' =>'label.titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false])
         ->add('submit', SubmitType::class, ['label' => 'label.filtra',
           'attr' => ['class' => 'btn-primary']]);
       return;
     }
-    if (in_array($options['form_mode'], ['B', 'H', 'D'])) {
+    if (in_array($options['form_mode'], ['B', 'H', 'D', 'C'])) {
       // form documenti BES
       if (!empty($options['values'][0])) {
         // scelta alunno
@@ -142,6 +139,45 @@ class DocumentoType extends AbstractType {
         ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
           'attr' => ['widget' => 'gs-button-end',
           'onclick' => "location.href='".$options['return_url']."'"]]);
+      return;
+    }
+    if ($options['form_mode'] == 'archivio_bes') {
+      // form filtro archivio documenti BES
+      $builder
+        ->add('anno', ChoiceType::class, ['label' => 'label.filtro_anno_scolastico',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_translation_domain' => false,
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn($val, $key, $index) => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => true])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo_documenti',
+          'data' => $options['values'][2],
+          'choices' => ['label.documenti_bes_H' => 'H', 'label.documenti_bes_D' => 'D',
+            'label.documenti_bes_B' => 'B', 'label.documenti_bes_C' => 'C'],
+          'placeholder' => 'label.tutti_tipi_documento',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false])
+        ->add('cognome', TextType::class, ['label' => 'label.cognome',
+          'data' => $options['values'][3],
+          'attr' => ['placeholder' => 'label.cognome', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.nome',
+          'data' => $options['values'][4],
+          'attr' => ['placeholder' => 'label.nome', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false])
+        ->add('codice_fiscale', TextType::class, ['label' => 'label.codice_fiscale',
+          'data' => $options['values'][5],
+          'attr' => ['placeholder' => 'label.codice_fiscale', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false])
+        ->add('submit', SubmitType::class, ['label' => 'label.filtra',
+          'attr' => ['class' => 'btn-primary']]);
       return;
     }
     // form vuoto per solo allegato

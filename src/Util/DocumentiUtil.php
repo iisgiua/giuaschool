@@ -8,25 +8,25 @@
 
 namespace App\Util;
 
-use App\Entity\Classe;
-use App\Entity\Materia;
-use App\Entity\Cattedra;
-use Exception;
 use App\Entity\Alunno;
 use App\Entity\Ata;
-use App\Entity\Genitore;
-use DateTime;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Documento;
 use App\Entity\File;
+use App\Entity\Genitore;
 use App\Entity\ListaDestinatari;
 use App\Entity\ListaDestinatariClasse;
 use App\Entity\ListaDestinatariUtente;
+use App\Entity\Materia;
 use App\Entity\Sede;
 use App\Entity\Staff;
 use App\Entity\Utente;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
@@ -37,7 +37,6 @@ use Symfony\Component\Process\Process;
  * @author Antonello Dessì
  */
 class DocumentiUtil {
-
 
   /**
    * @var string $dirClassi Percorso della directory per l'archivio delle classi
@@ -185,6 +184,7 @@ class DocumentiUtil {
             case 'B':   // diagnosi BES
             case 'H':   // PEI
             case 'D':   // PDP
+            case 'C':   // certificazione BES
               if ($docente->getResponsabileBes()) {
                 // utente responsabile BES: ok
                 return true;
@@ -237,9 +237,11 @@ class DocumentiUtil {
             case 'B':   // diagnosi BES
             case 'H':   // PEI
             case 'D':   // PDP
-              if ($docente->getResponsabileBes() && $documento->getAlunno() && $documento->getAlunno()->getClasse() &&
+            case 'C':   // certificazione BES
+              if ($docente->getResponsabileBes() && ($documento->getStato() == 'A' ||
+                  ($documento->getAlunno() && $documento->getAlunno()->getClasse() &&
                   (!$docente->getResponsabileBesSede() ||
-                  $docente->getResponsabileBesSede()->getId() == $documento->getAlunno()->getClasse()->getSede()->getId())) {
+                  $docente->getResponsabileBesSede()->getId() == $documento->getAlunno()->getClasse()->getSede()->getId())))) {
                 // utente responsabile BES di scuola o di stessa sede di alunno: ok
                 return true;
               }
@@ -343,9 +345,14 @@ class DocumentiUtil {
         $titolo = 'P.D.P. - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
         $nome = 'PDP '.$nomeAlunno;
         break;
+      case 'C':
+        // altra certificazione
+        $titolo = 'Certificazione - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
+        $nome = 'Certificazione '.$nomeAlunno;
+        break;
     }
     $nome = $this->normalizzaNome($nome);
-    $nomefile = $nome;
+    $nomefile = date('Ymd_His').'_'.bin2hex(random_bytes(8));
     // imposta documento allegato
     $allegato = (new File)
       ->setTitolo($titolo)
@@ -447,6 +454,7 @@ class DocumentiUtil {
         case 'B':   // diagnosi alunno BES
         case 'H':   // PEI
         case 'D':   // PDP
+        case 'C':   // certificazione BES
           // crea destinatari: CdC
           $destinatari
             ->setSedi(new ArrayCollection([$documento->getAlunno()->getClasse()->getSede()]))
@@ -460,7 +468,7 @@ class DocumentiUtil {
             ->setDocenti('C')
             ->setFiltroDocenti([$documento->getClasse()->getId()]);
           break;
-          case 'P':   // programmi finali
+        case 'P':   // programmi finali
         case 'M':   // documento 15 maggio
           // crea destinatari: CdC, genitori/alunni di classe
           $destinatari
@@ -601,16 +609,21 @@ class DocumentiUtil {
     $fs = new FileSystem();
     if ($documento->getTipo() == 'G') {
       // documento generico
-      $dir = $this->dirUpload;
+      $dir = $this->dirUpload.'/documenti';
+    } elseif (in_array($documento->getTipo(), ['B', 'H', 'D', 'C'])) {
+      // documenti riservati
+      if ($documento->getStato() == 'A') {
+        // documento archiviato
+        $dir = $this->dirUpload.'/documenti/'.$documento->getAnno().'/riservato';
+      } else {
+        // documento pubblicato
+        $dir = $this->dirUpload.'/documenti/riservato';
+      }
     } else {
       // altri documenti in archivio classi
       $classe = ($documento->getAlunno() && $documento->getAlunno()->getClasse()) ?
         $documento->getAlunno()->getClasse() : $documento->getClasse();
       $dir = $this->dirClassi.'/'.$classe->getAnno().$classe->getSezione().$classe->getGruppo();
-      if (in_array($documento->getTipo(), ['B', 'H', 'D'])) {
-        // documenti riservati
-        $dir .= '/riservato';
-      }
     }
     // controlla esistenza percorso
     if (!$fs->exists($dir)) {
@@ -650,8 +663,8 @@ class DocumentiUtil {
         return true;
       }
     }
-    if (in_array($documento->getTipo(), ['B', 'H', 'D']) && ($utente instanceOf Docente)) {
-      // documento PEI/PDP/diagnosi e utente docente
+    if (in_array($documento->getTipo(), ['B', 'H', 'D', 'C']) && ($utente instanceOf Docente)) {
+      // documento PEI/PDP/diagnosi/altro e utente docente
       if ($utente->getResponsabileBes() && $documento->getAlunno() && $documento->getAlunno()->getClasse() &&
           (!$utente->getResponsabileBesSede() ||
           $utente->getResponsabileBesSede()->getId() == $documento->getAlunno()->getClasse()->getSede()->getId())) {
@@ -751,9 +764,8 @@ class DocumentiUtil {
       // dati documenti
       $dati['documenti'][$i]['lista'] = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
         ->join('d.alunno', 'a')
-        ->where('d.tipo IN (:tipi) AND d.alunno=:alunno')
-        ->orderBy('d.tipo', 'ASC')
-        ->setParameter('tipi', ['B', 'H', 'D'])
+        ->where("d.tipo IN ('B', 'H', 'D', 'C') AND d.alunno=:alunno AND d.stato='P'")
+        ->orderBy('d.tipo', 'DESC')
         ->setParameter('alunno', $alunno)
         ->getQuery()
         ->getResult();
@@ -762,7 +774,10 @@ class DocumentiUtil {
         if ($this->azioneDocumento('delete', $docente, $documento)) {
           $dati['documenti'][$i]['delete'][$j] = 1;
         }
-        if (count($dati['documenti'][$i]['lista']) < 2 &&
+        if ($this->azioneDocumento('edit', $docente, $documento)) {
+          $dati['documenti'][$i]['edit'][$j] = 1;
+        }
+        if (count($dati['documenti'][$i]['lista']) < 3 &&
             $this->azioneDocumento('add', $docente, $documentoAdd)) {
           $dati['documenti'][$i]['add'][$j] = 1;
         }
@@ -787,7 +802,7 @@ class DocumentiUtil {
     $testo = mb_strtoupper($nome, 'UTF-8');
     $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
     $testo = preg_replace('/\W+/','-', $testo);
-    if (str_ends_with((string) $testo, '-')) {
+    while (str_ends_with((string) $testo, '-')) {
       $testo = substr((string) $testo, 0, -1);
     }
     return $testo;
@@ -808,8 +823,8 @@ class DocumentiUtil {
     // query base
     $query = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
       ->join('d.alunno', 'a')
-      ->where('d.tipo IN (:tipi) AND d.alunno=:alunno')
-      ->orderBy('d.tipo', 'ASC');
+      ->where("d.tipo IN ('B', 'H', 'D', 'C') AND d.alunno=:alunno AND d.stato='P'")
+      ->orderBy('d.tipo', 'DESC');
     if ($criteri['tipo']) {
       $query
         ->andWhere('d.tipo=:tipo')
@@ -818,7 +833,6 @@ class DocumentiUtil {
     foreach ($dati['lista'] as $i=>$alunno) {
       // dati documenti
       $dati['documenti'][$i] = (clone $query)
-        ->setParameter('tipi', ['B', 'H', 'D'])
         ->setParameter('alunno', $alunno)
         ->getQuery()
         ->getResult();
@@ -859,6 +873,44 @@ class DocumentiUtil {
     }
     // tutto ok
     return true;
+  }
+
+  /**
+   * Recupera i documenti archiviati per gli alunni BES, secondo i criteri indicati
+   *
+   * @param array $criteri Lista con i criteri di ricerca
+   * @param Docente $docente Docente responsabile BES
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function archivioBes($criteri, Docente $docente, int $pagina): array {
+    // estrae dati
+    $dati = $this->em->getRepository(Documento::class)->archivioBes($criteri, $pagina);
+    foreach ($dati['lista'] as $documento) {
+      // controlla azioni
+      if ($this->azioneDocumento('delete', $docente, $documento)) {
+        $dati['delete'][$documento->getId()] = 1;
+      }
+      if ($this->azioneDocumento('edit', $docente, $documento)) {
+        // controlla se esiste l'alunno
+        $codiceFiscale = trim(substr($documento->getTitolo(), strpos($documento->getTitolo(), '- C.F. ') + 7));
+        $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['codiceFiscale' => $codiceFiscale,
+          'abilitato' => 1]);
+        if ($alunno && $alunno->getClasse() && ($docente->getResponsabileBesSede() === null ||
+            $alunno->getClasse()->getSede() == $docente->getResponsabileBesSede())) {
+          // esiste alunno: controlla se esiste già un documento dello stesso tipo
+          $doc = $this->em->getRepository(Documento::class)->findOneBy(['alunno' => $alunno,
+            'tipo' => $documento->getTipo(), 'stato' => 'P']);
+          if (!$doc) {
+            // non esiste documento: aggiunge azione
+            $dati['restore'][$documento->getId()] = 1;
+          }
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

@@ -260,10 +260,8 @@ class DocumentoRepository extends BaseRepository {
     $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(Documento::class, 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND d.tipo IN (:tipi)')
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('abilitato', 1)
-			->setParameter('tipi', ['B', 'H', 'D']);
+      ->where("a.abilitato=1 AND d.tipo IN ('B', 'H', 'D', 'C') AND d.stato='P'")
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC');
     // vincolo di sede
     if ($sede) {
       $alunni
@@ -302,10 +300,8 @@ class DocumentoRepository extends BaseRepository {
     $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(Documento::class, 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
-      ->where('a.abilitato=:abilitato AND d.tipo IN (:tipi)')
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('abilitato', 1)
-			->setParameter('tipi', ['B', 'H', 'D']);
+      ->where("a.abilitato=1 AND d.tipo IN ('B', 'H', 'D', 'C') AND d.stato='P'")
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita', 'ASC');
     // vincolo su sede
     if ($sede) {
       $alunni
@@ -349,7 +345,7 @@ class DocumentoRepository extends BaseRepository {
       ->leftJoin('d.materia', 'm')
       ->leftJoin('d.alunno', 'a')
       ->leftJoin('a.classe', 'cl2')
-      ->where('ldu.utente=:utente')
+      ->where("d.stato='P' AND ldu.utente=:utente")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,cl2.anno,cl2.sezione,cl2.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
 			->setParameter('utente', $utente);
     // vincolo di tipo
@@ -372,6 +368,73 @@ class DocumentoRepository extends BaseRepository {
     // paginazione
     $dati = $this->paginazione($documenti->getQuery(), (int) $pagina);
     // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i documenti archiviati per gli alunni BES, secondo i criteri indicati
+   *
+   * @param array $criteri Lista con i criteri di ricerca
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function archivioBes(array $criteri, int $pagina): array {
+    // query base
+    $documenti = $this->createQueryBuilder('d')
+      ->where("d.stato='A' AND d.anno=:anno AND d.tipo IN ('B', 'H', 'D', 'C')")
+      ->orderBy('d.titolo', 'ASC')
+      ->addOrderBy('d.tipo', 'DESC')
+			->setParameter('anno', $criteri['anno']);
+    // vincolo su tipo
+    if ($criteri['tipo']) {
+      $documenti
+        ->andWhere('d.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // vincolo su cognome
+    if ($criteri['cognome']) {
+      $documenti
+        ->andWhere('d.titolo LIKE :cognome')
+        ->setParameter('cognome', $criteri['cognome'].'%');
+    }
+    // vincolo su nome
+    if ($criteri['nome']) {
+      $documenti
+        ->andWhere('d.titolo LIKE :nome')
+        ->setParameter('nome', '% '.$criteri['nome'].'% - C.F.%');
+    }
+    // vincolo su codice fiscale
+    if ($criteri['codice_fiscale']) {
+      $documenti
+        ->andWhere('d.titolo LIKE :codice_fiscale')
+        ->setParameter('codice_fiscale', '% - C.F. '.$criteri['codice_fiscale'].'%');
+    }
+    // paginazione
+    $dati = $this->paginazione($documenti->getQuery(), (int) $pagina);
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista degli anni scolastici presenti nell'archivio dei documenti BES
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function archivioBesAnni(): array {
+    // inizializza
+    $dati = [];
+    // legge anni
+    $anni = $this->createQueryBuilder('d')
+      ->select('DISTINCT d.anno')
+      ->where("d.stato='A'")
+      ->orderBy('d.anno', 'DESC')
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($anni as $val) {
+      $dati['A.S. '.$val['anno'].'/'.($val['anno'] + 1)] = $val['anno'];
+    }
+    // restituisce dati formattati
     return $dati;
   }
 

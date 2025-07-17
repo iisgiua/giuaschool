@@ -8,7 +8,6 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
@@ -20,11 +19,13 @@ use App\Entity\Materia;
 use App\Form\DocumentoType;
 use App\Util\DocumentiUtil;
 use App\Util\LogHandler;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -166,8 +167,14 @@ class DocumentiController extends BaseController {
     // memorizzazione e log
     $dblogger->logRimozione('DOCUMENTI', 'Cancella documento', $vecchioDocumento);
     // cancella file
-    $dir = $doc->documentoDir($documento);
     foreach ($documento->getAllegati() as $allegato) {
+      $dir = $doc->documentoDir($documento);
+      if (!file_exists($dir.'/'.$allegato->getFile().'.'.$allegato->getEstensione())) {
+        // compatibilità con vecchi documenti
+        $dir = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+          $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
+          $documento->getAlunno()->getClasse()->getGruppo().'/riservato/';
+      }
       unlink($dir.'/'.$allegato->getFile().'.'.$allegato->getEstensione());
     }
     // redirezione
@@ -175,7 +182,7 @@ class DocumentiController extends BaseController {
         'P' => 'documenti_programmi',
         'R' => 'documenti_relazioni',
         'M' => 'documenti_maggio',
-        'B', 'H', 'D' => 'documenti_bes',
+        'B', 'H', 'D', 'C' => $documento->getStato() == 'A' ? 'documenti_archivio_bes' : 'documenti_bes',
         default => 'documenti_piani',
     };
     return $this->redirectToRoute($pagina);
@@ -508,8 +515,16 @@ class DocumentiController extends BaseController {
     $doc->leggeUtente($this->getUser(), $documento);
     $this->em->flush();
     // invia il file
-    return $this->file($doc->documentoDir($documento).'/'.$allegato->getFile().'.'.$allegato->getEstensione(),
-      $allegato->getNome().'.'.$allegato->getEstensione(), ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+    $nomefile = $doc->documentoDir($documento).'/'.$allegato->getFile().'.'.$allegato->getEstensione();
+    if (!file_exists($nomefile)) {
+      // compatibilità con vecchi documenti
+      $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+        $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
+        $documento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
+        $allegato->getFile().'.'.$allegato->getEstensione();
+    }
+    return $this->file($nomefile, $allegato->getNome().'.'.$allegato->getEstensione(),
+      ResponseHeaderBag::DISPOSITION_ATTACHMENT);
   }
 
   /**
@@ -603,13 +618,6 @@ class DocumentiController extends BaseController {
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/tipo', '');
     $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/classe', 0));
-    if ($pagina == 0) {
-      // pagina non definita: la cerca in sessione
-      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bes/pagina', 1);
-    } else {
-      // pagina specificata: la conserva in sessione
-      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
-    }
     // form filtro
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getResponsabileBesSede() ? $this->getUser()->getResponsabileBesSede()->getId() : null, false);
@@ -675,13 +683,14 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla azione
-    $listaTipi = ['B', 'H', 'D'];
+    $listaTipi = ['H', 'D', 'B', 'C'];
     if ($alunno) {
-      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno]);
+      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno,
+        'stato' => 'P']);
       $tipiEsistenti = [];
       foreach ($documentiEsistenti as $des) {
         $tipiEsistenti[] = $des->getTipo();
-        // toglie anche incompatibile (o PEI o PDP)
+        // toglie anche tipo incompatibile (o PEI o PDP)
         $tipiEsistenti[] = ($des->getTipo() == 'H' ? 'D' : ($des->getTipo() == 'D' ? 'H' : null));
       }
       $listaTipi = array_diff($listaTipi, $tipiEsistenti);
@@ -731,9 +740,20 @@ class DocumentiController extends BaseController {
         $this->em->getRepository(Alunno::class)->findOneBy(['abilitato' => 1,
         'id' => $form->get('alunno')->getData()]);
       if (!$alunno) {
-        $controllaTipi = ($tipo == 'H' || $tipo == 'D') ? ['H', 'D'] : ['B'];
         $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunnoIndividuale,
-          'tipo' => $controllaTipi]);
+          'stato' => 'P']);
+        $tipiEsistenti = [];
+        foreach ($documentiEsistenti as $des) {
+          if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
+            // PEI o PDP
+            $tipiEsistenti[] = 'H';
+            $tipiEsistenti[] = 'D';
+          } else {
+            // altro tipo
+            $tipiEsistenti[] = $des->getTipo();
+          }
+        }
+        $listaTipi = array_diff($listaTipi, $tipiEsistenti);
       }
       if (count($allegati) < 1) {
         // errore: numero allegati
@@ -753,7 +773,7 @@ class DocumentiController extends BaseController {
         // errore: alunno di sede non ammessa
         $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
       }
-      if (!$alunno && $tipo && $alunnoIndividuale  && !empty($documentiEsistenti)) {
+      if (!$alunno && $tipo && $alunnoIndividuale && !in_array($tipo, $listaTipi)) {
         // errore: documento già presente
         $form->addError(new FormError($trans->trans('exception.documento_esistente')));
       }
@@ -761,8 +781,7 @@ class DocumentiController extends BaseController {
         // imposta documento
         $documento->setTipo($tipo);
         if (!$alunno) {
-          $documento
-          ->setAlunno($alunnoIndividuale);
+          $documento->setAlunno($alunnoIndividuale);
         }
         // imposta destinatari
         $doc->impostaDestinatari($documento);
@@ -911,5 +930,223 @@ class DocumentiController extends BaseController {
       'dati' => $dati,
       'info' => $info]);
    }
+
+  /**
+   * Gestione dei documenti archiviati per gli alunni BES
+   *
+   * @param Request $request Pagina richiesta
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/documenti/archivio/bes/{pagina}', name: 'documenti_archivio_bes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function archivioBes(Request $request, DocumentiUtil $doc, int $pagina): Response {
+    // controlla accesso a funzione
+    if (!$this->getUser()->getResponsabileBes()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // recupera pagina dalla sessione
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/pagina', $pagina);
+    }
+    // recupera criteri dalla sessione
+    $criteri = [];
+    $criteri['anno'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/anno', '');
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/tipo', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/cognome', '');
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/nome', '');
+    $criteri['codice_fiscale'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_archivio_bes/codice_fiscale', '');
+    // form filtro
+    $listaAnni = $this->em->getRepository(Documento::class)->archivioBesAnni();
+    if (empty($criteri['anno']) || !in_array($criteri['anno'], $listaAnni)) {
+      // anno non definito: lo imposta al primo disponibile
+      $criteri['anno'] = reset($listaAnni);
+    }
+    $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'archivio_bes',
+      'values' => [$criteri['anno'], $listaAnni, $criteri['tipo'], $criteri['cognome'], $criteri['nome'],
+      $criteri['codice_fiscale']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['anno'] = $form->get('anno')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['codice_fiscale'] = $form->get('codice_fiscale')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/anno', $criteri['anno']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/codice_fiscale',
+        $criteri['codice_fiscale']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $doc->archivioBes($criteri, $this->getUser(), $pagina);
+    $info['pagina'] = $pagina;
+    // mostra la pagina di risposta
+    return $this->render('documenti/archivio_bes.html.twig', [
+      'pagina_titolo' => 'page.documenti_bes',
+      'form' => $form,
+      'form_success' => null,
+      'form_help' => null,
+      'dati' => $dati,
+      'info' => $info]);
+  }
+
+  /**
+   * Gestione ripristino dei documenti BES archiviati
+   *
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Documento $documento Documento da ripristinare
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function besRestore(TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                             Documento $documento): Response {
+    // controlla accesso a funzione
+    if (!$this->getUser()->getResponsabileBes()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla alunno
+    $codiceFiscale = trim(substr($documento->getTitolo(), strpos($documento->getTitolo(), '- C.F. ') + 7));
+    $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['codiceFiscale' => $codiceFiscale,
+      'abilitato' => 1]);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla se esiste già un documento dello stesso tipo
+    $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['alunno' => $alunno,
+      'tipo' => $documento->getTipo(), 'stato' => 'P']);
+    if ($documentoEsistente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo permessi
+    if (!$doc->azioneDocumento('edit', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($alunno->getClasse() && $this->getUser()->getResponsabileBesSede() &&
+        $alunno->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
+      // errore: alunno di sede non ammessa
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // imposta documento
+    $vecchioDocumento = clone $documento;
+    $documento
+      ->setDocente($this->getUser())
+      ->setAlunno($alunno)
+      ->setStato('P')
+      ->setTitolo('')
+      ->setAnno(0);
+    // cancella lista destinatari
+    $doc->cancellaDestinatari($documento);
+    // imposta destinatari
+    $doc->impostaDestinatari($documento);
+    // ok: memorizzazione e log
+    $dblogger->logModifica ('DOCUMENTI', 'Ripristino documento BES', $vecchioDocumento, $documento);
+    // sposta file
+    $fs = new FileSystem();
+    $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.
+      $vecchioDocumento->getAnno().'/riservato/'.$documento->getAllegati()[0]->getFile().'.'.
+      $documento->getAllegati()[0]->getEstensione();
+    $nomefile = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.
+      $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
+    $fs->rename($nomefileVecchio, $nomefile);
+    // messaggio ok
+    $this->addFlash('success', $trans->trans('message.documento_bes_ripristinato', [
+      'sex' => $alunno->getSesso() == 'F' ? 'a' : 'o', 'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
+    // redirezione
+    return $this->redirectToRoute('documenti_archivio_bes');
+  }
+
+  /**
+   * Gestione archiviazione dei documenti BES
+   *
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Documento $documento Documento da archiviare
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function besArchive(TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                             Documento $documento): Response {
+    // controlla accesso a funzione
+    if (!$this->getUser()->getResponsabileBes()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla alunno
+    if (!$documento->getAlunno()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo permessi
+    if (!$doc->azioneDocumento('edit', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($documento->getAlunno()->getClasse() && $this->getUser()->getResponsabileBesSede() &&
+        $documento->getAlunno()->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
+      // errore: alunno di sede non ammessa
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // imposta documento
+    $vecchioDocumento = clone $documento;
+    $documento
+      ->setDocente($this->getUser())
+      ->setAlunno(null)
+      ->setStato('A')
+      ->setTitolo($vecchioDocumento->getAlunno()->getCognome().' '.
+        $vecchioDocumento->getAlunno()->getNome().' - C.F. '.
+        $vecchioDocumento->getAlunno()->getCodiceFiscale())
+      ->setAnno((int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
+    // cancella lista destinatari
+    $doc->cancellaDestinatari($documento);
+    // imposta destinatari
+    $destinatari = new ListaDestinatari();
+    $this->em->persist($destinatari);
+    $documento->setListaDestinatari($destinatari);
+    // ok: memorizzazione e log
+    $dblogger->logModifica ('DOCUMENTI', 'Archiviazione documento BES', $vecchioDocumento, $documento);
+    // sposta file
+    $fs = new FileSystem();
+    if (!$fs->exists($this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.$documento->getAnno())) {
+      // crea cartella dell'archivio per l'anno indicato
+      $fs->mkdir($this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.$documento->getAnno(), 0770);
+      $fs->mkdir($this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.$documento->getAnno().'/riservato', 0770);
+    }
+    $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.
+      $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
+    $nomefile = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.
+      $documento->getAnno().'/riservato/'.$documento->getAllegati()[0]->getFile().'.'.
+      $documento->getAllegati()[0]->getEstensione();
+    $fs->rename($nomefileVecchio, $nomefile);
+    // messaggio ok
+    $this->addFlash('success', $trans->trans('message.documento_bes_archiviato', [
+      'sex' => $vecchioDocumento->getAlunno()->getSesso() == 'F' ? 'a' : 'o',
+      'alunno' => $vecchioDocumento->getAlunno()->getCognome().' '.$vecchioDocumento->getAlunno()->getNome()]));
+    // redirezione
+    return $this->redirectToRoute('documenti_bes');
+  }
 
 }

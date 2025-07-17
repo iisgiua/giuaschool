@@ -38,10 +38,10 @@ label.attivita: Attività
 label.autore: Autore
 label.autorizza_entrata: Autorizzazione ritardo
 label.autorizza_uscita: Autorizzazione uscita
-label.bes_B: Alunno con bisogni educativi speciali
-label.bes_D: Alunno con certificazione DSA
-label.bes_H: Alunno con sostegno
-label.bes_A: Alunno con altre problematiche
+label.bes_B: Bisogni educativi speciali
+label.bes_D: Certificazione DSA
+label.bes_H: Sostegno
+label.bes_A: Altre problematiche
 label.bes_N: No
 label.bes: BES
 label.cancel: Annulla
@@ -494,7 +494,8 @@ label.tutti_tipi_documento: Tutti i tipi
 label.tipo_documenti: Tipo di documenti
 label.documenti_bes_H: P.E.I.
 label.documenti_bes_D: P.D.P.
-label.documenti_bes_B: Diagnosi B.E.S.
+label.documenti_bes_B: Diagnosi
+label.documenti_bes_C: Altra certificazione
 label.documenti_generici: Altro
 label.scegli_tipo_documento: Scegli il tipo di documento
 label.titolo_documento: Titolo del documento
@@ -737,7 +738,8 @@ title.alunni.classe_edit: Cambia la classe degli alunni ad anno iniziato
 page.documenti_docenti: Documenti Docenti
 title.documenti_docenti: Visualizza i documenti dei docenti
 page.documenti_bes: Documenti BES
-title.documenti_bes: Inserimento documenti relativi agli alunni BES
+title.documenti_bes: Gestione documenti relativi agli alunni BES
+title.documenti_archivio_bes: Documenti archiviati relativi agli alunni BES
 title.nuovo_documento_bes: Inserisci il documento relativo all'alunno BES
 page.documenti_alunni: Documenti Alunni
 title.documenti_alunni: Visualizza i documenti degli alunni
@@ -1404,7 +1406,10 @@ message.lezione_esiste_altra: "Non è possibile firmare la lezione della {ora}ª
 message.cancella_lezione_con_voti: "Non è possibile cancellare la lezione indicata.<br>Hai inserito uno o più valutazioni per questa materia in questa data.<br>Per rimuovere la lezione, devi prima modificare la data delle valutazioni."
 message.modifica_lezione_con_voti: "Non è possibile modificare la materia della lezione indicata.<br>Hai inserito uno o più valutazioni per la materia esistente in questa data.<br>Per cambiare la materia della lezione, devi prima modificare la data delle valutazioni."
 message.no_documenti: Non sono presenti documenti
-message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
+message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: P.E.I./P.D.P. e diagnosi o altra certificazione.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
+message.documenti_archivio_bes: "Scarica, elimina o ripristina i documenti degli alunni BES.<br>I documenti archiviati non sono visibili."
+message.documento_bes_ripristinato: Il documento dell'alunn{sex} {alunno} è stato ripristinato.
+message.documento_bes_archiviato: Il documento dell'alunn{sex} {alunno} è stato archiviato.
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
 message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
 message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
@@ -1769,3 +1774,4 @@ exception.no_circolare: Non ha selezionato la circolare.
 exception.nota_classe_non_prevista: Non è possibile inserire una nota a tutta la classe.
 exception.docente_supplenza_errato: Il docente sostituito è identico a chi lo sostituisce
 exception.lista_cattedre_vuota: La lista delle classi/materie per la supplenza è vuota
+exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documenti BES dell'alunno selezionato
