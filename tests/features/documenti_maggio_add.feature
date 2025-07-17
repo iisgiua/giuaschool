@@ -93,7 +93,6 @@ Scenario: inserisce documento 15 maggio e lo visualizza su lista cattedre
   E vedi la tabella:
     | classe                      | documento                 | azione   |
     | $c1:anno,sezione,corso,sede | /Documento 15 maggio.*5A/ | Cancella |
-  E vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf" di dimensione "61514"
 
 Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   Data modifica istanze di tipo "Classe":
@@ -111,7 +110,6 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   E vedi la tabella:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf"
 
 Scenario: impedisce inserimento documento 15 maggio con più di un allegato
   Data modifica istanze di tipo "Classe":

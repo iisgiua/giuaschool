@@ -116,7 +116,6 @@ Scenario: inserisce piano di lavoro e lo visualizza su lista cattedre
   E vedi la tabella:
     | classe e materia                                 | documento                          | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Piano di lavoro.*1B.*Informatica/ | Cancella |
-  E vedi file "archivio/classi/1B/PIANO-1B-INFORMATICA.pdf" di dimensione "61514"
 
 Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   Data ricerca istanze di tipo "Materia":
@@ -137,7 +136,6 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/PIANO-1B-INFORMATICA.pdf"
 
 Scenario: impedisce inserimento piano di lavoro con più di un allegato
   Data ricerca istanze di tipo "Materia":

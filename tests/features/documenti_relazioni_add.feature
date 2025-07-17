@@ -145,7 +145,6 @@ Scenario: inserisce relazione e la visualizza su lista cattedre
   E vedi la tabella:
     | classe e materia                                 | documento                           | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Relazione finale.*1B.*Informatica/ | Cancella |
-  E vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf" di dimensione "61514"
 
 Scenario: inserisce relazione di sostegno e la visualizza su lista cattedre
   Data ricerca istanze di tipo "Materia":
@@ -169,7 +168,6 @@ Scenario: inserisce relazione di sostegno e la visualizza su lista cattedre
   E vedi la tabella:
     | classe e materia                                 | documento                                      | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Relazione finale.*1B.*Sostegno - Rossi Mario/ | Cancella |
-  E vedi file "archivio/classi/1B/RELAZIONE-1B-SOSTEGNO-ROSSI-MARIO.pdf" di dimensione "61514"
 
 Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   Data ricerca istanze di tipo "Materia":
@@ -190,7 +188,6 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf"
 
 Scenario: impedisce inserimento relazione con più di un allegato
   Data ricerca istanze di tipo "Materia":

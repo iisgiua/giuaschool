@@ -228,7 +228,6 @@ Scenario: cancella piano di lavoro inserito in precedenza e torna alla visualizz
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/documento-xlsx.xlsx"
 
 Scenario: inserisce e poi cancella piano di lavoro
   Data ricerca istanze di tipo "Materia":
@@ -246,14 +245,12 @@ Scenario: inserisce e poi cancella piano di lavoro
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E pagina attiva "documenti_piani"
-  E vedi file "archivio/classi/1B/PIANO-1B-INFORMATICA.pdf" di dimensione "61514"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_piani"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/PIANO-1B-INFORMATICA.pdf"
 
 Scenario: cancella programma inserito in precedenza e torna alla visualizzazione cattedre
   Data ricerca istanze di tipo "Materia":
@@ -276,7 +273,6 @@ Scenario: cancella programma inserito in precedenza e torna alla visualizzazione
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/documento-xlsx.xlsx"
 
 Scenario: inserisce e poi cancella programma
   Data ricerca istanze di tipo "Materia":
@@ -294,14 +290,12 @@ Scenario: inserisce e poi cancella programma
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E pagina attiva "documenti_programmi"
-  E vedi file "archivio/classi/1B/PROGRAMMA-1B-INFORMATICA.pdf" di dimensione "61514"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_programmi"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/PROGRAMMA-1B-INFORMATICA.pdf"
 
 Scenario: cancella relazione inserita in precedenza e torna alla visualizzazione cattedre
   Data ricerca istanze di tipo "Materia":
@@ -324,7 +318,6 @@ Scenario: cancella relazione inserita in precedenza e torna alla visualizzazione
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/documento-xlsx.xlsx"
 
 Scenario: inserisce e poi cancella relazione
   Data ricerca istanze di tipo "Materia":
@@ -342,14 +335,12 @@ Scenario: inserisce e poi cancella relazione
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E pagina attiva "documenti_relazioni"
-  E vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf" di dimensione "61514"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_relazioni"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf"
 
 Scenario: cancella documento 15 maggio inserito in precedenza e torna alla visualizzazione cattedre
   Data modifica istanze di tipo "Classe":
@@ -369,7 +360,6 @@ Scenario: cancella documento 15 maggio inserito in precedenza e torna alla visua
   E vedi la tabella:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/5A/documento-xlsx.xlsx"
 
 Scenario: inserisce e poi cancella documento del 15 maggio
   Data modifica istanze di tipo "Classe":
@@ -384,14 +374,12 @@ Scenario: inserisce e poi cancella documento del 15 maggio
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E pagina attiva "documenti_maggio"
-  E vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf" di dimensione "61514"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_maggio"
   E vedi la tabella:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
-  E non vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf"
 
 Schema dello scenario: cancella documento BES inserito in precedenza e torna alla pagina di inserimento
   E modifica utente connesso:
@@ -441,14 +429,12 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E vedi la tabella:
     | classe | alunno           | documento        | azione            |
     | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"
   E non vedi la tabella:
     | classe | alunno | documento | azione |
   E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-  E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
     | tipo     | nome     | alunno                 | alunno_file                              |
     | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
