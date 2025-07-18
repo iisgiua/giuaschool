@@ -332,23 +332,23 @@ class DocumentiUtil {
         break;
       case 'B':
         // diagnosi alunno BES
-        $titolo = 'Diagnosi - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
-        $nome = 'Diagnosi '.$nomeAlunno;
+        $titolo = 'Diagnosi ('.$documento->getAlunno()->getId().')';;
+        $nome = 'Diagnosi '.$documento->getAlunno()->getId();
         break;
       case 'H':
         // PEI
-        $titolo = 'P.E.I. - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
-        $nome = 'PEI '.$nomeAlunno;
+        $titolo = 'P.E.I. ('.$documento->getAlunno()->getId().')';
+        $nome = 'PEI '.$documento->getAlunno()->getId();
         break;
       case 'D':
         // PDP
-        $titolo = 'P.D.P. - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
-        $nome = 'PDP '.$nomeAlunno;
+        $titolo = 'P.D.P. ('.$documento->getAlunno()->getId().')';
+        $nome = 'PDP '.$documento->getAlunno()->getId();
         break;
       case 'C':
         // altra certificazione
-        $titolo = 'Certificazione - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
-        $nome = 'Certificazione '.$nomeAlunno;
+        $titolo = 'Altra certificazione ('.$documento->getAlunno()->getId().')';
+        $nome = 'Certificazione '.$documento->getAlunno()->getId();
         break;
     }
     $nome = $this->normalizzaNome($nome);
