@@ -394,7 +394,6 @@ Schema dello scenario: cancella documento BES inserito in precedenza e torna all
   E istanze di tipo "Documento":
     | id  | classe | alunno | tipo   |
     | $d1 | $cl1   | $a1    | <tipo> |
-  E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/3A/riservato/documento-xlsx.xlsx"
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -406,6 +405,7 @@ Schema dello scenario: cancella documento BES inserito in precedenza e torna all
   Esempi:
     | tipo |
     | B    |
+    | C    |
     | H    |
     | D    |
 
@@ -427,8 +427,8 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E premi pulsante "Conferma"
   E vedi la pagina "documenti_bes"
   E vedi la tabella:
-    | classe | alunno           | documento        | azione            |
-    | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
+    | classe | alunno           | documento        | azione                     |
+    | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Archivia Cancella |
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"
@@ -436,10 +436,11 @@ Schema dello scenario: inserisce e poi cancella documento BES
     | classe | alunno | documento | azione |
   E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   Esempi:
-    | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | alunno                 |
+    | certificazione | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | $a1:cognome+ +$a1:nome |
 
 
 ################################################################################

@@ -896,8 +896,8 @@ class DocumentiController extends BaseController {
      if ($this->getUser() instanceOf Docente) {
        // tipi per docenti
        $opzioni = ['label.documenti_da_leggere' => 'X', 'label.piani' => 'L', 'label.programmi' => 'P',
-         'label.maggio' => 'M', 'label.documenti_bes_B' => 'B', 'label.documenti_bes_H' => 'H',
-         'label.documenti_bes_D' => 'D', 'label.documenti_generici' => 'G'];
+         'label.maggio' => 'M', 'label.documenti_bes_B' => 'B', 'label.documenti_bes_C' => 'C',
+         'label.documenti_bes_D' => 'D', 'label.documenti_bes_H' => 'H', 'label.documenti_generici' => 'G'];
      } elseif (($this->getUser() instanceOf Genitore) || ($this->getUser() instanceOf Alunno)) {
        // tipi per genitori/alunni
        $opzioni = ['label.documenti_da_leggere' => 'X', 'label.programmi' => 'P',

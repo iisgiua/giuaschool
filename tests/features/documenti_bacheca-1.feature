@@ -49,6 +49,7 @@ Schema dello scenario: visualizza i documenti per l'utente connesso
     | Docente  | P    |
     | Docente  | M    |
     | Docente  | B    |
+    | Docente  | C    |
     | Docente  | H    |
     | Docente  | D    |
     | Docente  | G    |
@@ -94,6 +95,7 @@ Schema dello scenario: visualizza lista vuota in assenza di documenti per l'uten
     | Docente  | P    |
     | Docente  | M    |
     | Docente  | B    |
+    | Docente  | C    |
     | Docente  | H    |
     | Docente  | D    |
     | Docente  | G    |
@@ -174,20 +176,21 @@ Schema dello scenario: visualizza filtro tipo documenti
     | stato      | riferimento          | documento       | azione  |
     | DA LEGGERE | $cl1 $cl1:corso,sede | Documento Excel | Scarica |
   Esempi:
-    | ruolo    | tipo | tipo2 | tipo_id   |
-    | Docente  | L    | P     | Piani     |
-    | Docente  | P    | M     | Programmi |
-    | Docente  | M    | B     | 15 maggio |
-    | Docente  | B    | H     | Diagnosi  |
-    | Docente  | H    | D     | P.E.I.    |
-    | Docente  | D    | G     | P.D.P.    |
-    | Docente  | G    | L     | Altro     |
-    | Genitore | P    | G     | Programmi |
-    | Genitore | M    | P     | 15 maggio |
-    | Genitore | G    | M     | Altro     |
-    | Alunno   | P    | G     | Programmi |
-    | Alunno   | M    | P     | 15 maggio |
-    | Alunno   | G    | M     | Altro     |
+    | ruolo    | tipo | tipo2 | tipo_id         |
+    | Docente  | L    | P     | Piani           |
+    | Docente  | P    | M     | Programmi       |
+    | Docente  | M    | B     | 15 maggio       |
+    | Docente  | B    | H     | Diagnosi        |
+    | Docente  | C    | H     | certificazione  |
+    | Docente  | H    | D     | P.E.I.          |
+    | Docente  | D    | G     | P.D.P.          |
+    | Docente  | G    | L     | Altro           |
+    | Genitore | P    | G     | Programmi       |
+    | Genitore | M    | P     | 15 maggio       |
+    | Genitore | G    | M     | Altro           |
+    | Alunno   | P    | G     | Programmi       |
+    | Alunno   | M    | P     | 15 maggio       |
+    | Alunno   | G    | M     | Altro           |
 
 Schema dello scenario: visualizza filtro tipo documenti per stato da leggere
   Dato login utente con ruolo esatto "<ruolo>"
@@ -223,6 +226,7 @@ Schema dello scenario: visualizza filtro tipo documenti per stato da leggere
     | Docente  | P    |
     | Docente  | M    |
     | Docente  | B    |
+    | Docente  | C    |
     | Docente  | H    |
     | Docente  | D    |
     | Docente  | G    |
@@ -268,6 +272,7 @@ Schema dello scenario: visualizza filtro titolo documenti
     | Docente  | P    |
     | Docente  | M    |
     | Docente  | B    |
+    | Docente  | C    |
     | Docente  | H    |
     | Docente  | D    |
     | Docente  | G    |

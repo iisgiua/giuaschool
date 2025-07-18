@@ -45,34 +45,36 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | stato      | riferimento          | documento       | azione  |
     | DA LEGGERE | $cl1 $cl1:corso,sede | Documento Excel | Scarica |
   Esempi:
-    | ruolo    | tipo | tipo2 | tipo_id    | titolo |
-    | Docente  | L    | L     | Piani      | Excel  |
-    | Docente  | L    | P     | Piani      |        |
-    | Docente  | P    | P     | Programmi  | Excel  |
-    | Docente  | P    | M     | Programmi  |        |
-    | Docente  | M    | M     | 15 maggio  | Excel  |
-    | Docente  | M    | B     | 15 maggio  |        |
-    | Docente  | B    | B     | Diagnosi   | Excel  |
-    | Docente  | B    | H     | Diagnosi   |        |
-    | Docente  | H    | H     | P.E.I.     | Excel  |
-    | Docente  | H    | D     | P.E.I.     |        |
-    | Docente  | D    | D     | P.D.P.     | Excel  |
-    | Docente  | D    | P     | P.D.P.     |        |
-    | Docente  | G    | G     | Altro      | Excel  |
-    | Docente  | G    | L     | Altro      |        |
-    | Genitore | P    | P     | Programmi  | Excel  |
-    | Genitore | P    | M     | Programmi  |        |
-    | Genitore | M    | M     | 15 maggio  | Excel  |
-    | Genitore | M    | B     | 15 maggio  |        |
-    | Genitore | G    | G     | Altro      | Excel  |
-    | Genitore | G    | L     | Altro      |        |
-    | Alunno   | P    | P     | Programmi  | Excel  |
-    | Alunno   | P    | M     | Programmi  |        |
-    | Alunno   | M    | M     | 15 maggio  | Excel  |
-    | Alunno   | M    | B     | 15 maggio  |        |
-    | Alunno   | G    | G     | Altro      | Excel  |
-    | Alunno   | G    | L     | Altro      |        |
-    | Ata      | G    | G     | Da leggere | Excel  |
+    | ruolo    | tipo | tipo2 | tipo_id        | titolo |
+    | Docente  | L    | L     | Piani          | Excel  |
+    | Docente  | L    | P     | Piani          |        |
+    | Docente  | P    | P     | Programmi      | Excel  |
+    | Docente  | P    | M     | Programmi      |        |
+    | Docente  | M    | M     | 15 maggio      | Excel  |
+    | Docente  | M    | B     | 15 maggio      |        |
+    | Docente  | B    | B     | Diagnosi       | Excel  |
+    | Docente  | B    | H     | Diagnosi       |        |
+    | Docente  | C    | C     | certificazione | Excel  |
+    | Docente  | C    | H     | certificazione |        |
+    | Docente  | H    | H     | P.E.I.         | Excel  |
+    | Docente  | H    | D     | P.E.I.         |        |
+    | Docente  | D    | D     | P.D.P.         | Excel  |
+    | Docente  | D    | P     | P.D.P.         |        |
+    | Docente  | G    | G     | Altro          | Excel  |
+    | Docente  | G    | L     | Altro          |        |
+    | Genitore | P    | P     | Programmi      | Excel  |
+    | Genitore | P    | M     | Programmi      |        |
+    | Genitore | M    | M     | 15 maggio      | Excel  |
+    | Genitore | M    | B     | 15 maggio      |        |
+    | Genitore | G    | G     | Altro          | Excel  |
+    | Genitore | G    | L     | Altro          |        |
+    | Alunno   | P    | P     | Programmi      | Excel  |
+    | Alunno   | P    | M     | Programmi      |        |
+    | Alunno   | M    | M     | 15 maggio      | Excel  |
+    | Alunno   | M    | B     | 15 maggio      |        |
+    | Alunno   | G    | G     | Altro          | Excel  |
+    | Alunno   | G    | L     | Altro          |        |
+    | Ata      | G    | G     | Da leggere     | Excel  |
 
 
 ################################################################################
@@ -104,12 +106,13 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | $d1 | <tipodoc> | $a1     |
   Quando pagina attiva "documenti_bacheca"
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" con password "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | tipodoc | alunno                 |
+    | certificazione | C       | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | B       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | H       | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | D       | $a1:cognome+ +$a1:nome |
 
 
 ################################################################################
