@@ -48,6 +48,7 @@ Schema dello scenario: visualizza tutti i documenti per lo staff della scuola
     | $cl2 $cl2:corso,sede | $a2    | Documento Pdf   |
   Esempi:
     | tipo |
+    | C    |
     | B    |
     | H    |
     | D    |
@@ -75,8 +76,8 @@ Scenario: visualizza più documenti per alunno BES
   E premi pulsante "Filtra"
   Allora vedi la tabella non ordinata:
     | classe                              | alunno | documento       |
-    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel |
-    |                                     |        | Documento Pdf   |
+    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Pdf   |
+    |                                     |        | Documento Excel |
 
 
 ################################################################################
@@ -104,6 +105,8 @@ Schema dello scenario: visualizza filtri classi e tipo documenti
     | <classe> | <alunno> | <documento> |
   Esempi:
     | tipo | tipo2 | tipo_id  | classe_id  | classe               | alunno | documento       |
+    | C    | C     | Tutti    | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
+    | C    | C     | Tutti    | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
     | B    | B     | Tutti    | $cl1:id    | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
     | B    | B     | Tutti    | $cl2:id    | $cl2 $cl2:corso,sede | $a2    | Documento PDF   |
     | B    | D     | Diagnosi | Tutte      | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
@@ -143,6 +146,7 @@ Schema dello scenario: visualizza solo documenti di sede dello staff
     | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
   Esempi:
     | tipo |
+    | C    |
     | B    |
     | H    |
     | D    |
@@ -174,13 +178,15 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | classe               | alunno | documento       |
     | $cl1 $cl1:corso,sede | $a1    | Documento Excel |
   Esempi:
-    | tipo | tipo2 | tipo_id  | classe_id |
-    | B    | B     | Diagnosi | $cl1:id   |
-    | B    | H     | Diagnosi | Tutte     |
-    | H    | H     | P.E.I.   | $cl1:id   |
-    | H    | B     | P.E.I.   | Tutte     |
-    | D    | D     | P.D.P.   | $cl1:id   |
-    | D    | B     | P.D.P.   | Tutte     |
+    | tipo | tipo2 | tipo_id        | classe_id |
+    | C    | C     | certificazione | $cl1:id   |
+    | C    | H     | certificazione | Tutte     |
+    | B    | B     | Diagnosi       | $cl1:id   |
+    | B    | H     | Diagnosi       | Tutte     |
+    | H    | H     | P.E.I.         | $cl1:id   |
+    | H    | B     | P.E.I.         | Tutte     |
+    | D    | D     | P.D.P.         | $cl1:id   |
+    | D    | B     | P.D.P.         | Tutte     |
 
 
 ################################################################################
@@ -210,12 +216,13 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" con password "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | tipo           | tipodoc | alunno                 |
+    | certificazione | C       | $a1:cognome+ +$a1:nome |
+    | Diagnosi       | B       | $a1:cognome+ +$a1:nome |
+    | P.E.I.         | H       | $a1:cognome+ +$a1:nome |
+    | P.D.P.         | D       | $a1:cognome+ +$a1:nome |
 
 
 ################################################################################
