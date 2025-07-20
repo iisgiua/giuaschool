@@ -8,11 +8,12 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
+use App\Doctrine\EncryptedStringType;
 use App\Repository\AlunnoRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,8 +21,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Alunno - dati degli alunni
- *
- *
  *
  * @author Antonello Dessì
  */
@@ -39,9 +38,9 @@ class Alunno extends Utente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
-   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro] 
-   *
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES, A=altro]
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['N', 'H', 'D', 'B', 'A'], strict: true, message: 'field.choice')]
@@ -50,7 +49,7 @@ class Alunno extends Utente {
   /**
    * @var string|null $noteBes Note sull'alunno BES
    */
-  #[ORM\Column(name: 'note_bes', type: Types::TEXT, nullable: true)]
+  #[ORM\Column(name: 'note_bes', type: EncryptedStringType::NAME, nullable: true)]
   private ?string $noteBes = '';
 
   /**

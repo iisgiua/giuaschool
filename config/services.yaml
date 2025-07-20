@@ -92,3 +92,9 @@ services:
     parent: mailer.transport_factory.abstract
     tags:
       - { name: 'mailer.transport_factory' }
+
+  # usato per il servizio di cifratura
+  App\Security\Encryptor:
+    arguments:
+      $key: '%env(APP_SECRET)%'
+    public: true
