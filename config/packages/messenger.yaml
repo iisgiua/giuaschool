@@ -59,20 +59,8 @@ framework:
           delay: 10000
           multiplier: 3
           max_delay: 0
-      azione:
-        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-        options:
-          auto_setup: false
-          table_name: gs_messenger_messages
-          queue_name: azione
-        retry_strategy:
-          max_retries: 3
-          delay: 600000
-          multiplier: 4
-          max_delay: 0
     routing:
       'App\Message\NotificaMessage': notifica
       'App\Message\AvvisoMessage': avviso
       'App\Message\EventoMessage': evento
       'App\Message\CircolareMessage': circolare
-      'App\Message\UtenteActionMessage': azione
