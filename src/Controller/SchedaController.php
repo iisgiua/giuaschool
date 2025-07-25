@@ -12,11 +12,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Cattedra;
 use App\Entity\Configurazione;
 use App\Entity\Alunno;
+use App\Entity\Scrutinio;
 use App\Entity\VotoScrutinio;
 use App\Entity\Classe;
 use DateTime;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -144,6 +147,25 @@ class SchedaController extends BaseController {
           $valutazioni['lista'][$voti[$alunno->getId()][$cattedra->getMateria()->getId()]->getUnico()];
         $dati['scrutini'][0]['info'] = $voti[$alunno->getId()][$cattedra->getMateria()->getId()];
       }
+    } elseif ($periodo == 'X') {
+      // scrutinio sospeso
+      $periodoNome = $trans->trans('label.periodo_X');
+      // voto finale
+      $dati['scrutini'][0]['nome'] = $trans->trans('label.periodo_F');
+      $cond = '';
+      $param = [new Parameter('anno', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
+      if (!empty($classe->getGruppo())) {
+        $cond = ' AND c.gruppo=:gruppo';
+        $param[] = new Parameter('gruppo', $classe->getGruppo());
+      }
+      $scrutiniX = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
+        ->join('s.classe', 'c')
+        ->where("s.periodo='X' AND c.anno=:anno AND c.sezione=:sezione".$cond)
+        ->setParameters(new ArrayCollection($param))
+        ->getQuery()
+        ->getOneOrNullResult();
+      $dati['scrutini'][0]['voto'] = $valutazioni['lista'][$scrutiniX->getDato('voti')[$alunno->getId()][$cattedra->getMateria()->getId()]['unico']];
+      $dati['scrutini'][0]['info'] = null;
     }
     // cancella dati inutili
     foreach (['lista', 'media', 'lezioni'] as $tipo) {

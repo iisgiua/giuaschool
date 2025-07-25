@@ -916,7 +916,7 @@ class SistemaController extends BaseController {
           break;
         case 5: // gestione documenti
           // directory da svuotare
-          $finder->in($path.'/upload/documenti')->notName('.gitkeep');
+          $finder->files()->in($path.'/upload/documenti')->depth('== 0')->notName('.gitkeep');
           $fs->remove($finder);
           // crea nuova directory
           $fs->mkdir($path.'/upload/documenti/riservato', 0770);
@@ -927,7 +927,7 @@ class SistemaController extends BaseController {
             ->select('d as doc, se.classe')
             ->join('d.alunno', 'a')
             ->join(StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
-            ->where('d.tipo IN (:tipi)')
+            ->where("d.tipo IN (:tipi) AND d.stato='P'")
             ->setParameter('tipi', ['B', 'D', 'H', 'C'])
             ->getQuery()
             ->getResult();
@@ -935,18 +935,13 @@ class SistemaController extends BaseController {
             // vecchio percorso
             $file = $documento['doc']->getAllegati()[0]->getFile().'.'.
               $documento['doc']->getAllegati()[0]->getEstensione();
-            $percorso1 = $documento['classe'].'/riservato/';
+            $percorso = '/archivio/classi/'.$documento['classe'].'/riservato/';
             // rimuove dati della classe
             $documento['doc']->setClasse(null);
             $documento['doc']->getListaDestinatari()->setFiltroDocenti([0]);
-            if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
-              // sposta documento
-              $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
-              $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/riservato/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
-              $documento['doc']->getAllegati()[0]->setFile($nomefile);
-            } else {
+            if (!$fs->exists($path.$percorso.$file)) {
               // cerca eventuale cambio sezione
+              $percorso = null;
               $trasferito = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
                 ->join('cc.alunno', 'a')
                 ->where('a.id=:alunno AND cc.classe IS NOT NULL')
@@ -954,24 +949,29 @@ class SistemaController extends BaseController {
                 ->getQuery()
                 ->getOneOrNullResult();
               if ($trasferito) {
-                $percorso1 = $trasferito->getClasse()->getAnno().$trasferito->getClasse()->getSezione().
-                  $trasferito->getClasse()->getGruppo().'/riservato/';
-                if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
-                  // sposta documento
-                  $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
-                  $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                    $path.'/upload/documenti/riservato/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
-                  $documento['doc']->getAllegati()[0]->setFile($nomefile);
-                } else {
+                $percorso = '/archivio/classi/'.$trasferito->getClasse()->getAnno().
+                  $trasferito->getClasse()->getSezione().$trasferito->getClasse()->getGruppo().'/riservato/';
+              }
+              if (!$trasferito || !$fs->exists($path.$percorso.$file)) {
+                // cerca su nuova directory
+                $percorso = '/upload/documenti/riservato/';
+                if (!$fs->exists($path.$percorso.$file)) {
                   // segna per la cancellazione
                   $documento['doc']->setTipo('*');
                   $documento['doc']->setAlunno(null);
+                  $percorso = null;
+                } else {
+                  // evita spostamento file
+                  $percorso = null;
                 }
-              } else {
-                // segna per la cancellazione
-                $documento['doc']->setTipo('*');
-                $documento['doc']->setAlunno(null);
               }
+            }
+            if ($percorso) {
+              // sposta documento
+              $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
+              $fs->rename($path.$percorso.$file,
+                $path.'/upload/documenti/riservato/'.$nomefile.'.'.$documento['doc']->getAllegati()[0]->getEstensione());
+              $documento['doc']->getAllegati()[0]->setFile($nomefile);
             }
           }
           $this->em->flush();
@@ -979,20 +979,23 @@ class SistemaController extends BaseController {
           $documenti = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
             ->join('d.alunno', 'a')
             ->leftJoin(StoricoEsito::class, 'se', 'WITH', 'se.alunno = a.id')
-            ->where('d.tipo IN (:tipi) AND se.id IS NULL')
+            ->where("d.tipo IN (:tipi) AND d.stato='P' AND se.id IS NULL")
             ->setParameter('tipi', ['B', 'D', 'H', 'C'])
             ->getQuery()
             ->getResult();
           foreach ($documenti as $documento) {
             // vecchio percorso
             $file = $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
-            $percorso1 = '/riservato/';
+            $percorso = null;
             if ($documento->getAlunno()->getClasse()) {
               // alunno abilitato
-              $percorso1 = $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
+              $percorso = '/archivio/classi/'.$documento->getAlunno()->getClasse()->getAnno().
+                $documento->getAlunno()->getClasse()->getSezione().
                 $documento->getAlunno()->getClasse()->getGruppo().'/riservato/';
-            } else {
+            }
+            if (!$percorso || !$fs->exists($path.$percorso.$file)) {
               // alunno trasferito
+              $percorso = null;
               $trasferito = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
                 ->join('cc.alunno', 'a')
                 ->where('a.id=:alunno AND cc.classe IS NOT NULL')
@@ -1000,26 +1003,37 @@ class SistemaController extends BaseController {
                 ->getQuery()
                 ->getOneOrNullResult();
               if ($trasferito) {
-                $percorso1 = $trasferito->getClasse()->getAnno().$trasferito->getClasse()->getSezione().
+                $percorso = '/archivio/classi/'.$trasferito->getClasse()->getAnno().
+                  $trasferito->getClasse()->getSezione().
                   $trasferito->getClasse()->getGruppo().'/riservato/';
+              }
+              if (!$trasferito || !$fs->exists($path.$percorso.$file)) {
+                // cerca su nuova directory
+                $percorso = '/upload/documenti/riservato/';
+                if (!$fs->exists($path.$percorso.$file)) {
+                  // segna per la cancellazione
+                  $documento->setTipo('*');
+                  $percorso = null;
+                } else {
+                  // evita spostamento file
+                  $percorso = null;
+                }
               }
             }
             // rimuove dati della classe
             $documento->setClasse(null);
             $documento->getListaDestinatari()->setFiltroDocenti([0]);
-            if ($fs->exists($path.'/archivio/classi/'.$percorso1.$file)) {
+            if ($percorso) {
               // sposta documento
               $nomefile = md5(uniqid()).'-'.random_int(1, 1000);
-              $fs->rename($path.'/archivio/classi/'.$percorso1.$file,
-                $path.'/upload/documenti/'.$info['vecchioAnno'].'/riservato/'.$nomefile.'.'.$documento->getAllegati()[0]->getEstensione());
+              $fs->rename($path.$percorso.$file,
+                $path.'/upload/documenti/'.$info['vecchioAnno'].'/riservato/'.$nomefile.'.'.
+                $documento->getAllegati()[0]->getEstensione());
               $documento->getAllegati()[0]->setFile($nomefile);
               $documento->setStato('A');
               $documento->setAnno($info['vecchioAnno']);
               $documento->setTitolo($documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome().
                 ' - C.F. '.$documento->getAlunno()->getCodiceFiscale());
-            } else {
-              // segna per la cancellazione
-              $documento->setTipo('*');
             }
             // elimina il riferimento all'alunno disabilitato
             $documento->setAlunno(null);

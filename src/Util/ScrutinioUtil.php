@@ -279,6 +279,29 @@ class ScrutinioUtil {
         $listaAlunni[] = $voto->getAlunno()->getId();
         $elenco['sospesi'][$voto->getAlunno()->getId()] = $voto;
       }
+    } elseif ($periodo == 'X') {
+      // alunni con scrutinio rinviato dall'A.S. precedente
+      $cond = '';
+      $param = [new Parameter('anno', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
+      if (!empty($classe->getGruppo())) {
+        $cond = ' AND c.gruppo=:gruppo';
+        $param[] = new Parameter('gruppo', $classe->getGruppo());
+      }
+      $scrutiniX = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
+        ->join('s.classe', 'c')
+        ->where("s.periodo='X' AND c.anno=:anno AND c.sezione=:sezione".$cond)
+        ->setParameters(new ArrayCollection($param))
+        ->getQuery()
+        ->getOneOrNullResult();
+      foreach ($scrutiniX->getDato('alunni') as $id) {
+        if ($scrutiniX->getDato('voti')[$id][$materia->getId()]['unico'] < 6) {
+          $voto = (new VotoScrutinio())
+            ->setUnico($scrutiniX->getDato('voti')[$id][$materia->getId()]['unico'])
+            ->setAssenze($scrutiniX->getDato('voti')[$id][$materia->getId()]['assenze']);
+          $listaAlunni[] = $id;
+          $elenco['sospesi'][$id] = $voto;
+        }
+      }
     } else {
       // alunni della classe
       $listaAlunni = $this->reg->alunniInData(new DateTime(), $classe);
@@ -4272,6 +4295,25 @@ class ScrutinioUtil {
           $dati['voti'][$alu][$mat]['recupero'] = 'C';
           $dati['voti'][$alu][$mat]['debito'] = 'debito';
           $dati['voti'][$alu][$mat]['dati'] = [];
+        }
+      }
+      // proposte di voto
+      // legge le proposte di voto (tutte le materie, anche voti nulli)
+      $proposte = $this->em->getRepository(PropostaVoto::class)
+        ->proposte($classe, $periodo, array_keys($dati['alunni']), array_keys($dati['materie']));
+      foreach ($dati['alunni'] as $alu => $aluDati) {
+        foreach ($dati['materie'] as $mat => $matDati) {
+          if (!empty($dati['voti'][$alu][$mat]) && $dati['voti'][$alu][$mat]['unico'] < 6) {
+            if (empty($proposte[$alu][$mat]) ||
+                empty($proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])]) ||
+                empty($proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])]->getUnico())) {
+              // mancano valutazioni
+              $dati['errori'][$mat] = 1;
+            } else {
+              // conserva proposta di voto
+              $dati['proposte'][$alu][$mat] = $proposte[$alu][$mat][array_key_first($proposte[$alu][$mat])];
+            }
+          }
         }
       }
     } else {

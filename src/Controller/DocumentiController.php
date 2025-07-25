@@ -1137,6 +1137,13 @@ class DocumentiController extends BaseController {
     }
     $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.
       $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
+    if (!$fs->exists($nomefileVecchio)) {
+      // usa vecchio formato
+      $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+        $vecchioDocumento->getAlunno()->getClasse()->getAnno().$vecchioDocumento->getAlunno()->getClasse()->getSezione().
+        $vecchioDocumento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
+        $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
+    }
     $nomefile = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.
       $documento->getAnno().'/riservato/'.$documento->getAllegati()[0]->getFile().'.'.
       $documento->getAllegati()[0]->getEstensione();

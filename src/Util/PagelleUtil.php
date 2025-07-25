@@ -2336,21 +2336,26 @@ class PagelleUtil {
         $this->pdf->getHandler()->setHtmlVSpace($tagvs);
         // legge dati
         $dati = $this->certificazioniDati($classe, $periodo);
-        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
-        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
-        $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
-        foreach ($dati['ammessi'] as $id => $alu) {
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', [0, 0, 0], [255, 255, 255]]);
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
-          $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
+        if (!empty($dati['ammessi'])) {
+          $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [false]);
+          $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('startPageGroup');
+          $dati['tcpdf']['header'][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
+          foreach ($dati['ammessi'] as $id => $alu) {
+            $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setHeaderData', ['', 0, $alu['cognome'] . ' ' . $alu['nome'] . ' - ' . $dati['classe'], '', [0, 0, 0], [255, 255, 255]]);
+            $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('setPrintHeader', [true]);
+            $dati['tcpdf'][$id][] = $this->pdf->getHandler()->serializeTCPDFtag('AddPage');
+          }
+          // crea documento
+          $html = $this->tpl->render('coordinatore/documenti/scrutinio_certificazioni.html.twig', [
+            'dati' => $dati]);
+          $this->pdf->createFromHtml($html);
+          $this->pdf->getHandler()->deletePage(1);
+          // salva il documento
+          $this->pdf->save($percorso . '/' . $nomefile);
+        } else {
+          // nessuna certificazione
+          return null;
         }
-        // crea documento
-        $html = $this->tpl->render('coordinatore/documenti/scrutinio_certificazioni.html.twig', [
-          'dati' => $dati]);
-        $this->pdf->createFromHtml($html);
-        $this->pdf->getHandler()->deletePage(1);
-        // salva il documento
-        $this->pdf->save($percorso . '/' . $nomefile);
       }
       // restituisce nome del file
       return $percorso . '/' . $nomefile;
