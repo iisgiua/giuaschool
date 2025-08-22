@@ -104,7 +104,7 @@
     </tbody>
   </table>
   {% include 'include/modal-remote.html.twig' %}
-  {% include 'include/modal-confirm.html.twig' %}
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_verifica'} %}
 </div>
 {% endblock %}
 

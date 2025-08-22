@@ -40,6 +40,8 @@ return [
     'templates/bacheca/scheda_avviso_alunni.html.twig',
     'templates/bacheca/scheda_avviso_genitori.html.twig',
     'templates/bacheca/scheda_avviso.html.twig',
+    'templates/bacheca/index.html.twig',
+    'templates/bacheca/',
     'templates/ruolo_staff/avvisi_archivio.html.twig',
     'templates/ruolo_staff/avvisi_attivita.html.twig',
     'templates/ruolo_staff/avvisi_attivita_edit.html.twig',
@@ -64,6 +66,8 @@ return [
     'templates/agenda/scheda_evento_genitori_P.html.twig',
     'templates/agenda/scheda_evento_genitori_V.html.twig',
     'templates/agenda/scheda_evento_genitori_C.html.twig',
+    'templates/agenda/index.html.twig',
+    'templates/agenda/',
   ],
   'sqlCommand' => [
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'SISTEMA', 'precisione_media', 'Indica il numero di decimali utilizzati per le medie dei voti.<br>[numero intero]', '1', 0);", "SELECT id FROM gs_configurazione WHERE parametro='precisione_media'"],
