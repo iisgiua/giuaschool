@@ -12,7 +12,6 @@ use App\EventListener\LogListener;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Events;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
@@ -23,10 +22,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+
 
 /**
  * Comando per caricare le fixtures create tramite alice
@@ -48,7 +49,7 @@ class AliceLoadCommand extends Command {
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
    * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
-   * @param LogListener $logListener Gestione dei log su database (listener)
+   * @param ServiceLocator $locator Gestore per i servizi registrati
    */
   public function __construct(
       protected EntityManagerInterface $em,
@@ -57,7 +58,7 @@ class AliceLoadCommand extends Command {
       protected PurgerLoader $alice,
       private readonly string $dirProgetto,
       protected ?CustomProvider $customProvider = null,
-      private LogListener $logListener) {
+      private ServiceLocator $locator) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
@@ -115,8 +116,12 @@ class AliceLoadCommand extends Command {
    * @return int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    // disattiva temporaneamente il log listener
-    $this->logListener->disattiva();
+    // recupera il LogListener solo se esiste nell'ambiente in uso
+    if ($this->locator->has(LogListener::class)) {
+      $logListener = $this->locator->get(LogListener::class);
+      // disattiva il LogListener per l'esecuzione del comando
+      $logListener->disattiva();
+    }
     // carica argomenti e opzioni
     $fixture = $input->getArgument('fixture');
     $append = $input->getOption('append');
