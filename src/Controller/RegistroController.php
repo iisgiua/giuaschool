@@ -1101,7 +1101,7 @@ class RegistroController extends BaseController
       }
       $annotazione_old = clone $annotazione;
       if ($annotazione->getAvviso()) {
-        $dest_filtro = $annotazione->getAvviso()->getFiltro();
+        $dest_filtro = $annotazione->getAvviso()->getFiltroGenitori();
       }
     } else {
       // azione add
@@ -1202,15 +1202,9 @@ class RegistroController extends BaseController
         $log_avviso_utenti = null;
         if ($annotazione->getAvviso()) {
           $log_avviso = $annotazione->getAvviso()->getId();
-          $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
-          // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('au')
-            ->delete()
-            ->where('au.avviso=:avviso')
-            ->setParameter('avviso', $annotazione->getAvviso())
-            ->getQuery()
-            ->execute();
-          // cancella avviso
+          $log_avviso_utenti = $annotazione->getAvviso()->getFiltroGenitori();
+          // cancella destinatari avviso
+          $com->cancellaDestinatari($annotazione->getAvviso());
           $this->em->remove($annotazione->getAvviso());
           $annotazione->setAvviso(null);
         }
@@ -1232,15 +1226,8 @@ class RegistroController extends BaseController
             ->addAnnotazione($annotazione);
           $this->em->persist($avviso);
           $annotazione->setAvviso($avviso);
-          // destinatari
-          $dest = $bac->destinatariAvviso($avviso);
-          // imposta utenti
-          foreach ($dest['utenti'] as $u) {
-            $obj = (new AvvisoUtente())
-              ->setAvviso($avviso)
-              ->setUtente($this->em->getReference(Utente::class, $u));
-            $this->em->persist($obj);
-          }
+          // imposta destinatari
+          $com->impostaDestinatari($avviso);
         }
         // ok: memorizza dati
         $this->em->flush();
@@ -1321,15 +1308,9 @@ class RegistroController extends BaseController
     $log_avviso_utenti = null;
     if ($annotazione->getAvviso()) {
       $log_avviso = $annotazione->getAvviso()->getId();
-      $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
-      // cancella destinatari precedenti e dati lettura
-      $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
-        ->delete()
-        ->where('au.avviso=:avviso')
-        ->setParameter('avviso', $annotazione->getAvviso())
-        ->getQuery()
-        ->execute();
-      // cancella avviso
+      $log_avviso_utenti = $annotazione->getAvviso()->getFiltroGenitori();
+      // cancella destinatari avviso
+      $com->cancellaDestinatari($annotazione->getAvviso());
       $vecchioAvviso = $annotazione->getAvviso();
       $annotazione->setAvviso(null);
     }
