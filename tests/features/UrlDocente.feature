@@ -34,7 +34,8 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | colloqui_edit              |
     | colloqui_create            |
     | circolari_bacheca          |
-    | bacheca_avvisi             |
+    | avvisi_bacheca             |
+    | avvisi_agenda              |
     | documenti_bacheca          |
     | utenti_profilo             |
     | utenti_email               |

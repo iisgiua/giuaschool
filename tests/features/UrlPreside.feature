@@ -29,12 +29,12 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per l'utente pr
     | documenti_relazioni        |
     | documenti_maggio           |
     | circolari_bacheca          |
-    | bacheca_avvisi             |
+    | avvisi_bacheca             |
     | documenti_bacheca          |
-    | staff_avvisi               |
-    | staff_avvisi_attivita      |
-    | staff_avvisi_individuali   |
+    | avvisi_gestione            |
+    | avvisi_archivio            |
     | circolari_gestione         |
+    | circolari_archivio         |
     | staff_studenti_autorizza   |
     | staff_studenti_assenze     |
     | staff_studenti_deroghe     |

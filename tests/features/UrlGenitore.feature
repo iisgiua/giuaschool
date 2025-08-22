@@ -28,7 +28,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | circolari_bacheca          |
     | avvisi_bacheca             |
     | documenti_bacheca          |
-    | genitori_eventi            |
+    | avvisi_agenda              |
     | utenti_profilo             |
     | utenti_email               |
     | utenti_password            |

@@ -17,7 +17,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
   Esempi:
     | route                      |
     | circolari_bacheca          |
-    | bacheca_avvisi_ata         |
+    | avvisi_bacheca             |
     | documenti_bacheca          |
     | utenti_profilo             |
     | utenti_email               |
