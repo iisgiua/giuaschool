@@ -22,11 +22,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Contracts\Service\ServiceProviderInterface;
 
 
 /**
@@ -49,7 +49,7 @@ class AliceLoadCommand extends Command {
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
    * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
-   * @param ServiceProviderInterface $locator Gestore per i servizi registrati
+   * @param ServiceLocator $locator Gestore per i servizi registrati
    */
   public function __construct(
       protected EntityManagerInterface $em,
@@ -58,7 +58,7 @@ class AliceLoadCommand extends Command {
       protected PurgerLoader $alice,
       private readonly string $dirProgetto,
       protected ?CustomProvider $customProvider = null,
-      private ServiceProviderInterface $locator) {
+      private ServiceLocator $locator) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
