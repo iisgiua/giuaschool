@@ -29,7 +29,7 @@ use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\NotificaMessageHandler;
-// use App\Util\BachecaUtil;
+use App\Util\ComunicazioniUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use DateTime;
@@ -64,7 +64,6 @@ class RegistroController extends BaseController
    *
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -75,7 +74,7 @@ class RegistroController extends BaseController
    */
   #[Route(path: '/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}', name: 'lezioni_registro_firme', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function firme(Request $request, RegistroUtil $reg, BachecaUtil $bac,
+  public function firme(Request $request, RegistroUtil $reg,
                         int $cattedra, int $classe, string $data, string $vista): Response {
     // inizializza variabili
     $lista_festivi = null;
@@ -1061,7 +1060,7 @@ class RegistroController extends BaseController
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
@@ -1073,7 +1072,7 @@ class RegistroController extends BaseController
   #[Route(path: '/lezioni/registro/annotazione/edit/{classe}/{data}/{id}', name: 'lezioni_registro_annotazione_edit', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'id' => '\d+'], defaults: ['id' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function annotazioneEdit(Request $request, TranslatorInterface $trans,
-                                  MessageBusInterface $msg, RegistroUtil $reg, BachecaUtil $bac,
+                                  MessageBusInterface $msg, RegistroUtil $reg, ComunicazioniUtil $com,
                                   LogHandler $dblogger, int $classe, string $data,
                                   int $id): Response {
     // inizializza
@@ -1185,13 +1184,13 @@ class RegistroController extends BaseController
       // controllo permessi
       if ($annotazione->getVisibile()) {
         // permessi avviso
-        if (!$bac->azioneAvviso('add', $dataObj, $this->getUser(), null)) {
+        if (!$com->azioneAvviso('add', $dataObj, $this->getUser(), null)) {
           // errore: azione non permessa
           $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
       }
       if ($annotazione->getAvviso()) {
-        if (!$bac->azioneAvviso('delete', $dataObj, $this->getUser(), $annotazione->getAvviso())) {
+        if (!$com->azioneAvviso('delete', $dataObj, $this->getUser(), $annotazione->getAvviso())) {
           // errore: cancellazione non permessa
           $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
@@ -1205,7 +1204,7 @@ class RegistroController extends BaseController
           $log_avviso = $annotazione->getAvviso()->getId();
           $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
           // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+          $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameter('avviso', $annotazione->getAvviso())
@@ -1223,15 +1222,14 @@ class RegistroController extends BaseController
             $this->getUser()->getNome().' '.$this->getUser()->getCognome();
           $avviso = (new Avviso())
             ->setTipo('D')
-            ->setDestinatari(['G'])
             ->setSedi(new ArrayCollection([$classe->getSede()]))
-            ->setFiltroTipo('U')
-            ->setFiltro($val_filtro_alunni_id)
+            ->setGenitori('U')
+            ->setFiltroGenitori($val_filtro_alunni_id)
             ->setData($annotazione->getData())
-            ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
+            ->setTitolo($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
             ->setTesto($annotazione->getTesto())
-            ->setDocente($this->getUser())
-            ->addAnnotazioni($annotazione);
+            ->setAutore($this->getUser())
+            ->addAnnotazione($annotazione);
           $this->em->persist($avviso);
           $annotazione->setAvviso($avviso);
           // destinatari
@@ -1287,7 +1285,7 @@ class RegistroController extends BaseController
    * Cancella annotazione dal registro
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo dell'annotazione
    *
@@ -1296,7 +1294,7 @@ class RegistroController extends BaseController
    */
   #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function annotazioneDelete(RegistroUtil $reg, BachecaUtil $bac,
+  public function annotazioneDelete(RegistroUtil $reg, ComunicazioniUtil $com,
                                     LogHandler $dblogger, int $id): Response {
     // controlla annotazione
     $annotazione = $this->em->getRepository(Annotazione::class)->find($id);
@@ -1310,7 +1308,7 @@ class RegistroController extends BaseController
       throw $this->createNotFoundException('exception.not_allowed');
     }
     if ($annotazione->getAvviso() &&
-        !$bac->azioneAvviso('delete', $annotazione->getData(), $this->getUser(), $annotazione->getAvviso())) {
+        !$com->azioneAvviso('delete', $annotazione->getData(), $this->getUser(), $annotazione->getAvviso())) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }

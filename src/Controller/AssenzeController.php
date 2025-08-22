@@ -24,7 +24,6 @@ use App\Form\AppelloType;
 use App\Form\EntrataType;
 use App\Form\PresenzaType;
 use App\Form\UscitaType;
-// use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -51,7 +50,6 @@ class AssenzeController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (sostituzione)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -63,9 +61,8 @@ class AssenzeController extends BaseController {
    */
   #[Route(path: '/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}/{posizione}', name: 'lezioni_assenze_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M', 'posizione' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G', 'posizione' => '0'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function quadro(Request $request, RegistroUtil $reg, BachecaUtil $bac,
-                         int $cattedra, int $classe, string $data, string $vista,
-                         int $posizione): Response {
+  public function quadro(Request $request, RegistroUtil $reg, int $cattedra, int $classe, string $data,
+                         string $vista, int $posizione): Response {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
