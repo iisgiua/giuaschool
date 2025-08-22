@@ -6,3 +6,8 @@ services:
   Fidry\AliceDataFixtures\Loader\PurgerLoader:
     alias: fidry_alice_data_fixtures.doctrine.purger_loader
     public: true
+
+  App\Command\AliceLoadCommand:
+    arguments:
+      $locator: !service_locator
+        App\EventListener\LogListener: '@?App\EventListener\LogListener'

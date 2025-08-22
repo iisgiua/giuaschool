@@ -146,8 +146,8 @@ class NotificheUtil {
     // conta nuovi avvisi
     $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
-      ->where('au.utente=:utente AND au.letto is NULL')
+      ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+      ->where('cu.utente=:utente AND cu.letto is NULL')
 			->setParameter('utente', $utente)
       ->getQuery()
       ->getSingleScalarResult();
