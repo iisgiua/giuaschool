@@ -8,13 +8,15 @@
 
 namespace App\Command;
 
-use Symfony\Component\Console\Attribute\AsCommand;
+use App\EventListener\LogListener;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Events;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,7 +27,6 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-
 
 /**
  * Comando per caricare le fixtures create tramite alice
@@ -47,6 +48,7 @@ class AliceLoadCommand extends Command {
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
    * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
+   * @param LogListener $logListener Gestione dei log su database (listener)
    */
   public function __construct(
       protected EntityManagerInterface $em,
@@ -54,7 +56,8 @@ class AliceLoadCommand extends Command {
       protected Generator $faker,
       protected PurgerLoader $alice,
       private readonly string $dirProgetto,
-      protected ?CustomProvider $customProvider = null) {
+      protected ?CustomProvider $customProvider = null,
+      private LogListener $logListener) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
@@ -112,6 +115,8 @@ class AliceLoadCommand extends Command {
    * @return int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    // disattiva temporaneamente il log listener
+    $this->logListener->disattiva();
     // carica argomenti e opzioni
     $fixture = $input->getArgument('fixture');
     $append = $input->getOption('append');
