@@ -373,23 +373,4 @@ class Colloquio implements Stringable {
       ' - '.$this->fine->format('H:i');
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'docente' => $this->docente->getId(),
-      'data' => $this->data->format('d/m/Y'),
-      'inizio' => $this->inizio->format('H:i'),
-      'fine' => $this->fine->format('H:i'),
-      'tipo' => $this->tipo,
-      'luogo' => $this->luogo,
-      'durata' => $this->durata,
-      'numero' => $this->numero,
-      'abilitato' => $this->abilitato];
-    return $dati;
-  }
-
 }

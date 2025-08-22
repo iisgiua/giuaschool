@@ -126,20 +126,6 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame('Richiesta: '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'nome' => $existent->getNome(),
-      'sede' => $existent->getSede() ? $existent->getSede()->getId() : null,
-      'richiedenti' => $existent->getRichiedenti(),
-      'destinatari' => $existent->getDestinatari(),
-      'modulo' => $existent->getModulo(),
-      'campi' => $existent->getCampi(),
-      'allegati' => $existent->getAllegati(),
-      'tipo' => $existent->getTipo(),
-      'unica' => $existent->getUnica(),
-      'gestione' => $existent->getGestione(),
-      'abilitata' => $existent->getAbilitata()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

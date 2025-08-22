@@ -91,7 +91,7 @@ class ModuloType extends AbstractType {
           'required' => false])
         ->add('circolare', ChoiceType::class, ['label' => 'label.archivio_circolari',
           'choices' => $options['values'][3],
-          'choice_label' => fn($obj) => $obj->getNumero().' - '.$obj->getOggetto(),
+          'choice_label' => fn($obj) => $obj->getNumero().' - '.$obj->getTitolo(),
           'choice_value' => fn($obj) => $obj ? $obj->getId() : $obj,
           'placeholder' => 'label.choose_option',
           'choice_translation_domain' => false,

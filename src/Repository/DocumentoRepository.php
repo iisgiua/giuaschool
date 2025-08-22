@@ -8,14 +8,14 @@
 
 namespace App\Repository;
 
-use App\Entity\Documento;
-use App\Entity\ListaDestinatariUtente;
-use App\Entity\Utente;
-use App\Entity\Docente;
-use App\Entity\Classe;
-use App\Entity\Sede;
 use App\Entity\Alunno;
 use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\ComunicazioneUtente;
+use App\Entity\Docente;
+use App\Entity\Documento;
+use App\Entity\Sede;
+use App\Entity\Utente;
 
 
 /**
@@ -32,7 +32,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function piani(Docente $docente) {
+  public function piani(Docente $docente): array {
     // query
     $cattedre = $this->getEntityManager()->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
@@ -40,13 +40,9 @@ class DocumentoRepository extends BaseRepository {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND c.docente=:docente')
+      ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='L' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P'")
+      ->where("c.attiva=1 AND c.tipo!='P' AND m.tipo NOT IN ('S', 'E') AND c.docente=:docente")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nome', 'ASC')
-			->setParameter('documento', 'L')
-			->setParameter('attiva', 1)
-			->setParameter('potenziamento', 'P')
-			->setParameter('materie', ['S', 'E'])
 			->setParameter('docente', $docente)
       ->getQuery()
       ->getResult();
@@ -62,7 +58,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function programmi(Docente $docente, bool $programmiQuinte) {
+  public function programmi(Docente $docente, bool $programmiQuinte): array {
     // query
     $cattedre = $this->getEntityManager()->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
@@ -70,13 +66,9 @@ class DocumentoRepository extends BaseRepository {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND c.docente=:docente')
+      ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='P' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P'")
+      ->where("c.attiva=1 AND c.tipo!='P' AND m.tipo NOT IN ('S', 'E') AND c.docente=:docente")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nome', 'ASC')
-			->setParameter('documento', 'P')
-			->setParameter('attiva', 1)
-			->setParameter('potenziamento', 'P')
-			->setParameter('materie', ['S', 'E'])
 			->setParameter('docente', $docente);
     if (!$programmiQuinte) {
       $cattedre
@@ -96,7 +88,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function relazioni(Docente $docente) {
+  public function relazioni(Docente $docente): array {
     // query
     $cattedre = $this->getEntityManager()->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,a.id AS alunno_id,a.cognome AS alunnoCognome,a.nome AS alunnoNome,d AS documento')
@@ -105,16 +97,10 @@ class DocumentoRepository extends BaseRepository {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('c.alunno', 'a')
-      ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:materia AND c.docente=:docente AND (cl.anno!=:quinta OR m.tipo=:sostegno)')
+      ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='R' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P' AND (m.tipo!='S' OR (d.alunno=a.id AND d.autore=c.docente))")
+      ->where("c.attiva=1 AND c.tipo!='P' AND m.tipo!='E' AND c.docente=:docente AND (cl.anno!=5 OR m.tipo='S')")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nome', 'ASC')
-			->setParameter('documento', 'R')
-			->setParameter('sostegno', 'S')
-			->setParameter('attiva', 1)
-			->setParameter('potenziamento', 'P')
-			->setParameter('materia', 'E')
 			->setParameter('docente', $docente)
-			->setParameter('quinta', 5)
       ->getQuery()
       ->getResult();
     // restituisce dati
@@ -128,17 +114,15 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function maggio(Docente $docente) {
+  public function maggio(Docente $docente): array {
     // query
     $cattedre = $this->getEntityManager()->getRepository(Classe::class)->createQueryBuilder('cl')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,cl.gruppo,co.nomeBreve AS corso,s.citta AS sede,d AS documento')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
-      ->where('cl.anno=:quinta AND cl.coordinatore=:coordinatore')
+      ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='M' AND d.classe=cl.id AND d.stato='P'")
+      ->where('cl.anno=5 AND cl.coordinatore=:coordinatore')
       ->orderBy('cl.sezione,cl.gruppo')
-			->setParameter('documento', 'M')
-			->setParameter('quinta', 5)
 			->setParameter('coordinatore', $docente)
       ->getQuery()
       ->getResult();
@@ -155,7 +139,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function docenti($criteri, $pagina, Sede $sede=null) {
+  public function docenti(array $criteri, int $pagina, ?Sede $sede=null): array {
     // compatibilità MySQL >= 5.7
     $mode = $this->getEntityManager()->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
     if (str_contains((string) $mode, 'ONLY_FULL_GROUP_BY')) {
@@ -171,12 +155,9 @@ class DocumentoRepository extends BaseRepository {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:civica')
+      ->where("c.attiva=1 AND c.tipo!='P' AND m.tipo!='E'")
       ->groupBy('cl.anno,cl.sezione,cl.gruppo')
-      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
-			->setParameter('attiva', 1)
-			->setParameter('potenziamento', 'P')
-			->setParameter('civica', 'E');
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC');
     // vincolo di sede
     if ($sede) {
       $cattedre
@@ -193,21 +174,16 @@ class DocumentoRepository extends BaseRepository {
       case 'L':
         // piani di lavoro (escluso sostegno)
         $cattedre
-          ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->andWhere('m.tipo!=:sostegno')
-          ->addGroupBy('m.nomeBreve')
-          ->setParameter('documento','L')
-          ->setParameter('sostegno', 'S');
+          ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='L' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P'")
+          ->andWhere("m.tipo!='S'")
+          ->addGroupBy('m.nomeBreve');
         break;
       case 'P':
         // programmi (escluse quinte e sostegno)
         $cattedre
-          ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->andWhere('m.tipo!=:sostegno AND cl.anno!=:quinta')
-          ->addGroupBy('m.nomeBreve')
-          ->setParameter('documento','P')
-          ->setParameter('sostegno', 'S')
-          ->setParameter('quinta', 5);
+          ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='P' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P'")
+          ->andWhere("m.tipo!='S' AND cl.anno!=5")
+          ->addGroupBy('m.nomeBreve');
         break;
       case 'R':
         // relazioni (escluse quinte curricolari)
@@ -215,21 +191,16 @@ class DocumentoRepository extends BaseRepository {
         $cattedre
           ->addSelect("a.id AS alunno_id,CONCAT(a.cognome,' ',a.nome) AS alunno")
           ->leftJoin('c.alunno', 'a')
-          ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
-          ->andWhere('cl.anno!=:quinta OR m.tipo=:sostegno')
+          ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='R' AND d.classe=cl.id AND d.materia=m.id AND d.stato='P' AND (m.tipo!='S' OR (d.alunno=a.id AND d.autore=c.docente))")
+          ->andWhere("cl.anno!=5 OR m.tipo='S'")
           ->addGroupBy('m.nomeBreve,a.cognome,a.nome')
-          ->addOrderBy('a.cognome,a.nome', 'ASC')
-          ->setParameter('documento','R')
-          ->setParameter('sostegno', 'S')
-          ->setParameter('quinta', 5);
+          ->addOrderBy('a.cognome,a.nome', 'ASC');
         break;
       case 'M':
         // documento 15 maggio (solo classi quinte)
         $cattedre
-          ->leftJoin(Documento::class, 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
-          ->andWhere('cl.anno=:quinta AND cl.coordinatore=c.docente')
-          ->setParameter('documento','M')
-          ->setParameter('quinta', 5);
+          ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='M' AND d.classe=cl.id AND d.stato='P'")
+          ->andWhere("cl.anno=5 AND cl.coordinatore=c.docente");
         break;
     }
     // filtro su classe
@@ -255,7 +226,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function bes($criteri, $pagina, Sede $sede=null) {
+  public function bes(array $criteri, int $pagina, ?Sede $sede=null): array {
     // query base
     $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(Documento::class, 'd', 'WITH', 'd.alunno=a.id')
@@ -295,7 +266,7 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function alunni($criteri, $pagina, Sede $sede=null) {
+  public function alunni(array $criteri, int $pagina, ?Sede $sede=null): array {
     // query base
     $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join(Documento::class, 'd', 'WITH', 'd.alunno=a.id')
@@ -335,24 +306,23 @@ class DocumentoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function lista($criteri, Utente $utente, $pagina) {
+  public function lista(array $criteri, Utente $utente, int $pagina): array {
     // query base
     $documenti = $this->createQueryBuilder('d')
-      ->select('DISTINCT d as documento,ldu.letto,ldu.firmato,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo')
-      ->join('d.listaDestinatari', 'ld')
-      ->join(ListaDestinatariUtente::class, 'ldu', 'WITH', 'ldu.listaDestinatari=ld.id')
+      ->select('DISTINCT d as documento,cu.letto,cu.firmato,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo')
+      ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=d.id')
       ->leftJoin('d.classe', 'cl')
       ->leftJoin('d.materia', 'm')
       ->leftJoin('d.alunno', 'a')
       ->leftJoin('a.classe', 'cl2')
-      ->where("d.stato='P' AND ldu.utente=:utente")
+      ->where("d.stato='P' AND cu.utente=:utente")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,cl2.anno,cl2.sezione,cl2.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
 			->setParameter('utente', $utente);
     // vincolo di tipo
     if ($criteri['tipo'] == 'X') {
       // documenti da leggere
       $documenti
-        ->andWhere('ldu.letto IS NULL');
+        ->andWhere('cu.letto IS NULL');
     } elseif ($criteri['tipo']) {
       // tipo di documento
       $documenti
@@ -362,7 +332,7 @@ class DocumentoRepository extends BaseRepository {
     // filtra titolo
     if ($criteri['titolo']) {
       $documenti
-        ->join('d.allegati', 'al', 'WITH', 'al.titolo LIKE :titolo')
+        ->andWhere('d.titolo LIKE :titolo')
         ->setParameter('titolo', '%'.$criteri['titolo'].'%');
     }
     // paginazione

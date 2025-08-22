@@ -23,8 +23,8 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | genitori_note              |
     | genitori_deroghe           |
     | genitori_pagelle           |
-    | circolari_genitori         |
-    | genitori_avvisi            |
+    | circolari_bacheca          |
+    | avvisi_bacheca             |
     | documenti_bacheca          |
     | genitori_eventi            |
     | utenti_profilo             |

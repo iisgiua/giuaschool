@@ -61,7 +61,7 @@ class CustomProvider extends Base {
    */
   public function collection(mixed $args=null): ArrayCollection {
     $objects = func_get_args();
-    return new ArrayCollection($objects);
+    return $args ? new ArrayCollection($objects) : new ArrayCollection();
   }
 
   /**

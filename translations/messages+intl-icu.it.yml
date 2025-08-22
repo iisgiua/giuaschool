@@ -1,6 +1,7 @@
 # translations/messages+intl-icu.it.yml
 
 ##### ETICHETTE #####
+label.preview: Anteprima
 label.abilitato: Abilitato
 label.action: Azione
 label.add: Aggiungi
@@ -30,6 +31,7 @@ label.ata_tipo_T: Tecnico
 label.ata_tipo_U: Autista
 label.ata_tipo: Mansioni
 label.ata: ATA
+label.ata_tutti: ATA (tutti)
 label.ata_amministrativi: Amministrativi
 label.ata_tecnici: Tecnici
 label.ata_collaboratori: Collaboratori scolastici
@@ -280,13 +282,15 @@ label.rappresentante: Rappresentante
 label.rappresentante_L: Rappresentante di classe
 label.rappresentante_S: Rappresentante di classe
 label.rappresentante_I: Rappresentante di Istituto
-label.rappresentante_P: Consulta Provinciale
+label.rappresentante_P: Rappresentante Consulta Provinciale
 label.rappresentante_R: Rappresentante RSU
 label.rappresentanti_L: Genitori rappresentanti di classe
 label.rappresentanti_S: Alunni rappresentanti di classe
-label.rappresentanti_I: Consiglio di Istituto
-label.rappresentanti_P: Consulta Provinciale
+label.rappresentanti_I: Rappresentanti di Istituto
+label.rappresentanti_P: Rappresentanti Consulta Provinciale
 label.rappresentanti_R: RSU
+label.rappresentanti_genitori: Rappresentanti dei genitori
+label.rappresentanti_alunni: Rappresentanti degli alunni
 label.recupero_A: Studio individuale
 label.recupero_C: Corso di recupero
 label.recupero_N: Non recuperato
@@ -671,6 +675,14 @@ label.qualsiasi_modulo_formativo: Qualsiasi modulo formativo
 label.esame_requisiti: Alunni che hanno i requisiti di ammissione all'esame
 label.esame_requisiti_tutti: Tutti gli alunni
 label.esame_requisiti_alunni: Solo alcuni
+label.avvisi_tipo_C: Avviso generico
+label.avvisi_tipo_E: Ingresso posticipato
+label.avvisi_tipo_U: Uscita anticipata
+label.avvisi_tipo_A: Svolgimento attivià
+label.avvisi_tipo_I: Comunicazione personale
+label.tutti_tipi: Tutti i tipi
+label.tutti_mesi: Tutti i mesi
+label.filtro_tipo: Filtra per tipo
 
 
 ##### PAGINE #####
@@ -861,9 +873,11 @@ title.scuola.moduliFormativi_edit: Modifica di un modulo formativo per l'orienta
 page.coordinatore.moduliFormativi: Moduli Formativi
 title.coordinatore.moduliFormativi: Moduli formativi svolti nella classe
 title.coordinatore.moduliFormativi_alunni: Moduli formativi seguiti dagli alunni della classe
+page.avvisi_gestione: Gestione Avvisi
+title.avvisi_gestione: Gestione degli avvisi
 
 page.agenda_compito: Agenda Compiti
-page.agenda_eventi: Agenda Docenti
+page.agenda_eventi: Agenda Eventi
 page.agenda_verifica: Agenda Verifiche
 page.alias: Alias Utente
 page.alunni: Gestione Alunni
@@ -873,11 +887,12 @@ page.app_login: Accesso tramite App
 page.app_telegram: Registrazione per Telegram
 page.app_moodle: Accesso ad APPRENDERE
 page.archiviazione: Archiviazione Registri
-page.bacheca_avvisi: Avvisi Docenti
+page.bacheca_avvisi: Lista Avvisi
 page.bacheca_avvisi_ata: Avvisi ATA
 page.cambio_classe: Cambio Classe
 page.cattedre: Gestione Cattedre
 page.circolari_ata: Lista Circolari
+page.circolari_bacheca: Lista Circolari
 page.circolari_docenti: Lista Circolari
 page.circolari_genitori: Lista Circolari
 page.circolari_gestione: Gestione Circolari
@@ -976,7 +991,7 @@ page.utenti_otp: Abilita OTP
 page.utenti_password: Cambia Password
 page.utenti_profilo: Profilo Utente
 
-title.agenda_eventi: Agenda degli eventi per il docente
+title.agenda_eventi: Agenda degli eventi
 title.agenda_verifiche: Agenda delle verifiche della classe
 title.alias_exit: Esci dall'alias
 title.alias: Impersona un altro utente
@@ -985,7 +1000,7 @@ title.annotazioni: Inserimento annotazioni sul registro
 title.appello: Appello degli studenti
 title.archiviazione: Creazione e archiviazione dei registri
 title.autorizza: Gestione dei ritardi e delle uscite anticipate
-title.bacheca_avvisi: Avvisi per il docente
+title.bacheca_avvisi: Lista degli avvisi
 title.bacheca_avvisi_ata: Avvisi per il personale ATA
 title.cambio_classe_modifica: Modifica un cambio di classe esistente
 title.cambio_classe: Inserisci un nuovo cambio di classe
@@ -993,6 +1008,7 @@ title.circolari_alunni: Circolari per gli studenti
 title.circolari_ata: Lista delle circolari
 title.circolari_docenti: Lista delle circolari
 title.circolari_genitori: Circolari per i genitori
+title.circolari_bacheca: Lista delle circolari
 title.circolari_gestione: Gestione delle circolari
 title.coordinatore_assenze: Assenze della classe
 title.coordinatore_avvisi: Gestione degli avvisi per la classe
@@ -1051,7 +1067,7 @@ title.modifica_ata: Modifica i dati del personale ATA
 title.modifica_avviso_attivita: Modifica l'avviso per lo svolgimento di un'attività
 title.modifica_avviso_coordinatore: Modifica l'avviso per la classe
 title.modifica_avviso_entrate: Modifica l'avviso per l'ingresso posticipato
-title.modifica_avviso_individuale: Modifica l'avviso individuale per i genitori
+title.modifica_avviso_individuale: Modifica la comunicazione personale per i genitori
 title.modifica_avviso_uscite: Modifica l'avviso per l'uscita anticipata
 title.modifica_avviso: Modifica l'avviso
 title.modifica_circolare: Modifica la circolare
@@ -1089,7 +1105,7 @@ title.nuovo_alunno: Inserisci i dati di un nuovo alunno
 title.nuovo_avviso_attivita: Inserisci un nuovo avviso per lo svolgimento di un'attività
 title.nuovo_avviso_coordinatore: Inserisci un nuovo avviso per la classe
 title.nuovo_avviso_entrate: Inserisci un nuovo avviso per l'ingresso posticipato
-title.nuovo_avviso_individuale: Inserisci un nuovo avviso individuale per i genitori
+title.nuovo_avviso_individuale: Inserisci una nuova comunicazione personale per i genitori
 title.nuovo_avviso_uscite: Inserisci un nuovo avviso per l'uscita anticipata
 title.nuovo_avviso: Inserisci un nuovo avviso
 title.nuovo_colloquio: Aggiunge un orario di colloquio individuale
@@ -1224,16 +1240,17 @@ message.cancella_avviso: Verrà cancellato l'avviso e le annotazioni sul registr
 message.cancella_avviso_coordinatore: Verrà cancellato l'avviso. Vuoi continuare?
 message.orario_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong> e <strong>{ORA}</strong> che verranno sostituiti automaticamente con la data e l'ora indicata.
 message.avviso_entrata_oggetto: Modifica orario di ingresso della classe
-message.avviso_entrata_testo: Si comunica che il giorno {DATA} la classe entrerà alle ore {ORA}.
+message.avviso_entrata_testo: Si comunica che il giorno {data} la classe entrerà alle ore {ora}. {note}
 message.avviso_uscita_oggetto: Modifica orario di uscita della classe
-message.avviso_uscita_testo: Si comunica che il giorno {DATA} la classe uscirà alle ore {ORA}.
+message.avviso_uscita_testo: Si comunica che il giorno {data} la classe uscirà alle ore {ora}. {note}
 message.avviso_attivita_oggetto: Prevista attività per la classe
-message.avviso_attivita_testo: "Si comunica che il giorno {DATA}, dalle ore {INIZIO} alle ore {FINE}, si svolgerà la seguente attività: "
+message.avviso_attivita_testo: "Si comunica che il giorno {data}, dalle ore {inizio} alle ore {fine}, si svolgerà la seguente attività: {attivita}."
 message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong>, <strong>{INIZIO}</strong> e <strong>{FINE}</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
 message.presenti_avvisi: "{num, plural, one {È presente un avviso da leggere alla classe} other {Sono presenti # avvisi da leggere alla classe}}"
 message.presenti_nuovi_avvisi: "{num, plural, one {È presente un nuovo avviso da leggere} other {Sono presenti # nuovi avvisi da leggere}}"
 message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe {classe}
-message.avviso_individuale_oggetto: "Messaggio dal{docente}"
+message.avviso_predefinito_info: Il testo dell'avviso è predeterminato e utilizza i dati inseriti al suo interno. Usare il pulsante di ANTEPRIMA per visualizzare il testo finale.
+message.avviso_individuale_oggetto: "Comunicazione del{docente}"
 message.info_avviso_con_annotazione: All'avviso sarà associata una annotazione sul registro, inserita nella data e nelle classi indicate.
 message.verifica_oggetto: "Verifica per la materia {materia}"
 message.verifiche_presenti: "ATTENZIONE: sono previste altre verifiche per la data e la classe indicate.<br>Puoi scegliere se modificare la verifica inserita o confermarla senza effettuare cambiamenti."
@@ -1484,8 +1501,9 @@ message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla sc
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
 exception.annotazione_no_classi: Non puoi creare l'annotazione sul Registro senza indicare le classi.
-exception.annotazione_non_permessa: Spiacente non puoi creare o modificare l'annotazione sul Registro.
+exception.annotazione_non_permessa: Non puoi creare o modificare un'annotazione sul Registro.
 exception.annotazione_solo_ata: Non puoi creare l'annotazione sul Registro per un avviso indirizzato solo al personale ATA.
+exception.annotazione_no_destinatari: Non puoi creare l'annotazione sul Registro per un avviso che non ha come destinatari genitori, alunni o docenti (tutti o con filtro di classe).
 exception.attivazione_email_esistente: L'indirizzo di posta elettronica indicato risulta già in uso.
 exception.attivazione_esistente: L'utente risulta già attivo.
 exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
@@ -1632,12 +1650,26 @@ exception.data_nulla: Non hai indicato la data.
 exception.circolare_numero_esiste: Il numero assegnato alla circolare risulta essere già esistente.
 exception.circolare_oggetto_nullo: Non ha inserito l'oggetto della circolare.
 exception.circolare_sede_nulla: Non hai indicato la sede a cui è destinata la circolare.
+exception.circolare_sede_non_ammessa: Non sei abilitato alla sede indicata.
+exception.avviso_oggetto_nullo: Non ha inserito l'oggetto dell'avviso.
+exception.avviso_sede_nulla: Non hai indicato la sede a cui è destinato l'avviso.
+exception.avviso_sede_non_ammessa: Non sei abilitato alla sede indicata.
 exception.circolare_destinatari_nulli: Non hai indicato nessun destinatario della circolare.
+exception.avviso_destinatari_nulli: Non hai indicato nessun destinatario dell'avviso.
 exception.filtro_classi_invalido: Hai indicato una o più classi non valide nel filtro {dest}.
 exception.filtro_materie_invalido: Hai indicato una o più materie non valide nel filtro dei Docenti.
 exception.filtro_rappresentanti_invalido: Hai indicato nel filtro un tipo di rappresentante non valido.
 exception.filtro_utenti_invalido: Hai indicato uno o più utenti non validi nel filtro {dest}.
-exception.lista_altri_invalida: La lista degli Altri destinatari non è in un formato valido.
+exception.filtro_coordinatori_classi_invalido: Hai indicato uno o più classi non valide nel filtro dei coordinatori.
+exception.filtro_docenti_classi_invalido: Hai indicato uno o più classi non valide nel filtro dei docenti.
+exception.filtro_genitori_classi_invalido: Hai indicato uno o più classi non valide nel filtro dei genitori.
+exception.filtro_alunni_classi_invalido: Hai indicato uno o più classi non valide nel filtro degli alunni.
+exception.filtro_rappresentanti_genitori_classi_invalido: Hai indicato uno o più classi non valide nel filtro dei rappresentanti dei genitori.
+exception.filtro_rappresentanti_alunni_classi_invalido: Hai indicato uno o più classi non valide nel filtro dei rappresentanti degli alunni.
+exception.filtro_docenti_invalido: Hai indicato uno o più utenti non validi nel filtro dei docenti.
+exception.filtro_genitori_invalido: Hai indicato uno o più utenti non validi nel filtro dei genitori.
+exception.filtro_alunni_invalido: Hai indicato uno o più utenti non validi nel filtro degli alunni.
+exception.lista_esterni_invalida: La lista dei destinatari esterni non è in un formato valido.
 exception.circolare_documento_nullo: Non hai caricato il documento della circolare.
 exception.circolare_documento_numero: Hai caricato più di un documento della circolare.
 exception.file_ata_sede: La sede indicata per l'utente ATA non esiste.
@@ -1685,8 +1717,6 @@ exception.classe_inizio_fine_invalido: La data di iniziale è successiva a quell
 exception.classe_valutazioni_presenti: Sono presenti valutazioni in date incongruenti.
 exception.classe_note_presenti: Sono presenti note disciplinari in date incongruenti.
 exception.classe_non_diversa: La classe indicata è uguale a quella attualmente frequentata.
-exception.avviso_sede_nulla: Non hai indicato la sede a cui è destinata l'avviso.
-exception.avviso_destinatari_nulli: Non hai indicato nessun destinatario dell'avviso.
 exception.filtro_classe_nullo: Non hai indicato nessuna classe.
 exception.filtro_utente_nullo: Non hai indicato nessun utente.
 exception.invalid_service_idprovider: "Spiacente il servizio è disabilitato per incompatibilità con la GSuite. Il problema sarà risolto con il rilascio della nuova versione dell'app."
@@ -1775,3 +1805,4 @@ exception.nota_classe_non_prevista: Non è possibile inserire una nota a tutta l
 exception.docente_supplenza_errato: Il docente sostituito è identico a chi lo sostituisce
 exception.lista_cattedre_vuota: La lista delle classi/materie per la supplenza è vuota
 exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documenti BES dell'alunno selezionato
+exception.tipo_filtro_invalido: Il tipo di filtro non è valido

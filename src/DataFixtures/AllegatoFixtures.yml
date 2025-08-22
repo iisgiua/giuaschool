@@ -1,0 +1,83 @@
+####################
+# AllegatoFixtures - dati di test
+#
+# Dati per la gestione di un file:
+#   titolo: nome da visualizzare per il file
+#   nome: nome per il salvataggio del file sul client
+#   estensione: estensione del file per il salvataggio sul client (indica anche il tipo)
+#   dimensione: dimensione del file
+#   file: nome del file memorizzato sul server
+#   comunicazione: comunicazione a cui appartiene l'allegato
+####################
+
+
+include:
+  - DocumentoFixtures.yml
+  - CircolareFixtures.yml
+  - AvvisoFixtures.yml
+
+
+App\Entity\Allegato:
+  file_pdf_{1..3}:
+    titolo: 'Documento PDF - versione <current()>'
+    nome: 'documento-pdf-versione-<current()>'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@documento_pdf_<current()>'
+  file_word_{1..3}:
+    titolo: 'Documento Word - versione <current()>'
+    nome: 'documento-word-versione-<current()>'
+    estensione: 'docx'
+    dimensione: 45134
+    file: 'documento-docx'
+    comunicazione: '@documento_word_<current()>'
+  file_excel_{1..3}:
+    titolo: 'Documento Excel - versione <current()>'
+    nome: 'documento-excel-versione-<current()>'
+    estensione: 'xlsx'
+    dimensione: 66812
+    file: 'documento-xlsx'
+    comunicazione: '@documento_excel_<current()>'
+  file_circolare_1:
+    titolo: 'Circolare 10'
+    nome: 'Circolare-10'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@circolare_perclasse'
+  file_circolare_2:
+    titolo: 'Circolare 20'
+    nome: 'Circolare-20'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@circolare_perdocenti'
+  file_circolare_3:
+    titolo: 'Circolare 30'
+    nome: 'Circolare-30'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@circolare_conallegato'
+  file_circolare_3_allegato:
+    titolo: 'Allegato Circolare 30'
+    nome: 'Allegato-Circolare-30'
+    estensione: 'docx'
+    dimensione: 45134
+    file: 'documento-docx'
+    comunicazione: '@circolare_conallegato'
+  file_circolare_4:
+    titolo: 'Circolare 40'
+    nome: 'Circolare-40'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@circolare_nonpubblicata'
+  file_avviso_1:
+    titolo: 'Avviso 1'
+    nome: 'Avviso-1'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@avviso_C_allegato'

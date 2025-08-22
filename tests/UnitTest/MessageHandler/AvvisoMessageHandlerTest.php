@@ -8,15 +8,15 @@
 
 namespace App\Tests\UnitTest\MessageHandler;
 
-use App\Entity\AvvisoUtente;
-use DateTime;
-use App\Entity\Utente;
-use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Classe;
-use App\Tests\DatabaseTestCase;
+use App\Entity\ComunicazioneUtente;
+use App\Entity\Genitore;
+use App\Entity\Utente;
 use App\Message\AvvisoMessage;
 use App\MessageHandler\AvvisoMessageHandler;
+use App\Tests\DatabaseTestCase;
+use DateTime;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -61,7 +61,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
    */
   protected function setUp(): void {
     // dati da caricare
-    $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures'];
+    $this->fixtures = ['AvvisoFixtures', 'ComunicazioneClasseFixtures', 'ComunicazioneUtenteFixtures'];
     // esegue il setup predefinito
     parent::setUp();
   }
@@ -114,10 +114,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_C');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':ora')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':ora')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('ora', new DateTime())
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -141,10 +141,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_U');
-    $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -159,7 +159,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -177,10 +177,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_E');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -195,7 +195,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -213,10 +213,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_A');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -231,7 +231,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -249,10 +249,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_I');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -267,7 +267,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -285,10 +285,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_D');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -303,7 +303,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -321,10 +321,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_O');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -339,7 +339,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -357,10 +357,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_V');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -375,7 +375,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -393,10 +393,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_P');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -411,7 +411,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertSame(0, $notifica->getDati()['allegati']);
     }
@@ -429,10 +429,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_C');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -447,7 +447,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertCount($notifica->getDati()['allegati'], $avviso->getAllegati());
     }
@@ -465,10 +465,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_C_allegato');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -483,7 +483,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
       $this->assertSame('<!AVVISO!><!'.$avviso->getId().'!>', $notifica->getTag());
       $this->assertSame($avviso->getId(), $notifica->getDati()['id']);
       $this->assertSame($avviso->getData()->format('d/m/Y'), $notifica->getDati()['data']);
-      $this->assertSame($avviso->getOggetto(), $notifica->getDati()['oggetto']);
+      $this->assertSame($avviso->getTitolo(), $notifica->getDati()['oggetto']);
       $this->assertSame($avviso->getTesto(), $notifica->getDati()['testo']);
       $this->assertCount($notifica->getDati()['allegati'], $avviso->getAllegati());
     }
@@ -501,14 +501,13 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_C');
-    $avviso->setOra(new DateTime('09:10:00'));
-    $avviso->setOraFine(new DateTime('11:30:00'));
+    $avviso->setSostituzioni(['{DATA}' => $avviso->getData()->format('d/m/Y'), '{ORA}' => '09:10:00', '{INIZIO}' => '09:10:00', '{FINE}' => '11:30:00']);
     $avviso->setTesto('Questa è una data: {DATA}. Questo è un orario: {ORA}. Questo è un orario di inizio: {INIZIO}. Questo è un orario di fine: {FINE}.');
     $this->em->flush();
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -519,8 +518,8 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     // controlla
     $this->assertGreaterThan(0, count($this->bus));
     $testo = 'Questa è una data: '.$avviso->getData()->format('d/m/Y').'. Questo è un orario: '.
-      $avviso->getOra()->format('G:i').'. Questo è un orario di inizio: '.$avviso->getOra()->format('G:i').
-      '. Questo è un orario di fine: '.$avviso->getOraFine()->format('G:i').'.';
+      $avviso->getSostituzioni()['{ORA}'].'. Questo è un orario di inizio: '.$avviso->getSostituzioni()['{INIZIO}'].
+      '. Questo è un orario di fine: '.$avviso->getSostituzioni()['{FINE}'].'.';
     foreach ($this->bus as $notifica) {
       $this->assertSame($testo, $notifica->getDati()['testo']);
     }
@@ -529,7 +528,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
   }
 
   /**
-   * Invio messaggio di avviso per attività con informazioni aggiuntivi per gli utenti destinatari.
+   * Invio messaggio di avviso per attività con informazioni aggiuntive per gli utenti destinatari.
    *
    */
   public function testAvvisoInfoUtenti(): void {
@@ -538,10 +537,10 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
     $this->bus = [];
     $amh = new AvvisoMessageHandler($this->em, $this->mockedLogger, $this->mockedMessageBus);
     $avviso = $this->getReference('avviso_A');
-    $risultato = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
+    $risultato = $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->update()
-      ->set('au.letto', ':nulla')
-      ->where('au.avviso=:avviso')
+      ->set('cu.letto', ':nulla')
+      ->where('cu.comunicazione=:avviso')
       ->setParameter('nulla', null)
       ->setParameter('avviso', $avviso->getId())
       ->getQuery()
@@ -561,7 +560,7 @@ class AvvisoMessageHandlerTest extends DatabaseTestCase {
         $this->assertSame('', $notifica->getDati()['alunno']);
         $this->assertSame('', $notifica->getDati()['classi']);
       } else {
-        $classe = $this->em->getRepository(Classe::class)->find($avviso->getFiltro()[0]);
+        $classe = $this->em->getRepository(Classe::class)->find($avviso->getFiltroDocenti()[0]);
         $this->assertSame('', $notifica->getDati()['alunno']);
         $this->assertSame($classe->getAnno().'ª '.$classe->getSezione(), $notifica->getDati()['classi']);
       }

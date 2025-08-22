@@ -121,16 +121,6 @@ class RichiestaColloquioTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getColloquio().', '.$existent->getAppuntamento()->format('H:i'), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'appuntamento' => $existent->getAppuntamento()->format('H:i'),
-      'colloquio' => $existent->getColloquio()->getId(),
-      'alunno' => $existent->getAlunno()->getId(),
-      'genitore' => $existent->getGenitore()->getId(),
-      'genitoreAnnulla' => $existent->getGenitoreAnnulla() ? $existent->getGenitoreAnnulla()->getId() : '',
-      'stato' => $existent->getStato(),
-      'messaggio' => $existent->getMessaggio()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

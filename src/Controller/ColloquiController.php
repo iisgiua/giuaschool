@@ -101,8 +101,6 @@ class ColloquiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // salva vecchia richiesta
-    $vecchiaRichiesta = clone $richiesta;
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
@@ -115,7 +113,7 @@ class ColloquiController extends BaseController {
       // modifica stato
       $richiesta->setStato('C');
       // ok: memorizzazione e log
-      $dblogger->logModifica('COLLOQUI', 'Conferma richiesta', $vecchiaRichiesta, $richiesta);
+      $dblogger->logAzione('COLLOQUI', 'Conferma richiesta');
       // redirezione
       return $this->redirectToRoute('colloqui_richieste');
     }
@@ -147,8 +145,6 @@ class ColloquiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // salva vecchia richiesta
-    $vecchiaRichiesta = clone $richiesta;
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
@@ -165,7 +161,7 @@ class ColloquiController extends BaseController {
         // modifica stato
         $richiesta->setStato('N');
         // ok: memorizzazione e log
-        $dblogger->logModifica('COLLOQUI', 'Rifiuta richiesta', $vecchiaRichiesta, $richiesta);
+        $dblogger->logAzione('COLLOQUI', 'Rifiuta richiesta');
         // redirezione
         return $this->redirectToRoute('colloqui_richieste');
       }
@@ -198,8 +194,6 @@ class ColloquiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // salva vecchia richiesta
-    $vecchiaRichiesta = clone $richiesta;
     // informazioni per la visualizzazione
     $info['data'] = $richiesta->getColloquio()->getData();
     $info['tipo'] = $richiesta->getColloquio()->getTipo();
@@ -214,7 +208,7 @@ class ColloquiController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.colloquio_no_messaggio')));
       } else {
         // ok: memorizzazione e log
-        $dblogger->logModifica('COLLOQUI', 'Modifica richiesta', $vecchiaRichiesta, $richiesta);
+        $dblogger->logAzione('COLLOQUI', 'Modifica richiesta');
         // redirezione
         return $this->redirectToRoute('colloqui_richieste');
       }
@@ -270,7 +264,6 @@ class ColloquiController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $vecchioColloquio = clone $colloquio;
     } else {
       // azione add
       $colloquio = (new Colloquio())
@@ -357,11 +350,7 @@ class ColloquiController extends BaseController {
         // clcola numero colloqui
         $colloquio->setNumero($col->numeroColloqui($colloquio));
         // ok: memorizzazione e log
-        if ($id) {
-          $dblogger->logModifica('COLLOQUI', 'Modifica ricevimento', $vecchioColloquio, $colloquio);
-        } else {
-          $dblogger->logCreazione('COLLOQUI', 'Aggiunge ricevimento', $colloquio);
-        }
+        $dblogger->logAzione('COLLOQUI', $id ? 'Modifica ricevimento' : 'Aggiunge ricevimento');
         // redirezione
         return $this->redirectToRoute('colloqui_gestione');
       }
@@ -395,12 +384,10 @@ class ColloquiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // copia per log
-    $vecchioColloquio = clone $colloquio;
     // abilita/disabilita colloquio
     $colloquio->setAbilitato($stato);
     // memorizzazione e log
-    $dblogger->logModifica('COLLOQUI', 'Abilita/Disabilita ricevimento', $vecchioColloquio, $colloquio);
+    $dblogger->logAzione('COLLOQUI', 'Abilita/Disabilita ricevimento');
     // redirezione
     return $this->redirectToRoute('colloqui_gestione');
   }
@@ -547,13 +534,12 @@ class ColloquiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // annulla richiesta
-    $vecchiaRichiesta = clone $richiesta;
     $richiesta
       ->setStato('A')
       ->setMessaggio('')
       ->setGenitoreAnnulla($this->getUser());
     // ok: memorizzazione e log
-    $dblogger->logModifica('COLLOQUI', 'Disdetta prenotazione', $vecchiaRichiesta, $richiesta);
+    $dblogger->logAzione('COLLOQUI', 'Disdetta prenotazione');
     // redirezione
     return $this->redirectToRoute('colloqui_genitori');
   }
@@ -628,7 +614,7 @@ class ColloquiController extends BaseController {
           ->setGenitore($this->getUser());
         $this->em->persist($richiesta);
         // ok: memorizzazione e log
-        $dblogger->logCreazione('COLLOQUI', 'Nuova prenotazione', $richiesta);
+        $dblogger->logAzione('COLLOQUI', 'Nuova prenotazione');
         // redirezione
         return $this->redirectToRoute('colloqui_genitori');
       }
@@ -703,12 +689,10 @@ class ColloquiController extends BaseController {
       ($tipo == 'D' ? false : null));
     // controlla richieste e li elimina
     foreach ($ricevimenti as $ricevimento) {
-      // copia per log
-      $vecchioColloquio = clone $ricevimento;
       // cancella colloquio
       $this->em->remove($ricevimento);
       // memorizzazione e log
-      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio);
+      $dblogger->logAzione('COLLOQUI', 'Cancella ricevimento');
     }
     // redirezione
     return $this->redirectToRoute('colloqui_gestione');

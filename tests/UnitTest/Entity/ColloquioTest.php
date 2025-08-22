@@ -124,18 +124,6 @@ class ColloquioTest extends EntityTestCase {
     $this->assertSame($existent->getDocente().': '.$existent->getData()->format('d/m/Y').', '.
       $existent->getInizio()->format('H:i').' - '.$existent->getFine()->format('H:i'),
       (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'docente' => $existent->getDocente()->getId(),
-      'data' => $existent->getData()->format('d/m/Y'),
-      'inizio' => $existent->getInizio()->format('H:i'),
-      'fine' => $existent->getFine()->format('H:i'),
-      'tipo' => $existent->getTipo(),
-      'luogo' => $existent->getLuogo(),
-      'durata' => $existent->getDurata(),
-      'numero' => $existent->getNumero(),
-      'abilitato' => $existent->getAbilitato()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

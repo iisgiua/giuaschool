@@ -122,31 +122,17 @@ class UtenteRepository extends EntityRepository {
    *
    * @return array Lista di ID degli utenti
    */
-  public function getIdRappresentanti($destinatari) {
-    // seleziona destinatari
-    $test = [];
-    $param = [];
-    foreach ($destinatari as $dest) {
-      if (in_array($dest, ['R', 'I', 'P'])) {
-        $test[] = 'FIND_IN_SET(:'.$dest.', u.rappresentante)>0';
-        $param[] = $dest;
-      }
+  public function getIdRappresentanti(array $destinatari): array {
+    // condizioni
+    $condizioni = [];
+    foreach ($destinatari as $val) {
+      $condizioni[] = "FIND_IN_SET('".$val."', u.rappresentante)>0";
     }
-    if (empty($test)) {
-      // nessun destinatario tra i rappresentanti
-      return [];
-    }
-    // crea query
+    // query base
     $utenti = $this->createQueryBuilder('u')
       ->select('DISTINCT u.id')
-      ->where('u.abilitato=:abilitato')
-      ->andWhere(implode(' OR ', $test))
-      ->setParameter('abilitato', 1);
-    foreach ($param as $p) {
-      $utenti->setParameter(':'.$p, $p);
-    }
-    // esegue query
-    $utenti = $utenti
+      ->where('u.abilitato=1')
+      ->andWhere(implode(' OR ', $condizioni))
       ->getQuery()
       ->getArrayResult();
     // restituisce la lista degli ID
@@ -163,7 +149,7 @@ class UtenteRepository extends EntityRepository {
    *
    * @return array Lista di ID degli utenti
    */
-  public function getIdRappresentantiClasse(array $destinatari, array $sedi, string $tipo, array $filtro) {
+  public function getIdRappresentantiClasse(array $destinatari, array $sedi, string $tipo, array $filtro): array {
     $alunni = [];
     $genitori = [];
     // rappresentanti alunni
@@ -171,9 +157,7 @@ class UtenteRepository extends EntityRepository {
       $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('DISTINCT a.id')
         ->join('a.classe', 'cl')
-        ->where('a.abilitato=:abilitato AND FIND_IN_SET(:classe, a.rappresentante)>0 AND cl.sede IN (:sedi)')
-        ->setParameter('abilitato', 1)
-        ->setParameter('classe', 'S')
+        ->where("a.abilitato=1 AND FIND_IN_SET('S', a.rappresentante)>0 AND cl.sede IN (:sedi)")
         ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi
@@ -190,9 +174,7 @@ class UtenteRepository extends EntityRepository {
         ->select('DISTINCT g.id')
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')
-        ->where('g.abilitato=:abilitato AND FIND_IN_SET(:classe, g.rappresentante)>0 AND a.abilitato=:abilitato AND cl.sede IN (:sedi)')
-        ->setParameter('abilitato', 1)
-        ->setParameter('classe', 'L')
+        ->where("g.abilitato=1 AND FIND_IN_SET('L', g.rappresentante)>0 AND a.abilitato=1 AND cl.sede IN (:sedi)")
         ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi

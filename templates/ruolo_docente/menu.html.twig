@@ -3,12 +3,12 @@
   <li{{ attivo is defined and attivo == 'lezioni' ? ' class="active"' }}><a href="{{ path('lezioni') }}" title="Compila i registri e gestisci le lezioni"><span class="glyphicon glyphicon-blackboard gs-mr-2" aria-hidden="true"></span>Lezioni</a></li>
   <li{{ attivo is defined and attivo == 'colloqui' ? ' class="active"' }}><a href="{{ path('colloqui_richieste') }}" title="Gestisci le prenotazioni dei colloqui"><span class="glyphicon glyphicon-comment gs-mr-2" aria-hidden="true"></span>Colloqui</a></li>
   <li{{ attivo is defined and attivo == 'documenti' ? ' class="active"' }}><a href="{{ path('documenti_piani') }}" title="Gestione dei documenti della classe"><span class="glyphicon glyphicon-duplicate gs-mr-2" aria-hidden="true"></span>Documenti</a></li>
-  <li{{ attivo is defined and attivo == 'bacheca' ? ' class="active"' }}><a href="{{ path('circolari_docenti') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
-  <li{{ attivo is defined and attivo == 'agenda' ? ' class="active"' }} ><a href="{{ path('agenda_eventi') }}" title="Visualizza gli eventi in agenda"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>
+  <li{{ attivo is defined and attivo == 'bacheca' ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
+  <li{{ attivo is defined and attivo == 'agenda' ? ' class="active"' }} ><a href="{{ path('avvisi_agenda') }}" title="Visualizza gli eventi in agenda"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>
   {% if app.session.get('/APP/DOCENTE/coordinatore') or is_granted('ROLE_STAFF') %}
   <li{{ attivo is defined and attivo == 'coordinatore' ? ' class="active"' }}><a href="{{ path('coordinatore') }}" title="Funzioni per il coordinatore"><span class="glyphicon glyphicon-education gs-mr-2" aria-hidden="true"></span>Coordinatore</a></li>
   {% endif %}
   {% if is_granted('ROLE_STAFF') %}
-  <li{{ attivo is defined and attivo == 'staff' ? ' class="active"' }}><a href="{{ path('staff_avvisi') }}" title="Funzioni per lo staff"><span class="glyphicon glyphicon-star gs-mr-2" aria-hidden="true"></span>Staff</a></li>
+  <li{{ attivo is defined and attivo == 'staff' ? ' class="active"' }}><a href="{{ path('avvisi_gestione') }}" title="Funzioni per lo staff"><span class="glyphicon glyphicon-star gs-mr-2" aria-hidden="true"></span>Staff</a></li>
   {% endif %}
 </ul>

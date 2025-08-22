@@ -1,7 +1,7 @@
 <p>Si prega di prendere visione delle seguenti circolari presenti nel Registro Elettronico dell'<em>{{ intestazione_istituto_breve }}</em>:</p>
 <ul>
 {% for c in circolari %}
-  <li>Circolare n. {{ c.numero }} del {{ c.data}}<br><strong>{{ c.oggetto }}</strong></li>
+  <li>Circolare n. {{ c.numero }} del {{ c.data}}<br><strong>{{ c.titolo }}</strong></li>
 {% endfor %}
 </ul>
 <p>&nbsp;</p>

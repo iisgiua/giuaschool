@@ -8,11 +8,12 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\Comunicazione;
 use App\Entity\Documento;
-use ReflectionClass;
-use Doctrine\Common\Collections\ArrayCollection;
-use App\Entity\Materia;
 use App\Tests\EntityTestCase;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use ReflectionClass;
 
 
 /**
@@ -24,24 +25,24 @@ class DocumentoTest extends EntityTestCase {
 
  /**
    * Definisce dati per i test.
-   *
    */
   protected function setUp(): void {
     // nome dell'entità
     $this->entity = Documento::class;
     // campi da testare
-    $this->fields = ['tipo', 'docente', 'listaDestinatari', 'materia', 'classe', 'alunno', 'cifrato', 'firma', 'stato', 'titolo', 'anno'];
-    $this->noStoredFields = ['allegati'];
+    $this->fields = ['autore', 'materia', 'classe', 'alunno', 'tipo', 'cifrato', 'firma', 'stato', 'titolo', 'data',
+      'anno', 'speciali', 'ata', 'coordinatori', 'filtroCoordinatori', 'docenti', 'filtroDocenti', 'genitori',
+      'filtroGenitori', 'rappresentantiGenitori', 'filtroRappresentantiGenitori', 'alunni', 'filtroAlunni',
+      'rappresentantiAlunni', 'filtroRappresentantiAlunni', 'esterni'];
+    $this->noStoredFields = ['allegati', 'sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma', 'stato', 'titolo', 'anno'],
-      'gs_sede' => '*',
-      'gs_file' => '*',
-      'gs_lista_destinatari' => '*'];
+    $this->canRead = ['gs_comunicazione' => ['id', 'autore_id', 'materia_id', 'classe_id', 'alunno_id', 'cattedra_id', 'creato', 'modificato', 'tipo', 'cifrato', 'firma', 'stato', 'titolo', 'data', 'anno', 'speciali', 'ata', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'genitori', 'filtro_genitori', 'rappresentanti_genitori', 'filtro_rappresentanti_genitori', 'alunni', 'filtro_alunni', 'rappresentanti_alunni', 'filtro_rappresentanti_alunni', 'esterni', 'categoria', 'numero', 'testo', 'sostituzioni'],
+      'gs_allegato' => '*'];
     // SQL write
-    $this->canWrite = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma', 'stato', 'titolo', 'anno']];
+    $this->canWrite = ['gs_comunicazione' => ['id', 'autore_id', 'materia_id', 'classe_id', 'alunno_id', 'cattedra_id', 'creato', 'modificato', 'tipo', 'cifrato', 'firma', 'stato', 'titolo', 'data', 'anno', 'speciali', 'ata', 'coordinatori', 'filtro_coordinatori', 'docenti', 'filtro_docenti', 'genitori', 'filtro_genitori', 'rappresentanti_genitori', 'filtro_rappresentanti_genitori', 'alunni', 'filtro_alunni', 'rappresentanti_alunni', 'filtro_rappresentanti_alunni', 'esterni', 'categoria', 'numero', 'testo', 'sostituzioni']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -72,18 +73,33 @@ class DocumentoTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
+          ($field == 'autore' ? $this->getReference("docente_curricolare_1") :
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_SOSTEGNO_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
-          ($field == 'classe' ? $this->getReference("classe_1A") :
-          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
           ($field == 'cifrato' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'firma' ? $this->faker->boolean() :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1))  :
           ($field == 'titolo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'anno' ? $this->faker->randomNumber(4, false) :
-          null)))))))))));
+          ($field == 'speciali' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 5)) :
+          ($field == 'ata' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 3)) :
+          ($field == 'coordinatori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroCoordinatori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'docenti' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroDocenti' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'genitori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'rappresentantiGenitori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroRappresentantiGenitori' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'alunni' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroAlunni' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'rappresentantiAlunni' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroRappresentantiAlunni' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'esterni' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
+          ($field == 'materia' ? $this->getReference("materia_curricolare_1") :
+          ($field == 'classe' ? $this->getReference("classe_1A") :
+          ($field == 'alunno' ? $this->getReference("alunno_1A_1") :
+          null))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -129,38 +145,23 @@ class DocumentoTest extends EntityTestCase {
     $existent->addAllegato($this->getReference('file_word_1'));
     $existent->addAllegato($this->getReference('file_word_2'));
     $existent->addAllegato($this->getReference('file_word_1'));
-    $this->assertSame([$this->getReference('file_word_1'), $this->getReference('file_word_2')], $existent->getAllegati()->toArray(), $this->entity.'::addAllegato');
+    $this->assertSame(array_values([$this->getReference('file_word_1'), $this->getReference('file_word_2')]), array_values($existent->getAllegati()->toArray()), $this->entity.'::addAllegato');
     // removeAllegato
     $existent->removeAllegato($this->getReference('file_word_1'));
     $existent->removeAllegato($this->getReference('file_word_1'));
     $this->assertSame(array_values([$this->getReference('file_word_2')]), array_values($existent->getAllegati()->toArray()), $this->entity.'::removeAllegato');
+    // addSede
+    $existent->setSedi(new ArrayCollection());
+    $existent->addSede($this->getReference('sede_1'));
+    $existent->addSede($this->getReference('sede_2'));
+    $existent->addSede($this->getReference('sede_1'));
+    $this->assertSame([$this->getReference('sede_1'), $this->getReference('sede_2')], $existent->getSedi()->toArray(), $this->entity.'::addSede');
+    // removeSedi
+    $existent->removeSede($this->getReference('sede_1'));
+    $existent->removeSede($this->getReference('sede_1'));
+    $this->assertSame(array_values([$this->getReference('sede_2')]), array_values($existent->getSedi()->toArray()), $this->entity.'::removeSede');
     // toString
-    $this->assertSame('Documento #'.$existent->getId(), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'tipo' => $existent->getTipo(),
-      'docente' => $existent->getDocente()->getId(),
-      'listaDestinatari' => $existent->getListaDestinatari()->datiVersione(),
-      'allegati' => array_map(fn($ogg) => $ogg->datiVersione(), $existent->getAllegati()->toArray()),
-      'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
-      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
-      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
-      'cifrato' => $existent->getCifrato(),
-      'firma' => $existent->getFirma(),
-      'stato' => $existent->getStato(),
-      'titolo' => $existent->getTitolo(),
-      'anno' =>  $existent->getAnno()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $dt['tipo'] = 'P';
-    $existent->setTipo('P');
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $materia = $this->em->getRepository(Materia::class)->find(1);
-    $existent->setMateria($materia);
-    $dt['materia'] = $materia->getId();
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $existent->getListaDestinatari()->setfiltroGenitori([10, 20]);
-    $dt['listaDestinatari']['filtroGenitori'] = [10, 20];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $this->assertSame('Documento "'.$existent->getTitolo().'"', (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -176,37 +177,6 @@ class DocumentoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Tipo - CHOICE');
     $existent->setTipo('L');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
-    // docente
-    $property = $this->getPrivateProperty(Documento::class, 'docente');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_curricolare_1"));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
-    // listaDestinatari
-    $temp = $existent->getListaDestinatari();
-    $property = $this->getPrivateProperty(Documento::class, 'listaDestinatari');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($temp);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
-    // allegati
-    $property = $this->getPrivateProperty(Documento::class, 'allegati');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Allegati - NOT BLANK');
-    $existent->setAllegati(new ArrayCollection([$this->getReference("file_1")]));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID NOT BLANK');
-    // materia
-    $existent->setMateria(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NULL');
-    // classe
-    $existent->setClasse(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NULL');
-    // alunno
-    $existent->setAlunno(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NULL');
     // cifrato
     $existent->setCifrato(str_repeat('*', 256));
     $err = $this->val->validate($existent);
@@ -225,6 +195,51 @@ class DocumentoTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Titolo - MAX LENGTH');
     $existent->setTitolo(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Titolo - VALID MAX LENGTH');
+    // data
+    $property = $this->getPrivateProperty(Comunicazione::class, 'data');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
+    $existent->setData(new DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
+    $existent->setData(new DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
+    // coordinatori
+    $existent->setCoordinatori('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Coordinatori - CHOICE');
+    $existent->setCoordinatori('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Coordinatori - VALID CHOICE');
+    // docenti
+    $existent->setDocenti('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Docenti - CHOICE');
+    $existent->setDocenti('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docenti - VALID CHOICE');
+    // genitori
+    $existent->setGenitori('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Genitori - CHOICE');
+    $existent->setGenitori('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Genitori - VALID CHOICE');
+    // rappresentantiGenitori
+    $existent->setRappresentantiGenitori('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::RappresentantiGenitori - CHOICE');
+    $existent->setRappresentantiGenitori('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::RappresentantiGenitori - VALID CHOICE');
+    // alunni
+    $existent->setAlunni('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Alunni - CHOICE');
+    $existent->setAlunni('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunni - VALID CHOICE');
+    // rappresentantiAlunni
+    $existent->setRappresentantiAlunni('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::RappresentantiAlunni - CHOICE');
+    $existent->setRappresentantiAlunni('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::RappresentantiAlunni - VALID CHOICE');
   }
 
 }

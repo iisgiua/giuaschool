@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_menu %}
+  {% if is_granted('ROLE_DOCENTE') %}
+    {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'bacheca'} %}
+  {% elseif is_granted('ROLE_ATA') %}
+    {% include 'ruolo_ata/menu.html.twig' %}
+  {% elseif is_granted('ROLE_GENITORE') %}
+    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+  {% elseif is_granted('ROLE_ALUNNO') %}
+    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+  {% endif %}
+{% endblock %}
+
+{% block pagina_submenu %}
+  {% if is_granted('ROLE_DOCENTE') %}
+    {% include 'ruolo_docente/menu_bacheca.html.twig' %}
+  {% elseif is_granted('ROLE_ATA') %}
+    {% include 'ruolo_ata/menu_bacheca.html.twig' %}
+  {% endif %}
+{% endblock %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.bacheca_avvisi'|trans }}</h1>
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
+    <div id="{{ form.vars.id }}">
+      <div class="form-group" title="{{ form.visualizza.vars.label|trans }}">
+        <label class="sr-only control-label" for="avviso_filtro_visualizza">{{ form.visualizza.vars.label|trans }}</label>
+        {{ form_widget(form.visualizza) }}
+      </div>
+      <div class="form-group" title="{{ form.mese.vars.label|trans }}">
+        <label class="sr-only control-label" for="avviso_filtro_mese">{{ form.mese.vars.label|trans }}</label>
+        {{ form_widget(form.mese) }}
+      </div>
+      <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
+        <label class="sr-only control-label" for="avviso_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
+        {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
+      </div>
+      <div class="form-group _col-sm-2">
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
+  {% if dati.lista|length > 0 %}
+  <table class="table table-bordered table-hover table-striped gs-mb-4">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-1">{{ 'label.stato'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.sede'|trans }}</th>
+        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for k,a in dati.lista %}
+      <tr>
+        <td>
+      {% if a.letto %}
+          <span class="label label-default">LETTO</span>
+      {% else %}
+          <span class="label label-warning">DA LEGGERE</span>
+      {% endif %}
+        </td>
+        <td><small>{{ a.avviso.data|date('d/m/Y') }}</small></td>
+        <td><small>{% for s in a.avviso.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
+        <td>{{ a.avviso.titolo }}</td>
+        <td>
+          <button type="button" class="btn btn-xs btn-primary" title="Visualizza l'avviso" data-toggle="modal" data-target="#gs-modal-info" data-info-date="{{ a.avviso.data|date('j') }} {{ info.mesi[a.avviso.data|date('n')] }} {{ a.avviso.data|date('Y') }}" data-info-title="{{ a.avviso.titolo }}" data-info-id="{{ a.avviso.id }}" data-body="avviso-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
+          <div id="avviso-{{ loop.index }}" style="display:none">
+            <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
+              <div class="gs-text-normal">{{ a.avviso.testoPersonalizzato|raw|nl2br }}</div>
+              <div class="text-right gs-text-normal"><em>({{ a.avviso.autore }})</em></div>
+            </div>
+      {% if a.avviso.allegati|length > 0 %}
+            <div class="gs-mt-2">
+        {% for n,f in a.avviso.allegati %}
+              <div class="gs-mt-3 gs-mb-3">
+                <strong>Allegato {{ n+1 }}:</strong> {{ f.titolo }}
+                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {'avviso': a.avviso.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {'avviso': a.avviso.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+              </div>
+        {% endfor %}
+            </div>
+      {% endif %}
+            <div class="gs-mt-2 gs-pt-3 gs-pb-3 gs-bg-secondary" style="border-radius:4px;">
+              <div class="gs-pl-2 gs-pr-2">
+                <strong>Sede:</strong>
+                {% for s in a.avviso.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}
+              </div>
+              <div class="gs-pl-2 gs-pr-2">
+                <strong>Tipo:</strong>
+      {% if     a.avviso.tipo == 'U' %}Uscita anticipata di una o più classi
+      {% elseif a.avviso.tipo == 'E' %}Ingresso posticipato di una o più classi
+      {% elseif a.avviso.tipo == 'A' %}Svolgimento attività
+      {% elseif a.avviso.tipo == 'C' %}Avviso generico
+      {% elseif a.avviso.tipo == 'I' %}Comunicazione dello staff del Dirigente Scolastico
+      {% elseif a.avviso.tipo == 'O' %}Comunicazione del coordinatore di classe
+      {% elseif a.avviso.tipo == 'D' %}Comunicazione del docente
+      {% elseif a.avviso.tipo == 'V' %}Calendario verifiche
+      {% elseif a.avviso.tipo == 'P' %}Calendario compiti
+      {% endif %}
+              </div>
+              <div class="gs-pl-2 gs-pr-2">
+                <strong>Data e ora di lettura:</strong>
+                {{ a.letto ? a.letto|date('d/m/Y H:i') : 'Adesso' }}
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Nessun avviso presente</strong>
+  </div>
+  {% endif %}
+  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_bacheca'} %}
+  {% include 'include/modal-info.html.twig' %}
+  {% include 'include/modal-waiting.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#avviso_filtro_visualizza').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_filtro_mese').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_filtro_submit').click(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    $.get("/avvisi/legge/"+$(e.relatedTarget).data('info-id'), 'json');
+    $(e.relatedTarget).data('info-title');
+    var title = $(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
+    var id = $(e.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
+{% endblock %}

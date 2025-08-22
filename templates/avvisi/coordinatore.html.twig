@@ -1,0 +1,76 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not info.classe %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_avvisi'|trans }} {{ info.classe }}</h1>
+  <div class="row gs-mb-1">
+    <div class="col-sm-6">
+    </div>
+    <div class="col-sm-6 text-right">
+    {% if dati.azioni.add is defined %}
+      <a class="btn btn-primary" href="{{ path('avvisi_edit_coordinatore') }}" role="button" title="Aggiungi un nuovo avviso"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+    {% endif %}
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped gs-mb-0">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.oggetto'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.destinatari'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for k,a in dati.lista %}
+      <tr>
+        <td>{{ a.data|date('d/m/Y') }}</td>
+        <td>{{ a.titolo }}</td>
+        <td><strong>
+    {% if a.docenti != 'N' %}DOCENTI<br>{% endif %}
+    {% if a.genitori != 'N' %}GENITORI{% if a.genitori == 'U' %}: {{ dati.utenti[k].genitori|raw }}{% endif %}<br>{% endif %}
+    {% if a.alunni != 'N' %}ALUNNI{% if a.genitori == 'U' %}: {{ dati.utenti[k].alunni|raw }}{% endif %}<br>{% endif %}
+          </strong>
+        </td>
+        <td>
+          <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+      {% if dati.azioni[k].edit is defined %}
+          <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_coordinatore', {'avviso': a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
+      {% endif %}
+      {% if dati.azioni[k].delete is defined %}
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso_coordinatore'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    {% include 'include/modal-remote.html.twig' %}
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_avviso'} %}
+    {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_coordinatore'} %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

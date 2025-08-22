@@ -320,21 +320,4 @@ class RichiestaColloquio implements Stringable {
     return $this->colloquio.', '.$this->appuntamento->format('H:i');
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'appuntamento' => $this->appuntamento->format('H:i'),
-      'colloquio' => $this->colloquio->getId(),
-      'alunno' => $this->alunno->getId(),
-      'genitore' => $this->genitore->getId(),
-      'genitoreAnnulla' => $this->genitoreAnnulla ? $this->genitoreAnnulla->getId() : '',
-      'stato' => $this->stato,
-      'messaggio' => $this->messaggio];
-    return $dati;
-  }
-
 }

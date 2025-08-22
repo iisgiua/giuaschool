@@ -23,18 +23,14 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto                     |
-    | $ldu1 | $ld1             | #logged | null                      |
-    | $ldu2 | $ld2             | #logged | #dtm(11,11,2021,15,23,12) |
   E istanze di tipo "Documento":
-    | id  | tipo    | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo>  | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo2> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo    | classe | materia | alunno |
+    | $d1 | <tipo>  | $cl1   | null    | null   |
+    | $d2 | <tipo2> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto                     |
+    | $cu1 | $d1           | #logged | null                      |
+    | $cu2 | $d2           | #logged | #dtm(11,11,2021,15,23,12) |
   E pagina attiva "documenti_bacheca"
   E selezioni opzione "<tipo_id>" da lista "documento_tipo"
   E inserisci "<titolo>" nel campo "documento_titolo"

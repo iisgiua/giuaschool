@@ -239,7 +239,7 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno di doce
     | $c1 | si     | $cl1   | $m1     | N    | #other  | $a1    |
     | $c2 | si     | $cl1   | $m1     | N    | #logged | $a1    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | alunno | docente | tipo |
+    | id  | classe | materia | alunno | autore  | tipo |
     | $d1 | $cl1   | $m1     | $a1    | #other  | R    |
     | $d2 | $cl1   | $m1     | $a1    | #logged | R    |
   Quando pagina attiva "documenti_docenti"
@@ -267,7 +267,7 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno stesso 
     | $c1 | si     | $cl1   | $m1     | N    | #other  | $a1    |
     | $c2 | si     | $cl1   | $m1     | N    | #other  | $a2    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | alunno | docente | tipo |
+    | id  | classe | materia | alunno | autore  | tipo |
     | $d1 | $cl1   | $m1     | $a1    | #other  | R    |
     | $d2 | $cl1   | $m1     | $a2    | #other  | R    |
   Quando pagina attiva "documenti_docenti"

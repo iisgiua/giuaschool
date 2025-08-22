@@ -12,6 +12,7 @@ use App\Entity\Alunno;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Docente;
+use App\Entity\Materia;
 use App\Entity\Staff;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -188,6 +189,22 @@ class AjaxController extends BaseController {
     $dati = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'V');
     // restituisce lista per checkbox
     return new JsonResponse($dati);
+  }
+
+  /**
+   * Restituisce la lista delle materie della classe indicata
+   *
+   * @param Classe $classe Classe di riferimento
+   *
+   * @return JsonResponse Informazioni di risposta
+   */
+  #[Route(path: '/ajax/materie/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], methods: ['POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function materieAjax(Classe $classe): JsonResponse {
+    // solo cattedre attive e normali, no sostegno, no ed.civ.
+    $materie = $this->em->getRepository(Materia::class)->materieClasse($classe, true, false, 'V');
+    // restituisce dati
+    return new JsonResponse($materie);
   }
 
 }

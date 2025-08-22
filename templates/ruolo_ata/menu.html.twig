@@ -3,5 +3,5 @@
   {% if app.user.segreteria %}
   <li{{ app.request.attributes.get('_route')|slice(0,11) == 'segreteria_' ? ' class="active"' }}><a href="{{ path('segreteria_assenze') }}" title="Funzioni per la segreteria"><span class="glyphicon glyphicon-list-alt gs-mr-2" aria-hidden="true"></span>Segreteria</a></li>
   {% endif %}
-  <li{{ app.request.attributes.get('_route') in ['circolari_ata','bacheca_avvisi_ata','documenti_bacheca'] ? ' class="active"' }}><a href="{{ path('circolari_ata') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
+  <li{{ app.request.attributes.get('_route') in ['circolari_bacheca','avvisi_bacheca','documenti_bacheca'] ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
 </ul>

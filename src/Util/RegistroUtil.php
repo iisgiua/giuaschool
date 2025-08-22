@@ -12,7 +12,7 @@ use App\Entity\Alunno;
 use App\Entity\Annotazione;
 use App\Entity\Assenza;
 use App\Entity\AssenzaLezione;
-use App\Entity\AvvisoUtente;
+use App\Entity\ComunicazioneUtente;
 use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
@@ -157,20 +157,14 @@ class RegistroUtil {
    *
    * @return bool Restituisce vero se l'azione è permessa
    */
-  //TODO: rimettere blocco standard
   public function azioneLezione(string $azione, DateTime $data, Docente $docente,
                                 Classe $classe, array $firme): bool {
-    // if ($this->bloccoScrutinio($data, $classe)) {
-    //   // blocco scrutinio
-    //   return false;
-    // }
+    if ($this->bloccoScrutinio($data, $classe)) {
+      // blocco scrutinio
+      return false;
+    }
     if ($azione == 'add') {
       // azione di creazione
-      // da rimuovere...
-      if ($this->bloccoScrutinio($data, $classe)) {
-        // blocco scrutinio
-        return false;
-      }
       $oggi = new DateTime();
       if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
         // data non nel futuro
@@ -186,12 +180,6 @@ class RegistroUtil {
         return true;
       }
     } elseif ($azione == 'delete') {
-      // azione di cancellazione
-      // da rimuovere...
-      if ($this->bloccoScrutinio($data, $classe)) {
-        // blocco scrutinio
-        return false;
-      }
       if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
         // ok: docente ha firmato
         return true;
@@ -572,28 +560,30 @@ class RegistroUtil {
       $ann['docente'] = $a->getDocente()->getNome().' '.$a->getDocente()->getCognome();
       $ann['avviso'] = $a->getAvviso();
       $ann['gruppo'] = $a->getClasse()->getGruppo();
-      $ann['alunni'] = null;
-      if ($a->getAvviso() && in_array('A', $a->getAvviso()->getDestinatari())) {
+      $ann['alunni'] = [];
+      $ann['genitori'] = [];
+      if ($a->getAvviso() && ($a->getAvviso()->getAlunni() == 'U' ||
+          ($a->getAvviso()->getRappresentantiAlunni() != 'N' && in_array($a->getAvviso()->getAlunni(), ['N', 'U'])))) {
         // legge alunno destinatario
         $ann['alunni'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->join(AvvisoUtente::class, 'au', 'WITH', 'au.utente=a.id')
-          ->join('au.avviso', 'av')
-          ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+          ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.utente=a.id')
+          ->where('a.classe=:classe AND cu.comunicazione=:avviso')
+          ->setParameter('classe', $a->getClasse())
           ->setParameter('avviso', $a->getAvviso())
-          ->setParameter('destinatari', 'A')
-          ->setParameter('filtro', 'U')
+          ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
           ->getQuery()
           ->getResult();
-      } elseif ($a->getAvviso() && in_array('G', $a->getAvviso()->getDestinatari())) {
+      }
+      if ($a->getAvviso() && $a->getAvviso()->getGenitori() == 'U' ||
+          ($a->getAvviso()->getRappresentantiGenitori() != 'N' && in_array($a->getAvviso()->getGenitori(), ['N', 'U']))) {
         // legge genitore destinatario
-        $ann['alunni'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        $ann['genitori'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id')
-          ->join(AvvisoUtente::class, 'au', 'WITH', 'au.utente=g.id')
-          ->join('au.avviso', 'av')
-          ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+          ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.utente=g.id')
+          ->where('a.classe=:classe AND cu.comunicazione=:avviso')
+          ->setParameter('classe', $a->getClasse())
           ->setParameter('avviso', $a->getAvviso())
-          ->setParameter('destinatari', 'G')
-          ->setParameter('filtro', 'U')
+          ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
           ->getQuery()
           ->getResult();
       }

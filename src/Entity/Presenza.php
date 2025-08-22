@@ -292,20 +292,4 @@ class Presenza implements Stringable {
     return 'Fuori classe '.$this->tipo.' del '.$this->data->format('d/m/Y').': '.$this->alunno;
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'data' => $this->data ? $this->data->format('d/m/Y') : '',
-      'oraInizio' => $this->oraInizio ? $this->oraInizio->format('H:i') : '',
-      'oraFine' => $this->oraFine ? $this->oraFine->format('H:i') : '',
-      'tipo' => $this->tipo,
-      'descrizione' => $this->descrizione,
-      'alunno' => $this->alunno ? $this->alunno->getId() : ''];
-    return $dati;
-  }
-
 }

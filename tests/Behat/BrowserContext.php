@@ -9,17 +9,18 @@
 namespace App\Tests\Behat;
 
 use App\Entity\Utente;
-use Exception;
+use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ExpectationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 
 
 /**
@@ -27,7 +28,7 @@ use Fidry\AliceDataFixtures\Loader\PurgerLoader;
  *
  * @author Antonello Dessì
  */
-class BrowserContext extends BaseContext {
+class BrowserContext extends BaseContext implements Context {
 
   //==================== METODI DELLA CLASSE ====================
 

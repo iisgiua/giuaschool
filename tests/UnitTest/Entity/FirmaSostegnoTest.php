@@ -35,7 +35,9 @@ class FirmaSostegnoTest extends EntityTestCase {
     $this->fixtures = '_entityTestFixtures';
     // SQL read
     $this->canRead = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo'],
-      'gs_lezione' => '*'];
+      'gs_lezione' => '*',
+      'gs_materia' => '*',
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
     // SQL exec
@@ -116,14 +118,8 @@ class FirmaSostegnoTest extends EntityTestCase {
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    // datiVersione
-    $dt = [
-      'lezione' => $existent->getLezione() ? $existent->getLezione()->getId() : null,
-      'docente' => $existent->getDocente() ? $existent->getDocente()->getId() : null,
-      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
-      'argomento' => $existent->getArgomento(),
-      'attivita' => $existent->getAttivita()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    // toString
+    $this->assertSame($existent->getLezione().' ('.$existent->getDocente().')', (string) $existent, $this->entity.'::toString');
   }
 
   /**

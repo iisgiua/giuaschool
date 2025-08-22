@@ -46,12 +46,10 @@ class AtaRepository extends BaseRepository {
    *
    * @return array Lista di ID dell'utente Dsga
    */
-  public function getIdDsga() {
+  public function getIdDsga(): array {
     $dsga = $this->createQueryBuilder('a')
       ->select('a.id')
-      ->where('a.abilitato=:abilitato AND a.tipo=:dsga')
-      ->setParameter('abilitato', 1)
-      ->setParameter('dsga', 'D')
+      ->where("a.abilitato=1 AND a.tipo='D'")
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();

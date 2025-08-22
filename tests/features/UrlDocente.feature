@@ -33,7 +33,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | colloqui_storico           |
     | colloqui_edit              |
     | colloqui_create            |
-    | circolari_docenti          |
+    | circolari_bacheca          |
     | bacheca_avvisi             |
     | documenti_bacheca          |
     | utenti_profilo             |

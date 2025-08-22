@@ -1,0 +1,101 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.staff_avvisi_archivio'|trans }}</h1>
+  {% include('include/form-inline.html.twig') %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-6">
+    </div>
+    <div class="col-sm-6 text-right">
+    </div>
+  </div>
+  {% if dati.lista|length > 0 %}
+  <table class="table table-bordered table-hover table-striped gs-mb-0">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-1">{{ 'label.autore'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.tipo'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.oggetto'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.destinatari'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for k,a in dati.lista %}
+      <tr>
+        <td><small>{{ a.autore.nome }} {{ a.autore.cognome }}</small></td>
+        <td><small>{{ ('label.avvisi_tipo_'~a.tipo)|trans }}</small></td>
+        <td>{{ a.data|date('d/m/Y') }}</td>
+        <td>{{ a.titolo }}</td>
+        <td>
+          <small>{% set inizio=1 %}
+    {% if 'D' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}DSGA{% endif -%}
+    {% if 'S' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RSPP{% endif -%}
+    {% if 'R' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RSU{% endif -%}
+    {% if 'I' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI DI ISTITUTO{% endif -%}
+    {% if 'P' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI CONSULTA PROVICIALE{% endif -%}
+    {% if 'A' in a.ata and 'T' in a.ata and 'C' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}ATA
+    {%- elseif 'A' in a.ata or 'T' in a.ata or 'C' in a.ata %}
+      {%- if 'A' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}AMMINISTRATIVI{% endif -%}
+      {%- if 'T' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}TECNICI{% endif -%}
+      {%- if 'C' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}COLL.SCOLAST.{% endif -%}
+    {% endif -%}
+    {% if a.coordinatori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}COORDINATORI{% endif -%}
+    {% if a.docenti != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}DOCENTI{% endif -%}
+    {% if a.genitori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}GENITORI{% endif -%}
+    {% if a.alunni != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}ALUNNI{% endif -%}
+    {% if a.rappresentantiGenitori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI GENITORI{% endif -%}
+    {% if a.rappresentantiAlunni != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI ALUNNI{% endif -%}
+          </small>
+        </td>
+        <td>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_archivio'} %}
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Nessun avviso presente</strong>
+  </div>
+  {% endif %}
+  {% include 'include/modal-remote.html.twig' %}
+  {% include 'include/modal-waiting.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  $('#avviso_filtro_anno').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_filtro_autore').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_filtro_tipo').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_filtro_mese').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+});
+</script>
+{% endblock %}

@@ -28,15 +28,15 @@ class LogTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Log::class;
     // campi da testare
-    $this->fields = ['utente', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'dati'];
+    $this->fields = ['utente', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'classeEntita', 'idEntita', 'dati'];
     $this->noStoredFields = [];
-    $this->generatedFields = ['id', 'creato', 'modificato'];
+    $this->generatedFields = ['id', 'creato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_log' => ['id', 'creato', 'modificato', 'utente_id', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'dati']];
+    $this->canRead = ['gs_log' => ['id', 'creato', 'utente_id', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'classe_entita', 'id_entita', 'dati']];
     // SQL write
-    $this->canWrite = ['gs_log' => ['id', 'creato', 'modificato', 'utente_id', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'dati']];
+    $this->canWrite = ['gs_log' => ['id', 'creato', 'utente_id', 'username', 'ruolo', 'alias', 'ip', 'origine', 'tipo', 'categoria', 'azione', 'classe_entita', 'id_entita', 'dati']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -63,7 +63,7 @@ class LogTest extends EntityTestCase {
    * Sono esclusi gli attributi ereditati.
    *
    */
-  public function testProperties() {
+  public function testProperties(): void {
     // crea nuovi oggetti
     for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
@@ -78,12 +78,11 @@ class LogTest extends EntityTestCase {
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'categoria' ? $this->faker->passthrough(substr($this->faker->text(), 0, 32)) :
           ($field == 'azione' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'classeEntita' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'idEntita' ? $this->faker->passthrough(substr($this->faker->text(), 0, 32)) :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          null))))))))));
+          null))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
-      }
-      foreach ($this->generatedFields as $field) {
-        $this->assertEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Pre-insert');
       }
       // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
@@ -92,12 +91,6 @@ class LogTest extends EntityTestCase {
         $this->assertNotEmpty($o[$i]->{'get'.ucfirst((string) $field)}(), $this->entity.'::get'.ucfirst((string) $field).' - Post-insert');
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
-      // controlla dati dopo l'aggiornamento
-      sleep(1);
-      $data[$i]['utente'] = $this->getReference("docente_curricolare_2");
-      $o[$i]->setUtente($data[$i]['utente']);
-      $this->em->flush();
-      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
     for ($i = 0; $i < 5; $i++) {
@@ -117,111 +110,20 @@ class LogTest extends EntityTestCase {
   /**
    * Test altri metodi
    */
-  public function testMethods() {
+  public function testMethods(): void {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $this->assertSame($existent->getModificato()->format('d/m/Y H:i').' - '.$existent->getAzione(), (string) $existent, $this->entity.'::toString');
+    $this->assertSame($existent->getCreato()->format('d/m/Y H:i:s').' - '.$existent->getAzione(), (string) $existent, $this->entity.'::toString');
   }
 
   /**
    * Test validazione dei dati
    */
-  public function testValidation() {
+  public function testValidation(): void {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
-    // utente
-    $property = $this->getPrivateProperty(Log::class, 'utente');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_curricolare_1"));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Utente - VALID NOT BLANK');
-    // username
-    $property = $this->getPrivateProperty(Log::class, 'username');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Username - NOT BLANK');
-    $existent->setUsername($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID NOT BLANK');
-    $existent->setUsername(str_repeat('*', 256));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Username - MAX LENGTH');
-    $existent->setUsername(str_repeat('*', 255));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID MAX LENGTH');
-    // ruolo
-    $property = $this->getPrivateProperty(Log::class, 'ruolo');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ruolo - NOT BLANK');
-    $existent->setRuolo($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ruolo - VALID NOT BLANK');
-    $existent->setRuolo(str_repeat('*', 33));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Ruolo - MAX LENGTH');
-    $existent->setRuolo(str_repeat('*', 32));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ruolo - VALID MAX LENGTH');
-    // alias
-    $existent->setAlias(str_repeat('*', 256));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Alias - MAX LENGTH');
-    $existent->setAlias(str_repeat('*', 255));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alias - VALID MAX LENGTH');
-    // ip
-    $property = $this->getPrivateProperty(Log::class, 'ip');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Ip - NOT BLANK');
-    $existent->setIp($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ip - VALID NOT BLANK');
-    $existent->setIp(str_repeat('*', 65));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Ip - MAX LENGTH');
-    $existent->setIp(str_repeat('*', 64));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ip - VALID MAX LENGTH');
-    // origine
-    $property = $this->getPrivateProperty(Log::class, 'origine');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Origine - NOT BLANK');
-    $existent->setOrigine($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Origine - VALID NOT BLANK');
-    $existent->setOrigine(str_repeat('*', 256));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Origine - MAX LENGTH');
-    $existent->setOrigine(str_repeat('*', 255));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Origine - VALID MAX LENGTH');
-    // tipo
-    $existent->setTipo('*');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Tipo - CHOICE');
-    $existent->setTipo('A');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
-    // categoria
-    $property = $this->getPrivateProperty(Log::class, 'categoria');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Categoria - NOT BLANK');
-    $existent->setCategoria($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Categoria - VALID NOT BLANK');
-    $existent->setCategoria(str_repeat('*', 33));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Categoria - MAX LENGTH');
-    $existent->setCategoria(str_repeat('*', 32));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Categoria - VALID MAX LENGTH');
-    // azione
-    $property = $this->getPrivateProperty(Log::class, 'azione');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Azione - NOT BLANK');
-    $existent->setAzione($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Azione - VALID NOT BLANK');
-    $existent->setAzione(str_repeat('*', 65));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Azione - MAX LENGTH');
-    $existent->setAzione(str_repeat('*', 64));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Azione - VALID MAX LENGTH');
   }
 
 }

@@ -32,6 +32,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'tipo', type: 'string', length: 1)]
 #[ORM\DiscriminatorMap(['N' => 'Firma', 'S' => 'FirmaSostegno'])]
+#[ORM\Index(columns: ['tipo'])]
 #[UniqueEntity(fields: ['lezione', 'docente'], message: 'field.unique')]
 class Firma implements Stringable {
 
@@ -180,18 +181,6 @@ class Firma implements Stringable {
    */
   public function __toString(): string {
     return $this->lezione.' ('.$this->docente.')';
-  }
-
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'lezione' => $this->lezione ? $this->lezione->getId() : null,
-      'docente' => $this->docente ? $this->docente->getId() : null];
-    return $dati;
   }
 
 }

@@ -59,7 +59,7 @@ class ClasseRepository extends BaseRepository {
    *
    * @return string Lista delle classi
    */
-  public function listaClassi($lista) {
+  public function listaClassi($lista): string {
     // legge classi valide
     $classi = $this->createQueryBuilder('c')
       ->select("CONCAT(c.anno,'ª ',c.sezione) AS nome,c.gruppo")
@@ -83,9 +83,14 @@ class ClasseRepository extends BaseRepository {
    * @return array Lista di ID delle classi
    */
   public function getIdClasse($sedi, $filtro) {
+    // subquery per identificare classi articolate (cioè con stesso anno/sezione ma almeno un gruppo NON NULL)
+    $subquery = $this->createQueryBuilder('c2')
+      ->select('c2.id')
+      ->where('c2.anno=c.anno AND c2.sezione=c.sezione AND c2.gruppo IS NOT NULL');
+    // query base
     $classi = $this->createQueryBuilder('c')
-      ->select('DISTINCT c.id')
-      ->where('c.sede IN (:sedi)')
+      ->select('c.id')
+      ->where('c.sede IN (:sedi) AND (c.gruppo IS NOT NULL OR (c.gruppo IS NULL AND NOT EXISTS('.$subquery->getDQL().')))')
 			->setParameter('sedi', $sedi);
     if ($filtro) {
       // filtro classi
@@ -153,34 +158,34 @@ class ClasseRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
-  /**
-   * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti genitori
-   *
-   * @param array $sedi Sedi di servizio (lista ID di Sede)
-   * @param array|null $filtro Lista di ID per il filtro classi o null se nessun filtro
-   *
-   * @return array Lista di ID delle classi
-   */
-  public function getIdClasseGenitori($sedi, $filtro) {
-    $classi = $this->createQueryBuilder('c')
-      ->select('DISTINCT c.id')
-      ->where('c.sede IN (:sedi)')
-			->setParameter('sedi', $sedi);
-    if ($filtro) {
-      // filtro genitori
-      $classi
-        ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
-        ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
-        ->andWhere('g.id IN (:lista)')
-        ->setParameter('lista', $filtro)
-        ->setParameter('abilitato', 1);
-    }
-    $classi = $classi
-      ->getQuery()
-      ->getArrayResult();
-    // restituisce la lista degli ID
-    return array_column($classi, 'id');
-  }
+  // /**
+  //  * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti genitori
+  //  *
+  //  * @param array $sedi Sedi di servizio (lista ID di Sede)
+  //  * @param array|null $filtro Lista di ID per il filtro classi o null se nessun filtro
+  //  *
+  //  * @return array Lista di ID delle classi
+  //  */
+  // public function getIdClasseGenitori($sedi, $filtro) {
+  //   $classi = $this->createQueryBuilder('c')
+  //     ->select('DISTINCT c.id')
+  //     ->where('c.sede IN (:sedi)')
+	// 		->setParameter('sedi', $sedi);
+  //   if ($filtro) {
+  //     // filtro genitori
+  //     $classi
+  //       ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+  //       ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
+  //       ->andWhere('g.id IN (:lista)')
+  //       ->setParameter('lista', $filtro)
+  //       ->setParameter('abilitato', 1);
+  //   }
+  //   $classi = $classi
+  //     ->getQuery()
+  //     ->getArrayResult();
+  //   // restituisce la lista degli ID
+  //   return array_column($classi, 'id');
+  // }
 
   /**
    * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti alunni
@@ -226,49 +231,49 @@ class ClasseRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
-  /**
-   * Restituisce le classi per le sedi, i destinatari e il filtro rappresentanti indicato
-   *
-   * @param array $sedi Sedi di servizio (lista ID di Sede)
-   * @param array $destinatari Lista dei destinatari (ruolo utenti)
-   * @param array|null $filtro Lista del tipo di rappresentanti
-   *
-   * @return array Lista di ID delle classi
-   */
-  public function getIdClasseRappresentanti($sedi, $destinatari, $filtro) {
-    $classiId = [];
-    // classi per gli alunni rappresentanti
-    if ($filtro && in_array('A', $destinatari, true)) {
-      // filtro alunni
-      $classi = $this->createQueryBuilder('c')
-        ->select('DISTINCT c.id')
-        ->where('c.sede IN (:sedi)')
-        ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
-        ->setParameter('sedi', $sedi)
-        ->setParameter('abilitato', 1)
-        ->setParameter('lista', $filtro)
-        ->getQuery()
-        ->getArrayResult();
-      $classiId = array_column($classi, 'id');
-    }
-    // classi per i genitori rappresentanti
-    if ($filtro && in_array('G', $destinatari, true)) {
-      // filtro genitori
-      $classi = $this->createQueryBuilder('c')
-        ->select('DISTINCT c.id')
-        ->where('c.sede IN (:sedi)')
-        ->join(Genitore::class, 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
-        ->join(Alunno::class, 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
-        ->setParameter('sedi', $sedi)
-        ->setParameter('abilitato', 1)
-        ->setParameter('lista', $filtro)
-        ->getQuery()
-        ->getArrayResult();
-      $classiId = array_unique(array_merge($classiId, array_column($classi, 'id')));
-    }
-    // restituisce la lista degli ID
-    return $classiId;
-  }
+  // /**
+  //  * Restituisce le classi per le sedi, i destinatari e il filtro rappresentanti indicato
+  //  *
+  //  * @param array $sedi Sedi di servizio (lista ID di Sede)
+  //  * @param array $destinatari Lista dei destinatari (ruolo utenti)
+  //  * @param array|null $filtro Lista del tipo di rappresentanti
+  //  *
+  //  * @return array Lista di ID delle classi
+  //  */
+  // public function getIdClasseRappresentanti($sedi, $destinatari, $filtro) {
+  //   $classiId = [];
+  //   // classi per gli alunni rappresentanti
+  //   if ($filtro && in_array('A', $destinatari, true)) {
+  //     // filtro alunni
+  //     $classi = $this->createQueryBuilder('c')
+  //       ->select('DISTINCT c.id')
+  //       ->where('c.sede IN (:sedi)')
+  //       ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
+  //       ->setParameter('sedi', $sedi)
+  //       ->setParameter('abilitato', 1)
+  //       ->setParameter('lista', $filtro)
+  //       ->getQuery()
+  //       ->getArrayResult();
+  //     $classiId = array_column($classi, 'id');
+  //   }
+  //   // classi per i genitori rappresentanti
+  //   if ($filtro && in_array('G', $destinatari, true)) {
+  //     // filtro genitori
+  //     $classi = $this->createQueryBuilder('c')
+  //       ->select('DISTINCT c.id')
+  //       ->where('c.sede IN (:sedi)')
+  //       ->join(Genitore::class, 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
+  //       ->join(Alunno::class, 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
+  //       ->setParameter('sedi', $sedi)
+  //       ->setParameter('abilitato', 1)
+  //       ->setParameter('lista', $filtro)
+  //       ->getQuery()
+  //       ->getArrayResult();
+  //     $classiId = array_unique(array_merge($classiId, array_column($classi, 'id')));
+  //   }
+  //   // restituisce la lista degli ID
+  //   return $classiId;
+  // }
 
   /**
    * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
@@ -276,17 +281,26 @@ class ClasseRepository extends BaseRepository {
    * @param int|null $sede Identificativo della sede, usato per filtrare le classi della sede indicata; se nullo non filtra i dati
    * @param bool $breve Se vero riporta solo la classe senza il corso, altrimenti riporta tutto
    * @param bool $ordAnno Se vero le classi sono ordinate per anno-sezione, altrimenti per sezione-anno
+   * @param bool $articolate Se vero nelle classi articolate considera solo quelle con gruppi
    *
    * @return array Array associativo predisposto per le opzioni dei form
    */
-  public function opzioni(?int $sede = null, bool $breve = true, $ordAnno = true): array {
+public function opzioni(?int $sede = null, bool $breve=true, $ordAnno=true, bool $articolate=false): array {
     // inizializza
     $dati = [];
-    // legge classi
+    // query base
     $classi = $this->createQueryBuilder('c')
       ->join('c.sede', 's');
     if ($sede) {
       $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
+    }
+    if ($articolate) {
+      // subquery per identificare classi articolate (cioè con stesso anno/sezione ma almeno un gruppo NON NULL)
+      $subquery = $this->createQueryBuilder('c2')
+        ->select('c2.id')
+        ->where('c2.anno=c.anno AND c2.sezione=c.sezione AND c2.gruppo IS NOT NULL');
+      $classi
+        ->andWhere('c.gruppo IS NOT NULL OR (c.gruppo IS NULL AND NOT EXISTS('.$subquery->getDQL().'))');
     }
     $classi = $classi
       ->orderBy('s.ordinamento,'.($ordAnno ? 'c.anno,c.sezione,c.gruppo' : 'c.sezione,c.gruppo,c.anno').',c.gruppo')

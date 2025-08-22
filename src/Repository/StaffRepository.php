@@ -8,6 +8,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Preside;
+
 
 /**
  * Staff - repository
@@ -26,9 +28,8 @@ class StaffRepository extends BaseRepository {
   public function getIdStaff($sedi) {
     $staff = $this->createQueryBuilder('s')
       ->select('DISTINCT s.id')
-      ->where('s.abilitato=:abilitato AND NOT s INSTANCE OF App\Entity\Preside')
+      ->where('s.abilitato=1 AND NOT s INSTANCE OF '.Preside::class)
       ->andWhere('s.sede IS NULL OR s.sede IN (:sedi)')
-      ->setParameter('abilitato', 1)
       ->setParameter('sedi', $sedi)
       ->getQuery()
       ->getArrayResult();
@@ -46,14 +47,42 @@ class StaffRepository extends BaseRepository {
    */
   public function cerca($criteri, $pagina=1) {
     // crea query
-    $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato AND (NOT d INSTANCE OF App\Entity\Preside)')
-      ->orderBy('d.cognome,d.nome,d.username', 'ASC')
+    $query = $this->createQueryBuilder('s')
+      ->where('s.nome LIKE :nome AND s.cognome LIKE :cognome AND s.abilitato=1 AND NOT s INSTANCE OF '.Preside::class)
+      ->orderBy('s.cognome,s.nome,s.username', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
-      ->setParameter('cognome', $criteri['cognome'].'%')
-      ->setParameter('abilitato', 1);
+      ->setParameter('cognome', $criteri['cognome'].'%');
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
+  }
+
+  /**
+   * Restituisce la lista dello staff, predisposta per le opzioni dei form
+   *
+   * @param bool $preside Se vero, include anche l preside
+   *
+   * @return array Array associativo predisposto per le opzioni dei form
+   */
+  public function opzioni(bool $preside=true): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $staff = $this->createQueryBuilder('s')
+      ->where('s.abilitato=1');
+    if (!$preside) {
+      $staff->andWhere('s NOT INSTANCE OF '.Preside::class);
+    }
+    $staff = $staff
+      ->orderBy('s.cognome,s.nome,s.username')
+      ->getQuery()
+      ->getResult();
+    // imposta opzioni
+    foreach ($staff as $s) {
+      $nome = $s->getCognome().' '.$s->getNome();
+      $dati[$nome] = $s;
+    }
+    // restituisce lista opzioni
+    return $dati;
   }
 
 }

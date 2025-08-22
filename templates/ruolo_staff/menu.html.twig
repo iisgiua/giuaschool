@@ -1,14 +1,10 @@
 <nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
-    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:12] == 'staff_avvisi' ? ' active' }}">
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:6] == 'avvisi' ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli avvisi">Avvisi<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
-        <li{{ app.request.attributes.get('_route') in ['staff_avvisi','staff_avvisi_edit'] ? ' class="active"' }}><a href="{{ path('staff_avvisi') }}" title="Gestione degli avvisi di tipo generico">Avviso generico</a></li>
-        <li{{ app.request.attributes.get('_route')[:19] == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'E' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'E'}) }}" title="Gestione degli avvisi per l'ingresso posticipato delle classi">Ingresso posticipato</a></li>
-        <li{{ app.request.attributes.get('_route')[:19] == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'U' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'U'}) }}" title="Gestione degli avvisi per l'uscita anticipata delle classi">Uscita anticipata</a></li>
-        <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_attivita' ? ' class="active"' }}><a href="{{ path('staff_avvisi_attivita') }}" title="Gestione degli avvisi per lo svolgimento di attività per le classi">Svolgimento attività</a></li>
-        <li{{ app.request.attributes.get('_route')[:24] == 'staff_avvisi_individuali' ? ' class="active"' }}><a href="{{ path('staff_avvisi_individuali') }}" title="Gestione degli avvisi individuali per i genitori">Messaggio personale</a></li>
-        <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_archivio' ? ' class="active"' }}><a href="{{ path('staff_avvisi_archivio') }}" title="Archivio degli avvisi degli anni precedenti">Archivio</a></li>
+        <li{{ app.request.attributes.get('_route')[:11] in ['avvisi_gest','avvisi_edit'] ? ' class="active"' }}><a href="{{ path('avvisi_gestione') }}" title="Gestione degli avvisi">Gestione</a></li>
+        <li{{ app.request.attributes.get('_route') == 'avvisi_archivio' ? ' class="active"' }}><a href="{{ path('avvisi_archivio') }}" title="Archivio degli avvisi degli anni passati">Archivio</a></li>
       </ul>
     </li>
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route') in ['circolari_gestione', 'circolari_archivio'] ? ' active' }}">

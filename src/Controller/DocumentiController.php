@@ -12,13 +12,13 @@ use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Documento;
-use App\Entity\File;
+use App\Entity\Allegato;
 use App\Entity\Genitore;
-use App\Entity\ListaDestinatari;
 use App\Entity\Materia;
 use App\Form\DocumentoType;
-use App\Util\DocumentiUtil;
+use App\Util\ComunicazioniUtil;
 use App\Util\LogHandler;
+use DateTime;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,17 +39,17 @@ class DocumentiController extends BaseController {
   /**
    * Gestione inserimento dei programmi svolti dei docenti
    *
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/documenti/programmi', name: 'documenti_programmi', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function programmi(DocumentiUtil $doc): Response {
+  public function programmi(ComunicazioniUtil $com): Response {
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
     // recupera dati
-    $dati = $doc->programmiDocente($this->getUser(), $programmiQuinte);
+    $dati = $com->programmiDocente($this->getUser(), $programmiQuinte);
     // mostra la pagina di risposta
     return $this->render('documenti/programmi.html.twig', [
       'pagina_titolo' => 'page.documenti_programmi',
@@ -61,7 +61,7 @@ class DocumentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Classe $classe Classe di riferimento per il documento
    * @param Materia $materia Materia di riferimento per il documento
@@ -71,7 +71,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/programmi/add/{classe}/{materia}', name: 'documenti_programmi_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function programmiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+  public function programmiAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                                LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
@@ -83,7 +83,7 @@ class DocumentiController extends BaseController {
     }
     // controlla azione
     $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'P',
-      'classe' => $classe, 'materia' => $materia]);
+      'classe' => $classe, 'materia' => $materia, 'stato' => 'P']);
     if ($documentoEsistente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -91,13 +91,13 @@ class DocumentiController extends BaseController {
     // crea documento
     $documento = (new Documento())
       ->setTipo('P')
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
+      ->setData(new DateTime('today'))
       ->setClasse($classe)
-      ->setMateria($materia)
-      ->setListaDestinatari(new ListaDestinatari());
+      ->setMateria($materia);
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento, $programmiQuinte)) {
+    if (!$com->azioneDocumento('add', $this->getUser(), $documento, $programmiQuinte)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -115,15 +115,17 @@ class DocumentiController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
         // imposta destinatari
-        $doc->impostaDestinatari($documento);
+        $com->destinatariDocumento($documento);
         // conversione pfd
-        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $com->convertePdf($allegati[0]['temp'].'.'.$allegati[0]['ext']);
         // imposta allegato
-        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        $com->allegatoDocumento($documento, $file, $estensione, $allegati[0]['size']);
+        // aggiunge titolo a documento
+        $documento->setTitolo($documento->getAllegati()[0]->getTitolo());
         // rimuove sessione con gli allegati
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
-        $dblogger->logCreazione('DOCUMENTI', 'Inserimento programma svolto', $documento);
+        $dblogger->logAzione('DOCUMENTI', 'Inserimento programma svolto');
         // redirezione
         return $this->redirectToRoute('documenti_programmi');
       }
@@ -140,7 +142,7 @@ class DocumentiController extends BaseController {
    * Cancella il documento indicato
    *
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione dei documenti
    * @param Documento $documento Documento da cancellare
    *
    * @return Response Pagina di risposta
@@ -148,27 +150,25 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(LogHandler $dblogger, DocumentiUtil $doc, Documento $documento): Response {
+  public function delete(LogHandler $dblogger, ComunicazioniUtil $com, Documento $documento): Response {
     // controllo permessi
-    if (!$doc->azioneDocumento('delete', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // copia per log
-    $vecchioDocumento = clone $documento;
     // cancella documento
     $this->em->remove($documento);
-    // cancella lista destinatari
-    $doc->cancellaDestinatari($documento);
+    // cancella destinatari
+    $com->cancellaDestinatari($documento);
     // cancella allegati
     foreach ($documento->getAllegati() as $allegato) {
       $this->em->remove($allegato);
     }
     // memorizzazione e log
-    $dblogger->logRimozione('DOCUMENTI', 'Cancella documento', $vecchioDocumento);
+    $dblogger->logAzione('DOCUMENTI', 'Cancella documento');
     // cancella file
     foreach ($documento->getAllegati() as $allegato) {
-      $dir = $doc->documentoDir($documento);
+      $dir = $com->dirDocumento($documento);
       if (!file_exists($dir.'/'.$allegato->getFile().'.'.$allegato->getEstensione())) {
         // compatibilità con vecchi documenti
         $dir = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
@@ -191,16 +191,16 @@ class DocumentiController extends BaseController {
   /**
    * Gestione inserimento delle relazioni finali dei docenti
    *
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/documenti/relazioni', name: 'documenti_relazioni', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function relazioni(DocumentiUtil $doc): Response {
+  public function relazioni(ComunicazioniUtil $com): Response {
     // recupera dati
-    $dati = $doc->relazioniDocente($this->getUser());
+    $dati = $com->relazioniDocente($this->getUser());
     // mostra la pagina di risposta
     return $this->render('documenti/relazioni.html.twig', [
       'pagina_titolo' => 'page.documenti_relazioni',
@@ -212,7 +212,7 @@ class DocumentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Classe $classe Classe di riferimento per il documento
    * @param Materia $materia Materia di riferimento per il documento
@@ -223,7 +223,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/relazioni/add/{classe}/{materia}/{alunno}', name: 'documenti_relazioni_add', requirements: ['classe' => '\d+', 'materia' => '\d+', 'alunno' => '\d+'], defaults: ['alunno' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function relazioniAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+  public function relazioniAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                                LogHandler $dblogger, Classe $classe, Materia $materia,
                                Alunno $alunno=null): Response {
     // inizializza
@@ -235,7 +235,8 @@ class DocumentiController extends BaseController {
     }
     // controlla azione
     $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'R',
-      'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'docente' => $this->getUser()]);
+      'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'autore' => $this->getUser(),
+      'stato' => 'P']);
     if ($documentoEsistente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -243,14 +244,14 @@ class DocumentiController extends BaseController {
     // crea documento
     $documento = (new Documento())
       ->setTipo('R')
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
+      ->setData(new DateTime('today'))
       ->setClasse($classe)
       ->setMateria($materia)
-      ->setAlunno($alunno)
-      ->setListaDestinatari(new ListaDestinatari());
+      ->setAlunno($alunno);
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('add', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -269,15 +270,17 @@ class DocumentiController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
         // imposta destinatari
-        $doc->impostaDestinatari($documento);
+        $com->destinatariDocumento($documento);
         // conversione pfd
-        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $com->convertePdf($allegati[0]['temp'].'.'.$allegati[0]['ext']);
         // imposta allegato
-        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        $com->allegatoDocumento($documento, $file, $estensione, $allegati[0]['size']);
+        // aggiunge titolo a documento
+        $documento->setTitolo($documento->getAllegati()[0]->getTitolo());
         // rimuove sessione con gli allegati
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
-        $dblogger->logCreazione('DOCUMENTI', 'Inserimento relazione finale', $documento);
+        $dblogger->logAzione('DOCUMENTI', 'Inserimento relazione finale');
         // redirezione
         return $this->redirectToRoute('documenti_relazioni');
       }
@@ -293,16 +296,16 @@ class DocumentiController extends BaseController {
   /**
    * Gestione inserimento dei piani di lavoro dei docenti
    *
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione dei documenti
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/documenti/piani', name: 'documenti_piani', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function piani(DocumentiUtil $doc): Response {
+  public function piani(ComunicazioniUtil $com): Response {
     // recupera dati
-    $dati = $doc->pianiDocente($this->getUser());
+    $dati = $com->pianiDocente($this->getUser());
     // mostra la pagina di risposta
     return $this->render('documenti/piani.html.twig', [
       'pagina_titolo' => 'page.documenti_piani',
@@ -314,7 +317,7 @@ class DocumentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Classe $classe Classe di riferimento per il documento
    * @param Materia $materia Materia di riferimento per il documento
@@ -324,7 +327,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/piani/add/{classe}/{materia}', name: 'documenti_piani_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function pianiAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+  public function pianiAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                            LogHandler $dblogger, Classe $classe, Materia $materia): Response {
     // inizializza
     $info = [];
@@ -335,7 +338,7 @@ class DocumentiController extends BaseController {
     }
     // controlla azione
     $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'L',
-      'classe' => $classe, 'materia' => $materia]);
+      'classe' => $classe, 'materia' => $materia, 'stato' => 'P']);
     if ($documentoEsistente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -343,13 +346,13 @@ class DocumentiController extends BaseController {
     // crea documento
     $documento = (new Documento())
       ->setTipo('L')
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
+      ->setData(new DateTime('today'))
       ->setClasse($classe)
-      ->setMateria($materia)
-      ->setListaDestinatari(new ListaDestinatari());
+      ->setMateria($materia);
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('add', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -367,15 +370,17 @@ class DocumentiController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
         // imposta destinatari
-        $doc->impostaDestinatari($documento);
+        $com->destinatariDocumento($documento);
         // conversione pfd
-        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $com->convertePdf($allegati[0]['temp'].'.'.$allegati[0]['ext']);
         // imposta allegato
-        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        $com->allegatoDocumento($documento, $file, $estensione, $allegati[0]['size']);
+        // aggiunge titolo a documento
+        $documento->setTitolo($documento->getAllegati()[0]->getTitolo());
         // rimuove sessione con gli allegati
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
-        $dblogger->logCreazione('DOCUMENTI', 'Inserimento piano di lavoro', $documento);
+        $dblogger->logAzione('DOCUMENTI', 'Inserimento piano di lavoro');
         // redirezione
         return $this->redirectToRoute('documenti_piani');
       }
@@ -391,16 +396,16 @@ class DocumentiController extends BaseController {
   /**
    * Gestione inserimento dei documenti del 15 maggio
    *
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/documenti/maggio', name: 'documenti_maggio', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function maggio(DocumentiUtil $doc): Response {
+  public function maggio(ComunicazioniUtil $com): Response {
     // recupera dati
-    $dati = $doc->maggioDocente($this->getUser());
+    $dati = $com->maggioDocente($this->getUser());
     // mostra la pagina di risposta
     return $this->render('documenti/maggio.html.twig', [
       'pagina_titolo' => 'page.documenti_maggio',
@@ -412,7 +417,7 @@ class DocumentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Classe $classe Classe di riferimento per il documento
    *
@@ -421,7 +426,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/maggio/add/{classe}', name: 'documenti_maggio_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function maggioAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+  public function maggioAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                             LogHandler $dblogger, Classe $classe): Response {
     // inizializza
     $info = [];
@@ -432,7 +437,7 @@ class DocumentiController extends BaseController {
     }
     // controlla azione
     $documentoEsistente = $this->em->getRepository(Documento::class)->findOneBy(['tipo' => 'M',
-      'classe' => $classe]);
+      'classe' => $classe, 'stato' => 'P']);
     if ($documentoEsistente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -440,12 +445,12 @@ class DocumentiController extends BaseController {
     // crea documento
     $documento = (new Documento())
       ->setTipo('M')
-      ->setDocente($this->getUser())
-      ->setClasse($classe)
-      ->setListaDestinatari(new ListaDestinatari());
+      ->setAutore($this->getUser())
+      ->setData(new DateTime('today'))
+      ->setClasse($classe);
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('add', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -462,15 +467,17 @@ class DocumentiController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
         // imposta destinatari
-        $doc->impostaDestinatari($documento);
+        $com->destinatariDocumento($documento);
         // conversione pfd
-        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $com->convertePdf($allegati[0]['temp'].'.'.$allegati[0]['ext']);
         // imposta allegato
-        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        $com->allegatoDocumento($documento, $file, $estensione, $allegati[0]['size']);
+        // aggiunge titolo a documento
+        $documento->setTitolo($documento->getAllegati()[0]->getTitolo());
         // rimuove sessione con gli allegati
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
-        $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento del 15 maggio', $documento);
+        $dblogger->logAzione('DOCUMENTI', 'Inserimento documento del 15 maggio');
         // redirezione
         return $this->redirectToRoute('documenti_maggio');
       }
@@ -486,52 +493,49 @@ class DocumentiController extends BaseController {
   /**
    * Scarica uno degli allegati al documento indicato
    *
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param Documento $documento Documento a cui appartiene l'allegato
-   * @param File|null $allegato Allegato da scaricare, o null per il primo del documento
+   * @param int $allegato Numero dell'allegato (0 per per il primo)
+   * @param string $tipo Tipo di risposta (V=visualizza, D=download)
    *
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/documenti/download/{documento}/{allegato}', name: 'documenti_download', requirements: ['documento' => '\d+', 'allegato' => '\d+'], defaults: ['allegato' => '0'], methods: ['GET'])]
+  #[Route(path: '/documenti/download/{documento}/{allegato}/{tipo}', name: 'documenti_download', requirements: ['documento' => '\d+', 'allegato' => '\d+', 'tipo' => 'V|D'], defaults: ['allegato' => '0','tipo' => 'D'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function download(DocumentiUtil $doc, Documento $documento,
-                           File $allegato = null): Response {
+  public function download(ComunicazioniUtil $com, Documento $documento, int $allegato, string $tipo): Response {
     // controlla allegato
-    if ($allegato && !$documento->getAllegati()->contains($allegato)) {
+    if ($allegato < 0 || $allegato >= count($documento->getAllegati())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    if (!$allegato) {
-      // prende il primo allegato
-      $allegato = $documento->getAllegati()[0];
-    }
     // controllo permesso lettura
-    if (!$doc->permessoLettura($this->getUser(), $documento)) {
+    if (!$com->permessoLettura($this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // segna lettura e memorizza su db
-    $doc->leggeUtente($this->getUser(), $documento);
+    $com->leggeUtente($this->getUser(), $documento);
     $this->em->flush();
     // invia il file
-    $nomefile = $doc->documentoDir($documento).'/'.$allegato->getFile().'.'.$allegato->getEstensione();
+    $file = $documento->getAllegati()[$allegato];
+    $nomefile = $com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione();
     if (!file_exists($nomefile)) {
       // compatibilità con vecchi documenti
       $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
         $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
         $documento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
-        $allegato->getFile().'.'.$allegato->getEstensione();
+        $file->getFile().'.'.$file->getEstensione();
     }
-    return $this->file($nomefile, $allegato->getNome().'.'.$allegato->getEstensione(),
-      ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+    return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
+      ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
 
   /**
    * Visualizza i documenti dei docenti
    *
    * @param Request $request Pagina richiesta
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -539,7 +543,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/docenti/{pagina}', name: 'documenti_docenti', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function docenti(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function docenti(Request $request, ComunicazioniUtil $com, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
@@ -573,7 +577,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->docenti($criteri, $pagina, $this->getUser()->getSede());
+    $dati = $com->documentiDocenti($criteri, $pagina, $this->getUser()->getSede());
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     $info['tipo'] = $criteri['tipo'];
@@ -591,7 +595,7 @@ class DocumentiController extends BaseController {
    * Gestione inserimento dei documenti per gli alunni BES
    *
    * @param Request $request Pagina richiesta
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -599,7 +603,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/{pagina}', name: 'documenti_bes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function bes(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function bes(Request $request, ComunicazioniUtil $com, int $pagina): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -636,7 +640,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->besDocente($criteri, $this->getUser(), $pagina);
+    $dati = $com->besDocente($criteri, $this->getUser(), $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->render('documenti/bes.html.twig', [
@@ -653,7 +657,7 @@ class DocumentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Alunno $alunno Alunno di riferimento per il documento
    *
@@ -662,7 +666,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/add/{alunno}', name: 'documenti_bes_add', requirements: ['alunno' => '\d+'], defaults: ['alunno' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besAdd(Request $request, TranslatorInterface $trans, DocumentiUtil $doc,
+  public function besAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                          LogHandler $dblogger, Alunno $alunno = null): Response {
     // inizializza
     $info = [];
@@ -689,9 +693,14 @@ class DocumentiController extends BaseController {
         'stato' => 'P']);
       $tipiEsistenti = [];
       foreach ($documentiEsistenti as $des) {
-        $tipiEsistenti[] = $des->getTipo();
-        // toglie anche tipo incompatibile (o PEI o PDP)
-        $tipiEsistenti[] = ($des->getTipo() == 'H' ? 'D' : ($des->getTipo() == 'D' ? 'H' : null));
+        if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
+          // PEI o PDP
+          $tipiEsistenti[] = 'H';
+          $tipiEsistenti[] = 'D';
+        } else {
+          // altro tipo
+          $tipiEsistenti[] = $des->getTipo();
+        }
       }
       $listaTipi = array_diff($listaTipi, $tipiEsistenti);
       if (empty($listaTipi)) {
@@ -709,12 +718,12 @@ class DocumentiController extends BaseController {
     // crea documento
     $documento = (new Documento())
       ->setTipo(array_values($listaTipi)[0])
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
       ->setAlunno($alunno)
-      ->setListaDestinatari(new ListaDestinatari());
+      ->setData(new DateTime('today'));
     $this->em->persist($documento);
     // controllo permessi
-    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('add', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -784,24 +793,26 @@ class DocumentiController extends BaseController {
           $documento->setAlunno($alunnoIndividuale);
         }
         // imposta destinatari
-        $doc->impostaDestinatari($documento);
+        $com->destinatariDocumento($documento);
         // conversione pfd
-        [$file, $estensione] = $doc->convertePdf($allegati[0]['temp']);
+        [$file, $estensione] = $com->convertePdf($allegati[0]['temp'].'.'.$allegati[0]['ext']);
         // imposta allegato
-        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        $com->allegatoDocumento($documento, $file, $estensione, $allegati[0]['size']);
+        // aggiunge titolo a documento
+        $documento->setTitolo($documento->getAllegati()[0]->getTitolo());
         // protegge documento
-        if ($doc->codificaDocumento($documento)) {
+        if ($com->codificaPdf($documento, $com->dirDocumento($documento))) {
           // rimuove sessione con gli allegati
           $this->reqstack->getSession()->remove($varSessione);
           // ok: memorizzazione e log
-          $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento BES', $documento);
+          $dblogger->logAzione('DOCUMENTI', 'Inserimento documento BES');
           // redirezione
           return $this->redirectToRoute('documenti_bes');
         }
         // errore di codifica: rimuove file
         $form->addError(new FormError($trans->trans('exception.documento_errore_codifica')));
         $file = $documento->getAllegati()[0];
-        unlink($doc->documentoDir($documento).'/'.$file->getFile().'.'.$file->getEstensione());
+        unlink($com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione());
       }
     }
     // mostra la pagina di risposta
@@ -816,7 +827,7 @@ class DocumentiController extends BaseController {
    * Visualizza i documenti degli alunni
    *
    * @param Request $request Pagina richiesta
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -824,7 +835,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/alunni/{pagina}', name: 'documenti_alunni', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function alunni(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function alunni(Request $request, ComunicazioniUtil $com, int $pagina): Response {
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/tipo', '');
@@ -855,7 +866,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->alunni($criteri, $pagina, $this->getUser()->getSede());
+    $dati = $com->documentiAlunni($criteri, $pagina, $this->getUser()->getSede());
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
@@ -935,14 +946,14 @@ class DocumentiController extends BaseController {
    * Gestione dei documenti archiviati per gli alunni BES
    *
    * @param Request $request Pagina richiesta
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
    */
   #[Route(path: '/documenti/archivio/bes/{pagina}', name: 'documenti_archivio_bes', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function archivioBes(Request $request, DocumentiUtil $doc, int $pagina): Response {
+  public function archivioBes(Request $request, ComunicazioniUtil $com, int $pagina): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -991,7 +1002,7 @@ class DocumentiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_archivio_bes/pagina', $pagina);
     }
     // recupera dati
-    $dati = $doc->archivioBes($criteri, $this->getUser(), $pagina);
+    $dati = $com->archivioBes($criteri, $this->getUser(), $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->render('documenti/archivio_bes.html.twig', [
@@ -1007,7 +1018,7 @@ class DocumentiController extends BaseController {
    * Gestione ripristino dei documenti BES archiviati
    *
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Documento $documento Documento da ripristinare
    *
@@ -1015,7 +1026,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besRestore(TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+  public function besRestore(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
                              Documento $documento): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
@@ -1038,7 +1049,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo permessi
-    if (!$doc->azioneDocumento('edit', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('edit', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -1048,23 +1059,23 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // imposta documento
-    $vecchioDocumento = clone $documento;
+    $vecchioDocumentoAnno = $documento->getAnno();
     $documento
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
       ->setAlunno($alunno)
       ->setStato('P')
-      ->setTitolo('')
+      ->setTitolo($documento->getAllegati()[0]->getTitolo())
       ->setAnno(0);
     // cancella lista destinatari
-    $doc->cancellaDestinatari($documento);
+    $com->cancellaDestinatari($documento);
     // imposta destinatari
-    $doc->impostaDestinatari($documento);
+    $com->destinatariDocumento($documento);
     // ok: memorizzazione e log
-    $dblogger->logModifica ('DOCUMENTI', 'Ripristino documento BES', $vecchioDocumento, $documento);
+    $dblogger->logAzione ('DOCUMENTI', 'Ripristino documento BES');
     // sposta file
     $fs = new FileSystem();
     $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.
-      $vecchioDocumento->getAnno().'/riservato/'.$documento->getAllegati()[0]->getFile().'.'.
+      $vecchioDocumentoAnno.'/riservato/'.$documento->getAllegati()[0]->getFile().'.'.
       $documento->getAllegati()[0]->getEstensione();
     $nomefile = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.
       $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
@@ -1080,7 +1091,7 @@ class DocumentiController extends BaseController {
    * Gestione archiviazione dei documenti BES
    *
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Documento $documento Documento da archiviare
    *
@@ -1088,7 +1099,7 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besArchive(TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+  public function besArchive(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
                              Documento $documento): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
@@ -1101,7 +1112,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo permessi
-    if (!$doc->azioneDocumento('edit', $this->getUser(), $documento)) {
+    if (!$com->azioneDocumento('edit', $this->getUser(), $documento)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -1111,23 +1122,18 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // imposta documento
-    $vecchioDocumento = clone $documento;
+    $vecchioAlunno = $documento->getAlunno();
     $documento
-      ->setDocente($this->getUser())
+      ->setAutore($this->getUser())
       ->setAlunno(null)
       ->setStato('A')
-      ->setTitolo($vecchioDocumento->getAlunno()->getCognome().' '.
-        $vecchioDocumento->getAlunno()->getNome().' - C.F. '.
-        $vecchioDocumento->getAlunno()->getCodiceFiscale())
+      ->setTitolo($vecchioAlunno->getCognome().' '.$vecchioAlunno->getNome().' - C.F. '.
+        $vecchioAlunno->getCodiceFiscale())
       ->setAnno((int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
     // cancella lista destinatari
-    $doc->cancellaDestinatari($documento);
-    // imposta destinatari
-    $destinatari = new ListaDestinatari();
-    $this->em->persist($destinatari);
-    $documento->setListaDestinatari($destinatari);
+    $com->cancellaDestinatari($documento);
     // ok: memorizzazione e log
-    $dblogger->logModifica ('DOCUMENTI', 'Archiviazione documento BES', $vecchioDocumento, $documento);
+    $dblogger->logAzione('DOCUMENTI', 'Archiviazione documento BES');
     // sposta file
     $fs = new FileSystem();
     if (!$fs->exists($this->getParameter('kernel.project_dir').'/FILES/upload/documenti/riservato/'.$documento->getAnno())) {
@@ -1140,8 +1146,8 @@ class DocumentiController extends BaseController {
     if (!$fs->exists($nomefileVecchio)) {
       // usa vecchio formato
       $nomefileVecchio = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
-        $vecchioDocumento->getAlunno()->getClasse()->getAnno().$vecchioDocumento->getAlunno()->getClasse()->getSezione().
-        $vecchioDocumento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
+        $vecchioAlunno->getClasse()->getAnno().$vecchioAlunno->getClasse()->getSezione().
+        $vecchioAlunno->getClasse()->getGruppo().'/riservato/'.
         $documento->getAllegati()[0]->getFile().'.'.$documento->getAllegati()[0]->getEstensione();
     }
     $nomefile = $this->getParameter('kernel.project_dir').'/FILES/upload/documenti/'.
@@ -1150,8 +1156,8 @@ class DocumentiController extends BaseController {
     $fs->rename($nomefileVecchio, $nomefile);
     // messaggio ok
     $this->addFlash('success', $trans->trans('message.documento_bes_archiviato', [
-      'sex' => $vecchioDocumento->getAlunno()->getSesso() == 'F' ? 'a' : 'o',
-      'alunno' => $vecchioDocumento->getAlunno()->getCognome().' '.$vecchioDocumento->getAlunno()->getNome()]));
+      'sex' => $vecchioAlunno->getSesso() == 'F' ? 'a' : 'o',
+      'alunno' => $vecchioAlunno->getCognome().' '.$vecchioAlunno->getNome()]));
     // redirezione
     return $this->redirectToRoute('documenti_bes');
   }

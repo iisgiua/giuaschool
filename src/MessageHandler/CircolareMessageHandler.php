@@ -8,17 +8,18 @@
 
 namespace App\MessageHandler;
 
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Throwable;
 use App\Entity\Circolare;
+use App\Entity\ComunicazioneUtente;
 use App\Message\CircolareMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Handler\Acknowledger;
 use Symfony\Component\Messenger\Handler\BatchHandlerInterface;
 use Symfony\Component\Messenger\Handler\BatchHandlerTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Throwable;
 
 
 /**
@@ -33,6 +34,7 @@ class CircolareMessageHandler implements BatchHandlerInterface {
 
 
   //==================== METODI DELLA CLASSE ====================
+
   /**
    * Costruttore
    *
@@ -43,8 +45,7 @@ class CircolareMessageHandler implements BatchHandlerInterface {
   public function __construct(
       private EntityManagerInterface $em,
       private LoggerInterface $logger,
-      private MessageBusInterface $messageBus)
-  {
+      private MessageBusInterface $messageBus) {
   }
 
   /**
@@ -117,14 +118,14 @@ class CircolareMessageHandler implements BatchHandlerInterface {
    * @return bool Restituisce vero se è stata aggiunta una nuova circolare
    */
   private function raggruppa(int $id, array &$destinatari): bool {
-    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'stato' => 'P']);
     if ($circolare) {
       // solo circolari esistenti e pubblicate
-      $utenti = $this->em->getRepository(Circolare::class)->notifica($circolare);
+      $utenti = $this->em->getRepository(ComunicazioneUtente::class)->notifica($circolare);
       foreach ($utenti as $u) {
         // memorizza circolari per utente
         $destinatari[$u][] = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-          'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+          'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
       }
       // segnala nuova circolare
       return true;

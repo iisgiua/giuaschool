@@ -120,15 +120,6 @@ class PresenzaTest extends EntityTestCase {
     // toString
     $this->assertSame('Fuori classe '.$existent->getTipo().' del '.$existent->getData()->format('d/m/Y').': '.$existent->getAlunno(),
       (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'data' => $existent->getData() ? $existent->getData()->format('d/m/Y') : '',
-      'oraInizio' => $existent->getOraInizio() ? $existent->getOraInizio()->format('H:i') : '',
-      'oraFine' => $existent->getOraFine() ? $existent->getOraFine()->format('H:i') : '',
-      'tipo' => $existent->getTipo(),
-      'descrizione' => $existent->getDescrizione(),
-      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : ''];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

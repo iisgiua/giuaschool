@@ -423,25 +423,4 @@ class Richiesta implements Stringable {
     return 'Richiesta del '.$this->inviata->format('d/m/Y').' da '.$this->utente;
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'inviata' => $this->inviata->format('d/m/y H:i'),
-      'gestita' => $this->gestita ? $this->gestita->format('d/m/y H:i') : '',
-      'data' => $this->data ? $this->data->format('d/m/y H:i') : '',
-      'valori' => $this->valori,
-      'documento' => $this->documento,
-      'allegati' => $this->allegati,
-      'stato' => $this->stato,
-      'messaggio' => $this->messaggio,
-      'utente' => $this->utente->getId(),
-      'classe' => $this->classe ? $this->classe->getId() : null,
-      'definizioneRichiesta' => $this->definizioneRichiesta->getId()];
-    return $dati;
-  }
-
 }

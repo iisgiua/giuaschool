@@ -8,400 +8,82 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use DateTimeInterface;
 use App\Repository\AvvisoRepository;
-use Stringable;
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\HttpFoundation\File\File;
+use Stringable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * Avviso - dati per la gestione di un avviso
  *
- *
  * @author Antonello Dessì
  */
-#[ORM\Table(name: 'gs_avviso')]
 #[ORM\Entity(repositoryClass: AvvisoRepository::class)]
-#[ORM\HasLifecycleCallbacks]
-class Avviso implements Stringable {
+class Avviso extends Comunicazione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-  /**
-   * @var int|null $id Identificativo univoco per l'avviso
-   */
-  #[ORM\Column(type: Types::INTEGER)]
-  #[ORM\Id]
-  #[ORM\GeneratedValue(strategy: 'AUTO')]
-  private ?int $id = null;
 
   /**
-   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
-   */
-  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
-  private ?DateTime $creato = null;
-
-  /**
-   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
-   */
-  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
-  private ?DateTime $modificato = null;
-
-  /**
-   * @var string|null $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
-   *
-   *
-   */
-  #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
-  #[Assert\Choice(choices: ['U', 'E', 'V', 'P', 'A', 'I', 'C', 'D', 'O'], strict: true, message: 'field.choice')]
-  private ?string $tipo = 'U';
-
-  /**
-   * @var Collection|null $sedi Sedi a cui è destinato l'avviso
-   *
-   *
-   */
-  #[ORM\JoinTable(name: 'gs_avviso_sede')]
-  #[ORM\JoinColumn(name: 'avviso_id', nullable: false)]
-  #[ORM\InverseJoinColumn(name: 'sede_id', nullable: false)]
-  #[ORM\ManyToMany(targetEntity: \Sede::class)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Collection $sedi;
-
-  /**
-   * @var int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
-   */
-  #[ORM\Column(type: Types::INTEGER, nullable: false)]
-  private int $anno = 0;
-
-  /**
-   * @var DateTimeInterface|null $data Data dell'evento associato all'avviso
-   */
-  #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?DateTime $data = null;
-
-  /**
-   * @var DateTimeInterface|null $ora Ora associata all'evento dell'avviso
-   */
-  #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-  #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?DateTime $ora = null;
-
-  /**
-   * @var DateTimeInterface|null $oraFine Ora finale associata all'evento dell'avviso
-   */
-  #[ORM\Column(name: 'ora_fine', type: Types::TIME_MUTABLE, nullable: true)]
-  #[Assert\Type(type: '\DateTime', message: 'field.type')]
-  private ?DateTime $oraFine = null;
-
-  /**
-   * @var Cattedra|null $cattedra Cattedra associata ad una verifica (o per altri usi)
+   * @var Cattedra|null $cattedra Cattedra associata all'avviso (solo per alcuni tipi di avviso)
    */
   #[ORM\JoinColumn(nullable: true)]
-  #[ORM\ManyToOne(targetEntity: \Cattedra::class)]
+  #[ORM\ManyToOne(targetEntity: Cattedra::class)]
   private ?Cattedra $cattedra = null;
 
   /**
-   * @var Materia $materia Materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   * @var Classe|null $classe Classe a cui è associato l'avviso (solo per alcuni tipi di avviso)
    */
   #[ORM\JoinColumn(nullable: true)]
-  #[ORM\ManyToOne(targetEntity: \Materia::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
+  private ?Classe $classe = null;
+
+  /**
+   * @var Materia $materia Materia associata all'avviso (solo per alcuni tipi di avviso)
+   */
+  #[ORM\JoinColumn(nullable: true)]
+  #[ORM\ManyToOne(targetEntity: Materia::class)]
   private ?Materia $materia = null;
 
   /**
-   * @var string|null $oggetto Oggetto dell'avviso
-   *
-   *
+   * @var Collection|null $annotazioni Annotazioni associate all'avviso (solo per alcuni tipi di avviso)
    */
-  #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
-  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
-  private ?string $oggetto = '';
+  #[ORM\OneToMany(targetEntity: Annotazione::class, mappedBy: 'avviso')]
+  private ?Collection $annotazioni;
 
   /**
    * @var string|null $testo Testo dell'avviso
    */
   #[ORM\Column(type: Types::TEXT, nullable: false)]
+  #[Assert\NotBlank(message: 'field.notblank')]
   private ?string $testo = '';
 
   /**
-   * @var array|null $allegati Lista di file allegati all'avviso
+   * @var string $sostituzioni Array associativo con le variabili segnaposto e il testo sostitutivo
    */
-  #[ORM\Column(type: Types::ARRAY, nullable: true)]
-  private ?array $allegati = [];
-
-  /**
-    * @var array|null $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
-    */
-   #[ORM\Column(name: 'destinatari_ata', type: Types::SIMPLE_ARRAY, nullable: true)]
-   private ?array $destinatariAta = [];
-
-  /**
-    * @var array|null $destinatariSpeciali Indica i destinatari speciali dell'avviso [S=RSPP]
-    */
-   #[ORM\Column(name: 'destinatari_speciali', type: Types::SIMPLE_ARRAY, nullable: true)]
-   private ?array $destinatariSpeciali = [];
-
-  /**
-    * @var array|null $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
-    */
-   #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
-   private ?array $destinatari = [];
-
-  /**
-    * @var string|null $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
-    *
-    *
-    */
-   #[ORM\Column(name: 'filtro_tipo', type: Types::STRING, length: 1, nullable: false)]
-   #[Assert\Choice(choices: ['N', 'T', 'C', 'M', 'U'], strict: true, message: 'field.choice')]
-   private ?string $filtroTipo = 'N';
-
-  /**
-   * @var array|null $filtro Lista degli ID per il tipo di filtro specificato
-   */
-  #[ORM\Column(name: 'filtro', type: Types::SIMPLE_ARRAY, nullable: true)]
-  private ?array $filtro = [];
-
-  /**
-   * @var Docente|null $docente Docente che ha scritto l'avviso
-   *
-   *
-   */
-  #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: \Docente::class)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  private ?Docente $docente = null;
-
-  /**
-   * @var Collection|null $annotazioni Annotazioni associate all'avviso
-   */
-  #[ORM\OneToMany(targetEntity: \Annotazione::class, mappedBy: 'avviso')]
-  private ?Collection $annotazioni;
-
-
-  //==================== EVENTI ORM ====================
-  /**
-   * Simula un trigger onCreate
-   */
-  #[ORM\PrePersist]
-  public function onCreateTrigger(): void {
-   // inserisce data/ora di creazione
-   $this->creato = new DateTime();
-   $this->modificato = $this->creato;
-  }
-
-  /**
-   * Simula un trigger onUpdate
-   */
-  #[ORM\PreUpdate]
-  public function onChangeTrigger(): void {
-    // aggiorna data/ora di modifica
-    $this->modificato = new DateTime();
-  }
+  #[ORM\Column(type: Types::JSON, nullable: false)]
+  private array $sostituzioni = [];
 
 
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Restituisce l'identificativo univoco per l'avviso
+   * Restituisce la cattedra associata all'avviso (solo per alcuni tipi di avviso)
    *
-   * @return int|null Identificativo univoco
-   */
-  public function getId(): ?int {
-    return $this->id;
-  }
-
-  /**
-   * Restituisce la data e ora della creazione dell'istanza
-   *
-   * @return DateTime|null Data/ora della creazione
-   */
-  public function getCreato(): ?DateTime {
-    return $this->creato;
-  }
-
-  /**
-   * Restituisce la data e ora dell'ultima modifica dei dati
-   *
-   * @return DateTime|null Data/ora dell'ultima modifica
-   */
-  public function getModificato(): ?DateTime {
-    return $this->modificato;
-  }
-
-  /**
-   * Restituisce il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, C=comunicazione generica, I=comunicazione individuale]
-   *
-   * @return string|null Tipo dell'avviso
-   */
-  public function getTipo(): ?string {
-    return $this->tipo;
-  }
-
-  /**
-   * Modifica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, C=comunicazione generica, I=comunicazione individuale]
-   *
-   * @param string|null $tipo Tipo dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setTipo(?string $tipo): self {
-    $this->tipo = $tipo;
-    return $this;
-  }
-
-  /**
-   * Restituisce le sedi a cui è destinato l'avviso
-   *
-   * @return Collection|null Sedi a cui è destinato l'avviso
-   */
-  public function getSedi(): ?Collection {
-    return $this->sedi;
-  }
-
-  /**
-   * Modifica le sedi a cui è destinato l'avviso
-   *
-   * @param Collection $sedi Sedi a cui è destinato l'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setSedi(Collection $sedi): self {
-    $this->sedi = $sedi;
-    return $this;
-  }
-
-  /**
-   * Aggiunge una sede a cui è destinato l'avviso
-   *
-   * @param Sede $sede Sede a cui è destinato l'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function addSedi(Sede $sede): self  {
-    if (!$this->sedi->contains($sede)) {
-      $this->sedi[] = $sede;
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove una sede da quelle a cui è destinato l'avviso
-   *
-   * @param Sede $sede Sedi da rimuovere da quelle a cui è destinato l'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeSedi(Sede $sede): self {
-    $this->sedi->removeElement($sede);
-    return $this;
-  }
-
-  /**
-   * Restituisce l'anno iniziale dell'A.S. a cui si riferisce l'avviso
-   *
-   * @return int Anno iniziale dell'A.S. a cui si riferisce l'avviso
-   */
-  public function getAnno(): int {
-    return $this->anno;
-  }
-
-  /**
-   * Modifica l'anno iniziale dell'A.S. a cui si riferisce l'avviso
-   *
-   * @param int $anno Anno iniziale dell'A.S. a cui si riferisce l'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setAnno(int $anno): self {
-    $this->anno = $anno;
-    return $this;
-  }
-
-  /**
-   * Restituisce la data dell'evento associato all'avviso
-   *
-   * @return DateTime|null Data dell'evento associato all'avviso
-   */
-  public function getData(): ?DateTime {
-    return $this->data;
-  }
-
-  /**
-   * Modifica la data dell'evento associato all'avviso
-   *
-   * @param DateTime|null $data Data dell'evento associato all'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setData(?DateTime $data): self {
-    $this->data = $data;
-    return $this;
-  }
-
-  /**
-   * Restituisce l'ora associata all'evento dell'avviso
-   *
-   * @return DateTime|null Ora dell'evento associato all'avviso
-   */
-  public function getOra(): ?DateTime {
-    return $this->ora;
-  }
-
-  /**
-   * Modifica l'ora associata all'evento dell'avviso
-   *
-   * @param DateTime|null $ora Ora dell'evento associato all'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setOra(?DateTime $ora): self {
-    $this->ora = $ora;
-    return $this;
-  }
-
-  /**
-   * Restituisce l'ora finale dell'evento associato all'avviso
-   *
-   * @return DateTime|null Ora finale dell'evento associato all'avviso
-   */
-  public function getOraFine(): ?DateTime {
-    return $this->oraFine;
-  }
-
-  /**
-   * Modifica l'ora finale dell'evento associato all'avviso
-   *
-   * @param DateTime|null $oraFine Ora finale dell'evento associato all'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setOraFine(?DateTime $oraFine): self {
-    $this->oraFine = $oraFine;
-    return $this;
-  }
-
-  /**
-   * Restituisce la cattedra associata ad una verifica (o per altri usi)
-   *
-   * @return Cattedra|null Cattedra associata ad una verifica
+   * @return Cattedra|null Cattedra associata ad un avviso
    */
   public function getCattedra(): ?Cattedra {
     return $this->cattedra;
   }
 
   /**
-   * Modifica la cattedra associata ad una verifica (o per altri usi)
+   * Modifica la cattedra associata all'avviso (solo per alcuni tipi di avviso)
    *
-   * @param Cattedra|null $cattedra Cattedra associata ad una verifica
+   * @param Cattedra|null $cattedra Cattedra associata ad un avviso
    *
    * @return self Oggetto modificato
    */
@@ -411,18 +93,39 @@ class Avviso implements Stringable {
   }
 
   /**
-   * Restituisce la materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   * Restituisce la classe a cui è associato l'avviso (solo per alcuni tipi di avviso)
    *
-   * @return Materia|null Materia associata ad una verifica per una cattedra di sostegno
+   * @return Classe|null Classe a cui è associato l'avviso
+   */
+  public function getClasse(): ?Classe {
+    return $this->classe;
+  }
+
+  /**
+   * Modifica la classe a cui è associato l'avviso (solo per alcuni tipi di avviso)
+   *
+   * @param Classe|null $classe Classe a cui è associato l'avviso
+   *
+   * @return self Oggetto modificato
+   */
+  public function setClasse(?Classe $classe): self {
+    $this->classe = $classe;
+    return $this;
+  }
+
+  /**
+   * Restituisce la materia associata all'avviso (solo per alcuni tipi di avviso)
+   *
+   * @return Materia|null Materia associata all'avviso
    */
   public function getMateria(): ?Materia {
     return $this->materia;
   }
 
   /**
-   * Modifica la materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   * Modifica la materia associata all'avviso (solo per alcuni tipi di avviso)
    *
-   * @param Materia|null $materia Materia associata ad una verifica per una cattedra di sostegno
+   * @param Materia|null $materia Materia associata all'avviso
    *
    * @return self Oggetto modificato
    */
@@ -432,23 +135,30 @@ class Avviso implements Stringable {
   }
 
   /**
-   * Restituisce l'oggetto dell'avviso
+   * Restituisce le annotazioni associate all'avviso (solo per alcuni tipi di avviso)
    *
-   * @return string|null Oggetto dell'avviso
+   * @return Collection|null Annotazioni associate all'avviso
    */
-  public function getOggetto(): ?string {
-    return $this->oggetto;
+  public function getAnnotazioni(): ?Collection {
+    return $this->annotazioni;
   }
 
   /**
-   * Modifica l'oggetto dell'avviso
+   * Modifica le annotazioni associate all'avviso (solo per alcuni tipi di avviso)
    *
-   * @param string|null $oggetto Oggetto dell'avviso
+   * @param Collection $annotazioni Annotazioni associate all'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setOggetto(?string $oggetto): self {
-    $this->oggetto = $oggetto;
+  public function setAnnotazioni(Collection $annotazioni): self {
+    // ripulisce lista esistente
+    foreach ($this->annotazioni as $annotazione) {
+      $this->removeAnnotazione($annotazione);
+    }
+    // imposta la nuova lista
+    foreach ($annotazioni as $annotazione) {
+      $this->addAnnotazione($annotazione);
+    }
     return $this;
   }
 
@@ -474,202 +184,23 @@ class Avviso implements Stringable {
   }
 
   /**
-   * Restituisce la lista di file allegati all'avviso
+   * Restituisce l'array associativo con le variabili segnaposto e il testo sostitutivo
    *
-   * @return array|null Lista di file allegati all'avviso
+   * @return array Lista delle variabili segnaposto e del relativo testo sostitutivo
    */
-  public function getAllegati(): ?array {
-    return $this->allegati;
+  public function getSostituzioni(): array {
+    return $this->sostituzioni;
   }
 
   /**
-   * Modifica la lista di file allegati all'avviso
+   * Modifica l'array associativo con le variabili segnaposto e il testo sostitutivo
    *
-   * @param array|null $allegati Lista di file allegati all'avviso
+   * @param array sostituzioni Lista delle variabili segnaposto e del relativo testo sostitutivo
    *
    * @return self Oggetto modificato
    */
-  public function setAllegati(?array $allegati): self {
-    if ($allegati === $this->allegati) {
-      // clona array per forzare update su doctrine
-      $allegati = unserialize(serialize($allegati));
-    }
-    $this->allegati = $allegati;
-    return $this;
-  }
-
-  /**
-   * Indica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
-   *
-   * @return array|null Personale ATA destinatario dell'avviso
-   */
-  public function getDestinatariAta(): ?array {
-    return $this->destinatariAta;
-  }
-
-  /**
-   * Modifica il personale ATA destinatario dell'avviso [D=DSGA, A=tutto il personale ATA, M=amministrativi, T=tecnici, C=collaboratori scolastici]
-   *
-   * @param array|null $destinatariAta Personale ATA destinatario dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDestinatariAta(?array $destinatariAta): self {
-    $this->destinatariAta = $destinatariAta;
-    return $this;
-  }
-
-  /**
-   * Modifica i destinatari speciali dell'avviso [S=RSPP]
-   *
-   * @param array|null $destinatariAta Destinatari speciali dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDestinatariSpeciali(?array $destinatariSpeciali): self {
-    $this->destinatariSpeciali = $destinatariSpeciali;
-    return $this;
-  }
-
-  /**
-   * Indica i destinatari speciali dell'avviso [S=RSPP]
-   *
-   * @return array|null Destinatari speciali dell'avviso
-   */
-  public function getDestinatariSpeciali(): ?array {
-    return $this->destinatariSpeciali;
-  }
-
-  /**
-   * Indica i destinatari dell'avviso Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
-   *
-   * @return array|null Destinatari dell'avviso
-   */
-  public function getDestinatari(): ?array {
-    return $this->destinatari;
-  }
-
-  /**
-   * Modifica i destinatari dell'avviso Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni, R=RSU, I=consiglio di istituto, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe, P=consulta provinciale]
-   *
-   * @param array|null $destinatari Destinatari dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDestinatari(?array $destinatari): self {
-    $this->destinatari = $destinatari;
-    return $this;
-  }
-
-  /**
-   * Restituisce il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (esclusi coordinatori)]
-   *
-   * @return string|null Il tipo di filtro da applicare
-   */
-  public function getFiltroTipo(): ?string {
-    return $this->filtroTipo;
-  }
-
-  /**
-   * Modifica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (esclusi coordinatori)]
-   *
-   * @param string|null $filtroTipo Il tipo di filtro da applicare
-   *
-   * @return self Oggetto modificato
-   */
-  public function setFiltroTipo(?string $filtroTipo): self {
-    $this->filtroTipo = $filtroTipo;
-    return $this;
-  }
-
-  /**
-   * Restituisce la lista degli ID per il tipo di filtro specificato
-   *
-   * @return array|null Lista degli ID per il tipo di filtro specificato
-   */
-  public function getFiltro(): ?array {
-    return $this->filtro;
-  }
-
-  /**
-   * Modifica la lista degli ID per il tipo di filtro specificato
-   *
-   * @param array|null $filtro Lista degli ID per il tipo di filtro specificato
-   *
-   * @return self Oggetto modificato
-   */
-  public function setFiltro(?array $filtro): self {
-    $this->filtro = $filtro;
-    return $this;
-  }
-
-  /**
-   * Restituisce il docente che ha scritto l'avviso
-   *
-   * @return Docente|null Docente che ha scritto l'avviso
-   */
-  public function getDocente(): ?Docente {
-    return $this->docente;
-  }
-
-  /**
-   * Modifica il docente che ha scritto l'avviso
-   *
-   * @param Docente $docente Docente che ha scritto l'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDocente(Docente $docente): self {
-    $this->docente = $docente;
-    return $this;
-  }
-
-  /**
-   * Restituisce le annotazioni associate all'avviso
-   *
-   * @return Collection|null Lista delle annotazioni associate all'avviso
-   */
-  public function getAnnotazioni(): ?Collection {
-    return $this->annotazioni;
-  }
-
-  /**
-   * Modifica le annotazioni associate all'avviso
-   *
-   * @param Annotazione $annotazione Lista delle annotazioni associate all'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function setAnnotazioni(?Collection $annotazioni): self {
-    $this->annotazioni = $annotazioni;
-    return $this;
-  }
-
-  /**
-   * Aggiunge una annotazione all'avviso
-   *
-   * @param Annotazione $annotazione L'annotazione da aggiungere
-   *
-   * @return self Oggetto modificato
-   */
-  public function addAnnotazioni(Annotazione $annotazione): self {
-    if (!$this->annotazioni->contains($annotazione)) {
-      $this->annotazioni->add($annotazione);
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove una annotazione dall'avviso
-   *
-   * @param Annotazione $annotazione L'annotazione da rimuovere
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeAnnotazioni(Annotazione $annotazione): self {
-    if ($this->annotazioni->contains($annotazione)) {
-      $this->annotazioni->removeElement($annotazione);
-    }
+  public function setSostituzioni(array $sostituzioni): self {
+    $this->sostituzioni = $sostituzioni;
     return $this;
   }
 
@@ -681,148 +212,49 @@ class Avviso implements Stringable {
    */
   public function __construct() {
     // valori predefiniti
-    $this->sedi = new ArrayCollection();
+    parent::__construct();
     $this->annotazioni = new ArrayCollection();
   }
 
   /**
-   * Aggiunge un file alla lista di allegati all'avviso
+   * Aggiunge una annotazione all'avviso
    *
-   * @param File $allegato File allegato all'avviso
+   * @param Annotazione $annotazione L'annotazione da aggiungere
    *
    * @return self Oggetto modificato
    */
-  public function addAllegato(File $allegato): self {
-    if (!in_array($allegato->getBasename(), $this->allegati)) {
-      $this->allegati[] = $allegato->getBasename();
+  public function addAnnotazione(Annotazione $annotazione): self {
+    if (!$this->annotazioni->contains($annotazione)) {
+      $this->annotazioni->add($annotazione);
+      // mantiene la coerenza della relazione bidirezionale
+      $annotazione->setAvviso($this);
     }
     return $this;
   }
 
   /**
-   * Rimuove un file dalla lista di allegati all'avviso
+   * Rimuove una annotazione dall'avviso
    *
-   * @param File $allegato File da rimuovere dalla lista di allegati all'avviso
+   * @param Annotazione $annotazione L'annotazione da rimuovere
    *
    * @return self Oggetto modificato
    */
-  public function removeAllegato(File $allegato): self {
-    if (in_array($allegato->getBasename(), $this->allegati)) {
-      unset($this->allegati[array_search($allegato->getBasename(), $this->allegati)]);
+  public function removeAnnotazione(Annotazione $annotazione): self {
+    $this->annotazioni->removeElement($annotazione);
+    if ($annotazione->getAvviso() == $this) {
+      // mantiene la coerenza della relazione bidirezionale
+      $annotazione->setAvviso(null);
     }
     return $this;
   }
 
   /**
-   * Aggiunge una tipologia di personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+   * Restituisce il testo dell'avviso con le sostituzioni applicate
    *
-   * @param string $destinatario Personale ATA destinatario dell'avviso
-   *
-   * @return self Oggetto modificato
+   * @return string Testo con le sostituzioni applicate
    */
-  public function addDestinatarioAta(string $destinatario): self {
-    if (!in_array($destinatario, $this->destinatariAta)) {
-      $this->destinatariAta[] = $destinatario;
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove una tipologia di personale ATA dai destinatari dell'avviso [D=DSGA, A=personale ATA]
-   *
-   * @param string $destinatario Personale ATA da rimuovere dai destinatari
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeDestinatarioAta(string $destinatario): self {
-    if (in_array($destinatario, $this->destinatariAta)) {
-      unset($this->destinatariAta[array_search($destinatario, $this->destinatariAta)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Aggiunge un destinatario speciale dell'avviso [S=RSPP]
-   *
-   * @param string $destinatario Destinatario speciale dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function addDestinatarioSpeciale(string $destinatario): self {
-    if (!in_array($destinatario, $this->destinatariSpeciali)) {
-      $this->destinatariSpeciali[] = $destinatario;
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un destinatario speciale dell'avviso [S=RSPP]
-   *
-   * @param string $destinatario Destinatario speciale dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeDestinatarioSpeciale(string $destinatario): self {
-    if (in_array($destinatario, $this->destinatariSpeciali)) {
-      unset($this->destinatariSpeciali[array_search($destinatario, $this->destinatariSpeciali)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Aggiunge un destinatario dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
-   *
-   * @param string $destinatario Destinatario dell'avviso
-   *
-   * @return self Oggetto modificato
-   */
-  public function addDestinatario(string $destinatario): self {
-    if (!in_array($destinatario, $this->destinatari)) {
-      $this->destinatari[] = $destinatario;
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un destinatario dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
-   *
-   * @param string $destinatario Destinatario da rimuovere dalla lista
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeDestinatario(string $destinatario): self {
-    if (in_array($destinatario, $this->destinatari)) {
-      unset($this->destinatari[array_search($destinatario, $this->destinatari)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista degli ID per il tipo di filtro specificato
-   *
-   * @param string $filtro Filtro da aggiungere alla lista
-   *
-   * @return self Oggetto modificato
-   */
-  public function addFiltro(string $filtro): self {
-    if (!in_array($filtro, $this->filtro)) {
-      $this->filtro[] = $filtro;
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista degli ID per il tipo di filtro specificato
-   *
-   * @param string $filtro Filtro da rimuovere dalla lista
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeFiltro(string $filtro): self {
-    if (in_array($filtro, $this->filtro)) {
-      unset($this->filtro[array_search($filtro, $this->filtro)]);
-    }
-    return $this;
+  public function testoPersonalizzato(): string {
+    return strtr($this->testo, $this->sostituzioni);
   }
 
   /**
@@ -831,7 +263,7 @@ class Avviso implements Stringable {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return 'Avviso: '.$this->oggetto;
+    return 'Avviso "'.$this->getTitolo().'"';
   }
 
 }

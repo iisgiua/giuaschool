@@ -26,7 +26,7 @@
   <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
     <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
         {% if avvisi > 0 %}
-    <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|trans({'num': avvisi}) }}</strong></button>
+    <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_classe', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|trans({'num': avvisi}) }}</strong></button>
         {% endif %}
         {% if circolari|length > 0 %}
     <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-info" data-title="Circolari da leggere" data-body="circolare-lista"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari|length }} {{ 'message.num_circolari'|trans({'num': circolari|length}) }}</strong></button>
@@ -35,27 +35,25 @@
       <div class="list-group-item">
         <div class="list-group-item-text">
           <h3 class="modal-title gs-h3">Circolare n. {{ c.numero }} del {{ c.data|date('d/m/Y') }}</h3>
-          <h4 class="modal-title gs-h4"><em>{{ c.oggetto }}</em></h4>
+          <h4 class="modal-title gs-h4"><em>{{ c.titolo }}</em></h4>
           <div class="gs-mt-2">
-            <strong>Documento:</strong> Circolare n. {{ c.numero }}
-            <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'id': c.id, 'doc': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
-            <a class="btn btn-xs btn-primary pull-right " target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+            <strong>Documento:</strong> {{ c.allegati[0].titolo }}
+            <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.id, 'allegato': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+            <a class="btn btn-xs btn-primary pull-right " target="_blank" href="{{ path('circolari_download', {'circolare': c.id, 'allegato': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
           </div>
-            {% if c.allegati|length > 0 %}
-              {% for n,d in c.allegati %}
+            {% if c.allegati|length > 1 %}
+              {% for n,a in c.allegati %}
+                {% if not loop.first  %}
           <div class="gs-mt-2">
-                {% if d[0:10] == 'Circolare-'  %}
-            <strong>Allegato:</strong> {{ d[('Circolare-'~c.numero~'-Allegato-')|length:] }}
-                {% else %}
-            <strong>Allegato {{ n+1 }}:</strong>
+            <strong>Allegato {{ n }}:</strong> {{ a.titolo }}
+            <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+            <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'circolare': c.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+          </div>
                 {% endif %}
-                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'id': c.id, 'doc': n+1, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': n+1, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
-          </div>
               {% endfor %}
             {% endif %}
           <div class="text-center gs-mt-4">
-            <a class="btn btn-success" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': c.id}) }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+            <a class="btn btn-success" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': c.id}) }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
           </div>
         </div>
       </div>
@@ -64,7 +62,7 @@
         <div class="list-group-item-text">
           <div class="text-center gs-mt-3 gs-mb-3">
           {% if circolari|length > 1 %}
-            <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': 0}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+            <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': 0}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
           {% endif %}
             <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
           </div>
@@ -149,11 +147,13 @@
           <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v.gruppo }}</strong><br>
         {% endif %}
           <div class="list-group-item-text">
+        {% if v.genitori is not empty %}
+            <strong>Destinatari genitori:
+            {% for al in v.genitori %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+        {% endif %}
         {% if v.alunni is not empty %}
-              <strong>Destinatari ({% for d in v.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}):
-              {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
-        {% elseif v.avviso and v.avviso.filtroTipo == 'R' %}
-              <strong>Destinatari ({% for f in v.avviso.filtro %}{{ ('label.rappresentante_'~(f == 'I' ? 'istituto' : 'classe'))|trans }}{{ not loop.last ? ', ' }}{% endfor %})</strong><br>
+            <strong>Destinatari alunni:
+            {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
         {% endif %}
             {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }}, inserita in data {{ (v.avviso ? v.avviso.modificato : v.modificato)|date('d/m/Y') }})</em></small>

@@ -1,42 +1,131 @@
 ####################
 # DocumentoFixtures - dati di test
 #
-# Dati per la gestione di un documento generico:
-#   tipo: tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, B=documenti BES, C=altre certificazioni BES, G=materiali generici]
-#   docente: docente che carica il documento
-#   listaDestinatari: lista dei destinatari del documento
+# Dati per la gestione di un documento:
+#   tipo: tipo di documento
+#   cifrato: conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+#   firma: indica se è richiesta la firma di presa visione
+#   stato: stato del documento
+#   titolo: titolo del documento
+#   data: data  del documento
+#   anno: anno scolastico del documento
+#   autore: utente che carica il documento
+#   allegati: lista dei file allegati al documento
+#   sedi: sedi scolastiche di destinazione (usato come filtro principale)
+#   speciali: indica i destinatari speciali che non dipendono dal filtro di sede [R=RSU, I=rappresentanti di istituto, P=consulta provinciale, S=RSPP]
+#   ata: indica i destinatari tra il personale ATA [D=DSGA, A=amministrativi, T=tecnici, C=collaboratori scolastici]
+#   coordinatori: indica i destinatari tra i coordinatori [N=nessuno, T=tutti, C=filtro classe]
+#   filtroCoordinatori: lista dei filtri per i coordinatori
+#   docenti: indica i destinatari tra i docenti [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+#   filtroDocenti: lista dei filtri per i docenti
+#   genitori: indica i destinatari tra i genitori [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroGenitori: lista dei filtri per i genitori
+#   rappresentantiGenitori: indica i destinatari tra i rappresentanti di classe dei genitori [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiGenitori: lista dei filtri per i rappresentanti dei genitori
+#   alunni: indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroAlunni: lista dei filtri per gli alunni
+#   rappresentantiAlunni: indica i destinatari tra i rappresentanti di classe degli alunni [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiAlunni: lista dei filtri per i rappresentanti degli alunni
+#   esterni: lista degli altri destinatari esterni
 #   materia: materia a cui è riferito il documento (solo per alcuni tipi di documento)
 #   classe: classe a cui è riferito il documento (solo per alcuni tipi di documento)
 #   alunno: alunno a cui è riferito il documento (solo per alcuni tipi di documento)
-#   cifrato: conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
-#   firma: indica se è richiesta la firma di presa visione
-#   allegati: lista dei file allegati al documento
-#   stato: stato del documento (A=bozza, I=inviato, V=visualizzato, P=preso visione)
-#   titolo: titolo del documento
-#   anno: anno iniziale dell'A.S. a cui si riferisce il documento
 ####################
 
 
 include:
   - DocenteFixtures.yml
-  - ListaDestinatariFixtures.yml
   - MateriaFixtures.yml
   - ClasseFixtures.yml
   - AlunnoFixtures.yml
-  - FileFixtures.yml
+  - AllegatoFixtures.yml
 
 
 App\Entity\Documento:
-  documento_{1..5}:
+  documento_word_{1..3}:
     tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "B", "C", "G"])>'
-    docente: '@docente_*'
-    listaDestinatari: '@lista_destinatari_DOCENTI_<current()>'
+    cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
+    firma: '<boolean(50)>'
+    stato: '<randomElement(["P", "B", "A"])>'
+    titolo: 'Documento Word - versione <current()>'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_word_<current()>)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'C'
+    filtroGenitori: '<arrayId(documento_word_<current()>, filtroGenitori, @documento_word_<current()>, @classe_1A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     materia: '50%? @materia_*'
     classe: '50%? @classe_*'
     alunno: '50%? @alunno_*'
+  documento_pdf_{1..3}:
+    tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "B", "C", "G"])>'
     cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
     firma: '<boolean(50)>'
-    allegati: '<collection(@file_word_<current()>)>'
     stato: '<randomElement(["P", "B", "A"])>'
-    titolo: '<text()>'
+    titolo: 'Documento PDF - versione <current()>'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
     anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_word_<current()>)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'U'
+    filtroDocenti: '<arrayId(documento_pdf_<current()>, filtroDocenti, @documento_pdf_<current()>, @docente_curricolare_<current()>)>'
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    materia: '50%? @materia_*'
+    classe: '50%? @classe_*'
+    alunno: '50%? @alunno_*'
+  documento_excel_{1..3}:
+    tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "B", "C", "G"])>'
+    cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
+    firma: '<boolean(50)>'
+    stato: '<randomElement(["P", "B", "A"])>'
+    titolo: 'Documento Excel - versione <current()>'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_word_<current()>)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(documento_excel_<current()>, filtroAlunni, @documento_excel_<current()>, @classe_1A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    materia: '50%? @materia_*'
+    classe: '50%? @classe_*'
+    alunno: '50%? @alunno_*'

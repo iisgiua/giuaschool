@@ -30,12 +30,9 @@ Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di l
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E creazione istanze di tipo "ListaDestinatari":
-    | id  |
-    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
-    | $d1 | $c1:classe | $c1:materia | #other  | L    | $ld              |
+    | id  | classe     | materia     | autore | tipo |
+    | $d1 | $c1:classe | $c1:materia | #other | L    |
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
@@ -52,12 +49,9 @@ Scenario: visualizza errore per scaricamento programma senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E creazione istanze di tipo "ListaDestinatari":
-    | id  |
-    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
-    | $d1 | $c1:classe | $c1:materia | #other  | P    | $ld              |
+    | id  | classe     | materia     | autore | tipo |
+    | $d1 | $c1:classe | $c1:materia | #other | P    |
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
@@ -74,12 +68,9 @@ Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E creazione istanze di tipo "ListaDestinatari":
-    | id  |
-    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
-    | $d1 | $c1:classe | $c1:materia | #other  | R    | $ld              |
+    | id  | classe     | materia     | autore | tipo |
+    | $d1 | $c1:classe | $c1:materia | #other | R    |
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
@@ -97,12 +88,9 @@ Scenario: visualizza errore per scaricamento documento del 15 maggio senza perme
     | coordinatore | anno | sezione | #coordinatore |
     | #logged      |      |         | null          |
     |              | 5    | A       | #other        |
-  E creazione istanze di tipo "ListaDestinatari":
-    | id  |
-    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | docente | tipo | ListaDestinatari |
-    | $d1 | $c1        | #other  | M    | $ld              |
+    | id  | classe     | autore | tipo |
+    | $d1 | $c1        | #other | M    |
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
@@ -119,12 +107,9 @@ Schema dello scenario: visualizza errore per scaricamento documento BES senza pe
   E ricerca istanze di tipo "Alunno":
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
-  E creazione istanze di tipo "ListaDestinatari":
-    | id  |
-    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | docente | tipo   | ListaDestinatari |
-    | $d1 | $cl1   | $a1    | #other  | <tipo> | $ld              |
+    | id  | classe | alunno | autore | tipo   |
+    | $d1 | $cl1   | $a1    | #other  | <tipo> |
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
@@ -154,7 +139,7 @@ Scenario: scarica piano di lavoro inserito
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_piani"
@@ -176,7 +161,7 @@ Scenario: scarica programma inserito
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | P    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_programmi"
@@ -198,7 +183,7 @@ Scenario: scarica relazione inserita
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | R    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_relazioni"
@@ -217,7 +202,7 @@ Scenario: scarica documento del 15 maggio inserito
     | anno | sezione | #coordinatore |
     | 5    | A       | #logged       |
   E istanze di tipo "Documento":
-    | id  | classe | docente | tipo |
+    | id  | classe | autore  | tipo |
     | $d1 | $c1    | #logged | M    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/5A/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_maggio"
@@ -267,7 +252,7 @@ Scenario: accesso pagina scaricamento documenti senza utente
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   E logout utente

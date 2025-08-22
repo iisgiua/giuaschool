@@ -23,8 +23,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Utente - dati degli utenti
  *
- *
- *
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_utente')]
@@ -33,12 +31,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'ruolo', type: 'string', length: 3)]
 #[ORM\DiscriminatorMap(['UTE' => 'Utente', 'AMM' => 'Amministratore', 'ATA' => 'Ata', 'DOC' => 'Docente', 'STA' => 'Staff', 'PRE' => 'Preside', 'ALU' => 'Alunno', 'GEN' => 'Genitore'])]
+#[ORM\Index(columns: ['ruolo'])]
 #[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 #[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco per il generico utente
    */
@@ -61,8 +61,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $username Nome utente univoco
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false)]
   #[Assert\Length(min: 3, max: 128, minMessage: 'field.minlength', maxMessage: 'field.maxlength')]
@@ -71,8 +69,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $password Password cifrata dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -86,8 +82,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $email Indirizzo email dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -157,8 +151,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $nome Nome dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -167,8 +159,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $cognome Cognome dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -177,8 +167,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $sesso Sesso dell'utente [M,F]
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
   #[Assert\Choice(choices: ['M', 'F'], strict: true, message: 'field.choice')]
@@ -193,8 +181,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $comuneNascita Comune di nascita dell'utente
-   *
-   *
    */
   #[ORM\Column(name: 'comune_nascita', type: Types::STRING, length: 64, nullable: true)]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
@@ -202,8 +188,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $provinciaNascita Provincia del comune di nascita dell'utente
-   *
-   *
    */
   #[ORM\Column(name: 'provincia_nascita', type: Types::STRING, length: 2, nullable: true)]
   #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
@@ -211,8 +195,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $codiceFiscale Codice fiscale dell'utente
-   *
-   *
    */
   #[ORM\Column(name: 'codice_fiscale', type: Types::STRING, length: 16, nullable: true)]
   #[Assert\Length(max: 16, maxMessage: 'field.maxlength')]
@@ -220,8 +202,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $citta Città di residenza dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
@@ -229,8 +209,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $provincia Provincia della città di residenza dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 2, nullable: true)]
   #[Assert\Length(max: 2, maxMessage: 'field.maxlength')]
@@ -238,8 +216,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var string|null $indirizzo Indirizzo di residenza dell'utente
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
   #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
@@ -258,7 +234,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?array $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
 
   /**
-   * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
    */
   #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $rappresentante = [''];
@@ -271,7 +247,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
   /**
    * @var array|null $infoLogin Lista di dati utili in fase di autenticazione (dato non persistente)
-   *
    */
   private ?array $infoLogin = [];
 
@@ -945,7 +920,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   * Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
    *
    * @return array|null Indica se l'utente è eletto come rappresentante
    */
@@ -954,7 +929,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Modifica il valore che indica se l'utente è eletto come rappresentante [C=di classe, I=di istituto, P=consulta provinciale, R=RSU]
+   * Modifica il valore che indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
    *
    * @param array $rappresentante Indica se l'utente è eletto come rappresentante
    *

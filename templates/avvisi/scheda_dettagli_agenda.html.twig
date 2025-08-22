@@ -1,0 +1,68 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3"> {{ info.data|date('j') }} {{ info.mesi[info.data|date('n')] }} {{ info.data|date('Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>{% if info.tipo == 'A' %}Attività previste{% elseif info.tipo == 'V' or info.tipo == 'S' %}Verifiche previste{% elseif info.tipo == 'P' %}Compiti assegnati per casa{% elseif info.tipo == 'Q' %}Colloqui confermati{% endif %}</em></h4>
+</div>
+<div class="modal-body">
+{% for k,e in dati.eventi %}
+  <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
+  {% if info.tipo == 'A' %}
+  {# ---------- ATTIVITA' ---------- #}
+    {% if app.user.controllaRuolo('DSPT') and dati.classi[k]|length() > 0 %}
+    <div class="gs-text-normal"><strong class="gs-big">Classi: {{ dati.classi[k] }}</strong></div>
+    {% endif %}
+    <div class="gs-text-normal">{{ e.testoPersonalizzato|raw|nl2br }}</div>
+    <div class="text-right gs-text-normal"><em>({{ e.autore }})</em></div>
+  {% elseif info.tipo in ['V', 'S', 'P'] %}
+  {# ---------- VERIFICHE/COMPITI ---------- #}
+    {% if app.user.controllaRuolo('DSP') %}
+    <div class="gs-text-norma -------l"><strong class="gs-big">Classe: {{ e.cattedra.classe }}</strong></div>
+    {% endif %}
+    {% if e.autore != app.user %}
+    <div><strong>Docente: {{ e.autore }}</strong></div>
+    {% endif %}
+    <div class="gs-text-normal">
+      <strong>Materia: {{ e.cattedra.materia.tipo == 'S' ? e.materia.nome : e.cattedra.materia.nome }}</strong>
+    </div>
+    {% if app.user.controllaRuolo('DSP') %}
+    <div class="gs-text-normal"><strong>Destinatari: {{ dati.destinatari[k]|length > 0 ? dati.destinatari[k]|raw : 'TUTTA LA CLASSE' }}</strong></div>
+    {% endif %}
+    <div class="gs-text-normal gs-pt-3 gs-pb-3">{{ e.testoPersonalizzato|raw|nl2br }}</div>
+    <div class="text-right gs-text-normal">
+      <em>(inserito in data: {{ e.creato|date('d/m/Y') }})</em>
+      {% if e.modificato|date('Ymd') > e.creato|date('Ymd') %}<br><em>(modificato in data: {{ e.modificato|date('d/m/Y') }})</em>{% endif %}
+    </div>
+    {% if app.user.controllaRuolo('DSP') %}
+    <div class="text-right">
+      {% if dati.azioni[k].edit is defined %}
+      <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {'tipo': info.tipo == 'S' ? 'V' : info.tipo, 'avviso': e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
+      {% endif %}
+      {% if dati.azioni[k].delete is defined %}
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+      {% endif %}
+    </div>
+    {% endif %}
+  {% elseif info.tipo == 'Q' %}
+  {# ---------- COLLOQUI ---------- #}
+    {% if app.user.controllaRuolo('DSP') %}
+    <strong class="gs-text-normal gs-big">Classe {{ e.anno }}ª {{ e.sezione }}{{ e.gruppo ? ('-'~e.gruppo) }} - Alunn{{ e.sesso == 'M' ? 'o' : 'a' }} {{ e.cognome }} {{ e.nome }} ({{ e.dataNascita|date('d/m/Y') }}) </strong><br>
+    <strong class="gs-text-normal">Appuntamento alle ore {{ e.appuntamento|date('G:i') }}</strong><br>
+    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_'~e.tipo)|trans }}: {{ e.luogo }}</strong>
+      {% if e.messaggio is not empty %}
+    <br><span class="gs-text-normal">Messaggio ai genitori: <em>{{ e.messaggio }}</em></span>
+      {% endif %}
+    {% else %}
+    <strong class="gs-text-normal gs-big">Prof.{{ e.sessoDocente == 'F' ? 'ssa' }} {{ e.cognomeDocente }} {{ e.nomeDocente }}</strong><br>
+    <strong class="gs-text-normal">Appuntamento alle ore {{ e.appuntamento|date('G:i') }}</strong><br>
+    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_'~e.tipo)|trans }}: {{ e.luogo }}</strong>
+      {% if e.messaggio is not empty %}
+    <br><span class="gs-text-normal">Messaggio del docente: <em>{{ e.messaggio }}</em></span>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+  </div>
+{% endfor %}
+</div>

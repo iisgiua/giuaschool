@@ -16,7 +16,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
   Allora vedi la pagina "<route>"
   Esempi:
     | route                      |
-    | circolari_ata              |
+    | circolari_bacheca          |
     | bacheca_avvisi_ata         |
     | documenti_bacheca          |
     | utenti_profilo             |

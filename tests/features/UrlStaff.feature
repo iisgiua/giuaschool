@@ -28,7 +28,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | documenti_programmi        |
     | documenti_relazioni        |
     | documenti_maggio           |
-    | circolari_docenti          |
+    | circolari_bacheca          |
     | bacheca_avvisi             |
     | documenti_bacheca          |
     | staff_avvisi               |

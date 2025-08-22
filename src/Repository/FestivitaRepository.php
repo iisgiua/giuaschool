@@ -239,20 +239,46 @@ class FestivitaRepository extends BaseRepository {
    *
    * @return string Lista di giorni festivi come stringhe di date
    */
-  public function listaFestivi($format='d/m/Y') {
+  public function listaFestivi($format='d/m/Y'): string {
     // legge date
     $lista = $this->createQueryBuilder('f')
-      ->where('f.sede IS NULL AND f.tipo=:tipo')
-			->setParameter('tipo', 'F')
+      ->where("f.sede IS NULL AND f.tipo='F'")
       ->orderBy('f.data', 'ASC')
       ->getQuery()
       ->getResult();
     // crea lista
-    $lista_date = '';
+    $listaDate = '';
     foreach ($lista as $f) {
-      $lista_date .= ',"'.$f->getData()->format($format).'"';
+      $listaDate .= ',"'.$f->getData()->format($format).'"';
     }
-    return '['.substr($lista_date, 1).']';
+    return '['.substr($listaDate, 1).']';
+  }
+
+  /**
+   * Restituisce la lista delle date dei giorni festivi per il mese indicato.
+   * Non sono considerate le assemblee di istituto (non sono giorni festivi).
+   * Sono esclusi i giorni che precedono o seguono il periodo dell'anno scolastico.
+   * Non sono indicati i riposi settimanali (domenica ed eventuali altri).
+   *
+   * @param DateTime $data Mese di riferimento
+   *
+   * @return array Array associativo con le date dei giorni festivi
+   */
+  public function listaMese(DateTime $data): array {
+    $dati = [];
+    // legge date
+    $festivi = $this->createQueryBuilder('f')
+      ->where("f.sede IS NULL AND f.tipo='F' AND MONTH(f.data)=:mese AND YEAR(f.data)=:anno")
+      ->setParameter('mese', $data->format('n'))
+      ->setParameter('anno', $data->format('Y'))
+      ->orderBy('f.data', 'ASC')
+      ->getQuery()
+      ->getResult();
+    foreach ($festivi as $f) {
+      $dati[(int) $f->getData()->format('j')] = 1;
+    }
+    // restituisce dati
+    return $dati;
   }
 
   /**

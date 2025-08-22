@@ -126,19 +126,6 @@ class LezioneTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getData()->format('d/m/Y').': '.$existent->getOra().' - '.$existent->getClasse().' '.$existent->getMateria(), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'data' => $existent->getData() ? $existent->getData()->format('d/m/Y') : null,
-      'ora' => $existent->getOra(),
-      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
-      'gruppo' => $existent->getGruppo() ?? '',
-      'tipoGruppo' => $existent->getTipoGruppo(),
-      'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
-      'argomento' => $existent->getArgomento(),
-      'attivita' => $existent->getAttivita(),
-      'moduloFormativo' => $existent->getModuloFormativo() ? $existent->getModuloFormativo()->getId() : null,
-      'sostituzione' => $existent->getSostituzione()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

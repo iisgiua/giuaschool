@@ -8,13 +8,15 @@
 
 namespace App\MessageHandler;
 
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Entity\Avviso;
 use App\Entity\Classe;
+use App\Entity\ComunicazioneUtente;
+use App\Entity\Utente;
 use App\Message\AvvisoMessage;
 use App\Message\NotificaMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 
@@ -26,7 +28,9 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 class AvvisoMessageHandler {
 
+
   //==================== METODI DELLA CLASSE ====================
+
   /**
    * Costruttore
    *
@@ -37,8 +41,7 @@ class AvvisoMessageHandler {
   public function __construct(
       private readonly EntityManagerInterface $em,
       private readonly LoggerInterface $logger,
-      private readonly MessageBusInterface $messageBus)
-  {
+      private readonly MessageBusInterface $messageBus) {
   }
 
   /**
@@ -46,30 +49,28 @@ class AvvisoMessageHandler {
    *
    * @param AvvisoMessage $message Dati per la notifica dell'avviso
    */
-  public function __invoke(AvvisoMessage $message) {
+  public function __invoke(AvvisoMessage $message): void {
     $avviso = $this->em->getRepository(Avviso::class)->find($message->getId());
     $destinatari = [];
     if ($avviso) {
       // dati avviso
       $tipo = ($avviso->getTipo() == 'V' ? 'verifica' : ($avviso->getTipo() == 'P' ? 'compito' : 'avviso'));
       $data = $avviso->getData()->format('d/m/Y');
-      $testo = $avviso->getTesto();
-      $ora1 = ($avviso->getOra() ? $avviso->getOra()->format('G:i') : '');
-      $ora2 = ($avviso->getOraFine() ? $avviso->getOraFine()->format('G:i') : '');
-      $testo = str_replace(['{DATA}', '{ORA}', '{INIZIO}', '{FINE}'], [$data, $ora1, $ora1, $ora2], $testo);
-      $oggetto = $avviso->getOggetto();
+      $testo = $avviso->testoPersonalizzato();
+      $oggetto = $avviso->getTitolo();
       // legge classi
       $classi = '';
-      if ($avviso->getFiltroTipo() == 'C' && !empty($avviso->getFiltro())) {
-        // entrate/uscite/attività
-        $classi = $this->em->getRepository(Classe::class)->listaClassi($avviso->getFiltro());
+      if ($avviso->getDocenti() == 'C') {
+        // entrate/uscite/attività/altri avvisi a docenti di classi
+        $classi = $this->em->getRepository(Classe::class)->listaClassi($avviso->getFiltroDocenti());
       }
       $dati = ['id' => $avviso->getId(), 'data' => $data, 'oggetto' => $oggetto,
         'testo' => $testo, 'allegati' => count($avviso->getAllegati())];
       // legge i destinatari
-      $destinatari = $this->em->getRepository(Avviso::class)->notifica($avviso);
-      foreach ($destinatari as $utente) {
+      $destinatari = $this->em->getRepository(ComunicazioneUtente::class)->notifica($avviso);
+      foreach ($destinatari as $idUtente) {
         // crea le notifiche per ogni destinatario
+        $utente = $this->em->getRepository(Utente::class)->find($idUtente);
         $dati['alunno'] = '';
         $dati['classi'] = '';
         if ($utente->controllaRuolo('G')) {

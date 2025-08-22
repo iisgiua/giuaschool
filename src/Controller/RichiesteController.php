@@ -193,7 +193,7 @@ class RichiesteController extends BaseController {
           ->setData($data)
           ->setStato('I')
           ->setMessaggio('');
-        $dblogger->logCreazione('RICHIESTE', 'Invio richiesta', $richiesta);
+        $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
       }
@@ -235,13 +235,12 @@ class RichiesteController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // cambia stato
-    $richiestaVecchia = clone $richiesta;
     $richiesta
       ->setInviata(new DateTime())
       ->setGestita(null)
       ->setStato('A');
     // memorizzazione e log
-    $dblogger->logModifica('RICHIESTE', 'Annulla richiesta', $richiestaVecchia, $richiesta);
+    $dblogger->logAzione('RICHIESTE', 'Annulla richiesta');
     // redirezione
     return $this->redirectToRoute('richieste_lista');
   }
@@ -626,13 +625,12 @@ class RichiesteController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
         // cambia stato
-        $richiestaVecchia = clone $richiesta;
         $richiesta
           ->setGestita(new DateTime())
           ->setStato('R')
           ->setMessaggio($form->get('messaggio')->getData());
       // memorizzazione e log
-      $dblogger->logModifica('RICHIESTE', 'Rimuove richiesta', $richiestaVecchia, $richiesta);
+      $dblogger->logAzione('RICHIESTE', 'Rimuove richiesta');
       // redirezione
       return $this->redirectToRoute('richieste_gestione');
     }
@@ -694,20 +692,20 @@ class RichiesteController extends BaseController {
         $richiesta->getUtente()->setAutorizzaUscita($form->get('deroga')->getData());
       }
       // cambia stato
-      $richiestaVecchia = clone $richiesta;
+      $richiestaVecchiaStato = $richiesta->getStato();
       $richiesta
         ->setGestita(new DateTime())
         ->setStato('G')
         ->setMessaggio($form->get('messaggio')->getData());
       // memorizzazione e log
-      $dblogger->logModifica('RICHIESTE', 'Gestisce richiesta', $richiestaVecchia, $richiesta);
+      $dblogger->logAzione('RICHIESTE', 'Gestisce richiesta');
       if (isset($derogaVecchia)) {
         $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
           'Username' => $richiesta->getUtente()->getUserIdentifier(),
             ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia]);
       }
       // controlla unicità
-      if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchia->getStato() == 'R') {
+      if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchiaStato == 'R') {
         // richiesta gestita deve essere una sola
         $this->em->getRepository(Richiesta::class)->createQueryBuilder('r')
           ->update()
@@ -790,14 +788,13 @@ class RichiesteController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // cambia stato
-    $richiestaVecchia = clone $richiesta;
     $richiesta
       ->setInviata(new DateTime())
       ->setGestita(null)
       ->setStato('A')
       ->setMessaggio('');
     // memorizzazione e log
-    $dblogger->logModifica('RICHIESTE', 'Annulla richiesta', $richiestaVecchia, $richiesta);
+    $dblogger->logAzione('RICHIESTE', 'Annulla richiesta');
     // redirezione
     return $this->redirectToRoute('richieste_classe', ['classe'=> $classe->getId()]);
   }
@@ -941,7 +938,7 @@ class RichiesteController extends BaseController {
           ->setData($data)
           ->setStato('I')
           ->setMessaggio('');
-        $dblogger->logCreazione('RICHIESTE', 'Invio richiesta', $richiesta);
+        $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
         // redirezione
         return $this->redirectToRoute('richieste_classe', ['classe'=> $classe->getId()]);
       }

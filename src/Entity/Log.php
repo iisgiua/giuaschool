@@ -8,162 +8,111 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use DateTimeInterface;
 use App\Repository\LogRepository;
-use Stringable;
 use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use Stringable;
 
 
 /**
- * Log - dati per il log degli eventi
- *
+ * Log - dati per il log delle modifiche ai dati e delle azioni dell'utente
  *
  * @author Antonello Dessì
  */
 #[ORM\Table(name: 'gs_log')]
 #[ORM\Entity(repositoryClass: LogRepository::class)]
-#[ORM\HasLifecycleCallbacks]
 class Log implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco per il log
    */
-  #[ORM\Column(type: Types::INTEGER)]
+  #[ORM\Column(type: Types::INTEGER, options: ['unsigned' => true])]
   #[ORM\Id]
   #[ORM\GeneratedValue(strategy: 'AUTO')]
   private ?int $id = null;
 
   /**
-   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTime $creato Data e ora della creazione dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
-  private ?DateTime $creato = null;
-
-  /**
-   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
-   */
-  #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
-  private ?DateTime $modificato = null;
+  private DateTime $creato;
 
   /**
    * @var Utente|null $utente Utente connesso
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: \Utente::class)]
-  #[Assert\NotBlank(message: 'field.notblank')]
+  #[ORM\ManyToOne(targetEntity: Utente::class)]
   private ?Utente $utente = null;
 
   /**
    * @var string|null $username Username dell'utente connesso
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $username = '';
 
   /**
    * @var string|null $ruolo Ruolo dell'utente connesso
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $ruolo = '';
 
   /**
    * @var string|null $alias Username dell'utente reale se l'utente è un alias, altrimenti null
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $alias = '';
 
   /**
    * @var string|null $ip Indirizzo IP dell'utente connesso
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $ip = '';
 
   /**
    * @var string|null $origine Controller che ha generato il log
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
   private ?string $origine = '';
 
   /**
-   * @var string|null $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
-   *
-   *
+   * @var string|null $tipo Tipo di dati memorizzati [A=azione utente (action), C=creazione istanza (create), U=modifica istanza (update), D=cancellazione istanza (delete)]
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: false)]
-  #[Assert\Choice(choices: ['A', 'C', 'U', 'D'], strict: true, message: 'field.choice')]
   private ?string $tipo = 'A';
 
   /**
    * @var string|null $categoria Categoria dell'azione registrata nel log
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
   private ?string $categoria = '';
 
   /**
    * @var string|null $azione Azione registrata nel log
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
-  #[Assert\NotBlank(message: 'field.notblank')]
-  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
   private ?string $azione = '';
+
+  /**
+   * @var string $classeEntita Nome dell'entità (se tipo creazione/modifica/cancellazione)
+   */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  private ?string $classeEntita = null;
+
+  /**
+   * @var string $idEntita ID del record (se tipo creazione/modifica/cancellazione)
+   */
+  #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
+  private ?string $idEntita = null;
 
   /**
    * @var array|null $dati Lista di dati da memorizzare nel log
    */
-  #[ORM\Column(type: Types::ARRAY, nullable: true)]
-  private ?array $dati = [];
-
-
-  //==================== EVENTI ORM ====================
-  /**
-   * Simula un trigger onCreate
-   */
-  #[ORM\PrePersist]
-  public function onCreateTrigger(): void {
-    // inserisce data/ora di creazione
-    $this->creato = new DateTime();
-    $this->modificato = $this->creato;
-  }
-
-  /**
-   * Simula un trigger onUpdate
-   */
-  #[ORM\PreUpdate]
-  public function onChangeTrigger(): void {
-    // aggiorna data/ora di modifica
-    $this->modificato = new DateTime();
-  }
+  #[ORM\Column(type: Types::JSON, nullable: false)]
+  private array $dati = [];
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -184,15 +133,6 @@ class Log implements Stringable {
    */
   public function getCreato(): ?DateTime {
     return $this->creato;
-  }
-
-  /**
-   * Restituisce la data e ora dell'ultima modifica dei dati
-   *
-   * @return DateTime|null Data/ora dell'ultima modifica
-   */
-  public function getModificato(): ?DateTime {
-    return $this->modificato;
   }
 
   /**
@@ -322,7 +262,7 @@ class Log implements Stringable {
   }
 
   /**
-   * Restituisce il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   * Restituisce il tipo di dati memorizzati [A=azione utente (action), C=creazione istanza (create), U=modifica istanza (update), D=cancellazione istanza (delete)]
    *
    * @return string|null Tipo di dati memorizzati
    */
@@ -331,7 +271,7 @@ class Log implements Stringable {
   }
 
   /**
-   * Modifica il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   * Modifica il tipo di dati memorizzati [A=azione utente (action), C=creazione istanza (create), U=modifica istanza (update), D=cancellazione istanza (delete)]
    *
    * @param string|null $tipo Tipo di dati memorizzati
    *
@@ -385,6 +325,48 @@ class Log implements Stringable {
   }
 
   /**
+   * Restituisce il nome dell'entità (se tipo creazione/modifica/cancellazione)
+   *
+   * @return string|null Nome dell'entità
+   */
+  public function getClasseEntita(): ?string {
+    return $this->classeEntita;
+  }
+
+  /**
+   * Modifica il nome dell'entità (se tipo creazione/modifica/cancellazione)
+   *
+   * @param string|null $classeEntita Nome dell'entità
+   *
+   * @return self Oggetto modificato
+   */
+  public function setClasseEntita(?string $classeEntita): self {
+    $this->classeEntita = $classeEntita;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'ID del record (se tipo creazione/modifica/cancellazione)
+   *
+   * @return string|null ID del record
+   */
+  public function getIdEntita(): ?string {
+    return $this->idEntita;
+  }
+
+  /**
+   * Modifica l'ID del record (se tipo creazione/modifica/cancellazione)
+   *
+   * @param string|null $dEntita ID del record
+   *
+   * @return self Oggetto modificato
+   */
+  public function setIdEntita(?string $idEntita): self {
+    $this->idEntita = $idEntita;
+    return $this;
+  }
+
+  /**
    * Restituisce la lista di dati da memorizzare nel log
    *
    * @return array|null Lista di dati da memorizzare nel log
@@ -401,10 +383,6 @@ class Log implements Stringable {
    * @return self Oggetto modificato
    */
   public function setDati(array $dati): self {
-    if ($dati === $this->dati) {
-      // clona array per forzare update su doctrine
-      $dati = unserialize(serialize($dati));
-    }
     $this->dati = $dati;
     return $this;
   }
@@ -413,12 +391,20 @@ class Log implements Stringable {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->creato = new DateTime();
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->modificato->format('d/m/Y H:i').' - '.$this->azione;
+    return $this->creato->format('d/m/Y H:i:s').' - '.$this->azione;
   }
 
 }

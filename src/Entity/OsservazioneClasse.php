@@ -29,6 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'tipo', type: 'string', length: 1)]
 #[ORM\DiscriminatorMap(['C' => 'OsservazioneClasse', 'A' => 'OsservazioneAlunno'])]
+#[ORM\Index(columns: ['tipo'])]
 class OsservazioneClasse implements Stringable {
 
 

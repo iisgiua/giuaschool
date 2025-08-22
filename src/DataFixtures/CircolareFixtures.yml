@@ -1,29 +1,33 @@
 ####################
 # CircolareFixtures - dati di test
 #
-# Dati per le circolari scolastiche:
-#   sedi: sedi a cui è destinata la circolare
-#   anno: anno iniziale dell'A.S. a cui si riferisce la circolare
-#   numero: numero della circolare
-#   data: data della circolare
-#   oggetto: oggetto della circolare
-#   documento: documento della circolare
-#   allegati: lista di file allegati alla circolare
-#   ata: indica se il personale ATA è destinatario della circolare o no
-#   destinatariAta: indica le categorie del personale ATA destinatarie dell'avviso [A=amministrativi, T=tecnici, C=collaboratori scolastici]
-#   dsga: indica se il DSGA è destinatario della circolare o no
-#   genitori: indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
-#   filtroGenitori: lista dei filtri per i genitori
-#   alunni: indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
-#   filtroAlunni: lista dei filtri per gli alunni
-#   coordinatori: indica quali coordinatori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
+# Dati per la gestione delle circolari scolastiche:
+#   tipo: tipo di documento
+#   cifrato: conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+#   firma: indica se è richiesta la firma di presa visione
+#   stato: stato del documento
+#   titolo: titolo del documento
+#   data: data  del documento
+#   anno: anno scolastico del documento
+#   autore: utente che carica il documento
+#   allegati: lista dei file allegati al documento
+#   sedi: sedi scolastiche di destinazione (usato come filtro principale)
+#   speciali: indica i destinatari speciali che non dipendono dal filtro di sede [R=RSU, I=rappresentanti di istituto, P=consulta provinciale, S=RSPP]
+#   ata: indica i destinatari tra il personale ATA [D=DSGA, A=amministrativi, T=tecnici, C=collaboratori scolastici]
+#   coordinatori: indica i destinatari tra i coordinatori [N=nessuno, T=tutti, C=filtro classe]
 #   filtroCoordinatori: lista dei filtri per i coordinatori
-#   docenti: indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+#   docenti: indica i destinatari tra i docenti [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
 #   filtroDocenti: lista dei filtri per i docenti
-#   altri: altri destinatari della circolare non riferiti ad utenti sul registro
-#   firma: indica se è richiesta la conferma esplicita di lettura della circolare o no
-#   notifica: indica se è richiesta la notifica della circolare ai destinatari o no
-#   pubblicata: indica se la circolare è pubblicata o no
+#   genitori: indica i destinatari tra i genitori [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroGenitori: lista dei filtri per i genitori
+#   rappresentantiGenitori: indica i destinatari tra i rappresentanti di classe dei genitori [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiGenitori: lista dei filtri per i rappresentanti dei genitori
+#   alunni: indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroAlunni: lista dei filtri per gli alunni
+#   rappresentantiAlunni: indica i destinatari tra i rappresentanti di classe degli alunni [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiAlunni: lista dei filtri per i rappresentanti degli alunni
+#   esterni: lista degli altri destinatari esterni
+#   numero: numero della circolare (univoco solo assieme alla data)
 ####################
 
 
@@ -34,98 +38,115 @@ include:
   - AlunnoFixtures.yml
   - DocenteFixtures.yml
   - AtaFixtures.yml
+  - AllegatoFixtures.yml
 
 
 App\Entity\Circolare:
   circolare_perclasse:
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
-    numero: '10'
+    tipo: 'G'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Circolare 10 - Classe 2A'
     data: '<dateTimeBetween("-1 month", "now")>'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    documento: '<fileObj()>'
-    allegati: '<(array())>'
-    ata: false
-    destinatariAta: []
-    dsga: false
-    genitori: 'C'
-    filtroGenitori: '<arrayId(circolare_perclasse, filtroGenitori, @circolare_perclasse, @classe_2A)>'
-    alunni: 'C'
-    filtroAlunni: '<arrayId(circolare_perclasse, filtroAlunni, @circolare_perclasse, @classe_2A)>'
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_circolare_1)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
     coordinatori: 'N'
     filtroCoordinatori: []
     docenti: 'C'
-    filtroDocenti: '<arrayId(circolare_perclasse, filtroDocenti, @circolare_perclasse, @classe_2A)>'
-    altri: []
-    firma: true
-    notifica: true
-    pubblicata: true
+    filtroDocenti: '<arrayId(circolare_perclasse, filtroDocenti, @circolare_perclasse, @classe_1A, @classe_2A)>'
+    genitori: 'C'
+    filtroGenitori: '<arrayId(circolare_perclasse, filtroGenitori, @circolare_perclasse, @classe_1A, @classe_2A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(circolare_perclasse, filtroAlunni, @circolare_perclasse, @classe_1A, @classe_2A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: 10
   circolare_perdocenti:
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
-    numero: '20'
+    tipo: 'G'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Circolare 20 - Docenti'
     data: '<dateTimeBetween("-1 month", "now")>'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    documento: '<fileObj()>'
-    allegati: '<(array())>'
-    ata: false
-    destinatariAta: []
-    dsga: false
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_circolare_2)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
     coordinatori: 'N'
     filtroCoordinatori: []
     docenti: 'T'
     filtroDocenti: []
-    altri: []
-    firma: true
-    notifica: true
-    pubblicata: true
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: 20
   circolare_conallegato:
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
-    numero: '30'
+    tipo: 'G'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Circolare 30 - Ata Docenti con allegato'
     data: '<dateTimeBetween("-1 month", "now")>'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    documento: '<fileObj()>'
-    allegati: '<words()>'
-    ata: true
-    destinatariAta: []
-    dsga: true
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_circolare_3, @file_circolare_3_allegato)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: 'ATC'
     coordinatori: 'N'
     filtroCoordinatori: []
     docenti: 'T'
     filtroDocenti: []
-    altri: []
-    firma: true
-    notifica: true
-    pubblicata: true
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: 30
   circolare_nonpubblicata:
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
-    numero: '40'
+    tipo: 'G'
+    cifrato:
+    firma: false
+    stato: 'B'
+    titolo: 'Circolare 40 - Bozza'
     data: '<dateTimeBetween("-1 month", "now")>'
-    oggetto: '<substr(<text()>, 0, 255)>'
-    documento: '<fileObj()>'
-    allegati: '<(array())>'
-    ata: false
-    destinatariAta: []
-    dsga: false
-    genitori: 'N'
-    filtroGenitori: []
-    alunni: 'N'
-    filtroAlunni: []
+    anno: 0
+    autore: '@docente_*'
+    allegati: '<collection(@file_circolare_4)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
     coordinatori: 'N'
     filtroCoordinatori: []
     docenti: 'T'
     filtroDocenti: []
-    altri: []
-    firma: true
-    notifica: true
-    pubblicata: false
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: 40

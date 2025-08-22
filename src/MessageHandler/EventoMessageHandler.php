@@ -8,9 +8,9 @@
 
 namespace App\MessageHandler;
 
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Message\EventoMessage;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 
@@ -20,9 +20,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
  * @author Antonello Dessì
  */
 #[AsMessageHandler]
-class EventoMessageHandler
-{
+class EventoMessageHandler {
+
+
   //==================== METODI DELLA CLASSE ====================
+
   /**
    * Costruttore
    *
@@ -31,9 +33,9 @@ class EventoMessageHandler
    */
   public function __construct(
       private readonly LoggerInterface $logger,
-      private readonly MessageBusInterface $messageBus)
-  {
+      private readonly MessageBusInterface $messageBus) {
   }
+
   /**
    * Prepara i dati per l'invio successivo della notifica
    *

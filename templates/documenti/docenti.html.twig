@@ -38,7 +38,7 @@
           <a href="{{ path('documenti_download', {'documento': d.id }) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.allegati[0].titolo }}</strong>
           </a><br>
-          <small>Docente: {{ d.docente.nome }} {{ d.docente.cognome }} - Dimensione: {{ (d.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
+          <small>Docente: {{ d.autore.nome }} {{ d.autore.cognome }} - Dimensione: {{ (d.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         {% else %}
             <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
         {% endfor %}

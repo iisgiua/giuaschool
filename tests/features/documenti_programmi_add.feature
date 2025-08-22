@@ -42,7 +42,7 @@ Scenario: visualizza errore per pagina inserimento di programma già inserito da
     | id  | docente | attiva | tipo |
     | $c1 | #logged | si     | N    |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
+    | id  | classe     | materia     | autore  | tipo |
     | $d1 | $c1:classe | $c1:materia | #logged | P    |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
     | classe        | materia        |
@@ -61,7 +61,7 @@ Scenario: visualizza errore per pagina inserimento di programma già inserito da
     | $c1 | #logged | si     | $cl1   | $m1     | N    |
     | $c2 | #other  | si     | $cl1   | $m1     | I    |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
+    | id  | classe     | materia     | autore  | tipo |
     | $d1 | $cl1       | $m1         | #other  | P    |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
     | classe  | materia |

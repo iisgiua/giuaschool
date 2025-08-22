@@ -8,12 +8,15 @@
 
 namespace App\Install;
 
-use PDO;
+require_once __DIR__.'/DataMigrator.php';
+
 use Exception;
-use ZipArchive;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
-use Symfony\Component\Filesystem\Filesystem;
+use PDO;
 use SPID_PHP\Setup;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
+use ZipArchive;
+
 
 /**
  * Updater - Gestione procedure di aggiornamento dell'applicazione
@@ -100,6 +103,7 @@ class Updater {
     $this->env = [];
     $this->sys = [];
     $this->pdo = null;
+    $this->migrator = null;
     $this->projectPath = dirname($this->publicPath);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -1588,18 +1592,25 @@ class Updater {
     if (!$this->pdo) {
       $this->connectDb();
     }
+    // crea istanza di migrazione (utilizzabile nelle procedure)
+    $migrator = new DataMigrator($this->pdo);
     // legge aggiornamenti
     $updates = $this->readUpdates();
-    // esegue procedure di aggiornamento
-    foreach ($updates['procedure'] as $proc) {
-      eval($proc);
-    }
+    // carica substep
+    $subStep = $_GET['sub'] ?? 0;
+    // esegue procedura di aggiornamento
+    eval($updates['procedure'][$subStep]);
     // visualizza pagina
     $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
-    $page['step'] = $step.' - Aggiornamento dei dati';
-    $page['title'] = 'Procedura di aggiornamento dei dati';
-    $page['success'] = 'La procedura di aggiornamento dei dati è stata eseguita correttamente.';
-    $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
+    $page['step'] = $step.' - Migrazione dei dati';
+    $page['title'] = 'Procedura di migrazione dei dati ['.$subStep.']';
+    $page['success'] = 'La procedura di migrazione dei dati è stata eseguita correttamente.';
+    $subStep++;
+    if ($subStep == count($updates)) {
+      $step++;
+      unset($subStep);
+    }
+    $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.$step.(isset($subStep) ? '&sub='.$subStep : '');
     include($this->publicPath.'/install/update_page.php');
   }
 

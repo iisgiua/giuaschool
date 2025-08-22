@@ -439,25 +439,4 @@ class DefinizioneRichiesta implements Stringable {
     return 'Richiesta: '.$this->nome;
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'nome' => $this->nome,
-      'sede' => $this->sede ? $this->sede->getId() : null,
-      'richiedenti' => $this->richiedenti,
-      'destinatari' => $this->destinatari,
-      'modulo' => $this->modulo,
-      'campi' => $this->campi,
-      'allegati' => $this->allegati,
-      'tipo' => $this->tipo,
-      'unica' => $this->unica,
-      'gestione' => $this->gestione,
-      'abilitata' => $this->abilitata];
-    return $dati;
-  }
-
 }

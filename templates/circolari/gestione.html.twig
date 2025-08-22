@@ -6,11 +6,11 @@
   <div class="row gs-mb-0">
     <div class="col-sm-offset-6 col-sm-6 text-right">
   {% if dati.azioni.add is defined  %}
-      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {'id': 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {'circolare': 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
   {% endif %}
     </div>
   </div>
-  {% if page == 1 and dati.bozza|length > 0 %}
+  {% if info.pagina == 1 and dati.bozza|length > 0 %}
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <caption class="text-center text-warning gs-pb-0"><strong class="gs-big">Circolari in stato di bozza</strong></caption>
     <thead class="bg-warning">
@@ -28,17 +28,17 @@
         <td>{{ c.data|date('d/m/Y') }}</td>
         <td>{{ c.numero }}</td>
         <td><small>{% for s in c.sedi %}{{ s.citta|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-        <td><small>{{ c.oggetto }}</small></td>
+        <td><small>{{ c.titolo }}</small></td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'id': c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'circolare': c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni['unpublish-'~k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('circolari_edit', {'id': c.id}) }}" role="button" title="Modifica la circolare indicata"><span class="glyphicon glyphicon-edit"></span></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('circolari_edit', {'circolare': c.id}) }}" role="button" title="Modifica la circolare indicata"><span class="glyphicon glyphicon-edit"></span></a>
       {% endif %}
       {% if dati.azioni['unpublish-'~k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {'id': c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {'circolare': c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
       {% if dati.azioni['unpublish-'~k].publish is defined %}
-          <a class="btn btn-success btn-xs" href="{{ path('circolari_publish', {'pubblica': 1, 'id': c.id}) }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
+          <a class="btn btn-success btn-xs" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 1}) }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
       {% endif %}
         </td>
       </tr>
@@ -48,7 +48,7 @@
   <div class="row gs-mt-2">
     <div class="col-sm-offset-6 col-sm-6 text-right">
     {% if dati.azioni.add is defined  %}
-      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {'id': 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {'circolare': 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
     {% endif %}
     </div>
   </div>
@@ -65,7 +65,7 @@
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
       </div>
       <div class="form-group" title="Filtro sul contenuto dell'oggetto della circolare">
-        <label class="sr-only control-label" for="circolari_gestione_oggetto">{{ form.oggetto.vars.label|trans }}</label>
+        <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
         {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
       </div>
       <div class="form-group _col-sm-2">
@@ -85,23 +85,23 @@
       </tr>
     </thead>
     <tbody>
-    {% for k,c in dati.lista %}
+    {% for k,c in dati.pubblicate.lista %}
       <tr>
         <td>{{ c.data|date('d/m/Y') }}</td>
         <td>{{ c.numero }}</td>
-        <td><small>{% for s in c.sedi %}{{ s.citta|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-        <td><small>{{ c.oggetto }}</small></td>
+        <td><small>{% for s in c.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
+        <td><small>{{ c.titolo }}</small></td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'id': c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'circolare': c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni['publish-'~k].unpublish is defined %}
-          <a class="btn btn-warning btn-xs" href="{{ path('circolari_publish', {'pubblica': 0, 'id': c.id}) }}" role="button" title="Rimuove la pubblicazione della circolare indicata"><span class="glyphicon glyphicon-trash"></span></a>
+          <a class="btn btn-warning btn-xs" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 0}) }}" role="button" title="Rimuove la pubblicazione della circolare indicata"><span class="glyphicon glyphicon-trash"></span></a>
       {% endif %}
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
-  {% include 'include/paginate.html.twig' with {'maxPagine': maxPages, 'pagina': page, 'url': 'circolari_gestione'} %}
+  {% include 'include/paginate.html.twig' with {'maxPagine': dati.pubblicate.maxPagine, 'pagina': info.pagina, 'url': 'circolari_gestione'} %}
   {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_circolare'} %}
   {% include 'include/modal-remote.html.twig' %}
 </div>

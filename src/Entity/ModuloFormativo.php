@@ -236,18 +236,4 @@ class ModuloFormativo implements Stringable {
     return (string) $this->nomeBreve;
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'nome' => $this->nome,
-      'nomeBreve' => $this->nomeBreve,
-      'tipo' => $this->tipo,
-      'classi' => $this->classi];
-    return $dati;
-  }
-
 }

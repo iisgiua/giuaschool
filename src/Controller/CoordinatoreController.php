@@ -8,38 +8,25 @@
 
 namespace App\Controller;
 
-use App\Entity\ModuloFormativo;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Classe;
-use DateTime;
 use App\Entity\Alunno;
 use App\Entity\CambioClasse;
-use App\Entity\Cattedra;
-use App\Entity\Utente;
-use App\Entity\Annotazione;
-use App\Entity\Avviso;
-use App\Entity\AvvisoClasse;
-use App\Entity\AvvisoUtente;
+use App\Entity\Classe;
+use App\Entity\ModuloFormativo;
 use App\Entity\Presenza;
 use App\Entity\Preside;
 use App\Entity\Staff;
-use App\Form\AvvisoType;
 use App\Form\FiltroType;
 use App\Form\PresenzaType;
-use App\Message\AvvisoMessage;
-use App\MessageHandler\NotificaMessageHandler;
-use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
-use Doctrine\Common\Collections\ArrayCollection;
+use DateTime;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -468,415 +455,6 @@ class CoordinatoreController extends BaseController {
   }
 
   /**
-   * Gestione degli avvisi per la classe.
-   *
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param int $classe Identificativo della classe
-   * @param int $pagina Numero di pagina per l'elenco da visualizzare
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/coordinatore/avvisi/{classe}/{pagina}', name: 'coordinatore_avvisi', requirements: ['classe' => '\d+', 'pagina' => '\d+'], defaults: ['classe' => 0, 'pagina' => '0'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function avvisi(BachecaUtil $bac, int $classe, int $pagina): Response {
-    // inizializza variabili
-    $dati = null;
-    $limite = 20;
-    $maxPages = 1;
-    // parametro classe
-    if ($classe == 0) {
-      // recupera parametri da sessione
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
-    } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
-    }
-    // parametro pagina
-    if ($pagina == 0) {
-      // pagina non definita: la cerca in sessione
-      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_avvisi/pagina', 1);
-    } else {
-      // pagina specificata: la conserva in sessione
-      $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_avvisi/pagina', $pagina);
-    }
-    // controllo classe
-    if ($classe > 0) {
-      $classe = $this->em->getRepository(Classe::class)->find($classe);
-      if (!$classe) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // controllo accesso alla funzione
-      if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-        // coordinatore
-        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-        if (!in_array($classe->getId(), $classi)) {
-          // errore
-          throw $this->createNotFoundException('exception.invalid_params');
-        }
-      }
-      // recupera dati
-      $dati = $bac->listaAvvisiCoordinatore($pagina, $limite, $this->getUser(), $classe);
-      $maxPages = ceil($dati['lista']->count() / $limite);
-    }
-    // visualizza pagina
-    return $this->render('coordinatore/avvisi.html.twig', [
-      'pagina_titolo' => 'page.coordinatore_avvisi',
-      'classe' => $classe,
-      'dati' => $dati,
-      'page' => $pagina,
-      'maxPages' => $maxPages]);
-  }
-
-  /**
-   * Aggiunge o modifica un avviso
-   *
-   * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param MessageBusInterface $msg Gestione delle notifiche
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $classe Identificativo della classe
-   * @param int $id Identificativo dell'avviso
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/coordinatore/avvisi/edit/{classe}/{id}', name: 'coordinatore_avviso_edit', requirements: ['classe' => '\d+', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function avvisoEdit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                             BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger,
-                             int $classe, int $id): Response {
-    // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    $dati['classe'] = $classe;
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    // controlla azione
-    if ($id > 0) {
-      // azione edit
-      $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
-      if (!$avviso) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      $avviso_old = clone $avviso;
-    } else {
-      // azione add
-      $avviso = (new Avviso())
-        ->setTipo('O')
-        ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto', ['classe' => ''.$classe]))
-        ->setData(new DateTime('today'))
-        ->addSedi($classe->getSede());
-      $this->em->persist($avviso);
-      // imposta classe tramite cattedra
-      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['attiva' => 1, 'classe' => $classe]);
-      $avviso->setCattedra($cattedra);
-    }
-    // imposta autore dell'avviso
-    $avviso->setDocente($this->getUser());
-    // form di inserimento
-    $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'coordinatore',
-      'return_url' => $this->generateUrl('coordinatore_avvisi'),
-      'values' => [(count($avviso->getAnnotazioni()) > 0)]]);
-    $form->handleRequest($request);
-    // visualizzazione filtri
-    $dati['lista'] = '';
-    if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $this->em->getRepository(Alunno::class)->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
-    }
-    if ($form->isSubmitted()) {
-      // controllo errori
-      if (!$avviso->getDestinatari()) {
-        // destinatari non definiti
-        $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
-      }
-      if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
-        // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
-      }
-      // controlla filtro
-      $lista = [];
-      $errore = false;
-      if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $this->em->getRepository(Alunno::class)
-          ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
-        if ($errore) {
-          // utente non valido
-          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
-        }
-        $avviso->setFiltro($lista);
-      }
-      // controllo permessi
-      if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
-        // errore: avviso non permesso
-        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
-      }
-      if ($form->get('creaAnnotazione')->getData() &&
-          !$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
-        // errore: nuova annotazione non permessa
-        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
-      }
-      if (count($avviso->getAnnotazioni()) > 0) {
-        $a = $avviso->getAnnotazioni()[0];
-        if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
-          // errore: cancellazione annotazione non permessa
-          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
-        }
-      }
-      // modifica dati
-      if ($form->isValid()) {
-        // gestione destinatari
-        if ($id) {
-          // cancella destinatari precedenti e dati lettura
-          $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
-            ->delete()
-            ->where('au.avviso=:avviso')
-            ->setParameter('avviso', $avviso)
-            ->getQuery()
-            ->execute();
-          $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
-            ->delete()
-            ->where('ac.avviso=:avviso')
-            ->setParameter('avviso', $avviso)
-            ->getQuery()
-            ->execute();
-        }
-        if ($avviso->getFiltroTipo() == 'T') {
-          // destinatari solo classe corrente
-          $avviso->setFiltroTipo('C')->setFiltro([$classe->getId()]);
-          $dest = $bac->destinatariAvviso($avviso);
-          $avviso->setFiltroTipo('T')->setFiltro([]);
-        } else {
-          // destinatari utenti
-          $dest = $bac->destinatariAvviso($avviso);
-        }
-        // imposta utenti
-        foreach ($dest['utenti'] as $u) {
-          $obj = (new AvvisoUtente())
-            ->setAvviso($avviso)
-            ->setUtente($this->em->getReference(Utente::class, $u));
-          $this->em->persist($obj);
-        }
-        // imposta classe
-        foreach ($dest['classi'] as $c) {
-          $obj = (new AvvisoClasse())
-            ->setAvviso($avviso)
-            ->setClasse($this->em->getReference(Classe::class, $c));
-          $this->em->persist($obj);
-        }
-        // annotazione
-        $log_annotazioni['delete'] = [];
-        if ($id) {
-          // cancella annotazioni
-          foreach ($avviso->getAnnotazioni() as $a) {
-            $log_annotazioni['delete'][] = $a->getId();
-            $this->em->remove($a);
-          }
-          $avviso->setAnnotazioni(new ArrayCollection());
-        }
-        if ($form->get('creaAnnotazione')->getData()) {
-          // crea nuove annotazioni
-          $testo = $bac->testoAvviso($avviso);
-          $a = (new Annotazione())
-            ->setData($avviso->getData())
-            ->setTesto($testo)
-            ->setVisibile(false)
-            ->setAvviso($avviso)
-            ->setClasse($classe)
-            ->setDocente($avviso->getDocente());
-          $this->em->persist($a);
-          $avviso->addAnnotazioni($a);
-        }
-        // ok: memorizza dati
-        $this->em->flush();
-        // notifica con attesa di mezzora
-        $notifica = new AvvisoMessage($avviso->getId());
-        if (!$id || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-          // inserisce avviso (nuovo o modificato) in coda notifiche
-          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-        }
-        // log azione
-        if (!$id) {
-          // nuovo
-          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', [
-            'Avviso' => $avviso->getId(),
-            'Annotazioni' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
-        } else {
-          // modifica
-          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', [
-            'Id' => $avviso->getId(),
-            'Testo' => $avviso_old->getTesto(),
-            'Destinatari' => $avviso_old->getDestinatari(),
-            'Filtro Tipo' => $avviso_old->getFiltroTipo(),
-            'Filtro' => $avviso_old->getFiltro(),
-            'Docente' => $avviso_old->getDocente()->getId(),
-            'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
-            'Annotazioni create' => implode(', ', array_map(fn($a) => $a->getId(), $avviso->getAnnotazioni()->toArray()))]);
-        }
-        // redirezione
-        return $this->redirectToRoute('coordinatore_avvisi');
-      }
-    }
-    // mostra la pagina di risposta
-    return $this->render('coordinatore/avviso_edit.html.twig', [
-      'pagina_titolo' => 'page.coordinatore_avvisi',
-      'form' => $form,
-      'form_title' => ($id > 0 ? 'title.modifica_avviso_coordinatore' : 'title.nuovo_avviso_coordinatore'),
-      'dati' => $dati]);
-  }
-
-  /**
-   * Mostra i dettagli di un avviso
-   *
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param int $classe Identificativo della classe
-   * @param int $id ID dell'avviso
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/coordinatore/avvisi/dettagli/{classe}/{id}', name: 'coordinatore_avviso_dettagli', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function avvisoDettagli(BachecaUtil $bac, int $classe, int $id): Response {
-    // inizializza
-    $dati = null;
-    // controllo avviso
-    $avviso = $this->em->getRepository(Avviso::class)->find($id);
-    if (!$avviso) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    if (!$bac->permessoLettura($avviso, $this->getUser())) {
-      // errore: non è autore dell'avviso
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // legge dati
-    $dati = $bac->dettagliAvviso($avviso);
-    // visualizza pagina
-    return $this->render('coordinatore/scheda_avviso.html.twig', [
-      'dati' => $dati]);
-  }
-
-  /**
-   * Cancella avviso
-   *
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param int $classe Identificativo della classe
-   * @param int $id Identificativo dell'avviso
-   *
-   * @return Response Pagina di risposta
-   *
-   */
-  #[Route(path: '/coordinatore/avvisi/delete/{classe}/{id}', name: 'coordinatore_avviso_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function avvisoDelete(LogHandler $dblogger, BachecaUtil $bac,
-                               RegistroUtil $reg, int $classe, int $id): Response {
-    // controllo avviso
-    $avviso = $this->em->getRepository(Avviso::class)->findOneBy(['id' => $id, 'tipo' => 'O']);
-    if (!$avviso) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
-    if (!$classe) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
-    // controllo permessi
-    if (!$bac->azioneAvviso('delete', $avviso->getData(), $this->getUser(), $avviso)) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    if (count($avviso->getAnnotazioni()) > 0) {
-      $a = $avviso->getAnnotazioni()[0];
-      if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-    }
-    // cancella annotazioni
-    $log_annotazioni = [];
-    foreach ($avviso->getAnnotazioni() as $a) {
-      $log_annotazioni[] = $a->getId();
-      $this->em->remove($a);
-    }
-    // cancella destinatari
-    $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
-      ->delete()
-      ->where('au.avviso=:avviso')
-      ->setParameter('avviso', $avviso)
-      ->getQuery()
-      ->execute();
-    $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('ac')
-      ->delete()
-      ->where('ac.avviso=:avviso')
-      ->setParameter('avviso', $avviso)
-      ->getQuery()
-      ->execute();
-    // cancella avviso
-    $avviso_id = $avviso->getId();
-    $this->em->remove($avviso);
-    // ok: memorizza dati
-    $this->em->flush();
-    // rimuove notifica
-    NotificaMessageHandler::delete($this->em, (new AvvisoMessage($avviso_id))->getTag());
-    // log azione
-    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', [
-      'Id' => $avviso_id,
-      'Data' => $avviso->getData()->format('d/m/Y'),
-      'Testo' => $avviso->getTesto(),
-      'Destinatari' => $avviso->getDestinatari(),
-      'Filtro Tipo' => $avviso->getFiltroTipo(),
-      'Filtro' => $avviso->getFiltro(),
-      'Classe' => $avviso->getCattedra()->getCLasse()->getId(),
-      'Docente' => $avviso->getDocente()->getId(),
-      'Annotazioni' => implode(', ', $log_annotazioni)]);
-    // redirezione
-    return $this->redirectToRoute('coordinatore_avvisi');
-  }
-
-  /**
    * Gestione presenze fuori classe
    *
    * @param Request $request Pagina richiesta
@@ -1006,7 +584,6 @@ class CoordinatoreController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    $vecchiaPresenza = clone $presenza;
     // controllo classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
@@ -1067,7 +644,7 @@ class CoordinatoreController extends BaseController {
       }
       if ($form->isValid()) {
         // ok: memorizzazione e log
-        $dblogger->logModifica('PRESENZE', 'Modifica presenza', $vecchiaPresenza, $presenza);
+        $dblogger->logAzione('PRESENZE', 'Modifica presenza');
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -1100,7 +677,6 @@ class CoordinatoreController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    $vecchiaPresenza = clone $presenza;
     // controllo classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
@@ -1130,7 +706,7 @@ class CoordinatoreController extends BaseController {
     // cancella presenza
     $this->em->remove($presenza);
     // ok: memorizzazione e log
-    $dblogger->logRimozione('PRESENZE', 'Cancella presenza', $vecchiaPresenza);
+    $dblogger->logAzione('PRESENZE', 'Cancella presenza');
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirect
@@ -1259,7 +835,7 @@ class CoordinatoreController extends BaseController {
               ->setDescrizione($form->get('descrizione')->getData())
               ->setAlunno($alunno);
             $this->em->persist($presenza);
-            $dblogger->logCreazione('PRESENZE', 'Aggiunge presenza', $presenza);
+            $dblogger->logAzione('PRESENZE', 'Aggiunge presenza');
           }
         }
         // messaggio

@@ -42,7 +42,7 @@ Scenario: visualizza errore per pagina inserimento di piano di lavoro già inser
     | id  | docente | attiva | tipo |
     | $c1 | #logged | si     | N    |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
+    | id  | classe     | materia     | autore  | tipo |
     | $d1 | $c1:classe | $c1:materia | #logged | L    |
   Quando vai alla pagina "documenti_piani_add" con parametri:
     | classe        | materia        |
@@ -61,7 +61,7 @@ Scenario: visualizza errore per pagina inserimento di piano di lavoro già inser
     | $c1 | #logged | si     | $cl1   | $m1     | N    |
     | $c2 | #other  | si     | $cl1   | $m1     | I    |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
+    | id  | classe     | materia     | autore  | tipo |
     | $d1 | $cl1       | $m1         | #other  | L    |
   Quando vai alla pagina "documenti_piani_add" con parametri:
     | classe  | materia |

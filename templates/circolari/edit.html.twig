@@ -12,15 +12,16 @@
       {{ form_start(form) }}
       {{ form_errors(form) }}
       <div class="form-group">
-        <label class="col-sm-2 control-label required">{{ 'label.data_numero'|trans }}</label>
+        <label class="col-sm-2 control-label required">{{ 'label.data'|trans }}</label>
         <div class="col-sm-4">
           {{ form_widget(form.data) }}
         </div>
-        <div class="col-sm-4 col-sm-offset-2">
+        <label class="col-sm-2 control-label required">{{ 'label.numero'|trans }}</label>
+        <div class="col-sm-4 _col-sm-offset-2">
           {{ form_widget(form.numero) }}
         </div>
       </div>
-      {{ form_row(form.oggetto) }}
+      {{ form_row(form.titolo) }}
       <div class="form-group">
         <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
         <div class="col-sm-10">
@@ -31,10 +32,14 @@
         <label class="col-sm-2 control-label required">{{ 'label.destinatari'|trans }}</label>
         <div class="col-sm-10">
           <div class="form-group gs-mb-2 gs-vertical-center">
-            <div class="col-sm-2 text-right">{{ form_widget(form.dsga) }}</div>
-            <div class="col-sm-10">
+            <div class="col-sm-12">
+              {{ form_widget(form.speciali) }}
+            </div>
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-12">
+              {{ form_widget(form.ataTutti) }}
               {{ form_widget(form.ata) }}
-              {{ form_widget(form.destinatariAta) }}
             </div>
           </div>
           <div class="form-group gs-mb-2 gs-vertical-center">
@@ -66,18 +71,25 @@
             {{ form_widget(form.filtroAlunni) }}
           </div>
           <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.rappresentanti_genitori'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.rappresentantiGenitori) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteRappresentantiGenitori" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroRappresentantiGenitori" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroRappresentantiGenitori) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.rappresentanti_alunni'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.rappresentantiAlunni) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteRappresentantiAlunni" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroRappresentantiAlunni" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroRappresentantiAlunni) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
             <div class="col-sm-2 text-right">{{ 'label.altri'|trans|upper }}</div>
-            <div class="col-sm-10">{{ form_widget(form.altri) }}</div>
+            <div class="col-sm-10">{{ form_widget(form.esterni) }}</div>
           </div>
         </div>
       </div>
-      {#-- <div class="form-group"> #}
-        {#-- <label class="col-sm-2 control-label">{{ 'label.impostazioni'|trans }}</label> #}
-        {#-- <div class="col-sm-10"> #}
-          {#-- {{ form_widget(form.firma) }} #}
-          {#-- {{ form_widget(form.notifica) }} #}
-        {#-- </div> #}
-      {#-- </div> #}
       <div class="form-group">
         <label class="col-sm-2 control-label required">{{ 'label.documento'|trans }}</label>
         <div class="col-sm-10">
@@ -197,7 +209,7 @@
         </div>
       </div>
       {{ form_widget(form._token) }}
-      {{ form_end(form, {'render_rest': false}) }}
+      {{ form_end(form) }}
     </div>
   </div>
 </div>
@@ -342,26 +354,30 @@ $(document).ready(function() {
     $("#circolare_docenti").val('N').change();
     $("#circolare_genitori").val('N').change();
     $("#circolare_alunni").val('N').change();
+    $("#circolare_rappresentantiGenitori").val('N').change();
+    $("#circolare_rappresentantiAlunni").val('N').change();
   });
   $("#gs-pulsanteCoordinatori").click(function() {
-    var opt = $('#circolare_filtroCoordinatori').val();
-    var type = ($('#circolare_coordinatori').val() == 'C' ? 'classi' : '');
-    $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
-    $('input[name="circolare[sedi][]"]:checked').each(function() {
-      var s=$(this).parent().text().trim();
-      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+    if (!modaleClassiDefinito('coordinatori')) {
+        var opt = $('#circolare_filtroCoordinatori').val();
+        var type = ($('#circolare_coordinatori').val() == 'C' ? 'classi' : '');
+        $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+        $('input[name="circolare[sedi][]"]:checked').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"]').show();
+        });
+        $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
+        });
+        if (opt != "") {
+          $.each(opt.split(","), function(idx,item){
+            $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+          });
+        }
+        $("#gs-modal-"+type).data('caller', 'Coordinatori').modal('show');
+      }
     });
-    $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
-      var s=$(this).parent().text().trim();
-      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
-    });
-    if (opt != "") {
-      $.each(opt.split(","), function(idx,item){
-        $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
-      });
-    }
-    $("#gs-modal-"+type).data('caller', 'Coordinatori').modal('show');
-  });
   $("#circolare_coordinatori").change(function() {
     $("#circolare_filtroCoordinatori").val('');
     if ($(this).val() == 'C') {
@@ -390,25 +406,34 @@ $(document).ready(function() {
           $('#gs-modal-docenti-row').append(s);
         });
       }
-    } else {
-      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
-      if (type == 'classi') {
+      $("#gs-modal-"+type).data('caller', 'Docenti').modal('show');
+    } else if (type == 'classi') {
+      if (!modaleClassiDefinito('docenti')) {
+        $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
         $('input[name="circolare[sedi][]"]:checked').each(function() {
           var s=$(this).parent().text().trim();
-          $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+          $('#gs-modal-classi div[data-sede="'+s+'"]').show();
         });
         $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
           var s=$(this).parent().text().trim();
-          $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
+          $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
         });
+        if (opt != "") {
+          $.each(opt.split(","), function(idx,item){
+            $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+          });
+        }
+        $("#gs-modal-"+type).data('caller', 'Docenti').modal('show');
       }
+    } else {
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
       if (opt != "") {
         $.each(opt.split(","), function(idx,item){
           $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
         });
       }
+      $("#gs-modal-"+type).data('caller', 'Docenti').modal('show');
     }
-    $("#gs-modal-"+type).data('caller', 'Docenti').modal('show');
   });
   $("#circolare_docenti").change(function() {
     $("#circolare_filtroDocenti").val('');
@@ -434,11 +459,11 @@ $(document).ready(function() {
       $('#circolare_lista_classi').val('');
       $('input[name="circolare[sedi][]"]:checked').each(function() {
         var s=$(this).parent().text().trim();
-        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',false);
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').show();
       });
       $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
         var s=$(this).parent().text().trim();
-        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',true);
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').hide();
       });
       if (opt != "") {
         $('#gs-modal-alunni-row').data('id', opt);
@@ -448,23 +473,28 @@ $(document).ready(function() {
           $('#gs-modal-alunni-row').append(s);
         });
       }
+      $("#gs-modal-"+type).data('caller', 'Genitori').modal('show');
     } else {
-      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
-      $('input[name="circolare[sedi][]"]:checked').each(function() {
-        var s=$(this).parent().text().trim();
-        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
-      });
-      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
-        var s=$(this).parent().text().trim();
-        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
-      });
-      if (opt != "") {
-        $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
-        });
+      if (type == 'classi') {
+        if (!modaleClassiDefinito('genitori')) {
+          $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+          $('input[name="circolare[sedi][]"]:checked').each(function() {
+            var s=$(this).parent().text().trim();
+            $('#gs-modal-classi div[data-sede="'+s+'"]').show();
+          });
+          $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+            var s=$(this).parent().text().trim();
+            $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
+          });
+          if (opt != "") {
+            $.each(opt.split(","), function(idx,item){
+              $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+            });
+          }
+          $("#gs-modal-"+type).data('caller', 'Genitori').modal('show');
+        }
       }
     }
-    $("#gs-modal-"+type).data('caller', 'Genitori').modal('show');
   });
   $("#circolare_genitori").change(function() {
     $("#circolare_filtroGenitori").val('');
@@ -490,11 +520,11 @@ $(document).ready(function() {
       $('#circolare_lista_classi').val('');
       $('input[name="circolare[sedi][]"]:checked').each(function() {
         var s=$(this).parent().text().trim();
-        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',false);
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').show();
       });
       $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
         var s=$(this).parent().text().trim();
-        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',true);
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').hide();
       });
       if (opt != "") {
         $('#gs-modal-alunni-row').data('id', opt);
@@ -504,23 +534,26 @@ $(document).ready(function() {
           $('#gs-modal-alunni-row').append(s);
         });
       }
+      $("#gs-modal-"+type).data('caller', 'Alunni').modal('show');
     } else {
-      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
-      $('input[name="circolare[sedi][]"]:checked').each(function() {
-        var s=$(this).parent().text().trim();
-        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
-      });
-      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
-        var s=$(this).parent().text().trim();
-        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
-      });
-      if (opt != "") {
-        $.each(opt.split(","), function(idx,item){
-          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+      if (!modaleClassiDefinito('alunni')) {
+        $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+        $('input[name="circolare[sedi][]"]:checked').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"]').show();
         });
+        $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
+        });
+        if (opt != "") {
+          $.each(opt.split(","), function(idx,item){
+            $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+          });
+        }
+        $("#gs-modal-"+type).data('caller', 'Alunni').modal('show');
       }
     }
-    $("#gs-modal-"+type).data('caller', 'Alunni').modal('show');
   });
   $("#circolare_alunni").change(function() {
     $("#circolare_filtroAlunni").val('');
@@ -532,6 +565,68 @@ $(document).ready(function() {
       $("#gs-filtroAlunni").hide();
     }
   });
+  $("#gs-pulsanteRappresentantiGenitori").click(function() {
+    if (!modaleClassiDefinito('rappresentantiGenitori')) {
+      var opt = $('#circolare_filtroRappresentantiGenitori').val();
+      var type = ($('#circolare_rappresentantiGenitori').val() == 'C' ? 'classi' : '');
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"]').show();
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
+      });
+      if (opt != "") {
+        $.each(opt.split(","), function(idx,item){
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+        });
+      }
+      $("#gs-modal-"+type).data('caller', 'RappresentantiGenitori').modal('show');
+    }
+  });
+  $("#circolare_rappresentantiGenitori").change(function() {
+    $("#circolare_filtroRappresentantiGenitori").val('');
+    if ($(this).val() == 'C') {
+      $("#gs-pulsanteRappresentantiGenitori").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteRappresentantiGenitori").hide();
+      $("#gs-filtroRappresentantiGenitori").hide();
+    }
+  });
+  $("#gs-pulsanteRappresentantiAlunni").click(function() {
+    if (!modaleClassiDefinito('rappresentantiAlunni')) {
+      var opt = $('#circolare_filtroRappresentantiAlunni').val();
+      var type = ($('#circolare_rappresentantiAlunni').val() == 'C' ? 'classi' : '');
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"]').show();
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"]').hide();
+      });
+      if (opt != "") {
+        $.each(opt.split(","), function(idx,item){
+          $('#gs-modal-'+type+' input[value="'+item+'"]').prop("checked", true).change();
+        });
+      }
+      $("#gs-modal-"+type).data('caller', 'RappresentantiAlunni').modal('show');
+    }
+  });
+  $("#circolare_rappresentantiAlunni").change(function() {
+    $("#circolare_filtroRappresentantiAlunni").val('');
+    if ($(this).val() == 'C') {
+      $("#gs-pulsanteRappresentantiAlunni").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteRappresentantiAlunni").hide();
+      $("#gs-filtroRappresentantiAlunni").hide();
+    }
+  });
   $("#gs-modal-classi-confirm").click(function() {
     var opt = $('#gs-modal-classi input[type="checkbox"]:checked');
     var optlst = opt.map(function(){return $(this).val();}).get();
@@ -540,17 +635,25 @@ $(document).ready(function() {
     } else {
       var txt = opt.map(function(){return $(this).parent().text();}).get().join(', ');
       var caller = $("#gs-modal-classi").data('caller');
+      var caller2 = caller.charAt(0).toLowerCase()+caller.slice(1);
+      $("#circolare_"+caller2).data('previous', $("#circolare_"+caller2).val());
+      $("select[id^='circolare_']").each(function() {
+        if ($(this).val() == 'C') {
+          var caller = $(this).attr('id').replace('circolare_', '');
+          var caller2 = caller.charAt(0).toUpperCase()+caller.slice(1);
+          $("#circolare_filtro"+caller2).val(optlst);
+          $("#gs-filtro"+caller2).text(txt).show();
+          $("#gs-pulsante"+caller2).show();
+        }
+      });
       $("#gs-modal-classi").modal('hide');
-      $("#circolare_filtro"+caller).val(optlst);
-      $("#circolare_"+caller.toLowerCase()).data('previous', $("#circolare_"+caller.toLowerCase()).val());
-      $("#gs-pulsante"+caller).show();
-      $("#gs-filtro"+caller).text(txt).show();
     }
   });
   $("#gs-modal-classi-cancel").click(function() {
-    var caller = $("#gs-modal-classi").data('caller').toLowerCase();
-    var old = $("#circolare_"+caller).data('previous');
-    $("#circolare_"+caller).val(old);
+    var caller = $("#gs-modal-classi").data('caller');
+    var caller2 = caller.charAt(0).toLowerCase() + caller.slice(1);
+    var old = $("#circolare_"+caller2).data('previous');
+    $("#circolare_"+caller2).val(old);
     $("#gs-modal-classi").modal('hide');
   });
   $("#gs-modal-materie-confirm").click(function() {
@@ -647,19 +750,19 @@ $(document).ready(function() {
     $("#circolare_"+caller).val(old);
     $("#gs-modal-alunni").modal('hide');
   });
-  $("#circolare_ata").change(function() {
+  $("#circolare_ataTutti").change(function() {
     if ($(this).is(":checked")) {
-      $("input[name='circolare[destinatariAta][]'][value='A']").prop("checked", true).parent().addClass('active');
-      $("input[name='circolare[destinatariAta][]'][value='T']").prop("checked", true).parent().addClass('active');
-      $("input[name='circolare[destinatariAta][]'][value='C']").prop("checked", true).parent().addClass('active');
+      $("input[name='circolare[ata][]'][value='A']").prop("checked", true).parent().addClass('active');
+      $("input[name='circolare[ata][]'][value='T']").prop("checked", true).parent().addClass('active');
+      $("input[name='circolare[ata][]'][value='C']").prop("checked", true).parent().addClass('active');
     } else {
-      $("input[name='circolare[destinatariAta][]'][value='A']").prop("checked", false).parent().removeClass('active');
-      $("input[name='circolare[destinatariAta][]'][value='T']").prop("checked", false).parent().removeClass('active');
-      $("input[name='circolare[destinatariAta][]'][value='C']").prop("checked", false).parent().removeClass('active');
+      $("input[name='circolare[ata][]'][value='A']").prop("checked", false).parent().removeClass('active');
+      $("input[name='circolare[ata][]'][value='T']").prop("checked", false).parent().removeClass('active');
+      $("input[name='circolare[ata][]'][value='C']").prop("checked", false).parent().removeClass('active');
     }
   });
-  $("input[name='circolare[destinatariAta][]']").change(function() {
-    $("#circolare_ata").prop("checked", false).parent().removeClass('active');
+  $("input[name='circolare[ata][]']").change(function() {
+    $("#circolare_ataTutti").prop("checked", false).parent().removeClass('active');
   });
   $(document).on('keypress','.modal', function(e){
     return event.keyCode != 13;
@@ -693,7 +796,34 @@ $(document).ready(function() {
       $("#circolare_filtroAlunni").data('nomi', $("{{ dati.alunni|raw }}").text());
     }
   }
+  if ($("#circolare_rappresentantiGenitori").val() == 'C') {
+    $("#gs-pulsanteRappresentantiGenitori").show();
+    $("#gs-filtroRappresentantiGenitori").html("{{ dati.rappresentantiGenitori|raw }}").show();
+  }
+  if ($("#circolare_rappresentantiAlunni").val() == 'C') {
+    $("#gs-pulsanteRappresentantiAlunni").show();
+    $("#gs-filtroRappresentantiAlunni").html("{{ dati.rappresentantiAlunni|raw }}").show();
+  }
 });
+function modaleClassiDefinito(caller) {
+  var caller2 = caller.charAt(0).toUpperCase()+caller.slice(1);
+  if ($("#circolare_"+caller).data('previous') == 'C') {
+    return false;
+  }
+  var lista = $('select[id^="circolare_"]:not(#circolare_'+caller+')').
+    filter(function() { return $(this).val() == 'C'; });
+  if (lista.length == 0) {
+    return false;
+  }
+  var id = lista[0].id.replace('circolare_', '');
+  var optlst = $('#circolare_filtro'+id.charAt(0).toUpperCase()+id.slice(1)).val();
+  var txt = $('#gs-filtro'+id.charAt(0).toUpperCase()+id.slice(1)).text();
+  $("#circolare_"+caller).data('previous', $("#circolare_"+caller).val());
+  $("#circolare_filtro"+caller2).val(optlst);
+  $("#gs-filtro" + caller2).text(txt).show();
+  $("#gs-pulsante" + caller2).show();
+  return true;
+}
 function addUser(caller, element) {
   var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
   var nome = $(element).parent().text().trim();

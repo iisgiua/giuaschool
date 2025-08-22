@@ -8,20 +8,20 @@
 
 namespace App\MessageHandler;
 
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Throwable;
-use DateTime;
 use App\Entity\Istituto;
-use Exception;
 use App\Entity\Utente;
 use App\Message\NotificaMessage;
 use App\Util\TelegramManager;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 use Twig\Environment;
 
 
@@ -32,6 +32,7 @@ use Twig\Environment;
  */
 #[AsMessageHandler]
 class NotificaMessageHandler {
+
 
   //==================== METODI DELLA CLASSE ====================
 

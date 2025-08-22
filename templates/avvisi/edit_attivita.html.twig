@@ -1,0 +1,183 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% form_theme form _self %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid gs-mt-4">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      <div class="help-block gs-text-normal gs-mt-0"><em>{{ 'message.avviso_predefinito_info'|trans|raw }}<br>
+        {{ 'message.info_avviso_con_annotazione'|trans }}</em></div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ form.data.vars.label|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.data) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ form.inizio.vars.label|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.inizio) }}
+        </div>
+        <label class="col-sm-2 control-label required">{{ form.fine.vars.label|trans }}</label>
+        <div class="col-sm-4 _col-sm-offset-2">
+          {{ form_widget(form.fine) }}
+        </div>
+      </div>
+      {{ form_row(form.attivita) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.sedi) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.destinatari'|trans }}</label>
+        <div class="col-sm-10">
+          <div id="gs-modal-classi">
+            {{ form_widget(form.classi) }}
+          </div>
+          {{ form_widget(form.filtroDocenti) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          {{ form_widget(form.submit) }}
+          <button type="button" class="btn btn-success gs-mr-3" title="Anteprima del testo del messaggio" data-toggle="modal" data-target="#gs-modal-info">{{ 'label.preview'|trans }}</button>
+          {{ form_widget(form.cancel) }}
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+  {% include 'include/modal-info.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date()|date('d/m/Y') }}",
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13, 14, 15, 16, 17, 18, 19, 20],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+  });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+  $("input[name='avviso[sedi][]']").change(function() {
+    $('input[name="avviso[sedi][]"]:checked').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] div').show();
+    });
+    $('input[name="avviso[sedi][]"]:not(:checked)').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('checked',false).parent().removeClass('active');
+      $('#gs-modal-classi div[data-sede="'+s+'"] div').hide();
+    });
+  }).change();
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    const val = {
+      data: $('#avviso_data').val(),
+      inizio: $('#avviso_inizio').val(),
+      fine: $('#avviso_fine').val(),
+      attivita: $('#avviso_attivita').val() };
+    var tpl = "{{ tpl }}";
+    var ris = tpl.replace(/\{(\w+)\}/g,
+      (match, key) => { return val[key] !== undefined ? val[key] : ''; });
+    ris = "<em>"+ris+"</em>";
+    $(this).find('#gs-modal-info-label').html('Anteprima del testo del messaggio');
+    $(this).find('#gs-modal-info-body').html(ris);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
+  });
+  // init
+  var c = '{{ form.filtroDocenti.vars.value }}'.split(',');
+  c.forEach(function(i) {
+    $('input[name="avviso[classi][]"][value="'+i+'"]').click();
+  });
+});
+</script>
+{% endblock %}
+
+{% block _avviso_classi_widget %}
+  {% set prec = '' %}
+  {% for group_label, group in choices %}
+    {% if group_label != prec %}
+      {% if prec != '' %}
+</div>
+      {% endif %}
+      {% set prec = group_label %}
+<div class="col-sm-6" data-sede="{{ prec }}">
+  <div><strong><em>{{ prec }}</em></strong></div>
+    {% endif %}
+    {% set sez = '' %}
+    {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+  </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+  <div class="row">
+      {% endif %}
+      {{- form_widget(form[key], {
+        parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
+        translation_domain: choice_translation_domain,
+      }) -}}
+    {% endfor %}
+    {% if sez != '' %}
+  </div>
+    {% endif %}
+  {% endfor %}
+  {% if prec != '' %}
+</div>
+  {% endif %}
+{% endblock %}

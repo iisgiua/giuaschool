@@ -16,6 +16,7 @@ use App\Entity\Materia;
 use App\Entity\Provisioning;
 use App\Entity\Sede;
 use App\Entity\Staff;
+use App\Event\UtenteCreatoEvent;
 use App\Form\CattedraSupplenzaType;
 use App\Form\CattedraType;
 use App\Form\DocenteType;
@@ -28,6 +29,7 @@ use App\Util\PdfManager;
 use App\Util\StaffUtil;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
@@ -198,13 +200,14 @@ class DocentiController extends BaseController {
    * Modifica dei dati di un docente
    *
    * @param Request $request Pagina richiesta
+   * @param EventDispatcherInterface $dispatcher Gestore degli eventi di sistema
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
    */
   #[Route(path: '/docenti/modifica/edit/{id}', name: 'docenti_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function modificaEdit(Request $request, int $id): Response {
+  public function modificaEdit(Request $request, EventDispatcherInterface $dispatcher, int $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -245,6 +248,8 @@ class DocentiController extends BaseController {
       }
       // memorizza modifiche
       $this->em->flush();
+      // invia evento UtenteCreato
+      // $dispatcher->dispatch(new UtenteCreatoEvent($docente));
       // messaggio
       $this->addFlash('success', 'message.update_ok');
       // redirect

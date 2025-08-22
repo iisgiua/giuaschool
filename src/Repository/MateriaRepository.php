@@ -119,23 +119,30 @@ class MateriaRepository extends EntityRepository {
    *
    * @param Classe $classe Classe di cui recuperare le cattedre
    * @param bool $curricolari Se vero verranno restituite solo le materie curricolari (escluso sostegno e potenziamento)
+   * @param bool $civica Se vero verrà restituita anche Educazione Civica
    * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo,V=vettore di dati]
    *
    * @return array Dati formattati in un array associativo
    */
-  public function materieClasse(Classe $classe, bool $curricolari=true, string $tipo='A'): array {
+  public function materieClasse(Classe $classe, bool $curricolari=true, bool $civica=true, string $tipo='A'): array {
     $dati = [];
     // lista materie
     $materie = $this->createQueryBuilder('m')
       ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
-      ->where("c.attiva=1 AND d.abilitato=1 AND cl.id=:classe")
+      ->where("c.attiva=1 AND d.abilitato=1 AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
       ->orderBy('m.nome', 'ASC')
-      ->setParameter('classe', $classe);
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo());
     if ($curricolari) {
-      $materie = $materie
-        ->andWhere("m.tipo!='S' AND c.tipo!='P'");
+      // esclude potenziamento e sostegno
+      $materie->andWhere("m.tipo!='S' AND c.tipo!='P'");
+    }
+    if (!$civica) {
+      // esclude civica
+      $materie->andWhere("m.tipo!='E'");
     }
     $materie = $materie
       ->getQuery()

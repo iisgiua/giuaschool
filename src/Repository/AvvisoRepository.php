@@ -9,17 +9,18 @@
 namespace App\Repository;
 
 use App\Entity\Alunno;
-use App\Entity\Ata;
 use App\Entity\Avviso;
-use App\Entity\AvvisoClasse;
-use App\Entity\AvvisoUtente;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
+use App\Entity\ComunicazioneClasse;
+use App\Entity\ComunicazioneUtente;
 use App\Entity\Docente;
 use App\Entity\Genitore;
+use App\Entity\RichiestaColloquio;
+use App\Entity\Utente;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -30,231 +31,47 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class AvvisoRepository extends BaseRepository {
 
   /**
-   * Restituisce le statistiche sulla lettura della circolare
+   * Restituisce gli avvisi per la pagina di gestione secondo i criteri di ricerca inseriti
    *
-   * @param Avviso $avviso Avviso di cui fare le statistiche di lettura
+   * @param array $criteri Criteri di ricerca
+   * @param int $pagina Pagina corrente
    *
    * @return array Dati formattati come array associativo
    */
-  public function statistiche(Avviso $avviso): array {
-    $dati = [];
-    $dati['ata'] = [0, 0, []];
-    $dati['dsga'] = [0, 0, []];
-    $dati['coordinatori'] = [0, 0, []];
-    $dati['docenti'] = [0, 0, []];
-    $dati['genitori'] = [0, 0, []];
-    $dati['alunni'] = [0, 0, []];
-    $dati['classi'] = [0, 0, []];
-    // lettura utenti
-    if (count($avviso->getDestinatariAta()) > 0) {
-      // dsga/ata
-      $utenti = $this->createQueryBuilder('a')
-        ->select('ata.tipo,COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
-        ->where('a.id=:avviso')
-        ->setParameter('avviso', $avviso)
-        ->groupBy('ata.tipo')
-        ->getQuery()
-        ->getArrayResult();
-      $ata = [0, 0, []];
-      foreach ($utenti as $u) {
-        if ($u['tipo'] == 'D') {
-          // dsga
-          $dati['dsga'] = [$u['tot'], $u['letti'], []];
-        } else {
-          // altri ata
-          $ata[0] += $u['tot'];
-          $ata[1] += $u['letti'];
-        }
-      }
-      if ($ata[0] > 0) {
-        $dati['ata'] = $ata;
-      }
-      // dati di lettura
-      $utenti = $this->createQueryBuilder('a')
-        ->select('ata.cognome,ata.nome,ata.tipo,au.letto')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Ata::class, 'ata', 'WITH', 'ata.id=au.utente')
-        ->where('a.id=:avviso AND au.letto IS NOT NULL')
-        ->setParameter('avviso', $avviso)
-        ->orderBy('ata.cognome,ata.nome', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($utenti as $utente) {
-        $dati[$utente['tipo'] == 'D' ? 'dsga' : 'ata'][2][] = [
-          $utente['letto'],
-          $utente['cognome'].' '.$utente['nome']];
-      }
+  public function lista(array $criteri, int $pagina): array {
+    // query base
+    $avvisi = $this->createQueryBuilder('a')
+      ->where("a.stato='P' AND a.tipo IN ('C', 'E', 'U', 'A', 'I')")
+      ->orderBy('a.data', 'DESC')
+      ->addOrderBy('a.titolo', 'ASC');
+    // filtro autore
+    if ($criteri['autore']) {
+      $avvisi
+        ->andWhere('a.autore=:autore')
+        ->setParameter('autore', $criteri['autore']);
     }
-    if (in_array('C', $avviso->getDestinatari())) {
-      // coordinatori
-      $utenti = $this->createQueryBuilder('a')
-        ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
-        ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
-        ->where('a.id=:avviso')
-        ->setParameter('avviso', $avviso)
-        ->getQuery()
-        ->getArrayResult();
-      $dati['coordinatori'] = [$utenti[0]['tot'], $utenti[0]['letti'], []];
-      // dati di lettura
-      $utenti = $this->createQueryBuilder('a')
-        ->select('d.cognome,d.nome,c.anno,c.sezione,c.gruppo,au.letto')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
-        ->join(Classe::class, 'c', 'WITH', 'c.coordinatore=d.id')
-        ->where('a.id=:avviso AND au.letto IS NOT NULL')
-			  ->setParameter('avviso', $avviso)
-        ->orderBy('c.anno,c.sezione,c.gruppo', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($utenti as $utente) {
-        $dati['coordinatori'][2][] = [
-          $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
-          $utente['cognome'].' '.$utente['nome']];
-      }
+    // filtro tipo
+    if ($criteri['tipo']) {
+      $avvisi
+        ->andWhere('a.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
     }
-    if (in_array('D', $avviso->getDestinatari())) {
-      // docenti
-      $utenti = $this->createQueryBuilder('a')
-        ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
-        ->where('a.id=:avviso')
-			  ->setParameter('avviso', $avviso)
-        ->getQuery()
-        ->getArrayResult();
-      $dati['docenti'] = [$utenti[0]['tot'], $utenti[0]['letti']];
-      // dati di lettura
-      $utenti = $this->createQueryBuilder('a')
-        ->select('d.cognome,d.nome,au.letto')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Docente::class, 'd', 'WITH', 'd.id=au.utente')
-        ->where('a.id=:avviso AND au.letto IS NOT NULL')
-			  ->setParameter('avviso', $avviso)
-        ->orderBy('d.cognome,d.nome', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($utenti as $utente) {
-        $dati['docenti'][2][] = [
-          $utente['letto'],
-          $utente['cognome'].' '.$utente['nome']];
-      }
+    // filtro mese
+    if ($criteri['mese']) {
+      $avvisi
+        ->andWhere('MONTH(a.data)=:mese')
+        ->setParameter('mese', $criteri['mese']);
     }
-    if (in_array('G', $avviso->getDestinatari())) {
-      // genitori
-      $utenti = $this->createQueryBuilder('a')
-        ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Genitore::class, 'g', 'WITH', 'g.id=au.utente')
-        ->where('a.id=:avviso')
-			  ->setParameter('avviso', $avviso)
-        ->getQuery()
-        ->getArrayResult();
-      $dati['genitori'] = [$utenti[0]['tot'], $utenti[0]['letti']];
-      // dati di lettura
-      $utenti = $this->createQueryBuilder('a')
-        ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,g.cognome AS cognome_gen,g.nome AS nome_gen,au.letto')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Genitore::class, 'g', 'WITH', 'g.id=au.utente')
-        ->join('g.alunno', 'al')
-        ->join('al.classe', 'c')
-        ->where('a.id=:avviso AND au.letto IS NOT NULL')
-			  ->setParameter('avviso', $avviso)
-        ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($utenti as $utente) {
-        $dati['genitori'][2][] = [
-          $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
-          $utente['cognome'].' '.$utente['nome'].
-          ' ('.$utente['cognome_gen'].' '.$utente['nome_gen'].')'];
-      }
+    // filtro oggetto
+    if ($criteri['oggetto']) {
+      $avvisi
+        ->andWhere('a.titolo LIKE :oggetto')
+        ->setParameter('oggetto', '%'.$criteri['oggetto'].'%');
     }
-    if (in_array('A', $avviso->getDestinatari())) {
-      // alunni
-      $utenti = $this->createQueryBuilder('a')
-        ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
-        ->where('a.id=:avviso')
-			  ->setParameter('avviso', $avviso)
-        ->getQuery()
-        ->getArrayResult();
-      $dati['alunni'] = [$utenti[0]['tot'], $utenti[0]['letti']];
-      // dati di lettura
-      $utenti = $this->createQueryBuilder('a')
-        ->select('al.cognome,al.nome,c.anno,c.sezione,c.gruppo,au.letto')
-        ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
-        ->join(Alunno::class, 'al', 'WITH', 'al.id=au.utente')
-        ->join('al.classe', 'c')
-        ->where('a.id=:avviso AND au.letto IS NOT NULL')
-			  ->setParameter('avviso', $avviso)
-        ->orderBy('c.anno,c.sezione,c.gruppo,al.cognome,al.nome', 'ASC')
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($utenti as $utente) {
-        $dati['alunni'][2][] = [
-          $utente['letto'],
-          $utente['anno'].'ª '.$utente['sezione'].($utente['gruppo'] ? '-'.$utente['gruppo'] : '').' - '.
-          $utente['cognome'].' '.$utente['nome']];
-      }
-      // classi
-      $classi = $this->createQueryBuilder('a')
-        ->select('COUNT(ac.id) AS tot,COUNT(ac.letto) AS letti')
-        ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
-        ->join('ac.classe', 'cl')
-        ->where('a.id=:avviso')
-			  ->setParameter('avviso', $avviso)
-        ->getQuery()
-        ->getArrayResult();
-      if ($classi[0]['tot'] > 0) {
-        $dati['classi'] = [$classi[0]['tot'], $classi[0]['letti'], []];
-        if ($classi[0]['tot'] > $classi[0]['letti']) {
-          // lista classi in cui va letta
-          $classi = $this->createQueryBuilder('a')
-            ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome,cl.gruppo")
-            ->join(AvvisoClasse::class, 'ac', 'WITH', 'ac.avviso=a.id')
-            ->join('ac.classe', 'cl')
-            ->where('a.id=:avviso AND ac.letto IS NULL')
-			      ->setParameter('avviso', $avviso)
-            ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
-            ->getQuery()
-            ->getArrayResult();
-          $dati['classi'][2] = array_map(
-            fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
-        }
-      }
-    }
-    // restituisce i dati
+    // paginazione
+    $dati = $this->paginazione($avvisi->getQuery(), $pagina);
+    // restituisce dati
     return $dati;
-  }
-
-  /**
-   * Restituisce la lista degli utenti a cui deve essere inviata una notifica per l'avviso indicato
-   *
-   * @param Avviso $avviso Avviso da notificare
-   *
-   * @return array Lista degli utenti
-   */
-  public function notifica(Avviso $avviso) {
-    // legge destinatari
-    $destinatari = $this->getEntityManager()->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
-      ->join('au.utente', 'u')
-      ->where('au.avviso=:avviso AND au.letto IS NULL')
-			->setParameter('avviso', $avviso)
-      ->getQuery()
-      ->getResult();
-    $utenti = [];
-    foreach ($destinatari as $dest) {
-      $utenti[] = $dest->getUtente();
-    }
-    // restituisce lista utenti
-    return $utenti;
   }
 
   /**
@@ -268,7 +85,7 @@ class AvvisoRepository extends BaseRepository {
     // legge anni
     $anni = $this->createQueryBuilder('a')
       ->select('DISTINCT a.anno')
-      ->where('a.anno > 0')
+      ->where("a.stato='A'")
       ->orderBy('a.anno', 'DESC')
       ->getQuery()
       ->getArrayResult();
@@ -280,93 +97,68 @@ class AvvisoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista degli autori di avvisi presenti nell'archivio
+   * Restituisce la lista degli avvisi in archivio che rispondono ai criteri di ricerca impostati
+   *
+   * @param array $criteri Criteri di ricerca
+   * @param int $pagina Pagina corrente
    *
    * @return array Dati formattati come array associativo
    */
-  public function autori(): array {
-    // inizializza
-    $dati = [];
-    // legge docenti
-    $docenti = $this->createQueryBuilder('a')
-      ->select('DISTINCT (a.docente) AS id,d.cognome,d.nome')
-      ->join('a.docente', 'd')
-      ->where('a.anno > 0')
-      ->orderBy('d.cognome,d.nome', 'ASC')
-      ->getQuery()
-      ->getArrayResult();
-    foreach ($docenti as $val) {
-      $dati[$val['nome'].' '.$val['cognome']] = $val['id'];
+  public function listaArchivio(array $criteri, int $pagina): array {
+    // query base
+    $avvisi = $this->createQueryBuilder('a')
+      ->where("a.stato='A' AND a.tipo IN ('C', 'E', 'U', 'A', 'I')")
+      ->orderBy('a.data', 'DESC')
+      ->addOrderBy('a.titolo', 'ASC');
+    // filtro anno
+    if ($criteri['anno'] > 0) {
+      $avvisi
+        ->andWhere('a.anno=:anno')
+        ->setParameter('anno', $criteri['anno']);
     }
-    // restituisce dati formattati
+    // filtro autore
+    if ($criteri['autore']) {
+      $avvisi
+        ->andWhere('a.autore=:autore')
+        ->setParameter('autore', $criteri['autore']);
+    }
+    // filtro tipo
+    if ($criteri['tipo']) {
+      $avvisi
+        ->andWhere('a.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // filtro mese
+    if ($criteri['mese']) {
+      $avvisi
+        ->andWhere('MONTH(a.data)=:mese')
+        ->setParameter('mese', $criteri['mese']);
+    }
+    // filtro oggetto
+    if ($criteri['oggetto']) {
+      $avvisi
+        ->andWhere('a.titolo LIKE :oggetto')
+        ->setParameter('oggetto', '%'.$criteri['oggetto'].'%');
+    }
+    // paginazione
+    $dati = $this->paginazione($avvisi->getQuery(), $pagina);
+    // restituisce dati
     return $dati;
   }
 
   /**
-   * Restituisce la lista degli avvisi in archivio che rispondono ai criteri di ricerca impostati
-   *
-   * @param array $ricerca Criteri di ricerca
-   * @param int $pagina Pagina corrente
-   * @param int $limite Numero di elementi per pagina
-   *
-   * @return array Dati formattati come array associativo
-   */
-  public function listaArchivio($ricerca, $pagina, $limite): Paginator {
-    // crea query base
-    $query = $this->createQueryBuilder('a')
-      ->where('a.anno > 0')
-      ->orderBy('a.data,a.ora', 'ASC');
-    if ($ricerca['anno'] > 0) {
-      // filtra per anno
-      $query->andWhere('a.anno = :anno')->setParameter('anno', $ricerca['anno']);
-    }
-    if ($ricerca['mese'] > 0) {
-      // filtra per mese
-      $query->andWhere('MONTH(a.data) = :mese')->setParameter('mese', $ricerca['mese']);
-    }
-    if ($ricerca['docente'] > 0) {
-      // filtra per autore
-      $query->andWhere('a.docente = :docente')->setParameter('docente', $ricerca['docente']);
-    }
-    if (!empty($ricerca['destinatari'])) {
-      // filtra per destinatari
-      if (in_array($ricerca['destinatari'], ['C', 'D', 'G', 'A', 'R', 'I', 'L', 'S', 'P'])) {
-        $query->andWhere('INSTR(a.destinatari, :destinatari)>0')
-          ->setParameter('destinatari', $ricerca['destinatari']);
-      } elseif ($ricerca['destinatari'] == 'E') {
-        $query->andWhere('INSTR(a.destinatariAta, :destinatari)>0')
-          ->setParameter('destinatari', 'D');
-      } elseif ($ricerca['destinatari'] == 'T') {
-        $query->andWhere('INSTR(a.destinatariAta, :destinatari)>0')
-          ->setParameter('destinatari', 'A');
-      } elseif ($ricerca['destinatari'] == 'Z') {
-        $query->andWhere('INSTR(a.destinatariSpeciali, :destinatari)>0')
-          ->setParameter('destinatari', 'S');
-      }
-    }
-    if (!empty($ricerca['oggetto'])) {
-      // filtra per oggetto
-      $query->andWhere('a.oggetto LIKE :oggetto')
-        ->setParameter('oggetto', '%'.$ricerca['oggetto'].'%');
-    }
-    // crea lista con pagine
-    $dati = $this->paginazione($query->getQuery(), $pagina);
-    return $dati['lista'];
-  }
-
-  /**
-   * Restituisce il numero delle verifiche della classe
+   * Restituisce il numero di verifiche della classe per il mese indicato
    *
    * @param Classe $classe Classe di cui restituire le verifiche
    * @param DateTime $mese Mese di riferemento delle verifiche
    *
    * @return array Dati formattati come array associativo
    */
-  public function verificheClasse(Classe $classe, DateTime $mese): array {
+  public function numeroVerificheClasse(Classe $classe, DateTime $mese): array {
     $dati = [];
     // legge le verifiche
-    $parametri = [new Parameter('mese', $mese->format('n')), new Parameter('anno', $classe->getAnno()),
-      new Parameter('sezione', $classe->getSezione())];
+    $parametri = [new Parameter('mese', $mese->format('n')), new Parameter('anno', $mese->format('Y')),
+      new Parameter('annoclasse', $classe->getAnno()), new Parameter('sezione', $classe->getSezione())];
     $sql = '';
     if (!empty($classe->getGruppo())) {
       $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
@@ -376,7 +168,7 @@ class AvvisoRepository extends BaseRepository {
       ->select('COUNT(a.id) as num,a.data')
       ->join('a.cattedra', 'c')
       ->join('c.classe', 'cl')
-      ->where("a.tipo='V' AND MONTH(a.data)=:mese AND cl.anno=:anno AND cl.sezione=:sezione".$sql)
+      ->where("a.stato='P' AND a.tipo='V' AND MONTH(a.data)=:mese AND YEAR(a.data)=:anno AND cl.anno=:annoclasse AND cl.sezione=:sezione".$sql)
       ->groupBy('a.data')
       ->setParameters(new ArrayCollection($parametri))
       ->getQuery()
@@ -388,30 +180,346 @@ class AvvisoRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista delle verifiche della classe per la data indicata
+   * Recupera gli avvisi destinati all'utente indicato
    *
-   * @param Classe $classe Classe di cui restituire le verifiche
-   * @param DateTime $data Giorno di riferemento delle verifiche
+   * @param array $criteri Criteri di ricerca
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   * @param Utente $utente Utente a cui sono indirizzati gli avvisi
    *
    * @return array Dati formattati come array associativo
    */
-  public function dettagliVerificheClasse(Classe $classe, DateTime $data): array {
-    // legge le verifiche
-    $parametri = [new Parameter('data', $data->format('Y-m-d')), new Parameter('anno', $classe->getAnno()),
-      new Parameter('sezione', $classe->getSezione())];
-    $sql = '';
-    if (!empty($classe->getGruppo())) {
-      $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
-      $parametri[] = new Parameter('gruppo', $classe->getGruppo());
+  public function listaBacheca(array $criteri, int $pagina, Utente $utente): array {
+    // query base
+    $avvisi = $this->createQueryBuilder('a')
+      ->select('a avviso,cu.letto')
+      ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+      ->where("a.stato='P' AND cu.utente=:utente")
+      ->orderBy('a.data', 'DESC')
+      ->addOrderBy('a.titolo', 'ASC')
+			->setParameter('utente', $utente);
+    // filtro visualizzazione
+    if ($criteri['visualizza'] == 'D') {
+      $avvisi->andWhere('cu.letto IS NULL');
     }
-    $verifiche = $this->createQueryBuilder('a')
-      ->join('a.cattedra', 'c')
-      ->join('c.classe', 'cl')
-      ->where("a.tipo='V' AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione".$sql)
-      ->setParameters(new ArrayCollection($parametri))
+    // filtro mese
+    if ($criteri['mese']) {
+      $avvisi
+        ->andWhere('MONTH(a.data)=:mese')
+        ->setParameter('mese', $criteri['mese']);
+    }
+    // filtro oggetto
+    if ($criteri['oggetto']) {
+      $avvisi
+        ->andWhere('a.titolo LIKE :oggetto')
+        ->setParameter('oggetto', '%'.$criteri['oggetto'].'%');
+    }
+    // paginazione
+    $dati = $this->paginazione($avvisi->getQuery(), $pagina);
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera gli avvisi (non letti) destinati alla classe indicata
+   *
+   * @param Classe $classe Classe a cui sono indirizzati gli avvisi
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function classe(Classe $classe): array {
+    // legge avvisi non letti
+    $avvisi = $this->createQueryBuilder('a')
+      ->join(ComunicazioneClasse::class, 'cc', 'WITH', 'cc.comunicazione=a.id')
+      ->where("a.stato='P' AND cc.classe=:classe AND cc.letto IS NULL")
+      ->orderBy('a.data', 'ASC')
+      ->addOrderBy('a.titolo', 'ASC')
+			->setParameter('classe', $classe)
       ->getQuery()
       ->getResult();
-    return $verifiche;
+    // restituisce dati
+    return $avvisi;
+  }
+
+  /**
+   * Controlla la presenza di avvisi non letti destinati agli alunni della classe indicata
+   *
+   * @param Classe $classe Classe a cui sono indirizzati gli avvisi
+   *
+   * @return int Numero di avvisi da leggere
+   */
+  public function numeroClasse(Classe $classe): int {
+    // legge avvisi non letti
+    $numero = $this->createQueryBuilder('a')
+      ->select('COUNT(a.id)')
+      ->join(ComunicazioneClasse::class, 'cc', 'WITH', 'cc.comunicazione=a.id')
+      ->where("a.stato='P' AND cc.classe=:classe AND cc.letto IS NULL")
+      ->orderBy('a.data', 'ASC')
+			->setParameter('classe', $classe)
+      ->getQuery()
+      ->getSingleScalarResult();
+    // restituisce numero avvisi
+    return $numero;
+  }
+
+  /**
+   * Restituisce gli avvisi inseriti dal coordinatore per la classe indicata
+   *
+   * @param Classe $classe Classe di riferimento
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function listaCoordinatore(Classe $classe, int $pagina): array {
+    // legge avvisi
+    $avvisi = $this->createQueryBuilder('a')
+      ->join('a.classe', 'c')
+      ->where("a.stato='P' AND a.tipo='O' AND c.id=:classe")
+      ->orderBy('a.data', 'DESC')
+      ->addOrderBy('a.titolo', 'ASC')
+			->setParameter('classe', $classe);
+    // paginazione
+    $dati = $this->paginazione($avvisi->getQuery(), $pagina);
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce verifiche o compiti previsti per lo stesso giorno di quello indicato nell'avviso.
+   *
+   * @param Avviso $avviso Avviso di riferimento, con l'indicazione del tipo di attività prevista
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function previsti(Avviso $avviso): array {
+    // legge altre attività in stessa classe e stessa data
+    $previsti = $this->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('c.classe', 'cl')
+      ->where("a.stato='P' AND a.tipo=:tipo AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione")
+			->setParameter('tipo', $avviso->getTipo())
+			->setParameter('data', $avviso->getData()->format('Y-m-d'))
+			->setParameter('anno', $avviso->getCattedra()->getClasse()->getAnno())
+			->setParameter('sezione', $avviso->getCattedra()->getClasse()->getSezione())
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC');
+    if ($avviso->getId()) {
+      // modifica di avviso esistente
+      $previsti
+        ->andWhere('a.id!=:avviso')
+        ->setParameter('avviso', $avviso->getId());
+    }
+    $previsti = $previsti
+      ->getQuery()
+      ->getResult();
+    // aggiunge info
+    $dati = [];
+    foreach ($previsti as $k => $attivita) {
+      $dati['avvisi'][$k] = $attivita;
+      $dati['destinatari'][$k] = '';
+      if ($attivita->getAlunni() == 'U') {
+        $dati['destinatari'][$k] = $this->getEntityManager()->getRepository(Alunno::class)
+          ->listaAlunni($attivita->getFiltroAlunni(), 'gs-filtroAlunni-');
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera gli eventi per l'utente indicato relativamente al mese indicato
+   *
+   * @param Utente $utente Utente a cui sono indirizzati gli eventi
+   * @param DateTime $mese Mese di riferemento degli eventi da recuperare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function agendaEventi(Utente $utente, $mese) {
+    $dati = [];
+    // eventi per utente destinatario (attività/verifiche/compiti)
+    $eventi = $this->createQueryBuilder('a')
+      ->select('DISTINCT DAY(a.data) AS giorno,a.tipo')
+      ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+      ->where("a.stato='P' AND a.tipo IN ('A', 'V', 'P') AND MONTH(a.data)=:mese AND YEAR(a.data)=:anno AND cu.utente=:utente")
+			->setParameter('mese', $mese->format('n'))
+			->setParameter('anno', $mese->format('Y'))
+			->setParameter('utente', $utente)
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($eventi as $evento) {
+      $dati[(int) $evento['giorno']][$evento['tipo']] = 1;
+    }
+    // colloqui
+    if ($utente instanceOf Docente || $utente instanceOf Genitore) {
+      // query base
+      $colloqui = $this->getEntityManager()->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
+        ->select('DISTINCT DAY(c.data) AS giorno')
+        ->join('rc.colloquio', 'c')
+        ->where("rc.stato='C' AND c.abilitato=1 AND MONTH(c.data)=:mese AND YEAR(c.data)=:anno")
+        ->orderBy('rc.appuntamento', 'ASC')
+        ->setParameter('mese', $mese->format('n'))
+        ->setParameter('anno', $mese->format('Y'));
+      if ($utente instanceOf Docente) {
+        // colloqui per il docente
+        $colloqui
+          ->andWhere('c.docente=:docente')
+          ->setParameter('docente', $utente);
+      } else {
+        // colloqui per il genitore
+        $colloqui
+          ->andWhere('rc.alunno=:alunno AND rc.genitore=:genitore')
+          ->setParameter('genitore', $utente)
+          ->setParameter('alunno', $utente->getAlunno());
+      }
+      // legge dati
+      $colloqui = $colloqui
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($colloqui as $colloquio) {
+        $dati[(int) $colloquio['giorno']]['Q'] = 1;
+      }
+    }
+    // verifiche/compiti per docente
+    if ($utente instanceOf Docente) {
+      // verifiche/compiti inseriti sulla cattedra del docente curricolare (da docente/compresenza/sostegno)
+      $eventi1 = $this->createQueryBuilder('a')
+        ->select('DISTINCT DAY(a.data) AS giorno,a.tipo')
+        ->join('a.cattedra', 'c')
+        ->join('c.materia', 'm')
+        ->leftJoin(Cattedra::class, 'c2', 'WITH', "m.tipo!='S' AND c2.attiva=1 AND c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente")
+        ->leftJoin(Cattedra::class, 'c3', 'WITH', "m.tipo='S' AND c3.attiva=1 AND c3.classe=c.classe AND c3.materia=a.materia AND c3.docente=:docente")
+        ->where("a.stato='P' AND a.tipo IN ('V', 'P') AND MONTH(a.data)=:mese AND YEAR(a.data)=:anno AND (c2.id IS NOT NULL OR c3.id IS NOT NULL)")
+        ->setParameter('mese', $mese->format('n'))
+        ->setParameter('anno', $mese->format('Y'))
+        ->setParameter('docente', $utente)
+        ->getQuery()
+        ->getArrayResult();
+      // verifiche/compiti inseriti per l'alunno del docente di sostegno
+      $eventi2 = $this->createQueryBuilder('a')
+        ->select('DISTINCT DAY(a.data) AS giorno,a.tipo')
+        ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+        ->join('a.cattedra', 'c')
+        ->join(Cattedra::class, 'c2', 'WITH', "c2.attiva=1 AND c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=cu.utente")
+        ->where("a.stato='P' AND a.tipo IN ('V', 'P') AND MONTH(a.data)=:mese AND YEAR(a.data)=:anno")
+        ->setParameter('mese', $mese->format('n'))
+        ->setParameter('anno', $mese->format('Y'))
+        ->setParameter('docente', $utente)
+        ->getQuery()
+        ->getArrayResult();
+      foreach (array_merge($eventi1, $eventi2) as $evento) {
+        $dati[(int) $evento['giorno']][$evento['tipo']] = 1;
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i dettagli degli eventi per l'utente indicato relativamente alla data e tipo indicati
+   *
+   * @param DateTime $data Data di riferemento degli eventi da recuperare
+   * @param string $tipo Tipo dell'evento [V=verifiche proprie, S=verifiche classe, P=compiti, A=attività, Q=colloqui]
+   * @param Utente|null $utente Utente a cui sono indirizzati gli eventi (solo per alcuni tipi)
+   * @param Classe|null $classe Classe di riferimento per gli eventi (solo per alcuni tipi)
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function listaAgendaEventi(DateTime $data, string $tipo, ?Utente $utente=null, ?Classe $classe=null): array {
+    $dati = [];
+    $dati['eventi'] = [];
+    if (in_array($tipo, ['A', 'V', 'P'])) {
+      // eventi per utente destinatario (attività/verifiche/compiti)
+      $dati['eventi'] = $this->createQueryBuilder('a')
+        ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+        ->where("a.stato='P' AND a.tipo=:tipo AND a.data=:data AND cu.utente=:utente")
+        ->setParameter('tipo', $tipo)
+        ->setParameter('data', $data->format('Y-m-d'))
+        ->setParameter('utente', $utente)
+        ->getQuery()
+        ->getResult();
+      // verifiche/compiti per docente
+      if (in_array($tipo, ['V', 'P']) && $utente instanceOf Docente) {
+        // verifiche/compiti inseriti sulla cattedra del docente curricolare (da docente/compresenza/sostegno)
+        $dati['eventi'] += $this->createQueryBuilder('a')
+          ->join('a.cattedra', 'c')
+          ->join('c.materia', 'm')
+          ->leftJoin(Cattedra::class, 'c2', 'WITH', "m.tipo!='S' AND c2.attiva=1 AND c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente")
+          ->leftJoin(Cattedra::class, 'c3', 'WITH', "m.tipo='S' AND c3.attiva=1 AND c3.classe=c.classe AND c3.materia=a.materia AND c3.docente=:docente")
+          ->where("a.stato='P' AND a.tipo=:tipo AND a.data=:data AND (c2.id IS NOT NULL OR c3.id IS NOT NULL)")
+          ->setParameter('tipo', $tipo)
+          ->setParameter('data', $data->format('Y-m-d'))
+          ->setParameter('docente', $utente)
+          ->getQuery()
+          ->getResult();
+        // verifiche/compiti inseriti per l'alunno del docente di sostegno
+        $dati['eventi'] += $this->createQueryBuilder('a')
+          ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=a.id')
+          ->join('a.cattedra', 'c')
+          ->join(Cattedra::class, 'c2', 'WITH', "c2.attiva=1 AND c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=cu.utente")
+          ->where("a.stato='P' AND a.tipo=:tipo AND a.data=:data")
+          ->setParameter('tipo', $tipo)
+          ->setParameter('data', $data->format('Y-m-d'))
+          ->setParameter('docente', $utente)
+          ->getQuery()
+          ->getResult();
+      }
+    } elseif ($tipo == 'Q' && ($utente instanceOf Docente || $utente instanceOf Genitore)) {
+      // colloqui
+      $colloqui = $this->getEntityManager()->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione,cl.gruppo,d.cognome AS cognomeDocente,d.nome AS nomeDocente,d.sesso AS sessoDocente')
+        ->join('rc.colloquio', 'c')
+        ->join('rc.alunno', 'a')
+        ->join('a.classe', 'cl')
+        ->join('c.docente', 'd')
+        ->where("rc.stato='C' AND c.abilitato=1 AND c.data=:data")
+        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome,a.dataNascita')
+        ->setParameter('data', $data->format('Y-m-d'));
+      if ($utente instanceOf Docente) {
+        // colloqui per il docente
+        $colloqui
+          ->andWhere('c.docente=:docente')
+          ->setParameter('docente', $utente);
+      } else {
+        // colloqui per il genitore
+        $colloqui
+          ->andWhere('rc.alunno=:alunno AND rc.genitore=:genitore')
+          ->setParameter('genitore', $utente)
+          ->setParameter('alunno', $utente->getAlunno());
+      }
+      // legge dati
+      $dati['eventi'] = $colloqui
+        ->getQuery()
+        ->getArrayResult();
+    } elseif ($tipo == 'S') {
+      // legge le verifiche di classe
+      $parametri = [new Parameter('data', $data->format('Y-m-d')), new Parameter('anno', $classe->getAnno()),
+        new Parameter('sezione', $classe->getSezione())];
+      $sql = '';
+      if (!empty($classe->getGruppo())) {
+        $sql = " AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)";
+        $parametri[] = new Parameter('gruppo', $classe->getGruppo());
+      }
+      $dati['eventi'] = $this->createQueryBuilder('a')
+        ->join('a.cattedra', 'c')
+        ->join('c.classe', 'cl')
+        ->where("a.stato='P' AND a.tipo='V' AND a.data=:data AND cl.anno=:anno AND cl.sezione=:sezione".$sql)
+        ->setParameters(new ArrayCollection($parametri))
+        ->getQuery()
+        ->getResult();
+    }
+    if ($tipo != 'Q') {
+      foreach ($dati['eventi'] as $k => $evento) {
+        $dati['destinatari'][$k] = '';
+        $dati['classi'][$k] = '';
+        if ($evento->getAlunni() == 'U') {
+          $dati['destinatari'][$k] = $this->getEntityManager()->getRepository(Alunno::class)
+            ->listaAlunni($evento->getFiltroAlunni(), '');
+        } elseif ($evento->getAlunni() == 'C') {
+          $dati['classi'][$k] = $this->getEntityManager()->getRepository(Classe::class)
+            ->listaClassi($evento->getFiltroAlunni());
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

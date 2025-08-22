@@ -36,8 +36,8 @@ Scenario: visualizza errore per cancellazione piano di lavoro di cattedra inesis
     | classe  | materia | #attiva |
     | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | L    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | L    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -54,8 +54,8 @@ Scenario: visualizza errore per cancellazione piano di lavoro di cattedra altrui
     | id  | docente | attiva | classe | materia | tipo |
     | $c1 | #other  | si     | $cl1   | $m1     | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | L    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | L    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -72,8 +72,8 @@ Scenario: visualizza errore per cancellazione programma di cattedra inesistente
     | classe  | materia | #attiva |
     | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | P    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | P    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -90,8 +90,8 @@ Scenario: visualizza errore per cancellazione programma di cattedra altrui
     | id  | docente | attiva | classe | materia | tipo |
     | $c1 | #other  | si     | $cl1   | $m1     | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | P    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | P    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -108,8 +108,8 @@ Scenario: visualizza errore per cancellazione relazione di cattedra inesistente
     | classe  | materia | #attiva |
     | $cl1    | $m1     | no      |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | R    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | R    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -126,8 +126,8 @@ Scenario: visualizza errore per cancellazione relazione di cattedra altrui
     | id  | docente | attiva | classe | materia | tipo |
     | $c1 | #other  | si     | $cl1   | $m1     | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
-    | $d1 | $cl1   | $m1     | #other  | R    |
+    | id  | classe | materia | autore | tipo |
+    | $d1 | $cl1   | $m1     | #other | R    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -141,8 +141,8 @@ Scenario: visualizza errore per cancellazione documento del 15 maggio di cattedr
     | id   | anno | sezione |
     | $c1  | 5    | A       |
   E istanze di tipo "Documento":
-    | id  | classe | docente | tipo |
-    | $d1 | $c1    | #other  | M    |
+    | id  | classe | autore | tipo |
+    | $d1 | $c1    | #other | M    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -156,8 +156,8 @@ Scenario: visualizza errore per cancellazione documento del 15 maggio di cattedr
     | id   | anno | sezione |
     | $c1  | 5    | A       |
   E istanze di tipo "Documento":
-    | id  | classe | docente | tipo |
-    | $d1 | $c1    | #other  | M    |
+    | id  | classe | autore | tipo |
+    | $d1 | $c1    | #other | M    |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -174,8 +174,8 @@ Scenario: visualizza errore per cancellazione documento BES da non responsabile 
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo | docente |
-    | $d1 | $cl1   | $a1    | B    | #other  |
+    | id  | classe | alunno | tipo | autore |
+    | $d1 | $cl1   | $a1    | B    | #other |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -196,8 +196,8 @@ Scenario: visualizza errore per cancellazione documento BES da responsabile BES 
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo | docente |
-    | $d1 | $cl1   | $a1    | B    | #other  |
+    | id  | classe | alunno | tipo | autore |
+    | $d1 | $cl1   | $a1    | B    | #other |
   Quando vai alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
@@ -218,7 +218,7 @@ Scenario: cancella piano di lavoro inserito in precedenza e torna alla visualizz
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_delete" con parametri:
@@ -263,7 +263,7 @@ Scenario: cancella programma inserito in precedenza e torna alla visualizzazione
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | P    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_delete" con parametri:
@@ -308,7 +308,7 @@ Scenario: cancella relazione inserita in precedenza e torna alla visualizzazione
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | R    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_delete" con parametri:
@@ -350,7 +350,7 @@ Scenario: cancella documento 15 maggio inserito in precedenza e torna alla visua
     | id   | anno | sezione |
     | $c1  | 5    | A       |
   E istanze di tipo "Documento":
-    | id  | classe | docente | tipo |
+    | id  | classe | autore  | tipo |
     | $d1 | $c1    | #logged | M    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/5A/documento-xlsx.xlsx"
   Quando vai alla pagina "documenti_delete" con parametri:
@@ -457,7 +457,7 @@ Scenario: accesso pagina cancellazione documenti senza utente
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E logout utente
   Quando vai alla pagina "documenti_delete" con parametri:
@@ -476,7 +476,7 @@ Schema dello scenario: accesso pagina cancellazione documenti con altri utenti
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E logout utente
   E login utente con ruolo esatto <ruolo>

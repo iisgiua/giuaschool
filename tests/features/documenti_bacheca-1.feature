@@ -23,19 +23,15 @@ Schema dello scenario: visualizza i documenti per l'utente connesso
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto |
-    | $ldu1 | $ld1             | #logged | null  |
-    | $ldu2 | $ld1             | #other  | null  |
-    | $ldu3 | $ld2             | #other  | null  |
   E istanze di tipo "Documento":
-    | id  | tipo   | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo> | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo   | classe | materia | alunno |
+    | $d1 | <tipo> | $cl1   | null    | null   |
+    | $d2 | <tipo> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto |
+    | $cu1 | $d1           | #logged | null  |
+    | $cu2 | $d1           | #other  | null  |
+    | $cu3 | $d2           | #other  | null  |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "Tutti" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
@@ -70,18 +66,14 @@ Schema dello scenario: visualizza lista vuota in assenza di documenti per l'uten
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto |
-    | $ldu1 | $ld1             | #other  | null  |
-    | $ldu2 | $ld2             | #other  | null  |
   E istanze di tipo "Documento":
-    | id  | tipo   | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo> | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo   | classe | materia | alunno |
+    | $d1 | <tipo> | $cl1   | null    | null   |
+    | $d2 | <tipo> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto |
+    | $cu1 | $d1           | #other  | null  |
+    | $cu2 | $d2           | #other  | null  |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "Tutti" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
@@ -115,27 +107,23 @@ Schema dello scenario: visualizza più file per documento di utente connesso
   E ricerca istanze di tipo "Classe":
     | id   |
     | $cl1 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto |
-    | $ldu1 | $ld1             | #logged | null  |
-  E creazione istanze di tipo "File":
-    | id  | titolo  | nome    | estensione | file    | dimensione |
-    | $f1 | Prova 1 | PROVA-1 | pdf        | PROVA-1 | 123456     |
-    | $f2 | Prova 2 | PROVA-2 | pdf        | PROVA-2 | 654321     |
   E istanze di tipo "Documento":
-    | id  | tipo   | listaDestinatari | classe | materia | alunno | allegati      |
-    | $d1 | <tipo> | $ld1             | $cl1   | null    | null   | #arc($f1,$f2) |
+    | id  | tipo   | classe | materia | alunno |
+    | $d1 | <tipo> | $cl1   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto |
+    | $cu1 | $d1           | #logged | null  |
+  E creazione istanze di tipo "Allegato":
+    | id  | titolo  | nome    | estensione | file    | dimensione | comunicazione |
+    | $f1 | Prova 1 | PROVA-1 | pdf        | PROVA-1 | 123456     | $d1           |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "Tutti" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
   E premi pulsante "Filtra"
   Allora vedi nella tabella i dati:
-    | stato      | riferimento          | documento | azione  |
-    | DA LEGGERE | $cl1 $cl1:corso,sede | Prova 1   | Scarica |
-    |            |                      | Prova 2   | Scarica |
+    | stato      | riferimento          | documento       | azione  |
+    | DA LEGGERE | $cl1 $cl1:corso,sede | Documento Excel | Scarica |
+    |            |                      | Prova 1         | Scarica |
   Esempi:
     | ruolo    | tipo |
     | Docente  | G    |
@@ -156,18 +144,14 @@ Schema dello scenario: visualizza filtro tipo documenti
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto |
-    | $ldu1 | $ld1             | #logged | null  |
-    | $ldu2 | $ld2             | #logged | null  |
   E istanze di tipo "Documento":
-    | id  | tipo    | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo>  | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo2> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo    | classe | materia | alunno |
+    | $d1 | <tipo>  | $cl1   | null    | null   |
+    | $d2 | <tipo2> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto |
+    | $cu1 | $d1           | #logged | null  |
+    | $cu2 | $d2           | #logged | null  |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "<tipo_id>" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
@@ -201,18 +185,14 @@ Schema dello scenario: visualizza filtro tipo documenti per stato da leggere
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto                     |
-    | $ldu1 | $ld1             | #logged | null                      |
-    | $ldu2 | $ld2             | #logged | #dtm(11,11,2021,15,23,12) |
   E istanze di tipo "Documento":
-    | id  | tipo   | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo> | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo   | classe | materia | alunno |
+    | $d1 | <tipo> | $cl1   | null    | null   |
+    | $d2 | <tipo> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto                     |
+    | $cu1 | $d1           | #logged | null                      |
+    | $cu2 | $d2           | #logged | #dtm(11,11,2021,15,23,12) |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "Da leggere" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
@@ -247,18 +227,14 @@ Schema dello scenario: visualizza filtro titolo documenti
     | id   |
     | $cl1 |
     | $cl2 |
-  E creazione istanze di tipo "listaDestinatari":
-    | id   |
-    | $ld1 |
-    | $ld2 |
-  E creazione istanze di tipo "listaDestinatariUtente":
-    | id    | listaDestinatari | utente  | letto                     |
-    | $ldu1 | $ld1             | #logged | null                      |
-    | $ldu2 | $ld2             | #logged | #dtm(11,11,2021,15,23,12) |
   E istanze di tipo "Documento":
-    | id  | tipo   | listaDestinatari | classe | materia | alunno |
-    | $d1 | <tipo> | $ld1             | $cl1   | null    | null   |
-    | $d2 | <tipo> | $ld2             | $cl2   | null    | null   |
+    | id  | tipo   | classe | materia | alunno |
+    | $d1 | <tipo> | $cl1   | null    | null   |
+    | $d2 | <tipo> | $cl2   | null    | null   |
+  E creazione istanze di tipo "ComunicazioneUtente":
+    | id   | comunicazione | utente  | letto                     |
+    | $cu1 | $d1           | #logged | null                      |
+    | $cu2 | $d2           | #logged | #dtm(11,11,2021,15,23,12) |
   Quando pagina attiva "documenti_bacheca"
   E selezioni opzione "Tutti" da lista "documento_tipo"
   E inserisci "Excel" nel campo "documento_titolo"

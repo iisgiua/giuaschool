@@ -8,18 +8,14 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Avviso;
 use App\Entity\StoricoEsito;
-use App\Entity\Assenza;
-use App\Util\BachecaUtil;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 /**
@@ -49,14 +45,17 @@ class FileController extends BaseController {
     $dir = $this->getParameter('dir_tmp');
     // controlla upload
     foreach ($files as $k=>$file) {
-      $nomefile = md5(uniqid()).'-'.random_int(1, 1000).'.'.$file->getClientOriginalExtension();
-      if ($file->isValid() && $file->move($dir, $nomefile)) {
+      $nomefile = date('Ymd_His').'_'.bin2hex(random_bytes(8));
+      $info = pathinfo($file->getClientOriginalName());
+      $nomeCaricato = $info['filename'];
+      $tipoCaricato = $file->getClientOriginalExtension();
+      if ($file->isValid() && $file->move($dir, $nomefile.'.'.$tipoCaricato)) {
         // file caricato senza errori
         $risposta[$k]['type'] = 'uploaded';
         $risposta[$k]['temp'] = $nomefile;
-        $risposta[$k]['name'] = $file->getClientOriginalName();
-        $risposta[$k]['ext'] = $file->getClientOriginalExtension();
-        $fl = new File($dir.'/'.$nomefile);
+        $risposta[$k]['name'] = $nomeCaricato;
+        $risposta[$k]['ext'] = $tipoCaricato;
+        $fl = new File($dir.'/'.$nomefile.'.'.$tipoCaricato);
         $risposta[$k]['size'] = $fl->getSize();
       } else {
         // errore
@@ -66,7 +65,7 @@ class FileController extends BaseController {
     }
     // memorizza in sessione
     $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-    $this->reqstack->getSession()->set($var_sessione, array_merge($risposta, $this->reqstack->getSession()->get($var_sessione, [])));
+    $this->reqstack->getSession()->set($var_sessione, array_merge($this->reqstack->getSession()->get($var_sessione, []), $risposta));
     // restituisce risposta
     return new JsonResponse($risposta);
   }
@@ -111,44 +110,6 @@ class FileController extends BaseController {
     }
     // restituisce risposta vuota
     return new JsonResponse([]);
-  }
-
-  /**
-   * Esegue il download di un allegato di un avviso.
-   *
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param int $avviso ID dell'avviso
-   * @param int $allegato Numero dell'allegato
-   *
-   * @return Response Documento inviato in risposta
-   *
-   */
-  #[Route(path: '/file/avviso/{avviso}/{allegato}', name: 'file_avviso', requirements: ['avviso' => '\d+', 'allegato' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_UTENTE')]
-  public function avviso(BachecaUtil $bac, int $avviso, int $allegato): Response {
-    // controllo avviso
-    $avviso = $this->em->getRepository(Avviso::class)->find($avviso);
-    if (!$avviso) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo allegato
-    if ($allegato < 1 || $allegato > count($avviso->getAllegati())) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controllo permessi
-    if (!$bac->permessoLettura($avviso, $this->getUser())) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // file
-    $file = new File($this->getParameter('dir_avvisi').'/'.
-      array_values($avviso->getAllegati())[$allegato - 1]);
-    // nome da visualizzare
-    $nome = 'avviso-'.$avviso->getId().'-allegato-'.$allegato.'.'.$file->guessExtension();
-    // invia il documento
-    return $this->file($file, $nome, ResponseHeaderBag::DISPOSITION_INLINE);
   }
 
   /**
@@ -216,41 +177,6 @@ class FileController extends BaseController {
         break;
     }
     // invia il documento
-    return $this->file($file);
-  }
-
-  /**
-   * Esegue il download del certificato del tipo indicato.
-   *
-   * @param string $tipo Tipo del certificato da scaricare [D=autodichiarazione]
-   * @param int $id ID dell'oggetto di riferimento
-   *
-   * @return Response Certificato inviato in risposta
-   *
-   */
-  #[Route(path: '/file/certificato/{tipo}/{id}', name: 'file_certificato', requirements: ['tipo' => 'D', 'id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function certificato(string $tipo, int $id): Response {
-    // init
-    $fs = new Filesystem();
-    if ($tipo == 'D') {
-      $assenza = $this->em->getRepository(Assenza::class)->find($id);
-      if (!$assenza) {
-        // errore assenza non definita
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      $percorso = $this->getParameter('dir_classi').'/'.
-        $assenza->getAlunno()->getClasse()->getAnno().$assenza->getAlunno()->getClasse()->getSezione().'/certificati/';
-      $nomefile = 'AUTODICHIARAZIONE-'.$assenza->getAlunno()->getId().'-'.$id.'.pdf';
-    }
-    // controllo esistenza certificato
-    if (!$fs->exists($percorso.$nomefile)) {
-      // errore certificato non esiste
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // file
-    $file = new File($percorso.$nomefile);
-    // invia il certificato
     return $this->file($file);
   }
 

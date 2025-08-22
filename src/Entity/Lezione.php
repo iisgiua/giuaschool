@@ -403,24 +403,4 @@ class Lezione implements Stringable {
     return $this->data->format('d/m/Y').': '.$this->ora.' - '.$this->classe.' '.$this->materia;
   }
 
-  /**
-   * Restituisce i dati dell'istanza corrente come un array associativo
-   *
-   * @return array Lista dei valori dell'istanza
-   */
-  public function datiVersione(): array {
-    $dati = [
-      'data' => $this->data ? $this->data->format('d/m/Y') : null,
-      'ora' => $this->ora,
-      'classe' => $this->classe ? $this->classe->getId() : null,
-      'gruppo' => $this->gruppo ?? '',
-      'tipoGruppo' => $this->tipoGruppo,
-      'materia' => $this->materia ? $this->materia->getId() : null,
-      'argomento' => $this->argomento,
-      'attivita' => $this->attivita,
-      'moduloFormativo' => $this->moduloFormativo ? $this->moduloFormativo->getId() : null,
-      'sostituzione' => $this->sostituzione];
-    return $dati;
-  }
-
 }

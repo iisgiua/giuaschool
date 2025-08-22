@@ -1,0 +1,311 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3">{{ avviso.data|date('j') }} {{ mesi[avviso.data|date('n')] }} {{ avviso.data|date('Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>{{ avviso.titolo }}</em></h4>
+</div>
+<div class="modal-body">
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Sede:</strong></div>
+    <div class="col-sm-10">
+    {% for s in avviso.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? '<br>' }}{% endfor %}
+    </div>
+  </div>
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Destinatari:</strong></div>
+    <div class="col-sm-10">
+  {% if 'D' in avviso.speciali %}DSGA<br>{% endif %}
+  {% if 'S' in avviso.speciali %}RSPP<br>{% endif %}
+  {% if 'R' in avviso.speciali %}RSU<br>{% endif %}
+  {% if 'I' in avviso.speciali %}RAPPRESENTANTI DI ISTITUTO <br>{% endif %}
+  {% if 'P' in avviso.speciali %}RAPPRESENTANTI CONSULTA PROVICIALE<br>{% endif %}
+  {% if 'A' in avviso.ata and 'T' in avviso.ata and 'C' in avviso.ata %}ATA<br>
+  {% elseif 'A' in avviso.ata or 'T' in avviso.ata or 'C' in avviso.ata %}
+    {% if 'A' in avviso.ata %}AMMINISTRATIVI{% endif %}
+    {% if 'T' in avviso.ata %}TECNICI{% endif %}
+    {% if 'C' in avviso.ata %}COLL.SCOLAST.{% endif %}
+    <br>
+  {% endif %}
+  {% if avviso.coordinatori != 'N' %}COORDINATORI {{ dati.coordinatori|raw }}<br>{% endif %}
+  {% if avviso.docenti != 'N' %}DOCENTI {{ dati.docenti|raw }}<br>{% endif %}
+  {% if avviso.genitori != 'N' %}GENITORI {{ dati.genitori|raw }}<br>{% endif %}
+  {% if avviso.alunni != 'N' %}ALUNNI {{ dati.alunni|raw }}<br>{% endif %}
+  {% if avviso.rappresentantiGenitori != 'N' %}RAPPRESENTANTI GENITORI {{ dati.rappresentantiGenitori|raw }}<br>{% endif %}
+  {% if avviso.rappresentantiAlunni != 'N' %}RAPPRESENTANTI ALUNNI {{ dati.rappresentantiAlunni|raw }}<br>{% endif %}
+  {% for a in avviso.esterni %}{{ a }}{{ not loop.last ? '<br>' }}{% endfor %}
+    </div>
+  </div>
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Autore:</strong></div>
+    <div class="col-sm-10">{{ avviso.autore.cognome }} {{ avviso.autore.nome }}</div>
+  </div>
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Tipo:</strong></div>
+    <div class="col-sm-10">
+  {% if avviso.tipo == 'U' %}Uscita anticipata
+  {% elseif avviso.tipo == 'E' %}Ingresso posticipato
+  {% elseif avviso.tipo == 'A' %}Svolgimento attività
+  {% elseif avviso.tipo == 'C' %}Avviso generico
+  {% elseif avviso.tipo == 'I' %}Comunicazione personale
+  {% elseif avviso.tipo == 'O' %}Comunicazione del coordinatore
+  {% endif %}
+    </div>
+  </div>
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Annotazione:</strong></div>
+    <div class="col-sm-10">{{ avviso.annotazioni|length > 0 ? 'Si' : 'No' }}</div>
+  </div>
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Testo:</strong></div>
+    <div class="col-sm-10"><em>{{ avviso.testoPersonalizzato|raw|nl2br }}</em></div>
+  </div>
+  {% if avviso.allegati|length > 0 %}
+  <div class="row gs-mt-2">
+    <div class="col-sm-2"><strong>Allegati:</strong></div>
+    <div class="col-sm-10">
+    {% for n,a in avviso.allegati %}
+      <a target="_blank" href="{{ path('avvisi_download', {'avviso': avviso.id, 'allegato': n}) }}" title="Scarica l'allegato"><strong>{{ a.titolo }}</strong></a><br>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% if avviso.stato == 'P' %}
+  <div class="gs-mt-2">
+    <strong>Statistiche di lettura:</strong>
+    {% if dati.statistiche.dsga is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">DSGA: {{ dati.statistiche.dsga.percentuale|number_format(0) }}% ({{ dati.statistiche.dsga.letti }} su {{ dati.statistiche.dsga.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.dsga.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-dsga">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.dsga.letti > 0 %}
+    <div id="gs-collapse-dsga" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.dsga.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rspp is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">RSPP: {{ dati.statistiche.rspp.percentuale|number_format(0) }}% ({{ dati.statistiche.rspp.letti }} su {{ dati.statistiche.rspp.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rspp.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rspp">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rspp.letti > 0 %}
+    <div id="gs-collapse-rspp" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rspp.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rappresentanti_R is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.rappresentanti_R'|trans }}: {{ dati.statistiche.rappresentanti_R.percentuale|number_format(0) }}% ({{ dati.statistiche.rappresentanti_R.letti }} su {{ dati.statistiche.rappresentanti_R.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rappresentanti_R.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rappresentanti_R">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rappresentanti_R.letti > 0 %}
+    <div id="gs-collapse-rappresentanti_R" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rappresentanti_R.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rappresentanti_I is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.rappresentanti_I'|trans }}: {{ dati.statistiche.rappresentanti_I.percentuale|number_format(0) }}% ({{ dati.statistiche.rappresentanti_I.letti }} su {{ dati.statistiche.rappresentanti_I.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rappresentanti_I.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rappresentanti_I">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rappresentanti_I.letti > 0 %}
+    <div id="gs-collapse-rappresentanti_I" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rappresentanti_I.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rappresentanti_P is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.rappresentanti_P'|trans }}: {{ dati.statistiche.rappresentanti_P.percentuale|number_format(0) }}% ({{ dati.statistiche.rappresentanti_P.letti }} su {{ dati.statistiche.rappresentanti_P.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rappresentanti_P.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rappresentanti_P">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rappresentanti_P.letti > 0 %}
+    <div id="gs-collapse-rappresentanti_P" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rappresentanti_P.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.ata_A is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.ata_amministrativi'|trans }}: {{ dati.statistiche.ata_A.percentuale|number_format(0) }}% ({{ dati.statistiche.ata_A.letti }} su {{ dati.statistiche.ata_A.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.ata_A.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-ata_A">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.ata_A.letti > 0 %}
+    <div id="gs-collapse-ata_A" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.ata_A.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.ata_T is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.ata_tecnici'|trans }}: {{ dati.statistiche.ata_T.percentuale|number_format(0) }}% ({{ dati.statistiche.ata_T.letti }} su {{ dati.statistiche.ata_T.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.ata_T.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-ata_T">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.ata_T.letti > 0 %}
+    <div id="gs-collapse-ata_T" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.ata_T.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.ata_C is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.ata_collaboratori'|trans }}: {{ dati.statistiche.ata_C.percentuale|number_format(0) }}% ({{ dati.statistiche.ata_C.letti }} su {{ dati.statistiche.ata_C.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.ata_C.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-ata_C">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.ata_C.letti > 0 %}
+    <div id="gs-collapse-ata_C" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.ata_C.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.coordinatori is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Coordinatori: {{ dati.statistiche.coordinatori.percentuale|number_format(0) }}% ({{ dati.statistiche.coordinatori.letti }} su {{ dati.statistiche.coordinatori.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.coordinatori.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-coordinatori">Dettagli</button></div>
+    </div>
+        {% if dati.statistiche.coordinatori.letti > 0 %}
+    <div id="gs-collapse-coordinatori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+          {% for u in dati.statistiche.coordinatori.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+          {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.docenti is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Docenti: {{ dati.statistiche.docenti.percentuale|number_format(0) }}% ({{ dati.statistiche.docenti.letti }} su {{ dati.statistiche.docenti.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.docenti.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-docenti">Dettagli</button></div>
+    </div>
+        {% if dati.statistiche.docenti.letti > 0 %}
+    <div id="gs-collapse-docenti" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+          {% for u in dati.statistiche.docenti.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+          {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.genitori is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Genitori: {{ dati.statistiche.genitori.percentuale|number_format(0) }}% ({{ dati.statistiche.genitori.letti }} su {{ dati.statistiche.genitori.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.genitori.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-genitori">Dettagli</button></div>
+    </div>
+        {% if dati.statistiche.genitori.letti > 0 %}
+    <div id="gs-collapse-genitori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+          {% for u in dati.statistiche.genitori.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+          {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.alunni is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">Alunni: {{ dati.statistiche.alunni.percentuale|number_format(0) }}% ({{ dati.statistiche.alunni.letti }} su {{ dati.statistiche.alunni.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.alunni.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-alunni">Dettagli</button></div>
+    </div>
+        {% if dati.statistiche.alunni.letti > 0 %}
+    <div id="gs-collapse-alunni" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+          {% for u in dati.statistiche.alunni.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+          {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rappresentanti_L is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.rappresentanti_L'|trans }}: {{ dati.statistiche.rappresentanti_L.percentuale|number_format(0) }}% ({{ dati.statistiche.rappresentanti_L.letti }} su {{ dati.statistiche.rappresentanti_L.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rappresentanti_L.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rappresentanti_L">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rappresentanti_L.letti > 0 %}
+    <div id="gs-collapse-rappresentanti_L" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rappresentanti_L.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.rappresentanti_S is defined %}
+    <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+      <div class="col-sm-8 gs-pl-0">{{ 'label.rappresentanti_S'|trans }}: {{ dati.statistiche.rappresentanti_S.percentuale|number_format(0) }}% ({{ dati.statistiche.rappresentanti_S.letti }} su {{ dati.statistiche.rappresentanti_S.totali }})</div>
+      <div class="col-sm-4 text-right"><button type="button" class="btn btn-primary btn-xs{{ dati.statistiche.rappresentanti_S.letti == 0 ? ' disabled' }}" data-toggle="collapse" data-target="#gs-collapse-rappresentanti_S">Dettagli</button></div>
+    </div>
+      {% if dati.statistiche.rappresentanti_S.letti > 0 %}
+    <div id="gs-collapse-rappresentanti_S" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
+        {% for u in dati.statistiche.rappresentanti_S.elenco %}
+      <div class="row">
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+        <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+      </div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endif %}
+    {% if dati.statistiche.classi is defined %}
+    <div class="gs-ml-4">
+      Classi:  {{ dati.statistiche.classi.percentuale|number_format(0) }}% ({{ dati.statistiche.classi.letti }} su {{ dati.statistiche.classi.totali }})
+      {% if dati.statistiche.classi.letti < dati.statistiche.classi.totali %}
+      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi.elenco %}{{ c.anno }}{{ c.sezione }}{{ c.gruppo ? '-'~c.gruppo }}{{ not loop.last ? ', '}}{% endfor %}
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

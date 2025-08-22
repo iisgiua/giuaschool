@@ -114,13 +114,6 @@ class ModuloFormativoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getNomeBreve(), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'nome' => $existent->getNome(),
-      'nomeBreve' => $existent->getNomeBreve(),
-      'tipo' => $existent->getTipo(),
-      'classi' => $existent->getClassi()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

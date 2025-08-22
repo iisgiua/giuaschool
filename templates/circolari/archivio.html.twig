@@ -6,15 +6,15 @@
   <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
     <div id="{{ form.vars.id }}">
       <div class="form-group" title="{{ form.anno.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolari_archivio_anno">{{ form.anno.vars.label|trans }}</label>
+        <label class="sr-only control-label" for="circolare_filtro_anno">{{ form.anno.vars.label|trans }}</label>
         {{ form_widget(form.anno) }}
       </div>
       <div class="form-group" title="{{ form.mese.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolari_archivio_mese">{{ form.mese.vars.label|trans }}</label>
+        <label class="sr-only control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
         {{ form_widget(form.mese) }}
       </div>
       <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolari_archivio_oggetto">{{ form.oggetto.vars.label|trans }}</label>
+        <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
         {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
       </div>
       <div class="form-group _col-sm-2">
@@ -27,72 +27,20 @@
   <table class="table table-bordered table-hover table-striped gs-mb-4">
     <thead class="bg-success">
       <tr>
-        <th class="">{{ 'label.numero'|trans }}</th>
-        <th class="">{{ 'label.data'|trans }}</th>
-        <th class="">{{ 'label.oggetto'|trans }}</th>
-        <th class="">{{ 'label.action'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.numero'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.data'|trans }}</th>
+        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
       </tr>
     </thead>
     <tbody>
-    {% for k,a in dati.lista %}
+    {% for c in dati.lista %}
       <tr>
-        <td>{{ a.numero }}</td>
-        <td>{{ a.data|date('d/m/Y') }}</td>
-        <td><small>{{ a.oggetto }}</small></td>
+        <td>{{ c.circolare.numero }}</td>
+        <td>{{ c.circolare.data|date('d/m/Y') }}</td>
+        <td><small>{{ c.circolare.titolo }}</small></td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Visualizza la circolare" data-toggle="modal" data-target="#gs-modal-info" data-info-num="{{ a.numero }}" data-info-date="{{ a.data|date('j') }} {{ mesi[a.data|date('n')] }} {{ a.data|date('Y') }}" data-info-title="{{ a.oggetto }}" data-body="circolare-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
-          <div id="circolare-{{ loop.index }}" style="display:none">
-            <div class="list-group-item">
-              <div class="list-group-item-text">
-                <div class="gs-mt-2">
-                  <div><strong>Destinatari:</strong></div>
-                  {% if a.dsga %}<div class="gs-ml-5">DSGA</div>{% endif %}
-                  {% if a.ata %}
-                  <div class="gs-ml-5">ATA</div>
-                  {% elseif 'A' in a.destinatariAta or 'T' in a.destinatariAta or 'C' in a.destinatariAta %}
-                  <div class="gs-ml-5">
-                    {% if 'A' in a.destinatariAta %}Amministrativi{% endif %}
-                    {% if 'T' in a.destinatariAta %}Tecnici{% endif %}
-                    {% if 'C' in a.destinatariAta %}Coll.scolast.{% endif %}
-                  </div>
-                  {% endif %}
-                  {% if a.coordinatori != 'N' %}<div class="gs-ml-5">COORDINATORI {{ dati.info[a.id].coordinatori|raw }}</div>{% endif %}
-                  {% if a.docenti != 'N' %}<div class="gs-ml-5">DOCENTI {{ dati.info[a.id].docenti|raw }}</div>{% endif %}
-                  {% if a.genitori != 'N' %}<div class="gs-ml-5">GENITORI {{ dati.info[a.id].genitori|raw }}</div>{% endif %}
-                  {% if a.alunni != 'N' %}<div class="gs-ml-5">ALUNNI {{ dati.info[a.id].alunni|raw }}</div>{% endif %}
-                  {% for a in a.altri %}<div class="gs-ml-5">{{ a }}</div>{% endfor %}
-                </div>
-                <div class="gs-mt-2">
-                  <div><strong>Impostazioni:</strong></div>
-                  {% if a.firma %}<div class="gs-ml-5">Conferma di lettura</div>{% endif %}
-                  {% if a.notifica %}<div class="gs-ml-5">Forza invio notifica</div>{% endif %}
-                  {% if not a.firma and not a.notifica %}<div class="gs-ml-5">NESSUNA</div>{% endif %}
-                </div>
-              </div>
-            </div>
-            <div class="list-group-item">
-              <div class="list-group-item-text">
-                <div class="gs-mt-3 gs-mb-3">
-                  <strong>Documento:</strong>
-                  <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
-                  <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
-                </div>
-              </div>
-            </div>
-      {% if a.allegati|length > 0 %}
-          <div class="list-group-item">
-            <div class="list-group-item-text">
-        {% for n,d in a.allegati %}
-              <div class="gs-mt-3 gs-mb-3">
-                <strong>Allegato{{ a.allegati|length > 1 ? ' '~loop.index }}:</strong>
-                <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': a.id, 'doc': loop.index, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
-                <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': a.id, 'doc': loop.index, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-              </div>
-        {% endfor %}
-            </div>
-          </div>
-      {% endif %}
-          </div>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'circolare': c.circolare.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
         </td>
       </tr>
     {% endfor %}
@@ -103,8 +51,8 @@
     <strong class="gs-big">Nessuna circolare presente</strong>
   </div>
   {% endif %}
-  {% include 'include/paginate.html.twig' with {'maxPagine': maxPages, 'pagina': page, 'url': 'circolari_archivio'} %}
-  {% include 'include/modal-info.html.twig' %}
+  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'circolari_archivio'} %}
+  {% include 'include/modal-remote.html.twig' %}
   {% include 'include/modal-waiting.html.twig' %}
 </div>
 {% endblock %}
@@ -113,25 +61,25 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('#circolari_archivio_anno').change(function (e) {
+  $('#circolari_anno').change(function (e) {
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });
-  $('#circolari_archivio_mese').change(function (e) {
+  $('#circolari_mese').change(function (e) {
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });
-  $('#circolari_archivio_submit').click(function (e) {
+  $('#circolari_submit').click(function (e) {
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });
-  $('#gs-modal-info').on('show.bs.modal', function (e) {
-    $(e.relatedTarget).data('info-title');
-    var title = 'Circolare n. '+$(e.relatedTarget).data('info-num')+' del '+$(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
-    var id = $(e.relatedTarget).data('body');
-    var html = $('#'+id).html();
-    $(this).find('#gs-modal-info-label').html(title);
-    $(this).find('#gs-modal-info-body').html(html);
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
 });
 </script>

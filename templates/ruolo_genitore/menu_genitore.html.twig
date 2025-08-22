@@ -20,13 +20,13 @@
   <li{{ app.request.attributes.get('_route') == 'genitori_pagelle' ? ' class="active"' }}><a href="{{ path('genitori_pagelle') }}" title="Pagelle e comunicazioni sugli scrutini"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
   <li{{ app.request.attributes.get('_route')[:10] == 'richieste_' ? ' class="active"' }}><a href="{{ path('richieste_lista') }}" title="Gestione dei moduli di richiesta"><span class="glyphicon glyphicon-pencil gs-mr-2" aria-hidden="true"></span>Richieste</a></li>
   <li{{ app.request.attributes.get('_route') in ['colloqui_genitori', 'colloqui_prenota'] ? ' class="active"' }}><a href="{{ path('colloqui_genitori') }}" title="Prenotazione dei colloqui con i docenti"><span class="glyphicon glyphicon-comment gs-mr-2" aria-hidden="true"></span>Colloqui</a></li>
-  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_avvisi','circolari_genitori','documenti_bacheca'] ? ' active' }}">
+  <li class="dropdown{{ app.request.attributes.get('_route') in ['avvisi_bacheca','circolari_bacheca','documenti_bacheca'] ? ' active' }}">
     <a href="#" title="Visualizza circolari, avvisi e documenti" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
-      <li{{ app.request.attributes.get('_route') == 'circolari_genitori' ? ' class="active"' }} ><a href="{{ path('circolari_genitori') }}" title="Visualizza le circolari indirizzate ai genitori">Circolari</a></li>
-      <li{{ app.request.attributes.get('_route') == 'genitori_avvisi' ? ' class="active"' }} ><a href="{{ path('genitori_avvisi') }}" title="Visualizza gli avvisi indirizzati ai genitori">Avvisi</a></li>
+      <li{{ app.request.attributes.get('_route') == 'circolari_bacheca' ? ' class="active"' }} ><a href="{{ path('circolari_bacheca') }}" title="Visualizza le circolari indirizzate ai genitori">Circolari</a></li>
+      <li{{ app.request.attributes.get('_route') == 'avvisi_bacheca' ? ' class="active"' }} ><a href="{{ path('avvisi_bacheca') }}" title="Visualizza gli avvisi indirizzati ai genitori">Avvisi</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_bacheca' ? ' class="active"' }}><a href="{{ path('documenti_bacheca') }}" title="Visualizza i documenti indirizzati al genitore">Documenti</a></li>
     </ul>
   </li>
-  <li{{ app.request.attributes.get('_route') == 'genitori_eventi' ? ' class="active"' }} ><a href="{{ path('genitori_eventi') }}" title="Visualizza gli eventi in agenda"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>
+  <li{{ app.request.attributes.get('_route') == 'avvisi_agenda' ? ' class="active"' }} ><a href="{{ path('avvisi_agenda') }}" title="Visualizza gli eventi in agenda"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>
 </ul>

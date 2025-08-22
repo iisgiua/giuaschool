@@ -127,20 +127,6 @@ class RichiestaTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame('Richiesta del '.$existent->getInviata()->format('d/m/Y').' da '.$existent->getUtente(), (string) $existent, $this->entity.'::toString');
-    // datiVersione
-    $dt = [
-      'inviata' => $existent->getInviata()->format('d/m/y H:i'),
-      'gestita' => $existent->getGestita() ? $existent->getGestita()->format('d/m/y H:i') : '',
-      'data' => $existent->getData() ? $existent->getData()->format('d/m/y H:i') : '',
-      'valori' =>  $existent->getValori(),
-      'documento' =>  $existent->getDocumento(),
-      'allegati' =>  $existent->getAllegati(),
-      'stato' =>  $existent->getStato(),
-      'messaggio' =>  $existent->getMessaggio(),
-      'utente' => $existent->getUtente()->getId(),
-      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
-      'definizioneRichiesta' => $existent->getDefinizioneRichiesta()->getId()];
-    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

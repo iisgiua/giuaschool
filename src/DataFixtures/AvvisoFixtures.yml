@@ -2,215 +2,357 @@
 # AvvisoFixtures - dati di test
 #
 # Dati per la gestione di un avviso:
-#   tipo: indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
-#   sedi: sedi a cui è destinato l'avviso
-#   anno: anno iniziale dell'A.S. a cui si riferisce l'avviso
-#   data: data dell'evento associato all'avviso
-#   ora: ora associata all'evento dell'avviso
-#   oraFine: ora finale associata all'evento dell'avviso
-#   cattedra: cattedra associata ad una verifica (o per altri usi)
-#   materia: materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
-#   oggetto: oggetto dell'avviso
+#   tipo: tipo di documento
+#   cifrato: conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+#   firma: indica se è richiesta la firma di presa visione
+#   stato: stato del documento
+#   titolo: titolo del documento
+#   data: data  del documento
+#   anno: anno scolastico del documento
+#   autore: utente che carica il documento
+#   allegati: lista dei file allegati al documento
+#   sedi: sedi scolastiche di destinazione (usato come filtro principale)
+#   speciali: indica i destinatari speciali che non dipendono dal filtro di sede [R=RSU, I=rappresentanti di istituto, P=consulta provinciale, S=RSPP]
+#   ata: indica i destinatari tra il personale ATA [D=DSGA, A=amministrativi, T=tecnici, C=collaboratori scolastici]
+#   coordinatori: indica i destinatari tra i coordinatori [N=nessuno, T=tutti, C=filtro classe]
+#   filtroCoordinatori: lista dei filtri per i coordinatori
+#   docenti: indica i destinatari tra i docenti [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+#   filtroDocenti: lista dei filtri per i docenti
+#   genitori: indica i destinatari tra i genitori [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroGenitori: lista dei filtri per i genitori
+#   rappresentantiGenitori: indica i destinatari tra i rappresentanti di classe dei genitori [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiGenitori: lista dei filtri per i rappresentanti dei genitori
+#   alunni: indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroAlunni: lista dei filtri per gli alunni
+#   rappresentantiAlunni: indica i destinatari tra i rappresentanti di classe degli alunni [N=nessuno, T=tutti, C=filtro classe]
+#   filtroRappresentantiAlunni: lista dei filtri per i rappresentanti degli alunni
+#   esterni: lista degli altri destinatari esterni
+#   cattedra: cattedra associata all'avviso (solo per alcuni tipi di avviso)
+#   materia: associata all'avviso (solo per alcuni tipi di avviso)
+#   annotazioni: annotazioni associate all'avviso (solo per alcuni tipi di avviso)
 #   testo: testo dell'avviso
-#   allegati: lista di file allegati all'avviso
-#   destinatariAta: indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
-#   destinatariSpeciali: Indica i destinatari speciali dell'avviso [S=RSPP]
-#   destinatari: indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
-#   filtroTipo: indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
-#   filtro: lista degli ID per il tipo di filtro specificato
-#   docente: docente che ha scritto l'avviso
-#   annotazioni: annotazioni associate all'avviso
+#   sostituzioni: lista di sostituzioni da applicare al testo dell'avviso
 ####################
 
 
 include:
   - SedeFixtures.yml
   - CattedraFixtures.yml
-  - MateriaFixtures.yml
   - StaffFixtures.yml
   - DocenteFixtures.yml
-  - AtaFixtures.yml
+  - GenitoreFixtures.yml
   - AlunnoFixtures.yml
+  - AllegatoFixtures.yml
 
 
 App\Entity\Avviso:
   avviso_U:
     tipo: 'U'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora: '<dateTimeBetween("10:30", "12:00")>'
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: 'D'
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'C'
+    filtroDocenti: '<arrayId(avviso_U, filtroDocenti, @avviso_U, @classe_2A)>'
+    genitori: 'C'
+    filtroGenitori: '<arrayId(avviso_U, filtroGenitori, @avviso_U, @classe_2A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(avviso_U, filtroAlunni, @avviso_U, @classe_2A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array("D", "A"))>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G", "A"))>'
-    filtroTipo: 'C'
-    filtro: '<arrayId(avviso_U, filtro, @avviso_U, @classe_2A)>'
-    docente: '@staff_*'
+    sostituzioni: '<array_combine(["{ora}"], ["11:00"])>'
   avviso_E:
     tipo: 'E'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora: '<dateTimeBetween("09:00", "10:30")>'
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: 'D'
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'C'
+    filtroDocenti: '<arrayId(avviso_E, filtroDocenti, @avviso_E, @classe_3A)>'
+    genitori: 'C'
+    filtroGenitori: '<arrayId(avviso_E, filtroGenitori, @avviso_E, @classe_3A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(avviso_E, filtroAlunni, @avviso_E, @classe_3A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array("D", "A"))>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G", "A"))>'
-    filtroTipo: 'C'
-    filtro: '<arrayId(avviso_E, filtro, @avviso_E, @classe_3A)>'
-    docente: '@staff_*'
+    sostituzioni: '<array_combine(["{ora}"], ["09":00"])>'
   avviso_A:
     tipo: 'A'
-    sedi: '<collection(@sede_2)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora: '<dateTimeBetween("08:30", "10:00")>'
-    oraFine: '<dateTimeBetween("11:30", "12:30")>'
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: 'D'
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'C'
+    filtroDocenti: '<arrayId(avviso_A, filtroDocenti, @avviso_A, @classe_3B)>'
+    genitori: 'C'
+    filtroGenitori: '<arrayId(avviso_A, filtroGenitori, @avviso_A, @classe_3B)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(avviso_A, filtroAlunni, @avviso_A, @classe_3B)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array("D", "A"))>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("D", "G", "A"))>'
-    filtroTipo: 'C'
-    filtro: '<arrayId(avviso_A, filtro, @avviso_A, @classe_3B)>'
-    docente: '@staff_*'
+    sostituzioni: '<array_combine(["{ora}","{oraFine}"], ["09:00","11:00"])>'
   avviso_I:
     tipo: 'I'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'U'
+    filtroGenitori: '<arrayId(avviso_I, filtroGenitori, @avviso_I, @genitore1_3A_1)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G"))>'
-    filtroTipo: 'U'
-    filtro: '<arrayId(avviso_I, filtro, @avviso_I, @genitore1_3A_1)>'
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_D:
     tipo: 'D'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'U'
+    filtroGenitori: '<arrayId(avviso_D, filtroGenitori, @avviso_D, @genitore2_1A_1)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G"))>'
-    filtroTipo: 'U'
-    filtro: '<arrayId(avviso_D, filtro, @avviso_D, @genitore2_1A_1)>'
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_O:
     tipo: 'O'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'U'
+    filtroAlunni: '<arrayId(avviso_O, filtroAlunni, @avviso_O, @alunno_2A_1)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra: '@cattedra_curricolare_*'
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("A"))>'
-    filtroTipo: 'U'
-    filtro: '<arrayId(avviso_O, filtro, @avviso_O, @alunno_2A_1)>'
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_V:
     tipo: 'V'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra: '@cattedra_*'
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G", "A"))>'
-    filtroTipo: 'T'
-    filtro:
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_P:
     tipo: 'P'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra: '@cattedra_*'
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("G", "A"))>'
-    filtroTipo: 'T'
-    filtro:
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_C:
     tipo: 'C'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'C'
+    filtroDocenti: '<arrayId(avviso_C, filtroDocenti, @avviso_C, @classe_3A)>'
+    genitori: 'C'
+    filtroGenitori: '<arrayId(avviso_C, filtroGenitori, @avviso_C, @classe_3A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(avviso_C, filtroAlunni, @avviso_C, @classe_3A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array())>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("D", "G", "A"))>'
-    filtroTipo: 'C'
-    filtro: '<arrayId(avviso_C, filtro, @avviso_C, @classe_3A)>'
-    docente: '@staff_*'
+    sostituzioni: []
   avviso_C_allegato:
     tipo: 'C'
-    sedi: '<collection(@sede_1)>'
-    anno: '<((new Datetime())->format("Y"))>'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
     data: '<dateTimeBetween("-1 month", "+1 month")>'
-    ora:
-    oraFine:
+    anno: 0
+    autore: '@staff_*'
+    allegati: '<collection(@file_avviso_1)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'U'
+    filtroAlunni: '<arrayId(avviso_C_allegato, filtroAlunni, @avviso_C_allegato, @alunno_4A_1)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     cattedra:
     materia:
-    oggetto: '<substr(<text()>, 0, 255)>'
+    annotazioni: '<collection()>'
     testo: '<text()>'
-    allegati: '<(array("prova.pdf"))>'
-    destinatariAta: '<(array())>'
-    destinatariSpeciali: '<(array())>'
-    destinatari: '<(array("A"))>'
-    filtroTipo: 'U'
-    filtro: '<arrayId(avviso_C_allegato, filtro, @avviso_C_allegato, @alunno_4A_1)>'
-    docente: '@staff_*'
+    sostituzioni: []

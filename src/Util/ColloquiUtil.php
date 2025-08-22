@@ -147,8 +147,8 @@ class ColloquiUtil {
           $this->em->remove($colloquio);
           $avviso = 'message.salta_colloqui_duplicati';
         } else {
-          // memorizzazione e log
-          $this->dblogger->logCreazione('COLLOQUI', 'Aggiunge ricevimento', $colloquio);
+          // memorizzazione
+          $this->em->flush();
         }
       }
     }

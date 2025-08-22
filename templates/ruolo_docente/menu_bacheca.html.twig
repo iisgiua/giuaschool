@@ -1,7 +1,7 @@
 <nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'circolari_docenti' ? ' class="active"' }}><a href="{{ path('circolari_docenti') }}" title="Visualizza le circolari indirizzati al docente">Circolari</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'bacheca_avvisi' ? ' class="active"' }}><a href="{{ path('bacheca_avvisi') }}" title="Visualizza gli avvisi indirizzati al docente">Avvisi</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'circolari_bacheca' ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza le circolari indirizzate al docente">Circolari</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'avvisi_bacheca' ? ' class="active"' }}><a href="{{ path('avvisi_bacheca') }}" title="Visualizza gli avvisi indirizzati al docente">Avvisi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_bacheca' ? ' class="active"' }}><a href="{{ path('documenti_bacheca') }}" title="Visualizza i documenti indirizzati al docente">Documenti</a></li>
   </ul>
 </nav>

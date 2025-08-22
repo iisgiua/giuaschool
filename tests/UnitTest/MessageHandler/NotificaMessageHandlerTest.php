@@ -83,8 +83,8 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
    */
   protected function setUp(): void {
     // dati da caricare
-    $this->fixtures = ['AvvisoFixtures', 'AvvisoClasseFixtures', 'AvvisoUtenteFixtures',
-      'CircolareFixtures', 'CircolareClasseFixtures', 'CircolareUtenteFixtures', 'IstitutoFixtures'];
+    $this->fixtures = ['AvvisoFixtures', 'ComunicazioneClasseFixtures', 'ComunicazioneUtenteFixtures',
+      'CircolareFixtures', 'IstitutoFixtures'];
     // esegue il setup predefinito
     parent::setUp();
   }
@@ -139,7 +139,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -171,7 +171,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -203,7 +203,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -235,7 +235,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -268,7 +268,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -300,7 +300,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -332,7 +332,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -373,7 +373,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_A');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => '3ª D'];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -414,7 +414,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_V');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -455,7 +455,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_P');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -527,7 +527,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -559,7 +559,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -591,7 +591,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $circolare = $this->getReference('circolare_perclasse');
     $tag = '<!CIRCOLARE!><!'.$circolare->getId().'!>';
     $dati = ['id' => $circolare->getId(), 'numero' => $circolare->getNumero(),
-      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getOggetto()];
+      'data' => $circolare->getData()->format('d/m/Y'), 'oggetto' => $circolare->getTitolo()];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
     $nmh->__invoke($msg);
@@ -630,7 +630,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_V');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -670,7 +670,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_V');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -710,7 +710,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_P');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue
@@ -781,7 +781,7 @@ class NotificaMessageHandlerTest extends DatabaseTestCase {
     $avviso = $this->getReference('avviso_V');
     $tag = '<!AVVISO!><!'.$avviso->getId().'!>';
     $dati = ['id' => $avviso->getId(), 'data' => $avviso->getData()->format('d/m/Y'),
-      'oggetto' => $avviso->getOggetto(), 'allegati' => count($avviso->getAllegati()),
+      'oggetto' => $avviso->getTitolo(), 'allegati' => count($avviso->getAllegati()),
       'alunno' => '', 'classi' => ''];
     $msg = new NotificaMessage($utenteId, $tipo, $tag, $dati);
     // esegue

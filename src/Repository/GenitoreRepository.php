@@ -42,7 +42,7 @@ class GenitoreRepository extends BaseRepository {
       $genitori
         ->andWhere('cl.id IN (:classi)')->setParameter('classi', $filtro);
     } elseif ($tipo == 'R') {
-      // filtro rppresentanti
+      // filtro rappresentanti
       $genitori
         ->andWhere('g.rappresentante IN (:tipi)')->setParameter('tipi', $filtro);
     } elseif ($tipo == 'U') {

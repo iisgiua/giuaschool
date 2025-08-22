@@ -5,39 +5,116 @@
 
 include:
   - _testFixtures.yml
-  - ../../src/DataFixtures/FileFixtures.yml
-  - ../../src/DataFixtures/ListaDestinatariFixtures.yml
 
 
+App\Entity\Allegato:
+  allegato_1:
+    titolo: 'Documento Excel - versione 1'
+    nome: 'documento-excel-versione-1'
+    estensione: 'xlsx'
+    dimensione: 66812
+    file: 'documento-xlsx'
+    comunicazione: '@documento_1'
+  allegato_2:
+    titolo: 'Documento PDF - versione 1'
+    nome: 'documento-pdf-versione-1'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@documento_2'
+  allegato_3:
+    titolo: 'Documento Word - versione 1'
+    nome: 'documento-word-versione-1'
+    estensione: 'docx'
+    dimensione: 45134
+    file: 'documento-docx'
+    comunicazione: '@documento_3'
 
 App\Entity\Documento:
   documento_1:
     tipo: 'L'
-    docente: '@docente_curricolare_*'
-    listaDestinatari: '@lista_destinatari_DOCENTI_1'
-    materia:
-    classe:
-    alunno:
     cifrato:
     firma: true
-    allegati: '<collection(@file_excel_1)>'
+    stato: 'P'
+    titolo: 'Documento Excel - versione 1'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
+    anno: 0
+    autore: '@docente_curricolare_*'
+    allegati: '<collection(@allegato_1)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'C'
+    filtroDocenti: '<arrayId(documento_1, filtroDocenti, @documento_1, @classe_1A)>'
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    materia:
+    classe:
+    alunno:
   documento_2:
     tipo: 'G'
-    docente: '@docente_curricolare_*'
-    listaDestinatari: '@lista_destinatari_GENITORI_1'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Documento PDF - versione 1'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
+    anno: 0
+    autore: '@docente_curricolare_*'
+    allegati: '<collection(@allegato_2)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'C'
+    filtroGenitori: '<arrayId(documento_2, filtroGenitori, @documento_2, @classe_1A)>'
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     materia:
     classe:
     alunno:
-    cifrato:
-    firma: false
-    allegati: '<collection(@file_pdf_1)>'
   documento_3:
     tipo: 'G'
-    docente: '@docente_curricolare_*'
-    listaDestinatari: '@lista_destinatari_ALUNNI_1'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Documento PDF - versione 1'
+    data: '<dateTimeBetween("-2 month", "-1 month")>'
+    anno: 0
+    autore: '@docente_curricolare_*'
+    allegati: '<collection(@allegato_3)>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'C'
+    filtroAlunni: '<arrayId(documento_3, filtroAlunni, @documento_3, @classe_1A)>'
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
     materia:
     classe:
     alunno:
-    cifrato:
-    firma: false
-    allegati: '<collection(@file_word_1)>'

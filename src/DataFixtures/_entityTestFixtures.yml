@@ -4,6 +4,7 @@
 
 
 include:
+  - AllegatoFixtures.yml
   - AlunnoFixtures.yml
   - AmministratoreFixtures.yml
   - AnnotazioneFixtures.yml
@@ -11,16 +12,14 @@ include:
   - AssenzaFixtures.yml
   - AssenzaLezioneFixtures.yml
   - AtaFixtures.yml
-  - AvvisoClasseFixtures.yml
   - AvvisoFixtures.yml
-  - AvvisoUtenteFixtures.yml
   - CambioClasseFixtures.yml
   - CattedraFixtures.yml
-  - CircolareClasseFixtures.yml
   - CircolareFixtures.yml
-  - CircolareUtenteFixtures.yml
   - ClasseFixtures.yml
   - ColloquioFixtures.yml
+  - ComunicazioneClasseFixtures.yml
+  - ComunicazioneUtenteFixtures.yml
   - ConfigurazioneFixtures.yml
   - CorsoFixtures.yml
   - DefinizioneConsiglioFixtures.yml
@@ -32,15 +31,11 @@ include:
   - EntrataFixtures.yml
   - EsitoFixtures.yml
   - FestivitaFixtures.yml
-  - FileFixtures.yml
   - FirmaFixtures.yml
   - FirmaSostegnoFixtures.yml
   - GenitoreFixtures.yml
   - IstitutoFixtures.yml
   - LezioneFixtures.yml
-  - ListaDestinatariClasseFixtures.yml
-  - ListaDestinatariFixtures.yml
-  - ListaDestinatariUtenteFixtures.yml
   - LogFixtures.yml
   - MateriaFixtures.yml
   - ModuloFormativoFixtures.yml

@@ -8,24 +8,23 @@
 
 namespace App\Util;
 
-use DateTime;
-use App\Entity\Richiesta;
-use App\Entity\AvvisoUtente;
+use App\Entity\Alunno;
+use App\Entity\Assenza;
+use App\Entity\Ata;
+use App\Entity\Avviso;
+use App\Entity\ComunicazioneUtente;
 use App\Entity\Cattedra;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Entity\Richiesta;
+use App\Entity\RichiestaColloquio;
+use App\Entity\Staff;
+use App\Entity\Utente;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use App\Entity\Utente;
-use App\Entity\Genitore;
-use App\Entity\Alunno;
-use App\Entity\Docente;
-use App\Entity\Staff;
-use App\Entity\Ata;
-use App\Entity\Assenza;
-use App\Entity\Avviso;
-use App\Entity\Circolare;
-use App\Entity\RichiestaColloquio;
 
 
 /**
@@ -91,7 +90,7 @@ class NotificheUtil {
         // legge avvisi
         $dati['avvisi'] = $this->numeroAvvisi($utente);
         // legge circolari
-        $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+        $dati['circolari'] = $this->em->getRepository(ComunicazioneUtente::class)->numeroCircolariUtente($utente);
         // legge verifiche
         $dati['verifiche'] = $this->numeroVerificheGenitori($alunno);
         // legge compiti
@@ -103,7 +102,7 @@ class NotificheUtil {
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository(ComunicazioneUtente::class)->numeroCircolariUtente($utente);
       // legge verifiche
       $dati['verifiche'] = $this->numeroVerificheGenitori($utente);
       // legge compiti
@@ -119,7 +118,7 @@ class NotificheUtil {
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository(ComunicazioneUtente::class)->numeroCircolariUtente($utente);
       // legge verifiche
       $dati['verifiche'] = $this->numeroVerifiche($utente);
       // legge compiti
@@ -131,7 +130,7 @@ class NotificheUtil {
     } elseif ($utente instanceOf Ata) {
       // notifiche per gli ata
       $dati['avvisi'] = $this->numeroAvvisi($utente);
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository(ComunicazioneUtente::class)->numeroCircolariUtente($utente);
     }
     return $dati;
   }
@@ -147,7 +146,7 @@ class NotificheUtil {
     // conta nuovi avvisi
     $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->where('au.utente=:utente AND au.letto is NULL')
 			->setParameter('utente', $utente)
       ->getQuery()
@@ -170,7 +169,7 @@ class NotificheUtil {
     // verifiche per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
+      ->where('a.tipo=:tipo AND a.autore=:docente AND a.data=:oggi')
 			->setParameter('tipo', 'V')
 			->setParameter('docente', $docente)
 			->setParameter('oggi', $ora->format('Y-m-d'))
@@ -180,9 +179,9 @@ class NotificheUtil {
     $dati['oggi'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
-      ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+      ->where('a.autore!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
 			->setParameter('docente', $docente)
 			->setParameter('tipo', 'V')
 			->setParameter('data', $ora->format('Y-m-d'))
@@ -196,7 +195,7 @@ class NotificheUtil {
     $fine->modify('+2 days');
     $dati['prossime'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->where('a.tipo=:tipo AND a.docente=:docente AND a.data BETWEEN :inizio AND :fine')
+      ->where('a.tipo=:tipo AND a.autore=:docente AND a.data BETWEEN :inizio AND :fine')
 			->setParameter('tipo', 'V')
 			->setParameter('docente', $docente)
 			->setParameter('inizio', $inizio->format('Y-m-d'))
@@ -207,9 +206,9 @@ class NotificheUtil {
     $dati['prossime'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
-      ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c2.attiva=:attiva')
+      ->where('a.autore!=:docente AND a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c2.attiva=:attiva')
 			->setParameter('docente', $docente)
 			->setParameter('tipo', 'V')
 			->setParameter('inizio', $inizio->format('Y-m-d'))
@@ -235,7 +234,7 @@ class NotificheUtil {
     // verifiche per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
 			->setParameter('tipo', 'V')
 			->setParameter('oggi', $ora->format('Y-m-d'))
@@ -249,7 +248,7 @@ class NotificheUtil {
     $fine->modify('+2 days');
     $dati['prossime'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->where('a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND au.utente=:alunno')
 			->setParameter('tipo', 'V')
 			->setParameter('inizio', $inizio->format('Y-m-d'))
@@ -275,7 +274,7 @@ class NotificheUtil {
     // compiti per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
 			->setParameter('tipo', 'P')
 			->setParameter('oggi', $ora->format('Y-m-d'))
@@ -287,7 +286,7 @@ class NotificheUtil {
     $domani->modify('+1 day');
     $dati['domani'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->where('a.tipo=:tipo AND a.data=:domani AND au.utente=:alunno')
 			->setParameter('tipo', 'P')
 			->setParameter('domani', $domani->format('Y-m-d'))
@@ -312,7 +311,7 @@ class NotificheUtil {
     // compiti per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
+      ->where('a.tipo=:tipo AND a.autore=:docente AND a.data=:oggi')
 			->setParameter('tipo', 'P')
 			->setParameter('docente', $docente)
 			->setParameter('oggi', $ora->format('Y-m-d'))
@@ -322,9 +321,9 @@ class NotificheUtil {
     $dati['oggi'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
-      ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+      ->where('a.autore!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
 			->setParameter('docente', $docente)
 			->setParameter('tipo', 'P')
 			->setParameter('data', $ora->format('Y-m-d'))
@@ -336,7 +335,7 @@ class NotificheUtil {
     $domani->modify('+1 day');
     $dati['domani'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:domani')
+      ->where('a.tipo=:tipo AND a.autore=:docente AND a.data=:domani')
 			->setParameter('tipo', 'P')
 			->setParameter('docente', $docente)
 			->setParameter('domani', $domani->format('Y-m-d'))
@@ -346,9 +345,9 @@ class NotificheUtil {
     $dati['domani'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join(AvvisoUtente::class, 'au', 'WITH', 'au.avviso=a.id')
+      ->join(ComunicazioneUtente::class, 'au', 'WITH', 'au.comunicazione=a.id')
       ->join(Cattedra::class, 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
-      ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:domani AND c2.attiva=:attiva')
+      ->where('a.autore!=:docente AND a.tipo=:tipo AND a.data=:domani AND c2.attiva=:attiva')
 			->setParameter('docente', $docente)
 			->setParameter('tipo', 'P')
 			->setParameter('domani', $domani->format('Y-m-d'))

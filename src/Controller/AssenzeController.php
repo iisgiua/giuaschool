@@ -24,7 +24,7 @@ use App\Form\AppelloType;
 use App\Form\EntrataType;
 use App\Form\PresenzaType;
 use App\Form\UscitaType;
-use App\Util\BachecaUtil;
+// use App\Util\BachecaUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -1229,7 +1229,9 @@ class AssenzeController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controlla presenza
+    // controlla presenza e azione
+    $edit = false;
+    $delete = false;
     if ($id > 0) {
       // presenza esistente
       $presenza = $this->em->getRepository(Presenza::class)->findOneBy(['id' => $id,
@@ -1238,7 +1240,7 @@ class AssenzeController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $vecchiaPresenza = clone $presenza;
+      $edit = true;
     } else {
       // inserisce nuova presenza
       $presenza = (new Presenza())
@@ -1250,7 +1252,7 @@ class AssenzeController extends BaseController {
     $info['classe'] = $classe;
     $info['data'] = $data_obj;
     $info['alunno'] = $alunno;
-    $info['delete'] = ($id > 0);
+    $info['delete'] = $edit;
     $info['posizione'] = $posizione;
     // form
     $form = $this->createForm(PresenzaType::class, $presenza, [
@@ -1258,8 +1260,9 @@ class AssenzeController extends BaseController {
       'form_mode' => 'registro']);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (isset($vecchiaPresenza) && isset($request->request->all()['presenza']['delete'])) {
+      if ($edit && isset($request->request->all()['presenza']['delete'])) {
         // cancella presenza esistente
+        $delete = true;
         $this->em->remove($presenza);
       } else {
         // controlla dati
@@ -1308,16 +1311,8 @@ class AssenzeController extends BaseController {
       }
       if ($form->isValid()) {
         // ok: memorizzazione e log
-        if (isset($vecchiaPresenza) && isset($request->request->all()['presenza']['delete'])) {
-          // log cancella
-          $dblogger->logRimozione('PRESENZE', 'Cancella presenza', $vecchiaPresenza);
-        } elseif (isset($vecchiaPresenza)) {
-          // log modifica
-          $dblogger->logModifica('PRESENZE', 'Modifica presenza', $vecchiaPresenza, $presenza);
-        } else {
-          // log inserimento
-          $dblogger->logCreazione('PRESENZE', 'Aggiunge presenza', $presenza);
-        }
+        $dblogger->logAzione('PRESENZE', $delete ? 'Cancella presenza' :
+          ($edit ? 'Modifica presenza' : 'Aggiunge presenza'));
         // redirect
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
       }

@@ -45,7 +45,7 @@ Scenario: visualizza errore per pagina inserimento documento 15 maggio già inse
     | id   | anno | sezione |
     | $c1  | 5    | A       |
   E istanze di tipo "Documento":
-    | id  | classe     | docente | tipo |
+    | id  | classe     | autore  | tipo |
     | $d1 | $c1        | #logged | M    |
   Quando vai alla pagina "documenti_maggio_add" con parametri:
     | classe |
