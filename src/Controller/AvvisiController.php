@@ -1044,8 +1044,8 @@ class AvvisiController extends BaseController {
   #[Route(path: '/avvisi/edit/agenda/{tipo}/{avviso}', name: 'avvisi_edit_agenda', requirements: ['tipo' => 'V|P', 'avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function editAgenda(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                               RegistroUtil $reg, ComunicazioniUtil $com, LogHandler $dblogger,
-                               string $tipo, ?Avviso $avviso=null): Response {
+                             RegistroUtil $reg, ComunicazioniUtil $com, LogHandler $dblogger,
+                             string $tipo, ?Avviso $avviso=null): Response {
     // inizializza conferma
     if ($request->isMethod('GET')) {
       $this->reqstack->getSession()->set('/APP/ROUTE/avvisi_edit_agenda/conferma', 0);
@@ -1073,6 +1073,7 @@ class AvvisiController extends BaseController {
       }
       // va al primo giorno utile
       $mese = $this->em->getRepository(Festivita::class)->giornoSuccessivo($mese);
+      if (!$mese)
       $avviso = (new Avviso())
         ->setTipo($tipo)
         ->setData($mese)
@@ -1245,6 +1246,7 @@ class AvvisiController extends BaseController {
     // funzionalità per docenti
     if ($this->getUser() instanceOf Docente) {
       // filtro classi
+      $dati['filtro'] = [];
       $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($this->getUser(), 'Q');
       foreach ($classi as $c) {
         $dati['filtro'][$c->getClasse()->getId()] = ''.$c->getClasse();

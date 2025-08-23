@@ -73,7 +73,7 @@ class FestivitaRepository extends BaseRepository {
    * @param Sede $sede Sede da controllare (se nullo, festività di entrambe le sedi)
    * @param Classe $classe Se indicata controlla giorni senza lezioni (chiusura scuola o situazioni anomale)
    *
-   * @return DateTime|null Giorno di lezione successivo, o nullo se non esiste
+   * @return DateTime Giorno di lezione successivo, o fine anno se non esiste
    */
   public function giornoSuccessivo(DateTime $data, Sede $sede=null, Classe $classe=null) {
     // fine anno
@@ -143,7 +143,7 @@ class FestivitaRepository extends BaseRepository {
       return $succ;
     }
     // errore, dopo fine a.s.
-    return null;
+    return DateTime::createFromFormat('Y-m-d', $fine->getValore());
   }
 
   /**
