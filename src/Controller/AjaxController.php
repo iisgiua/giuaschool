@@ -198,7 +198,7 @@ class AjaxController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    */
-  #[Route(path: '/ajax/materie/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], methods: ['POST'])]
+  #[Route(path: '/ajax/materie/{classe}', name: 'ajax_materie', requirements: ['classe' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function materieAjax(Classe $classe): JsonResponse {
     // solo cattedre attive e normali, no sostegno, no ed.civ.

@@ -9,10 +9,10 @@
 namespace App\Controller;
 
 use App\Entity\Alunno;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Documento;
-use App\Entity\Allegato;
 use App\Entity\Genitore;
 use App\Entity\Materia;
 use App\Form\DocumentoType;
@@ -879,68 +879,80 @@ class DocumentiController extends BaseController {
       'info' => $info]);
   }
 
-   /**
-    * Visualizza documenti destinati all'utente
-    *
-    * @param Request $request Pagina richiesta
-    * @param int $pagina Numero di pagina per la lista visualizzata
-    *
-    * @return Response Pagina di risposta
-    *
-    */
-   #[Route(path: '/documenti/bacheca/{pagina}', name: 'documenti_bacheca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
-   #[IsGranted('ROLE_UTENTE')]
-   public function bacheca(Request $request, int $pagina): Response {
-     // recupera criteri dalla sessione
-     $criteri = [];
-     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/tipo', '');
-     $criteri['titolo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/titolo', '');
-     if ($pagina == 0) {
-       // pagina non definita: la cerca in sessione
-       $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/pagina', 1);
-     } else {
-       // pagina specificata: la conserva in sessione
-       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
-     }
-     // opzioni tipi predefiniti
-     $opzioni = ['label.documenti_da_leggere' => 'X'];
-     if ($this->getUser() instanceOf Docente) {
-       // tipi per docenti
-       $opzioni = ['label.documenti_da_leggere' => 'X', 'label.piani' => 'L', 'label.programmi' => 'P',
-         'label.maggio' => 'M', 'label.documenti_bes_B' => 'B', 'label.documenti_bes_C' => 'C',
-         'label.documenti_bes_D' => 'D', 'label.documenti_bes_H' => 'H', 'label.documenti_generici' => 'G'];
-     } elseif (($this->getUser() instanceOf Genitore) || ($this->getUser() instanceOf Alunno)) {
-       // tipi per genitori/alunni
-       $opzioni = ['label.documenti_da_leggere' => 'X', 'label.programmi' => 'P',
-         'label.maggio' => 'M', 'label.documenti_generici' => 'G'];
-     }
-     // form filtro
-     $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'bacheca',
-       'values' => [$criteri['tipo'], $opzioni, $criteri['titolo']]]);
-     $form->handleRequest($request);
-     if ($form->isSubmitted() && $form->isValid()) {
-       // imposta criteri di ricerca
-       $criteri['tipo'] = $form->get('tipo')->getData();
-       $criteri['titolo'] = $form->get('titolo')->getData();
-       $pagina = 1;
-       // memorizza in sessione
-       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/tipo', $criteri['tipo']);
-       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/titolo', $criteri['titolo']);
-       $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
-     }
-     // recupera dati
-     $dati = $this->em->getRepository(Documento::class)->lista($criteri, $this->getUser(), $pagina);
-     // informazioni di visualizzazione
-     $info['pagina'] = $pagina;
-     // mostra la pagina di risposta
-     return $this->render('documenti/bacheca.html.twig', [
-      'pagina_titolo' => 'page.documenti_bacheca',
-      'form' => $form,
-      'form_success' => null,
-      'form_help' => null,
-      'dati' => $dati,
-      'info' => $info]);
-   }
+  /**
+  * Visualizza documenti destinati all'utente
+  *
+  * @param Request $request Pagina richiesta
+  * @param int $pagina Numero di pagina per la lista visualizzata
+  *
+  * @return Response Pagina di risposta
+  *
+  */
+  #[Route(path: '/documenti/bacheca/{pagina}', name: 'documenti_bacheca', requirements: ['pagina' => '\d+'], defaults: ['pagina' => 0], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function bacheca(Request $request, int $pagina): Response {
+    // recupera criteri dalla sessione
+    $criteri = [];
+    $criteri['visualizza'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/visualizza', 'T');
+    $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/classe', 0));
+    $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/tipo', '');
+    $criteri['titolo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/titolo', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
+    }
+    // opzioni visualizzazione
+    $opzVisualizza = ['label.documenti_tutti' => 'T', 'label.documenti_da_leggere' => 'D'];
+    // opzioni predefinite
+    $opzClasse = [];
+    $opzTipo = [];
+    if ($this->getUser() instanceOf Docente) {
+      // opzioni per docenti
+      $opzClasse = $this->em->getRepository(Classe::class)->classiDocente($this->getUser(), 'C');
+      $opzTipo = ['label.piani' => 'L', 'label.programmi' => 'P', 'label.maggio' => 'M',
+        'label.documenti_bes_B' => 'B', 'label.documenti_bes_C' => 'C', 'label.documenti_bes_D' => 'D',
+        'label.documenti_bes_H' => 'H', 'label.documenti_generici' => 'G'];
+    } elseif (($this->getUser() instanceOf Genitore) || ($this->getUser() instanceOf Alunno)) {
+      // tipi per genitori/alunni
+      $opzTipo = ['label.programmi' => 'P', 'label.maggio' => 'M', 'label.documenti_generici' => 'G'];
+    }
+    // form filtro
+    $form = $this->createForm(DocumentoType::class, null, ['form_mode' => 'bacheca',
+      'values' => [$criteri['visualizza'], $opzVisualizza, $criteri['classe'], $opzClasse,
+      $criteri['tipo'], $opzTipo, $criteri['titolo']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['visualizza'] = $form->get('visualizza')->getData();
+      $criteri['classe'] = $form->get('classe')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['titolo'] = $form->get('titolo')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/visualizza', $criteri['visualizza']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/classe',
+        is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/tipo', $criteri['tipo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/titolo', $criteri['titolo']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $this->em->getRepository(Documento::class)->lista($criteri, $this->getUser(), $pagina);
+    // informazioni di visualizzazione
+    $info['pagina'] = $pagina;
+    // mostra la pagina di risposta
+    return $this->render('documenti/bacheca.html.twig', [
+    'pagina_titolo' => 'page.documenti_bacheca',
+    'form' => $form,
+    'form_success' => null,
+    'form_help' => null,
+    'dati' => $dati,
+    'info' => $info]);
+  }
 
   /**
    * Gestione dei documenti archiviati per gli alunni BES

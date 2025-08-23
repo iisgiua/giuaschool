@@ -318,16 +318,22 @@ class DocumentoRepository extends BaseRepository {
       ->where("d.stato='P' AND cu.utente=:utente")
       ->orderBy('cl.anno,cl.sezione,cl.gruppo,cl2.anno,cl2.sezione,cl2.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
 			->setParameter('utente', $utente);
-    // vincolo di tipo
-    if ($criteri['tipo'] == 'X') {
-      // documenti da leggere
+    // filtro visualizzazione (documenti da leggere)
+    if ($criteri['visualizza'] == 'D') {
       $documenti
         ->andWhere('cu.letto IS NULL');
-    } elseif ($criteri['tipo']) {
-      // tipo di documento
+    }
+    // filtro tipo di documento
+    if ($criteri['tipo']) {
       $documenti
         ->andWhere('d.tipo=:tipo')
         ->setParameter('tipo', $criteri['tipo']);
+    }
+    // filtra classe
+    if ($criteri['classe']) {
+      $documenti
+        ->andWhere('cl.id=:classe OR cl2.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
     }
     // filtra titolo
     if ($criteri['titolo']) {

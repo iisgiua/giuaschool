@@ -33,7 +33,7 @@ Schema dello scenario: visualizza i documenti per l'utente connesso
     | $cu2 | $d1           | #other  | null  |
     | $cu3 | $d2           | #other  | null  |
   Quando pagina attiva "documenti_bacheca"
-  E selezioni opzione "Tutti" da lista "documento_tipo"
+  E selezioni opzione "Tutti" da lista "documento_visualizza"
   E inserisci "" nel campo "documento_titolo"
   E premi pulsante "Filtra"
   Allora vedi la tabella:
@@ -97,7 +97,6 @@ Schema dello scenario: visualizza lista vuota in assenza di documenti per l'uten
     | Alunno   | P    |
     | Alunno   | M    |
     | Alunno   | G    |
-    | Ata      | G    |
 
 Schema dello scenario: visualizza più file per documento di utente connesso
   Dato login utente con ruolo esatto "<ruolo>"
@@ -129,7 +128,6 @@ Schema dello scenario: visualizza più file per documento di utente connesso
     | Docente  | G    |
     | Genitore | G    |
     | Alunno   | G    |
-    | Ata      | G    |
 
 
 ################################################################################
@@ -194,7 +192,7 @@ Schema dello scenario: visualizza filtro tipo documenti per stato da leggere
     | $cu1 | $d1           | #logged | null                      |
     | $cu2 | $d2           | #logged | #dtm(11,11,2021,15,23,12) |
   Quando pagina attiva "documenti_bacheca"
-  E selezioni opzione "Da leggere" da lista "documento_tipo"
+  E selezioni opzione "Da leggere" da lista "documento_visualizza"
   E inserisci "" nel campo "documento_titolo"
   E premi pulsante "Filtra"
   Allora vedi la tabella:
@@ -216,7 +214,6 @@ Schema dello scenario: visualizza filtro tipo documenti per stato da leggere
     | Alunno   | P    |
     | Alunno   | M    |
     | Alunno   | G    |
-    | Ata      | G    |
 
 Schema dello scenario: visualizza filtro titolo documenti
   Dato login utente con ruolo esatto "<ruolo>"
@@ -258,4 +255,3 @@ Schema dello scenario: visualizza filtro titolo documenti
     | Alunno   | P    |
     | Alunno   | M    |
     | Alunno   | G    |
-    | Ata      | G    |

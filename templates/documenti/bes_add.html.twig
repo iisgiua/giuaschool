@@ -106,7 +106,7 @@ $(document).ready(function() {
   $('#documento_classe').change(function() {
     if ($(this).val()) {
       $('#gs-modal-waiting').modal('show');
-      url = "{{ path('ajax_classe') }}/"+$(this).val();
+      url = "/ajax/classe/"+$(this).val();
       $.post(url, function(data) {
           var s1='';
           var s2='';

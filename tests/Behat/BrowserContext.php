@@ -1361,6 +1361,28 @@ class BrowserContext extends BaseContext implements Context {
     $this->assertTrue($field && $field->isVisible());
   }
 
+  /**
+   * Attende la fine di tutte le richieste AJAX, tramite attesa scomparsa di spinner.
+   *
+   * @When aspetti chiamata AJAX sia completata
+   */
+  public function aspettaCaricamentoAjax(): void {
+    // tempo massimo in secondi
+    $timeout = time() + 5;
+    do {
+      $page = $this->session->getPage();
+      $element = $page->find('css', '#gs-waiting');
+      if ($element === null || !$element->isVisible()) {
+        // spinner non più presente o non visibile
+        return;
+      }
+      // aspetta 200ms prima di riprovare
+      sleep(200);
+    } while (time() < $timeout);
+    // errore
+    $this->assertFalse(time() >= $timeout, '+++ Attesa massima scaduta.');
+  }
+
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 

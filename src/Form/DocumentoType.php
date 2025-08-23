@@ -94,17 +94,34 @@ class DocumentoType extends AbstractType {
     if ($options['form_mode'] == 'bacheca') {
       // form filtro documenti bacheca
       $builder
-        ->add('tipo', ChoiceType::class, ['label' => 'label.tipo_documenti',
+        ->add('visualizza', ChoiceType::class, ['label' => 'label.filtro_visualizza',
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
-          'placeholder' => 'label.documenti_tutti',
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_visualizza'],
+          'required' => true])
+        ->add('classe', ChoiceType::class, ['label' => 'label.filtro_classe',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.tutte_classi',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_classe'],
+          'required' => false])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.filtro_tipo_documenti',
+          'data' => $options['values'][4],
+          'choices' => $options['values'][5],
+          'placeholder' => 'label.documenti_tutti_tipi',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_tipo_documenti'],
           'required' => false])
         ->add('titolo', TextType::class, ['label' => 'label.titolo_documento',
-          'data' => $options['values'][2],
-          'attr' => ['placeholder' =>'label.titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
+          'data' => $options['values'][6],
+          'attr' => ['placeholder' =>'label.titolo_documento', 'title' => 'label.filtro_titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false])
         ->add('submit', SubmitType::class, ['label' => 'label.filtra',

@@ -75,6 +75,7 @@ label.circolari_filtro_oggetto: Filtra per oggetto
 label.avvisi_filtro_oggetto: Filtra per oggetto
 label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
 label.avvisi_filtro_visualizza: Filtra per tipo di visualizzazione
+label.filtro_visualizza: Filtra per tipo di visualizzazione
 label.circolari_lette: Lette
 label.circolari_proprie: Destinate a me
 label.circolari_tutte: Tutte
@@ -489,6 +490,7 @@ label.filtro_documenti: Filtro documenti
 label.documenti_presenti: Documenti presenti
 label.documenti_mancanti: Documenti mancanti
 label.documenti_tutti: Tutti i documenti
+label.documenti_tutti_tipi: Tutti i tipi di documento
 label.programmi: Programmi svolti
 label.relazioni: Relazioni finali
 label.tutti: Tutti
@@ -503,6 +505,7 @@ label.documenti_bes_C: Altra certificazione
 label.documenti_generici: Altro
 label.scegli_tipo_documento: Scegli il tipo di documento
 label.titolo_documento: Titolo del documento
+label.filtro_titolo_documento: Filtra per titolo del documento
 label.riferimento: Riferimento
 label.profilo: Profilo utente
 label.spid: Accesso SPID
@@ -683,6 +686,7 @@ label.avvisi_tipo_I: Comunicazione personale
 label.tutti_tipi: Tutti i tipi
 label.tutti_mesi: Tutti i mesi
 label.filtro_tipo: Filtra per tipo
+label.filtro_tipo_documenti: Filtra per tipo di documento
 
 
 ##### PAGINE #####

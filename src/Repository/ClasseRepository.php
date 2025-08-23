@@ -9,8 +9,9 @@
 namespace App\Repository;
 
 use App\Entity\Alunno;
-use App\Entity\Genitore;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
+use App\Entity\Docente;
 
 
 /**
@@ -158,35 +159,6 @@ class ClasseRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
-  // /**
-  //  * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti genitori
-  //  *
-  //  * @param array $sedi Sedi di servizio (lista ID di Sede)
-  //  * @param array|null $filtro Lista di ID per il filtro classi o null se nessun filtro
-  //  *
-  //  * @return array Lista di ID delle classi
-  //  */
-  // public function getIdClasseGenitori($sedi, $filtro) {
-  //   $classi = $this->createQueryBuilder('c')
-  //     ->select('DISTINCT c.id')
-  //     ->where('c.sede IN (:sedi)')
-	// 		->setParameter('sedi', $sedi);
-  //   if ($filtro) {
-  //     // filtro genitori
-  //     $classi
-  //       ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
-  //       ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
-  //       ->andWhere('g.id IN (:lista)')
-  //       ->setParameter('lista', $filtro)
-  //       ->setParameter('abilitato', 1);
-  //   }
-  //   $classi = $classi
-  //     ->getQuery()
-  //     ->getArrayResult();
-  //   // restituisce la lista degli ID
-  //   return array_column($classi, 'id');
-  // }
-
   /**
    * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti alunni
    *
@@ -230,50 +202,6 @@ class ClasseRepository extends BaseRepository {
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
   }
-
-  // /**
-  //  * Restituisce le classi per le sedi, i destinatari e il filtro rappresentanti indicato
-  //  *
-  //  * @param array $sedi Sedi di servizio (lista ID di Sede)
-  //  * @param array $destinatari Lista dei destinatari (ruolo utenti)
-  //  * @param array|null $filtro Lista del tipo di rappresentanti
-  //  *
-  //  * @return array Lista di ID delle classi
-  //  */
-  // public function getIdClasseRappresentanti($sedi, $destinatari, $filtro) {
-  //   $classiId = [];
-  //   // classi per gli alunni rappresentanti
-  //   if ($filtro && in_array('A', $destinatari, true)) {
-  //     // filtro alunni
-  //     $classi = $this->createQueryBuilder('c')
-  //       ->select('DISTINCT c.id')
-  //       ->where('c.sede IN (:sedi)')
-  //       ->join(Alunno::class, 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato AND a.rappresentante IN (:lista)')
-  //       ->setParameter('sedi', $sedi)
-  //       ->setParameter('abilitato', 1)
-  //       ->setParameter('lista', $filtro)
-  //       ->getQuery()
-  //       ->getArrayResult();
-  //     $classiId = array_column($classi, 'id');
-  //   }
-  //   // classi per i genitori rappresentanti
-  //   if ($filtro && in_array('G', $destinatari, true)) {
-  //     // filtro genitori
-  //     $classi = $this->createQueryBuilder('c')
-  //       ->select('DISTINCT c.id')
-  //       ->where('c.sede IN (:sedi)')
-  //       ->join(Genitore::class, 'g', 'WITH', 'g.abilitato=:abilitato AND g.rappresentante IN (:lista)')
-  //       ->join(Alunno::class, 'a', 'WITH', 'g.alunno=a.id AND a.classe=c.id AND a.abilitato=:abilitato')
-  //       ->setParameter('sedi', $sedi)
-  //       ->setParameter('abilitato', 1)
-  //       ->setParameter('lista', $filtro)
-  //       ->getQuery()
-  //       ->getArrayResult();
-  //     $classiId = array_unique(array_merge($classiId, array_column($classi, 'id')));
-  //   }
-  //   // restituisce la lista degli ID
-  //   return $classiId;
-  // }
 
   /**
    * Restituisce la lista delle classi/gruppi, predisposta per le opzioni dei form
@@ -372,6 +300,63 @@ public function opzioni(?int $sede = null, bool $breve=true, $ordAnno=true, bool
       } else {
         // info gruppi classe
         $dati[$classe['classe']]['gruppi'][] = $classe['gruppo'];
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle classi del docente indicato
+   *
+   * @param Docente $docente Docente di cui recuperare le classi
+   * @param string $tipo Tipo di formattazione dei dati desiderata [Q=risultato query,C=form ChoiceType,A=array associativo,V=vettore di dati]
+   *
+   * @return array Dati formattati in un array associativo
+   */
+  public function classiDocente(Docente $docente, $tipo='A'): array {
+    $dati = [];
+    // lista classi
+    $classi = $this->createQueryBuilder('cl')
+      ->join(Cattedra::class, 'c', 'WITH', 'c.classe=cl.id')
+      ->where('c.docente=:docente AND c.attiva=1')
+      ->orderBy('cl.anno,cl.sezione,cl.gruppo')
+      ->setParameter('docente', $docente)
+      ->getQuery()
+      ->getResult();
+    // formato dati
+    if ($tipo == 'Q') {
+      // risultato query (vettore di oggetti)
+      $dati = $classi;
+    } elseif ($tipo == 'C') {
+      // form ChoiceType
+      foreach ($classi as $classe) {
+        $label = ''.$classe;
+        $dati[$label] = $classe;
+      }
+    } elseif ($tipo == 'V') {
+      // vettore di dati
+      $dati['lista'] = [];
+      $dati['label'] = [];
+      foreach ($classi as $idx => $classe) {
+        $label = ''.$classe;
+        $dati['lista'][$idx] = ['id' => $classe->getId(), 'anno' => $classe->getAnno(),
+          'sezione' => $classe->getSezione(), 'gruppo' => $classe->getGruppo(),
+          'oreSettimanali' => $classe->getOreSettimanali(), 'sede' => $classe->getSede()->getNomeBreve(),
+          'corso' => $classe->getCorso()->getNomeBreve(),
+          'coordinatore' => $classe->getCoordinatore() ? ''.$classe->getCoordinatore() : '',
+          'segretario' => $classe->getSegretario() ? ''.$classe->getSegretario() : ''];
+        $dati['label'][$idx] = $label;
+      }
+    } else {
+      // array associativo
+      $dati['choice'] = [];
+      $dati['lista'] = [];
+      foreach ($classi as $classe) {
+        $label = ''.$classe;
+        $dati['choice'][$label] = $classe;
+        $dati['lista'][$classe->getId()]['object'] = $classe;
+        $dati['lista'][$classe->getId()]['label'] = $label;
       }
     }
     // restituisce dati

@@ -70,7 +70,6 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | Alunno   | M    | B     | 15 maggio      |        |
     | Alunno   | G    | G     | Altro          | Excel  |
     | Alunno   | G    | L     | Altro          |        |
-    | Ata      | G    | G     | Da leggere     | Excel  |
 
 
 ################################################################################
