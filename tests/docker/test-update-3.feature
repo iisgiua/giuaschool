@@ -61,7 +61,7 @@ Scenario: scarica piano di lavoro inserito
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   E istanze di tipo "Documento":
-    | id  | classe | materia | docente | tipo |
+    | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_piani"
