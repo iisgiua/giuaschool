@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use Fidry\AliceDataFixtures\Persistence\PurgeMode;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -22,7 +23,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -48,8 +49,8 @@ class AliceLoadCommand extends Command {
    * @param Generator $faker Generatore automatico di dati fittizi
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
+   * @param ContainerInterface $locator Gestore per i servizi registrati
    * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
-   * @param ServiceLocator $locator Gestore per i servizi registrati
    */
   public function __construct(
       protected EntityManagerInterface $em,
@@ -57,8 +58,9 @@ class AliceLoadCommand extends Command {
       protected Generator $faker,
       protected PurgerLoader $alice,
       private readonly string $dirProgetto,
-      protected ?CustomProvider $customProvider = null,
-      private ServiceLocator $locator) {
+      #[AutowireLocator([LogListener::class => '?'.LogListener::class])]
+      private ContainerInterface $locator,
+      protected ?CustomProvider $customProvider = null) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);

@@ -5,15 +5,8 @@ services:
   _defaults:
     autowire: true
     autoconfigure: true
-    bind:               # Pass defined values to any <$name> argument for any service
-      $dirProgetto:     '%kernel.project_dir%'
 
   # necessario per il comando app:alice:load
   Fidry\AliceDataFixtures\Loader\PurgerLoader:
     alias: fidry_alice_data_fixtures.doctrine.purger_loader
     public: true
-
-  App\Command\AliceLoadCommand:
-    arguments:
-      $locator: !service_locator
-        App\EventListener\LogListener: '@?App\EventListener\LogListener'
