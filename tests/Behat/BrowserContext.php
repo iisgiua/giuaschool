@@ -1249,6 +1249,47 @@ class BrowserContext extends BaseContext implements Context {
   }
 
   /**
+   * Va alla pagina e clicca ripetutamente su pulsante sinchè c'è messaggio o cambia URL
+   *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}} o {{@nome}}
+   *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   *  $selettore: selettore css che individua la sezione in cui cercare il testo
+   *  $ricerca: testo da cercare come espressione regolare
+   *
+   * @When vai alla url :testoParam e premi :testo finché :selettore contiene :ricerca
+   */
+  public function vaiAllaPaginaECliccaRipetutamente($testoParam, $testo, $selettore, $ricerca): void {
+    // va alla pagina
+    $url = $this->getMinkParameter('base_url').$testoParam;
+    $partiUrl = explode('?', $url.'?');
+    $this->session->visit($url);
+    $this->waitForPage();
+    $this->assertPageStatus(200);
+    $this->assertPageUrl($url);
+    $this->log('SHOW', 'Pagina: '.$url);
+    // ripete finché c'è messaggio e la URL è la stessa
+    $continua = true;
+    do {
+      // clicca su pulsante
+      $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
+      $this->assertNotEmpty($links[0]);
+      $links[0]->click();
+      sleep(1);
+      $this->waitForPage();
+      $this->assertPageStatus(200);
+      // controllo pagina
+      $attuale = $this->session->getCurrentUrl();
+      $this->log('SHOW', 'Pagina: '.$attuale);
+      $partiAttuale = explode('?', $attuale.'?');
+      $partiAttuale[1] = substr($partiAttuale[1], 0, strlen($partiUrl[1]));
+      $continua = ($partiUrl[0] == $partiAttuale[0] && $partiUrl[1] == $partiAttuale[1]);
+      // controllo sezione
+      $sezione = $this->session->getPage()->find('css', $selettore);
+      $text = ($sezione && $sezione->isVisible()) ? $sezione->getText() : '';
+      $continua &= preg_match($ricerca, $text);
+    } while ($continua);
+  }
+
+  /**
    * Controlla che il valore impostato nel campo del form sia uguale a quello indicato
    *  $testoParam: campo del form identificato tramite attributo id|name|label
    *  $valore: testo o valore presente nel campo del form
@@ -1324,17 +1365,21 @@ class BrowserContext extends BaseContext implements Context {
   //==================== METODI PROTETTI DELLA CLASSE ====================
 
   /**
-   * Controlla che l'URL indicata corrisponda alla pagina corrente o lancia un'eccezione
+   * Controlla che l'URL indicata corrisponda alla pagina corrente o lancia un'eccezione.
+   * L'URL è considerata diversa se la parte dell'indirizzo è diversa o se la parte della query è diversa,
+   * non considerando argomenti aggiuntivi oltre quelli specificati.
    *
-   * @param string $url Indirizzo da controllare
+   * @param string $url Indirizzo da controllare (compresa parte con parametri)
    * @param string $message Messaggio di errore
    */
   protected function assertPageUrl($url, $message=null): void {
-    $current = $this->session->getCurrentUrl();
-    if (str_contains($current, '?')) {
-      $current = substr($current, 0, strpos($current, '?'));
-    }
-    if ($url != $current) {
+    $partiUrl = explode('?', $url.'?');
+    $attuale = $this->session->getCurrentUrl();
+    $partiAttuale = explode('?', $attuale.'?');
+    // non considera argomenti aggiuntivi oltre quelli indicati
+    $partiAttuale[1] = substr($partiAttuale[1], 0, strlen($partiUrl[1]));
+    // controlla se è la stessa pagina
+    if ($partiUrl[0] != $partiAttuale[0] || $partiUrl[1] != $partiAttuale[1]) {
       $info = $this->trace();
       $msg = ($message ?: 'Failed asserting that URL is the address of the current page').$info."\n".
         '+++ Expected: '.var_export($url, true)."\n".
