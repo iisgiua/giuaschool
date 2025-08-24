@@ -574,8 +574,8 @@ class RegistroUtil {
           ->getQuery()
           ->getResult();
       }
-      if ($a->getAvviso() && $a->getAvviso()->getGenitori() == 'U' ||
-          ($a->getAvviso()->getRappresentantiGenitori() != 'N' && in_array($a->getAvviso()->getGenitori(), ['N', 'U']))) {
+      if ($a->getAvviso() && ($a->getAvviso()->getGenitori() == 'U' ||
+          ($a->getAvviso()->getRappresentantiGenitori() != 'N' && in_array($a->getAvviso()->getGenitori(), ['N', 'U'])))) {
         // legge genitore destinatario
         $ann['genitori'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
           ->join(Genitore::class, 'g', 'WITH', 'g.alunno=a.id')
