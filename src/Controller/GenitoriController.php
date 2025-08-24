@@ -669,20 +669,10 @@ class GenitoriController extends BaseController {
       // log azione
       if ($form->get('delete')->isClicked()) {
         // eliminazione
-        $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
-          'ID' => $info['assenza']['ids'],
-          'Giustificato' => $info['assenza']['giustificato'],
-          'Motivazione' => $info['assenza']['motivazione'],
-          'Dichiarazione' => $info['assenza']['dichiarazione'],
-          'Certificati' => $info['assenza']['certificati']]);
+        $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online');
       } elseif (!$errore) {
         // inserimento o modifica
-        $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
-          'ID' => $info['assenza']['ids'],
-          'Giustificato' => $info['assenza']['giustificato'],
-          'Motivazione' => $info['assenza']['motivazione'],
-          'Dichiarazione' => $info['assenza']['dichiarazione'],
-          'Certificati' => $info['assenza']['certificati']]);
+        $dblogger->logAzione('ASSENZE', 'Giustificazione online');
       }
       // redirezione
       return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
@@ -793,16 +783,10 @@ class GenitoriController extends BaseController {
         // log azione
         if ($form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
-            'Ritardo' => $entrata->getId(),
-            'Motivazione' => $entrata_old->getMotivazione(),
-            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null]);
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online');
         } else {
           // inserisce o modifica
-          $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
-            'Ritardo' => $entrata->getId(),
-            'Motivazione' => $entrata_old->getMotivazione(),
-            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null]);
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online');
         }
       }
       // redirezione
@@ -911,16 +895,10 @@ class GenitoriController extends BaseController {
         // log azione
         if ($form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', [
-            'Uscita' => $uscita->getId(),
-            'Motivazione' => $uscita_old->getMotivazione(),
-            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null]);
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online');
         } else {
           // inserisce o modifica
-          $dblogger->logAzione('ASSENZE', 'Giustificazione online', [
-            'Uscita' => $uscita->getId(),
-            'Motivazione' => $uscita_old->getMotivazione(),
-            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null]);
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online');
         }
       }
       // redirezione

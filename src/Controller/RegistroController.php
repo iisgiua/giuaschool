@@ -1242,19 +1242,10 @@ class RegistroController extends BaseController
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('REGISTRO', 'Crea annotazione', [
-            'Annotazione' => $annotazione->getId(),
-            'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null)]);
+          $dblogger->logAzione('REGISTRO', 'Crea annotazione');
         } else {
           // modifica
-          $dblogger->logAzione('REGISTRO', 'Modifica annotazione', [
-            'Annotazione' => $annotazione->getId(),
-            'Docente' => $annotazione_old->getDocente()->getId(),
-            'Testo' => $annotazione_old->getTesto(),
-            'Visibile' => $annotazione_old->getVisibile(),
-            'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
-            'Avviso cancellato' => $log_avviso,
-            'Utenti avviso cancellati' => $log_avviso_utenti]);
+          $dblogger->logAzione('REGISTRO', 'Modifica annotazione');
         }
         // redirezione
         return $this->redirectToRoute('lezioni_registro_firme');
@@ -1327,15 +1318,7 @@ class RegistroController extends BaseController
       NotificaMessageHandler::delete($this->em, (new AvvisoMessage($log_avviso))->getTag());
     }
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella annotazione', [
-      'Annotazione' => $annotazione_id,
-      'Classe' => $annotazione->getClasse()->getId(),
-      'Docente' => $annotazione->getDocente()->getId(),
-      'Data' => $annotazione->getData()->format('Y-m-d'),
-      'Testo' => $annotazione->getTesto(),
-      'Visibile' => $annotazione->getVisibile(),
-      'Avviso cancellato' => $log_avviso,
-      'Utenti cancellati' => $log_avviso_utenti]);
+    $dblogger->logAzione('REGISTRO', 'Cancella annotazione');
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
   }
@@ -1516,17 +1499,10 @@ class RegistroController extends BaseController
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->logAzione('REGISTRO', 'Crea nota', [
-            'Nota' => $nota->getId()]);
+          $dblogger->logAzione('REGISTRO', 'Crea nota');
         } else {
           // modifica
-          $dblogger->logAzione('REGISTRO', 'Modifica nota', [
-            'Nota' => $nota->getId(),
-            'Testo' => $nota_old['testo'],
-            'Provvedimento' => $nota_old['provvedimento'],
-            'Docente provvedimento' => $nota_old['docenteProvvedimento'],
-            'Tipo nota' => $nota_old['tipo'],
-            'Alunni' => $nota_old['alunni']]);
+          $dblogger->logAzione('REGISTRO', 'Modifica nota');
         }
         // messaggio
         $minuti = abs($this->reqstack->getSession()->get('/CONFIG/SCUOLA/nota_modifica', 0));
@@ -1580,16 +1556,7 @@ class RegistroController extends BaseController
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella nota', [
-      'Nota' => $nota_id,
-      'Classe' => $nota->getClasse()->getId(),
-      'Docente' => $nota->getDocente()->getId(),
-      'Data' => $nota->getData()->format('Y-m-d'),
-      'Testo' => $nota->getTesto(),
-      'Provvedimento' => $nota->getProvvedimento(),
-      'Docente provvedimento' => ($nota->getDocenteProvvedimento() ? $nota->getDocenteProvvedimento()->getId() : null),
-      'Tipo nota' => $nota->getTipo(),
-      'Alunni' => $alunni_id]);
+    $dblogger->logAzione('REGISTRO', 'Cancella nota');
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
   }
@@ -1623,16 +1590,7 @@ class RegistroController extends BaseController
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Annulla nota', [
-      'Nota' => $nota->getId(),
-      'Classe' => $nota->getClasse()->getId(),
-      'Docente' => $nota->getDocente()->getId(),
-      'Data' => $nota->getData()->format('Y-m-d'),
-      'Testo' => $nota->getTesto(),
-      'Provvedimento' => $nota->getProvvedimento(),
-      'Docente provvedimento' => ($nota->getDocenteProvvedimento() ? $nota->getDocenteProvvedimento()->getId() : null),
-      'Tipo nota' => $nota->getTipo(),
-      'Alunni' => implode(',', array_map(fn($a) => $a->getId(), $nota->getAlunni()->toArray()))]);
+    $dblogger->logAzione('REGISTRO', 'Annulla nota');
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
   }

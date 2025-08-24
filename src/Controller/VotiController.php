@@ -366,19 +366,7 @@ class VotiController extends BaseController {
           // ok: memorizza dati
           $this->em->flush();
           // log azione
-          $dblogger->logAzione('VOTI', 'Voti della classe', [
-            'Tipo' => $tipo,
-            'Voti creati' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
-            'Voti modificati' => implode(', ', array_map(fn($e) => '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
-              ', Lezione: '.$e[3].
-              ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']',
-              $log['edit'])),
-            'Voti cancellati' => implode(', ', array_map(fn($e) => '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
-              ', Media: '.$e[1]->getMedia().
-              ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
-              ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
-              ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']',
-              $log['delete']))]);
+          $dblogger->logAzione('VOTI', 'Voti della classe');
           // redirezione
           return $this->redirectToRoute('lezioni_voti_quadro');
         }
@@ -575,36 +563,17 @@ class VotiController extends BaseController {
           // log azione
           if ($valutazione_precedente && $form->get('delete')->isClicked()) {
             // cancellazione
-            $dblogger->logAzione('VOTI', 'Cancella voto', [
-              'Id' => $valutazione_precedente[0],
-              'Tipo' => $tipo,
-              'Visibile' => $valutazione_precedente[1],
-              'Media' => $valutazione_precedente[6],
-              'Argomento' => $valutazione_precedente[2],
-              'Voto' => $valutazione_precedente[3],
-              'Giudizio' => $valutazione_precedente[4],
-              'Docente' => $valutazione->getDocente()->getId(),
-              'Alunno' => $valutazione->getAlunno()->getId(),
-              'Lezione' => $valutazione_precedente[5],
-              'Materia' => $valutazione_precedente[6]]);
+            $dblogger->logAzione('VOTI', 'Cancella voto');
           } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
                     $valutazione_precedente[4] != $valutazione->getGiudizio() ||
                     $valutazione_precedente[2] != $valutazione->getArgomento() ||
                     $valutazione_precedente[1] != $valutazione->getVisibile() ||
                     $valutazione_precedente[6] != $valutazione->getMedia())) {
             // modifica
-            $dblogger->logAzione('VOTI', 'Modifica voto', [
-              'Id' => $valutazione_precedente[0],
-              'Visibile' => $valutazione_precedente[1],
-              'Media' => $valutazione_precedente[6],
-              'Argomento' => $valutazione_precedente[2],
-              'Voto' => $valutazione_precedente[3],
-              'Giudizio' => $valutazione_precedente[4],
-              'Lezione' => $valutazione_precedente[5]]);
+            $dblogger->logAzione('VOTI', 'Modifica voto');
           } elseif (!$valutazione_precedente) {
             // creazione
-            $dblogger->logAzione('VOTI', 'Crea voto', [
-              'Id' => $valutazione->getId()]);
+            $dblogger->logAzione('VOTI', 'Crea voto');
           }
           // redirezione
           return $this->redirectToRoute('lezioni_voti_quadro');
@@ -994,18 +963,7 @@ class VotiController extends BaseController {
     // cancella voto
     $this->em->remove($valutazione);
     // memorizzazione e log
-    $dblogger->logAzione('VOTI', 'Cancella voto', [
-      'Id' => $vecchiaValutazione->getId(),
-      'Tipo' => $vecchiaValutazione->getTipo(),
-      'Visibile' => $vecchiaValutazione->getVisibile(),
-      'Media' => $vecchiaValutazione->getMedia(),
-      'Argomento' => $vecchiaValutazione->getArgomento(),
-      'Voto' => $vecchiaValutazione->getVoto(),
-      'Giudizio' => $vecchiaValutazione->getGiudizio(),
-      'Docente' => $vecchiaValutazione->getDocente()->getId(),
-      'Alunno' => $vecchiaValutazione->getAlunno()->getId(),
-      'Lezione' => $vecchiaValutazione->getLezione()->getId(),
-      'Materia' => $vecchiaValutazione->getMateria()->getId()]);
+    $dblogger->logAzione('VOTI', 'Cancella voto');
     // redirezione
     return $this->redirectToRoute('lezioni_voti_quadro');
   }

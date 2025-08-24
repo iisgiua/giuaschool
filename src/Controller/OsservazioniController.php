@@ -270,11 +270,7 @@ class OsservazioniController extends BaseController {
           'Id' => $osservazione->getId()]);
       } else {
         // modifica
-        $dblogger->logAzione('REGISTRO', 'Modifica osservazione', [
-          'Id' => $osservazione->getId(),
-          'Testo' => $osservazione_old['testo'],
-          'Alunno' => $osservazione_old['alunno']->getId(),
-          'Cattedra' => $osservazione_old['cattedra']->getId()]);
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione');
       }
       // redirezione
       return $this->redirectToRoute('lezioni_osservazioni');
@@ -319,12 +315,7 @@ class OsservazioniController extends BaseController {
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella osservazione', [
-      'Osservazione' => $osservazione_id,
-      'Cattedra' => $osservazione->getCattedra()->getId(),
-      'Alunno' => $osservazione->getAlunno()->getId(),
-      'Data' => $osservazione->getData()->format('Y-m-d'),
-      'Testo' => $osservazione->getTesto()]);
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione');
     // redirezione
     return $this->redirectToRoute('lezioni_osservazioni');
   }
@@ -521,13 +512,10 @@ class OsservazioniController extends BaseController {
       // log azione
       if (!$id) {
         // nuovo
-        $dblogger->logAzione('REGISTRO', 'Crea osservazione personale', [
-          'Id' => $osservazione->getId()]);
+        $dblogger->logAzione('REGISTRO', 'Crea osservazione personale');
       } else {
         // modifica
-        $dblogger->logAzione('REGISTRO', 'Modifica osservazione personale', [
-          'Id' => $osservazione->getId(),
-          'Testo' => $osservazione_old['testo']]);
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione personale');
       }
       // redirezione
       return $this->redirectToRoute('lezioni_osservazioni_personali');
@@ -573,11 +561,7 @@ class OsservazioniController extends BaseController {
     // ok: memorizza dati
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale', [
-      'Osservazione' => $osservazione_id,
-      'Cattedra' => $osservazione->getCattedra()->getId(),
-      'Data' => $osservazione->getData()->format('Y-m-d'),
-      'Testo' => $osservazione->getTesto()]);
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale');
     // redirezione
     return $this->redirectToRoute('lezioni_osservazioni_personali');
   }

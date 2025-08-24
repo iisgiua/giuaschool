@@ -451,40 +451,17 @@ class RichiesteController extends BaseController {
         // log azione
         if (isset($uscitaOld) && $mode == 'DELETE') {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
-            'Uscita' => $uscitaId,
-            'Alunno' => $uscita->getAlunno()->getId(),
-            'Data' => $uscita->getData()->format('Y-m-d'),
-            'Ora' => $uscita->getOra()->format('H:i'),
-            'Note' => $uscita->getNote(),
-            'Valido' => $uscita->getValido(),
-            'Giustificato' => ($uscita->getGiustificato() ? $uscita->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $uscita->getDocente()->getId(),
-            'DocenteGiustifica' => ($uscita->getDocenteGiustifica() ? $uscita->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita');
         } elseif (isset($uscitaOld)) {
           // modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica uscita', [
-            'Uscita' => $uscita->getId(),
-            'Ora' => $uscitaOld->getOra()->format('H:i'),
-            'Note' => $uscitaOld->getNote(),
-            'Valido' => $uscitaOld->getValido(),
-            'Giustificato' => ($uscitaOld->getGiustificato() ? $uscitaOld->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $uscitaOld->getDocente()->getId(),
-            'DocenteGiustifica' => ($uscitaOld->getDocenteGiustifica() ? $uscitaOld->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita');
         } else {
           // nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea uscita', [
-            'Uscita' => $uscita->getId()]);
+          $dblogger->logAzione('ASSENZE', 'Crea uscita');
         }
         if (isset($assenzaId)) {
           // cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
-            'Assenza' => $assenzaId,
-            'Alunno' => $assenza->getAlunno()->getId(),
-            'Data' => $assenza->getData()->format('Y-m-d'),
-            'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza');
         }
         // redirezione
         return $this->redirectToRoute('lezioni_assenze_quadro', ['posizione' => $posizione]);
@@ -700,9 +677,7 @@ class RichiesteController extends BaseController {
       // memorizzazione e log
       $dblogger->logAzione('RICHIESTE', 'Gestisce richiesta');
       if (isset($derogaVecchia)) {
-        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
-          'Username' => $richiesta->getUtente()->getUserIdentifier(),
-            ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia]);
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe');
       }
       // controlla unicità
       if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchiaStato == 'R') {

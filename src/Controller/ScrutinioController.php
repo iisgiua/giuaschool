@@ -249,13 +249,7 @@ class ScrutinioController extends BaseController {
             // ok: memorizza dati
             $this->em->flush();
             // log azione
-            $dblogger->logAzione('SCRUTINIO', 'Proposte', [
-              'Periodo' => $periodo,
-              'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
-              'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
-                ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"'.
-                ', Strategie: "'.$e->getDato('strategie').'"]',
-                $log['edit']))]);
+            $dblogger->logAzione('SCRUTINIO', 'Proposte');
             // segnala errori
             foreach ($errori as $err) {
               // aggiunge errore
@@ -544,12 +538,7 @@ class ScrutinioController extends BaseController {
       // ok: memorizza dati
       $this->em->flush();
       // log azione
-      $dblogger->logAzione('SCRUTINIO', 'Proposte', [
-        'Periodo' => $periodo,
-        'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
-        'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.$e->getDocente()->getId().', Voto: '.$e->getUnico().
-          ', Recupero: '.$e->getRecupero().', Debito: "'.$e->getDebito().'"]',
-           $log['edit']))]);
+      $dblogger->logAzione('SCRUTINIO', 'Proposte');
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
@@ -2131,11 +2120,7 @@ class ScrutinioController extends BaseController {
     // rende permanenti modifiche
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('SCRUTINIO', 'Proposte automatiche', [
-      'Periodo' => $periodo,
-      'Proposte inserite' => implode(', ', array_map(fn($e) => $e->getId(), $log['create'])),
-      'Proposte modificate' => implode(', ', array_map(fn($e) => '[Id: '.$e->getId().', Docente: '.
-        $e->getDocente()->getId().', Voto: '.$e->getUnico().']', $log['edit']))]);
+    $dblogger->logAzione('SCRUTINIO', 'Proposte automatiche');
     // redirect
     return $this->redirectToRoute('lezioni_scrutinio_proposte', ['cattedra' => $cattedra->getId(),
       'classe' => $cattedra->getClasse()->getId(), 'periodo' => $periodo]);

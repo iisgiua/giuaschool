@@ -36,7 +36,6 @@ use App\Form\ScrutinioAssenza;
 use App\Form\ScrutinioAssenzaType;
 use App\Form\ScrutinioPresenza;
 use App\Form\ScrutinioPresenzaType;
-use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
@@ -81,7 +80,6 @@ class ScrutinioUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param LogHandler $dblogger Gestore dei log su database
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param string $root Directory principale dell'applicazione
    */
@@ -90,7 +88,6 @@ class ScrutinioUtil {
       private readonly EntityManagerInterface $em,
       private readonly TranslatorInterface $trans,
       private readonly RequestStack $reqstack,
-      private readonly LogHandler $dblogger,
       private readonly RegistroUtil $reg,
       private readonly string $root) {
     // imposta directory per gli scrutini
@@ -981,13 +978,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'N',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -1010,13 +1000,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '1',
-      'Stato finale' => 'N']);
     // ok
     return true;
   }
@@ -1238,13 +1221,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('2');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '1',
-          'Stato finale' => '2']);
         // ok
         return true;
       }
@@ -1276,13 +1252,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '2',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -1555,13 +1524,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('3');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '2',
-        'Stato finale' => '3']);
       // ok
       return true;
     }
@@ -1610,13 +1572,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('4');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '3',
-        'Stato finale' => '4']);
       // ok
       return true;
     }
@@ -1646,13 +1601,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('2');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '3',
-      'Stato finale' => '2']);
     // ok
     return true;
   }
@@ -1730,13 +1678,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '4',
-        'Stato finale' => '5']);
       // ok
       return true;
     }
@@ -1796,13 +1737,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('3');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '4',
-      'Stato finale' => '3']);
     // ok
     return true;
   }
@@ -1841,13 +1775,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('6');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '5',
-	      'Stato finale' => '6']);
       // ok
       return true;
     }
@@ -1877,13 +1804,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('4');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '5',
-      'Stato finale' => '4']);
     // ok
     return true;
   }
@@ -1906,13 +1826,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('5');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '6',
-      'Stato finale' => '5']);
     // ok
     return true;
   }
@@ -2053,13 +1966,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('C');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '6',
-          'Stato finale' => 'C']);
         // ok
         return true;
       }
@@ -2110,13 +2016,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('6');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'C',
-      'Stato finale' => '6']);
     // ok
     return true;
   }
@@ -2417,13 +2316,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'N',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -2446,13 +2338,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '1',
-      'Stato finale' => 'N']);
     // ok
     return true;
   }
@@ -2532,13 +2417,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('2');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '1',
-          'Stato finale' => '2']);
         // ok
         return true;
       }
@@ -2568,13 +2446,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '2',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -3015,13 +2886,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('3');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '2',
-          'Stato finale' => '3']);
         // ok
         return true;
       }
@@ -3051,13 +2915,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('2');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '3',
-      'Stato finale' => '2']);
     // ok
     return true;
   }
@@ -3098,13 +2955,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('4');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '3',
-        'Stato finale' => '4']);
       // ok
       return true;
     }
@@ -3128,13 +2978,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('3');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-    'Scrutinio' => $scrutinio->getId(),
-	  'Classe' => $classe->getId(),
-    'Periodo' => $scrutinio->getPeriodo(),
-    'Stato iniziale' => '4',
-    'Stato finale' => '3']);
     // ok
     return true;
   }
@@ -3180,13 +3023,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '4',
-        'Stato finale' => '5']);
       // ok
       return true;
     }
@@ -3234,13 +3070,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('6');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '5',
-          'Stato finale' => '6']);
         // ok
         return true;
       }
@@ -3248,13 +3077,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('6');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '5',
-        'Stato finale' => '6']);
       // ok
       return true;
     }
@@ -3491,13 +3313,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('7');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '6',
-        'Stato finale' => '7']);
       // ok
       return true;
     }
@@ -3521,13 +3336,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('4');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '5',
-      'Stato finale' => '4']);
     // ok
     return true;
   }
@@ -3548,13 +3356,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('5');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '6',
-      'Stato finale' => '5']);
     // ok
     return true;
   }
@@ -3591,13 +3392,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('6');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '7',
-      'Stato finale' => '6']);
     // ok
     return true;
   }
@@ -3752,13 +3546,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('8');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '7',
-        'Stato finale' => '8']);
       // ok
       return true;
     }
@@ -3895,13 +3682,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('7');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '8',
-      'Stato finale' => '7']);
     // ok
     return true;
   }
@@ -4069,13 +3849,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('9');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '8',
-        'Stato finale' => '9']);
       // ok
       return true;
     }
@@ -4103,13 +3876,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('8');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '9',
-      'Stato finale' => '8']);
     // ok
     return true;
   }
@@ -4170,13 +3936,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('C');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '9',
-          'Stato finale' => 'C']);
         // ok
         return true;
       }
@@ -4227,13 +3986,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('9');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'C',
-      'Stato finale' => '9']);
     // ok
     return true;
   }
@@ -4514,13 +4266,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'N',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -4548,13 +4293,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '1',
-      'Stato finale' => 'N']);
     // ok
     return true;
   }
@@ -4640,13 +4378,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('2');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '1',
-          'Stato finale' => '2']);
         // ok
         return true;
       }
@@ -4678,13 +4409,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('1');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '2',
-      'Stato finale' => '1']);
     // ok
     return true;
   }
@@ -4971,13 +4695,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('3');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '2',
-        'Stato finale' => '3']);
       // ok
       return true;
     }
@@ -5021,13 +4738,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('2');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '3',
-      'Stato finale' => '2']);
     // ok
     return true;
   }
@@ -5092,13 +4802,6 @@ class ScrutinioUtil {
       // aggiorna stato
       $scrutinio->setStato('4');
       $this->em->flush();
-      // log
-      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-        'Scrutinio' => $scrutinio->getId(),
-        'Classe' => $classe->getId(),
-        'Periodo' => $scrutinio->getPeriodo(),
-        'Stato iniziale' => '3',
-        'Stato finale' => '4']);
       // ok
       return true;
     }
@@ -5126,13 +4829,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('3');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => '4',
-      'Stato finale' => '3']);
     // ok
     return true;
   }
@@ -5193,13 +4889,6 @@ class ScrutinioUtil {
         // aggiorna stato
         $scrutinio->setStato('C');
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $classe->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Stato iniziale' => '4',
-          'Stato finale' => 'C']);
         // ok
         return true;
       }
@@ -5250,13 +4939,6 @@ class ScrutinioUtil {
     // aggiorna stato
     $scrutinio->setStato('4');
     $this->em->flush();
-    // log
-    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', [
-      'Scrutinio' => $scrutinio->getId(),
-      'Classe' => $classe->getId(),
-      'Periodo' => $scrutinio->getPeriodo(),
-      'Stato iniziale' => 'C',
-      'Stato finale' => '4']);
     // ok
     return true;
   }
@@ -5347,13 +5029,6 @@ class ScrutinioUtil {
         // memorizza dati
         $scrutinio->setDati($scrutinio_dati);
         $this->em->flush();
-        // log
-        $this->dblogger->logAzione('SCRUTINIO', 'Modifica verbale', [
-          'Scrutinio' => $scrutinio->getId(),
-          'Classe' => $scrutinio->getClasse()->getId(),
-          'Periodo' => $scrutinio->getPeriodo(),
-          'Tipo' => 'Argomento',
-          'Punto' => $num_arg]);
       }
     } else {
       // imposta messaggi per eventuali altri errori del form

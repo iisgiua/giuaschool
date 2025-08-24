@@ -94,8 +94,7 @@ class UtentiController extends BaseController {
         // memorizza modifica
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('SICUREZZA', 'Cambio Email', [
-          'Precedente email' => $vecchia_email]);
+        $dblogger->logAzione('SICUREZZA', 'Cambio Email');
         // messaggio di successo
         $this->addFlash('success', 'message.update_ok');
         // redirezione
@@ -187,7 +186,7 @@ class UtentiController extends BaseController {
           // memorizza password
           $this->em->flush();
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Cambio Password', []);
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password');
           // messaggio di successo
           $this->addFlash('success', 'message.update_ok');
           // redirezione
@@ -250,7 +249,7 @@ class UtentiController extends BaseController {
         $this->getUser()->setOtp(null);
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP', []);
+        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP');
         // messaggio di successo
         $this->addFlash('success', 'message.otp_disabilitato');
         // redirezione
@@ -289,7 +288,7 @@ class UtentiController extends BaseController {
           // cancella sessione
           $this->reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
           // log azione
-          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', []);
+          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP');
           // messaggio di successo
           $this->addFlash('success', 'message.otp_abilitato');
           // redirezione
@@ -353,7 +352,7 @@ class UtentiController extends BaseController {
       $nuovaNotifica['abilitato'] = $form->get('abilitato')->getData();
       $this->getUser()->setNotifica($nuovaNotifica);
       // log e memorizzazione
-      $dblogger->logAzione('CONFIGURAZIONE', 'Notifiche', [$nuovaNotifica]);
+      $dblogger->logAzione('CONFIGURAZIONE', 'Modifica notifiche');
       // controlla configurazione
       if (($nuovaNotifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
            str_ends_with((string) $this->getUser()->getEmail(), '.local'))) ||

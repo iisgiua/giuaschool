@@ -362,40 +362,17 @@ class StaffController extends BaseController {
         // log azione
         if (isset($entrata_old) && $mode == 'DELETE') {
           // log cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella entrata', [
-            'Entrata' => $id_entrata,
-            'Alunno' => $entrata->getAlunno()->getId(),
-            'Data' => $entrata->getData()->format('Y-m-d'),
-            'Ora' => $entrata->getOra()->format('H:i'),
-            'Note' => $entrata->getNote(),
-            'Valido' => $entrata->getValido(),
-            'Giustificato' => ($entrata->getGiustificato() ? $entrata->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $entrata->getDocente()->getId(),
-            'DocenteGiustifica' => ($entrata->getDocenteGiustifica() ? $entrata->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Cancella entrata');
         } elseif (isset($entrata_old)) {
           // log modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica entrata', [
-            'Entrata' => $entrata->getId(),
-            'Ora' => $entrata_old->getOra()->format('H:i'),
-            'Note' => $entrata_old->getNote(),
-            'Valido' => $entrata_old->getValido(),
-            'Giustificato' => ($entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $entrata_old->getDocente()->getId(),
-            'DocenteGiustifica' => ($entrata_old->getDocenteGiustifica() ? $entrata_old->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Modifica entrata');
         } else {
           // log nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea entrata', [
-            'Entrata' => $entrata->getId()]);
+          $dblogger->logAzione('ASSENZE', 'Crea entrata');
         }
         if (isset($id_assenza)) {
           // log cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
-            'Assenza' => $id_assenza,
-            'Alunno' => $assenza->getAlunno()->getId(),
-            'Data' => $assenza->getData()->format('Y-m-d'),
-            'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza');
         }
         // redirezione
         return $this->redirectToRoute('staff_studenti_autorizza');
@@ -561,36 +538,17 @@ class StaffController extends BaseController {
         // log azione
         if (isset($uscita_old) && $mode == 'DELETE') {
           // cancella
-          $dblogger->logAzione('ASSENZE', 'Cancella uscita', [
-            'Uscita' => $id_uscita,
-            'Alunno' => $uscita->getAlunno()->getId(),
-            'Data' => $uscita->getData()->format('Y-m-d'),
-            'Ora' => $uscita->getOra()->format('H:i'),
-            'Note' => $uscita->getNote(),
-            'Valido' => $uscita->getValido(),
-            'Docente' => $uscita->getDocente()->getId()]);
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita');
         } elseif (isset($uscita_old)) {
           // modifica
-          $dblogger->logAzione('ASSENZE', 'Modifica uscita', [
-            'Uscita' => $uscita->getId(),
-            'Ora' => $uscita_old->getOra()->format('H:i'),
-            'Note' => $uscita_old->getNote(),
-            'Valido' => $uscita_old->getValido(),
-            'Docente' => $uscita_old->getDocente()->getId()]);
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita');
         } else {
           // nuovo
-          $dblogger->logAzione('ASSENZE', 'Crea uscita', [
-            'Uscita' => $uscita->getId()]);
+          $dblogger->logAzione('ASSENZE', 'Crea uscita');
         }
         if (isset($id_assenza)) {
           // cancella assenza
-          $dblogger->logAzione('ASSENZE', 'Cancella assenza', [
-            'Assenza' => $id_assenza,
-            'Alunno' => $assenza->getAlunno()->getId(),
-            'Data' => $assenza->getData()->format('Y-m-d'),
-            'Giustificato' => ($assenza->getGiustificato() ? $assenza->getGiustificato()->format('Y-m-d') : null),
-            'Docente' => $assenza->getDocente()->getId(),
-            'DocenteGiustifica' => ($assenza->getDocenteGiustifica() ? $assenza->getDocenteGiustifica()->getId() : null)]);
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza');
         }
         // redirezione
         return $this->redirectToRoute('staff_studenti_autorizza');
@@ -737,13 +695,7 @@ class StaffController extends BaseController {
         // ok: memorizza dati
         $this->em->flush();
         // log azione
-        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', [
-          'Username' => $alunno->getUsername(),
-          'Ruolo' => $alunno->getRoles()[0],
-          'ID' => $alunno->getId(),
-          'Autorizza entrata' => $alunno_old['autorizzaEntrata'],
-          'Autorizza uscita' => $alunno_old['autorizzaUscita'],
-          'Note' => $alunno_old['note']]);
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe');
       // redirezione
       return $this->redirectToRoute('staff_studenti_deroghe');
     }
@@ -1086,10 +1038,7 @@ class StaffController extends BaseController {
     // memorizza su db
     $this->em->flush();
     // log azione
-    $dblogger->logAzione('SICUREZZA', 'Generazione Password', [
-      'Username' => $utente->getUsername(),
-      'Ruolo' => $utente->getRoles()[0],
-      'ID' => $utente->getId()]);
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password');
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -1297,44 +1246,12 @@ class StaffController extends BaseController {
             $reg->ricalcolaOreAlunno($data_obj, $alu);
           }
           // log azione
-          $dblogger->logAzione('ASSENZE', 'Gestione assenti', [
-            'Data' => $data,
-            'Assenze create' => implode(', ', array_map(fn($e) => $e->getId(), $log['assenza_create'])),
-            'Assenze cancellate' => implode(', ', array_map(fn($k, $e) => '[Assenza: '.$k.
-              ', Alunno: '.$e->getAlunno()->getId().
-              ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
-              ', Docente: '.$e->getDocente()->getId().
-              ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']', array_keys($log['assenza_delete']), $log['assenza_delete'])),
-            'Entrate cancellate' => implode(', ', array_map(fn($k, $e) => '[Entrata: '.$k.
-              ', Alunno: '.$e->getAlunno()->getId().
-              ', Ora: '.$e->getOra()->format('H:i').
-              ', Note: "'.$e->getNote().'"'.
-              ', Giustificato: '.($e->getGiustificato() ? $e->getGiustificato()->format('Y-m-d') : '').
-              ', Docente: '.$e->getDocente()->getId().
-              ', DocenteGiustifica: '.($e->getDocenteGiustifica() ? $e->getDocenteGiustifica()->getId() : '').']',
-              array_keys($log['entrata_delete']), $log['entrata_delete'])),
-            'Uscite cancellate' => implode(', ', array_map(fn($k, $e) => '[Uscita: '.$k.
-              ', Alunno: '.$e->getAlunno()->getId().
-              ', Ora: '.$e->getOra()->format('H:i').
-              ', Note: "'.$e->getNote().'"'.
-              ', Docente: '.$e->getDocente()->getId(), array_keys($log['uscita_delete']), $log['uscita_delete']))]);
+          $dblogger->logAzione('ASSENZE', 'Gestione assenti');
         }
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_assenze.html.twig', [
-      'pagina_titolo' => 'page.staff_assenze',
-      'form' => $form->createView(),
-      'form_help' => null,
-      'form_success' => null,
-      'classe' => $classe,
-      'data' => $data_obj->format('Y-m-d'),
-      'data_succ' => $data_succ,
-      'data_prec' => $data_prec,
-      'errore' => $errore,
-      'lista_festivi' => $lista_festivi,
-      'info' => $info,
-      'form_assenze' => ($form_assenze ? $form_assenze->createView() : null)]);
+    return $this->render('ruolo_staff/studenti_assenze.html.twig');
   }
 
   /**
