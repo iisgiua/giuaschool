@@ -1251,7 +1251,19 @@ class StaffController extends BaseController {
       }
     }
     // mostra la pagina di risposta
-    return $this->render('ruolo_staff/studenti_assenze.html.twig');
+    return $this->render('ruolo_staff/studenti_assenze.html.twig', [
+      'pagina_titolo' => 'page.staff_assenze',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
+      'classe' => $classe,
+      'data' => $data_obj->format('Y-m-d'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
+      'errore' => $errore,
+      'lista_festivi' => $lista_festivi,
+      'info' => $info,
+      'form_assenze' => ($form_assenze ? $form_assenze->createView() : null)]);
   }
 
   /**
