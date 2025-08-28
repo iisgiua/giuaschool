@@ -28,6 +28,7 @@
 #   filtroRappresentantiAlunni: lista dei filtri per i rappresentanti degli alunni
 #   esterni: lista degli altri destinatari esterni
 #   cattedra: cattedra associata all'avviso (solo per alcuni tipi di avviso)
+#   classe: classe associata all'avviso (solo per alcuni tipi di avviso)
 #   materia: associata all'avviso (solo per alcuni tipi di avviso)
 #   annotazioni: annotazioni associate all'avviso (solo per alcuni tipi di avviso)
 #   testo: testo dell'avviso
@@ -52,9 +53,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_1'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: 'D'
@@ -73,6 +74,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -83,9 +85,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_1'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: 'D'
@@ -104,6 +106,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -114,9 +117,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_2'
     allegati: '<collection()>'
     sedi: '<collection(@sede_2)>'
     speciali: 'D'
@@ -135,6 +138,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -145,9 +149,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_2'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -157,7 +161,7 @@ App\Entity\Avviso:
     docenti: 'N'
     filtroDocenti: []
     genitori: 'U'
-    filtroGenitori: '<arrayId(avviso_I, filtroGenitori, @avviso_I, @genitore1_3A_1)>'
+    filtroGenitori: '<arrayId(avviso_I, filtroGenitori, @avviso_I, @genitore1_2A_1)>'
     rappresentantiGenitori: 'N'
     filtroRappresentantiGenitori: []
     alunni: 'N'
@@ -166,6 +170,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -176,9 +181,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_3'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -197,6 +202,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -207,9 +213,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_3'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -227,7 +233,8 @@ App\Entity\Avviso:
     rappresentantiAlunni: 'N'
     filtroRappresentantiAlunni: []
     esterni: []
-    cattedra: '@cattedra_curricolare_*'
+    cattedra:
+    classe: '@classe_2A'
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -238,9 +245,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<(new DateTime("2023-03-01"))>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@docente_curricolare_1'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -258,7 +265,8 @@ App\Entity\Avviso:
     rappresentantiAlunni: 'N'
     filtroRappresentantiAlunni: []
     esterni: []
-    cattedra: '@cattedra_*'
+    cattedra: '@cattedra_curricolare_1'
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -269,9 +277,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<(new DateTime("2023-03-01"))>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@docente_curricolare_1'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -289,7 +297,8 @@ App\Entity\Avviso:
     rappresentantiAlunni: 'N'
     filtroRappresentantiAlunni: []
     esterni: []
-    cattedra: '@cattedra_*'
+    cattedra: '@cattedra_curricolare_1'
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -300,9 +309,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_4'
     allegati: '<collection()>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -321,6 +330,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
@@ -331,9 +341,9 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("-1 month", "+1 month")>'
+    data: '<dateTimeBetween("now", "+1 month")>'
     anno: 0
-    autore: '@staff_*'
+    autore: '@staff_4'
     allegati: '<collection(@file_avviso_1)>'
     sedi: '<collection(@sede_1)>'
     speciali: ''
@@ -342,8 +352,8 @@ App\Entity\Avviso:
     filtroCoordinatori: []
     docenti: 'N'
     filtroDocenti: []
-    genitori: 'N'
-    filtroGenitori: []
+    genitori: 'C'
+    filtroGenitori: '<arrayId(avviso_C_allegato, filtroGenitori, @avviso_C_allegato, @classe_4A)>'
     rappresentantiGenitori: 'N'
     filtroRappresentantiGenitori: []
     alunni: 'U'
@@ -352,6 +362,7 @@ App\Entity\Avviso:
     filtroRappresentantiAlunni: []
     esterni: []
     cattedra:
+    classe:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'

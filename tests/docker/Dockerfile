@@ -145,12 +145,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /var/www/giuaschool
 RUN \
 # Install chrome headless
-  wget -qO - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg && \
-  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
+  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends --no-install-suggests install google-chrome-stable && \
-  dbus-uuidgen > /var/lib/dbus/machine-id && \
+  mkdir -p /var/lib/dbus && \
   mkdir -p /var/run/dbus && \
+  dbus-uuidgen > /var/lib/dbus/machine-id && \
 # Install xdebug
   apt-get -yqq --no-install-recommends --no-install-suggests install php-xdebug && \
   echo "xdebug.mode=coverage" >> /etc/php/8.2/mods-available/xdebug.ini && \

@@ -75,8 +75,8 @@ App\Entity\Allegato:
     file: 'documento-pdf'
     comunicazione: '@circolare_nonpubblicata'
   file_avviso_1:
-    titolo: 'Avviso 1'
-    nome: 'Avviso-1'
+    titolo: 'Allegato 1'
+    nome: 'Allegato-1'
     estensione: 'pdf'
     dimensione: 61514
     file: 'documento-pdf'

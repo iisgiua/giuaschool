@@ -160,8 +160,29 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
-      ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
+    // impostazioni per il driver
+    $capabilities = [
+      'prefs' => [
+        'download.default_directory' => '/var/www/giuaschool/tests/temp/download',
+        'download.prompt_for_download' => false,
+        'download.directory_upgrade' => true,
+        'safebrowsing.enabled' => true,
+        'safebrowsing.disable_download_protection' => true,
+        'profile.default_content_settings.popups' => 0,
+        'profile.content_settings.exceptions.automatic_downloads.*.setting' => 1
+      ],
+      'downloadBehavior' => 'allow',
+      'socketTimeout' => 60,
+      'domWaitTimeout' => 10000,
+      'browserConnection' => false,
+      'keepAlive' => false,
+      'requestTimeout' => 30000
+    ];
+    $driver = new ChromeDriver('http://chrome_headless:9222', null,'https://giuaschool_test', $capabilities);
+    $this->session = new Session($driver);
+    // ripulisce sessione
+    $this->session->stop();
+    $this->session->start();
     // inizializza variabili
     $this->cmdOutput = [];
     $this->cmdStatus = 0;
@@ -223,6 +244,19 @@ abstract class BaseContext extends RawMinkContext implements Context {
       foreach ($finder as $fl) {
         $fs->remove($fl);
       }
+      // cancella file scaricati
+      if ($fs->exists(dirname(__DIR__).'/temp/download')) {
+        $finder = new Finder();
+        $finder->in(dirname(__DIR__).'/temp/download')->files();
+        foreach ($finder as $fl) {
+          $fs->remove($fl);
+        }
+      }
+    }
+    if (!$fs->exists(dirname(__DIR__).'/temp/download')) {
+      // crea directory
+      mkdir(dirname(__DIR__).'/temp/download', 0777, true);
+      chmod(dirname(__DIR__).'/temp/download', 0777);
     }
     // cancella vecchi screenshots
     $finder = new Finder();

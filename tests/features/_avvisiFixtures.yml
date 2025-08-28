@@ -1,0 +1,61 @@
+####################
+# _avvisiFixtures - dati per i test sugli avvisi
+####################
+
+
+include:
+  - _testFixtures.yml
+  - ../../src/DataFixtures/AvvisoFixtures.yml
+  - ../../src/DataFixtures/ComunicazioneClasseFixtures.yml
+  - ../../src/DataFixtures/ComunicazioneUtenteFixtures.yml
+
+
+App\Entity\Avviso:
+  avviso_non_modificabile:
+    tipo: 'C'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: '<substr(<text()>, 0, 255)>'
+    data: '<(new DateTime("2023-06-01"))>'
+    anno: 0
+    autore: '@staff_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'N'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'N'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection(@annotazione_avviso_errata)>'
+    testo: '<text()>'
+    sostituzioni: []
+
+App\Entity\ComunicazioneUtente:
+  avviso_non_modificabile_utente:
+    comunicazione: '@avviso_non_modificabile'
+    utente: '@docente_curricolare_3'
+    letto:
+    firmato:
+
+App\Entity\Annotazione:
+  annotazione_avviso_errata:
+    data: '<(new DateTime("2023-06-01"))>'
+    testo: '<text()>'
+    visibile: false
+    avviso: '@avviso_non_modificabile'
+    classe: '@classe_1A'
+    docente: '@docente_curricolare_1'

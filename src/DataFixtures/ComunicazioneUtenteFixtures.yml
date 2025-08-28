@@ -17,11 +17,6 @@ include:
 
 
 App\Entity\ComunicazioneUtente:
-  comunicazione_utente_{1..3}:
-    comunicazione: '@documento_pdf_<current()>'
-    utente: '@docente_curricolare_<current()>'
-    letto: '50%? <dateTimeBetween("-1 month", "now")>'
-    firmato: '50%? <dateTimeBetween("-1 month", "now")>'
   circolare_utente_perclasse_1:
     comunicazione: '@circolare_perclasse'
     utente: '@docente_curricolare_*'
@@ -64,97 +59,97 @@ App\Entity\ComunicazioneUtente:
     firmato: '$letto'
   avviso_utente_U_1:
     comunicazione: '@avviso_U'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    utente: '@ata_A'
+    letto:
+    firmato:
   avviso_utente_U_2:
     comunicazione: '@avviso_U'
-    utente: '@genitore1_1A_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    utente: '@genitore1_2A_1'
+    letto: '<dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_U_3:
     comunicazione: '@avviso_U'
-    utente: '@alunno_1A_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    utente: '@alunno_2A_1'
+    letto: '<dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_U_4:
     comunicazione: '@avviso_U'
-    utente: '@docente_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    utente: '@docente_curricolare_1'
+    letto: '<dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_E_1:
     comunicazione: '@avviso_E'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    utente: '@ata_A'
+    letto:
+    firmato:
   avviso_utente_E_2:
     comunicazione: '@avviso_E'
-    utente: '@genitore1_1A_*'
+    utente: '@genitore1_3A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_E_3:
     comunicazione: '@avviso_E'
-    utente: '@alunno_1A_*'
+    utente: '@alunno_3A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_E_4:
     comunicazione: '@avviso_E'
-    utente: '@docente_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    utente: '@docente_curricolare_1'
+    letto: '<dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_A_1:
     comunicazione: '@avviso_A'
-    utente: '@ata_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    utente: '@ata_A'
+    letto: '<dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_A_2:
     comunicazione: '@avviso_A'
-    utente: '@genitore1_1A_*'
+    utente: '@genitore1_3B_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_A_3:
     comunicazione: '@avviso_A'
-    utente: '@alunno_1A_*'
+    utente: '@alunno_3B_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_A_4:
     comunicazione: '@avviso_A'
-    utente: '@docente_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    utente: '@docente_curricolare_1'
+    letto:
+    firmato:
   avviso_utente_I_1:
     comunicazione: '@avviso_I'
-    utente: '@genitore1_3A_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    utente: '@genitore1_2A_1'
+    letto:
+    firmato:
   avviso_utente_D_1:
     comunicazione: '@avviso_D'
-    utente: '@genitore2_1A_1'
+    utente: '@genitore2_2A_1'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_O_1:
     comunicazione: '@avviso_O'
     utente: '@alunno_2A_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    letto:
+    firmato:
   avviso_utente_V_1:
     comunicazione: '@avviso_V'
-    utente: '@alunno_1A_*'
+    utente: '@alunno_2A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_V_2:
     comunicazione: '@avviso_V'
-    utente: '@genitore2_1A_*'
+    utente: '@genitore2_2A_1'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_P_1:
     comunicazione: '@avviso_P'
-    utente: '@alunno_1A_*'
+    utente: '@alunno_2A_*'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_P_2:
     comunicazione: '@avviso_P'
-    utente: '@genitore2_1A_*'
+    utente: '@genitore2_2A_1'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_C_1:
@@ -169,11 +164,11 @@ App\Entity\ComunicazioneUtente:
     firmato: '$letto'
   avviso_utente_C_3:
     comunicazione: '@avviso_C'
-    utente: '@docente_curricolare_*'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    utente: '@docente_curricolare_1'
+    letto:
+    firmato:
   avviso_utente_C_allegato_1:
     comunicazione: '@avviso_C_allegato'
     utente: '@alunno_4A_1'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
-    firmato: '$letto'
+    letto:
+    firmato:

@@ -16,31 +16,31 @@ include:
 
 
 App\Entity\ComunicazioneClasse:
-  comunicazione_classe_{1..3}:
-    comunicazione: '@documento_word_<current()>'
-    classe: '@classe_1A'
-    letto: '50%? <dateTimeBetween("-1 month", "now")>'
   circolare_classe_perclasse_1:
     comunicazione: '@circolare_perclasse'
     classe: '@classe_1A'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
+    letta:
   circolare_classe_perclasse_2:
     comunicazione: '@circolare_perclasse'
     classe: '@classe_2A'
-    letta: '50%? <dateTimeBetween("-1 month", "now")>'
+    letta:
   avviso_classe_U:
     comunicazione: '@avviso_U'
     classe: '@classe_2A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    letto: '<dateTimeBetween("-1 day", "now")>'
   avviso_classe_E:
     comunicazione: '@avviso_E'
     classe: '@classe_3A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    letto: '<dateTimeBetween("-1 day", "now")>'
   avviso_classe_A:
     comunicazione: '@avviso_A'
     classe: '@classe_3B'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    letto: '<dateTimeBetween("-1 day", "now")>'
   avviso_classe_C:
     comunicazione: '@avviso_C'
     classe: '@classe_3A'
-    letto: '50%? <dateTimeBetween("-1 day", "now")>'
+    letto:
+  avviso_classe_C_allegato:
+    comunicazione: '@avviso_C_allegato'
+    classe: '@classe_4A'
+    letto:

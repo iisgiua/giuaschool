@@ -64,12 +64,12 @@
           </small>
         </td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>
       {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {'avviso': a.id}) : path('avvisi_edit', {'avviso': a.id})) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
+          <a class="btn btn-primary btn-xs" href="{{ a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {'avviso': a.id}) : path('avvisi_edit', {'avviso': a.id})) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>
       {% endif %}
         </td>
       </tr>

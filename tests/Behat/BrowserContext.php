@@ -43,7 +43,8 @@ class BrowserContext extends BaseContext implements Context {
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
-                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger, PurgerLoader $alice) {
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger,
+                              PurgerLoader $alice) {
     parent::__construct($kernel, $em, $router, $hasher, $slugger, $alice);
     $this->vars['sys']['logged'] = null;
     $this->vars['sys']['other'] = null;
@@ -567,9 +568,30 @@ class BrowserContext extends BaseContext implements Context {
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
-    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", (string) $headers['Content-Disposition'], $data));
-    $this->assertTrue($data[1] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
-    $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
+    $this->assertTrue(preg_match("/^(attachment|inline);\s*filename=(.*)$/i", (string) $headers['Content-Disposition'], $data));
+    $this->assertTrue($data[2] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
+    $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.$headers['Content-Length'].' byte]');
+  }
+
+  /**
+   * Clicca su pulsante e scarica il file indicato (NB: evita problemi con l'apertura di finestre)
+   *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   *  $testoParam: nome assegnato al file (con parametri)
+   *  $dimensione: lunghezza del file in byte
+   *
+   * @When click su :testo e scarica file con nome :testoParam
+   * @When click su :testo e scarica file con nome :testoParam e dimensione :dimensione
+   */
+  public function clickEScaricaConNomeEDimensione($testo, $testoParam, $dimensione=null): void {
+    // trova URL di download
+    $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
+    $this->assertNotEmpty($links[0]);
+    $url = $this->getMinkParameter('base_url').$links[0]->getAttribute('href');
+    // esegue direttamente URL
+    $this->session->visit($url);
+    $this->waitForPage();
+    // controlla file
+    $this->fileScaricatoConNomeEDimensione($testoParam, $dimensione);
   }
 
   /**
