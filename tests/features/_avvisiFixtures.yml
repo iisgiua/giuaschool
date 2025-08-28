@@ -47,7 +47,7 @@ App\Entity\Avviso:
 App\Entity\ComunicazioneUtente:
   avviso_non_modificabile_utente:
     comunicazione: '@avviso_non_modificabile'
-    utente: '@docente_curricolare_3'
+    utente: '@docente_curricolare_1'
     letto:
     firmato:
 
@@ -58,4 +58,4 @@ App\Entity\Annotazione:
     visibile: false
     avviso: '@avviso_non_modificabile'
     classe: '@classe_1A'
-    docente: '@docente_curricolare_1'
+    docente: '@docente_curricolare_3'

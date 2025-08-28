@@ -62,6 +62,7 @@ Scenario: Visualizzazione con filtro per mese
   Dato login utente "@docente_curricolare_3:username"
   Quando vai alla pagina "avvisi_bacheca"
   E selezioni opzione "6" da lista "avviso_filtro_mese"
+  E aspetti chiamata AJAX sia completata
   Allora vedi la pagina "avvisi_bacheca"
   E vedi nella tabella i dati:
     | stato      | data                                | sede                             | oggetto                         | azione     |
