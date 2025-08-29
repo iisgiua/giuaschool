@@ -59,10 +59,9 @@ Scenario: Visualizzazione con filtro di visualizzazione
     | DA LEGGERE | #dat(@avviso_non_modificabile:data) | @avviso_non_modificabile:sedi[0] | @avviso_non_modificabile:titolo | Visualizza |
 
 Scenario: Visualizzazione con filtro per mese
-  Dato login utente "@docente_curricolare_3:username"
+  Dato login utente "@docente_curricolare_1:username"
   Quando vai alla pagina "avvisi_bacheca"
   E selezioni opzione "6" da lista "avviso_filtro_mese"
-  E aspetti chiamata AJAX sia completata
   Allora vedi la pagina "avvisi_bacheca"
   E vedi nella tabella i dati:
     | stato      | data                                | sede                             | oggetto                         | azione     |
@@ -79,7 +78,7 @@ Scenario: Visualizzazione con filtro per oggetto
     | LETTO | #dat(@avviso_A:data) | @avviso_A:sedi[0] | @avviso_A:titolo | Visualizza |
 
 Scenario: Visualizzazione con filtri combinati
-  Dato login utente "@docente_curricolare_3:username"
+  Dato login utente "@docente_curricolare_1:username"
   Quando vai alla pagina "avvisi_bacheca"
   E selezioni opzione "D" da lista "avviso_filtro_visualizza"
   E selezioni opzione "6" da lista "avviso_filtro_mese"
@@ -106,7 +105,7 @@ Scenario: Visualizzazione lista vuota
 # Bisogna controllare memorizzazione dati di sessione
 
 Scenario: Navigazione con filtro persistente
-  Dato login utente "@docente_curricolare_3:username"
+  Dato login utente "@docente_curricolare_1:username"
   Quando vai alla pagina "avvisi_bacheca"
   E selezioni opzione "D" da lista "avviso_filtro_visualizza"
   E selezioni opzione "6" da lista "avviso_filtro_mese"

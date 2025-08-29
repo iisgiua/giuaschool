@@ -134,7 +134,7 @@ App\Entity\ComunicazioneUtente:
     firmato:
   avviso_utente_V_1:
     comunicazione: '@avviso_V'
-    utente: '@alunno_2A_*'
+    utente: '@alunno_2A_2'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_V_2:
@@ -144,7 +144,7 @@ App\Entity\ComunicazioneUtente:
     firmato: '$letto'
   avviso_utente_P_1:
     comunicazione: '@avviso_P'
-    utente: '@alunno_2A_*'
+    utente: '@alunno_2A_2'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_P_2:
@@ -159,7 +159,7 @@ App\Entity\ComunicazioneUtente:
     firmato: '$letto'
   avviso_utente_C_2:
     comunicazione: '@avviso_C'
-    utente: '@genitore1_3A_*'
+    utente: '@genitore1_3A_1'
     letto: '50%? <dateTimeBetween("-1 day", "now")>'
     firmato: '$letto'
   avviso_utente_C_3:

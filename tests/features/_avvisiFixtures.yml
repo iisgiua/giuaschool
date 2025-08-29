@@ -58,4 +58,4 @@ App\Entity\Annotazione:
     visibile: false
     avviso: '@avviso_non_modificabile'
     classe: '@classe_1A'
-    docente: '@docente_curricolare_3'
+    docente: '@docente_curricolare_2'
