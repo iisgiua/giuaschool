@@ -50,16 +50,16 @@ Scenario: Visualizzazione con filtro sul tipo uscita anticipata
   Quando selezioni opzione "U" da lista "avviso_filtro_tipo"
   Allora vedi la pagina "avvisi_gestione"
   E vedi la tabella non ordinata:
-    | Autore                               | Tipo              | Data                 | Oggetto          | Sede              | Destinatari                             | Azione                       |
-    | @avviso_U:autore.nome,autore.cognome | Uscita anticipata | #dat(@avviso_U:data) | @avviso_U:titolo | @avviso_U:sedi[0] | /DOCENTI.*GENITORI.*ALUNNI.*CLASSI: 2A/ | Visualizza Modifica Cancella |
+    | Autore                               | Tipo              | Data                 | Oggetto          | Sede              | Destinatari                                        | Azione                       |
+    | @avviso_U:autore.nome,autore.cognome | Uscita anticipata | #dat(@avviso_U:data) | @avviso_U:titolo | @avviso_U:sedi[0] | /DSGA.*ATA.*DOCENTI.*GENITORI.*ALUNNI.*CLASSI: 2A/ | Visualizza Modifica Cancella |
 
 Scenario: Visualizzazione con filtro sul tipo ingresso posticipato
   Data pagina attiva "avvisi_gestione"
   Quando selezioni opzione "E" da lista "avviso_filtro_tipo"
   Allora vedi la pagina "avvisi_gestione"
   E vedi la tabella non ordinata:
-    | Autore                               | Tipo                 | Data                 | Oggetto          | Sede              | Destinatari                             | Azione                       |
-    | @avviso_E:autore.nome,autore.cognome | Ingresso posticipato | #dat(@avviso_E:data) | @avviso_E:titolo | @avviso_E:sedi[0] | /DOCENTI.*GENITORI.*ALUNNI.*CLASSI: 3A/ | Visualizza Modifica Cancella |
+    | Autore                               | Tipo                 | Data                 | Oggetto          | Sede              | Destinatari                                        | Azione                       |
+    | @avviso_E:autore.nome,autore.cognome | Ingresso posticipato | #dat(@avviso_E:data) | @avviso_E:titolo | @avviso_E:sedi[0] | /DSGA.*ATA.*DOCENTI.*GENITORI.*ALUNNI.*CLASSI: 3A/ | Visualizza Modifica Cancella |
 
 Scenario: Visualizzazione con filtro sul tipo svolgimento attività
   Data pagina attiva "avvisi_gestione"
