@@ -11,12 +11,10 @@ namespace App\Tests\UnitTest\Security;
 use App\Security\AuthenticationEntryPoint;
 use App\Tests\DatabaseTestCase;
 use App\Util\LogHandler;
-use DateTime;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 

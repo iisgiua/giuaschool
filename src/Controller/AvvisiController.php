@@ -15,6 +15,7 @@ use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\ComunicazioneClasse;
 use App\Entity\ComunicazioneUtente;
+use App\Entity\Configurazione;
 use App\Entity\Docente;
 use App\Entity\Festivita;
 use App\Entity\Materia;
@@ -32,6 +33,7 @@ use App\Util\RegistroUtil;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use IntlDateFormatter;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
@@ -135,7 +137,9 @@ class AvvisiController extends BaseController {
   #[Route(path: '/avvisi/edit/{avviso}', name: 'avvisi_edit', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
   public function edit(Request $request, TranslatorInterface $trans, MessageBusInterface $msg, RegistroUtil $reg,
-                       ComunicazioniUtil $com, LogHandler $dblogger, ?Avviso $avviso=null): Response {
+                       ComunicazioniUtil $com, LogHandler $dblogger,
+                       #[MapEntity] ?Avviso $avviso=null
+                       ): Response {
     // inizializza
     $dati = [];
     $var_sessione = '/APP/FILE/avvisi_edit/allegati';
@@ -261,7 +265,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/dettagli/gestione/{avviso}', name: 'avvisi_dettagli_gestione', requirements: ['avviso' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
-  public function dettagliGestione(ComunicazioniUtil $com, Avviso $avviso): Response {
+  public function dettagliGestione(ComunicazioniUtil $com,
+                                   #[MapEntity] Avviso $avviso
+                                   ): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge dati
@@ -285,7 +291,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger, Avviso $avviso): Response {
+  public function delete(ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
+                         #[MapEntity] Avviso $avviso
+                         ): Response {
     // controllo permessi
     if (!$com->azioneAvviso('delete', $avviso->getData(), $this->getUser(), $avviso)) {
       // errore
@@ -345,7 +353,8 @@ class AvvisiController extends BaseController {
   #[IsGranted('ROLE_STAFF')]
   public function editClassi(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                              RegistroUtil $reg, ComunicazioniUtil $com, LogHandler $dblogger, string $tipo,
-                             ?Avviso $avviso=null): Response {
+                             #[MapEntity] ?Avviso $avviso=null
+                             ): Response {
     // controlla azione
     $edit = false;
     $valori = [];
@@ -379,20 +388,20 @@ class AvvisiController extends BaseController {
         case 'E':
           $titolo = 'message.avviso_entrata_oggetto';
           $testo = 'message.avviso_entrata_testo';
-          $valori['ora'] = $orario[1]['inizio'];    // inizio seconda ora
+          $valori['ora'] = $orario[1]['inizio'] ?? new DateTime('9:30');  // inizio seconda ora
           $valori['note'] = '';
           break;
         case 'U':
           $titolo = 'message.avviso_uscita_oggetto';
           $testo = 'message.avviso_uscita_testo';
-          $valori['ora'] = end($orario)['inizio'];  // inizio ultima ora
+          $valori['ora'] = end($orario)['inizio'] ?? new DateTime('13:30');  // inizio ultima ora
           $valori['note'] = '';
           break;
         case 'A':
           $titolo = 'message.avviso_attivita_oggetto';
           $testo = 'message.avviso_attivita_testo';
-          $valori['inizio'] = $orario[0]['inizio'];  // inizio prima ora
-          $valori['fine'] = end($orario)['fine'];   // fine ultima ora
+          $valori['inizio'] = $orario[0]['inizio'] ?? new DateTime('8:30');  // inizio prima ora
+          $valori['fine'] = end($orario)['fine'] ?? new DateTime('14:30');  // fine ultima ora
           $valori['attivita'] = '';
           break;
       }
@@ -526,7 +535,9 @@ class AvvisiController extends BaseController {
   #[Route(path: '/avvisi/edit/personali/{avviso}', name: 'avvisi_edit_personali', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
   public function editPersonali(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
-                                ComunicazioniUtil $com, LogHandler $dblogger, ?Avviso $avviso=null): Response {
+                                ComunicazioniUtil $com, LogHandler $dblogger,
+                                #[MapEntity] ?Avviso $avviso=null
+                                ): Response {
     // controlla azione
     $edit = false;
     if ($avviso) {
@@ -743,7 +754,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/classe/{classe}', name: 'avvisi_classe', requirements: ['classe' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classe(Classe $classe): Response {
+  public function classe(
+                         #[MapEntity] Classe $classe
+                         ): Response {
     // inizializza
     $mesi = ['Settembre' => 9, 'Ottobre' => 10, 'Novembre' => 11 , 'Dicembre' => 12, 'Gennaio' => 1,
       'Febbraio' => 2, 'Marzo' => 3, 'Aprile' => 4, 'Maggio' => 5, 'Giugno' => 6, 'Luglio' => 7, 'Agosto' => 8];
@@ -769,7 +782,10 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeFirma(Classe $classe, ?Avviso $avviso=null): Response {
+  public function classeFirma(
+                              #[MapEntity] Classe $classe,
+                              #[MapEntity] ?Avviso $avviso=null
+                              ): Response {
     // inizializza
     $lista = [];
     // controlla avvisi da firmare
@@ -800,7 +816,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/download/{avviso}/{allegato}/{tipo}', name: 'avvisi_download', requirements: ['avviso' => '\d+', 'allegato' => '\d+', 'tipo' => 'V|D'], defaults: ['allegato' => 0,'tipo' => 'V'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function download(ComunicazioniUtil $com, Avviso $avviso, int $allegato, string $tipo): Response {
+  public function download(ComunicazioniUtil $com,
+                           #[MapEntity] Avviso $avviso,
+                           int $allegato, string $tipo): Response {
     // controllo allegato
     if ($allegato < 0 || $allegato >= count($avviso->getAllegati())) {
       // errore
@@ -831,7 +849,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function legge(Avviso $avviso): JsonResponse {
+  public function legge(
+                        #[MapEntity] Avviso $avviso
+                        ): JsonResponse {
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->legge($avviso, $this->getUser());
     // restituisce dati
@@ -908,7 +928,8 @@ class AvvisiController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function editCoordinatore(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                                    RegistroUtil $reg, ComunicazioniUtil $com, LogHandler $dblogger,
-                                   ?Avviso $avviso=null): Response {
+                                   #[MapEntity] ?Avviso $avviso=null
+                                   ): Response {
     $info = [];
     // parametro classe
     $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
@@ -1045,7 +1066,9 @@ class AvvisiController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function editAgenda(Request $request, TranslatorInterface $trans, MessageBusInterface $msg,
                              RegistroUtil $reg, ComunicazioniUtil $com, LogHandler $dblogger,
-                             string $tipo, ?Avviso $avviso=null): Response {
+                             string $tipo,
+                             #[MapEntity] ?Avviso $avviso=null
+                             ): Response {
     // inizializza conferma
     if ($request->isMethod('GET')) {
       $this->reqstack->getSession()->set('/APP/ROUTE/avvisi_edit_agenda/conferma', 0);
@@ -1073,11 +1096,10 @@ class AvvisiController extends BaseController {
       }
       // va al primo giorno utile
       $mese = $this->em->getRepository(Festivita::class)->giornoSuccessivo($mese);
-      if (!$mese)
       $avviso = (new Avviso())
         ->setTipo($tipo)
         ->setData($mese)
-        ->setTitolo('__TEMP__');  // calore temporaneo per evitare errori di validazione
+        ->setTitolo('__TEMP__');  // valore temporaneo per evitare errori di validazione
       $this->em->persist($avviso);
     }
     // controllo permessi
@@ -1178,7 +1200,8 @@ class AvvisiController extends BaseController {
   #[Route(path: '/avvisi/agenda/{mese}/{visualizzazione}/{classe}', name: 'avvisi_agenda', requirements: ['mese' => '\d\d\d\d-\d\d', 'visualizzazione' => 'P|V', 'classe' => '\d+'], defaults: ['mese' => '0000-00', 'visualizzazione' => 'P', 'classe' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
   public function agenda(ComunicazioniUtil $com, string $mese, string $visualizzazione,
-                         ?Classe $classe=null): Response {
+                         #[MapEntity] ?Classe $classe=null
+                         ): Response {
     $dati = [];
     $info = [];
     // parametro data
@@ -1252,7 +1275,8 @@ class AvvisiController extends BaseController {
         $dati['filtro'][$c->getClasse()->getId()] = ''.$c->getClasse();
       }
       // azione add
-      if ($com->azioneAvviso('add', new DateTime(), $this->getUser(), null)) {
+      $fineAnno = $this->em->getRepository(Configurazione::class)->getParametro('anno_fine', '2000-01-01');
+      if ($com->azioneAvviso('add', DateTime::createFromFormat('Y-m-d', $fineAnno), $this->getUser(), null)) {
         // pulsante add
         $dati['azioni']['add'] = 1;
       }
@@ -1276,7 +1300,9 @@ class AvvisiController extends BaseController {
    */
   #[Route(path: '/avvisi/dettagli/agenda/{data}/{tipo}/{classe}', name: 'avvisi_dettagli_agenda', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'tipo' => 'V|S|P|A|Q', 'classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function dettagliAgenda(ComunicazioniUtil $com, string $data, string $tipo, ?Classe $classe=null): Response {
+  public function dettagliAgenda(ComunicazioniUtil $com, string $data, string $tipo,
+                                 #[MapEntity] ?Classe $classe=null
+                                 ): Response {
     // inizializza
     $dati = [];
     $info = [];

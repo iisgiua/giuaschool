@@ -8,18 +8,14 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\ExpressionLanguage\Expression;
-use App\Entity\DefinizioneRichiesta;
-use DateTime;
 use App\Entity\Alunno;
-use IntlDateFormatter;
-use App\Entity\Presenza;
 use App\Entity\Assenza;
-use App\Entity\Sede;
 use App\Entity\Classe;
+use App\Entity\DefinizioneRichiesta;
 use App\Entity\Genitore;
+use App\Entity\Presenza;
 use App\Entity\Richiesta;
+use App\Entity\Sede;
 use App\Entity\Uscita;
 use App\Form\FiltroType;
 use App\Form\RichiestaType;
@@ -27,12 +23,17 @@ use App\Form\UscitaType;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\RichiesteUtil;
+use DateTime;
+use IntlDateFormatter;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -711,7 +712,9 @@ class RichiesteController extends BaseController {
    */
   #[Route(path: '/richieste/classe/{classe}', name: 'richieste_classe', requirements: ['classe' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classe(Classe $classe): Response {
+  public function classe(
+                         #[MapEntity] Classe $classe
+                         ): Response {
     // inizializza
     $info = [];
     // recupera dati
@@ -742,7 +745,9 @@ class RichiesteController extends BaseController {
    */
   #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeDelete(LogHandler $dblogger, Classe $classe, int $id): Response {
+  public function classeDelete(LogHandler $dblogger,
+                               #[MapEntity] Classe $classe,
+                               int $id): Response {
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
@@ -789,9 +794,9 @@ class RichiesteController extends BaseController {
    */
   #[Route(path: '/richieste/classe/add/{classe}/{modulo}', name: 'richieste_classe_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeAdd(Request $request, TranslatorInterface $trans,
-                            RichiesteUtil $ric, LogHandler $dblogger,
-                            Classe $classe, int $modulo): Response {
+  public function classeAdd(Request $request, TranslatorInterface $trans, RichiesteUtil $ric, LogHandler $dblogger,
+                            #[MapEntity] Classe $classe,
+                            int $modulo): Response {
     // inizializza
     $info = [];
     $dati = [];

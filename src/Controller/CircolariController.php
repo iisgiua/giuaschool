@@ -23,6 +23,7 @@ use App\MessageHandler\NotificaMessageHandler;
 use App\Util\ComunicazioniUtil;
 use App\Util\LogHandler;
 use DateTime;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
@@ -57,8 +58,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/edit/{circolare}', name: 'circolari_edit', requirements: ['circolare' => '\d+'], defaults: ['circolare' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function edit(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                       LogHandler $dblogger, ?Circolare $circolare=null): Response {
+  public function edit(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+                       #[MapEntity] ?Circolare $circolare=null
+                       ): Response {
     // inizializza
     $dati = [];
     $var_sessione = '/APP/FILE/circolari_edit/';
@@ -210,7 +212,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com, Circolare $circolare): Response {
+  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Circolare $circolare
+                         ): Response {
     // controllo permessi
     if (!$com->azioneCircolare('delete', $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -313,8 +317,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/publish/{circolare}/{pubblica}', name: 'circolari_publish', requirements: ['circolare' => '\d+', 'pubblica' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
-  public function publish(MessageBusInterface $msg, LogHandler $dblogger,
-                          ComunicazioniUtil $com, Circolare $circolare, int $pubblica): Response {
+  public function publish(MessageBusInterface $msg, LogHandler $dblogger, ComunicazioniUtil $com,
+                          #[MapEntity] Circolare $circolare,
+                          int $pubblica): Response {
     // controllo permessi
     if (!$com->azioneCircolare(($pubblica ? 'publish' : 'unpublish'), $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -362,7 +367,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/dettagli/gestione/{circolare}', name: 'circolari_dettagli_gestione', requirements: ['circolare' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
-  public function dettagliGestione(ComunicazioniUtil $com, Circolare $circolare): Response {
+  public function dettagliGestione(ComunicazioniUtil $com,
+                                   #[MapEntity] Circolare $circolare
+                                   ): Response {
     // inizializza
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge dati
@@ -386,7 +393,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/download/{circolare}/{allegato}/{tipo}', name: 'circolari_download', requirements: ['circolare' => '\d+', 'allegato' => '\d+', 'tipo' => 'V|D'], defaults: ['allegato' => 0,'tipo' => 'V'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function download(ComunicazioniUtil $com, Circolare $circolare, int $allegato, string $tipo): Response {
+  public function download(ComunicazioniUtil $com,
+                           #[MapEntity] Circolare $circolare,
+                           int $allegato, string $tipo): Response {
     // controllo allegati
     if ($allegato < 0 || $allegato >= count($circolare->getAllegati())) {
       // errore
@@ -417,7 +426,9 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/firma/{circolare}', name: 'circolari_firma', requirements: ['circolare' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function firma(Circolare $circolare): Response {
+  public function firma(
+                        #[MapEntity] Circolare $circolare
+                        ): Response {
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->firma($circolare, $this->getUser());
     // redirect
@@ -497,7 +508,10 @@ class CircolariController extends BaseController {
    */
   #[Route(path: '/circolari/firma/classe/{classe}/{circolare}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'circolare' => '\d+'], defaults: ['circolare' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function firmaClasse(TranslatorInterface $trans, Classe $classe, ?Circolare $circolare=null): Response {
+  public function firmaClasse(TranslatorInterface $trans,
+                              #[MapEntity] Classe $classe,
+                              #[MapEntity] ?Circolare $circolare=null
+                              ): Response {
     $numeri = [];
     // lista circolari da firmare
     $circolari = $circolare ? [$circolare] :

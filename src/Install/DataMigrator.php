@@ -9,9 +9,7 @@
 namespace App\Install;
 
 use DateTime;
-use Exception;
 use PDO;
-use Symfony\Component\HttpFoundation\File\File;
 
 
 /**

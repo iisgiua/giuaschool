@@ -9,7 +9,6 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\Entity\Lezione;
-use App\Entity\ModuloFormativo;
 use App\Tests\EntityTestCase;
 use DateTime;
 use ReflectionClass;

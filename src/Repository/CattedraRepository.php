@@ -15,7 +15,6 @@ use App\Entity\Classe;
 use App\Entity\FirmaSostegno;
 use App\Entity\OrarioDocente;
 use App\Entity\Materia;
-use phpDocumentor\Reflection\Types\Object_;
 
 
 /**

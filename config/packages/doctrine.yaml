@@ -26,8 +26,8 @@ doctrine:
         prefix: 'App\Entity'
         alias: App
     controller_resolver:
-      enabled: true
-      auto_mapping: true
+      enabled: false
+      auto_mapping: false
     dql:
       numeric_functions:
         day: App\DQL\DayFunction

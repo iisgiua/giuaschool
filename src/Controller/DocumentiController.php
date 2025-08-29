@@ -9,7 +9,6 @@
 namespace App\Controller;
 
 use App\Entity\Alunno;
-use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Documento;
@@ -19,6 +18,7 @@ use App\Form\DocumentoType;
 use App\Util\ComunicazioniUtil;
 use App\Util\LogHandler;
 use DateTime;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -72,7 +72,10 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/programmi/add/{classe}/{materia}', name: 'documenti_programmi_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function programmiAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                               LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+                               LogHandler $dblogger,
+                               #[MapEntity] Classe $classe,
+                               #[MapEntity] Materia $materia
+                               ): Response {
     // inizializza
     $info = [];
     $programmiQuinte = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/programmi_quinte') == 'S';
@@ -150,7 +153,9 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com, Documento $documento): Response {
+  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Documento $documento
+                         ): Response {
     // controllo permessi
     if (!$com->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
@@ -224,8 +229,11 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/relazioni/add/{classe}/{materia}/{alunno}', name: 'documenti_relazioni_add', requirements: ['classe' => '\d+', 'materia' => '\d+', 'alunno' => '\d+'], defaults: ['alunno' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function relazioniAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                               LogHandler $dblogger, Classe $classe, Materia $materia,
-                               Alunno $alunno=null): Response {
+                               LogHandler $dblogger,
+                               #[MapEntity] Classe $classe,
+                               #[MapEntity] Materia $materia,
+                               #[MapEntity] Alunno $alunno=null
+                               ): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_relazioni_add/files';
@@ -328,7 +336,10 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/piani/add/{classe}/{materia}', name: 'documenti_piani_add', requirements: ['classe' => '\d+', 'materia' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function pianiAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                           LogHandler $dblogger, Classe $classe, Materia $materia): Response {
+                           LogHandler $dblogger,
+                           #[MapEntity] Classe $classe,
+                           #[MapEntity] Materia $materia
+                           ): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_piani_add/files';
@@ -427,7 +438,9 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/maggio/add/{classe}', name: 'documenti_maggio_add', requirements: ['classe' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function maggioAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                            LogHandler $dblogger, Classe $classe): Response {
+                            LogHandler $dblogger,
+                            #[MapEntity] Classe $classe
+                            ): Response {
     // inizializza
     $info = [];
     $varSessione = '/APP/FILE/documenti_maggio_add/files';
@@ -503,7 +516,9 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/download/{documento}/{allegato}/{tipo}', name: 'documenti_download', requirements: ['documento' => '\d+', 'allegato' => '\d+', 'tipo' => 'V|D'], defaults: ['allegato' => '0','tipo' => 'D'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function download(ComunicazioniUtil $com, Documento $documento, int $allegato, string $tipo): Response {
+  public function download(ComunicazioniUtil $com,
+                           #[MapEntity] Documento $documento,
+                           int $allegato, string $tipo): Response {
     // controlla allegato
     if ($allegato < 0 || $allegato >= count($documento->getAllegati())) {
       // errore
@@ -666,8 +681,9 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/add/{alunno}', name: 'documenti_bes_add', requirements: ['alunno' => '\d+'], defaults: ['alunno' => 0], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
-                         LogHandler $dblogger, Alunno $alunno = null): Response {
+  public function besAdd(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+                         #[MapEntity] Alunno $alunno=null
+                         ): Response {
     // inizializza
     $info = [];
     $classe = null;
@@ -1039,7 +1055,8 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function besRestore(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
-                             Documento $documento): Response {
+                             #[MapEntity] Documento $documento
+                             ): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -1112,7 +1129,8 @@ class DocumentiController extends BaseController {
   #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function besArchive(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
-                             Documento $documento): Response {
+                             #[MapEntity] Documento $documento
+                             ): Response {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore

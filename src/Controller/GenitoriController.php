@@ -8,32 +8,31 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\ExpressionLanguage\Expression;
-use DateTime;
-use IntlDateFormatter;
-use App\Entity\Festivita;
-use App\Entity\Materia;
-use App\Entity\Configurazione;
-use App\Entity\Esito;
-use App\Entity\Avviso;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
+use App\Entity\Configurazione;
 use App\Entity\Entrata;
+use App\Entity\Esito;
+use App\Entity\Festivita;
+use App\Entity\Materia;
 use App\Entity\Scrutinio;
 use App\Entity\Uscita;
 use App\Form\MessageType;
 use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
+use DateTime;
+use IntlDateFormatter;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -560,7 +559,8 @@ class GenitoriController extends BaseController {
   #[Route(path: '/genitori/giustifica/assenza/{assenza}/{posizione}', name: 'genitori_giustifica_assenza', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function giustificaAssenza(Request $request, GenitoriUtil $gen, LogHandler $dblogger,
-                                    Assenza $assenza, int $posizione): Response {
+                                    #[MapEntity] Assenza $assenza,
+                                    int $posizione): Response {
     // inizializza
     $fs = new Filesystem();
     $info = [];
@@ -700,7 +700,8 @@ class GenitoriController extends BaseController {
   #[Route(path: '/genitori/giustifica/ritardo/{entrata}/{posizione}', name: 'genitori_giustifica_ritardo', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function giustificaRitardo(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                    LogHandler $dblogger, Entrata $entrata,
+                                    LogHandler $dblogger,
+                                    #[MapEntity] Entrata $entrata,
                                     int $posizione): Response {
     // inizializza
     $info = [];
@@ -814,7 +815,9 @@ class GenitoriController extends BaseController {
   #[Route(path: '/genitori/giustifica/uscita/{uscita}/{posizione}', name: 'genitori_giustifica_uscita', requirements: ['posizione' => '\d+'], defaults: ['posizione' => 0], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function giustificaUscita(Request $request, TranslatorInterface $trans, GenitoriUtil $gen,
-                                   LogHandler $dblogger, Uscita $uscita, int $posizione): Response {
+                                   LogHandler $dblogger,
+                                   #[MapEntity] Uscita $uscita,
+                                   int $posizione): Response {
     // inizializza
     $info = [];
     $lista_motivazioni = ['label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9];

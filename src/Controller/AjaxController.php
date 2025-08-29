@@ -15,6 +15,7 @@ use App\Entity\Docente;
 use App\Entity\Materia;
 use App\Entity\Staff;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -168,7 +169,9 @@ class AjaxController extends BaseController {
    */
   #[Route(path: '/ajax/classe/{classe}', name: 'ajax_classe', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeAjax(Classe $classe): JsonResponse {
+  public function classeAjax(
+                             #[MapEntity] Classe $classe
+                             ): JsonResponse {
     // legge alunni
     $dati = $this->em->getRepository(Alunno::class)->classe($classe->getId());
     // restituisce dati
@@ -184,7 +187,9 @@ class AjaxController extends BaseController {
    */
   #[Route(path: '/ajax/cattedre/{docente}', name: 'ajax_cattedre', requirements: ['docente' => '\d+'], defaults: ['docente' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function cattedreAjax(Docente $docente): JsonResponse {
+  public function cattedreAjax(
+                               #[MapEntity] Docente $docente
+                               ): JsonResponse {
     // legge cattedre
     $dati = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'V');
     // restituisce lista per checkbox
@@ -200,7 +205,9 @@ class AjaxController extends BaseController {
    */
   #[Route(path: '/ajax/materie/{classe}', name: 'ajax_materie', requirements: ['classe' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function materieAjax(Classe $classe): JsonResponse {
+  public function materieAjax(
+                              #[MapEntity] Classe $classe
+                              ): JsonResponse {
     // solo cattedre attive e normali, no sostegno, no ed.civ.
     $materie = $this->em->getRepository(Materia::class)->materieClasse($classe, true, false, 'V');
     // restituisce dati

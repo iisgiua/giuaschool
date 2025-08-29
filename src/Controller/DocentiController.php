@@ -16,7 +16,6 @@ use App\Entity\Materia;
 use App\Entity\Provisioning;
 use App\Entity\Sede;
 use App\Entity\Staff;
-use App\Event\UtenteCreatoEvent;
 use App\Form\CattedraSupplenzaType;
 use App\Form\CattedraType;
 use App\Form\DocenteType;

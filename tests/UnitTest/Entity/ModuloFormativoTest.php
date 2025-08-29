@@ -10,6 +10,7 @@ namespace App\Tests\UnitTest\Entity;
 
 use App\Entity\ModuloFormativo;
 use App\Tests\EntityTestCase;
+use ReflectionClass;
 
 
 /**
@@ -100,7 +101,7 @@ class ModuloFormativoTest extends EntityTestCase {
       }
     }
     // controlla metodi setter per attributi generati
-    $rc = new \ReflectionClass($this->entity);
+    $rc = new ReflectionClass($this->entity);
     foreach ($this->generatedFields as $field) {
       $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
     }
