@@ -342,7 +342,7 @@ Scenario: controllo verbale
   E vedi poi testo "di 6 alunni iscritti alla classe, sono da scrutinare 4 alunni" in PDF analizzato in una riga
   E vedi poi testo "voto di comportamento" in PDF analizzato in una riga
   E imposti segnalibro PDF
-  E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome @voto_F_1A_7:unico #str(MAGGIORANZA) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "4" righe
+  E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome @voto_F_1A_7:unico #str(MAGGIORANZA) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "5" righe
   E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome @voto_F_1A_28:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome @voto_F_1A_38:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_alternativa_1:cognome,nome @voto_F_1A_48:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
