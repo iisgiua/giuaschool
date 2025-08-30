@@ -10,7 +10,7 @@ Funzionalità: Gestione degli avvisi
 
 
 Contesto: login docente Staff
-  Dato login utente con ruolo esatto "Staff"
+  Dato login utente "@staff_1:username"
 
 
 ################################################################################
