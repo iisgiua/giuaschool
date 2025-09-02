@@ -76,7 +76,7 @@ class AtaController extends BaseController {
       // trova file caricato
       $file = null;
       foreach ($this->reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
-        $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
+        $file = new File($this->getParameter('dir_tmp').'/'.$f['temp'].'.'.$f['ext']);
       }
       // importa file
       $dati = $importer->importaAta($form, $file);
