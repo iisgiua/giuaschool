@@ -1,5 +1,5 @@
 # load base image from actual version
-ARG VERSION
+ARG VERSION=latest
 FROM ghcr.io/iisgiua/giuaschool-test:$VERSION
 
 # parameters for actual version, new version and new build
@@ -41,4 +41,4 @@ RUN \
 EXPOSE 443
 
 # default command
-CMD tests/docker/test-update.sh
+CMD ["tests/docker/test-update.sh"]
