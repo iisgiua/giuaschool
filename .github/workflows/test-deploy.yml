@@ -5,13 +5,15 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   build:
     name: Build release
     runs-on: ubuntu-latest
-    env:
-      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     outputs:
       latest-release: ${{ steps.latest-release.outputs.release }}
     steps:
@@ -30,30 +32,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Restore image cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-image-${{ github.sha }}
-
-      - name: Ensure image cache dir exists
-        run: |
-          mkdir -p ${{ env.IMAGE_CACHE_DIR }}
-
-      - name: Build image with cache and save tar
+      - name: Build image (with cache)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: tests/docker/Dockerfile
           tags: gs:test
-          outputs: type=docker,dest=${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Create archive for update code
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
-          docker build -t gs:prod --target prod -f tests/docker/Dockerfile .
+          docker build --target prod -t gs:prod -f tests/docker/Dockerfile .
           docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
           docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
 
@@ -61,7 +53,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
           tag: update-${{ steps.latest-release.outputs.release }}
           name: "Aggiornamento della versione ${{ steps.latest-release.outputs.release }}"
           body: "- [Visualizza le modifiche successive al rilascio della versione ${{ steps.latest-release.outputs.release }}](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
@@ -76,22 +68,8 @@ jobs:
     name: PhpUnit tests
     needs: build
     runs-on: ubuntu-latest
-    env:
-      IMAGE_CACHE_DIR: /tmp/cache/docker-image
+    timeout-minutes: 15
     steps:
-
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Restore Docker image tar
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-image-${{ github.sha }}
-
-      - name: Load Docker image
-        run: |
-          docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
       - name: Run phpunit tests
         run: |
@@ -112,9 +90,6 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
 
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
       - name: Set matrix of features
         id: set-matrix
         run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
@@ -123,30 +98,11 @@ jobs:
     name: Behat tests
     needs: [build, feature-matrix]
     runs-on: ubuntu-latest
-    env:
-      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     strategy:
+      fail-fast: false
       matrix:
         feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
     steps:
-
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Restore Docker image tar
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.IMAGE_CACHE_DIR }}
-          key: ${{ runner.os }}-docker-image-${{ github.sha }}
-
-      # - name: Set swap space
-      #   uses: pierotofy/set-swap-space@master
-      #   with:
-      #     swap-size-gb: 5
-
-      - name: Load Docker image
-        run: |
-          docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
       - name: Run behat tests
         run: |
@@ -158,9 +114,6 @@ jobs:
     name: Test update procedure
     runs-on: ubuntu-latest
     steps:
-
-      - name: Check out the repo
-        uses: actions/checkout@v4
 
       - name: Run test update procedure
         run: |
@@ -175,9 +128,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
       - name: Generate changelog from latest release
         id: changelog
         uses: metcalfc/changelog-generator@v4.6.2
@@ -186,25 +136,10 @@ jobs:
 
       - name: Generate changelog page
         run: |
-          mkdir docs
+          mkdir -p docs
+          export CHANGELOG="${{ steps.changelog.outputs.changelog }}"
+          envsubst < .github/templates/latest-build.md.tmpl > docs/latest-build.md
           echo "tag: ${{ github.sha }}" > docs/build.yml
-          echo "---" > docs/latest-build.md
-          echo "layout: default" >> docs/latest-build.md
-          echo "title: Ultimo aggiornamento" >> docs/latest-build.md
-          echo "nav_order: 11" >> docs/latest-build.md
-          echo "---" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "# Ultimo aggiornamento"  >> docs/latest-build.md
-          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "_Le modifiche seguenti non sono ancora validate né definitive:<br>se ne sconsiglia l'installazione se non in ambiente di test_" >> docs/latest-build.md
-          echo "{: .text-center .pb-5}" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "Data e ora dell'ultimo aggiornamento: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "Lista delle modifiche effettuate dopo il rilascio della Versione {{ site.data.version.tag }}:"  >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "${{ steps.changelog.outputs.changelog }}"  >> docs/latest-build.md
 
       - name: Add changelog page to documentation
         uses: dmnemec/copy_file_to_another_repo_action@main
