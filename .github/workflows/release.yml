@@ -62,7 +62,7 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          target: application_prod
+          target: prod
           push: true
           tags: |
             ghcr.io/iisgiua/giuaschool:latest
@@ -73,7 +73,7 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          target: application_dev
+          target: dev
           push: true
           tags: |
             ghcr.io/iisgiua/giuaschool-dev:latest
@@ -84,6 +84,7 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
+          target: test
           push: true
           tags: |
             ghcr.io/iisgiua/giuaschool-test:latest

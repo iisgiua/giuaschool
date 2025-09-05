@@ -53,7 +53,7 @@ jobs:
       - name: Create archive for update code
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
-          docker build -t gs:prod --target application_prod -f tests/docker/Dockerfile .
+          docker build -t gs:prod --target prod -f tests/docker/Dockerfile .
           docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
           docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
 
