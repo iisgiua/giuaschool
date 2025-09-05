@@ -53,7 +53,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: update-${{ steps.latest-release.outputs.release }}
           name: "Aggiornamento della versione ${{ steps.latest-release.outputs.release }}"
           body: "- [Visualizza le modifiche successive al rilascio della versione ${{ steps.latest-release.outputs.release }}](https://iisgiua.github.io/giuaschool-docs/latest-build.html)"
