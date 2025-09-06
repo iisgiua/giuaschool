@@ -93,6 +93,8 @@ WORKDIR /var/www/giuaschool
 
 # installa ambiente di sviluppo
 RUN mkdir -p var/cache/dev var/sessions/dev && \
+    # inizializza cache
+    php bin/console cache:clear -q && \
     # pulizia file inutili
     rm -rf var/log/* tests/temp/mysql && \
     # imposta permessi sui file
@@ -125,6 +127,8 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearm
     sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
     # crea directory di ambiente
     mkdir -p var/cache/test var/sessions/test && \
+    # inizializza cache
+    php bin/console cache:clear -q && \
     # pulizia APT e file inutili
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* var/cache/dev var/sessions/dev && \
@@ -153,6 +157,8 @@ RUN composer install -q --no-dev --no-scripts && \
     sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
     # crea directory di ambiente
     mkdir -p var/cache/prod var/sessions/prod && \
+    # inizializza cache
+    php bin/console cache:clear -q && \
     # pulizia file inutili
     rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* && \
     rm -r src/Command/AliceLoadCommand.php  && \

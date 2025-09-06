@@ -25,8 +25,7 @@ RUN \
   mv "$FILE.zip" "v$ZIP.zip" && \
   cd ../../ && \
   cp tests/docker/*.feature tests/features/ && \
-  rm -r var/cache/* && \
-  rm -r tests/temp/* && \
+  rm -r var/cache/* var/sessions/* tests/temp/* && \
   mkdir -p var/cache/prod && \
   mkdir -p var/sessions/prod && \
   chown -R www-data:www-data src/* public/* tests/* var/* && \
