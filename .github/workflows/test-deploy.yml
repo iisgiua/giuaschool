@@ -100,9 +100,9 @@ jobs:
 
       - name: Run phpunit tests
         run: |
-          docker run --rm --name gs_test --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
+          docker run --name gs_test --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
-          docker stop gs_test
+          docker rm gs_test
 
       - name: Codacy coverage report
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
@@ -167,8 +167,7 @@ jobs:
         run: |
           TAG="${{ needs.build.outputs.latest-release }}"
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
-          docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
-          docker stop gs_test2
+          docker run rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
 
   deploy:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
