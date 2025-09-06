@@ -14,6 +14,8 @@ jobs:
   build:
     name: Build release
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     outputs:
       latest-release: ${{ steps.latest-release.outputs.release }}
     steps:
@@ -32,14 +34,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build image (with cache)
+      - name: Restore image cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
+
+      - name: Ensure image cache dir exists
+        run: mkdir -p ${{ env.IMAGE_CACHE_DIR }}
+
+      - name: Build image and save as tar
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: tests/docker/Dockerfile
           target: test
+          file: tests/docker/Dockerfile
           tags: gs:test
-          load: true
+          outputs: type=docker,dest=${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -69,8 +80,19 @@ jobs:
     name: PhpUnit tests
     needs: build
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     timeout-minutes: 15
     steps:
+
+      - name: Restore Docker image tar
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
+
+      - name: Load Docker image
+        run: docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
       - name: Run phpunit tests
         run: |
@@ -91,6 +113,9 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
 
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
       - name: Set matrix of features
         id: set-matrix
         run: echo "matrix=$(ls tests/features/*.feature | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
@@ -99,11 +124,22 @@ jobs:
     name: Behat tests
     needs: [build, feature-matrix]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
     strategy:
       fail-fast: false
       matrix:
         feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
     steps:
+
+      - name: Restore Docker image tar
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-image-${{ github.sha }}
+
+      - name: Load Docker image
+        run: docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
 
       - name: Run behat tests
         run: |
