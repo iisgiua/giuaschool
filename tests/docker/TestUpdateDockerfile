@@ -40,5 +40,6 @@ RUN \
 # open https port
 EXPOSE 443
 
-# default command
-CMD ["tests/docker/test-update.sh"]
+# default entrypoint
+ENTRYPOINT ["tests/docker/test-update.sh"]
+CMD []
