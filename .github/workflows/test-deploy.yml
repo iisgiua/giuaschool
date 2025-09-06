@@ -167,7 +167,7 @@ jobs:
         run: |
           TAG="${{ needs.build.outputs.latest-release }}"
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
-          docker run rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
+          docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
 
   deploy:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
