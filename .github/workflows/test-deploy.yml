@@ -85,6 +85,9 @@ jobs:
     timeout-minutes: 15
     steps:
 
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
       - name: Restore Docker image tar
         uses: actions/cache@v4
         with:
@@ -155,6 +158,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
       - name: Run test update procedure
         run: |
           TAG="${{ needs.build.outputs.latest-release }}"
@@ -167,6 +173,9 @@ jobs:
     name: Deploy release
     runs-on: ubuntu-latest
     steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
       - name: Generate changelog from latest release
         id: changelog
