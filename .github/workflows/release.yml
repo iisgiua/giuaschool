@@ -7,9 +7,10 @@ on:
         description: 'Release version'
         required: true
       prerelease:
-        description: 'Set TRUE for pre-release'
+        description: 'Set true for pre-release'
         required: false
-        default: 'FALSE'
+        default: false
+        type: boolean
 
 jobs:
 
@@ -36,7 +37,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
-        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
+        if: ${{ !github.event.inputs.prerelease }}
         uses: metcalfc/changelog-generator@v4.6.2
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +47,7 @@ jobs:
         with:
           body: ${{ steps.changelog.outputs.changelog }}
           draft: false
-          prerelease: ${{ github.event.inputs.prerelease == 'TRUE' }}
+          prerelease: ${{ github.event.inputs.prerelease }}
           tag: "v${{ github.event.inputs.version }}"
           name: "Versione ${{ github.event.inputs.version }}"
 
@@ -64,6 +65,8 @@ jobs:
           file: tests/docker/Dockerfile
           target: prod
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/iisgiua/giuaschool:latest
             ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }}
@@ -75,6 +78,8 @@ jobs:
           file: tests/docker/Dockerfile
           target: dev
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/iisgiua/giuaschool-dev:latest
             ghcr.io/iisgiua/giuaschool-dev:${{ github.event.inputs.version }}
@@ -86,6 +91,8 @@ jobs:
           file: tests/docker/Dockerfile
           target: test
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/iisgiua/giuaschool-test:latest
             ghcr.io/iisgiua/giuaschool-test:${{ github.event.inputs.version }}
@@ -95,6 +102,7 @@ jobs:
           docker run --name gs_release ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
           docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v${{ github.event.inputs.version }}.zip
           docker cp gs_release:/var/www/giuaschool-release.md5.zip giuaschool-release-v${{ github.event.inputs.version }}.md5.zip
+          docker rm gs_release
 
       - name: Publish release code
         uses: svenstaro/upload-release-action@v2
@@ -104,63 +112,19 @@ jobs:
           file_glob: true
           tag: "v${{ github.event.inputs.version }}"
 
-      - name: Create version tag for documentation
-        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
+      - name: Create version tag and changelog page
+        if: ${{ !github.event.inputs.prerelease }}
         run: |
-          mkdir docs
-          echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
-          echo "tag: 0" > docs/build.yml
+          mkdir -p docs/_data
+          echo "tag: ${{ github.event.inputs.version }}" > docs/_data/version.yml
+          echo "tag: 0" > docs/_data/build.yml
+          export CHANGELOG="${{ steps.changelog.outputs.changelog }}"
+          export TIMESTAMP="`TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`"
+          envsubst < .github/templates/latest-release.md.tmpl > docs/latest-release.md
+          envsubst < .github/templates/latest-build_void.md.tmpl > docs/latest-build.md
 
-      - name: Add version tag to documentation
-        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'docs/.'
-          destination_repo: 'iisgiua/giuaschool-docs'
-          destination_branch: 'master'
-          destination_folder: '_data'
-          user_name: ${{ github.actor }}
-          user_email: '${{ github.actor }}@users.noreply.github.com'
-          commit_message: 'Add version tag to documentation'
-
-      - name: Generate changelog pages
-        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
-        run: |
-          rm -f docs/*.yml
-          #####----- latest release page
-          echo "---" > docs/latest-release.md
-          echo "layout: default" >> docs/latest-release.md
-          echo "title: Ultima versione" >> docs/latest-release.md
-          echo "nav_order: 10" >> docs/latest-release.md
-          echo "---" >> docs/latest-release.md
-          echo "" >> docs/latest-release.md
-          echo "# Ultima versione"  >> docs/latest-release.md
-          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-release.md
-          echo "" >> docs/latest-release.md
-          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/iisgiua/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-v{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
-          echo "{: .text-center .pb-5}" >> docs/latest-release.md
-          echo "" >> docs/latest-release.md
-          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
-          echo "" >> docs/latest-release.md
-          echo "Lista delle modifiche incluse nella nuova versione:"  >> docs/latest-release.md
-          echo "" >> docs/latest-release.md
-          echo "${{ steps.changelog.outputs.changelog }}"  >> docs/latest-release.md
-          #####----- latest build page
-          echo "---" > docs/latest-build.md
-          echo "layout: default" >> docs/latest-build.md
-          echo "title: 'Ultimo aggiornamento'" >> docs/latest-build.md
-          echo "nav_order: 11" >> docs/latest-build.md
-          echo "---" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "# Ultimo aggiornamento"  >> docs/latest-build.md
-          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
-          echo "" >> docs/latest-build.md
-          echo "Nessuna modifica dal rilascio dell'ultima versione" >> docs/latest-build.md
-
-      - name: Add changelog pages to documentation
-        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
+      - name: Add version tag and changelog pages to documentation
+        if: ${{ !github.event.inputs.prerelease }}
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
@@ -170,12 +134,13 @@ jobs:
           destination_branch: 'master'
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
-          commit_message: 'Add changelog pages to documentation'
+          commit_message: 'Add version tag and changelog pages to documentation'
 
   test-update:
     needs: release
     name: Test update procedure
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
 
       - name: Check out the repo
@@ -184,5 +149,5 @@ jobs:
       - name: Test update procedure
         run: |
           TAG="${{ needs.release.outputs.tag }}"
-          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${{ github.event.inputs.version }}" --build-arg NEWBUILD="0" -t gs:test -f tests/docker/TestUpdateDockerfile .
-          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test
+          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${{ github.event.inputs.version }}" --build-arg NEWBUILD="0" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
+          docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2

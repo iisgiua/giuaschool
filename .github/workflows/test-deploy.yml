@@ -185,35 +185,22 @@ jobs:
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate changelog page
+      - name: Create build tag and changelog page
         run: |
-          mkdir -p docs
+          mkdir -p docs/_data
           export CHANGELOG="${{ steps.changelog.outputs.changelog }}"
           export TIMESTAMP="`TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`"
           envsubst < .github/templates/latest-build.md.tmpl > docs/latest-build.md
-          echo "tag: ${{ github.sha }}" > docs/build.yml
+          echo "tag: ${{ github.sha }}" > docs/_data/build.yml
 
-      - name: Add changelog page to documentation
+      - name: Add build tag and changelog page to documentation
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'docs/latest-build.md'
+          source_file: 'docs/.'
           destination_repo: 'iisgiua/giuaschool-docs'
           destination_branch: 'master'
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
-          commit_message: 'Add changelog page to documentation'
-
-      - name: Add build tag to documentation
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'docs/build.yml'
-          destination_repo: 'iisgiua/giuaschool-docs'
-          destination_branch: 'master'
-          destination_folder: '_data'
-          user_name: ${{ github.actor }}
-          user_email: '${{ github.actor }}@users.noreply.github.com'
-          commit_message: 'Add build tag to documentation'
+          commit_message: 'Add build tag and changelog page to documentation'
