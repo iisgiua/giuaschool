@@ -155,13 +155,13 @@ RUN composer install -q --no-dev --no-scripts && \
     composer -q clear-cache && \
     # imposta ambiente di produzione
     sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
+    rm src/Command/AliceLoadCommand.php  && \
     # crea directory di ambiente
     mkdir -p var/cache/prod var/sessions/prod && \
     # inizializza cache
     php bin/console cache:clear -q && \
     # pulizia file inutili
     rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* && \
-    rm -r src/Command/AliceLoadCommand.php  && \
     rm -rf src/DataFixtures tests/*.php tests/Behat tests/data tests/features tests/temp tests/UnitTest && \
     rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
     # imposta permessi sui file
