@@ -9,4 +9,4 @@ service apache2 start
 dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
 
 # Resegue test PHPUnit
-exec php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover clover.xml
+php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover clover.xml
