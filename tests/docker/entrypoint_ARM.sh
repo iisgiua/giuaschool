@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# Start MySql service in background
+# terminazione immediata sugli errori
+set -e
+
+# avvia MySql in background
 service mariadb start
 
-# Adjust mutex configuration and start Apache service in foreground
+# imposta configurazione per sistemi ARM
 echo 'Mutex posixsem' >> /etc/apache2/apache2.conf
-/usr/sbin/apache2ctl -D FOREGROUND
+
+# avvia Apache in foreground
+exec /usr/sbin/apache2ctl -D FOREGROUND

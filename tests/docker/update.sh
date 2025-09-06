@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Remove unused files
+# terminazione immediata sugli errori
+set -e
+
+# pulizia dei file inutili
 rm -f -r bin/
 rm -f -r tests/
 rm -f -r var/cache/* var/log/* var/sessions/*
 
-# Rename .env to avoid overwriting on update
+# rinomina .env per evitare sia sovrascritto in aggiornamento
 mv .env .env-dist
 
-# Create archive for added/changed files
+# crea l'archivio con i file modificati e aggiunti
 wget -q -P ../ https://github.com/iisgiua/giuaschool/releases/download/$1/giuaschool-release-$1.md5.zip
 unzip -q ../giuaschool-release-$1.md5.zip -d ../
 find ./ -type f -exec md5sum {} + | sort -k 2 > ../giuaschool-update.md5

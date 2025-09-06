@@ -47,7 +47,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
           docker build --target prod -t gs:prod -f tests/docker/Dockerfile .
-          docker run --name gs_update --entrypoint "" gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
+          docker run --name gs_update gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.release }}'
           docker cp gs_update:/var/www/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.release }}.zip
 
       - name: Upload update code
@@ -74,7 +74,7 @@ jobs:
 
       - name: Run phpunit tests
         run: |
-          docker run --name gs_test --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 --entrypoint "" gs:test tests/docker/test-phpunit.sh
+          docker run --name gs_test --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage report
@@ -107,7 +107,7 @@ jobs:
 
       - name: Run behat tests
         run: |
-          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 --entrypoint "" gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
+          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   test-update:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
@@ -120,7 +120,7 @@ jobs:
         run: |
           TAG="${{ needs.build.outputs.latest-release }}"
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test -f tests/docker/TestUpdateDockerfile .
-          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 --entrypoint "" gs:test tests/docker/test-update.sh
+          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-update.sh
 
   deploy:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
