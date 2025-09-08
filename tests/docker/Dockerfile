@@ -1,5 +1,5 @@
 ########## Base Step - Imposta sistema operativo, tool e servizi
-FROM debian:12.12 AS base
+FROM debian:12.11 AS base
 
 # variabili di ambiente
 ARG DEBIAN_FRONTEND=noninteractive
