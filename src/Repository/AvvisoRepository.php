@@ -354,7 +354,7 @@ class AvvisoRepository extends BaseRepository {
         ->select('DISTINCT DAY(c.data) AS giorno')
         ->join('rc.colloquio', 'c')
         ->where("rc.stato='C' AND c.abilitato=1 AND MONTH(c.data)=:mese AND YEAR(c.data)=:anno")
-        ->orderBy('c.data', 'ASC')
+        ->orderBy('DAY(c.data)', 'ASC')
         ->setParameter('mese', $mese->format('n'))
         ->setParameter('anno', $mese->format('Y'));
       if ($utente instanceOf Docente) {
