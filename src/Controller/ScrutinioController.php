@@ -453,17 +453,23 @@ class ScrutinioController extends BaseController {
       }
     }
     // controllo materia
-    $materia = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
-      ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
-      ->join('c.classe', 'cl')
-      ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
-      ->setParameter('materia', $materia)
-      ->setParameter('anno', $classe->getAnno())
-      ->setParameter('sezione', $classe->getSezione())
-      ->setParameter('gruppo', $classe->getGruppo())
-      ->setMaxResults(1)
-      ->getQuery()
-      ->getOneOrNullResult();
+    if ($periodo == 'X') {
+      // scrutinio di A.S. precedente
+      $materia = $this->em->getRepository(Materia::class)->find($materia);
+    } else {
+      // scrutinio degli altri periodi
+      $materia = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
+        ->join(Cattedra::class, 'c', 'WITH', 'c.materia=m.id')
+        ->join('c.classe', 'cl')
+        ->where("m.id=:materia AND c.attiva=1 AND c.tipo='N' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+        ->setParameter('materia', $materia)
+        ->setParameter('anno', $classe->getAnno())
+        ->setParameter('sezione', $classe->getSezione())
+        ->setParameter('gruppo', $classe->getGruppo())
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+    }
     if (!$materia) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

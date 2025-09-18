@@ -610,7 +610,7 @@ class SistemaController extends BaseController {
               ->join('c.docente', 'd')
               ->join('c.materia', 'm')
               ->join('c.classe', 'cl')
-              ->where("c.attiva=1 AND c.tipo!='P' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
+              ->where("d.abilitato=1 AND c.attiva=1 AND c.tipo!='P' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo=:gruppo OR cl.gruppo='' OR cl.gruppo IS NULL)")
               ->orderBy('d.cognome,d.nome,m.ordinamento', 'ASC')
               ->setParameter('anno', $scrutinio->getClasse()->getAnno())
               ->setParameter('sezione', $scrutinio->getClasse()->getSezione())
