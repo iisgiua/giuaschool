@@ -309,7 +309,7 @@ class DocumentoRepository extends BaseRepository {
   public function lista(array $criteri, Utente $utente, int $pagina): array {
     // query base
     $documenti = $this->createQueryBuilder('d')
-      ->select('DISTINCT d as documento,cu.letto,cu.firmato,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo')
+      ->select('DISTINCT d as documento,cu.letto,cu.firmato,cl.anno,cl.sezione,cl.gruppo,cl2.anno AS anno2,cl2.sezione AS sezione2,cl2.gruppo AS gruppo2,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo')
       ->join(ComunicazioneUtente::class, 'cu', 'WITH', 'cu.comunicazione=d.id')
       ->leftJoin('d.classe', 'cl')
       ->leftJoin('d.materia', 'm')
