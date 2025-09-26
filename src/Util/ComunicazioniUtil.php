@@ -293,10 +293,8 @@ class ComunicazioniUtil {
         ->getIdRappresentantiClasse(['S'], $sedi, $comunicazione->getRappresentantiAlunni(),
         $comunicazione->getFiltroRappresentantiAlunni()));
     }
-    // destinatari univoci
-    $utenti = array_unique($utenti);
-    $classi = array_unique($classi);
     // imposta utenti destinatari
+    $utenti = array_unique($utenti);
     foreach ($utenti as $utente) {
       $obj = (new ComunicazioneUtente())
         ->setComunicazione($comunicazione)
@@ -304,11 +302,16 @@ class ComunicazioniUtil {
       $this->em->persist($obj);
     }
     // imposta classi destinatarie
-    foreach ($classi as $classe) {
-      $obj = (new ComunicazioneClasse())
-        ->setComunicazione($comunicazione)
-        ->setClasse($this->em->getReference(Classe::class, $classe));
-      $this->em->persist($obj);
+    if ($comunicazione instanceOf Circolare ||
+        ($comunicazione instanceOf Avviso && in_array($comunicazione->getTipo(), ['U', 'E', 'A', 'C']))) {
+      // solo per circolari e avvisi uscite/ritardi/attività/generici
+      $classi = array_unique($classi);
+      foreach ($classi as $classe) {
+        $obj = (new ComunicazioneClasse())
+          ->setComunicazione($comunicazione)
+          ->setClasse($this->em->getReference(Classe::class, $classe));
+        $this->em->persist($obj);
+      }
     }
   }
 

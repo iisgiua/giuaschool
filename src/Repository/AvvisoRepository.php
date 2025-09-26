@@ -253,7 +253,6 @@ class AvvisoRepository extends BaseRepository {
       ->select('COUNT(a.id)')
       ->join(ComunicazioneClasse::class, 'cc', 'WITH', 'cc.comunicazione=a.id')
       ->where("a.stato='P' AND cc.classe=:classe AND cc.letto IS NULL")
-      ->orderBy('a.data', 'ASC')
 			->setParameter('classe', $classe)
       ->getQuery()
       ->getSingleScalarResult();

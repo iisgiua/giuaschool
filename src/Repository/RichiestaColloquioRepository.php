@@ -170,7 +170,6 @@ class RichiestaColloquioRepository extends BaseRepository {
       ->select('COUNT(rc.id)')
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data>=:oggi')
-      ->orderBy('c.data,rc.appuntamento', 'ASC')
       ->setParameter('stato', 'R')
       ->setParameter('docente', $docente)
       ->setParameter('abilitato', 1)

@@ -46,11 +46,11 @@ class ColloquioRepository extends BaseRepository {
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')
-      ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
+    ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
       ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
       ->where('c.docente=:docente AND c.data BETWEEN :inizio AND :fine')
+      ->groupBy('c.id,c.creato,c.modificato,c.tipo,c.luogo,c.data,c.inizio,c.fine,c.durata,c.numero,c.abilitato,c.docente')
       ->orderBy('c.data,c.inizio', 'ASC')
-      ->groupBy('c.id')
       ->setParameter('valide', ['R', 'C'])
       ->setParameter('docente', $docente)
       ->setParameter('inizio', $inizio->format('Y-m-d'))
