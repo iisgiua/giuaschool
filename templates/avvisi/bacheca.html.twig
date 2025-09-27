@@ -75,7 +75,7 @@
               <div class="text-right gs-text-normal"><em>({{ a.avviso.autore }})</em></div>
             </div>
       {% if a.avviso.allegati|length > 0 %}
-            <div class="gs-mt-2">
+            <div class="alert alert-success gs-mt-2 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
         {% for n,f in a.avviso.allegati %}
               <div class="gs-mt-3 gs-mb-3">
                 <strong>Allegato {{ n+1 }}:</strong> {{ f.titolo }}
@@ -85,10 +85,15 @@
         {% endfor %}
             </div>
       {% endif %}
-            <div class="gs-mt-2 gs-pt-3 gs-pb-3 gs-bg-secondary" style="border-radius:4px;">
+            <div class="gs-mt-1 gs-pt-1 gs-pb-3">
               <div class="gs-pl-2 gs-pr-2">
                 <strong>Sede:</strong>
                 {% for s in a.avviso.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}
+      {% if dati.classi[k]|length > 0 %}
+                <br>
+                <strong>Classi:</strong>
+                {% for c in dati.classi[k] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %}
+      {% endif %}
               </div>
               <div class="gs-pl-2 gs-pr-2">
                 <strong>Tipo:</strong>

@@ -215,6 +215,20 @@ class AvvisoRepository extends BaseRepository {
     }
     // paginazione
     $dati = $this->paginazione($avvisi->getQuery(), $pagina);
+    // aggiunge info classi
+    $dati['classi'] = [];
+    foreach ($dati['lista'] as $k => $a) {
+      $classi = $this->getEntityManager()->getRepository(ComunicazioneClasse::class)->createQueryBuilder('cc')
+        ->select('cc.id,cl.anno,cl.sezione,cl.gruppo')
+        ->join('cc.classe', 'cl')
+        ->where('cc.comunicazione=:avviso')
+        ->orderBy('cl.anno,cl.sezione,cl.gruppo')
+        ->setParameter('avviso', $a['avviso']->getId())
+        ->getQuery()
+        ->getArrayResult();
+      $dati['classi'][$k] = array_map(
+        fn($c): string => $c['anno'].'ª '.$c['sezione'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
+    }
     // restituisce dati
     return $dati;
   }

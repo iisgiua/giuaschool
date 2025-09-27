@@ -148,10 +148,10 @@ class LogListener {
       $req = $this->request->getCurrentRequest();
       $tok = $this->token->getToken();
       // dati utente
-      $utente = $tok->getUser();
+      $utente = $tok ? $tok->getUser() : null;
       $this->info['utente'] = $utente;
-      $this->info['username'] = $utente->getUserIdentifier();
-      $this->info['ruolo'] = $utente->getRoles()[0];
+      $this->info['username'] = $utente ? $utente->getUserIdentifier() : '--ANONIMO--';
+      $this->info['ruolo'] = $utente ? $utente->getRoles()[0] : '--NESSUNO--';
       $this->info['alias'] = ($tok instanceOf SwitchUserToken) ?
         $tok->getOriginalToken()->getUser()->getUserIdentifier() : null;
       // dati di navigazione
