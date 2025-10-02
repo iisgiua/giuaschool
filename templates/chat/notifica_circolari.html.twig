@@ -1,7 +1,7 @@
 Nuove circolari:
 {% for c in circolari %}
  - n. {{ c.numero }} del {{ c.data}}
-   <b>{{ c.titolo }}</b>
+   <b>{{ c.oggetto }}</b>
 {% endfor %}
 
 <a href="{{ url_registro }}">Vai al registro</a>
