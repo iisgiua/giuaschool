@@ -35,3 +35,4 @@ App\Entity\Amministratore:
     indirizzo: ''
     numeriTelefono: '<(array())>'
     notifica: '<(array())>'
+    dati: '<(array())>'

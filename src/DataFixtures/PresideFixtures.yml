@@ -37,3 +37,4 @@ App\Entity\Preside:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    dati: '<(array())>'

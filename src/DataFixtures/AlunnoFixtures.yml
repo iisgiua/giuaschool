@@ -69,6 +69,7 @@ App\Entity\Alunno:
     classe: '@classe_1A'
     genitori: '<collection(@genitore1_1A_<current()>, @genitore2_1A_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_2A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -110,6 +111,8 @@ App\Entity\Alunno:
     classe: '@classe_2A'
     genitori: '<collection(@genitore1_2A_<current()>, @genitore2_2A_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
+
 
   # ----- alunni del triennio INF -----
   alunno_3A_{1..2}:
@@ -153,6 +156,7 @@ App\Entity\Alunno:
     classe: '@classe_3A'
     genitori: '<collection(@genitore1_3A_<current()>, @genitore2_3A_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_4A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -194,6 +198,7 @@ App\Entity\Alunno:
     classe: '@classe_4A'
     genitori: '<collection(@genitore1_4A_<current()>, @genitore2_4A_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_5A_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -235,6 +240,7 @@ App\Entity\Alunno:
     classe: '@classe_5A'
     genitori: '<collection(@genitore1_5A_<current()>, @genitore2_5A_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- alunni del quinquennio LSA -----
   alunno_1B_{1..2}:
@@ -278,6 +284,7 @@ App\Entity\Alunno:
     classe: '@classe_1B'
     genitori: '<collection(@genitore1_1B_<current()>, @genitore2_1B_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_2B_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -319,6 +326,7 @@ App\Entity\Alunno:
     classe: '@classe_2B'
     genitori: '<collection(@genitore1_2B_<current()>, @genitore2_2B_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_3B_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -360,6 +368,7 @@ App\Entity\Alunno:
     classe: '@classe_3B'
     genitori: '<collection(@genitore1_3B_<current()>, @genitore2_3B_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_4B_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -401,6 +410,7 @@ App\Entity\Alunno:
     classe: '@classe_4B'
     genitori: '<collection(@genitore1_4B_<current()>, @genitore2_4B_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_5B_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -442,6 +452,7 @@ App\Entity\Alunno:
     classe: '@classe_5B'
     genitori: '<collection(@genitore1_5B_<current()>, @genitore2_5B_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- alunni del biennio BCH -----
   alunno_1C_{1..2}:
@@ -485,6 +496,7 @@ App\Entity\Alunno:
     classe: '@classe_1C'
     genitori: '<collection(@genitore1_1C_<current()>, @genitore2_1C_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_2C_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -526,6 +538,7 @@ App\Entity\Alunno:
     classe: '@classe_2C'
     genitori: '<collection(@genitore1_2C_<current()>, @genitore2_2C_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- alunni della classe articolata CHI/AMB -----
   alunno_3CAMB_{1..2}:
@@ -569,6 +582,7 @@ App\Entity\Alunno:
     classe: '@classe_3CAMB'
     genitori: '<collection(@genitore1_3CAMB_<current()>, @genitore2_3CAMB_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_3CCHI_{1..2}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -610,6 +624,7 @@ App\Entity\Alunno:
     classe: '@classe_3CCHI'
     genitori: '<collection(@genitore1_3CCHI_<current()>, @genitore2_3CCHI_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- alunni con sostegno -----
   alunno_sostegno_{1..2}:
@@ -653,6 +668,7 @@ App\Entity\Alunno:
     classe: '@classe_1A'
     genitori: '<collection(@genitore1_sostegno_<current()>, @genitore2_sostegno_<current()>)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_sostegno_3:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -694,6 +710,7 @@ App\Entity\Alunno:
     classe: '@classe_3CCHI'
     genitori: '<collection(@genitore1_sostegno_3, @genitore2_sostegno_3)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   alunno_sostegno_4:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -735,6 +752,7 @@ App\Entity\Alunno:
     classe: '@classe_3CAMB'
     genitori: '<collection(@genitore1_sostegno_4, @genitore2_sostegno_4)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- alunni con materia altenativa -----
   alunno_alternativa_1:
@@ -778,3 +796,4 @@ App\Entity\Alunno:
     classe: '@classe_1A'
     genitori: '<collection(@genitore1_alternativa_1, @genitore2_alternativa_1)>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'

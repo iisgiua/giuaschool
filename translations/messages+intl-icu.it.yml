@@ -687,6 +687,11 @@ label.tutti_tipi: Tutti i tipi
 label.tutti_mesi: Tutti i mesi
 label.filtro_tipo: Filtra per tipo
 label.filtro_tipo_documenti: Filtra per tipo di documento
+label.pagina_voti_compatta: Visualizza i voti in modo compatto (vecchio stile)?
+label.pagina_voti_medie_tipi: Visualizza anche le medie per tipo di voto?
+label.pagina_voti_scritto: Visualizza le valutazioni scritte/grafiche?
+label.pagina_voti_orale: Visualizza le valutazioni orali?
+label.pagina_voti_pratico: Visualizza le valutazioni pratiche?
 
 
 ##### PAGINE #####
@@ -1151,6 +1156,7 @@ title.voti_classe: Aggiungi o modifica una valutazione per la classe
 title.piano_integrativo_apprendimenti: Piano di Integrazione degli Apprendimenti
 title.gestione_colloqui: Inserimento delle ore di colloquio
 title.date_colloqui: Date confermate
+title.lezioni_voti_configura: Configura la visualizzazione della pagina con i voti
 
 
 ##### MESSAGGI #####

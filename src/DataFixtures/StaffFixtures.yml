@@ -44,3 +44,4 @@ App\Entity\Staff:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    dati: '<(array())>'

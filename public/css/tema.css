@@ -615,8 +615,7 @@ button.btn.disabled:active, button.btn.disabled:focus {
 }
 .gs-table-sticky td.gs-col-sticky {
   text-align: left;
-  min-width: 200px;
-
+  /* min-width: 200px; */
   overflow: hidden;
   text-overflow: ellipsis;
 }

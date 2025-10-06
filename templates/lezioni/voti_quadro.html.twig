@@ -17,7 +17,7 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4"><em>{{ info.materia }}</em></h2>
   <div class="row text-center gs-big gs-mb-2"><em>Clicca su un voto per modificarlo o eliminarlo.</em></div>
   <div class="row gs-mb-1">
-    <div class="col-sm-8">
+    <div class="col-sm-4">
       <strong class="gs-big">Periodo:</strong>
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ periodo ? lista_periodi[periodo].nome : 'Scegli' }}<span class="caret gs-ml-3"></span></button>
@@ -30,6 +30,9 @@
         </ul>
       </div>
     </div>
+    <div class="col-sm-4 text-center">
+      <a class="btn btn-info btn-sm" href="{{ path('lezioni_voti_configura') }}" role="button" title="Configura la visualizzazione della pagina dei voti"><span class="glyphicon glyphicon-pushpin gs-mr-3"></span><strong>Visualizzazione</strong></a>
+    </div>
     <div class="col-sm-4 text-right">
     {% if periodo %}
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_esporta', {'cattedra': cattedra.id, 'classe': classe.id, 'data': lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.esporta'|trans }}</strong></a>
@@ -38,56 +41,194 @@
     {% endif %}
     </div>
   </div>
+    {% if info.pagina.compatta %}
   <div class="gs-table-sticky-wrapper">
     <table class="gs-table-sticky">
       <thead>
         <tr>
           <th rowspan="2" class="gs-col-sticky gs-color-1">Alunno</th>
-          <th colspan="{{ dati.lista.S|keys|length + 1 + edit }}" class="gs-color-2">Scritto/Grafico</th>
-          <th colspan="{{ dati.lista.O|keys|length + 1 + edit }}" class="gs-color-3">Orale</th>
-          <th colspan="{{ dati.lista.P|keys|length + 1 + edit }}" class="gs-color-4">Pratico</th>
+      {% if info.pagina.scritto %}
+          <th colspan="{{ 1 + info.pagina.medie_tipi + edit }}" class="gs-color-2">Scritto/Grafico</th>
+      {% endif %}
+      {% if info.pagina.orale %}
+          <th colspan="{{ 1 + info.pagina.medie_tipi + edit }}" class="gs-color-3">Orale</th>
+      {% endif %}
+      {% if info.pagina.pratico %}
+          <th colspan="{{ 1 + info.pagina.medie_tipi + edit }}" class="gs-color-4">Pratico</th>
+      {% endif %}
           <th rowspan="2" class="gs-color-1">Media</th>
         </tr>
         <tr>
-      {% if edit %}
-          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
-      {% endif %}
-      {% for d in dati.lista.S|keys %}
-          <th class="gs-color-2">
-        {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.S[d] is empty %}Modifica la valutazione Scritta/Grafica per la classe{% else %}Modifica la valutazione Scritta/Grafica: {{ dati.lista.S[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
-        {% else %}
-            {{ d[0:3] }}<br>{{ d[4:2] }}
-        {% endif %}
-          </th>
-      {% endfor %}
+      {% if info.pagina.scritto %}
+          <th class="gs-color-2">Voti</th>
+        {% if info.pagina.medie_tipi %}
           <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
-      {% if edit %}
-          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
-      {% endif %}
-      {% for d in dati.lista.O|keys %}
-          <th class="gs-color-3">
-        {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.O[d] is empty %}Modifica la valutazione Orale per la classe{% else %}Modifica la valutazione Orale: {{ dati.lista.O[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
-        {% else %}
-            {{ d[0:3] }}<br>{{ d[4:2] }}
         {% endif %}
-          </th>
-      {% endfor %}
+        {% if edit %}
+          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
+      {% if info.pagina.orale %}
+          <th class="gs-color-3">Voti</th>
+        {% if info.pagina.medie_tipi %}
           <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
-      {% if edit %}
-          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
-      {% endif %}
-      {% for d in dati.lista.P|keys %}
-          <th class="gs-color-4">
-        {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.P[d] is empty %}Modifica la valutazione Pratica per la classe{% else %}Modifica la valutazione Pratica: {{ dati.lista.P[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
-        {% else %}
-            {{ d[0:3] }}<br>{{ d[4:2] }}
         {% endif %}
-          </th>
-      {% endfor %}
+        {% if edit %}
+          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
+      {% if info.pagina.pratico %}
+          <th class="gs-color-4">Voti</th>
+        {% if info.pagina.medie_tipi %}
           <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
+        {% endif %}
+        {% if edit %}
+          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for k,a in dati.alunni %}
+        {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
+        <tr>
+          <td class="gs-col-sticky gs-pt-1 gs-pb-1">
+            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+            {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          </td>
+          {% for tipo in info.pagina.tipi %}
+          <td style="text-align:left;">
+            {% for d,dd in dati.lista[tipo] %}
+              {% if dati.voti[k][tipo][d] is defined %}
+                {% set v = dati.voti[k][tipo][d] %}
+                {% if v.docente_id != app.user.id %}
+            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</strong></button>
+                {% elseif v.voto > 0 and not v.visibile %}
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% elseif v.voto > 0 and not v.media %}
+            <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% elseif v.voto > 0 %}
+            <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
+                {% else %}
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><span class="glyphicon glyphicon-asterisk gs-big"></span></button>
+                {% endif %}
+            <div id="gs-voti-{{ v.id }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <p>
+                {% if not v.visibile %}
+                    <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+                {% endif %}
+                    <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
+                  </p>
+                  <p><strong>Docente:</strong> {{ v.nome }} {{ v.cognome }}</p>
+                  <p><strong>Valutazione:</strong> {{ ('label.voti_'~v.tipo)|trans }} <em>{{ not v.media ? '(non utilizzata nel calcolo della media)' }}</em></p>
+                  <p><strong>Alunno:</strong> {{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</p>
+                {% if v.argomento is not empty %}
+                  <p><strong>Argomenti o descrizione della prova:</strong><br>{{ v.argomento }}</p>
+                {% endif %}
+                {% if v.voto_str is defined %}
+                  <p><strong>Voto:</strong> {{ v.voto_str }}</p>
+                {% endif %}
+                {% if v.giudizio is not empty %}
+                  <p><strong>Giudizio:</strong><br>{{ v.giudizio }}</p>
+                {% endif %}
+                </div>
+                {% if v.docente_id == app.user.id and edit %}
+                <div class="list-group-item-text text-right">
+                  <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
+                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+              {% endif %}
+            {% endfor %}
+          </td>
+            {% if info.pagina.medie_tipi %}
+          <td class="{{ dati.medie[k][tipo] < 5 ? 'text-danger' : (dati.medie[k][tipo] < 6 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></td>
+            {% endif %}
+            {% if edit %}
+          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
+            {% endif %}
+          {% endfor %}
+          <td class="{{ dati.medie[k]['T'] < 5 ? 'text-danger' : (dati.medie[k]['T'] < 6 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% else %}
+  <div class="gs-table-sticky-wrapper">
+    <table class="gs-table-sticky">
+      <thead>
+        <tr>
+          <th rowspan="2" class="gs-col-sticky gs-color-1">Alunno</th>
+      {% if info.pagina.scritto %}
+          <th colspan="{{ dati.lista.S|keys|length + info.pagina.medie_tipi + edit }}" class="gs-color-2">Scritto/Grafico</th>
+      {% endif %}
+      {% if info.pagina.orale %}
+          <th colspan="{{ dati.lista.O|keys|length + info.pagina.medie_tipi + edit }}" class="gs-color-3">Orale</th>
+      {% endif %}
+      {% if info.pagina.pratico %}
+          <th colspan="{{ dati.lista.P|keys|length + info.pagina.medie_tipi + edit }}" class="gs-color-4">Pratico</th>
+      {% endif %}
+          <th rowspan="2" class="gs-color-1">Media</th>
+        </tr>
+        <tr>
+      {% if info.pagina.scritto %}
+        {% for d in dati.lista.S|keys %}
+          <th class="gs-color-2">
+          {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.S[d] is empty %}Modifica la valutazione Scritta/Grafica per la classe{% else %}Modifica la valutazione Scritta/Grafica: {{ dati.lista.S[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+          {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+          {% endif %}
+          </th>
+        {% endfor %}
+        {% if info.pagina.medie_tipi %}
+          <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
+        {% endif %}
+        {% if edit %}
+          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
+      {% if info.pagina.orale %}
+        {% for d in dati.lista.O|keys %}
+          <th class="gs-color-3">
+          {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.O[d] is empty %}Modifica la valutazione Orale per la classe{% else %}Modifica la valutazione Orale: {{ dati.lista.O[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+          {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+          {% endif %}
+          </th>
+        {% endfor %}
+        {% if info.pagina.medie_tipi %}
+          <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
+        {% endif %}
+        {% if edit %}
+          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
+      {% if info.pagina.pratico %}
+        {% for d in dati.lista.P|keys %}
+          <th class="gs-color-4">
+          {% if edit %}
+            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P', 'data': d[7:]}) }}" role="button" title="{% if dati.lista.P[d] is empty %}Modifica la valutazione Pratica per la classe{% else %}Modifica la valutazione Pratica: {{ dati.lista.P[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+          {% else %}
+            {{ d[0:3] }}<br>{{ d[4:2] }}
+          {% endif %}
+          </th>
+        {% endfor %}
+        {% if info.pagina.medie_tipi %}
+        <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
+        {% endif %}
+        {% if edit %}
+          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'tipo': 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+        {% endif %}
+      {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -99,10 +240,7 @@
             <strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small>
             {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
           </td>
-          {% for tipo in ['S','O','P'] %}
-            {% if edit %}
-          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
-            {% endif %}
+          {% for tipo in info.pagina.tipi %}
             {% for d,dd in dati.lista[tipo] %}
           <td>
               {% if dati.voti[k][tipo][d] is defined %}
@@ -153,7 +291,12 @@
               {% endif %}
             {% endfor %}
           </td>
+            {% if info.pagina.medie_tipi %}
           <td class="{{ dati.medie[k][tipo] < 5 ? 'text-danger' : (dati.medie[k][tipo] < 6 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></td>
+            {% endif %}
+            {% if edit %}
+          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
+            {% endif %}
           {% endfor %}
           <td class="{{ dati.medie[k]['T'] < 5 ? 'text-danger' : (dati.medie[k]['T'] < 6 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></td>
         </tr>
@@ -162,6 +305,7 @@
       </tbody>
     </table>
   </div>
+    {% endif %}
     {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>

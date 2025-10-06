@@ -15,6 +15,7 @@ use App\Entity\Lezione;
 use App\Entity\Materia;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
+use App\Form\PaginaVotiType;
 use App\Form\VotoClasseType;
 use App\Util\GenitoriUtil;
 use App\Util\LogHandler;
@@ -56,9 +57,8 @@ class VotiController extends BaseController {
    * @param int $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
-   *
    */
-  #[Route(path: '/lezioni/voti/quadro/{cattedra}/{classe}/{periodo}', name: 'lezioni_voti_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => '1|2|3|0'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => 0], methods: ['GET'])]
+  #[Route(path: '/lezioni/voti/quadro/{cattedra}/{classe}/{periodo}', name: 'lezioni_voti_quadro', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'periodo' => '1|2|3|0'], defaults: ['cattedra' => 0, 'classe' => 0, 'periodo' => 0], methods: ['GET','POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function voti(Request $request, RegistroUtil $reg, int $cattedra, int $classe, int $periodo): Response {
     // inizializza variabili
@@ -144,6 +144,23 @@ class VotiController extends BaseController {
         }
         // legge voti
         $dati = $reg->quadroVoti($inizio, $fine, $this->getUser(), $cattedra);
+        // informazioni sulle preferenze di visualizzazione
+        $preferenze = $this->getUser()->getDati();
+        $info['pagina']['compatta'] = $preferenze['pagina']['lezioni_voti_quadro']['compatta'] ?? 0;
+        $info['pagina']['medie_tipi'] = $preferenze['pagina']['lezioni_voti_quadro']['medie_tipi'] ?? 1;
+        $info['pagina']['scritto'] = $preferenze['pagina']['lezioni_voti_quadro']['scritto'] ?? 1;
+        $info['pagina']['orale'] = $preferenze['pagina']['lezioni_voti_quadro']['orale'] ?? 1;
+        $info['pagina']['pratico'] = $preferenze['pagina']['lezioni_voti_quadro']['pratico'] ?? 1;
+        $info['pagina']['tipi'] = [];
+        if ($info['pagina']['scritto']) {
+          $info['pagina']['tipi'][] = 'S';
+        }
+        if ($info['pagina']['orale']) {
+          $info['pagina']['tipi'][] = 'O';
+        }
+        if ($info['pagina']['pratico']) {
+          $info['pagina']['tipi'][] = 'P';
+        }
       }
     }
     // salva pagina visitata
@@ -173,7 +190,6 @@ class VotiController extends BaseController {
    * @param string $data Data del giorno (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/classe/{cattedra}/{tipo}/{data}', name: 'lezioni_voti_classe', requirements: ['cattedra' => '\d+', 'tipo' => 'S|O|P', 'data' => '\d\d\d\d-\d\d-\d\d\.\d+'], defaults: ['data' => '0000-00-00.0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -394,7 +410,6 @@ class VotiController extends BaseController {
    * @param int $id Identificativo del voto (0=nuovo)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/alunno/{cattedra}/{alunno}/{tipo}/{id}', name: 'lezioni_voti_alunno', requirements: ['cattedra' => '\d+', 'alunno' => '\d+', 'tipo' => 'S|O|P', 'id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -599,7 +614,6 @@ class VotiController extends BaseController {
    * @param int $alunno Identificativo dell'alunno (nullo se non ancora scelto)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/dettagli/{cattedra}/{classe}/{alunno}', name: 'lezioni_voti_dettagli', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'alunno' => '\d+'], defaults: ['cattedra' => 0, 'classe' => 0, 'alunno' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -699,7 +713,6 @@ class VotiController extends BaseController {
    * @param int $materia Identificativo della materia
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/sostegno/{cattedra}/{materia}', name: 'lezioni_voti_sostegno', requirements: ['cattedra' => '\d+', 'materia' => '\d+'], defaults: ['cattedra' => 0, 'materia' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -782,7 +795,6 @@ class VotiController extends BaseController {
    * @param string $data Data del giorno (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/stampa/{cattedra}/{classe}/{data}', name: 'lezioni_voti_stampa', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -860,7 +872,6 @@ class VotiController extends BaseController {
    * @param string $data Data del giorno (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/esporta/{cattedra}/{classe}/{data}', name: 'lezioni_voti_esporta', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -939,7 +950,6 @@ class VotiController extends BaseController {
    * @param int $id Identificativo del voto
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -1022,6 +1032,49 @@ class VotiController extends BaseController {
       'cattedra' => $cattedra,
       'dati' => $dati,
       'info' => $info]);
+  }
+
+  /**
+   * Configura la visualizzazione dei voti per i docenti
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/lezioni/voti/configura', name: 'lezioni_voti_configura',  methods: ['GET','POST'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function votiConfigura(Request $request): Response {
+    // inizializza variabili
+    $dati = [];
+    // legge dati
+    $preferenze = $this->getUser()->getDati();
+    $dati['compatta'] = $preferenze['pagina']['lezioni_voti_quadro']['compatta'] ?? 0;
+    $dati['medie_tipi'] = $preferenze['pagina']['lezioni_voti_quadro']['medie_tipi'] ?? 1;
+    $dati['scritto'] = $preferenze['pagina']['lezioni_voti_quadro']['scritto'] ?? 1;
+    $dati['orale'] = $preferenze['pagina']['lezioni_voti_quadro']['orale'] ?? 1;
+    $dati['pratico'] = $preferenze['pagina']['lezioni_voti_quadro']['pratico'] ?? 1;
+    // form
+    $form = $this->createForm(PaginaVotiType::class, null, [
+      'return_url' => $this->generateUrl('lezioni_voti_quadro'),
+      'values' => [$dati['compatta'], $dati['medie_tipi'], $dati['scritto'], $dati['orale'], $dati['pratico']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // salva preferenze
+      $preferenze['pagina']['lezioni_voti_quadro']['compatta'] = $form->get('compatta')->getData();
+      $preferenze['pagina']['lezioni_voti_quadro']['medie_tipi'] = $form->get('medie_tipi')->getData();
+      $preferenze['pagina']['lezioni_voti_quadro']['scritto'] = $form->get('scritto')->getData();
+      $preferenze['pagina']['lezioni_voti_quadro']['orale'] = $form->get('orale')->getData();
+      $preferenze['pagina']['lezioni_voti_quadro']['pratico'] = $form->get('pratico')->getData();
+      $this->getUser()->setDati($preferenze);
+      $this->em->flush();
+      // redirezione
+      return $this->redirectToRoute('lezioni_voti_quadro');
+    }
+    // visualizza pagina
+    return $this->render('lezioni/configura_voti.html.twig', [
+      'pagina_titolo' => 'page.lezioni_voti',
+      'form' => $form->createView(),
+      'form_title' => 'title.lezioni_voti_configura']);
   }
 
 }

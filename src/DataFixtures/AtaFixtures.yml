@@ -44,6 +44,7 @@ App\Entity\Ata:
     segreteria: true
     sede:
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   ata_{A, T, C, U}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".a")>'
@@ -74,3 +75,4 @@ App\Entity\Ata:
     segreteria: '<($tipo == "A" ? true : false)>'
     sede: '@sede_*'
     rappresentante: '<(array())>'
+    dati: '<(array())>'

@@ -44,6 +44,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_1A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -73,6 +74,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_2A_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -102,6 +104,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_2A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -131,6 +134,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- genitori del triennio INF -----
   genitore1_3A_{1..2}:
@@ -162,6 +166,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_3A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -191,6 +196,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_4A_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -220,6 +226,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_4A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -249,6 +256,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_5A_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -278,6 +286,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_5A_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -307,6 +316,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- genitori del quinquennio LSA -----
   genitore1_1B_{1..2}:
@@ -338,6 +348,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_1B_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -367,6 +378,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_2B_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -396,6 +408,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_2B_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -425,6 +438,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_3B_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -454,6 +468,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_3B_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -483,6 +498,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_4B_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -512,6 +528,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_4B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_4B_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -541,6 +558,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_4B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_5B_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -570,6 +588,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_5B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_5B_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -599,6 +618,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_5B_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- genitori del biennio BCH -----
   genitore1_1C_{1..2}:
@@ -630,6 +650,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1C_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_1C_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -659,6 +680,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_1C_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_2C_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -688,6 +710,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2C_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_2C_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -717,6 +740,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_2C_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
 
   # ----- genitori della classe articolata CHI/AMB -----
@@ -749,6 +773,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3CAMB_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_3CAMB_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -778,6 +803,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3CAMB_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_3CCHI_{1..2}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -807,6 +833,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3CCHI_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_3CCHI_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -836,6 +863,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_3CCHI_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- genitori dell'alunno con sostegno -----
   genitore1_sostegno_{1..2}:
@@ -867,6 +895,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_sostegno_{1..2}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -896,6 +925,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore1_sostegno_{3..4}:
     sesso: 'M'
     nome: '@genitore1_sostegno_<($current - 2)>->nome'
@@ -925,6 +955,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_sostegno_{3..4}:
     sesso: 'M'
     nome: '@genitore2_sostegno_<($current - 2)>->nome'
@@ -954,6 +985,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
 
   # ----- genitori dell'alunno con materia alternativa -----
   genitore1_alternativa_1:
@@ -985,6 +1017,7 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_alternativa_1'
     rappresentante: '<(array())>'
+    dati: '<(array())>'
   genitore2_alternativa_1:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -1014,3 +1047,4 @@ App\Entity\Genitore:
     giustificaOnline: true
     alunno: '@alunno_alternativa_1'
     rappresentante: '<(array())>'
+    dati: '<(array())>'

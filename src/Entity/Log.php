@@ -147,11 +147,11 @@ class Log implements Stringable {
   /**
    * Modifica l'utente connesso
    *
-   * @param Utente $utente Utente connesso
+   * @param Utente|null $utente Utente connesso
    *
    * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente): self {
+  public function setUtente(?Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }

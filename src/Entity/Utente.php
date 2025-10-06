@@ -240,6 +240,12 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?array $rappresentante = [''];
 
   /**
+   * @var array|null $dati Lista di informazioni per la gestione dell'utente
+   */
+  #[ORM\Column(type: Types::JSON, nullable: false)]
+  private ?array $dati = [];
+
+  /**
    * @var array|null $listaProfili Lista di profili per lo stesso utente (dato non persistente)
    *
    */
@@ -937,6 +943,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    */
   public function setRappresentante(array $rappresentante): self {
     $this->rappresentante = $rappresentante;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista di informazioni per la gestione dell'utente
+   *
+   * @return array|null Lista di informazioni per la gestione dell'utente
+   */
+  public function getDati(): ?array {
+    return $this->dati;
+  }
+
+  /**
+   * Modifica la lista di informazioni per la gestione dell'utente
+   *
+   * @param array $dati Lista di informazioni per la gestione dell'utente
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDati(array $dati): self {
+    $this->dati = $dati;
     return $this;
   }
 

@@ -30,6 +30,7 @@
 #   notifica: lista di parametri di notifica per i servizi esterni
 #   listaProfili: lista di profili per lo stesso utente (dato non persistente)
 #   infoLogin: lista di dati utili in fase di autenticazione (dato non persistente)
+#   dati: lista di informazioni per la gestione dell'utente
 ####################
 
 
@@ -60,3 +61,4 @@ App\Entity\Utente:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(3)>'
     notifica: '<(array())>'
+    dati: '<(array())>'
