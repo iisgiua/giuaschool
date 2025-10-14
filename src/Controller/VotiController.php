@@ -276,10 +276,10 @@ class VotiController extends BaseController {
         // errore: festivo
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
-      // controlla lezione
-      $lezione = $this->em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
+      // controlla lezioni
+      $lezioni = $this->em->getRepository(Lezione::class)->lezioniVoto($form->get('data')->getData(),
         $this->getUser(), $classe, $cattedra->getMateria());
-      if (!$lezione) {
+      if (count($lezioni) == 0) {
         // lezione non esiste
         $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
           ['materia' => $cattedra->getMateria()->getNomeBreve()])));
@@ -301,9 +301,6 @@ class VotiController extends BaseController {
         }
       }
       if ($form->isValid()) {
-        $log['create'] = [];
-        $log['edit'] = [];
-        $log['delete'] = [];
         // controlla presenza alunni con voto
         $alunniVoto = [];
         foreach ($form->get('lista')->getData() as $valutazione) {
@@ -313,7 +310,7 @@ class VotiController extends BaseController {
           }
         }
         $conferma = 1;
-        $assenti = $this->em->getRepository(Lezione::class)->alunniAssenti($lezione, $alunniVoto);
+        $assenti = $this->em->getRepository(Lezione::class)->assentiLezioni($lezioni, $alunniVoto);
         if (!empty($assenti) && $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
           // alunni assenti: richiede conferma
           $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
@@ -347,29 +344,25 @@ class VotiController extends BaseController {
                 ->setMedia($valutazione->getMedia())
                 ->setArgomento($form->get('argomento')->getData())
                 ->setDocente($this->getUser())
-                ->setLezione($lezione)
+                ->setLezione($lezioni[0])
                 ->setMateria($cattedra->getMateria())
                 ->setAlunno($alunno)
                 ->setVoto($valutazione->getVoto())
                 ->setGiudizio($valutazione->getGiudizio())
                 ->setOrdine($ordine);
               $this->em->persist($voto);
-              $log['create'][] = $voto;
             } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
               // valutazione cancellata
-              $log['delete'][] = [$voto->getId(), $voto];
               $this->em->remove($voto);
             } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
                       $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
                       $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
-                      $voto->getLezione()->getId() != $lezione->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
+                      $voto->getLezione()->getId() != $lezioni[0]->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
               // valutazione modificata
-              $log['edit'][] = [$voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
-                $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia()];
               $voto
                 ->setVisibile($form->get('visibile')->getData())
                 ->setMedia($valutazione->getMedia())
-                ->setLezione($lezione)
+                ->setLezione($lezioni[0])
                 ->setArgomento($form->get('argomento')->getData())
                 ->setVoto($valutazione->getVoto())
                 ->setGiudizio($valutazione->getGiudizio())
@@ -530,16 +523,16 @@ class VotiController extends BaseController {
           // errore: festivo
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
-        // controlla lezione
-        $lezione = $this->em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
+        // controlla lezioni
+        $lezioni = $this->em->getRepository(Lezione::class)->lezioniVoto($form->get('data')->getData(),
           $this->getUser(), $classe, $cattedra->getMateria());
-        if (!$lezione) {
+        if (count($lezioni) == 0) {
           // lezione non esiste
           $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
             ['materia' => $cattedra->getMateria()->getNomeBreve()])));
         } else {
           // inserisce lezione
-          $valutazione->setLezione($lezione);
+          $valutazione->setLezione($lezioni[0]);
         }
         // controlla permessi
         if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria(), $alunno)) {
@@ -555,8 +548,7 @@ class VotiController extends BaseController {
       if ($form->isValid()) {
         // controlla presenza alunno
         $conferma = 1;
-        $assente = $this->em->getRepository(Lezione::class)->alunnoAssente($valutazione->getLezione(),
-          $valutazione->getAlunno());
+        $assente = $this->em->getRepository(Lezione::class)->assenteLezioni($lezioni, $valutazione->getAlunno());
         if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
             $this->reqstack->getSession()->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
           // alunno risulta assente: richiede conferma

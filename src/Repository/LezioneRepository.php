@@ -15,7 +15,6 @@ use \Doctrine\ORM\EntityRepository;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Materia;
-use App\Entity\Lezione;
 use App\Entity\Alunno;
 
 
@@ -27,91 +26,93 @@ use App\Entity\Alunno;
 class LezioneRepository extends EntityRepository {
 
   /**
-   * Restituisce la lezione del docente nella data e cattedra definita (escluso sostegno)
+   * Restituisce le lezioni del docente nella data e cattedra definita (escluso sostegno)
    *
    * @param DateTime $data Data della lezione
    * @param Docente $docente Docente della lezione
    * @param Classe $classe Classe della lezione
    * @param Materia $materia Materia della lezione
    *
-   * @return Lezione|null Restituisce l'identificatore della lezione o null se non trovata
+   * @return array Restituisce la lista delle lezioni
    */
-  public function lezioneVoto(DateTime $data, Docente $docente, Classe $classe, Materia $materia) {
-    // query base
-    $lezione = $this->createQueryBuilder('l')
+  public function lezioniVoto(DateTime $data, Docente $docente, Classe $classe, Materia $materia): array {
+    // legge lezioni
+    $lezioni = $this->createQueryBuilder('l')
       ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
-      ->where('l.data=:data AND l.classe=:classe AND f.docente=:docente AND l.materia=:materia')
+      ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
       ->setParameter('data', $data->format('Y-m-d'))
-      ->setParameter('docente', $docente)
       ->setParameter('classe', $classe)
       ->setParameter('materia', $materia)
+      ->setParameter('docente', $docente)
       ->orderBy('l.ora', 'ASC')
-      ->setMaxResults(1)
       ->getQuery()
-      ->getOneOrNullResult();
+      ->getResult();
     // controlla se ed.civica
-    if (!$lezione && $materia->getTipo() == 'E') {
+    if (count($lezioni) == 0 && $materia->getTipo() == 'E') {
       // legge lezione firmata con altra materia
-      $lezione = $this->createQueryBuilder('l')
+      $lezioni = $this->createQueryBuilder('l')
         ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
         ->where('l.data=:data AND l.classe=:classe AND f.docente=:docente')
         ->setParameter('data', $data->format('Y-m-d'))
-        ->setParameter('docente', $docente)
         ->setParameter('classe', $classe)
+        ->setParameter('docente', $docente)
         ->orderBy('l.ora', 'ASC')
-        ->setMaxResults(1)
         ->getQuery()
-        ->getOneOrNullResult();
+        ->getResult();
     }
     // restituisce lezione o null
-    return $lezione;
+    return $lezioni;
   }
 
   /**
    * Restituisce vero se l'alunno è assente alla lezione, falso altrimenti
    *
-   * @param Lezione $lezione Lezione da controllare
+   * @param array $lezioni Lista di lezioni da controllare
    * @param Alunno $alunno Alunno di cui controllare la presenza alla lezione
    *
    * @return bool Restituisce vero se l'alunno è assente, falso altrimenti
    */
-  public function alunnoAssente(Lezione $lezione, Alunno $alunno) {
+  public function assenteLezioni(array $lezioni, Alunno $alunno): bool {
     // legge assenza di alunno
-    $assenza = $this->createQueryBuilder('l')
-      ->select('al.ore')
+    $ore = $this->createQueryBuilder('l')
+      ->select('SUM(al.ore)')
       ->join(AssenzaLezione::class, 'al', 'WITH', 'al.lezione=l.id AND al.alunno=:alunno')
-      ->where('l.id=:lezione AND al.ore=:ora')
+      ->where('l.id IN (:lezioni) AND al.ore=1')
       ->setParameter('alunno', $alunno)
-      ->setParameter('lezione', $lezione)
-      ->setParameter('ora', 1)
-      ->setMaxResults(1)
+      ->setParameter('lezioni', array_map(fn($l) => $l->getId(), $lezioni))
       ->getQuery()
-      ->getOneOrNullResult();
-    // restituisce vero se l'alunno è assente per l'intera ora di lezione
-    return ($assenza !== null);
+      ->getSingleScalarResult();
+    // restituisce vero se l'alunno è assente per le intere ore di lezione
+    return $ore == count($lezioni);
   }
 
   /**
-   * Restituisce la lista degli alunni assenti alla lezione
+   * Restituisce la lista degli alunni assenti alle lezioni
    *
-   * @param Lezione $lezione Lezione da controllare
-   * @param array $alunni Lista ID degli alunni di cui controllare la presenza alla lezione
+   * @param array $lezioni Lista di lezioni da controllare
+   * @param array $alunni Lista ID degli alunni di cui controllare la presenza alle lezioni
    *
    * @return array Lista dei nomi degli alunni assenti
    */
-  public function alunniAssenti(Lezione $lezione, $alunni) {
-    // legge assenza di alunno
-    $assenti = $this->createQueryBuilder('l')
-      ->select('a.nome,a.cognome,a.dataNascita')
+  public function assentiLezioni(array $lezioni, array $alunni): array {
+    // legge assenza di alunni
+    $ore = $this->createQueryBuilder('l')
+      ->select('a.id,a.nome,a.cognome,a.dataNascita,SUM(al.ore) AS ore')
       ->join(AssenzaLezione::class, 'al', 'WITH', 'al.lezione=l.id AND al.alunno IN (:alunni)')
       ->join('al.alunno', 'a')
-      ->where('l.id=:lezione AND al.ore=:ora')
+      ->where('l.id IN (:lezioni) AND al.ore=1')
+      ->groupBy('a.id,a.nome,a.cognome,a.dataNascita')
       ->setParameter('alunni', $alunni)
-      ->setParameter('lezione', $lezione)
-      ->setParameter('ora', 1)
+      ->setParameter('lezioni', array_map(fn($l) => $l->getId(), $lezioni))
       ->getQuery()
       ->getArrayResult();
-    // restituisce alunni assenti
+    // restituisce alunni assenti per tutte le ore di lezione
+    $assenti = [];
+    foreach ($ore as $o) {
+      if ($o['ore'] == count($lezioni)) {
+        $assenti[] = $o;
+      }
+    }
     return $assenti;
   }
 

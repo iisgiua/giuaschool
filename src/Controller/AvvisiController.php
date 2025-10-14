@@ -1126,7 +1126,21 @@ class AvvisiController extends BaseController {
       // imposta dati
       $avviso->setAlunni($avviso->getGenitori());
       if ($avviso->getGenitori() == 'C') {
-        $avviso->setFiltroGenitori($avviso->getCattedra() ? [$avviso->getCattedra()->getClasse()->getId()] : []);
+        if ($avviso->getCattedra()) {
+          // gestisce classi articolate
+          $filtroClassi = [$avviso->getCattedra()->getClasse()->getId()];
+          $articolate = $this->em->getRepository(Classe::class)->classiArticolate($filtroClassi);
+          foreach ($articolate as $articolata) {
+            if (empty($articolata['comune'])) {
+              // se classe comune aggiunge tutti i gruppi
+              $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
+            }
+          }
+          $avviso->setFiltroGenitori($filtroClassi);
+        } else {
+          // nessuna classe (non dovrebbe succedere)
+          $avviso->setFiltroGenitori([]);
+        }
       }
       $avviso->setFiltroAlunni($avviso->getFiltroGenitori());
       $avviso->setSedi(new ArrayCollection($avviso->getCattedra() ?

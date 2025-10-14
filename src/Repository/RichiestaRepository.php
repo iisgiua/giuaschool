@@ -67,9 +67,8 @@ class RichiestaRepository extends BaseRepository {
       ->join('r.definizioneRichiesta', 'dr')
       ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
-      ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND c.sede=:sede')
+      ->where('dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
-			->setParameter('abilitata', 1)
 			->setParameter('sede', $criteri['sede'])
       ->orderBy('dr.nome,r.data,r.inviata', 'ASC');
     // controllo tipo
