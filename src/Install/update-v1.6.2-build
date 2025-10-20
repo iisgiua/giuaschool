@@ -8,6 +8,7 @@ return [
   ],
   'sqlCommand' => [
     ["ALTER TABLE gs_utente ADD dati JSON NOT NULL COMMENT '(DC2Type:json)'; UPDATE gs_utente SET dati='[]';", "SELECT dati FROM gs_utente UNION SELECT 1 FROM dual;"],
+    ["ALTER TABLE gs_log CHANGE utente_id utente_id INT DEFAULT NULL;", ""],
   ],
   'envDelete' => [
   ],
