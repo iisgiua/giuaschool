@@ -29,15 +29,15 @@ class ColloquioTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Colloquio::class;
     // campi da testare
-    $this->fields = ['docente', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato'];
+    $this->fields = ['docente', 'sede', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
+    $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'sede_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
     // SQL write
-    $this->canWrite = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
+    $this->canWrite = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'sede_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -71,6 +71,7 @@ class ColloquioTest extends EntityTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'docente' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'sede' ? $this->getReference("sede_1") :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'inizio' ? $this->faker->dateTime() :
           ($field == 'fine' ? $this->faker->dateTime() :
@@ -79,7 +80,7 @@ class ColloquioTest extends EntityTestCase {
           ($field == 'durata' ? $this->faker->numberBetween(5, 30) :
           ($field == 'numero' ? $this->faker->numberBetween(1, 5) :
           ($field == 'abilitato' ? $this->faker->boolean() :
-          null)))))))));
+          null))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -140,6 +141,13 @@ class ColloquioTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_curricolare_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
+    // sede
+    $property = $this->getPrivateProperty(Colloquio::class, 'sede');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');
+    $existent->setSede($this->getReference("sede_2"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sede - VALID NOT BLANK');
     // data
     $property = $this->getPrivateProperty(Colloquio::class, 'data');
     $property->setValue($existent, null);

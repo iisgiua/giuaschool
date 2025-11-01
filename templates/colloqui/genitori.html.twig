@@ -16,7 +16,8 @@
       <li class="list-group-item container-fluid{{ r.stato == 'A' or r.stato == 'N' ? ' list-group-item-warning'}}">
         <div class="col-sm-4">
           <strong>
-            {{ r.data|format_date('full')|title }} alle {{ r.appuntamento|date('G:i')}}<br>
+            {{ r.data|format_date('full')|title }} alle {{ r.appuntamento|date('G:i')}} -
+            Prof.{{ r.sesso == 'F' ? 'ssa' }} {{ r.cognome }} {{ r.nome }}<br>
             Modalità: {{ ('label.tipo_colloquio_'~r.tipo)|trans }}<br>
             {% if r.tipo == 'D' %}<a href="{{ r.luogo }}" target="_blank">{{ r.luogo }}</a>{% else %}{{ r.luogo }}{% endif %}
           </strong>

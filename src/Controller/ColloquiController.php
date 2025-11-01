@@ -16,6 +16,7 @@ use App\Entity\ScansioneOraria;
 use App\Entity\Cattedra;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
+use App\Entity\Sede;
 use App\Form\ColloquioType;
 use App\Form\FiltroType;
 use App\Form\PrenotazioneType;
@@ -231,7 +232,7 @@ class ColloquiController extends BaseController {
     $inizio = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
     // legge dati
-    $dati = $this->em->getRepository(Colloquio::class)->ricevimenti($this->getUser(), $inizio);
+    $dati = $this->em->getRepository(Colloquio::class)->ricevimenti($this->getUser(), null, $inizio);
     // pagina di risposta
     return $this->renderHtml('colloqui', 'gestione', $dati, $info);
   }
@@ -254,10 +255,20 @@ class ColloquiController extends BaseController {
     // inizializza
     $info = [];
     $dati = [];
+    $oggi = new DateTime('today');
+    // informazioni per la visualizzazione
+    $inizio = DateTime::createFromFormat('Y-m-d',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
+    $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
+    $fine = DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00');
+    $info['fine'] = $fine->format('d/m/Y');
+    $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
+    // lista sedi
+    $listaSedi = $this->em->getRepository(Sede::class)->sedi($this->getUser());
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $oggi = new DateTime('today');
       $colloquio = $this->em->getRepository(Colloquio::class)->findOneBy(['id' => $id,
         'docente' => $this->getUser()]);
       if (!$colloquio || $colloquio->getData() < $oggi) {
@@ -266,72 +277,54 @@ class ColloquiController extends BaseController {
       }
     } else {
       // azione add
+      $data = $oggi;
+      if ($this->em->getRepository(Festivita::class)->giornoFestivo($data)) {
+        // se festivo sposta al giorno successivo
+        $data = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data);
+      }
+      $sede = array_values($listaSedi)[0];
+      $oraInizio = DateTime::createFromFormat('H:i',
+        $this->em->getRepository(ScansioneOraria::class)->inizioLezioni($data, $sede));
+      $oraFine = (clone $oraInizio)->modify('+1 hour');
+      // impostazione di default
       $colloquio = (new Colloquio())
         ->setDocente($this->getUser())
-        ->setData(new DateTime('today'))
-        ->setInizio(new DateTime('08:30'))
-        ->setFine(new DateTime('09:30'))
+        ->setSede($sede)
+        ->setData($data)
+        ->setInizio($oraInizio)
+        ->setFine($oraFine)
         ->setDurata(10);
       $this->em->persist($colloquio);
     }
-    // informazioni per la visualizzazione
-    $inizio = DateTime::createFromFormat('Y-m-d',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-    $oggi = new DateTime('today');
-    $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
-    $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00');
-    $info['fine'] = $fine->format('d/m/Y');
-    $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
-    // lista sedi
-    $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
-    if (isset($listaSedi[''])) {
-      // elimina opzione vuota
-      unset($listaSedi['']);
-    }
-    // lista sedi
-    foreach ($listaSedi as $idSede) {
-      $info['orario'][$idSede] = $this->em->getRepository(ScansioneOraria::class)->orarioSede($idSede);
-    }
-    $listaOre = [];
-    for ($i = 1; $i <= 10; $i++) {
-      $listaOre[$i] = $i;
-    }
-    // determina l'ora di lezione
-    $info['ora'] = 1;
-    if ($id > 0) {
-      $giorno = $colloquio->getData()->format('w');
-      $sede = $listaSedi[array_key_first($listaSedi)];
-      $info['ora'] = 1;
-      foreach ($info['orario'][$sede][$giorno] as $ora => $orario) {
-        if ($orario->getInizio() == $colloquio->getInizio()) {
-          $info['ora'] = $ora;
-          break;
-        }
-      }
-    }
     // form di inserimento
     $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'singolo',
-      'values' => [$listaSedi, $listaOre]]);
+      'values' => [$listaSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controlla data
-      $data = $form->get('data')->getData();
-      $sede = $form->get('sede')->getData();
-      $ora = $form->get('ora')->getData();
-      $giorno = $data->format('w');
-      $oraInizio = $info['orario'][$sede][$giorno][$ora]->getInizio();
-      $oraFine = $info['orario'][$sede][$giorno][$ora]->getFine();
-      $colloquio->setInizio($oraInizio);
-      $colloquio->setFine($oraFine);
-      if ($this->em->getRepository(Festivita::class)->giornoFestivo($data) || $data < $oggi ||
-          $data > $fine) {
+      if ($this->em->getRepository(Festivita::class)->giornoFestivo($colloquio->getData()) ||
+          $colloquio->getData() < $oggi || $colloquio->getData() > $fine) {
         // errore: data non valida
         $form->addError(new FormError($trans->trans('exception.colloquio_data_invalida')));
       }
+      // controlla orari
+      if ($colloquio->getInizio() >= $colloquio->getFine()) {
+        // errore: orario inizio non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_incongruente')));
+      }
+      $orari = $this->em->getRepository(ScansioneOraria::class)->inizioFineLezioni($colloquio->getData(),
+          array_map(fn($s) => $s->getId(), array_values($listaSedi)));
+      if ($colloquio->getInizio()->format('H:i:00') < $orari['inizio']) {
+        // errore: orario inizio non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_inizio_invalida')));
+      }
+      if ($colloquio->getFine()->format('H:i:00') > $orari['fine']) {
+        // errore: orario fine non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_fine_invalida')));
+      }
       // controlla se esite già
-      if ($this->em->getRepository(Colloquio::class)->sovrapposizione($this->getUser(), $data,
-          $inizio, $fine, $id)) {
+      if ($this->em->getRepository(Colloquio::class)->sovrapposizione($this->getUser(), $colloquio->getData(),
+          $colloquio->getInizio(), $colloquio->getFine(), $id)) {
         // errore: sovrapposizione
         $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
       }
@@ -409,55 +402,64 @@ class ColloquiController extends BaseController {
     // inizializza
     $info = [];
     $dati = [];
+    $oggi = new DateTime('today');
+    // lista sedi
+    $listaSedi = $this->em->getRepository(Sede::class)->sedi($this->getUser());
     // imposta colloquio fittizio
+    $data = $oggi;
+    if ($this->em->getRepository(Festivita::class)->giornoFestivo($data)) {
+      // se festivo sposta al giorno successivo
+      $data = $this->em->getRepository(Festivita::class)->giornoSuccessivo($data);
+    }
+    $sede = array_values($listaSedi)[0];
+    $oraInizio = DateTime::createFromFormat('H:i',
+      $this->em->getRepository(ScansioneOraria::class)->inizioLezioni($data, $sede));
+    $oraFine = (clone $oraInizio)->modify('+1 hour');
     $colloquio = (new Colloquio())
       ->setDocente($this->getUser())
-      ->setData(new DateTime('today'))
-      ->setInizio(new DateTime('08:30'))
-      ->setFine(new DateTime('09:30'))
+      ->setSede($sede)
+      ->setData($data)
+      ->setInizio($oraInizio)
+      ->setFine($oraFine)
       ->setDurata(10);
-    // lista sedi
-    $listaSedi = $this->em->getRepository(Docente::class)->sedi($this->getUser());
-    if (isset($listaSedi[''])) {
-      // elimina opzione vuota
-      unset($listaSedi['']);
-    }
-    // informazioni per la visualizzazione
-    foreach ($listaSedi as $idSede) {
-      $info['orario'][$idSede] = $this->em->getRepository(ScansioneOraria::class)->orarioSede($idSede);
-    }
-    $listaOre = [];
-    for ($i = 1; $i <= 10; $i++) {
-      $listaOre[$i] = $i;
-    }
     // form di inserimento
     $form = $this->createForm(ColloquioType::class, $colloquio, ['form_mode' => 'periodico',
-      'values' => [$listaSedi, $listaOre]]);
+      'values' => [$listaSedi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge dati
-      $tipo = $form->get('tipo')->getData();
       $frequenza = $form->get('frequenza')->getData();
-      $durata = $form->get('durata')->getData();
-      $sede = $form->get('sede')->getData();
       $giorno = $form->get('giorno')->getData();
-      $ora = $form->get('ora')->getData();
-      $luogo = $form->get('luogo')->getData();
-      $inizio = $info['orario'][$sede][$giorno][$ora]->getInizio();
-      $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
+      // controlla orari
+      if ($colloquio->getInizio() >= $colloquio->getFine()) {
+        // errore: orario inizio non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_incongruente')));
+      }
+      $orari = $this->em->getRepository(ScansioneOraria::class)->inizioFineLezioni($colloquio->getData(),
+          array_map(fn($s) => $s->getId(), array_values($listaSedi)));
+      if ($colloquio->getInizio()->format('H:i:00') < $orari['inizio']) {
+        // errore: orario inizio non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_inizio_invalida')));
+      }
+      if ($colloquio->getFine()->format('H:i:00') > $orari['fine']) {
+        // errore: orario fine non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_fine_invalida')));
+      }
       // controlla link
-      if ($form->get('tipo')->getData() == 'D') {
-        if (str_ends_with((string) $luogo, 'meet.google.com/') || str_ends_with((string) $luogo, 'meet.google.com')) {
+      if ($colloquio->getTipo() == 'D') {
+        $link = $colloquio->getLuogo();
+        if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-        if (!str_starts_with((string) $luogo, 'https://') && !str_starts_with((string) $luogo, 'http://')) {
-          $luogo = 'https://'.$luogo;
+        if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
+          $colloquio->setLuogo('https://'.$link);
         }
       }
       if ($form->isValid()) {
         // genera date
-        $avviso = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
+        $avviso = $col->generaDate($this->getUser(), $colloquio->getTipo(), $frequenza, $colloquio->getDurata(),
+          $giorno, $colloquio->getInizio(), $colloquio->getFine(), $colloquio->getLuogo(), $colloquio->getSede());
         if (!empty($avviso)) {
           // mostra avviso
           $this->addFlash('avviso', $avviso);
@@ -580,7 +582,7 @@ class ColloquiController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // lista date
-    $dati = $col->dateRicevimento($docente);
+    $dati = $col->dateRicevimento($docente, $classe->getSede());
     // informazioni per la visualizzazione
     $info['docente'] = "".$docente;
     $cattedre = $this->em->getRepository(Cattedra::class)->cattedreDocente($docente, 'Q');

@@ -33,7 +33,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    *
    * @return string Ora nel formato hh:mm
    */
-  public function inizioLezioni(DateTime $data, Sede $sede) {
+  public function inizioLezioni(DateTime $data, Sede $sede): string {
     // legge la prima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.inizio')
@@ -57,7 +57,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    *
    * @return string Ora nel formato hh:mm
    */
-  public function fineLezioni(DateTime $data, Sede $sede) {
+  public function fineLezioni(DateTime $data, Sede $sede): string {
     // legge la ultima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.fine')
@@ -81,7 +81,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    *
    * @return string Ora nel formato hh:mm
    */
-  public function fineLezioniDocente(DateTime $data, Docente $docente) {
+  public function fineLezioniDocente(DateTime $data, Docente $docente): string {
     // legge la ultima ora
     $ora = $this->createQueryBuilder('s')
       ->select('s.fine')
@@ -203,6 +203,29 @@ class ScansioneOrariaRepository extends EntityRepository {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce l'ora di inizio e di fine delle lezioni per il giorno indicato (non festivo)
+   *
+   * @param DateTime $data Data di riferimento
+   * @param array $sedi Lista degli ID delle sedi da considerare
+   *
+   * @return array Dati con chiavi 'inizio' e 'fine'
+   */
+  public function inizioFineLezioni(DateTime $data, array $sedi): array {
+    // legge la ultima ora
+    $ore = $this->createQueryBuilder('s')
+      ->select('MAX(s.fine) AS fine, MIN(s.inizio) AS inizio')
+      ->join('s.orario', 'o')
+      ->where(':data BETWEEN o.inizio AND o.fine AND o.sede IN (:sedi) AND s.giorno=:giorno')
+			->setParameter('data', $data->format('Y-m-d'))
+			->setParameter('sedi', $sedi)
+			->setParameter('giorno', $data->format('w'))
+      ->getQuery()
+      ->getScalarResult();
+    // restituisce dati
+    return $ore[0];
   }
 
 }

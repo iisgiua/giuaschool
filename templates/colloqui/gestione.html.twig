@@ -15,6 +15,7 @@
     <thead class="bg-success">
       <tr>
         <th>{{ 'label.colloquio_ricevimento'|trans }}</th>
+        <th>{{ 'label.sede'|trans }}</th>
         <th>{{ 'label.tipo'|trans }}</th>
         <th>{{ 'label.colloquio_luogo'|trans }}</th>
         <th>{{ 'label.colloquio_durata'|trans }}</th>
@@ -36,6 +37,7 @@
           <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i')}} alle {{ d.ricevimento.fine|date('G:i')}}</strong>
       {% endif %}
         </td>
+        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.sede.nomeBreve }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ ('label.tipo_colloquio_'~d.ricevimento.tipo)|trans }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}<small>{{ d.ricevimento.luogo }}</small>{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.durata }} minuti ({{ d.ricevimento.numero }} colloqui){% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>

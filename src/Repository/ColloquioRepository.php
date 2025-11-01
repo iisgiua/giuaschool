@@ -13,6 +13,7 @@ use App\Entity\Configurazione;
 use App\Entity\RichiestaColloquio;
 use App\Entity\Colloquio;
 use App\Entity\Docente;
+use App\Entity\Sede;
 
 
 /**
@@ -27,14 +28,15 @@ class ColloquioRepository extends BaseRepository {
    * Viene restituito anche il numero di richieste valide (in attesa o confermate).
    *
    * @param Docente $docente Docente di cui cercare i ricevimenti
-   * @param DateTime $inizio Data di inizio del periodo di ricerca
-   * @param DateTime $fine Data di fine del periodo di ricerca
-   * @param bool $abilitato Se vero cerca ricevimenti abilitati, se falso quelli disabilitati, se nullo tutti
+   * @param Sede|null $sede Sede della classe dell'alunno (oppure null per qualsiasi sede)
+   * @param DateTime|null $inizio Data di inizio del periodo di ricerca
+   * @param DateTime|null $fine Data di fine del periodo di ricerca
+   * @param bool|null $abilitato Se vero cerca ricevimenti abilitati, se falso quelli disabilitati, se nullo tutti
    *
    * @return array Lista dati restituiti
    */
-  public function ricevimenti(Docente $docente, DateTime $inizio=null, DateTime $fine=null,
-                              bool $abilitato=null): array {
+  public function ricevimenti(Docente $docente, ?Sede $sede=null, ?DateTime $inizio=null, ?DateTime $fine=null,
+                              ?bool $abilitato=null): array {
     $dati = [];
     // imposta valori predefiniti
     if (!$inizio) {
@@ -46,15 +48,22 @@ class ColloquioRepository extends BaseRepository {
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')
-    ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
+      ->select('c AS ricevimento, COUNT(rc.id) AS richieste')
       ->leftJoin(RichiestaColloquio::class, 'rc', 'WITH', 'rc.colloquio=c.id AND rc.stato IN (:valide)')
       ->where('c.docente=:docente AND c.data BETWEEN :inizio AND :fine')
-      ->groupBy('c.id,c.creato,c.modificato,c.tipo,c.luogo,c.data,c.inizio,c.fine,c.durata,c.numero,c.abilitato,c.docente')
+      ->groupBy('c.id,c.creato,c.modificato,c.tipo,c.luogo,c.data,c.inizio,c.fine,c.durata,c.numero,c.abilitato,c.docente,c.sede')
       ->orderBy('c.data,c.inizio', 'ASC')
       ->setParameter('valide', ['R', 'C'])
       ->setParameter('docente', $docente)
       ->setParameter('inizio', $inizio->format('Y-m-d'))
       ->setParameter('fine', $fine->format('Y-m-d'));
+    // filtra per sede
+    if ($sede) {
+      // cerca colloquio della sede indicata o in tutte se non specificato
+      $colloqui
+        ->andWhere('c.sede=:sede OR c.sede IS NULL')
+        ->setParameter('sede', $sede);
+    }
     // cerca abilitati/disabilitati
     if ($abilitato !== null) {
       $colloqui

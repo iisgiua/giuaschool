@@ -9,6 +9,7 @@ return [
   'sqlCommand' => [
     ["ALTER TABLE gs_utente ADD dati JSON NOT NULL COMMENT '(DC2Type:json)'; UPDATE gs_utente SET dati='[]';", "SELECT dati FROM gs_utente UNION SELECT 1 FROM dual;"],
     ["ALTER TABLE gs_log CHANGE utente_id utente_id INT DEFAULT NULL;", ""],
+    ["ALTER TABLE gs_colloquio ADD sede_id INT DEFAULT NULL; ALTER TABLE gs_colloquio ADD CONSTRAINT FK_A42C6DE0E19F41BF FOREIGN KEY (sede_id) REFERENCES gs_sede (id); CREATE INDEX IDX_A42C6DE0E19F41BF ON gs_colloquio (sede_id);", "SELECT sede_id FROM gs_colloquio UNION SELECT 1 FROM dual;"]
   ],
   'envDelete' => [
   ],

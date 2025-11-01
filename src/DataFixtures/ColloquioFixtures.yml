@@ -3,6 +3,7 @@
 #
 # Dati per la programmazione dei colloqui dei docenti:
 #   docente: docente che deve fare il colloquio
+#   sede: sede crelativa al colloquio
 #   data: data del colloquio
 #   inizio: ora iniziale del colloquio
 #   fine: ora finale del colloquio
@@ -16,11 +17,13 @@
 
 include:
   - DocenteFixtures.yml
+  - SedeFixtures.yml
 
 
 App\Entity\Colloquio:
   colloquio_{1..5}:
     docente: '@docente_*'
+    sede: '@sede_1'
     data: '<dateTimeBetween("-1 month", "now")>'
     inizio: '<dateTimeBetween("08:30", "13:00")>'
     fine: '<dateTimeBetween("08:30", "13:00")>'

@@ -30,8 +30,13 @@
         <div class="col-sm-6">
           {{ form_row(form[0].giorno) }}
         </div>
+      </div>
+      <div class="row">
         <div class="col-sm-6">
-          {{ form_row(form[0].ora) }}
+          {{ form_row(form[0].inizio) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].fine) }}
         </div>
       </div>
       <div class="row">
@@ -56,9 +61,30 @@
 
 {% block pagina_js_fine %}
 {{ parent() }}
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
 <script>
 $(document).ready(function() {
-  var orario = new Array();
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12, 13, 14],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+    });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
   $('#colloquio_tipo').change(function() {
     if ($(this).val() == 'P') {
       $('#gs-luogo').text('Luogo');
@@ -74,23 +100,7 @@ $(document).ready(function() {
     }
     $('#colloquio_giorno').change();
   });
-  $('#colloquio_giorno').change(function() {
-    var s = $('#colloquio_sede').val();
-    var g = $(this).val();
-    var html = '';
-    orario[s][g].forEach((o, i) => { html += '<option value="'+i+'">'+o+'</option>'; });
-    $('#colloquio_ora').html(html);
-  });
   // init
-  {% for s,or in info.orario %}
-  orario[{{ s }}] = new Array();
-    {% for g,gv in or %}
-  orario[{{ s }}][{{ g }}] = new Array();
-      {% for o,ov in gv %}
-  orario[{{ s }}][{{ g }}][{{ o }}] = '{{ o }}ª: {{ ov.inizio|date('G:i') }} - {{ ov.fine|date('G:i') }}';
-      {% endfor %}
-    {% endfor %}
-  {% endfor %}
   $('#colloquio_tipo').change();
 });
 </script>

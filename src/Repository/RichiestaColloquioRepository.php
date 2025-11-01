@@ -82,9 +82,10 @@ class RichiestaColloquioRepository extends BaseRepository {
     $oggi = new DateTime('today');
     // legge dati richieste
     $richieste = $this->createQueryBuilder('rc')
-      ->select('rc.id,rc.appuntamento,rc.stato,rc.messaggio,c.id AS colloquio_id,c.tipo,c.data,c.luogo,(c.docente) AS docente_id')
+      ->select('rc.id,rc.appuntamento,rc.stato,rc.messaggio,c.id AS colloquio_id,c.tipo,c.data,c.luogo,(c.docente) AS docente_id,d.cognome,d.nome,d.sesso')
       ->join('rc.alunno', 'a')
       ->join('rc.colloquio', 'c')
+      ->join('c.docente', 'd')
       ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
       ->setParameter('alunno', $alunno)

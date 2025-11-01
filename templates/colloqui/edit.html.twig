@@ -28,7 +28,10 @@
       </div>
       <div class="row">
         <div class="col-sm-6">
-          {{ form_row(form[0].ora) }}
+          {{ form_row(form[0].inizio) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].fine) }}
         </div>
       </div>
       <div class="row">
@@ -60,9 +63,11 @@
 {{ parent() }}
 <script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
 <script>
 $(document).ready(function() {
-  var orario = new Array();
   $('.input-group.date').datepicker({
     format: "dd/mm/yyyy",
     weekStart: 1,
@@ -77,6 +82,25 @@ $(document).ready(function() {
     language: "it",
     zIndexOffset: 1200
   });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12, 13, 14],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+    });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
   $('#colloquio_tipo').change(function() {
     if ($(this).val() == 'P') {
       $('#gs-luogo').text('Luogo');
@@ -90,35 +114,11 @@ $(document).ready(function() {
     if ($('#colloquio_tipo').val() == 'P') {
       $('#colloquio_luogo').val('Sede di '+$('#colloquio_sede :selected').text());
     }
-    $('#colloquio_data').change();
   });
-  $('#colloquio_data').change(function() {
-    var s = $('#colloquio_sede').val();
-    var d = $(this).val();
-    var dg = d.substr(0, 2);
-    var dm = d.substr(3, 2);
-    var da = d.substr(-4);
-    var g = new Date();
-    g.setFullYear(da);
-    g.setMonth(dm - 1);
-    g.setDate(dg);
-    var w = g.getDay();
-    var html = '';
-    orario[s][w].forEach((o, i) => { html += '<option value="'+i+'">'+o+'</option>'; });
-    $('#colloquio_ora').html(html);
-  });
+  {% if form[0].vars.value.id == null %}
   // init
-  {% for s,or in info.orario %}
-  orario[{{ s }}] = new Array();
-    {% for g,gv in or %}
-  orario[{{ s }}][{{ g }}] = new Array();
-      {% for o,ov in gv %}
-  orario[{{ s }}][{{ g }}][{{ o }}] = '{{ o }}ª: {{ ov.inizio|date('G:i') }} - {{ ov.fine|date('G:i') }}';
-      {% endfor %}
-    {% endfor %}
-  {% endfor %}
   $('#colloquio_tipo').change();
-  $('#colloquio_ora').val({{ info.ora }});
+  {% endif %}
 });
 </script>
 {% endblock %}
