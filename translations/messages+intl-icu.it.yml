@@ -115,7 +115,7 @@ label.criterio_credito_desc_F: Frequenza assidua
 label.criterio_credito_desc_I: Interesse e impegno
 label.criterio_credito_desc_L: Corsi di lingue certificati da un ente esterno
 label.criterio_credito_desc_O: Svolgimento attività come rappresentante negli Organi Collegiali scolastici
-label.criterio_credito_desc_P: Proficua partecipazione ai PCTO e alle altre attività organizzate dall'Istituto
+label.criterio_credito_desc_P: Proficua partecipazione alla FSL e alle altre attività organizzate dall'Istituto
 label.criterio_credito_desc_R: Proficua partecipazione alle lezioni della Religione o Attività alternativa
 label.criterio_credito_desc_S: Attività sociali e sportive certificate da un ente esterno
 label.criterio_credito_sospeso_si: Almeno un voto superiore al 6 nelle materie con debito formativo
@@ -640,7 +640,7 @@ label.mailserver_port: Porta del server di posta
 label.mailserver_email: Indirizzo a cui spedire la mail di prova
 label.scegli_rappresentanti: Scegli i rappresentanti
 label.filtro_rappresentanti: Filtro per rappresentanti
-label.presenza_tipo_P: PCTO
+label.presenza_tipo_P: FSL
 label.presenza_tipo_M: Mobilità europea
 label.presenza_tipo_S: Attività a scuola
 label.presenza_tipo_E: Attività esterna
@@ -670,7 +670,7 @@ label.gruppo_religione_N: Gruppo N.A.
 label.RSPP: RSPP
 label.modulo_formativo: Modulo formativo
 label.modulo_formativo_tipo_O: Orientamento formativo
-label.modulo_formativo_tipo_P: PCTO
+label.modulo_formativo_tipo_P: FSL
 label.filtro_tipo_modulo_formativo: Filtro sul tipo del modulo formativo
 label.filtro_modulo_formativo: Filtro sul modulo formativo
 label.qualsiasi_tipo: Qualsiasi tipo
@@ -877,8 +877,8 @@ title.docenti.rspp: Configura il responsabile della sicurezza (RSPP)
 page.circolari_archivio: Archivio Circolari
 title.circolari_archivio: Archivio delle circolari degli anni passati
 page.scuola.moduliFormativi: Moduli Formativi
-title.scuola.moduliFormativi: Gestione dei moduli formativi per l'orientamento/PCTO
-title.scuola.moduliFormativi_edit: Modifica di un modulo formativo per l'orientamento/PCTO
+title.scuola.moduliFormativi: Gestione dei moduli formativi per l'orientamento/FSL
+title.scuola.moduliFormativi_edit: Modifica di un modulo formativo per l'orientamento/FSL
 page.coordinatore.moduliFormativi: Moduli Formativi
 title.coordinatore.moduliFormativi: Moduli formativi svolti nella classe
 title.coordinatore.moduliFormativi_alunni: Moduli formativi seguiti dagli alunni della classe
@@ -1289,8 +1289,8 @@ pur essendo stata informata la famiglia,\\n
 considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
 non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
 message.giudizio_non_ammissione_invalsi: "L'alunn{sex} non ha svolto i test INVALSI come previsto per l'ammissione all'Esame di Stato."
-message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di PCTO previsto per l'ammissione all'Esame di Stato."
-message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di PCTO e i test INVALSI, come previsto per l'ammissione all'Esame di Stato."
+message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL previsto per l'ammissione all'Esame di Stato."
+message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL e i test INVALSI, come previsto per l'ammissione all'Esame di Stato."
 message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
 con giudizio sospeso nello scrutinio finale di giugno,\\n
 benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
