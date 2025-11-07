@@ -151,6 +151,7 @@ $(document).ready(function() {
     $(e.relatedTarget).data('info-title');
     var title = $(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
     var id = $(e.relatedTarget).data('body');
+    var stato = $('#'+id).parent().parent().children(':first').html('<span class="label label-default">LETTO</span>');
     var html = $('#'+id).html();
     $(this).find('#gs-modal-info-label').html(title);
     $(this).find('#gs-modal-info-body').html(html);

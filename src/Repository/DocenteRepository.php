@@ -189,6 +189,7 @@ class DocenteRepository extends BaseRepository {
 
   /**
    * Restituisce la lista dei docenti abilitati, secondo i criteri di ricerca indicati
+   * NB: vengono sempre inclusi i docenti senza cattedra (es. staff)
    *
    * @param array $cerca Lista dei criteri di ricerca
    * @param int $pagina Pagina corrente
@@ -202,7 +203,7 @@ class DocenteRepository extends BaseRepository {
       ->leftJoin(Cattedra::class, 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
-      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
+      ->andWhere('cl.sede IN (:sedi) OR cl.id IS NULL')
 			->setParameter('attiva', 1)
 			->setParameter('nome', $cerca['nome'].'%')
 			->setParameter('cognome', $cerca['cognome'].'%')
