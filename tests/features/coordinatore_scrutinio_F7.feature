@@ -265,7 +265,7 @@ Scenario: terze - visualizzazione riquadro inserimento credito
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
+  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione alla FSL .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/condotta inferiore al nove/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 7 - 8/"
 
@@ -285,7 +285,7 @@ Scenario: quarte - visualizzazione riquadro inserimento credito
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
+  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione alla FSL .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/condotta inferiore al nove/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 8 - 9/"
 
@@ -305,7 +305,7 @@ Scenario: quinte - visualizzazione riquadro inserimento credito
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 6,00 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
+  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione alla FSL .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/condotta inferiore al nove/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 9 - 10/"
 
@@ -325,7 +325,7 @@ Scenario: quinte - visualizzazione riquadro inserimento credito con insufficienz
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 6/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 5,88 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
+  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" non contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione alla FSL .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/condotta inferiore al nove/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 7 - 8/"
 
@@ -653,7 +653,7 @@ Scenario: classe articolata - visualizzazione riquadro inserimento credito
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(8) div" contiene "/Ed\. civica 8/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(9) div" contiene "/Condotta 9/"
   E la sezione "#gs-main #gs-modal-remote #gs-form-collection li:nth-child(10) div" contiene "/Media 8,13 Assenze 9,47%/"
-  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione ai PCTO .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
+  E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(2)" contiene "/Credito scolastico Frequenza assidua Interesse e impegno .* partecipazione alla FSL .* partecipazione alle lezioni della Religione .* Organi Collegiali/"
   E la sezione "#gs-main #gs-modal-remote .modal-body .form-group:nth-child(3)" contiene "/intervallo: 10 - 11/"
 
 Scenario: classe articolata - visualizzazione pagina con dati mancanti
