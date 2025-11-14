@@ -228,6 +228,11 @@ class AvvisoRepository extends BaseRepository {
         ->getArrayResult();
       $dati['classi'][$k] = array_map(
         fn($c): string => $c['anno'].'ª '.$c['sezione'].($c['gruppo'] ? ('-'.$c['gruppo']) : ''), $classi);
+      // aggiunge statistiche di lettura
+      if (in_array($a['avviso']->getTipo(), ['E', 'U', 'A']) && $utente->controllaRuolo('DSP')) {
+        $dati['statistiche'][$k] = $this->getEntityManager()->getRepository(ComunicazioneUtente::class)
+          ->statistiche($a['avviso']);
+      }
     }
     // restituisce dati
     return $dati;

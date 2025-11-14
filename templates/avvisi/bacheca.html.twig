@@ -112,6 +112,41 @@
                 <strong>Data e ora di lettura:</strong>
                 {{ a.letto ? a.letto|date('d/m/Y H:i') : 'Adesso' }}
               </div>
+      {% if (dati.statistiche[k].genitori is defined) or (dati.statistiche[k].alunni is defined) %}
+              <div class="gs-pl-2 gs-pr-2 gs-mt-3">
+                <strong>Statistiche di lettura:</strong>
+        {% if dati.statistiche[k].genitori is defined %}
+                <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+                  <div class="col-sm-8 gs-pl-0">Genitori: {{ dati.statistiche[k].genitori.percentuale|number_format(0) }}% ({{ dati.statistiche[k].genitori.letti }} su {{ dati.statistiche[k].genitori.totali }})</div>
+                </div>
+          {% if dati.statistiche[k].genitori.letti > 0 %}
+                <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
+            {% for u in dati.statistiche[k].genitori.elenco %}
+                  <div class="row">
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+                    <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+                  </div>
+            {% endfor %}
+                </div>
+          {% endif %}
+        {% endif %}
+        {% if dati.statistiche[k].alunni is defined %}
+                <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+                  <div class="col-sm-8 gs-pl-0">Alunni: {{ dati.statistiche[k].alunni.percentuale|number_format(0) }}% ({{ dati.statistiche[k].alunni.letti }} su {{ dati.statistiche[k].alunni.totali }})</div>
+                </div>
+          {% if dati.statistiche[k].alunni.letti > 0 %}
+                <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
+            {% for u in dati.statistiche[k].alunni.elenco %}
+                  <div class="row">
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+                    <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+                  </div>
+            {% endfor %}
+                </div>
+          {% endif %}
+        {% endif %}
+              </div>
+      {% endif %}
             </div>
           </div>
         </td>
