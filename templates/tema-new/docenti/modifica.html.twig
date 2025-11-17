@@ -38,7 +38,7 @@
           <td><small>{{ u.username }}</small></td>
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.cognome }} {{ u.nome }}" data-cont-id="info-utente-{{ u.id }}">{{ 'label.show'|trans }}</button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_modifica_edit', {'id': u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_modifica_edit', {'docente': u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {'id': u.id, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password e la invia all'utente tramite email">{{ 'label.email_password'|trans }}</a>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {'id': u.id, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
     {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty and u.otp %}
@@ -78,7 +78,7 @@
       <tfoot>
         <tr>
           <td colspan="5">
-            <a class="btn btn-primary btn-sm" href="{{ path('docenti_modifica_edit', {id: 0}) }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('docenti_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
           </td>
         </tr>
       </tfoot>
