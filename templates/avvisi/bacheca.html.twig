@@ -182,7 +182,7 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
   });
   $('#gs-modal-info').on('show.bs.modal', function (e) {
-    $.get("/avvisi/legge/"+$(e.relatedTarget).data('info-id'), 'json');
+    $.get("/avvisi/legge/"+$(e.relatedTarget).data('info-id'));
     $(e.relatedTarget).data('info-title');
     var title = $(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
     var id = $(e.relatedTarget).data('body');
