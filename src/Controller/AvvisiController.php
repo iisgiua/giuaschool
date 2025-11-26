@@ -847,10 +847,10 @@ class AvvisiController extends BaseController {
    *
    * @return JsonResponse Informazioni di risposta
    */
-  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
   public function legge(
-                        #[MapEntity] Avviso $avviso
+                        #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->legge($avviso, $this->getUser());
