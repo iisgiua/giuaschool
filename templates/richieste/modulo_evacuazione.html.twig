@@ -3,6 +3,11 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.richieste.modulo_evacuazione'|trans }}</h1>
+  {% for tipo,messaggi in app.flashes %}
+    {% for msg in messaggi %}
+  <div class="alert alert-{{ tipo }}" role="alert"><strong class="gs-big">{{ msg|trans|raw }}</strong></div>
+    {% endfor %}
+  {% endfor %}
   <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
     <div id="filtro">
       <div class="form-group">
@@ -17,6 +22,7 @@
         {{ form_widget(form[0].submit) }}
       </div>
       <div class="form-group pull-right">
+        <a class="btn btn-success btn-sm" href="{{ path('richieste_modulo_evacuazione', {formato: 'Z'}) }}" role="button" title="Crea un file compresso con tutti i documenti"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.comprime'|trans }}</strong></a>
         <a class="btn btn-success btn-sm" href="{{ path('richieste_modulo_evacuazione', {formato: 'C'}) }}" role="button" title="Esporta i dati in formato CSV"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.esporta'|trans }}</strong></a>
       </div>
       {{ form_widget(form[0]._token) }}

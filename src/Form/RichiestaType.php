@@ -68,6 +68,7 @@ class RichiestaType extends AbstractType {
             $builder->add($nome, ChoiceType::class, ['label' => false,
               'attr' => ['class' => 'gs-mb-2'],
               'choices' => ['label.si' => true, 'label.no' => false],
+              'placeholder' => 'label.seleziona_opzione',
               'required' => $campo[1]]);
             break;
           case 'date':

@@ -17,7 +17,7 @@
     </ul>
   </li>
   <li{{ app.request.attributes.get('_route') == 'genitori_pagelle' ? ' class="active"' }}><a href="{{ path('genitori_pagelle') }}" title="Pagelle e comunicazioni sugli scrutini"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
-  <li{{ app.request.attributes.get('_route')[:10] == 'richieste_' ? ' class="active"' }}><a href="{{ path('richieste_lista') }}" title="Gestione dei moduli di richiesta"><span class="glyphicon glyphicon-pencil gs-mr-2" aria-hidden="true"></span>Richieste</a></li>
+  <li{{ app.request.attributes.get('_route')[:10] == 'richieste_' ? ' class="active"' }}><a href="{{ path('richieste_lista') }}" title="Gestione dei moduli di richiesta, autorizzazione e altro"><span class="glyphicon glyphicon-pencil gs-mr-2" aria-hidden="true"></span>Moduli</a></li>
   <li class="dropdown{{ app.request.attributes.get('_route') in ['avvisi_bacheca','circolari_bacheca','documenti_bacheca'] ? ' active' }}">
     <a href="#" title="Visualizza circolari, avvisi e documenti" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">

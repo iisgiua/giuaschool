@@ -9,16 +9,17 @@
       <thead class="thead-light">
         <tr class="sticky-top">
           <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.nome_modulo'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome_consultazione'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.inizio'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.fine'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
         </tr>
       </thead>
       <tbody>
-  {% for m in dati %}
-        <tr{% if not m.abilitata %} class="table-danger"{% endif %}>
+  {% for c in dati %}
+        <tr{% if not c.abilitata %} class="table-danger"{% endif %}>
           <td>
-    {% if m.abilitata %}
+    {% if c.abilitata %}
             <span title="{{ 'label.stato_abilitato'|trans }}">
               <svg class="icon icon-xs icon-success" aria-hidden="true">
                 <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
@@ -32,15 +33,16 @@
             </span>
     {% endif %}
           </td>
-          <td>{{ m.nome }}</td>
-          <td><strong>{{ m.sede ? m.sede.nomeBreve : 'TUTTE' }}</strong></td>
+          <td>{{ c.nome }}</td>
+          <td>{{ c.inizio|date('d/m/Y H:i') }}</td>
+          <td>{{ c.fine|date('d/m/Y H:i') }}</td>
           <td>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduli_edit', {'id': m.id}) }}" role="button" title="Modifica i dati del modulo">{{ 'label.edit'|trans }}</a>
-            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_modulo'|trans }}" data-href="{{ path('scuola_moduli_delete', {'id': m.id}) }}">{{ 'label.delete'|trans }}</button>
-    {% if m.abilitata %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': m.id, 'abilita': 0}) }}" role="button" title="Disabilita il modulo di richesta">{{ 'label.disable'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_consultazioni_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della consultazione">{{ 'label.edit'|trans }}</a>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella la consultazione" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ c.nome }}" data-contenuto="{{ 'message.cancella_consultazione'|trans }}" data-href="{{ path('scuola_moduli_delete', {'id': c.id}) }}">{{ 'label.delete'|trans }}</button>
+    {% if c.abilitata %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': c.id, 'abilita': 0}) }}" role="button" title="Disabilita la consultazione">{{ 'label.disable'|trans }}</a>
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': m.id, 'abilita': 1}) }}" role="button" title="Abilita il modulo di richiesta">{{ 'label.enable'|trans }}</a>
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': c.id, 'abilita': 1}) }}" role="button" title="Abilita la consultazione">{{ 'label.enable'|trans }}</a>
     {% endif %}
           </td>
         </tr>
@@ -48,8 +50,8 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4">
-            <a class="btn btn-primary btn-sm" href="{{ path('scuola_moduli_edit') }}" role="button" title="Nuovo modulo">{{ 'label.add'|trans }}</a>
+          <td colspan="5">
+            <a class="btn btn-primary btn-sm" href="{{ path('scuola_consultazioni_edit') }}" role="button" title="Nuovo modulo">{{ 'label.add'|trans }}</a>
           </td>
         </tr>
       </tfoot>

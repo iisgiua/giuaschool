@@ -8,6 +8,7 @@
 
 namespace App\Repository;
 
+use App\Entity\DefinizioneConsultazione;
 use App\Entity\Richiesta;
 use DateTime;
 use App\Entity\Alunno;
@@ -22,6 +23,21 @@ use App\Entity\Utente;
  * @author Antonello Dessì
  */
 class DefinizioneRichiestaRepository extends BaseRepository {
+
+  /**
+   * Restituisce la lista dei moduli di richiesta per la pagina di gestione
+   *
+   * @return array Lista degli oggetti di tipo DefinizioneRichiesta
+   */
+  public function gestione(): array {
+    $richieste = $this->createQueryBuilder('dr')
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.')')
+      ->orderBy('dr.nome', 'ASC')
+      ->getQuery()
+      ->getResult();
+    // restituisce dati
+    return $richieste;
+  }
 
   /**
    * Restituisce la lista dei moduli di richiesta accessibili all'utente indicato
@@ -43,7 +59,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
       ->leftJoin(Richiesta::class, 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.utente=:utente AND r.stato IN (:stati)')
-      ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.') AND dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere($sql)
       ->setParameter('utente', $utente instanceOf Genitore ? $utente->getAlunno() : $utente)
       ->setParameter('stati', ['I', 'G'])
@@ -98,7 +114,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     $richieste = $this->createQueryBuilder('dr')
       ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio,(r.utente) AS utente_id')
       ->leftJoin(Richiesta::class, 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
-      ->where('dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.') AND dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
       ->andWhere("FIND_IN_SET('DN', dr.richiedenti) > 0")
       ->setParameter('classe', $classe)
       ->setParameter('sedi', $sedi)
@@ -159,7 +175,7 @@ class DefinizioneRichiestaRepository extends BaseRepository {
     $sql = implode(' OR ', $funzioni);
     // legge dati
     $moduli = $this->createQueryBuilder('dr')
-      ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#'")
+      ->where("NOT (dr INSTANCE OF ".DefinizioneConsultazione::class.") AND dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#'")
       ->andWhere($sql)
       ->orderBy('dr.nome', 'ASC')
       ->getQuery()

@@ -11,6 +11,7 @@ namespace App\Controller;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Classe;
+use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\Genitore;
 use App\Entity\Presenza;
@@ -21,6 +22,7 @@ use App\Form\FiltroType;
 use App\Form\RichiestaType;
 use App\Form\UscitaType;
 use App\Util\LogHandler;
+use App\Util\PdfManager;
 use App\Util\RegistroUtil;
 use App\Util\RichiesteUtil;
 use DateTime;
@@ -28,6 +30,7 @@ use IntlDateFormatter;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,6 +38,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use ZipArchive;
 
 
 /**
@@ -45,10 +49,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class RichiesteController extends BaseController {
 
   /**
-   * Lista dei mpoduli di richiesta utilizzabili dall'utente
+   * Lista dei moduli di richiesta utilizzabili dall'utente
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/lista', name: 'richieste_lista', methods: ['GET'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
@@ -57,6 +60,7 @@ class RichiesteController extends BaseController {
     $info = [];
     // recupera dati
     $dati = $this->em->getRepository(DefinizioneRichiesta::class)->lista($this->getUser());
+    $dati['consultazioni'] = $this->em->getRepository(DefinizioneConsultazione::class)->lista($this->getUser());
     // pagina di risposta
     return $this->renderHtml('richieste', 'lista', $dati, $info);
   }
@@ -71,7 +75,6 @@ class RichiesteController extends BaseController {
    * @param int $modulo Identificativo del modulo di richiesta
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/add/{modulo}', name: 'richieste_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
@@ -178,22 +181,25 @@ class RichiesteController extends BaseController {
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
+        // memorizza richiesta
+        $richiesta
+          ->setValori($valori)
+          ->setInviata($invio)
+          ->setGestita(null)
+          ->setData($data)
+          ->setStato('I')
+          ->setMessaggio('');
+        $this->em->flush();
         // crea documento PDF
-        [$documento, $documentoId] = $ric->creaPdf($definizioneRichiesta, $utente,
+        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
           $utente->getClasse(), $valori, $data, $invio);
         // imposta eventuali allegati
         $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
-          ->setValori($valori)
           ->setDocumento($documento)
-          ->setAllegati($allegati)
-          ->setInviata($invio)
-          ->setGestita(null)
-          ->setData($data)
-          ->setStato('I')
-          ->setMessaggio('');
+          ->setAllegati($allegati);
         $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
@@ -211,17 +217,23 @@ class RichiesteController extends BaseController {
    * @param int $id Richiesta da annullare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function delete(LogHandler $dblogger, int $id): Response {
-    // inizializza
-    $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
     // controlla richiesta
-    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $id,
-      'utente' => $utente, 'stato' => ['I', 'G']]);
+    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $id, 'stato' => ['I', 'G']]);
     if (!$richiesta) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla utente
+    if ($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneConsultazione) {
+      $utente = $this->getUser();
+    } else {
+      $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
+    }
+    if ($richiesta->getUtente() != $utente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -241,7 +253,7 @@ class RichiesteController extends BaseController {
       ->setGestita(null)
       ->setStato('A');
     // memorizzazione e log
-    $dblogger->logAzione('RICHIESTE', 'Annulla richiesta');
+    $dblogger->logAzione('RICHIESTE', 'Annulla richiesta/risposta');
     // redirezione
     return $this->redirectToRoute('richieste_lista');
   }
@@ -253,7 +265,6 @@ class RichiesteController extends BaseController {
    * @param int $documento Indica il documento da scaricare: 0=modulo di richiesta, 1...=allegato indicato
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/download/{id}/{documento}', name: 'richieste_download', requirements: ['id' => '\d+', 'documento' => '\d+'], defaults: ['documento' => '0'], methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
@@ -267,7 +278,11 @@ class RichiesteController extends BaseController {
     // controlla accesso
     if ($this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getRichiedenti())) {
       // utente tra i richiedenti
-      $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
+      if ($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneConsultazione) {
+        $utente = $this->getUser();
+      } else {
+        $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
+      }
       if (($richiesta->getUtente() != $utente && !$utente->controllaRuolo('DS')) ||
           !in_array($richiesta->getStato(), ['I', 'G'], true)) {
         // errore: richiesta non accessibile al richiedente
@@ -310,7 +325,6 @@ class RichiesteController extends BaseController {
    * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/uscita/{data}/{alunno}/{richiesta}/{posizione}', name: 'richieste_uscita', requirements: ['data' => '\d\d\d\d-\d\d-\d\d', 'alunno' => '\d+', 'richiesta' => '\d+', 'posizione' => '\d+'], defaults: ['posizione' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -479,7 +493,6 @@ class RichiesteController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/gestione/{pagina}', name: 'richieste_gestione', requirements: ['pagina' => '\d+'], defaults: ['pagina' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
@@ -570,7 +583,6 @@ class RichiesteController extends BaseController {
    * @param int $id Richiesta da rimuovere
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/remove/{id}', name: 'richieste_remove', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
@@ -624,7 +636,6 @@ class RichiesteController extends BaseController {
    * @param int $id Richiesta da rimuovere
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/manage/{id}', name: 'richieste_manage', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
@@ -708,7 +719,6 @@ class RichiesteController extends BaseController {
    * @param Classe $classe Classe a cui ci si riferisce
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/classe/{classe}', name: 'richieste_classe', requirements: ['classe' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -729,8 +739,39 @@ class RichiesteController extends BaseController {
     }
     // informazioni
     $info['classe'] = $classe;
+    // scheda evacuazione
+    $classeNome = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
+      '/documenti/'.$classeNome.'-scheda-evacuazione.pdf';
+    if (file_exists($file)) {
+      $info['scheda_evacuazione'] = $classe->getId();
+    }
     // pagina di risposta
     return $this->renderHtml('richieste', 'classe', $dati, $info);
+  }
+
+  /**
+   * Scarica scheda evacuazione
+   *
+   * @param Classe $classe Classe a cui ci si riferisce
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/richieste/evacuazione/{classe}', name: 'richieste_evacuazione', requirements: ['classe' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_DOCENTE')]
+  public function downloadEvacuazione(
+                                      #[MapEntity] Classe $classe
+                                      ): Response {
+    // controllo scheda evacuazione
+    $classeNome = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
+    $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
+      '/documenti/'.$classeNome.'-scheda-evacuazione.pdf';
+    if (!file_exists($file)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // invia il documento
+    return $this->file($file);
   }
 
   /**
@@ -741,7 +782,6 @@ class RichiesteController extends BaseController {
    * @param int $id Richiesta da annullare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -790,7 +830,6 @@ class RichiesteController extends BaseController {
    * @param int $modulo Identificativo del modulo di richiesta
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/classe/add/{classe}/{modulo}', name: 'richieste_classe_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_DOCENTE')]
@@ -902,23 +941,26 @@ class RichiesteController extends BaseController {
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->creaPdf($definizioneRichiesta, $utente, $classe,
-          $valori, $data, $invio);
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
-        $this->reqstack->getSession()->remove($varSessione);
-        // ok: memorizzazione e log
+        // memorizza richiesta
         $richiesta
           ->setValori($valori)
-          ->setDocumento($documento)
-          ->setAllegati($allegati)
           ->setInviata($invio)
           ->setGestita(null)
           ->setData($data)
           ->setStato('I')
           ->setMessaggio('');
-        $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
+        $this->em->flush();
+        // crea documento PDF
+        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
+          $classe, $valori, $data, $invio);
+        // imposta eventuali allegati
+        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
+        $this->reqstack->getSession()->remove($varSessione);
+        // ok: memorizzazione e log
+        $richiesta
+          ->setDocumento($documento)
+          ->setAllegati($allegati);
+        $dblogger->logAzione('RICHIESTE', 'Invio modulo evacuazione');
         // redirezione
         return $this->redirectToRoute('richieste_classe', ['classe'=> $classe->getId()]);
       }
@@ -931,13 +973,12 @@ class RichiesteController extends BaseController {
    * Visualizza i moduli di evacuazione
    *
    * @param Request $request Pagina richiesta
-   * @param string $formato Formato della visualizzazione [H=html,C=csv]
+   * @param string $formato Formato della visualizzazione [H=html,C=csv,Z=zip]
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
-  #[Route(path: '/richieste/modulo/evacuazione/{formato}/{pagina}', name: 'richieste_modulo_evacuazione', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
+  #[Route(path: '/richieste/modulo/evacuazione/{formato}/{pagina}', name: 'richieste_modulo_evacuazione', requirements: ['formato' => 'H|C|Z', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
   public function moduloEvacuazione(Request $request, string $formato, int $pagina): Response {
     // inizializza
@@ -991,7 +1032,7 @@ class RichiesteController extends BaseController {
     }
     // recupera dati
     $dati = $this->em->getRepository(Richiesta::class)->listaClasse($this->getUser(), 'V',
-      $criteri, $formato == 'C' ? -1 : $pagina);
+      $criteri, $formato == 'H' ? $pagina : -1);
     // informazioni di visualizzazione
     $info['pagina'] = $pagina;
     // pagina di risposta
@@ -1007,6 +1048,32 @@ class RichiesteController extends BaseController {
       $response->headers->set('Content-Disposition', $disposition);
       $response->headers->set('Content-Type', 'text/csv');
       return $response;
+    } elseif ($formato == 'Z') {
+      // crea archivio ZIP
+      $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
+      $zip = new ZipArchive();
+      if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+        // errore
+        $this->addFlash('danger', 'exception.impossibile_creare_zip');
+      } else {
+        // aggiunta dei file
+        foreach ($dati['lista'] as $richiesta) {
+          $nomeClasse = $richiesta->getClasse()->getAnno().$richiesta->getClasse()->getSezione().
+            $richiesta->getClasse()->getGruppo();
+          $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$nomeClasse.'/documenti/'.
+            $richiesta->getDocumento();
+          $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento());
+        }
+        // chiusura del file ZIP
+        $zip->close();
+        // invia il documento
+        $nomefile = 'prove-evacuazione.zip';
+        $response = new BinaryFileResponse($zipPath);
+        $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', 'application/zip');
+        return $response;
+      }
     }
     // visualizza pagina HTML
     return $this->renderHtml('richieste', 'modulo_evacuazione', $dati, $info, [$form->createView()]);
@@ -1020,7 +1087,6 @@ class RichiesteController extends BaseController {
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/richieste/modulo/lista/{formato}/{pagina}', name: 'richieste_modulo_lista', requirements: ['formato' => 'H|C', 'pagina' => '\d+'], defaults: ['formato' => 'H', 'pagina' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_STAFF')]
@@ -1109,6 +1175,169 @@ class RichiesteController extends BaseController {
     }
     // visualizza pagina HTML
     return $this->renderHtml('richieste', 'modulo_lista', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Inserisce una risposta ad una consultazione
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RichiesteUtil $ric Funzioni di utilità per la gestione dei moduli di richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $modulo Identificativo del modulo della consultazione
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/richieste/risposta/{modulo}', name: 'richieste_risposta', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
+  #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
+  public function risposta(Request $request, TranslatorInterface $trans,
+                           RichiesteUtil $ric, LogHandler $dblogger, int $modulo): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    $utente = $this->getUser();
+    // controlla modulo
+    $consultazione = $this->em->getRepository(DefinizioneConsultazione::class)->createQueryBuilder('dc')
+      ->where('dc.id=:modulo AND dc.abilitata=1 AND :adesso BETWEEN dc.inizio AND dc.fine')
+      ->setParameter('modulo', $modulo)
+      ->setParameter('adesso', new DateTime('now'))
+      ->getQuery()
+      ->getOneOrNullResult();
+    if (!$consultazione) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla sede
+    $classe = $utente->getCodiceRuolo() == 'A' ? $utente->getClasse() :
+      ($utente->getCodiceRuolo() == 'G' ? $utente->getAlunno()->getClasse() : null);
+    $sedi = $classe ? [$classe->getSede()->getId()] : [];
+    if ($consultazione->getSede() &&
+        !in_array($consultazione->getSede()->getId(), $sedi, true)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla classe
+    if (!empty($consultazione->getClassi()) && (!$classe ||
+        !in_array($classe->getId(), $consultazione->getClassi()))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso a modulo richiesta
+    if (!$this->getUser()->controllaRuoloFunzione($consultazione->getRichiedenti())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controlla se esiste già una risposta
+    $altra = $this->em->getRepository(Richiesta::class)->findOneBy(['definizioneRichiesta' => $modulo,
+      'utente' => $utente, 'stato' => ['I', 'G']]);
+    if ($altra) {
+      // errore: esiste già altra risposta
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // crea risposta
+    $risposta = (new Richiesta())
+      ->setDefinizioneRichiesta($consultazione)
+      ->setUtente($utente)
+      ->setClasse($classe);
+    $this->em->persist($risposta);
+    // informazioni per la visualizzazione
+    $info['modulo'] = '@data/consultazioni/'.$consultazione->getModulo();
+    // // form di inserimento
+    $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
+      'values' => [$consultazione->getCampi(), $consultazione->getUnica()]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      $invio = new DateTime();
+      $data = null;
+      $valori = [];
+      // controllo errori
+      foreach ($consultazione->getCampi() as $nome => $campo) {
+        if ($form->get($nome)->getData() === null && $campo[1]) {
+          // campo obbligatorio vuoto
+          $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
+        } else {
+          // memorizza valore
+          $valori[$nome] = $form->get($nome)->getData();
+        }
+      }
+      if ($form->isValid()) {
+        // memorizza risposta
+        $risposta
+          ->setValori($valori)
+          ->setInviata($invio)
+          ->setGestita(null)
+          ->setStato('I')
+          ->setMessaggio('');
+        $this->em->flush();
+        // crea documento PDF
+        $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
+          $valori, $invio);
+        // ok: memorizzazione e log
+        $risposta
+          ->setDocumento($documento)
+          ->setInviata($invio);
+        $dblogger->logAzione('CONSULTAZIONI', 'Invio risposta');
+        // redirezione
+        return $this->redirectToRoute('richieste_lista');
+      }
+    }
+    // pagina di risposta
+    return $this->renderHtml('richieste', 'add', $dati, $info, [$form->createView(),
+     'message.richieste_add' ]);
+  }
+
+  /**
+   * Visualizza le consultazioni
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/richieste/consultazioni', name: 'richieste_consultazioni', methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function consultazioni(): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // recupera dati
+    $dati = $this->em->getRepository(DefinizioneConsultazione::class)->statistica($this->getUser());
+    // visualizza pagina HTML
+    return $this->renderHtml('richieste', 'consultazioni', $dati, $info);
+  }
+
+  /**
+   * Mostra l'esito di una consultazione
+   *
+   * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param DefinizioneConsultazione $consultazione Consultazione di cui mostrare l'esito
+   * @param string $formato Formato della visualizzazione [H=html,P=pdf]
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/richieste/esito/{consultazione}/{formato}', name: 'richieste_esito', requirements: ['consultazione' => '\d+', 'formato' => 'H|P'], defaults: ['formato' => 'H'], methods: ['GET'])]
+  #[IsGranted('ROLE_STAFF')]
+  public function esito(PdfManager $pdf,
+                        #[MapEntity] DefinizioneConsultazione $consultazione,
+                        string $formato): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // informazioni per la visualizzazione
+    $info['consultazione'] = $consultazione;
+    // recupera dati
+    $dati = $this->em->getRepository(Richiesta::class)->esito($consultazione);
+    if ($formato == 'P') {
+      // crea documento PDF
+      $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+        'Esito della consultazione: '.$consultazione->getNome());
+      // contenuto in formato HTML
+      $html = $this->renderView('richieste/scheda_esito_documento.html.twig', ['dati' => $dati,
+        'info' => $info]);
+      $pdf->createFromHtml($html);
+      // invia il documento
+      $nomefile = 'esiti-consultazione.pdf';
+      return $pdf->send($nomefile);
+    }
+    // visualizza pagina HTML
+    return $this->renderHtml('richieste', 'scheda_esito', $dati, $info);
   }
 
 }

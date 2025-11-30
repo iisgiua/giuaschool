@@ -1,0 +1,104 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% form_theme form[0].classi _self %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_consultazione_inizio', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_consultazione_fine', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+<script>
+$(document).ready(function() {
+  $('.gs-lista-campi').on('click', 'button.gs-remove-item', function() {
+    $(this).closest('fieldset.form-group').remove();
+  });
+  $('.gs-lista-campi').on('click', 'button.gs-add-item', function() {
+    var html = $('#definizione_consultazione_campi').data('prototype');
+    html = html.replace(/>\s*-\s*<\/button>/, '><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button>');
+    var idNum = $('#definizione_consultazione_campi fieldset').last().find('div').attr('id');
+    var reNum = /\d+$/;
+    var resNum = reNum.exec(idNum);
+    var num = (resNum == null ? 0 : 1 + parseInt(resNum, 10));
+    html = html.replace(/__name__/g, num);
+    $('#definizione_consultazione_campi').append(html);
+  });
+  $("#definizione_consultazione_sede").change(function() {
+    $("#gs-tutti").prop('checked', false);
+    var id=$(this).val();
+    if (id) {
+      $('#gs-sedi').children().hide();
+      $('#gs-sede-'+id).show();
+    } else {
+      $('#gs-sedi').children().show();
+    }
+    $('#gs-sedi').find('input[type="checkbox"]').prop('checked', false);
+  });
+  $("#gs-tutti").change(function() {
+    if ($(this).prop('checked')) {
+      $('#gs-sedi').find('input[type="checkbox"]:checked').prop('checked', false);
+      $('#gs-sedi').children().hide();
+    } else {
+      var id=$('#definizione_consultazione_sede').val();
+      if (id) {
+        $('#gs-sede-'+id).show();
+      } else {
+        $('#gs-sedi').children().show();
+      }
+    }
+  });
+  // init
+  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
+  $('#definizione_consultazione_campi fieldset button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg>')
+  $('.gs-lista-campi').append(button);
+  $("#definizione_consultazione_sede").change();
+  {% for c in info.classi %}
+  $('input[name="definizione_consultazione[classi][]"][value="{{ c }}"]:visible').click();
+  {% endfor %}
+});
+</script>
+{% endblock %}
+
+{% block _definizione_consultazione_classi_widget %}
+<div class="form-check form-check-inline">
+  <input type="checkbox" id="gs-tutti" name="tutti" class="form-check-input" value="TUTTI">
+  <label class="form-check-label" for="gs-tutti">TUTTE</label>
+</div>
+<div id="gs-sedi" class="row">
+  {% set prec = '' %}
+  {% for group_label, group in choices %}
+    {% if group_label != prec %}
+      {% if prec != '' %}
+  </div>
+      {% endif %}
+      {% set prec = group_label %}
+  <div id="gs-sede-{{ group.choices[group.choices|keys|first].data.sede.id }}" class="col-sm-6 mx-0">
+    <div class="row"><strong><em>{{ prec }}</em></strong></div>
+    {% endif %}
+    {% set sez = '' %}
+    {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+    </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+    <div class="row">
+      {% endif %}
+      {{- form_widget(form[key], {
+        parent_label_class: 'gs-checkbox-inline',
+        translation_domain: choice_translation_domain,
+      }) -}}
+    {% endfor %}
+    {% if sez != '' %}
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% if prec != '' %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -8,6 +8,11 @@
     <strong class="gs-big">{{ 'message.no_moduli_classe'|trans }}</strong>
   </div>
   {% else %}
+    {% if info.scheda_evacuazione is defined %}
+  <div class="alert alert-info text-center">
+    <strong class="gs-big"><a href="{{ path('richieste_evacuazione', {classe: info.scheda_evacuazione}) }}"><span class="glyphicon glyphicon-file gs-mr-2"></span><span class="gs-text-normal">Scheda Evacuazione: designazione studenti apri-file, chiudi-fila e assistenti</span></a></strong>
+  </div>
+    {% endif %}
     {% for mk,mv in dati.uniche %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>

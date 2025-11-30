@@ -389,6 +389,8 @@ label.uscite_anticipate: Uscite anticipate
 label.username: Nome utente
 label.utente: Utente
 label.utenti: Utenti
+label.stato_abilitato: Abilitato
+label.stato_disabilitato: Disabilitato
 label.utente_attivo: Utente attivo
 label.utente_disabilitato: Utente disabilitato
 label.valutazione_O: orale
@@ -597,6 +599,8 @@ label.tipo_time: Ora
 label.minus: -
 label.invia_richiesta: Nuova richiesta
 label.invia_modulo: Nuovo modulo
+label.invia_risposta: Invia risposta
+label.cancella_risposta: Cancella risposta
 label.cancella_richiesta: Cancella richiesta
 label.cancella_modulo: Cancella modulo
 label.richieste_scadute: Richieste scadute
@@ -692,6 +696,23 @@ label.pagina_voti_medie_tipi: Visualizza anche le medie per tipo di voto?
 label.pagina_voti_scritto: Visualizza le valutazioni scritte/grafiche?
 label.pagina_voti_orale: Visualizza le valutazioni orali?
 label.pagina_voti_pratico: Visualizza le valutazioni pratiche?
+label.nome_consultazione: Nome della consultazione
+label.destinatari_consultazione: Destinatari della consultazione
+label.campi_consultazione: Lista dei campi della consultazione
+label.template_consultazione: Nome del file del modello
+label.data_inizio_consultazione: Data dell'apertura della consultazione
+label.ora_inizio_consultazione: Ora dell'apertura della consultazione
+label.data_fine_consultazione: Data della chiusura della consultazione
+label.ora_fine_consultazione: Ora della chiusura della consultazione
+label.classi_consultazione: Classi dei destinatari
+label.sedi_consultazione: Sedi della consultazione
+label.comprime: Crea ZIP
+label.seleziona_opzione: Scegli l'opzione
+label.consultazione_in_attesa: In attesa
+label.consultazione_in_corso: In corso
+label.consultazione_chiusa: Terminata
+label.consultazione_risposte: Risposte inviate
+
 
 
 ##### PAGINE #####
@@ -800,8 +821,8 @@ title.scuola.orario_scansione: Modifica i dati della scansione oraria
 page.scuola.moduli: Configura Moduli
 title.scuola.moduli: Moduli di richiesta
 title.scuola.moduli_edit: Modifica i dati di un modulo di richiesta
-page.richieste.lista: Lista Richieste
-title.richieste.lista: Lista delle richieste
+page.richieste.lista: Lista Moduli
+title.richieste.lista: Lista dei moduli
 page.richieste.add: Modifica Richiesta
 title.richieste.add: Invia un modulo
 page.richieste.uscita: Gestione Uscite
@@ -870,6 +891,8 @@ title.richieste.classe_add: Inserimento di un nuovo modulo
 page.richieste.modulo: Gestione Moduli
 title.richieste.modulo_evacuazione: Moduli per le prove di evacuazione
 title.richieste.modulo_lista: Moduli inviati
+page.richieste.consultazioni: Visualizza Consultazioni
+title.richieste.consultazioni: Visualizza le consultazioni
 page.ruolo_staff.studenti: Statistiche Condotta
 title.ruolo_staff.studenti_condotta: Statistiche sulla condotta degli alunni
 page.docenti.rspp: Configura RSPP
@@ -884,6 +907,9 @@ title.coordinatore.moduliFormativi: Moduli formativi svolti nella classe
 title.coordinatore.moduliFormativi_alunni: Moduli formativi seguiti dagli alunni della classe
 page.avvisi_gestione: Gestione Avvisi
 title.avvisi_gestione: Gestione degli avvisi
+page.scuola.consultazioni: Configura Consultazioni
+title.scuola.consultazioni: Lista consultazioni
+title.scuola.consultazioni_edit: Modifica i dati di una consultazione
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Eventi
@@ -1459,12 +1485,14 @@ message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la mo
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
 message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_consultazione: Verrà cancellata la consultazione indicata. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
 message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
 message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
+message.cancella_risposta: Verrà cancellata la risposta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.edit_ricevimento_singolo: Inserisci le impostazioni per il ricevimento dei genitori.
@@ -1819,3 +1847,6 @@ exception.docente_supplenza_errato: Il docente sostituito è identico a chi lo s
 exception.lista_cattedre_vuota: La lista delle classi/materie per la supplenza è vuota
 exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documenti BES dell'alunno selezionato
 exception.tipo_filtro_invalido: Il tipo di filtro non è valido
+exception.consultazione_intervallo_date_invalido: La data e ora iniziale deve precedere quella finale
+exception.consultazione_nessuna_classe: Devi indicare almeno una classe di destinazione
+exception.impossibile_creare_zip: Impossibile creare il file compresso

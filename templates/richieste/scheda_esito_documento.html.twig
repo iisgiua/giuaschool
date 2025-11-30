@@ -1,0 +1,55 @@
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
+</div>
+<p style="text-align:center; font-size:13pt">
+  <strong>Consultazione: {{ info.consultazione.nome }}</strong><br>
+  <strong>Svolta dal {{ info.consultazione.inizio|date('d/m/Y H:i') }} al {{ info.consultazione.fine|date('d/m/Y H:i') }}</strong><br>
+</p>
+<br>
+<div style="text-align:center;font-size:11pt"><strong>VOTANTI</strong></div>
+<table border="0" cellpadding="3" style="font-size:11pt">
+{% if 'GN' in info.consultazione.richiedenti %}
+  <tr>
+    <td style="text-align:rigth"><strong>{{ 'label.genitori'|trans }}:</strong></td>
+    <td><strong>{{ dati.totale.GN }}</strong></td>
+  </tr>
+{% endif %}
+{% if 'AN' in info.consultazione.richiedenti %}
+  <tr>
+    <td style="text-align:rigth"><strong>{{ 'label.alunni'|trans }}:</strong></td>
+    <td><strong>{{ dati.totale.AN }}</strong></td>
+  </tr>
+{% endif %}
+  <tr style="font-size:12pt">
+    <td style="text-align:rigth"><strong>TOTALE:</strong></td>
+    <td><strong>{{ dati.totale.utenti }}</strong></td>
+  </tr>
+</table>
+<br><br>
+{% for nome,v in dati.lista %}
+  {% if info.consultazione.campi[nome][0] == 'bool' %}
+<div style="text-align:center;font-size:11pt"><strong>{{ nome|upper }}</strong></div>
+<table border="1" cellpadding="3" style="font-size:11pt">
+  {% if 'GN' in info.consultazione.richiedenti %}
+  <tr>
+    <td><strong>{{ 'label.genitori'|trans }}:</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['GN']|number_format(2, ',') }}%</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['GN']|number_format(2, ',') }}%</strong></td>
+  </tr>
+  {% endif %}
+  {% if 'AN' in info.consultazione.richiedenti %}
+  <tr>
+    <td><strong>{{ 'label.alunni'|trans }}:</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['AN']|number_format(2, ',') }}%</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['AN']|number_format(2, ',') }}%</strong></td>
+  </tr>
+  {% endif %}
+  <tr style="font-size:12pt">
+    <td><strong>TOTALE:</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}%</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}%</strong></td>
+  </tr>
+  {% endif %}
+{% endfor %}
+</table>

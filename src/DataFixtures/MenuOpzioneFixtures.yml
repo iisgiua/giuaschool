@@ -479,6 +479,17 @@ App\Entity\MenuOpzione:
   menu_opzione_SCUOLA12:
     ruolo: 'M'
     funzione: ''
+    nome: 'Consultazioni'
+    descrizione: 'Configura i dati per le consultazioni'
+    url: 'scuola_consultazioni'
+    ordinamento: 12
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA13:
+    ruolo: 'M'
+    funzione: ''
     nome: 'Moduli&nbsp;formativi'
     descrizione: 'Configura i moduli formativi per l''orientamento/PCTO'
     url: 'scuola_moduliFormativi'

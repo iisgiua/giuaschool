@@ -10,6 +10,7 @@ namespace App\Repository;
 
 use DateTime;
 use App\Entity\Alunno;
+use App\Entity\DefinizioneConsultazione;
 use App\Entity\Richiesta;
 use App\Entity\Staff;
 use App\Entity\Utente;
@@ -285,6 +286,72 @@ class RichiestaRepository extends BaseRepository {
       $dati = $this->paginazione($moduli->getQuery(), $pagina);
       // per evitare errori di paginazione
       $dati['lista']->setUseOutputWalkers(false);
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce i dati dell'esito di una consultazione
+   *
+   * @param DefinizioneConsultazione $consultazione Consultazione da cui estrarre l'esito
+   *
+   * @return array Lista associativa con i dati
+   */
+  public function esito(DefinizioneConsultazione $consultazione): array {
+    // legge risposte
+    $risposte = $this->createQueryBuilder('r')
+      ->where('r.definizioneRichiesta=:id AND r.stato IN (:stati)')
+      ->setParameter('id', $consultazione)
+      ->setParameter('stati', ['I', 'G'])
+      ->getQuery()
+      ->getResult();
+    // inizializza esito
+    $dati = [];
+    $dati['totale'] = [];
+    $dati['lista'] = [];
+    $dati['statistica'] = [];
+    foreach (explode(',', $consultazione->getRichiedenti()) as $ruolo) {
+      $dati['totale'][$ruolo] = 0;
+      foreach ($consultazione->getCampi() as $nome => $definizione) {
+        if (!$definizione[1]) {
+          // non risponde
+          $dati['lista'][$nome]['___NIENTE___'][$ruolo] = 0;
+        }
+      }
+    }
+    $dati['totale']['utenti'] = 0;
+    // conta risposte
+    foreach ($risposte as $risposta) {
+      foreach (explode(',', $consultazione->getRichiedenti()) as $ruolo) {
+        if ($risposta->getUtente()->controllaRuoloFunzione($ruolo)) {
+          foreach ($risposta->getValori() as $nome => $valore) {
+            if (!isset($dati['lista'][$nome][$valore][$ruolo])) {
+              $dati['lista'][$nome][$valore][$ruolo] = 0;
+            }
+            if (!isset($dati['lista'][$nome][$valore]['utenti'])) {
+              $dati['lista'][$nome][$valore]['utenti'] = 0;
+            }
+            $dati['lista'][$nome][$valore][$ruolo]++;
+            $dati['lista'][$nome][$valore]['utenti']++;
+            $dati['totale'][$ruolo]++;
+            $dati['totale']['utenti']++;
+          }
+          break;
+        }
+      }
+    }
+    // genera statistiche finali
+    foreach ($dati['lista'] as $nome => $valori) {
+      foreach ($valori as $valore => $ruoli) {
+        foreach ($ruoli as $ruolo => $conteggio) {
+          if ($dati['totale'][$ruolo] > 0) {
+            $dati['statistica'][$nome][$valore][$ruolo] = round(($conteggio / $dati['totale'][$ruolo]) * 100, 2);
+          } else {
+            $dati['statistica'][$nome][$valore][$ruolo] = 0;
+          }
+        }
+      }
     }
     // restituisce dati
     return $dati;

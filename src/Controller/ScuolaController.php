@@ -12,6 +12,7 @@ use App\Entity\Amministratore;
 use App\Entity\Classe;
 use App\Entity\Configurazione;
 use App\Entity\Corso;
+use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
@@ -27,6 +28,7 @@ use App\Entity\Sede;
 use App\Form\AmministratoreType;
 use App\Form\ClasseType;
 use App\Form\CorsoType;
+use App\Form\DefinizioneConsultazioneType;
 use App\Form\DefinizioneRichiestaType;
 use App\Form\DefinizioneScrutinioType;
 use App\Form\FestivitaType;
@@ -967,7 +969,7 @@ class ScuolaController extends BaseController {
       $dati = [];
       $info = [];
       // recupera dati
-      $dati = $this->em->getRepository(DefinizioneRichiesta::class)->findBY([], ['nome' => 'ASC']);
+      $dati = $this->em->getRepository(DefinizioneRichiesta::class)->gestione();
       // mostra la pagina di risposta
       return $this->renderHtml('scuola', 'moduli', $dati, $info);
   }
@@ -980,7 +982,6 @@ class ScuolaController extends BaseController {
    * @param int $id Identificativo del modulo
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/scuola/moduli/edit/{id}', name: 'scuola_moduli_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1063,12 +1064,11 @@ class ScuolaController extends BaseController {
   }
 
   /**
-   * Cancella un modulo definito
+   * Cancella un modulo di uso generico
    *
    * @param int $id Identificativo del modulo
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/scuola/moduli/delete/{id}', name: 'scuola_moduli_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1091,17 +1091,17 @@ class ScuolaController extends BaseController {
       $this->addFlash('danger', 'exception.delete_errors');
     }
     // redirect
-    return $this->redirectToRoute('scuola_moduli');
+    return $this->redirectToRoute($modulo instanceOf DefinizioneConsultazione ?
+      'scuola_consultazioni' : 'scuola_moduli');
   }
 
   /**
-   * Abilitazione o disabilitazione di un modulo di richiesta
+   * Abilitazione o disabilitazione di un modulo di uso generico
    *
-   * @param int $id ID del modulo di richiesta
+   * @param int $id ID del modulo
    * @param int $abilita Vale 1 per abilitare, 0 per disabilitare
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/scuola/moduli/abilita/{id}/{abilita}', name: 'scuola_moduli_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1119,14 +1119,14 @@ class ScuolaController extends BaseController {
     // messaggio
     $this->addFlash('success', 'message.update_ok');
     // redirezione
-    return $this->redirectToRoute('scuola_moduli');
+    return $this->redirectToRoute($modulo instanceOf DefinizioneConsultazione ?
+      'scuola_consultazioni' : 'scuola_moduli');
   }
 
   /**
    * Gestione dei moduli formativi per l'orientamento/PCTO
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/scuola/moduliFormativi', name: 'scuola_moduliFormativi', methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
@@ -1217,6 +1217,138 @@ class ScuolaController extends BaseController {
     }
     // redirect
     return $this->redirectToRoute('scuola_moduliFormativi');
+  }
+
+  /**
+   * Modifica i dati di una consultazione
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo del modulo
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/scuola/consultazioni/edit/{id}', name: 'scuola_consultazioni_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function consultazioniEdit(Request $request, TranslatorInterface $trans, int $id): Response {
+    // init
+    $fs = new Filesystem();
+    $finder = new Finder();
+    $path = $this->getParameter('kernel.project_dir').'/PERSONAL/data/consultazioni';
+    $dati = [];
+    $info = [];
+    // controlla azione
+    $campi = [];
+    if ($id > 0) {
+      // azione edit
+      $consultazione = $this->em->getRepository(DefinizioneConsultazione::class)->find($id);
+      if (!$consultazione) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      foreach ($consultazione->getCampi() as $key=>$val) {
+        $campi[] = ['nome_campo' => $key, 'tipo_campo' => $val[0], 'campo_obbligatorio' => $val[1]];
+      }
+    } else {
+      // azione add
+      $consultazione = (new DefinizioneConsultazione())
+        ->setInizio(new DateTime('today'))
+        ->setFine(new DateTime('tomorrow'));
+      $this->em->persist($consultazione);
+    }
+    // determina lista moduli
+    $lista = [];
+    if ($fs->exists($path)) {
+      $finder->files()->in($path)->name('*.html.twig')->sortByName();
+      foreach ($finder as $file) {
+        $lista[substr($file->getFilename(), 0, -10)] = $file->getFilename();
+      }
+    }
+    // informazioni di visualizzazione
+    $info['classi'] = $consultazione->getClassi();
+    // form
+    $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
+    $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, true, false);
+    $form = $this->createForm(DefinizioneConsultazioneType::class, $consultazione, [
+      'return_url' => $this->generateUrl('scuola_consultazioni'),
+      'values' => [$opzioniSedi, $consultazione->getInizio(), $consultazione->getFine(), $opzioniClassi,
+       $campi, $lista]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controllo intervallo date
+      $inizio = $form->get('inizio')->getData()->setTime(
+        (int) $form->get('inizio_ora')->getData()->format('H'),
+        (int) $form->get('inizio_ora')->getData()->format('i'), 0);
+      $consultazione->setInizio($inizio);
+      $fine = $form->get('fine')->getData()->setTime(
+        (int) $form->get('fine_ora')->getData()->format('H'),
+        (int) $form->get('fine_ora')->getData()->format('i'), 0);
+      $consultazione->setFine($fine);
+      if ($inizio >= $fine) {
+        // errore: intervallo non valido
+        $form->addError(new FormError($trans->trans('exception.consultazione_intervallo_date_invalido')));
+      }
+      // controlla campi
+      $listaCampi = [];
+      foreach ($form->get('campi')->getData() as $campo) {
+        $listaCampi[$campo['nome_campo']] = [$campo['tipo_campo'], $campo['campo_obbligatorio']];
+        if (empty($campo['nome_campo'])) {
+          // errore: nome campo mancante
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_senza_nome')));
+        } elseif ($campo['nome_campo'] == 'data') {
+          // errore: nome campo riservato
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_nome_riservato')));
+        }
+        if (empty($campo['tipo_campo'])) {
+          // errore: tipo campo mancante
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_senza_tipo')));
+        }
+      }
+      $consultazione->setCampi($listaCampi);
+      if (count($listaCampi) != count($form->get('campi')->getData())) {
+        // errore: nome campo duplicato
+        $form->addError(new FormError($trans->trans('exception.modulo_campo_duplicato')));
+      }
+      // controlla classi
+      if ($request->request->get('tutti')) {
+        // tutte le classi
+        $consultazione->setClassi([]);
+      } elseif (count($form->get('classi')->getData()) == 0) {
+        // errore: nessuna classe selezionata
+        $form->addError(new FormError($trans->trans('exception.consultazione_nessuna_classe')));
+      } else {
+        // imposta classi
+        $listaClassi = array_map(fn($o) => $o->getId(), $form->get('classi')->getData());
+        $consultazione->setClassi($listaClassi);
+      }
+      if ($form->isValid()) {
+        // memorizza modifiche
+        $this->em->flush();
+        // redirect
+        return $this->redirectToRoute('scuola_consultazioni');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'consultazioni_edit', $dati, $info, [
+      $form->createView(), 'message.required_fields'
+    ]);
+  }
+
+  /**
+   * Visualizza le consultazioni definite
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/scuola/consultazioni', name: 'scuola_consultazioni', methods: ['GET'])]
+  #[IsGranted('ROLE_AMMINISTRATORE')]
+  public function consultazioni(): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera dati
+    $dati = $this->em->getRepository(DefinizioneConsultazione::class)->findBY([], ['nome' => 'ASC']);
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'consultazioni', $dati, $info);
   }
 
 }

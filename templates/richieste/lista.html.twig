@@ -8,6 +8,35 @@
     <strong class="gs-big">{{ 'message.no_moduli_richieste'|trans }}</strong>
   </div>
   {% else %}
+    {% for mk,mv in dati.consultazioni %}
+  <div class="panel panel-warning">
+    <div class="panel-heading"><h3 class="panel-title gs-h3">Consultazione attiva: {{ mv.nome }}</h3></div>
+    <div class="panel-body">
+      <div class="col-sm-12 gs-big">
+        <strong><em>La consultazione sarà chiusa il {{ mv.fine|date('d/m/Y') }} alle ore {{ mv.fine|date('H:i') }}.</em></strong>
+      </div>
+      {% if mv.id %}
+      <div class="col-sm-6 gs-big">
+        <strong>Risposta inviata: </strong>{{ mv.inviata|date('d/m/Y H:i') }}
+      </div>
+      <div class="col-sm-6 gs-big">
+      </div>
+      <div class="col-sm-12">
+        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: mv.id}) }}" title="Scarica la risposta inviata">
+          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica la risposta inviata</strong>
+        </a>
+      </div>
+      <div class="text-right">
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la risposta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: mv.id}) }}" data-text="{{ 'message.cancella_risposta'|trans }}"><strong>{{ 'label.cancella_risposta'|trans }}</strong></button>
+      </div>
+      {% else %}
+      <div class="text-right">
+        <a class="btn btn-primary" href="{{ path('richieste_risposta', {modulo: mk}) }}" title="Invia la risposta"><strong>{{ 'label.invia_risposta'|trans }}</strong></a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+    {% endfor %}
     {% for mk,mv in dati.uniche %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
