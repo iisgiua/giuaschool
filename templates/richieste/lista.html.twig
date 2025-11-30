@@ -3,7 +3,7 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2">{{ titolo|trans }}</h1>
-  {% if dati.uniche is empty and dati.multiple is empty %}
+  {% if dati.uniche is empty and dati.multiple is empty and dati.consultazioni is empty %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.no_moduli_richieste'|trans }}</strong>
   </div>
