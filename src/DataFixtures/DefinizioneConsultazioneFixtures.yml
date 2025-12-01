@@ -1,7 +1,7 @@
 ####################
-# DefinizioneRichiestaFixtures - dati di test
+# DefinizioneConsultazioneFixtures - dati di test
 #
-# Dati per la gesstione di una richiesta:
+# Dati per la gesstione di una consultazione:
 #   nome: nome univoco della richiesta
 #   sede: sede del modulo, null per tutte le sedi
 #   richiedenti: lista dei ruoli degli utenti autorizzati a inviare la richiesta
@@ -13,6 +13,9 @@
 #   unica: indica se è ammessa una sola richiesta per l'utente
 #   gestione: indica se il modulo richiede la gestione degli stati
 #   abilitata: indica se la definizione della richiesta è abilitata
+#   inizio: data e ora dell'inizio della consultazione
+#   fine: data e ora della fine della consultazione
+#   classi: lista delle classi destinatarie
 ####################
 
 
@@ -20,8 +23,8 @@ include:
   - SedeFixtures.yml
 
 
-App\Entity\DefinizioneRichiesta:
-  definizione_richiesta_{1..5}:
+App\Entity\DefinizioneConsultazione:
+  definizione_consultazione_{1..5}:
     nome (unique): '<substr(<word()>, 0, 128)>'
     sede: '@sede_1'
     richiedenti: '<randomElement(["DN", "AN", "AM", "GN"])>'
@@ -33,3 +36,6 @@ App\Entity\DefinizioneRichiesta:
     unica: '<boolean(50)>'
     gestione: '<boolean(50)>'
     abilitata: true
+    inizio: '<dateTimeBetween("-1 month", "now")>'
+    fine: '<dateTimeBetween($inizio, "+1 month")>'
+    classi: []

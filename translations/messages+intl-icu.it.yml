@@ -1488,7 +1488,7 @@ message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.cancella_consultazione: Verrà cancellata la consultazione indicata. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
-message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
+message.richieste_add: Inserisci i dati nel modulo e conferma l'invio.
 message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
 message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?

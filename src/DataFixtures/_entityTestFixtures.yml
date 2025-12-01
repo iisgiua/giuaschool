@@ -24,6 +24,7 @@ include:
   - CorsoFixtures.yml
   - DefinizioneConsiglioFixtures.yml
   - DefinizioneRichiestaFixtures.yml
+  - DefinizioneConsultazioneFixtures.yml
   - DefinizioneScrutinioFixtures.yml
   - DerogaAssenzaFixtures.yml
   - DocenteFixtures.yml
