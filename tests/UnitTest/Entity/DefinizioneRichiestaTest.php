@@ -120,7 +120,13 @@ class DefinizioneRichiestaTest extends EntityTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existents = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($existents as $item) {
+      if (!$item instanceOf(DefinizioneConsultazione::class)) {
+        $existent = $item;
+        break;
+      }
+    }
     // toString
     $this->assertSame('Richiesta: '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
