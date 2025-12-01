@@ -1606,7 +1606,7 @@ class Updater {
     $page['title'] = 'Procedura di migrazione dei dati ['.$subStep.']';
     $page['success'] = 'La procedura di migrazione dei dati è stata eseguita correttamente.';
     $subStep++;
-    if ($subStep == count($updates)) {
+    if ($subStep == count($updates['procedure'])) {
       $step++;
       unset($subStep);
     }

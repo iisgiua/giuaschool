@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
 use ReflectionClass;
 use App\Tests\EntityTestCase;
@@ -129,7 +130,13 @@ class DefinizioneRichiestaTest extends EntityTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existents = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($existents as $item) {
+      if (!$item instanceOf(DefinizioneConsultazione::class)) {
+        $existent = $item;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
     $property = $this->getPrivateProperty(DefinizioneRichiesta::class, 'nome');
