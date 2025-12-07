@@ -27,24 +27,24 @@
 {% for nome,v in dati.lista %}
   {% if info.consultazione.campi[nome][0] == 'bool' %}
   <div class="text-center text-primary gs-mt-4"><strong class="gs-big">{{ nome|upper }}</strong></div>
-{% if 'GN' in info.consultazione.richiedenti %}
+    {% if 'GN' in info.consultazione.richiedenti %}
   <div class="row">
     <div class="col-sm-6 gs-pr-2"><strong class="gs-big">{{ 'label.genitori'|trans }}:</strong></div>
-    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['GN']|number_format(2, ',') }}%</strong></div>
-    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['GN']|number_format(2, ',') }}%</strong></div>
+    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['GN']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['GN'] }} su {{ dati.totale.GN }})</strong></div>
+    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['GN']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['GN'] }} su {{ dati.totale.GN }})</strong></div>
   </div>
-{% endif %}
-{% if 'AN' in info.consultazione.richiedenti %}
+    {% endif %}
+    {% if 'AN' in info.consultazione.richiedenti %}
   <div class="row">
     <div class="col-sm-6 gs-pr-2"><strong class="gs-big">{{ 'label.alunni'|trans }}:</strong></div>
-    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['AN']|number_format(2, ',') }}%</strong></div>
-    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['AN']|number_format(2, ',') }}%</strong></div>
+    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['AN']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['AN'] }} su {{ dati.totale.AN }})</strong></div>
+    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['AN']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['AN'] }} su {{ dati.totale.AN }})</strong></div>
   </div>
-{% endif %}
+    {% endif %}
   <div class="row">
     <div class="col-sm-6 gs-pr-2"><strong class="gs-big">TOTALE:</strong></div>
-    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}%</strong></div>
-    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}%</strong></div>
+    <div class="col-sm-3 text-success gs-pl-2"><strong class="gs-big">SI {{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['utenti'] }} su {{ dati.totale.utenti }})</strong></div>
+    <div class="col-sm-3 text-danger gs-pl-2"><strong class="gs-big">NO {{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['utenti'] }} su {{ dati.totale.utenti }})</strong></div>
   </div>
   {% endif %}
 {% endfor %}

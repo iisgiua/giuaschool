@@ -513,6 +513,8 @@ class VotiController extends BaseController {
         $valutazione->setVoto(10);
       }
       // controlli
+      $lezioni = $this->em->getRepository(Lezione::class)->lezioniVoto($form->get('data')->getData(),
+        $this->getUser(), $classe, $cattedra->getMateria());
       if ($valutazione_precedente && $form->get('delete')->isClicked()) {
         // cancella voto
         $this->em->remove($valutazione);
@@ -524,8 +526,6 @@ class VotiController extends BaseController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezioni
-        $lezioni = $this->em->getRepository(Lezione::class)->lezioniVoto($form->get('data')->getData(),
-          $this->getUser(), $classe, $cattedra->getMateria());
         if (count($lezioni) == 0) {
           // lezione non esiste
           $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',

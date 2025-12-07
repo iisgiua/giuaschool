@@ -34,21 +34,21 @@
   {% if 'GN' in info.consultazione.richiedenti %}
   <tr>
     <td><strong>{{ 'label.genitori'|trans }}:</strong></td>
-    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['GN']|number_format(2, ',') }}%</strong></td>
-    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['GN']|number_format(2, ',') }}%</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['GN']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['GN'] }} su {{ dati.totale.GN }})</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['GN']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['GN'] }} su {{ dati.totale.GN }})</strong></td>
   </tr>
   {% endif %}
   {% if 'AN' in info.consultazione.richiedenti %}
   <tr>
     <td><strong>{{ 'label.alunni'|trans }}:</strong></td>
-    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['AN']|number_format(2, ',') }}%</strong></td>
-    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['AN']|number_format(2, ',') }}%</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['AN']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['AN'] }} su {{ dati.totale.AN }})</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['AN']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['AN'] }} su {{ dati.totale.AN }})</strong></td>
   </tr>
   {% endif %}
   <tr style="font-size:12pt">
     <td><strong>TOTALE:</strong></td>
-    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}%</strong></td>
-    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}%</strong></td>
+    <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
+    <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
   </tr>
   {% endif %}
 {% endfor %}
