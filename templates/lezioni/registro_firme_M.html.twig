@@ -94,14 +94,14 @@
               <strong>Gruppo: {{ classe.anno~classe.sezione~'-'~v1.gruppo }}</strong><br>
               {% endif %}
               <div class="list-group-item-text">
-              {% if v.genitori is not empty %}
-                <strong>Destinatari genitori: {% for al in v.genitori %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+              {% if v1.genitori is not empty %}
+                <strong>Destinatari genitori: {% for al in v1.genitori %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
               {% endif %}
-              {% if v.alunni is not empty %}
-                <strong>Destinatari alunni: {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+              {% if v1.alunni is not empty %}
+                <strong>Destinatari alunni: {% for al in v1.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
               {% endif %}
                 {{ v1.testo|raw|nl2br }}<br>
-                <small><em>({{ v.docente }}, inserita in data {{ (v.avviso ? v.avviso.modificato : v.modificato)|date('d/m/Y') }})</em></small>
+                <small><em>({{ v1.docente }}, inserita in data {{ (v1.avviso ? v1.avviso.modificato : v1.modificato)|date('d/m/Y') }})</em></small>
               </div>
             </div>
             {% endfor %}
