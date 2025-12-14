@@ -48,8 +48,8 @@
                 <div class="text-center gs-mb-4"><strong>{{ 'label.consultazione_chiusa'|trans|upper }}</strong></div>
       {% endif %}
               </div>
-              <div class="col-sm-4"><strong>Inizio: </strong>{{ inizio|date('d/m/Y H:i') }}</div>
-              <div class="col-sm-4"><strong>Fine: </strong>{{ inizio|date('d/m/Y H:i') }}</div>
+              <div class="col-sm-4"><strong>Inizio: </strong>{{ c.inizio|date('d/m/Y H:i') }}</div>
+              <div class="col-sm-4"><strong>Fine: </strong>{{ c.fine|date('d/m/Y H:i') }}</div>
             </div>
             <div class="row gs-mb-2 gs-pb-3 gs-pl-4">
               <div class="col-sm-12"><strong>Destinatari: </strong>{% for d in c.destinatari %}{{ d|trans }}{{ not loop.last ? ', ' }}{% endfor %}</div>
