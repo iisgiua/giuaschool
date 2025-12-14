@@ -12,18 +12,18 @@
 {% if 'GN' in info.consultazione.richiedenti %}
   <tr>
     <td style="text-align:rigth"><strong>{{ 'label.genitori'|trans }}:</strong></td>
-    <td><strong>{{ dati.totale.GN }}</strong></td>
+    <td><strong>{{ (dati.totale.GN / dati.destinatari.GN * 100)|number_format(2) }}%</strong> ({{ dati.totale.GN }} su {{ dati.destinatari.GN }})</td>
   </tr>
 {% endif %}
 {% if 'AN' in info.consultazione.richiedenti %}
   <tr>
     <td style="text-align:rigth"><strong>{{ 'label.alunni'|trans }}:</strong></td>
-    <td><strong>{{ dati.totale.AN }}</strong></td>
+    <td><strong>{{ (dati.totale.AN / dati.destinatari.AN * 100)|number_format(2) }}%</strong> ({{ dati.totale.AN }} su {{ dati.destinatari.AN }})</td>
   </tr>
 {% endif %}
   <tr style="font-size:12pt">
     <td style="text-align:rigth"><strong>TOTALE:</strong></td>
-    <td><strong>{{ dati.totale.utenti }}</strong></td>
+    <td><strong>{{ (dati.totale.utenti / dati.destinatari.utenti * 100)|number_format(2) }}%</strong> ({{ dati.totale.utenti }} su {{ dati.destinatari.utenti }})</td>
   </tr>
 </table>
 <br><br>

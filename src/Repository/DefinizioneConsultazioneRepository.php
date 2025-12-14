@@ -70,7 +70,7 @@ class DefinizioneConsultazioneRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la statistca delle consultazioni
+   * Restituisce la statistica delle consultazioni
    *
    * @param Utente $utente Utente che gestisce le consultazioni
    *

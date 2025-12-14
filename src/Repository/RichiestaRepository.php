@@ -10,6 +10,7 @@ namespace App\Repository;
 
 use DateTime;
 use App\Entity\Alunno;
+use App\Entity\Genitore;
 use App\Entity\DefinizioneConsultazione;
 use App\Entity\Richiesta;
 use App\Entity\Staff;
@@ -313,6 +314,7 @@ class RichiestaRepository extends BaseRepository {
     $dati['statistica'] = [];
     foreach (explode(',', $consultazione->getRichiedenti()) as $ruolo) {
       $dati['totale'][$ruolo] = 0;
+      $dati['destinatari'][$ruolo] = 0;
       foreach ($consultazione->getCampi() as $nome => $definizione) {
         if (!$definizione[1]) {
           // non risponde
@@ -321,6 +323,7 @@ class RichiestaRepository extends BaseRepository {
       }
     }
     $dati['totale']['utenti'] = 0;
+    $dati['destinatari']['utenti'] = 0;
     // conta risposte
     foreach ($risposte as $risposta) {
       foreach (explode(',', $consultazione->getRichiedenti()) as $ruolo) {
@@ -351,6 +354,50 @@ class RichiestaRepository extends BaseRepository {
             $dati['statistica'][$nome][$valore][$ruolo] = 0;
           }
         }
+      }
+    }
+    // numero destinatari
+    $genitori = $this->getEntityManager()->getRepository(Genitore::class)->createQueryBuilder('g')
+      ->select('COUNT(g.id) AS totale')
+      ->join('g.alunno', 'a')
+      ->join('a.classe', 'c')
+      ->where("g.abilitato=1 AND a.abilitato=1 AND g.cognome NOT LIKE '#%' AND g.nome NOT LIKE '#%'");
+    $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
+      ->select('COUNT(a.id) AS totale')
+      ->join('a.classe', 'c')
+      ->where('a.abilitato=1');
+    if (!empty($consultazione->getSede())) {
+      // imposta sede
+      $genitori
+        ->andWhere('c.sede=:sede')
+        ->setParameter('sede', $consultazione->getSede());
+      $alunni
+        ->andWhere('c.sede=:sede')
+        ->setParameter('sede', $consultazione->getSede());
+    }
+    if (!empty($consultazione->getClassi())) {
+      // imposta classi
+      $genitori
+        ->andWhere('c.id IN (:classi)')
+        ->setParameter('classi', $consultazione->getClassi());
+      $alunni
+        ->andWhere('c.id IN (:classi)')
+        ->setParameter('classi', $consultazione->getClassi());
+    }
+    foreach (explode(',', $consultazione->getRichiedenti()) as $ruolo) {
+      if ($ruolo == 'GN') {
+        // genitori
+        $dati['destinatari'][$ruolo] = $genitori
+          ->getQuery()
+          ->getSingleScalarResult();
+        $dati['destinatari']['utenti'] += $dati['destinatari'][$ruolo];
+      }
+      if ($ruolo == 'AN') {
+        // alunni
+        $dati['destinatari'][$ruolo] = $alunni
+          ->getQuery()
+          ->getSingleScalarResult();
+        $dati['destinatari']['utenti'] += $dati['destinatari'][$ruolo];
       }
     }
     // restituisce dati

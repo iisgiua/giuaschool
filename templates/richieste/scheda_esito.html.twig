@@ -11,18 +11,18 @@
 {% if 'GN' in info.consultazione.richiedenti %}
   <div class="row">
     <div class="text-right col-sm-6 gs-pr-2"><strong class="gs-big">{{ 'label.genitori'|trans }}:</strong></div>
-    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ dati.totale.GN }}</strong></div>
+    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ (dati.totale.GN / dati.destinatari.GN * 100)|number_format(2) }}%</strong> ({{ dati.totale.GN }} su {{ dati.destinatari.GN }})</div>
   </div>
 {% endif %}
 {% if 'AN' in info.consultazione.richiedenti %}
   <div class="row">
     <div class="text-right col-sm-6 gs-pr-2"><strong class="gs-big">{{ 'label.alunni'|trans }}:</strong></div>
-    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ dati.totale.AN }}</strong></div>
+    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ (dati.totale.AN / dati.destinatari.AN * 100)|number_format(2) }}%</strong> ({{ dati.totale.AN }} su {{ dati.destinatari.AN }})</div>
   </div>
 {% endif %}
   <div class="row">
     <div class="text-right col-sm-6 gs-pr-2"><strong class="gs-big">TOTALE:</strong></div>
-    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ dati.totale.utenti }}</strong></div>
+    <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ (dati.totale.utenti / dati.destinatari.utenti * 100)|number_format(2) }}%</strong> ({{ dati.totale.utenti }} su {{ dati.destinatari.utenti }})</div>
   </div>
 {% for nome,v in dati.lista %}
   {% if info.consultazione.campi[nome][0] == 'bool' %}
