@@ -1810,6 +1810,8 @@ class ComunicazioniUtil {
       if ($this->azioneAvviso('delete', $a->getData(), $docente, $a)) {
         $dati['azioni'][$k]['delete'] = 1;
       }
+      // aggiunge dettagli
+      $dati['statistiche'][$k] = $this->em->getRepository(ComunicazioneUtente::class)->statistiche($a);
     }
     // pulsante add
     if ($this->azioneAvviso('add', new DateTime(), $docente, null)) {

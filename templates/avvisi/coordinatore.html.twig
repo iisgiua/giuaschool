@@ -38,19 +38,88 @@
           </strong>
         </td>
         <td>
-          <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button type="button" class="btn btn-xs btn-primary" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-info" data-info-date="{{ a.data|date('j/n/Y') }}" data-info-title="{{ a.titolo }}" data-info-id="{{ a.id }}" data-body="avviso-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni[k].edit is defined %}
           <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_coordinatore', {'avviso': a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso_coordinatore'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
+          <div id="avviso-{{ loop.index }}" style="display:none">
+            <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
+              <div class="gs-text-normal">{{ a.testoPersonalizzato|raw|nl2br }}</div>
+              <div class="text-right gs-text-normal"><em>({{ a.autore }})</em></div>
+            </div>
+      {% if a.allegati|length > 0 %}
+            <div class="alert alert-success gs-mt-2 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
+        {% for n,f in a.allegati %}
+              <div class="gs-mt-3 gs-mb-3">
+                <strong>Allegato {{ n+1 }}:</strong> {{ f.titolo }}
+                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+              </div>
+        {% endfor %}
+            </div>
+      {% endif %}
+            <div class="gs-mt-1 gs-pt-1 gs-pb-3">
+      {% if (dati.statistiche[k].docenti is defined) or (dati.statistiche[k].genitori is defined) or (dati.statistiche[k].alunni is defined) %}
+              <div class="gs-pl-2 gs-pr-2 gs-mt-3">
+                <strong>Statistiche di lettura:</strong>
+        {% if dati.statistiche[k].docenti is defined %}
+                <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+                  <div class="col-sm-8 gs-pl-0">Docenti: {{ dati.statistiche[k].docenti.percentuale|number_format(0) }}% ({{ dati.statistiche[k].docenti.letti }} su {{ dati.statistiche[k].docenti.totali }})</div>
+                </div>
+          {% if dati.statistiche[k].docenti.letti > 0 %}
+                <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
+            {% for u in dati.statistiche[k].docenti.elenco %}
+                  <div class="row">
+                    <div class="col-sm-8">{{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+                    <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+                  </div>
+            {% endfor %}
+                </div>
+          {% endif %}
+        {% endif %}
+        {% if dati.statistiche[k].genitori is defined %}
+                <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+                  <div class="col-sm-8 gs-pl-0">Genitori: {{ dati.statistiche[k].genitori.percentuale|number_format(0) }}% ({{ dati.statistiche[k].genitori.letti }} su {{ dati.statistiche[k].genitori.totali }})</div>
+                </div>
+          {% if dati.statistiche[k].genitori.letti > 0 %}
+                <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
+            {% for u in dati.statistiche[k].genitori.elenco %}
+                  <div class="row">
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+                    <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+                  </div>
+            {% endfor %}
+                </div>
+          {% endif %}
+        {% endif %}
+        {% if dati.statistiche[k].alunni is defined %}
+                <div class="row gs-ml-4 gs-mr-2 gs-pt-1 gs-pb-1" style="border-bottom: 1px solid #ccc">
+                  <div class="col-sm-8 gs-pl-0">Alunni: {{ dati.statistiche[k].alunni.percentuale|number_format(0) }}% ({{ dati.statistiche[k].alunni.letti }} su {{ dati.statistiche[k].alunni.totali }})</div>
+                </div>
+          {% if dati.statistiche[k].alunni.letti > 0 %}
+                <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
+            {% for u in dati.statistiche[k].alunni.elenco %}
+                  <div class="row">
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+                    <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
+                  </div>
+            {% endfor %}
+                </div>
+          {% endif %}
+        {% endif %}
+              </div>
+      {% endif %}
+            </div>
+          </div>
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
-    {% include 'include/modal-remote.html.twig' %}
+    {% include 'include/modal-info.html.twig' %}
     {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_avviso'} %}
     {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_coordinatore'} %}
   {% endif %}
@@ -61,9 +130,12 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('#gs-modal-remote').on('show.bs.modal', function (event) {
-    var url = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-remote-content').load(url);
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
+    var id = $(e.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(html);
   });
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
