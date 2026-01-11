@@ -3,11 +3,40 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2">{{ titolo|trans }}</h1>
-  {% if dati.uniche is empty and dati.multiple is empty and dati.consultazioni is empty %}
+  {% if dati.uniche is empty and dati.multiple is empty and dati.consultazioni is empty and dati.autorizzazioni is empty %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.no_moduli_richieste'|trans }}</strong>
   </div>
   {% else %}
+    {% for mk,mv in dati.autorizzazioni %}
+    <div class="panel panel-danger">
+    <div class="panel-heading"><h3 class="panel-title gs-h3">Autorizzazione {{ ('label.tipo_attivita_'~mv.tipo)|trans|lower }}: {{ mv.nome }}</h3></div>
+    <div class="panel-body">
+      <div class="col-sm-12 gs-big">
+        <strong>Data dell'attività: </strong>{{ mv.inizio|date('d/m/Y') }} dalle ore {{ mv.inizio|date('G:i') }} alle ore {{ mv.fine|date('G:i') }}.
+      </div>
+      {% if mv.inviata %}
+      <div class="col-sm-12 gs-big">
+        <strong>Autorizzazione inviata: </strong>{{ mv.inviata|date('d/m/Y H:i') }}
+      </div>
+      <div class="col-sm-12">
+        <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: mv.autorizzazione_id}) }}" title="Scarica l'autorizzazione inviata">
+          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'autorizzazione inviata</strong>
+        </a>
+      </div>
+      {% endif %}
+      {% if not mv.inviata %}
+      <div class="text-right">
+        <a class="btn btn-primary" href="{{ path('autorizzazioni_autorizza', {modulo: mk}) }}" title="Leggi i dettagli dell'attività e firma l'autorizzazione"><strong>Leggi i dettagli e autorizza</strong></a>
+      </div>
+      {% elseif mv.altra %}
+      <div class="text-right">
+        <a class="btn btn-primary" href="{{ path('autorizzazioni_autorizza', {modulo: mk}) }}" title="Aggiungi la tua firma all'autorizzazione"><strong>Aggiungi firma</strong></a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+    {% endfor %}
     {% for mk,mv in dati.consultazioni %}
   <div class="panel panel-warning">
     <div class="panel-heading"><h3 class="panel-title gs-h3">Consultazione attiva: {{ mv.nome }}</h3></div>

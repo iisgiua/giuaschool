@@ -43,6 +43,27 @@ class SedeRepository extends EntityRepository {
   }
 
   /**
+   * Restituisce la lista delle sedi, richiamabili tramite ID
+   *
+   * @return array Array associativo con i dati delle sedi
+   */
+  public function lista(): array {
+    // inizializza
+    $dati = [];
+    // legge dati
+    $sedi = $this->createQueryBuilder('s')
+      ->orderBy('s.ordinamento')
+      ->getQuery()
+      ->getResult();
+    // imposta dati
+    foreach ($sedi as $sede) {
+      $dati[$sede->getId()] = $sede;
+    }
+    // restituisce lista sedi
+    return $dati;
+  }
+
+  /**
    * Restituisce la lista delle sedi di lavoro del docente indicato
    *
    * @param Docente $docente Docente di cui cercare le sedi

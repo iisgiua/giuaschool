@@ -11,6 +11,7 @@ namespace App\Controller;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Classe;
+use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\Genitore;
@@ -61,6 +62,7 @@ class RichiesteController extends BaseController {
     // recupera dati
     $dati = $this->em->getRepository(DefinizioneRichiesta::class)->lista($this->getUser());
     $dati['consultazioni'] = $this->em->getRepository(DefinizioneConsultazione::class)->lista($this->getUser());
+    $dati['autorizzazioni'] = $this->em->getRepository(DefinizioneAutorizzazione::class)->lista($this->getUser());
     // pagina di risposta
     return $this->renderHtml('richieste', 'lista', $dati, $info);
   }
@@ -278,12 +280,21 @@ class RichiesteController extends BaseController {
     // controlla accesso
     if ($this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getRichiedenti())) {
       // utente tra i richiedenti
-      if ($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneConsultazione) {
+      $utenteRichiesta = $richiesta->getUtente();
+      if ($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneConsultazione &&
+          !($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneAutorizzazione)) {
+        // considera utenti alunno/genitori come differenti
         $utente = $this->getUser();
       } else {
+        // considera solo utente alunno
         $utente = $this->getUser() instanceOf Genitore ? $this->getUser()->getAlunno() : $this->getUser();
       }
-      if (($richiesta->getUtente() != $utente && !$utente->controllaRuolo('DS')) ||
+      if ($richiesta->getDefinizioneRichiesta() instanceOf DefinizioneAutorizzazione) {
+        // considera solo utente di richiesta come alunno
+        $utenteRichiesta = $richiesta->getUtente() instanceOf Genitore ? $richiesta->getUtente()->getAlunno() :
+          $richiesta->getUtente();
+      }
+      if (($utenteRichiesta != $utente && !$utente->controllaRuolo('DS')) ||
           !in_array($richiesta->getStato(), ['I', 'G'], true)) {
         // errore: richiesta non accessibile al richiedente
         throw $this->createNotFoundException('exception.not_allowed');
@@ -1198,7 +1209,7 @@ class RichiesteController extends BaseController {
     $utente = $this->getUser();
     // controlla modulo
     $consultazione = $this->em->getRepository(DefinizioneConsultazione::class)->createQueryBuilder('dc')
-      ->where('dc.id=:modulo AND dc.abilitata=1 AND :adesso BETWEEN dc.inizio AND dc.fine')
+      ->where('NOT (dc INSTANCE OF '.DefinizioneAutorizzazione::class.') AND  dc.id=:modulo AND dc.abilitata=1 AND :adesso BETWEEN dc.inizio AND dc.fine')
       ->setParameter('modulo', $modulo)
       ->setParameter('adesso', new DateTime('now'))
       ->getQuery()
@@ -1242,7 +1253,7 @@ class RichiesteController extends BaseController {
     $this->em->persist($risposta);
     // informazioni per la visualizzazione
     $info['modulo'] = '@data/consultazioni/'.$consultazione->getModulo();
-    // // form di inserimento
+    // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$consultazione->getCampi(), $consultazione->getUnica()]]);
     $form->handleRequest($request);

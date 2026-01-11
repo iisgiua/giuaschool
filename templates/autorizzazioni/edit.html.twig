@@ -1,0 +1,231 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% form_theme form[0].classi _self %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary gs-mt-5" >
+    <div class="panel-heading">
+      <div class="panel-title"><strong>{{ titolo|trans }}</strong></div>
+    </div>
+    <div class="panel-body" >
+      {{ form_start(form[0]) }}
+      {{ form_errors(form[0]) }}
+      <div class="help-block gs-text-normal"><em>{{ form[1]|trans|raw }}</em></div>
+      {{ form_row(form[0].nome) }}
+      <div class="form-group">
+        {% set field=form[0].tipo %}
+        <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+        <div class="col-sm-4">{{ form_widget(field) }}</div>
+        {% set field=form[0].inizio %}
+        <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+        <div class="col-sm-4">{{ form_widget(field) }}</div>
+      </div>
+      <div class="form-group">
+        {% set field=form[0].inizio_ora %}
+        <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+        <div class="col-sm-4">{{ form_widget(field) }}</div>
+        {% set field=form[0].fine_ora %}
+        <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+        <div class="col-sm-4">{{ form_widget(field) }}</div>
+      </div>
+      <div id="gs-uscita" style="display: none">
+        {{ form_row(form[0].destinazione) }}
+        <div class="form-group">
+          {% set field=form[0].svolgimento_tipo %}
+          <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+          <div class="col-sm-4">{{ form_widget(field) }}</div>
+          <div class="col-sm-6">{{ form_widget(form[0].svolgimento) }}</div>
+        </div>
+        {{ form_row(form[0].accompagnatori) }}
+        {{ form_row(form[0].partenza) }}
+        {{ form_row(form[0].rientro) }}
+      </div>
+      <div id="gs-attivita" style="display: none">
+        <div class="form-group">
+          {% set field=form[0].luogo_sede %}
+          <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+          <div class="col-sm-4">{{ form_widget(field) }}</div>
+          {% set field=form[0].luogo_aula %}
+          <label class="col-sm-2 control-label{{ field.vars.required ? ' required' }}" for="{{ field.vars.id }}">{{ field.vars.label|trans }}</label>
+          <div class="col-sm-4">{{ form_widget(field) }}</div>
+        </div>
+        {{ form_row(form[0].esterni) }}
+      </div>
+      {{ form_row(form[0].descrizione) }}
+      {{ form_row(form[0].sede) }}
+      {{ form_row(form[0].classi) }}
+      {{ form_end(form[0]) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+    });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
+  $("#definizione_autorizzazione_tipo").change(function() {
+    if ($(this).val() == 'U' || $(this).val() == 'V') {
+      $('#gs-attivita').hide();
+      $('#definizione_autorizzazione_luogo_sede').val('');
+      $('#definizione_autorizzazione_luogo_aula').val('');
+      $('#definizione_autorizzazione_esterni').val('');
+      $('#gs-uscita').show();
+      if ($('#definizione_autorizzazione_svolgimento').val() == '') {
+        $('#definizione_autorizzazione_svolgimento_tipo').val('P').change();
+      } else {
+        $('#definizione_autorizzazione_svolgimento_tipo').val('A');
+      }
+      if ($('#definizione_autorizzazione_partenza').val() == '') {
+        $('#definizione_autorizzazione_partenza').val("dall'Istituto Scolastico");
+      }
+      if ($('#definizione_autorizzazione_rientro').val() == null) {
+        $('#definizione_autorizzazione_rientro').val('S');
+      }
+    } else {
+      $('#gs-uscita').hide();
+      $('#definizione_autorizzazione_destinazione').val('');
+      $('#definizione_autorizzazione_svolgimento_tipo').val('');
+      $('#definizione_autorizzazione_svolgimento').val('');
+      $('#definizione_autorizzazione_accompagnatori').val('');
+      $('#definizione_autorizzazione_partenza').val('');
+      $('#definizione_autorizzazione_rientro').val('');
+      $('#gs-attivita').show();
+    }
+  });
+  $("#definizione_autorizzazione_svolgimento_tipo").change(function() {
+    if ($(this).val() == 'P') {
+      $('#definizione_autorizzazione_svolgimento').val("{{ 'label.svolgimento_attivita_P'|trans }}");
+    } else if ($(this).val() == 'M') {
+      $('#definizione_autorizzazione_svolgimento').val("{{ 'label.svolgimento_attivita_M'|trans }}");
+    } else {
+      $('#definizione_autorizzazione_svolgimento').val("").focus();
+    }
+  });
+  $("#definizione_autorizzazione_sede").change(function() {
+    $("#gs-tutti").prop('checked', false);
+    var id=$(this).val();
+    if (id) {
+      $('#gs-sedi').children().hide();
+      $('#gs-sede-'+id).show();
+    } else {
+      $('#gs-sedi').children().show();
+    }
+    $('#gs-sedi').find('input[type="checkbox"]').prop('checked', false);
+    $('#gs-sedi').find('label.gs-checkbox-inline.active').removeClass('active');
+  });
+  $("#gs-tutti").change(function() {
+    if ($(this).prop('checked')) {
+      $('#gs-sedi').find('input[type="checkbox"]:checked').prop('checked', false);
+      $('#gs-sedi').children().hide();
+    } else {
+      var id=$('#definizione_autorizzazione_sede').val();
+      if (id) {
+        $('#gs-sede-'+id).show();
+      } else {
+        $('#gs-sedi').children().show();
+      }
+    }
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+  // init
+  $("#definizione_autorizzazione_tipo").change();
+  $("#definizione_autorizzazione_sede").change();
+  {% if info.classi is empty %}
+  $('#gs-tutti').click();
+  {% else %}
+    {% for c in info.classi %}
+  $('input[name="definizione_autorizzazione[classi][]"][value="{{ c }}"]:visible').click();
+    {% endfor %}
+  {% endif %}
+});
+</script>
+{% endblock %}
+
+{% block _definizione_autorizzazione_classi_widget %}
+<div class="form-check gs-mb-1">
+  <label class="gs-checkbox-inline" for="gs-tutti">
+    <input type="checkbox" id="gs-tutti" name="tutti" value="TUTTI">
+    TUTTE
+  </label>
+</div>
+<div id="gs-sedi" class="row">
+  {% set prec = '' %}
+  {% for group_label, group in choices %}
+    {% if group_label != prec %}
+      {% if prec != '' %}
+  </div>
+      {% endif %}
+      {% set prec = group_label %}
+  <div id="gs-sede-{{ group.choices[group.choices|keys|first].data.sede.id }}" class="col-sm-6 gs-mr-0 gs-ml-0">
+    <div class="row"><strong><em>{{ prec }}</em></strong></div>
+    {% endif %}
+    {% set sez = '' %}
+    {% for key, choice in group %}
+      {% if choice.data.sezione~choice.data.gruppo != sez %}
+        {% if sez != '' %}
+    </div>
+        {% endif %}
+        {% set sez = choice.data.sezione~choice.data.gruppo %}
+    <div class="row">
+      {% endif %}
+      {{- form_widget(form[key], {
+        parent_label_class: 'gs-checkbox-inline',
+        translation_domain: choice_translation_domain,
+        label_attr: {class: 'gs-ml-4'}
+      }) -}}
+    {% endfor %}
+    {% if sez != '' %}
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% if prec != '' %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

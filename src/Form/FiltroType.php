@@ -207,10 +207,57 @@ class FiltroType extends AbstractType {
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'required' => false]);
+    } elseif ($options['form_mode'] == 'autorizzazioni') {
+      // form autorizzazioni
+      $builder
+        ->add('sede', ChoiceType::class, ['label' => 'label.filtro_sede',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_sede'],
+          'required' => count($options['values'][1]) == 1])
+        ->add('classe', ChoiceType::class, ['label' => 'label.filtro_classe',
+          'data' => $options['values'][2],
+          'choices' => $options['values'][3],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'choice_value' => 'id',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_classe'],
+          'required' => false])
+        ->add('tipo', ChoiceType::class, ['label' => 'label.filtro_tipo_attivita',
+          'data' => $options['values'][4],
+          'choices' => ['label.tipo_attivita_U' => 'U', 'label.tipo_attivita_V' => 'V',
+            'label.tipo_attivita_C' => 'C', 'label.tipo_attivita_E' => 'E', 'label.tipo_attivita_A' => 'A'],
+          'placeholder' => 'label.tutte_attivita',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_tipo_attivita'],
+          'required' => false])
+        ->add('mese', ChoiceType::class, ['label' => 'label.filtro_mese',
+          'data' => $options['values'][5],
+          'choices' => $options['values'][6],
+          'placeholder' => 'label.qualsiasi_mese',
+          'choice_translation_domain' => false,
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder', 'title' => 'label.filtro_mese'],
+          'required' => false])
+        ->add('nome', TextType::class, ['label' => 'label.filtro_nome',
+          'data' => $options['values'][7],
+          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.filtro_nome',
+            'style' => 'width:10em', 'class' => 'gs-placeholder'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false]);
     }
     // pulsante filtro
     $builder
-      ->add('submit', SubmitType::class, ['label' => 'label.filtra']);
+      ->add('submit', SubmitType::class, ['label' => 'label.filtra',
+        'attr' => ['class' => 'btn-primary']]);
   }
 
   /**

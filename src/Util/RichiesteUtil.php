@@ -8,13 +8,17 @@
 
 namespace App\Util;
 
-use DateTime;
 use App\Entity\Classe;
+use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
+use App\Entity\Richiesta;
 use App\Entity\Utente;
-use Symfony\Component\HttpFoundation\RequestStack;
+use ContainerFT0ZQNx\getDefinizioneAutorizzazioneTypeService;
+use DateTime;
+use Exception;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 
 
@@ -154,7 +158,6 @@ class RichiesteUtil {
     return $listaAllegati;
   }
 
-
   /**
    * Crea il documento PDF per la risposta ad una consultazione e lo salva nell'archivio dei documenti di classe.
    *
@@ -162,8 +165,8 @@ class RichiesteUtil {
    * @param int $idUtente Identificativo dell'utente che esegue la risposta
    * @param int $idRichiesta Identificativo della risposta
    * @param Classe $classe Classe di riferimento per la risposta
-   * @param array $valori Lista dei valori inseriti nel modulo di richiesta
-   * @param DateTime $invio Data e ora dell'invio della richiesta
+   * @param array $valori Lista dei valori inseriti nel modulo di risposta
+   * @param DateTime $invio Data e ora dell'invio della risposta
    *
    * @return string Nnome del documento PDF creato
    */
@@ -227,6 +230,146 @@ class RichiesteUtil {
     $this->pdf->save($percorso.'/'.$nomefile);
     // restituisce il nome del file
     return $nomefile;
+  }
+
+  /**
+   * Crea il documento PDF per l'autorizzazione ad una attività e lo salva nell'archivio dei documenti di classe.
+   *
+   * @param DefinizioneAutorizzazione $modulo Modulo dell'autorizzazione
+   * @param string $ruolo Ruolo dell'utente che esegue l'autorizzazione
+   * @param array $sedi Sedi di riferimento per l'autorizzazione
+   * @param int $idRichiesta Identificativo dell'autorizzazione
+   * @param Classe $classe Classe di riferimento per l'autorizzazione
+   * @param DateTime $invio Data e ora dell'invio dell'autorizzazione
+   *
+   * @return string Nnome del documento PDF creato
+   */
+  public function autorizzazionePdf(DefinizioneAutorizzazione $modulo, string $ruolo, array $sedi,
+                                    int $idRichiesta, Classe $classe, DateTime $invio): string {
+    // inizializza
+    $fs = new FileSystem();
+    // crea template per il documento
+    $percorso = $this->dirProgetto.'/PERSONAL/data/autorizzazioni/';
+    $template = file_get_contents($percorso.$modulo->getModulo());
+    // aggiunge header e footer
+    $header = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig' :
+      $this->dirProgetto.'/templates/autorizzazioni/_intestazione.html.twig';
+    $footer = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_firma.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_firma.html.twig' :
+      $this->dirProgetto.'/templates/autorizzazioni/_firma.html.twig';
+    $template = file_get_contents($header).$template.file_get_contents($footer);
+    $templateTwig = $this->tpl->createTemplate($template);
+    // crea documento
+    $html = $this->tpl->render($templateTwig, ['ruolo' => $ruolo, 'autorizzazione' => $modulo,
+      'sedi' => $sedi, 'invio' => $invio]);
+    $documentoId = $modulo->getId().'-'.$idRichiesta.'-'.hash('sha256', $html);
+    $templateHash = $this->tpl->createTemplate($html.
+      '<p>&nbsp;</p><p style="font-size:9pt;text-align:right;">[{{ id }}]</p>');
+    $htmlHash = $this->tpl->render($templateHash, ['id' => $documentoId]);
+    $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+      $modulo->getNome());
+    $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+    $this->pdf->getHandler()->SetFooterMargin(10);
+    $this->pdf->getHandler()->setFooterFont(['helvetica', '', 9]);
+    $this->pdf->getHandler()->setFooterData([0, 0, 0], [255, 255, 255]);
+    $this->pdf->getHandler()->setPrintFooter(true);
+    $tagvs = [
+      'div' => [0 => ['h' => 0, 'n' => 0], 1 => ['h' => 0, 'n' => 0]],
+      'p' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.1]],
+      'ul' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'ol' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'li' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'table' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.5]]];
+    $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+    $this->pdf->createFromHtml($htmlHash);
+    // salva il documento
+    $percorso = $this->dirProgetto.'/FILES/archivio/classi/'.
+      $classe->getAnno().$classe->getSezione().$classe->getGruppo().'/documenti';
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
+    $nomefile = 'autorizzazione-'.$documentoId.'.pdf';
+    $this->pdf->save($percorso.'/'.$nomefile);
+    // restituisce il nome del file
+    return $nomefile;
+  }
+
+  /**
+   * Aggiunge la firma al documento PDF per l'autorizzazione ad una attività e lo salva nell'archivio dei documenti di classe.
+   *
+   * @param Richiesta $esistente Autorizzazione esistente
+   * @param string $ruolo Ruolo dell'utente che esegue l'autorizzazione
+   * @param array $sedi Sedi di riferimento per l'autorizzazione
+   * @param int $idRichiesta Identificativo dell'autorizzazione
+   * @param Classe $classe Classe di riferimento per l'autorizzazione
+   * @param DateTime $invio Data e ora dell'invio dell'autorizzazione
+   *
+   * @return string Nnome del documento PDF creato
+   */
+  public function firmaAutorizzazionePdf(Richiesta $esistente, string $ruolo, array $sedi, int $idRichiesta,
+                                         Classe $classe, DateTime $invio): string {
+    // inizializza
+    $fs = new FileSystem();
+    // crea template per il documento
+    $percorso = $this->dirProgetto.'/PERSONAL/data/autorizzazioni/';
+    $template = file_get_contents($percorso.$esistente->getDefinizioneRichiesta()->getModulo());
+    // aggiunge header e footer
+    $header = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig' :
+      $this->dirProgetto.'/templates/autorizzazioni/_intestazione.html.twig';
+    $footer = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_firma.html.twig') ?
+      $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_firma.html.twig' :
+      $this->dirProgetto.'/templates/autorizzazioni/_firma.html.twig';
+    $template = file_get_contents($header).$template.file_get_contents($footer);
+    $templateTwig = $this->tpl->createTemplate($template);
+    // crea documento HTML
+    $html = $this->tpl->render($templateTwig, ['ruolo' => $ruolo,
+      'autorizzazione' => $esistente->getDefinizioneRichiesta(), 'sedi' => $sedi, 'invio' => $invio]);
+    $documentoId = $esistente->getDefinizioneRichiesta()->getId().'-'.$idRichiesta.'-'.hash('sha256', $html);
+    $templateHash = $this->tpl->createTemplate($html.
+      '<p>&nbsp;</p><p style="font-size:9pt;text-align:right;">[{{ id }}]</p>');
+    $htmlHash = $this->tpl->render($templateHash, ['id' => $documentoId]);
+    // importa PDF esistente
+    $percorsoDocumento = $this->dirProgetto.'/FILES/archivio/classi/'.
+      $classe->getAnno().$classe->getSezione().$classe->getGruppo().'/documenti/'.$esistente->getDocumento();
+    if (!$this->pdf->import($percorsoDocumento, 10)) {
+      // errore: impossibile leggere file
+      throw new Exception ('exception.pdf_import');
+    }
+    // PDF: informazioni sul documento
+    $this->pdf->getHandler()->SetCreator('TCPDF');
+    $this->pdf->getHandler()->SetAuthor($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'));
+    $this->pdf->getHandler()->SetTitle($esistente->getDefinizioneRichiesta()->getNome());
+    $this->pdf->getHandler()->SetSubject('');
+    $this->pdf->getHandler()->SetKeywords('');
+    // PDF: layout documento
+    $this->pdf->getHandler()->SetMargins(15, 20, 15, true);
+    $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+    $this->pdf->getHandler()->setPrintHeader(false);
+    // PDF: font predefinito
+    $this->pdf->getHandler()->SetFont('times', '', 12);
+    // PDF: footer
+    $this->pdf->getHandler()->SetFooterMargin(10);
+    $this->pdf->getHandler()->setFooterFont(['helvetica', '', 9]);
+    $this->pdf->getHandler()->setFooterData([0, 0, 0], [255, 255, 255]);
+    $this->pdf->getHandler()->setPrintFooter(true);
+    // PDF: impostazioni tag
+    $tagvs = [
+      'div' => [0 => ['h' => 0, 'n' => 0], 1 => ['h' => 0, 'n' => 0]],
+      'p' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.1]],
+      'ul' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'ol' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'li' => [0 => ['h' => 0, 'n' => 0.1], 1 => ['h' => 0, 'n' => 0.1]],
+      'table' => [0 => ['h' => 0, 'n' => 0.5], 1 => ['h' => 0, 'n' => 0.5]]];
+    $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+    // aggiunge autorizzazione a documento
+    $this->pdf->createFromHtml($htmlHash);
+    // salva il documento modificato
+    $this->pdf->save($percorsoDocumento);
+    // restituisce il nome del file
+    return $esistente->getDocumento();
   }
 
 }

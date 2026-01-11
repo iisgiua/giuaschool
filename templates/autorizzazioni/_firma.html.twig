@@ -1,0 +1,19 @@
+<p>&nbsp;</p>
+<table border="0" cellpadding="0" nobr="true" style="font-size:12pt;">
+  <tr nobr="true">
+    <td width="55%" align="left">DATA E ORA: {{ invio|date('d/m/Y H:i') }}</td>
+    <td width="45%" align="center">FIRMA:
+      <br><i>{{ app.user.nome }} {{ app.user.cognome }}</i>
+      <span style="font-size:10pt;">
+{% if is_granted('ROLE_GENITORE') %}
+        <br>Genitore/Tutore dell'alunn{{ app.user.alunno.sesso == 'M' ? 'o' : 'a' }}
+        <i>{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}</i>
+        <br>Classe {{ app.user.alunno.classe }} - {{ app.user.alunno.classe.sede.nomeBreve }}
+{% elseif is_granted('ROLE_ALUNNO') %}
+        <br>Classe {{ app.user.classe }} - {{ app.user.classe.sede.nomeBreve }}
+{% endif %}
+      </span>
+      <br><span style="font-size:9pt;">(sottoscritto digitalmente tramite il Registro Elettronico)</span>
+    </td>
+  </tr>
+</table>

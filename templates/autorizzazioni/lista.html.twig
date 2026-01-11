@@ -1,0 +1,93 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
+  {% include 'include/form-inline.html.twig' with {'form': form[0]} %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-offset-6  col-sm-6 text-right">
+      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('autorizzazioni_edit') }}" role="button" title="Inserisci un nuovo modulo di autorizzazione delle attività"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Nuovo</strong></a>
+    </div>
+  </div>
+  {% if dati.lista|length == 0 %}
+  <div class="alert alert-info text-center gs-big">
+    <strong>Non sono presenti dati</strong>
+  </div>
+  {% else %}
+  <table class="table table-bordered table-hover table-striped gs-mb-0">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-1">{{ 'label.abilitato'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.sede'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.classi'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.tipo'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.nome'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for a in dati.lista %}
+      <tr{% if not a.abilitata %} style="background-color: #f2dede;"{% endif %}>
+        <td>{% if a.abilitata %}<div class="text-success gs-big"><span class="glyphicon glyphicon-ok" title="Modulo di autorizzazione abilitato"></span></div>{% else %}<div class="text-danger gs-big"><span class="glyphicon glyphicon-ban-circle" title="Modulo di autorizzazione non abilitato"></span></div>{% endif %}</td>
+        <td>{% if a.sede is empty %}TUTTE{% else %}{{ a.sede|upper }}{% endif %}</td>
+        <td>{% if a.classi is empty %}TUTTE{% else %}{{ dati.info[a.id].classi }}{% endif %}</td>
+        <td>{{ ('label.tipo_attivita_'~a.tipo)|trans }}</td>
+        <td>{{ a.inizio|date('d/m/Y') }}</td>
+        <td><strong>{{ a.nome }}</strong></td>
+        <td>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza l'anteprima del modulo di autorizzazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('autorizzazioni_anteprima', {'autorizzazione': a.id}) }}" data-tipo="{{ ('label.tipo_attivita_'~a.tipo)|trans }}" data-nome="{{ a.nome }}"><strong>Anteprima</strong></button>
+          <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_edit', {autorizzazione: a.id}) }}" role="button" title="Modifica i dati del modulo di autorizzazione"><strong>{{ 'label.edit'|trans }}</strong></a>
+          <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_dettagli', {modulo: a.id}) }}" role="button" title="Dettagli delle autorizzazioni inviate"><strong>{{ 'label.show'|trans }}</strong></a>
+      {% if a.abilitata %}
+          <a class="btn btn-danger btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 0}) }}" role="button" title="Disabilita il modulo di autorizzazione"><strong>{{ 'label.disable'|trans }}</strong></a>
+      {% else %}
+          <a class="btn btn-success btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 1}) }}" role="button" title="Abilita il modulo di autorizzazione"><strong>{{ 'label.enable'|trans }}</strong></a>
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'autorizzazioni_lista'} %}
+    {% include 'include/modal-remote.html.twig' %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#filtro_sede').change(function(e) {
+    if ($(this).val()) {
+      $('#filtro_classe optgroup').hide();
+      $('#filtro_classe optgroup[label="'+sedi[$(this).val()]+'"]').show();
+      if ($('#filtro_classe').find("option:selected").parent().attr('label') != sedi[$(this).val()]) {
+        $('#filtro_classe').val('');
+      }
+    } else {
+      $('#filtro_classe optgroup').show();
+    }
+  });
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    var tipo = $(event.relatedTarget).data('tipo');
+    var nome = $(event.relatedTarget).data('nome');
+    var html = '<div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><span class="sr-only">Chiudi</span></button><h3 class="modal-title gs-h3">'+nome+'</h3><h4 class="modal-title gs-h4">'+tipo+'</h4></div><div class="modal-body bg-info"></div><div class="modal-footer gs-pb-2 gs-pt-0 gs-pr-2 gs-pl-2"><div class="text-center gs-pt-2 gs-pb-2"><button type="button" class="btn btn-default gs-mb-3" data-dismiss="modal"><strong>Chiudi</strong></button></div></div>';
+    $('#gs-modal-remote-content').html(html);
+    $(this).find('#gs-modal-remote-content .modal-body').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  // init
+  var sedi = [];
+  {% for s,n in info.sedi %}
+  sedi[{{ s }}] = '{{ n }}';
+  {% endfor %}
+  $('#filtro_sede').change();
+});
+</script>
+{% endblock %}

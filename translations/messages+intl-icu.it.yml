@@ -319,6 +319,7 @@ label.ROLE_PRESIDE: Preside
 label.ROLE_STAFF: Staff
 label.ROLE_UTENTE: Utente
 label.sabato: Sabato
+label.scegli_sede: Scegli la sede
 label.scegli_alunni: Scegli gli alunni
 label.scegli_alunno: Scegli l'alunno
 label.scegli_cattedra: Scegli la classe e la materia
@@ -712,7 +713,35 @@ label.consultazione_in_attesa: In attesa
 label.consultazione_in_corso: In corso
 label.consultazione_chiusa: Terminata
 label.consultazione_risposte: Risposte inviate
-
+label.nome_attivita: Nome
+label.tipo_attivita: Tipo
+label.tipo_attivita_U: Uscita didattica
+label.tipo_attivita_V: Visita guidata
+label.tipo_attivita_C: Conferenza
+label.tipo_attivita_E: Evento
+label.tipo_attivita_A: Attività generica
+label.data_attivita: Data
+label.ora_inizio_attivita: Inizio
+label.ora_fine_attivita: Fine
+label.destinazione_attivita: Destinazione
+label.svolgimento_attivita: Modalità
+label.svolgimento_attivita_P: A piedi
+label.svolgimento_attivita_M: Con i mezzi pubblici
+label.svolgimento_attivita_A: Altro
+label.accompagnatori_attivita: Accompagnatori
+label.partenza_attivita: Luogo di partenza
+label.rientro_attivita: Rientro
+label.rientro_attivita_S: Al termine dell'attività, gli studenti rientreranno a Scuola
+label.rientro_attivita_C: Al termine dell'attività, gli studenti potranno rientrare al proprio domicilio
+label.descrizione_attivita: Descrizione attività
+label.luogo_sede_attivita: Presso la sede
+label.luogo_aula_attivita: Nell'aula
+label.esterni_attivita: Esperti esterni
+label.sedi_attivita: Sede
+label.classi_attivita: Classi
+label.filtro_tipo_attivita: Filtra per tipo di attività
+label.tutte_attivita: Qualsiasi attività
+label.filtro_nome: Filtra per nome
 
 
 ##### PAGINE #####
@@ -910,6 +939,12 @@ title.avvisi_gestione: Gestione degli avvisi
 page.scuola.consultazioni: Configura Consultazioni
 title.scuola.consultazioni: Lista consultazioni
 title.scuola.consultazioni_edit: Modifica i dati di una consultazione
+page.autorizzazioni.lista: Gestione Autorizzazioni
+title.autorizzazioni.lista: Gestione dei moduli di autorizzazione delle attività
+page.autorizzazioni.edit: Modifica Autorizzazione
+title.autorizzazioni.edit: Crea o modifica il modulo di autorizzazione per una attività
+page.autorizzazioni.add: Invia Autorizzazione
+title.autorizzazioni.add: Invia l'autorizzazione dell'attività
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Eventi
@@ -1534,6 +1569,9 @@ message.lezione_sostegno_NA_con_religione: "Non è possibile firmare la lezione 
 message.lezione_incompatibile: "Non è possibile firmare la lezione della {ora}ª ora.<br>La materia o il gruppo è incompatibile con la lezione esistente."
 message.cattedra_esistente_non_creata: Alcune cattedre non sono state inserite perché risultano già esistenti.
 message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla scuola in formato PDF e inviato tramite email all'indirizzo ..., indicando come oggetto 'ELABORATO CITTADINANZA ATTIVA - CLASSE - COGNOME NOME', entro e non oltre il giorno ..."
+message.autorizzazioni_edit: Inserisci tutti i dati richiesti per il modulo di autorizzazione dell'attività
+message.autorizzazioni_autorizza: Leggi i dettagli dell'attività e invia l'autorizzazione
+
 
 
 ##### ERRORI #####
@@ -1850,3 +1888,14 @@ exception.tipo_filtro_invalido: Il tipo di filtro non è valido
 exception.consultazione_intervallo_date_invalido: La data e ora iniziale deve precedere quella finale
 exception.consultazione_nessuna_classe: Devi indicare almeno una classe di destinazione
 exception.impossibile_creare_zip: Impossibile creare il file compresso
+exception.autorizzazione_intervallo_date_invalido: L'ora iniziale deve precedere quella finale
+exception.autorizzazione_nessuna_classe: Devi indicare almeno una classe di destinazione
+exception.autorizzazione_no_descrizione: Devi indicare la descrizione dell'attività
+exception.autorizzazione_no_luogo_sede: Devi indicare la sede di svolgimento dell'attività
+exception.autorizzazione_no_luogo_aula: Devi indicare l'aula o l'ambiente di svolgimento dell'attività
+exception.autorizzazione_no_destinazione: Devi indicare la destinazione dell'uscita didattica o visita guidata
+exception.autorizzazione_no_svolgimento: Devi indicare la modalità di svolgimento dell'uscita didattica o visita guidata
+exception.autorizzazione_no_accompagnatori: Devi indicare gli accompagnatori dell'uscita didattica o visita guidata
+exception.autorizzazione_no_partenza: Devi indicare il luogo di partenza per l'uscita didattica o visita guidata
+exception.autorizzazione_no_rientro: Devi indicare la modalità di rientro dall'uscita didattica o visita guidata
+exception.pdf_import: Impossibile importare il file PDF

@@ -1346,7 +1346,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $this->em->getRepository(DefinizioneConsultazione::class)->findBY([], ['nome' => 'ASC']);
+    $dati = $this->em->getRepository(DefinizioneConsultazione::class)->gestione();
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'consultazioni', $dati, $info);
   }

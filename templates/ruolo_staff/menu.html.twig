@@ -37,10 +37,11 @@
         <li{{ app.request.attributes.get('_route') == 'documenti_docenti' ? ' class="active"' }}><a href="{{ path('documenti_docenti') }}" title="Mostra i documenti dei docenti">Visualizza documenti</a></li>
       </ul>
     </li>
-    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:16] == 'richieste_modulo' ? ' active' }}">
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] in ['richieste_modu', 'richieste_cons', 'autorizzazioni'] ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i moduli inviati">Moduli<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
         <li{{ app.request.attributes.get('_route') == 'richieste_modulo_evacuazione' ? ' class="active"' }}><a href="{{ path('richieste_modulo_evacuazione') }}" title="Visualizza i moduli delle prove di evacuazione">Evacuazione</a></li>
+        {# <li{{ app.request.attributes.get('_route')[:14] == 'autorizzazioni' ? ' class="active"' }}><a href="{{ path('autorizzazioni_lista') }}" title="Gestione delle autorizzazioni alle attività">Autorizzazioni</a></li> #}
         <li{{ app.request.attributes.get('_route') == 'richieste_consultazioni' ? ' class="active"' }}><a href="{{ path('richieste_consultazioni') }}" title="Visualizza le consultazioni">Consultazioni</a></li>
         <li{{ app.request.attributes.get('_route') == 'richieste_modulo_lista' ? ' class="active"' }}><a href="{{ path('richieste_modulo_lista') }}" title="Visualizza gli altri moduli inviati">Altri</a></li>
       </ul>

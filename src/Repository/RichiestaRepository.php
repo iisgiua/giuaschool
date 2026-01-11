@@ -11,6 +11,7 @@ namespace App\Repository;
 use DateTime;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
+use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\DefinizioneConsultazione;
 use App\Entity\Richiesta;
 use App\Entity\Staff;
@@ -69,7 +70,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('r.definizioneRichiesta', 'dr')
       ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
-      ->where('dr.gestione=1 AND c.sede=:sede')
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.') AND dr.gestione=1 AND c.sede=:sede')
       ->andWhere($sql)
 			->setParameter('sede', $criteri['sede'])
       ->orderBy('dr.nome,r.data,r.inviata', 'ASC');
@@ -153,7 +154,7 @@ class RichiestaRepository extends BaseRepository {
       ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
-      ->where('dr.abilitata=:abilitata AND dr.gestione=1 AND dr.tipo!=:tipo AND r.stato=:stato')
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.') AND dr.abilitata=:abilitata AND dr.gestione=1 AND dr.tipo!=:tipo AND r.stato=:stato')
       ->andWhere($sql)
       ->groupBy('s.nomeBreve')
       ->orderBy('s.ordinamento', 'ASC')
@@ -195,7 +196,7 @@ class RichiestaRepository extends BaseRepository {
       ->join('r.definizioneRichiesta', 'dr')
       ->join('r.classe', 'c')
       ->join('c.sede', 's')
-      ->where("dr.abilitata=1 AND dr.tipo=:tipo AND r.stato='I'")
+      ->where("NOT (dr INSTANCE OF ".DefinizioneConsultazione::class.") AND dr.abilitata=1 AND dr.tipo=:tipo AND r.stato='I'")
       ->andWhere($sql)
 			->setParameter('tipo', $tipo)
       ->orderBy('s.ordinamento,c.anno,c.sezione,r.data', 'ASC');
@@ -247,7 +248,7 @@ class RichiestaRepository extends BaseRepository {
       ->join(Alunno::class, 'a', 'WITH', 'a.id=r.utente')
       ->join('r.classe', 'c')
       ->join('c.sede', 's')
-      ->where("dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")
+      ->where("NOT (dr INSTANCE OF ".DefinizioneConsultazione::class.") AND dr.abilitata=1 AND dr.gestione=0 AND dr.tipo='#' AND dr.id=:modulo AND r.stato='I'")
       ->andWhere($sql)
 			->setParameter('modulo', $criteri['tipo'])
       ->orderBy('s.ordinamento,c.anno,c.sezione,a.cognome,a.nome,r.data', 'ASC');
@@ -402,6 +403,57 @@ class RichiestaRepository extends BaseRepository {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle autorizzazioni firmate per il modulo e l'alunno indicato
+   *
+   * @param DefinizioneAutorizzazione $modulo Modulo di autorizzazione
+   * @param Alunno $alunno Alunno che si sta autorizzazando
+   *
+   * @return array Lista associativa con i dati
+   */
+  public function autorizzazioni(DefinizioneAutorizzazione $modulo, Alunno $alunno): array {
+    // legge autorizzazioni
+    $autorizzazioni = $this->createQueryBuilder('r')
+      ->join(Genitore::class, 'g1', 'WITH', 'g1.alunno=:alunno')
+      ->join(Genitore::class, 'g2', 'WITH', 'g2.alunno=:alunno AND g2.id!=g1.id AND g2.username > g1.username')
+      ->where('r.definizioneRichiesta=:modulo AND r.stato IN (:stati)')
+      ->andWhere('r.utente=:alunno OR r.utente=g1.id OR r.utente=g2.id')
+      ->setParameter('alunno', $alunno)
+      ->setParameter('modulo', $modulo)
+      ->setParameter('stati', ['I', 'G'])
+      ->orderBy('r.inviata', 'ASC')
+      ->getQuery()
+      ->getResult();
+    // restituisce dati
+    return $autorizzazioni;
+  }
+
+  /**
+   * Restituisce i dettagli sulle autorizzazioni firmate per il modulo indicato
+   *
+   * @param DefinizioneAutorizzazione $modulo Modulo di autorizzazione
+   *
+   * @return array Lista associativa con i dati
+   */
+  public function autorizzazioniDettagli(DefinizioneAutorizzazione $modulo): array {
+    // legge autorizzazioni
+    $autorizzazioni = $this->createQueryBuilder('r')
+      // ->select('c.anno,c.sezione,c.gruppo,a.cognome,a.nome,')
+      // ->join(Alunno::class, 'a')
+      // ->join('a.classe', 'c')
+      // ->join(Genitore::class, 'g1', 'WITH', 'g1.alunno=a.id')
+      // ->join(Genitore::class, 'g2', 'WITH', 'g2.alunno=a.id AND g2.id!=g1.id AND g2.username>g1.username')
+      ->where('r.definizioneRichiesta=:modulo AND r.stato IN (:stati)')
+      // ->andWhere('r.utente=a.id OR r.utente=g1.id OR r.utente=g2.id')
+      ->setParameter('modulo', $modulo)
+      ->setParameter('stati', ['I', 'G'])
+      // ->groupBy('c.anno,c.sezione,c.gruppo,a.cognome,a.nome,r.documento')
+      ->getQuery()
+      ->getResult();
+    // restituisce dati
+    return $autorizzazioni;
   }
 
 }

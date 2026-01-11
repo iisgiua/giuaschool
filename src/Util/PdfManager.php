@@ -113,10 +113,11 @@ class PdfManager {
    * Importa un documento PDF esistente
    *
    * @param string $file Percorso completo del file PDF da importare
+   * @param int $footer Altezza del piè di pagina da cancellare in mm (default=0, nessuna cancellazione)
    *
    * @return bool Vero se importazione è avvenuta correttamente, falso altrimenti
    */
-  public function import(string $file): bool {
+  public function import(string $file, int $footer=0): bool {
     if (strtolower(substr($file, -4)) != '.pdf') {
       // non è un documento PDF
       return false;
@@ -140,6 +141,13 @@ class PdfManager {
         return false;
       }
     }
+    // layout documento
+    $this->pdf->SetMargins(15, 20, 15, true);
+    $this->pdf->SetAutoPageBreak(true, 20);
+    $this->pdf->setPrintHeader(false);
+    $this->pdf->setPrintFooter(false);
+    // font predefinito
+    $this->pdf->SetFont('times', '', 12);
     // importa tutto il documento
     for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
       // importa una pagina
@@ -147,6 +155,15 @@ class PdfManager {
       $this->pdf->AddPage();
       // imposta le dimensioni della pagina importata
       $this->pdf->useTemplate($templateId, ['adjustPageSize' => true]);
+      if ($footer > 0) {
+        $this->pdf->SetFillColor(255, 255, 255);
+        $this->pdf->Rect(0, $this->pdf->getPageHeight() - $footer, $this->pdf->getPageWidth(), $footer, 'F');
+        // PDF: footer
+        $this->pdf->SetFooterMargin(10);
+        $this->pdf->setFooterFont(['helvetica', '', 9]);
+        $this->pdf->setFooterData([0, 0, 0], [255, 255, 255]);
+        $this->pdf->setPrintFooter(true);
+      }
     }
     // importazione eseguita
     return true;
