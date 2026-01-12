@@ -1,0 +1,43 @@
+####################
+# DefinizioneConsultazioneFixtures - dati di test
+#
+# Dati per la gesstione di una consultazione:
+#   nome: nome univoco della richiesta
+#   sede: sede del modulo, null per tutte le sedi
+#   richiedenti: lista dei ruoli degli utenti autorizzati a inviare la richiesta
+#   destinatari: lista dei ruoli degli utenti autorizzati a gestire la richiesta
+#   modulo: nome del file del modulo di richiesta da compilare da parte del richiedente
+#   campi: lista dei campi da compilare nel modulo: nome1 => tipo1, nome2 => tipo2... I tipi ammessi sono: string/int/float/bool/date/time
+#   allegati: numero di allegati da inserire nella richiesta
+#   tipo: codifica del tipo di richiesta
+#   unica: indica se è ammessa una sola richiesta per l'utente
+#   gestione: indica se il modulo richiede la gestione degli stati
+#   abilitata: indica se la definizione della richiesta è abilitata
+#   inizio: data e ora dell'inizio della consultazione
+#   fine: data e ora della fine della consultazione
+#   classi: lista delle classi destinatarie
+#   dati: lista di informazioni per la gestione delle autorizzazioni
+####################
+
+
+include:
+  - SedeFixtures.yml
+
+
+App\Entity\DefinizioneAutorizzazione:
+  definizione_autorizzazione_{1..5}:
+    nome (unique): '<substr(<word()>, 0, 128)>'
+    sede: '@sede_1'
+    richiedenti: '<randomElement(["DN", "AN", "AM", "GN"])>'
+    destinatari: '<randomElement(["DN", "SN", "DN,SN"])>'
+    modulo: '<substr(<text()>, 0, 128)>'
+    campi: '<array_combine(<words(3)>, <sentences(3)>)>'
+    allegati: '<numberBetween(0, 3)>'
+    tipo: '<randomElement(["D", "U", "E", "V", "*"])>'
+    unica: '<boolean(50)>'
+    gestione: '<boolean(50)>'
+    abilitata: true
+    inizio: '<dateTimeBetween("-1 month", "now")>'
+    fine: '<dateTimeBetween($inizio, "+1 month")>'
+    classi: []
+    dati: []

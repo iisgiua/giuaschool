@@ -25,6 +25,7 @@ include:
   - DefinizioneConsiglioFixtures.yml
   - DefinizioneRichiestaFixtures.yml
   - DefinizioneConsultazioneFixtures.yml
+  - DefinizioneAutorizzazioneFixtures.yml
   - DefinizioneScrutinioFixtures.yml
   - DerogaAssenzaFixtures.yml
   - DocenteFixtures.yml

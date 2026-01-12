@@ -8,9 +8,8 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Entity\DefinizioneConsultazione;
+use App\Entity\DefinizioneAutorizzazione;
 use App\Tests\EntityTestCase;
-use DateTime;
 use ReflectionClass;
 
 
@@ -18,7 +17,7 @@ use ReflectionClass;
 * Unit test dell'entità DefinizioneConsultazione
 *
 */
-class DefinizioneConsultazioneTest extends EntityTestCase {
+class DefinizioneAutorizzazioneTest extends EntityTestCase {
 
  /**
    * Definisce dati per i test.
@@ -26,9 +25,9 @@ class DefinizioneConsultazioneTest extends EntityTestCase {
    */
   protected function setUp(): void {
     // nome dell'entità
-    $this->entity = DefinizioneConsultazione::class;
+    $this->entity = DefinizioneAutorizzazione::class;
     // campi da testare
-    $this->fields = ['nome', 'sede', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'gestione', 'tipo', 'inizio', 'fine', 'classi'];
+    $this->fields = ['nome', 'sede', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'gestione', 'tipo', 'inizio', 'fine', 'classi', 'dati'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -83,7 +82,8 @@ class DefinizioneConsultazioneTest extends EntityTestCase {
           ($field == 'inizio' ? $this->faker->dateTime() :
           ($field == 'fine' ? $this->faker->dateTime() :
           ($field == 'classi' ? $this->faker->optional($weight = 50, $default = [])->passthrough($this->faker->sentences($i)) :
-          null))))))))))))));
+          ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
+          null)))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -125,7 +125,7 @@ class DefinizioneConsultazioneTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $this->assertSame('Consultazione: '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
+    $this->assertSame('Autorizzazione: '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -135,24 +135,6 @@ class DefinizioneConsultazioneTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
-    // inizio
-    $property = $this->getPrivateProperty(DefinizioneConsultazione::class, 'inizio');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
-    $existent->setInizio(new DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
-    $existent->setInizio(new DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
-    // fine
-    $property = $this->getPrivateProperty(DefinizioneConsultazione::class, 'fine');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
-    $existent->setFine(new DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
-    $existent->setFine(new DateTime());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
   }
 
 }

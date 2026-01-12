@@ -34,9 +34,9 @@ class DefinizioneRichiestaTest extends EntityTestCase {
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'sede_id', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'gestione', 'abilitata', 'tipo', 'categoria', 'inizio', 'fine', 'classi']];
+    $this->canRead = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'sede_id', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'gestione', 'abilitata', 'tipo', 'categoria', 'inizio', 'fine', 'classi', 'dati']];
     // SQL write
-    $this->canWrite = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'sede_id', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'gestione', 'abilitata', 'tipo', 'categoria', 'inizio', 'fine', 'classi']];
+    $this->canWrite = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'sede_id', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'gestione', 'abilitata', 'tipo', 'categoria', 'inizio', 'fine', 'classi', 'dati']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
