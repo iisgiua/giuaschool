@@ -21,6 +21,7 @@ security:
         invalidate_session: false
       custom_authenticators:
         - 'App\Security\GSuiteAuthenticator'
+        - 'App\Security\MimSpidAuthenticator'
         - 'App\Security\SpidAuthenticator'
         - 'App\Security\FormAuthenticator'
         - 'App\Security\AppAuthenticator'

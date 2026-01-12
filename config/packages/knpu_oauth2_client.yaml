@@ -1,6 +1,7 @@
 knpu_oauth2_client:
   clients:
     gsuite:
+      # provider GOOGLE
       type: google
       client_id: '%env(OAUTH_GOOGLE_CLIENT_ID)%'
       client_secret: '%env(OAUTH_GOOGLE_CLIENT_SECRET)%'
@@ -17,3 +18,23 @@ knpu_oauth2_client:
       use_oidc_mode: false
       # whether to check OAuth2 'state': defaults to true
       use_state: true
+    mimspid:
+      # provider generico OAuth2
+      type: generic
+      client_id: '%env(MIMSPID_CLIENT_ID)%'
+      client_secret: '%env(MIMSPID_CLIENT_SECRET)%'
+      # route che riceve la chiamata di ritorno (callback)
+      redirect_route: login_mimspid_check
+      redirect_params: {}
+      # impostazioni OAuth2 aggiuntive
+      use_state: true
+      # classe per il provider standard League OAuth2
+      provider_class: League\OAuth2\Client\Provider\GenericProvider
+      # configurazione del Gateway delle Identità MIM
+      provider_options:
+        # endpoint di autorizzazione
+        urlAuthorize: 'https://eid.istruzione.it/eid-gateway-oidc/oauth2/authorize'
+        # endpoint token
+        urlAccessToken: 'https://eid.istruzione.it/eid-gateway-oidc/oauth2/token'
+        # NON ESISTE userinfo endpoint nel Gateway MIM
+        urlResourceOwnerDetails: ''

@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
- * OAuth2Controller - gestione dell'autenticazione su provider esterno (Google Workspace)
+ * OAuth2Controller - gestione dell'autenticazione su provider esterno (Google Workspace e SPID tramite MIM)
  *
  * @author Antonello Dessì
  */
@@ -57,11 +57,35 @@ class OAuth2Controller extends BaseController {
   /**
    * Esegue autenticazione su Google Workspace tramite GsuiteAuthenticator
    *
-   * @param Request $request Pagina richiesta
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
    */
   #[Route(path: '/login/gsuite/check', name: 'login_gsuite_check')]
   public function check(ClientRegistry $clientRegistry) {
+  }
+
+  /**
+   * Avvia l'autenticazione su provider esterno SPID tramite gateway MIM.
+   *
+   * @param ClientRegistry $clientRegistry Client che richiede il servizio
+   *
+   * @return Response Redirezione al servizio richiesto
+   */
+   #[Route('/login/mimspid', name: 'mimspid_login')]
+  public function loginMimSpid(ClientRegistry $clientRegistry): Response {
+    // redirezione allo SPID MIM
+    return $clientRegistry
+      ->getClient('mimspid')
+      ->redirect(['openid', 'iam', 'gateway'], []);
+  }
+
+  /**
+   * Esegue l'autenticazione su provider esterno SPID tramite gateway MIM.
+   *
+   * @param Request $request Pagina richiesta
+   * @param ClientRegistry $clientRegistry Client che richiede il servizio
+   */
+  #[Route(path: '/login/mimspid/check', name: 'login_mimspid_check')]
+  public function checkMimSpid(): void {
   }
 
 }
