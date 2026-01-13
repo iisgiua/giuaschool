@@ -8,6 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
+use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\DefinizioneConsultazione;
 use App\Tests\EntityTestCase;
 use DateTime;
@@ -123,7 +124,13 @@ class DefinizioneConsultazioneTest extends EntityTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existents = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($existents as $item) {
+      if (!$item instanceOf(DefinizioneAutorizzazione::class)) {
+        $existent = $item;
+        break;
+      }
+    }
     // toString
     $this->assertSame('Consultazione: '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
