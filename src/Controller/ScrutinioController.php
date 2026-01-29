@@ -203,7 +203,10 @@ class ScrutinioController extends BaseController {
               }
               if ($prop->getUnico() === null) {
                 // nessun voto
-                $errori[0] = 'exception.no_voto';
+                if ($cattedra->getMateria()->getTipo() != 'E') {
+                  // manca voto (esclusa Ed.Civica)
+                  $errori[0] = 'exception.no_voto';
+                }
                 continue;
               }
               if ($prop->getUnico() < $info['valutazioni']['min']) {
@@ -213,12 +216,12 @@ class ScrutinioController extends BaseController {
                 // corregge voto max
                 $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['max']);
               }
-              if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
-                // voto inferiore a quello dello scrutinio di giugno: non lo memorizza
-                $errori[1] = 'exception.proposta_sospeso_inferiore_a_finale';
-                $this->em->detach($prop);
-                continue;
-              }
+              // if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
+              //   // voto inferiore a quello dello scrutinio di giugno: non lo memorizza
+              //   $errori[1] = 'exception.proposta_sospeso_inferiore_a_finale';
+              //   $this->em->detach($prop);
+              //   continue;
+              // }
               if ($prop->getUnico() < $info['valutazioni']['suff'] && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
                 $errori[2] = 'exception.no_recupero';
