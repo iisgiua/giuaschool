@@ -22,7 +22,6 @@ Schema dello scenario: Visualizza messaggio di errore per voti incompleti
     | utente                          | classe           | cattedra                 |
     | @docente_curricolare_1:username | @classe_1A:id    | @cattedra_1A_1:id        |
     | @docente_religione_1:username   | @classe_1A:id    | @cattedra_1A_6:id        |
-    | @docente_curricolare_2:username | @classe_1A:id    | @cattedra_1A_civica_2:id |
     | @docente_itp_2:username         | @classe_3CAMB:id | @cattedra_3CAMB_1:id     |
     | @docente_curricolare_3:username | @classe_3CAMB:id | @cattedra_3C_3:id        |
 
