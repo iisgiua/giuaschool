@@ -945,6 +945,9 @@ page.autorizzazioni.edit: Modifica Autorizzazione
 title.autorizzazioni.edit: Crea o modifica il modulo di autorizzazione per una attività
 page.autorizzazioni.add: Invia Autorizzazione
 title.autorizzazioni.add: Invia l'autorizzazione dell'attività
+page.autorizzazioni.dettagli: Dettagli Autorizzazione
+title.autorizzazioni.dettagli: Dettagli per l'autorizzazione dell'attività
+
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Eventi
@@ -1252,7 +1255,7 @@ message.scrutinio_non_attivo: Non è possibile inserire o modificare i dati dell
 message.giudizio_condotta_NC: "Non ci sono elementi di valutazione."
 message.giudizio_condotta_5: "Ha assunto comportamenti di particolare gravità
 riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli
-studenti, nonché il regolamento di Istituto, prevedano l’irrogazione di sanzioni
+studenti, nonché il regolamento di Istituto prevedano l’irrogazione di sanzioni
 disciplinari che comportino l’allontanamento temporaneo dello studente dalla
 comunità scolastica per periodi superiori a 15 giorni e qualora lo studente non
 abbia dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da

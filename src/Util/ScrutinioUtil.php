@@ -2162,7 +2162,6 @@ class ScrutinioUtil {
       ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id')
       ->join('e.scrutinio', 's')
       ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
-      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
 			->setParameter('lista', $lista)
 			->setParameter('esito', 'A')
 			->setParameter('classe', $classe)

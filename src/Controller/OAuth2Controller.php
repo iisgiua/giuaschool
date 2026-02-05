@@ -75,7 +75,7 @@ class OAuth2Controller extends BaseController {
     // redirezione allo SPID MIM
     return $clientRegistry
       ->getClient('mimspid')
-      ->redirect(['openid', 'iam', 'gateway'], []);
+      ->redirect(['iam openid gateway'], []);
   }
 
   /**
