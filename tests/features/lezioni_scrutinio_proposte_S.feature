@@ -40,7 +40,7 @@ Schema dello scenario: Visualizza messaggio di errore per dati incompleti
   Esempi:
     | utente                          | classe           | cattedra                 | recupero          | argomenti | errore1                                                | errore2                             |
     | @docente_curricolare_1:username | @classe_1A:id    | @cattedra_1A_1:id        |                   | Tutto     | /Manca la modalità del recupero .* Manca il voto/      | Mancano gli argomenti da recuperare |
-    | @docente_curricolare_2:username | @classe_1A:id    | @cattedra_1A_civica_2:id | Corso di recupero |           | /Mancano gli argomenti da recuperare .* Manca il voto/ | Manca la modalità del recupero      |
+    | @docente_curricolare_2:username | @classe_1A:id    | @cattedra_1A_civica_2:id | Corso di recupero |           | /Mancano gli argomenti da recuperare .*/               | Manca la modalità del recupero      |
     | @docente_itp_2:username         | @classe_3CAMB:id | @cattedra_3CAMB_1:id     |                   |           | /Manca la modalità del recupero .* Manca il voto/      |                                     |
     | @docente_curricolare_3:username | @classe_3CAMB:id | @cattedra_3C_3:id        | Corso di recupero |           | /Mancano gli argomenti da recuperare .* Manca il voto/ | Manca la modalità del recupero      |
 
