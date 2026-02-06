@@ -8,7 +8,6 @@
 
 namespace App\Security;
 
-use App\Entity\Spid;
 use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
@@ -91,29 +90,27 @@ class MimSpidAuthenticator extends AbstractAuthenticator {
     $jwt = $accessToken->getToken();
     $parti = explode('.', $jwt);
     $datiJson = base64_decode(strtr($parti[1], '-_', '+/'));
+    // decodifica dati
+    $dati = json_decode($datiJson, true);
+    $codiceFiscale = $dati['sub'];
     // crea e restituisce il passaporto
     return new SelfValidatingPassport(
-      new UserBadge($datiJson, $this->getUser(...)));
+      new UserBadge($codiceFiscale, $this->getUser(...)));
   }
 
   /**
    * Restituisce l'utente corrispondente all'identificatore fornito
    *
-   * @param string $datiJson Dati codificati con i dati identificativi dell'utente
+   * @param string $codiceFiscale Codice fiscale identificativo dell'utente
    *
    * @return UserInterface|null L'utente trovato o null se errore
    *
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser(string $datiJson): ?UserInterface {
+  public function getUser(string $codiceFiscale): ?UserInterface {
     $user = null;
-    // decodifica dati
-    $dati = json_decode($datiJson, true);
-    $nome = $dati['given_name'];
-    $cognome = $dati['family_name'];
-    $codiceFiscale = $dati['sub'];
     // utente autenticato su SPID: controlla se esiste nel registro e se è abilitato allo SPID
-    $user = $this->em->getRepository(Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+    $user = $this->em->getRepository(Utente::class)->profiliAttiviCodiceFiscale($codiceFiscale, true);
     if (empty($user)) {
       // utente non esiste nel registro
       $this->logger->error('Utente non valido nell\'autenticazione MIM-SPID.',
