@@ -320,6 +320,17 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_SISTEMA'
     sottoMenu:
+  menu_opzione_SISTEMA9:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Configura&nbsp;SPID/CIE'
+    descrizione: 'Configura l''accesso SPID/CIE tramite il gateway MIM'
+    url: 'sistema_spid'
+    ordinamento: 9
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
   menu_opzione_SISTEMA10:
     ruolo: 'M'
     funzione: ''

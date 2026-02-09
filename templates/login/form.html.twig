@@ -128,17 +128,9 @@
 {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
 <link href="{{ asset('vendor/spid/css/spid-sp-access-button.min.css') }}" rel="stylesheet">
 {% endif %}
-<style>
-.spid-idp-button .spid-idp-button-menu li > a img { padding: 0px 10px 0px 10px; }
-.spid-idp-button .spid-idp-button-menu li > a, .spid-idp-button .spid-idp-button-menu label { padding-bottom: 5px; }
-#spid-idp-button-medium-get { text-align: left; }
-</style>
 {% endblock %}
 
 {% block pagina_js_fine %}
-{% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
-<script type="text/javascript" src="{{ asset('vendor/spid/js/spid-sp-access-button.min.js') }}"></script>
-{% endif %}
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
@@ -152,78 +144,6 @@ $(document).ready(function() {
       async: false
     });
   });
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-small-root-get");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-medium-root-get");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-large-root-get");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-xlarge-root-get");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-small-root-post");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-medium-root-post");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-large-root-post");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
-});
-$(document).ready(function(){
-    var rootList = $("#spid-idp-list-xlarge-root-post");
-    var idpList = rootList.children(".spid-idp-button-link");
-    var lnkList = rootList.children(".spid-idp-support-link");
-    while (idpList.length) {
-        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
-    }
-    rootList.append(lnkList);
 });
 </script>
 {% endblock %}

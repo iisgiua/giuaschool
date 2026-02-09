@@ -322,6 +322,6 @@ App\Entity\Configurazione:
   configurazione_ACCESSO5:
     categoria: 'ACCESSO'
     parametro: 'spid'
-    descrizione: 'Indica la modalit&agrave; dell''accesso SPID: \<em>no</em> = non utilizzato, <em>si</em> = utilizzato, <em>validazione</em> = utilizzato in validazione.<br>[si|no|validazione]'
+    descrizione: 'Indica la modalit&agrave; dell''accesso SPID: \<em>no</em> = non abilitato, <em>si</em> = abilitato.<br>[si|no]'
     valore: 'no'
     gestito: true

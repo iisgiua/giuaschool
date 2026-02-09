@@ -1,68 +1,8 @@
       <div class="col-sm-12 text-center gs-pt-3">
-
-        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
-        <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
-          <span class="italia-it-button-icon"><img src="{{ asset('spid/spid-sp-access-button/img/spid-ico-circle-bb.svg') }}" onerror="this.src='{{ asset('spid/spid-sp-access-button/img/spid-ico-circle-bb.png') }}'; this.onerror=null;" alt="" /></span>
-          <span class="italia-it-button-text">Entra con SPID</span>
+        <a href="{{ path('mimspid_login') }}" style="width:auto" class="italia-it-button italia-it-button-size-m button-spid" title="Usa l'accesso tramite SPID, CIE o eIDAS">
+          <span class="italia-it-button-icon"><img src="{{ asset('img/spid-ico-circle-bb.svg') }}" /></span>
+          <span class="italia-it-button-text">Entra con SPID - CIE - eIDAS</span>
         </a>
-        <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
-          <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
-            <li class="spid-idp-button-link" data-idp="arubaid">
-              <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="{{ asset('vendor/spid/img/spid-idp-arubaid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-arubaid.png') }}'; this.onerror=null;" alt="Aruba ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="etnaid">
-              <a href="{{ path('spid_login', {idp: 'IdEtna'}) }}"><span class="spid-sr-only">Etna ID</span><img src="{{ asset('vendor/spid/img/spid-idp-etnaid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-etnaid.png') }}'; this.onerror=null;" alt="Etna ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="infocertid">
-              <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="{{ asset('vendor/spid/img/spid-idp-infocertid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-infocertid.png') }}'; this.onerror=null;" alt="Infocert ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="lepidaid">
-              <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="{{ asset('vendor/spid/img/spid-idp-lepidaid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-lepidaid.png') }}'; this.onerror=null;" alt="Lepida ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="namirialid">
-              <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="{{ asset('vendor/spid/img/spid-idp-namirialid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-namirialid.png') }}'; this.onerror=null;" alt="Namirial ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="posteid">
-              <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="{{ asset('vendor/spid/img/spid-idp-posteid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-posteid.png') }}'; this.onerror=null;" alt="Poste ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="sielteid">
-              <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="{{ asset('vendor/spid/img/spid-idp-sielteid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-sielteid.png') }}'; this.onerror=null;" alt="Sielte ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="teamid">
-              <a href="{{ path('spid_login', {idp: 'IdTeamsystem'}) }}"><span class="spid-sr-only">Team System ID</span><img src="{{ asset('vendor/spid/img/spid-idp-teamsystemid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-teamsystemid.png') }}'; this.onerror=null;" alt="Team System ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="spiditalia">
-              <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="{{ asset('vendor/spid/img/spid-idp-spiditalia.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-spiditalia.png') }}'; this.onerror=null;" alt="SpidItalia" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="timid">
-              <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="{{ asset('vendor/spid/img/spid-idp-timid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-timid.png') }}'; this.onerror=null;" alt="Tim ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="infocamereid">
-              <a href="{{ path('spid_login', {idp: 'IdInfocamere'}) }}"><span class="spid-sr-only">InfoCamere ID</span><img src="{{ asset('vendor/spid/img/spid-idp-infocamereid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-infocamereid.png') }}'; this.onerror=null;" alt="InfoCamere ID" /></a>
-            </li>
-            <li class="spid-idp-button-link" data-idp="intesigroupspid">
-              <a href="{{ path('spid_login', {idp: 'IdIntesiGroup'}) }}"><span class="spid-sr-only">Intesi Group SPID</span><img src="{{ asset('vendor/spid/img/spid-idp-intesigroupspid.svg') }}" onerror="this.src='{{ asset('vendor/spid/img/spid-idp-intesigroupspid.png') }}'; this.onerror=null;" alt="Intesi Group SPID" /></a>
-            </li>
-            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'validazione' %}
-            <!-- AGID-VALIDATORE-INIZIO -->
-            <li class="spid-idp-support-link">
-              <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
-            </li>
-            <!-- AGID-VALIDATORE-FINE -->
-            {% endif %}
-            <li class="spid-idp-support-link">
-              <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
-            </li>
-            <li class="spid-idp-support-link">
-              <a href="https://www.spid.gov.it/richiedi-spid" target="_blank">Non hai SPID?</a>
-            </li>
-            <li class="spid-idp-support-link">
-              <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
-            </li>
-          </ul>
-        </div>
-        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
-
         <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
           <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
         </a>
@@ -74,15 +14,19 @@
                   <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
                   <span class="sr-only">{{ 'label.close'|trans }}</span>
                 </button>
-                <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h3>
+                <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Informazioni sulle identità digitali</h3>
               </div>
               <div class="modal-body text-left">
+                <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h4>
                 <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
-                  <br>Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
-                  <br>Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
-                <p><a href="https://www.spid.gov.it" target="_blank"><strong>Maggiori informazioni su SPID</strong></a></p>
-                <p><a href="https://www.spid.gov.it/richiedi-spid" target="_blank"><strong>Non hai SPID?</strong></a></p>
-                <p><a href="https://www.spid.gov.it/serve-aiuto" target="_blank"><strong>Serve aiuto?</strong></a></p>
+                  Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
+                  Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
+                <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è CIE?</h4>
+                <p>La Carta di Identità Elettronica (CIE) è il documento personale che attesta l’identità del cittadino.
+                  Dotata di microprocessore, oltre a comprovare l'identità personale, permette l'accesso ai servizi digitali della Pubblica Amministrazione.</p>
+                <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">What is eIDAS?</h4>
+                <p>The eIDAS regulation is the legislative basis for electronic interactions between businesses, citizens and public authorities, improving the security and efficiency of online services and e-business transactions in the European Union.
+                  With the Login with eIDAS button, the Italian node enables the cross-border interoperability of digital identities (eID) and its implementation will enable the circularity of Italian eIDs among EU member states.</p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>

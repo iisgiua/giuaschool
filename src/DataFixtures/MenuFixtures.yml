@@ -54,7 +54,7 @@ App\Entity\Menu:
     nome: ''
     descrizione: ''
     mega: false
-    opzioni: '<collection(@menu_opzione_SISTEMA1, @menu_opzione_SISTEMA2, @menu_opzione_SISTEMA3, @menu_opzione_SISTEMA4, @menu_opzione_SISTEMA5, @menu_opzione_SISTEMA6, @menu_opzione_SISTEMA7, @menu_opzione_SISTEMA8, @menu_opzione_SISTEMA10, @menu_opzione_SISTEMA11, @menu_opzione_SISTEMA12)>'
+    opzioni: '<collection(@menu_opzione_SISTEMA1, @menu_opzione_SISTEMA2, @menu_opzione_SISTEMA3, @menu_opzione_SISTEMA4, @menu_opzione_SISTEMA5, @menu_opzione_SISTEMA6, @menu_opzione_SISTEMA7, @menu_opzione_SISTEMA8, @menu_opzione_SISTEMA9, @menu_opzione_SISTEMA10, @menu_opzione_SISTEMA11, @menu_opzione_SISTEMA12)>'
 
   # ----- sottomenu SCUOLA -----
   menu_SCUOLA:

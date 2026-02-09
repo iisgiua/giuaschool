@@ -237,6 +237,22 @@ class ModuloType extends AbstractType {
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false]);
+    } elseif ($options['form_mode'] == 'spid') {
+      // form configurazione spid
+      $builder
+        ->add('abilitato', ChoiceType::class, ['label' => 'label.mimspid_abilitazione',
+          'data' => $options['values'][0],
+          'choices' => ['label.si' => 'si', 'label.no' => 'no'],
+          'expanded' => true,
+          'multiple' => false,
+          'label_attr' => ['class' => 'radio-inline'],
+          'required' => true])
+        ->add('client', TextType::class, ['label' => 'label.mimspid_client',
+          'data' => $options['values'][1],
+          'required' => false])
+        ->add('secret', TextType::class, ['label' => 'label.mimspid_secret',
+          'data' => $options['values'][2],
+          'required' => false]);
     }
     // aggiunge pulsanti al form
     if ($options['return_url']) {

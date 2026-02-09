@@ -742,6 +742,9 @@ label.classi_attivita: Classi
 label.filtro_tipo_attivita: Filtra per tipo di attività
 label.tutte_attivita: Qualsiasi attività
 label.filtro_nome: Filtra per nome
+label.mimspid_abilitazione: Abilita l'accesso SPID/CIE
+label.mimspid_client: Codice del client configurato sul SIDI
+label.mimspid_secret: Codice segreto configurato sul SIDI
 
 
 ##### PAGINE #####
@@ -947,6 +950,8 @@ page.autorizzazioni.add: Invia Autorizzazione
 title.autorizzazioni.add: Invia l'autorizzazione dell'attività
 page.autorizzazioni.dettagli: Dettagli Autorizzazione
 title.autorizzazioni.dettagli: Dettagli per l'autorizzazione dell'attività
+page.sistema.spid: Configura SPID/CIE
+title.sistema.spid: Configurazione accesso SPID/CIE tramite gateway del MIM
 
 
 page.agenda_compito: Agenda Compiti
@@ -1574,6 +1579,7 @@ message.cattedra_esistente_non_creata: Alcune cattedre non sono state inserite p
 message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla scuola in formato PDF e inviato tramite email all'indirizzo ..., indicando come oggetto 'ELABORATO CITTADINANZA ATTIVA - CLASSE - COGNOME NOME', entro e non oltre il giorno ..."
 message.autorizzazioni_edit: Inserisci tutti i dati richiesti per il modulo di autorizzazione dell'attività
 message.autorizzazioni_autorizza: Leggi i dettagli dell'attività e invia l'autorizzazione
+message.sistema_spid: Per configurare l'accesso SPID/CIE che utilizza il gateway delle identità del MIM, inserisci il codice del client e il codice segreto che è stato configurato attraverso il portale SIDI (aggregazione scuole).
 
 
 
@@ -1902,3 +1908,4 @@ exception.autorizzazione_no_accompagnatori: Devi indicare gli accompagnatori del
 exception.autorizzazione_no_partenza: Devi indicare il luogo di partenza per l'uscita didattica o visita guidata
 exception.autorizzazione_no_rientro: Devi indicare la modalità di rientro dall'uscita didattica o visita guidata
 exception.pdf_import: Impossibile importare il file PDF
+exception.spid_no_client_secret: Devi inserire sia il codice del client che il codice segreto.

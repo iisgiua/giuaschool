@@ -12,8 +12,6 @@ require_once __DIR__.'/DataMigrator.php';
 
 use Exception;
 use PDO;
-use SPID_PHP\Setup;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 use ZipArchive;
 
@@ -75,11 +73,8 @@ class Updater {
       2 => 'database',
       3 => 'schema',
       4 => 'admin',
-      5 => 'spid',
-      6 => 'spidData',
-      7 => 'spidConfig',
-      8 => 'clean',
-      9 => 'end'],
+      5 => 'clean',
+      6 => 'end'],
     'update' => [
       1 => 'unzip',
       2 => 'fileUpdate',
@@ -741,7 +736,7 @@ class Updater {
    *    [0] = descrizione del requisito (string)
    *    [1] = impostazione attuale (string)
    *    [2] = se il requisito è soddisfatto (bool)
-   * Il tipo di requisito può essere: 'mandatory', 'optional' o 'spid'
+   * Il tipo di requisito può essere: 'mandatory' o 'optional'
    *
    * @return array Vettore associativo con le informazioni sui requisiti controllati
    */
@@ -803,10 +798,16 @@ class Updater {
       'Estensione PHP: PDO',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
-    // // estensioni PHP: mysqli
+    // estensioni PHP: mysqli
     $test = function_exists('mysqli_connect');
     $data['mandatory'][] = [
       'Estensione PHP: mysqli',
+      $test ? 'INSTALLATA' : 'NON INSTALLATA',
+      $test];
+    // estensioni PHP: openssl
+    $test = extension_loaded('openssl');
+    $data['mandatory'][] = [
+      'Estensione PHP: openssl',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
     // directory scrivibili: .
@@ -895,48 +896,6 @@ class Updater {
       'Applicazione UNOCONV per la conversione in PDF',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
       $test];
-    // --- requisiti SPID ---
-    // estensioni PHP: openssl
-    $test = extension_loaded('openssl');
-    $data['spid'][] = [
-      'Estensione PHP: openssl',
-      $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
-    // directory scrivibili: vendor/italia/spid-php
-    $path = $this->projectPath.'/vendor/italia/spid-php';
-    $test = is_dir($path) && is_writable($path);
-    $data['spid'][] = [
-      'Cartella di configurazione dello SPID con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/cert
-    $path = $this->projectPath.'/vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/cert';
-    $test = is_dir($path) && is_writable($path);
-    $data['spid'][] = [
-      'Cartella di utilizzo del certificato SPID con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: vendor/italia/spid-php/cert
-    $path = $this->projectPath.'/vendor/italia/spid-php/cert';
-    $test = is_dir($path) && is_writable($path);
-    $data['spid'][] = [
-      'Cartella di archivio del certificato SPID con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: config/metadata
-    $path = $this->projectPath.'/config/metadata';
-    $test = is_dir($path) && is_writable($path);
-    $data['spid'][] = [
-      'Cartella di memorizzazione dei metadata con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log
-    $path = $this->projectPath.'/vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log';
-    $test = is_dir($path) && is_writable($path);
-    $data['spid'][] = [
-      'Cartella di log dello SPID con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
     // controllo finale
     $data['check']['mandatory'] = true;
     foreach ($data['mandatory'] as $mandatory) {
@@ -945,10 +904,6 @@ class Updater {
     $data['check']['optional'] = true;
     foreach ($data['optional'] as $optional) {
       $data['check']['optional'] &= $optional[2];
-    }
-    $data['check']['spid'] = true;
-    foreach ($data['spid'] as $spid) {
-      $data['check']['spid'] &= $spid[2];
     }
     // restituisce dati
     return $data;
@@ -1135,409 +1090,6 @@ class Updater {
     $page['step'] = $step.' - Utente amministratore';
     $page['title'] = 'Credenziali di accesso per l\'utente amministratore';
     include($this->publicPath.'/install/update_page.php');
-  }
-
-  /**
-   * Configura l'accesso tramite SPID
-   *
-   * @param int $step Passo della procedura
-   */
-  private function spid(int $step): void {
-    if (isset($_POST['install']['submit'])) {
-      // imposta l'utilizzo dello SPID
-      $spid = $_POST['install']['spid'];
-      // controlla requisiti
-      $req = $this->checkRequirements();
-      $success = $req['check']['spid'];
-      unset($req['check']);
-      unset($req['mandatory']);
-      unset($req['optional']);
-      // imposta dati della pagina
-      if (!$success && $spid != 'no') {
-        // errore: rimane sulla pagina
-        $page['danger'] = 'Non è possibile utilizzare lo SPID perché non sono soddisfatti i requisiti di sistema.';
-        $page['requirements'] = $req;
-        $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
-      } elseif ($spid == 'validazione') {
-        // validazione: va alla pagina successiva
-        $page['success'] = 'Verrà configurato lo SPID e sarà creato un nuovo certificato e i relativi metadati.';
-        $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
-      } elseif ($spid == 'si') {
-        // spid attivo: salta configurazione
-        $page['success'] = 'Non verrà modificata la configurazione esistente dello SPID.';
-        $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 2);
-      } else {
-        // spid non usato: salta tutto
-        $page['success'] = 'Non verrà inserito l\'accesso SPID nella pagina di accesso del registro elettronico.';
-        $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 3);
-      }
-    } else {
-      // imposta dati della pagina
-      $page['spid'] = $this->getParameter('spid');
-      $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
-    }
-    // imposta dati della pagina
-    $page['version'] = 'INSTALL';
-    $page['step'] = $step.' - Accesso SPID';
-    $page['title'] = 'Configurazione dell\'accesso tramite SPID';
-    include($this->publicPath.'/install/update_page.php');
-  }
-
-  /**
-   * Gestione delle impostazioni dello SPID
-   *
-   * @param int $step Passo della procedura
-   */
-  private function spidData(int $step): void {
-    // legge configurazione esistente
-    $spid = json_decode(file_get_contents(
-      $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
-    // controlla pagina
-    if (isset($_POST['install']['submit'])) {
-      // controlla i dati
-      $spid['entityID'] = strtolower(trim((string) $_POST['install']['entityID']));
-      if (empty($spid['entityID'])) {
-        // errore
-        throw new Exception('Non è stato indicato l\'identificativo del service provider', $step);
-      }
-      if (!str_starts_with($spid['entityID'], 'http://') && !str_starts_with($spid['entityID'], 'https://')) {
-        // errore
-        throw new Exception('L\'identificativo del service provider deve essere un indirizzo internet', $step);
-      }
-      $spid['spLocalityName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spLocalityName']));
-      if (empty($spid['spLocalityName'])) {
-        // errore
-        throw new Exception('Non è stata indicata la sede legale del service provider', $step);
-      }
-      $spid['spName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spName']));
-      if (empty($spid['spName'])) {
-        // errore
-        throw new Exception('Non è stato indicato il nome del service provider', $step);
-      }
-      $spid['spDescription'] = str_replace("'", "\\'", trim((string) $_POST['install']['spDescription']));
-      if (empty($spid['spDescription'])) {
-        // errore
-        throw new Exception('Non è stata indicata la descrizione del service provider', $step);
-      }
-      $spid['spOrganizationName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationName']));
-      if (empty($spid['spOrganizationName'])) {
-        // errore
-        throw new Exception('Non è stato indicato il nome completo dell\'ente', $step);
-      }
-      $spid['spOrganizationDisplayName'] = str_replace("'", "\\'", trim((string) $_POST['install']['spOrganizationDisplayName']));
-      if (empty($spid['spOrganizationDisplayName'])) {
-        // errore
-        throw new Exception('Non è stato indicato il nome abbreviato dell\'ente', $step);
-      }
-      $spid['spOrganizationURL'] = trim((string) $_POST['install']['spOrganizationURL']);
-      if (empty($spid['spOrganizationURL'])) {
-        // errore
-        throw new Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $step);
-      }
-      if (!str_starts_with($spid['spOrganizationURL'], 'http://') && !str_starts_with($spid['spOrganizationURL'], 'https://')) {
-        // errore
-        throw new Exception('L\'indirizzo internet dell\'ente non è valido', $step);
-      }
-      $spid['spOrganizationCode'] = trim((string) $_POST['install']['spOrganizationCode']);
-      if (empty($spid['spOrganizationCode'])) {
-        // errore
-        throw new Exception('Non è stato indicato il codice IPA dell\'ente', $step);
-      }
-      $spid['spOrganizationEmailAddress'] = trim((string) $_POST['install']['spOrganizationEmailAddress']);
-      if (empty($spid['spOrganizationEmailAddress'])) {
-        // errore
-        throw new Exception('Non è stato indicato l\'indirizzo email dell\'ente', $step);
-      }
-      if (!str_contains($spid['spOrganizationEmailAddress'], '@')) {
-        // errore
-        throw new Exception('L\'indirizzo email dell\'ente non è valido', $step);
-      }
-      $spid['spOrganizationTelephoneNumber'] = str_replace(' ', '', trim((string) $_POST['install']['spOrganizationTelephoneNumber']));
-      if (empty($spid['spOrganizationTelephoneNumber'])) {
-        // errore
-        throw new Exception('Non è stato indicato il numero di telefono dell\'ente', $step);
-      }
-      if ($spid['spOrganizationTelephoneNumber'][0] != '+' && !str_starts_with($spid['spOrganizationTelephoneNumber'], '00')) {
-        // aggiunge prefisso internazionale
-        $spid['spOrganizationTelephoneNumber'] = '+39'.$spid['spOrganizationTelephoneNumber'];
-      }
-      // imposta dominio service provider
-      $spid['spDomain'] = parse_url((string) $spid['entityID'], PHP_URL_HOST);
-      if (str_starts_with($spid['spDomain'], 'www.')) {
-        $spid['spDomain'] = substr($spid['spDomain'], 4);
-      }
-      // imposta identificatore ente
-      $spid['spOrganizationIdentifier'] = 'PA:IT-'. $spid['spOrganizationCode'];
-      if (empty($spid['installDir'])) {
-        // imposta directory di installazione SPID
-        $spid['installDir'] = $this->projectPath.'/vendor/italia/spid-php';
-      }
-      if (empty($spid['wwwDir'])) {
-        // imposta directory pubblica dello SPID
-        $spid['wwwDir'] = $this->publicPath;
-      }
-      if (empty($spid['adminPassword'])) {
-        // imposta password admin SPID
-        $spid['adminPassword'] = uniqid();
-      }
-      if (empty($spid['secretsalt'])) {
-        // imposta salt per crittografia
-        $spid['secretsalt'] = bin2hex(random_bytes(16));
-      }
-      // salva configurazione
-      unlink($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json');
-      file_put_contents($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json',
-        json_encode($spid));
-      // rimuove certificato esistente
-      if (file_exists($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.crt')) {
-        unlink($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.crt');
-        unlink($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.pem');
-      }
-      // imposta dati della pagina
-      $page['success'] = 'Le nuove impostazioni per l\'accesso SPID sono state inserite correttamente.';
-      $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
-    } else {
-      if (empty($spid['entityID'])) {
-        // imposta default
-        $url = parse_url($this->urlPath);
-        $spid['entityID'] = $url['scheme'].'://'.$url['host'];
-      }
-      // rimuove escaped chars
-      $spid['spLocalityName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spLocalityName']));
-      $spid['spName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spName']));
-      $spid['spDescription'] = htmlspecialchars(str_replace("\\'", "'", $spid['spDescription']));
-      $spid['spOrganizationName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spOrganizationName']));
-      $spid['spOrganizationDisplayName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spOrganizationDisplayName']));
-      // imposta dati della pagina
-      $page['spidData'] = $spid;
-      $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
-    }
-    // imposta dati della pagina
-    $page['version'] = 'INSTALL';
-    $page['step'] = $step.' - Impostazioni SPID';
-    $page['title'] = 'Impostazioni per l\'accesso tramite SPID';
-    include($this->publicPath.'/install/update_page.php');
-  }
-
-  /**
-   * Configurazione finale dello SPID
-   *
-   * @param int $step Passo della procedura
-   */
-  private function spidConfig(int $step): void {
-    // controlla pagina
-    if (isset($_POST['install']['submit'])) {
-      // legge metadata
-      $xml = base64_decode((string) $_POST['install']['xml']);
-      // scrive metadata
-      if (file_put_contents($this->projectPath.'/config/metadata/registro-spid.xml', $xml) === false) {
-        // errore di creazione del file
-        throw new Exception('Impossibile memorizzare il file dei metadata (registro-spid.xml).', $step);
-      }
-      // imposta dati della pagina
-      $page['success'] = 'L\'accesso SPID è stato configurato correttamente.';
-      $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
-    } else {
-      // configurazione finale
-      $this->spidSetup();
-      // JS per scaricare metadata
-      $page['javascript'] = <<<EOT
-        $('#gs-waiting').modal('show');
-        $.get({
-          'url': '/spid/module.php/saml/sp/metadata.php/service',
-          'dataType': 'text'
-        }).done(function(xml) {
-          $('#install_xml').val(btoa(xml));
-          $('#install_submit').click();
-        });
-        EOT;
-      // imposta dati della pagina
-      $page['spidConfig'] = true;
-      $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
-    }
-    // imposta dati della pagina
-    $page['version'] = 'INSTALL';
-    $page['step'] = $step.' - Configurazione SPID';
-    $page['title'] = 'Configurazione finale dello SPID';
-    include($this->publicPath.'/install/update_page.php');
-  }
-
-  /**
-   * Configura la libreria SPID-PHP
-   *
-   */
-  private function spidSetup(): void {
-    // inizializza
-    require $this->projectPath.'/vendor/symfony/filesystem/Filesystem.php';
-    $fs = new Filesystem();
-    // legge configurazione e imposta validazione
-    $validate = ($this->getParameter('spid') == 'validazione');
-    $spid = json_decode(file_get_contents(
-      $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
-    $spid['addValidatorIDP'] = $validate;
-    // salva configurazione modificata
-    unlink($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json');
-    file_put_contents($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json',
-      json_encode($spid));
-    // crea certificati
-    if (file_exists($spid['installDir'].'/cert/spid-sp.crt') &&
-        file_exists($spid['installDir'].'/cert/spid-sp.pem')) {
-      // certificato esiste: aggiorna configurazione SAML
-      $fs->mirror($spid['installDir'].'/cert',
-        $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert');
-    } else {
-      // crea file configurazione SSL
-      unlink($spid['installDir'].'/spid-php-openssl.cnf');
-      $sslFile = fopen($spid['installDir'].'/spid-php-openssl.cnf', 'w');
-      fwrite($sslFile, 'oid_section = spid_oids'."\n");
-      fwrite($sslFile, "\n".'[ req ]'."\n");
-      fwrite($sslFile, 'default_bits = 3072'."\n");
-      fwrite($sslFile, 'default_md = sha256'."\n");
-      fwrite($sslFile, 'distinguished_name = dn'."\n");
-      fwrite($sslFile, 'encrypt_key = no'."\n");
-      fwrite($sslFile, 'prompt = no'."\n");
-      fwrite($sslFile, 'req_extensions  = req_ext'."\n");
-      fwrite($sslFile, "\n".'[ spid_oids ]'."\n");
-      fwrite($sslFile, 'spid-privatesector-SP=1.3.76.16.4.3.1'."\n");
-      fwrite($sslFile, 'spid-publicsector-SP=1.3.76.16.4.2.1'."\n");
-      fwrite($sslFile, 'uri=2.5.4.83'."\n");
-      fwrite($sslFile, "\n".'[ dn ]'."\n");
-      fwrite($sslFile, 'organizationName='.$spid['spOrganizationName']."\n");
-      fwrite($sslFile, 'commonName='.$spid['spOrganizationDisplayName']."\n");
-      fwrite($sslFile, 'uri='.$spid['entityID']."\n");
-      fwrite($sslFile, 'organizationIdentifier='.$spid['spOrganizationIdentifier']."\n");
-      fwrite($sslFile, 'countryName='.$spid['spCountryName']."\n");
-      fwrite($sslFile, 'localityName='.$spid['spLocalityName']."\n");
-      fwrite($sslFile, "\n".'[ req_ext ]'."\n");
-      fwrite($sslFile, 'certificatePolicies = @spid_policies'."\n");
-      fwrite($sslFile, "\n".'[ spid_policies ]'."\n");
-      fwrite($sslFile, 'policyIdentifier = spid-publicsector-SP'."\n");
-      fclose($sslFile);
-      // crea certificato
-      $errors = '';
-      $sslParams = [
-        'config' => $spid['installDir'].'/spid-php-openssl.cnf',
-        'x509_extensions' => 'req_ext'];
-  	 	if (($sslPkey = openssl_pkey_new($sslParams)) === false) {
-        // errore di creazione del certificato
-        while (($e = openssl_error_string()) !== false) {
-          $errors .= '<br>'.$e;
-        }
-        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_new).'.$errors, $step);
-      }
-      $sslDn = [
-        'organizationName' => $spid['spOrganizationName'],
-        'commonName' => $spid['spOrganizationDisplayName'],
-        'uri' => $spid['entityID'],
-        'organizationIdentifier' => $spid['spOrganizationIdentifier'],
-        'countryName' => $spid['spCountryName'],
-        'localityName' => $spid['spLocalityName']];
-      if (($sslCsr = openssl_csr_new($sslDn, $sslPkey, $sslParams)) === false) {
-        // errore di creazione del certificato
-        while (($e = openssl_error_string()) !== false) {
-          $errors .= '<br>'.$e;
-        }
-        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_csr_new).'.$errors, $step);
-      }
-      if (($sslCert = openssl_csr_sign($sslCsr, null, $sslPkey, 730, $sslParams, time())) === false) {
-        // errore di creazione del certificato
-        while (($e = openssl_error_string()) !== false) {
-          $errors .= '<br>'.$e;
-        }
-        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_csr_sign).'.$errors, $step);
-      }
-      if (openssl_x509_export_to_file($sslCert, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.crt') === false) {
-        // errore di creazione del certificato
-        while (($e = openssl_error_string()) !== false) {
-          $errors .= '<br>'.$e;
-        }
-        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_x509_export_to_file).'.$errors, $step);
-      }
-      if (openssl_pkey_export_to_file($sslPkey, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.pem', null, $sslParams) === false) {
-        // errore di creazione del certificato
-        while (($e = openssl_error_string()) !== false) {
-          $errors .= '<br>'.$e;
-        }
-        throw new Exception('Impossibile creare il certificato per lo SPID (openssl_pkey_export_to_file).'.$errors, $step);
-      }
-      // copia in directory di configurazione SPID
-      $fs->mirror($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert',
-        $spid['installDir'].'/cert');
-    }
-    // crea link a dir pubblica
-    $fs->symlink($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/www',
-      $spid['wwwDir'].'/'.$spid['serviceName']);
-    // crea link a dir log
-    $fs->symlink($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/log',
-      $this->projectPath.'/var/log/'.$spid['serviceName']);
-    // personalizza configurazione SAML
-    $db = parse_url((string) $this->env['DATABASE_URL']);
-    $vars = [
-      '{{BASEURLPATH}}' => "'".$spid['serviceName']."/'",
-      '{{ADMIN_PASSWORD}}' => "'".$spid['adminPassword']."'",
-      '{{SECRETSALT}}' => "'".$spid['secretsalt']."'",
-      '{{TECHCONTACT_NAME}}' => "'".$spid['technicalContactName']."'",
-      '{{TECHCONTACT_EMAIL}}' => "'".$spid['technicalContactEmail']."'",
-      '{{ACSCUSTOMLOCATION}}' => "'".$spid['acsCustomLocation']."'",
-      '{{SLOCUSTOMLOCATION}}' => "'".$spid['sloCustomLocation']."'",
-      '{{SP_DOMAIN}}' => "'".$spid['spDomain']."'",
-      '{{DB_DSN}}' => "'".$db['scheme'].':host='.$db['host'].';port='.$db['port'].';dbname='.substr($db['path'], 1)."'",
-      '{{DB_USER}}' => "'".$db['user']."'",
-      '{{DB_PASW}}' => "'".$db['pass']."'"];
-    $template = file_get_contents($spid['installDir'].'/setup/config/config.tpl');
-    $customized = str_replace(array_keys($vars), $vars, $template);
-    $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/config.php';
-    if (file_put_contents($dest, $customized) === false) {
-      // errore di creazione del file
-      throw new Exception('Impossibile creare il file di configurazione SAML (config.php).', $step);
-    }
-    // personalizza configurazione SP
-    $vars = [
-      '{{ENTITYID}}' => "'".$spid['entityID']."'",
-      '{{NAME}}' => "'".$spid['spName']."'",
-      '{{DESCRIPTION}}' => "'".$spid['spDescription']."'",
-      '{{ORGANIZATIONNAME}}' => "'".$spid['spOrganizationName']."'",
-      '{{ORGANIZATIONDISPLAYNAME}}' => "'".$spid['spOrganizationDisplayName']."'",
-      '{{ORGANIZATIONURL}}' => "'".$spid['spOrganizationURL']."'",
-      '{{ACSINDEX}}' => $spid['acsIndex'],
-      '{{ATTRIBUTES}}' => implode(',', $spid['attr']),
-      '{{ORGANIZATIONCODETYPE}}' => "'".$spid['spOrganizationCodeType']."'",
-      '{{ORGANIZATIONCODE}}' => "'".$spid['spOrganizationCode']."'",
-      '{{ORGANIZATIONEMAILADDRESS}}' => "'".$spid['spOrganizationEmailAddress']."'",
-      '{{ORGANIZATIONTELEPHONENUMBER}}' => "'".$spid['spOrganizationTelephoneNumber']."'"];
-    $template = file_get_contents($spid['installDir'].'/setup/config/authsources_public.tpl');
-    $customized = str_replace(array_keys($vars), $vars, $template);
-    $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/authsources.php';
-    if (file_put_contents($dest, $customized) === false) {
-      // errore di creazione del file
-      throw new Exception('Impossibile creare il file di configurazione del Service Provider (authsources.php).', $step);
-    }
-    // aggiorna metadata
-    require ($spid['installDir'].'/setup/Setup.php');
-    require ($spid['installDir'].'/setup/Colors.php');
-    chdir($spid['installDir']);
-    try {
-      ob_start();
-      Setup::updateMetadata();
-      ob_end_clean();
-      chdir($this->projectPath.'/public/install');
-    } catch (Exception $e) {
-      // errore
-      chdir($this->projectPath.'/public/install');
-      throw new Exception($e->getMessage(), $step);
-    }
-    // copia HTML pulsante SPID
-    $pathSource = $spid['installDir'].'/vendor/italia/spid-sp-access-button/src/production';
-    $pathDest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/www/spid-sp-access-button';
-    foreach (['/css', '/img', '/js'] as $value) {
-      $source = $pathSource.$value;
-      $dest = $pathDest.$value;
-      $fs->mkdir($dest);
-      $fs->mirror($source, $dest);
-    }
-    // copia template twig per SPID
-    $fs->mirror($spid['installDir'].'/setup/simplesamlphp/simplesamlphp/templates',
-      $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/templates');
   }
 
   /**
