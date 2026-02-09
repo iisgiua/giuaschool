@@ -1873,14 +1873,13 @@ class SistemaController extends BaseController {
   }
 
   /**
-   * Imposta le informazioni di debug nel log di sistema
+   * Imposta la configurazione per SPID/CIE
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/sistema/spid', name: 'sistema_spid', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
