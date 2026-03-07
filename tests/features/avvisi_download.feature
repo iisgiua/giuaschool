@@ -71,7 +71,6 @@ Scenario: scarica da gestione l'allegato di un avviso
   E premi pulsante "Filtra"
   E premi pulsante "Visualizza"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
-  # E click su "Allegato 1" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
   E click su "Allegato 1"
   Allora file scaricato con nome "Allegato-1.pdf" e dimensione "61514"
 
@@ -81,7 +80,8 @@ Scenario: scarica da bacheca l'allegato di un avviso
   Quando premi pulsante "Visualizza"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
   E click su "Scarica l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
-  E click su "Visualizza l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
+  E click su "Visualizza l'allegato"
+  Allora file scaricato con nome "Allegato-1.pdf" e dimensione "61514"
 
 Scenario: scarica dal registro di classe l'allegato di un avviso
   Dato login utente "@docente_curricolare_1:username"
@@ -93,7 +93,8 @@ Scenario: scarica dal registro di classe l'allegato di un avviso
   E premi pulsante "Avviso"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
   E click su "Scarica l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
-  E click su "Visualizza l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
+  E click su "Visualizza l'allegato"
+  Allora file scaricato con nome "Allegato-1.pdf" e dimensione "61514"
 
 
 ################################################################################
