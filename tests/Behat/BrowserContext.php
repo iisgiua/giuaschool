@@ -569,8 +569,12 @@ class BrowserContext extends BaseContext implements Context {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
     $this->assertTrue(preg_match("/^(attachment|inline);\s*filename=(.*)$/i", (string) $headers['Content-Disposition'], $data));
-    $this->assertTrue($data[2] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
-    $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.$headers['Content-Length'].' byte]');
+    $this->assertEquals($testoParam, $data[2]);
+    if ($dimensione !== null) {
+        $content = $this->session->getPage()->getContent();
+        $this->assertEquals($dimensione, strlen($content));
+    }
+    $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.($dimensione ?? 0).' byte]');
   }
 
   /**
