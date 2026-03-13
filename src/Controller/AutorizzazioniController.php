@@ -16,6 +16,7 @@ use App\Form\DefinizioneAutorizzazioneType;
 use App\Form\FiltroType;
 use App\Form\RichiestaType;
 use App\Util\LogHandler;
+use App\Util\PdfManager;
 use App\Util\RichiesteUtil;
 use DateTime;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -296,8 +297,11 @@ class AutorizzazioniController extends BaseController {
     // crea pagina HTML
     $listaSedi = $this->em->getRepository(Sede::class)->lista();
     $templateTwig = $tpl->createTemplate($template);
-    $html = $tpl->render($templateTwig, ['autorizzazione' => $autorizzazione, 'ruolo' => 'GN',
+    $html1 = $tpl->render($templateTwig, ['autorizzazione' => $autorizzazione, 'ruolo' => 'GN',
       'sedi' => $listaSedi]);
+    $html2 = $tpl->render($templateTwig, ['autorizzazione' => $autorizzazione, 'ruolo' => 'AM',
+      'sedi' => $listaSedi]);
+    $html = $html1.'<hr style="border: 1px solid #999">'.$html2;
     // mostra la pagina di risposta
     return new Response($html);
   }
@@ -405,24 +409,37 @@ class AutorizzazioniController extends BaseController {
   /**
    * Mostra i dettagli delle autorizzazioni inviate
    *
-  //  * @param RichiesteUtil $ric Funzioni di utilità per la gestione dei moduli di richiesta
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param DefinizioneAutorizzazione $modulo Modulo dell'autorizzazione'
+   * @param string $formato Formato di visualizzazione (H=HTML, P=PDF)
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/autorizzazioni/dettagli/{modulo}', name: 'autorizzazioni_dettagli', requirements: ['modulo' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/autorizzazioni/dettagli/{modulo}/{formato}', name: 'autorizzazioni_dettagli', requirements: ['modulo' => '\d+', 'formato' => 'H|P'], defaults: ['formato' => 'H'], methods: ['GET'])]
   #[IsGranted('ROLE_STAFF')]
-  public function dettagli(
-        // Request $request, RichiesteUtil $ric, LogHandler $dblogger,
-                            #[MapEntity] DefinizioneAutorizzazione $modulo
-                            ): Response {
+  public function dettagli(PdfManager $pdf,
+                           #[MapEntity] DefinizioneAutorizzazione $modulo,
+                           string $formato): Response {
     // inizializza
     $info = [];
     $dati = [];
-
+    // informazioni per la visualizzazione
+    $info['modulo'] = $modulo;
+    // recupera dati
     $dati = $this->em->getRepository(Richiesta::class)->autorizzazioniDettagli($modulo);
-
     // pagina di risposta
+    if ($formato == 'P') {
+      // crea documento PDF
+      $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
+        'Autorizzazione per l\'attività: '.$modulo->getNome());
+      // contenuto in formato HTML
+      $html = $this->renderView('autorizzazioni/documento_dettagli.html.twig', ['dati' => $dati,
+        'info' => $info]);
+      $pdf->createFromHtml($html);
+      // invia il documento
+      $nomefile = 'lista-autorizzazioni.pdf';
+      return $pdf->send($nomefile);
+    }
     return $this->renderHtml('autorizzazioni', 'dettagli', $dati, $info);
   }
 

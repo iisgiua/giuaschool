@@ -1,10 +1,26 @@
-{% extends 'ruolo_genitore/index.html.twig' %}
+{% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
-
-{{dump()}}
-
+  <div class="alert alert-info gs-big gs-mb-2">
+    <strong>{{ ('label.tipo_attivita_'~info.modulo.tipo)|trans }}:</strong> <span class="gs-text-normal">{{ info.modulo.nome }}</span><br>
+    <strong>Data:</strong> <span class="gs-text-normal">{{ info.modulo.inizio|date('d/m/Y') }} dalle {{ info.modulo.inizio|date('G.i') }} alle {{ info.modulo.fine|date('G.i') }}</span>
+  </div>
+  <div class="row gs-mb-2">
+    <div class="col-sm-offset-6 col-sm-6 text-right">
+      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('autorizzazioni_dettagli', {modulo: info.modulo.id, formato: 'P'}) }}" role="button" title="Scarica il documento con l'elenco degli alunni autorizzati"><strong>Scarica elenco autorizzati</strong></a>
+      <a class="btn btn-sm btn-default gs-mr-2" href="{{ path('autorizzazioni_lista') }}" role="button" title="Ritorna alla gestione dei moduli delle autorizzazioni"><span class="glyphicon glyphicon-chevron-left gs-mr-2"></span><strong>Torna ai moduli</strong></a>
+    </div>
+  </div>
+  <h2 class="text-center gs-h2 gs-mt-2 gs-mb-3">Lista autorizzazioni ricevute</h2>
+  {% for c,cv in dati %}
+  <p class="gs-mt-3 gs-mb-0"><strong class="gs-big">Classe {{ c }} - Alunni autorizzati: {{ cv|length }}</strong></p>
+  <ul>
+    {% for a,av in cv %}
+    <li><strong>{{ av.alunno }}</strong> - Autorizzazione firmata da: {{ av.gen1_autorizza ? av.genitore1 }}{{ av.gen1_autorizza and (av.gen2_autorizza or av.alu_autorizza) ? ', ' }}{{ av.gen2_autorizza ? av.genitore2 }}{{ av.gen2_autorizza and av.alu_autorizza ? ', ' }}{{ av.alu_autorizza ? 'alunno maggiorenne' }}</li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
 </div>
 {% endblock %}

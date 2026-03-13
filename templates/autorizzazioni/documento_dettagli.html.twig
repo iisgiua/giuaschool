@@ -1,0 +1,19 @@
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
+</div>
+<p style="text-align:center; font-size:13pt">
+  <strong>{{ ('label.tipo_attivita_'~info.modulo.tipo)|trans }}: {{ info.modulo.nome }}</strong><br>
+  <strong>Data: {{ info.modulo.inizio|date('d/m/Y') }} dalle {{ info.modulo.inizio|date('G.i') }} alle {{ info.modulo.fine|date('G.i') }}</strong>
+</p>
+<br>
+<div style="text-align:center;font-size:12pt"><strong>Lista autorizzazioni ricevute</strong></div>
+{% for c,cv in dati %}
+  <div style="font-size:12pt"><strong>Classe {{ c }}</strong> - Alunni autorizzati: {{ cv|length }}
+    <ul>
+  {% for a,av in cv %}
+      <li style="font-size:11pt"><strong>{{ av.alunno }}</strong> - Autorizzazione firmata da: {{ av.gen1_autorizza ? av.genitore1 }}{{ av.gen1_autorizza and (av.gen2_autorizza or av.alu_autorizza) ? ', ' }}{{ av.gen2_autorizza ? av.genitore2 }}{{ av.gen2_autorizza and av.alu_autorizza ? ', ' }}{{ av.alu_autorizza ? 'alunno maggiorenne' }}</li>
+  {% endfor %}
+    </ul>
+  </div>
+{% endfor %}

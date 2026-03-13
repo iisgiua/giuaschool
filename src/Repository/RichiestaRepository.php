@@ -440,20 +440,45 @@ class RichiestaRepository extends BaseRepository {
   public function autorizzazioniDettagli(DefinizioneAutorizzazione $modulo): array {
     // legge autorizzazioni
     $autorizzazioni = $this->createQueryBuilder('r')
-      // ->select('c.anno,c.sezione,c.gruppo,a.cognome,a.nome,')
-      // ->join(Alunno::class, 'a')
-      // ->join('a.classe', 'c')
-      // ->join(Genitore::class, 'g1', 'WITH', 'g1.alunno=a.id')
-      // ->join(Genitore::class, 'g2', 'WITH', 'g2.alunno=a.id AND g2.id!=g1.id AND g2.username>g1.username')
+      ->select("(r.utente) AS utente,c.anno,c.sezione,c.gruppo,a.id AS alu_id,CONCAT(a.cognome,' ',a.nome) AS alu_nome,g1.id AS gen1_id,CONCAT(g1.cognome,' ',g1.nome) AS gen1_nome, g2.id AS gen2_id,CONCAT(g2.cognome,' ',g2.nome) AS gen2_nome")
+      ->join(Alunno::class, 'a')
+      ->join('a.classe', 'c')
+      ->join(Genitore::class, 'g1', 'WITH', 'g1.alunno=a.id')
+      ->join(Genitore::class, 'g2', 'WITH', 'g2.alunno=a.id AND g2.id!=g1.id AND g2.username>g1.username')
       ->where('r.definizioneRichiesta=:modulo AND r.stato IN (:stati)')
-      // ->andWhere('r.utente=a.id OR r.utente=g1.id OR r.utente=g2.id')
+      ->andWhere('r.utente=a.id OR r.utente=g1.id OR r.utente=g2.id')
       ->setParameter('modulo', $modulo)
       ->setParameter('stati', ['I', 'G'])
-      // ->groupBy('c.anno,c.sezione,c.gruppo,a.cognome,a.nome,r.documento')
+      ->orderBy('c.anno,c.sezione,c.gruppo,a.cognome,a.nome', 'ASC')
       ->getQuery()
       ->getResult();
+    // raggruppa dati per classe e alunno
+    $dati = [];
+    foreach ($autorizzazioni as $autorizzazione) {
+      $classe = $autorizzazione['anno'].'ª '.$autorizzazione['sezione'].
+        ($autorizzazione['gruppo'] ? '-'.$autorizzazione['gruppo'] : '');
+      $aluId = $autorizzazione['alu_id'];
+      if (!isset($dati[$classe][$aluId])) {
+        $dati[$classe][$aluId] = [
+          'alunno' => $autorizzazione['alu_nome'],
+          'genitore1' => $autorizzazione['gen1_nome'],
+          'genitore2' => $autorizzazione['gen2_nome'],
+          'alu_autorizza' => false,
+          'gen1_autorizza' => false,
+          'gen2_autorizza' => false];
+      }
+      if ($autorizzazione['utente'] == $aluId) {
+        $dati[$classe][$aluId]['alu_autorizza'] = true;
+      }
+      if ($autorizzazione['utente'] == $autorizzazione['gen1_id']) {
+        $dati[$classe][$aluId]['gen1_autorizza'] = true;
+      }
+      if ($autorizzazione['utente'] == $autorizzazione['gen2_id']) {
+        $dati[$classe][$aluId]['gen2_autorizza'] = true;
+      }
+    }
     // restituisce dati
-    return $autorizzazioni;
+    return $dati;
   }
 
 }
