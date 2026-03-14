@@ -567,16 +567,26 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
-    $headers = array_change_key_case($this->session->getResponseHeaders(), CASE_LOWER);
-    $this->assertTrue(preg_match("/^(attachment|inline);\s*filename=(.*)$/i", (string) $headers['content-disposition'], $data));
-    $this->assertEquals($testoParam, $data[2]);
-    $content = $this->session->getDriver()->getContent();
-    $size = $headers['content-length'] ?? strlen($content);
+
+    $path = $this->kernel->getProjectDir().'/tests/downloads/'.$testoParam;
+    $this->assertTrue(file_exists($path));
+    $size = filesize($path);
     if ($dimensione !== null) {
       // se è indicata la dimensione, controlla che sia corretta
-      $this->assertEquals($dimensione, $size);
+        $this->assertEquals($dimensione, $size);
     }
-    $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.$size.' byte]');
+    $this->log('DOWNLOAD', 'File '.$testoParam.' ['.$size.' byte]');
+
+    // $headers = array_change_key_case($this->session->getResponseHeaders(), CASE_LOWER);
+    // $this->assertTrue(preg_match("/^(attachment|inline);\s*filename=(.*)$/i", (string) $headers['content-disposition'], $data));
+    // $this->assertEquals($testoParam, $data[2]);
+    // $content = $this->session->getDriver()->getContent();
+    // $size = $headers['content-length'] ?? strlen($content);
+    // if ($dimensione !== null) {
+    //   // se è indicata la dimensione, controlla che sia corretta
+    //   $this->assertEquals($dimensione, $size);
+    // }
+    // $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.$size.' byte]');
   }
 
   /**

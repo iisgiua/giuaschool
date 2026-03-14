@@ -21,7 +21,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get latest release tag
         id: latest-release
@@ -87,7 +87,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Restore Docker image tar
         uses: actions/cache@v4
@@ -119,7 +119,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set matrix of features
         id: set-matrix
@@ -138,7 +138,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Restore Docker image tar
         uses: actions/cache@v4
@@ -161,7 +161,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run test update procedure
         run: |
@@ -177,7 +177,7 @@ jobs:
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate changelog from latest release
         id: changelog
