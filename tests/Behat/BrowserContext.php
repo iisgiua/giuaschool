@@ -568,12 +568,13 @@ class BrowserContext extends BaseContext implements Context {
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
 
-    $path = $this->kernel->getProjectDir().'/tests/downloads/'.$testoParam;
+    $path = $this->kernel->getProjectDir().'/tests/download/'.$testoParam;
+    $this->waitForFile($path);
     $this->assertTrue(file_exists($path));
     $size = filesize($path);
     if ($dimensione !== null) {
       // se è indicata la dimensione, controlla che sia corretta
-        $this->assertEquals($dimensione, $size);
+      $this->assertEquals($dimensione, $size);
     }
     $this->log('DOWNLOAD', 'File '.$testoParam.' ['.$size.' byte]');
 
@@ -1471,6 +1472,20 @@ class BrowserContext extends BaseContext implements Context {
   protected function waitForPage(): void {
     sleep(1);
     $this->session->wait(30000, "document.readyState === 'complete'");
+  }
+
+  /**
+   * Aspetta che il download del file sia completato
+   *
+   */
+  protected function waitForFile(string $file): void {
+    $start = time();
+    while (time() - $start < 30) {
+      if (file_exists($file) && !file_exists($file . '.crdownload')) {
+        return;
+      }
+      usleep(200000); // 200 ms
+    }
   }
 
   /**
