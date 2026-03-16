@@ -32,10 +32,10 @@ jobs:
           type: "stable"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Restore image cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}
@@ -44,7 +44,7 @@ jobs:
         run: mkdir -p ${{ env.IMAGE_CACHE_DIR }}
 
       - name: Build image and save as tar
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: test
@@ -90,7 +90,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Restore Docker image tar
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}
@@ -141,7 +141,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Restore Docker image tar
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.IMAGE_CACHE_DIR }}
           key: ${{ runner.os }}-docker-image-${{ github.sha }}

@@ -180,6 +180,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
     ];
     $driver = new ChromeDriver('http://chrome_headless:9222', null,'https://giuaschool_test', $capabilities);
     $this->session = new Session($driver);
+    $driver->getWebDriverSession()->execute('send_command', [
+      'cmd' => 'Page.setDownloadBehavior',
+      'params' => [
+          'behavior' => 'allow',
+          'downloadPath' => '/var/www/giuaschool/tests/temp/download']]);
     // ripulisce sessione
     $this->session->stop();
     $this->session->start();
