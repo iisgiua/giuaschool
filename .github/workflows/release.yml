@@ -150,4 +150,4 @@ jobs:
         run: |
           TAG="${{ needs.release.outputs.tag }}"
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${{ github.event.inputs.version }}" --build-arg NEWBUILD="0" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
-          docker run --no-sandbox --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
+          docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
