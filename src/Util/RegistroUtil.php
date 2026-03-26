@@ -159,12 +159,16 @@ class RegistroUtil {
    */
   public function azioneLezione(string $azione, DateTime $data, Docente $docente,
                                 Classe $classe, array $firme): bool {
-    if ($this->bloccoScrutinio($data, $classe)) {
-      // blocco scrutinio
-      return false;
-    }
+    // if ($this->bloccoScrutinio($data, $classe)) {
+    //   // blocco scrutinio
+    //   return false;
+    // }
     if ($azione == 'add') {
       // azione di creazione
+      if ($this->bloccoScrutinio($data, $classe)) {
+        // blocco scrutinio
+        return false;
+      }
       $oggi = new DateTime();
       if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
         // data non nel futuro
@@ -180,6 +184,11 @@ class RegistroUtil {
         return true;
       }
     } elseif ($azione == 'delete') {
+      // azione di cancellazione
+      if ($this->bloccoScrutinio($data, $classe)) {
+        // blocco scrutinio
+        return false;
+      }
       if (in_array($docente->getId(), array_reduce($firme, 'array_merge', []), true)) {
         // ok: docente ha firmato
         return true;

@@ -1580,6 +1580,7 @@ message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla sc
 message.autorizzazioni_edit: Inserisci tutti i dati richiesti per il modulo di autorizzazione dell'attività
 message.autorizzazioni_autorizza: Leggi i dettagli dell'attività e invia l'autorizzazione
 message.sistema_spid: Per configurare l'accesso SPID/CIE che utilizza il gateway delle identità del MIM, inserisci il codice del client e il codice segreto che è stato configurato attraverso il portale SIDI (aggregazione scuole).
+message.modifica_modulo_formativo_dopo_scrutinio: Non è possibile modificare i moduli formativi.
 
 
 

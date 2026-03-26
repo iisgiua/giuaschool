@@ -34,13 +34,17 @@
       <tr>
         <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
         <td>
+        {% if not v.materia|first is empty %}
           <strong>{% if v.materia|keys|first == 'R:S' %}Gruppo: Religione<br>{% elseif v.materia|keys|first == 'R:N' %}Gruppo: N.A.<br>{% elseif v.materia|keys|first == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif v.materia|keys|first[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}<br>{% endif %}</strong>
           {{ v.materia|first }}
+          <br>(<em>{% for d in v.docenti|first %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</em>)
+        {% endif %}
         </td>
         <td><small>{{ (v.argomenti|first)|raw }}</small></td>
         <td><small>{{ (v.attivita|first)|raw }}</small></td>
         {% if alunno.bes == 'H' %}
         <td><small>{{ (v.sostegno|first)|raw }}</small></td>
+        </small></td>
         {% endif %}
       </tr>
         {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}

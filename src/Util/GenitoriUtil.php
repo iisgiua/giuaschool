@@ -19,6 +19,7 @@ use App\Entity\Docente;
 use App\Entity\Entrata;
 use App\Entity\Esito;
 use App\Entity\Festivita;
+use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
 use App\Entity\Genitore;
 use App\Entity\Lezione;
@@ -103,11 +104,11 @@ class GenitoriUtil {
     // legge orario
     $scansioneoraria = $this->regUtil->orarioInData($data, $classe->getSede());
     // predispone dati lezioni come array associativo
-    $dati_lezioni = [];
+    $datiLezioni = [];
     foreach ($scansioneoraria as $s) {
       $ora = $s['ora'];
-      $dati_lezioni[$ora]['inizio'] = substr((string) $s['inizio'], 0, 5);
-      $dati_lezioni[$ora]['fine'] = substr((string) $s['fine'], 0, 5);
+      $datiLezioni[$ora]['inizio'] = substr((string) $s['inizio'], 0, 5);
+      $datiLezioni[$ora]['fine'] = substr((string) $s['fine'], 0, 5);
       // legge lezione
       $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
         ->join('l.classe', 'c')
@@ -124,34 +125,47 @@ class GenitoriUtil {
         // esistono lezioni
         foreach ($lezioni as $lezione) {
           $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
-          $dati_lezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve();
-          $dati_lezioni[$ora]['argomenti'][$gruppo] = trim((string) $lezione->getArgomento());
-          $dati_lezioni[$ora]['attivita'][$gruppo] = trim((string) $lezione->getAttivita());
-          $argSostegno = '';
-          if ($alunno->getBes() == 'H') {
-            // legge sostegno
-            $sostegno = $this->em->getRepository(FirmaSostegno::class)->createQueryBuilder('fs')
-              ->where('fs.lezione=:lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-              ->setParameter('lezione', $lezione)
-              ->setParameter('alunno', $alunno)
-              ->getQuery()
-              ->getResult();
-            foreach ($sostegno as $sost) {
-              $argSostegno .= ' '.trim($sost->getArgomento().' - '.$sost->getAttivita());
+          $datiLezioni[$ora]['materia'][$gruppo] = $lezione->getMateria()->getNomeBreve().
+              ($lezione->getSostituzione() && $lezione->getMateria()->getTipo() != 'U' ? ' ('.
+              $this->trans->trans('label.tipo_materia_U').')' : '');
+          $datiLezioni[$ora]['argomenti'][$gruppo] = trim((string) $lezione->getArgomento());
+          $datiLezioni[$ora]['attivita'][$gruppo] = trim((string) $lezione->getAttivita());
+          // legge firme
+          $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
+            ->join('f.docente', 'd')
+            ->where('f.lezione=:lezione')
+            ->orderBy('d.cognome,d.nome', 'ASC')
+            ->setParameter('lezione', $lezione)
+            ->getQuery()
+            ->getResult();
+          // docenti
+          $docenti = [];
+          $sostegno = '';
+          foreach ($firme as $f) {
+            $docenti[] = $f->getDocente()->getNome().' '.$f->getDocente()->getCognome();
+            if ($alunno->getBes() == 'H' && $f instanceOf FirmaSostegno &&
+                ($f->getAlunno() == null || $f->getAlunno()->getId() == $alunno->getId())) {
+              $separatore = (!empty($f->getArgomento()) && !empty($f->getAttivita())) ? ' - ' : '';
+              $argomenti = $f->getArgomento().$separatore.$f->getAttivita();
+              if (!empty($argomenti)) {
+                $sostegno .= $argomenti.'<br>';
+              }
             }
           }
-          $dati_lezioni[$ora]['sostegno'][$gruppo] = trim($argSostegno);
+          $datiLezioni[$ora]['docenti'][$gruppo] = $docenti;
+          $datiLezioni[$ora]['sostegno'][$gruppo] = $sostegno;
         }
       } else {
         // nessuna lezione esistente
-        $dati_lezioni[$ora]['materia']['N:'] = '';
-        $dati_lezioni[$ora]['argomenti']['N:'] = '';
-        $dati_lezioni[$ora]['attivita']['N:'] = '';
-        $dati_lezioni[$ora]['sostegno']['N:'] = '';
+        $datiLezioni[$ora]['materia']['N:'] = '';
+        $datiLezioni[$ora]['argomenti']['N:'] = '';
+        $datiLezioni[$ora]['attivita']['N:'] = '';
+        $datiLezioni[$ora]['docenti']['N:'] = '';
+        $datiLezioni[$ora]['sostegno']['N:'] = '';
       }
     }
     // memorizza lezioni del giorno
-    $dati['lezioni'] = $dati_lezioni;
+    $dati['lezioni'] = $datiLezioni;
     // legge annotazioni
     $annotazioni = $this->em->getRepository(Annotazione::class)->createQueryBuilder('a')
       ->join('a.docente', 'd')
