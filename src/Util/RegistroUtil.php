@@ -3499,9 +3499,18 @@ class RegistroUtil {
       }
     }
     if (!$cattedra && count($stato['sostituzione']) == 0) {
-      // errore: sostituzione impossibile
-      $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
-      return $stato;
+      // se ha cattedra di sostegno viene consentita compresenza
+      if ($this->em->getRepository(Cattedra::class)->docenteSostegno($docente)) {
+        // ok: sostituzione possibile
+        $stato = [];
+        $stato['sostituzioneSostegno'] = true;
+        $stato['trasforma']['S:'.(empty($classe->getGruppo()) ? 'N' : 'C')] = empty($classe->getGruppo()) ?
+          'sostegno' : 'gruppoSostegno';
+      } else {
+        // errore: sostituzione impossibile
+        $stato['errore'] = $this->trans->trans('message.lezione_incompatibile', ['ora' => $ora]);
+        return $stato;
+      }
     }
     // ok: nessun errore
     return $stato;
@@ -3524,7 +3533,11 @@ class RegistroUtil {
                                  string $gruppo, array $controllo, array $lezioni, array $firme): array  {
     // init
     $stato = [];
-    $tipoCattedra = (!$cattedra ? 'U' : $materia->getTipo()).':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
+    if (!empty($controllo['sostituzioneSostegno'])) {
+      $tipoCattedra = 'S:'.($tipoGruppo == 'R' ? 'N' : $tipoGruppo);
+    } else {
+      $tipoCattedra = (!$cattedra ? 'U' : $materia->getTipo()).':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
+    }
     $procedura = $controllo['trasforma'][$tipoCattedra];
     if (count($lezioni) > 0) {
       // trasformazione

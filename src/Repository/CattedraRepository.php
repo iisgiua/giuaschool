@@ -375,4 +375,24 @@ class CattedraRepository extends BaseRepository {
     return $query > 0;
   }
 
+  /**
+   * Restituisce VERO se il docente ha almeno una cattedra di sostegno (anche di potenziamento), FALSO altrimenti
+   *
+   * @param Docente $docente Docente di cui controllare le cattedre
+   *
+   * @return bool VERO se il docente ha cattedre di sostegno, FALSO altrimenti
+   */
+  public function docenteSostegno(Docente $docente): bool {
+    // lista cattedre
+    $cattedre = $this->createQueryBuilder('c')
+      ->select('COUNT(c.id)')
+      ->join('c.materia', 'm')
+      ->where("c.docente=:docente AND c.attiva=1 AND m.tipo='S'")
+      ->setParameter('docente', $docente)
+      ->getQuery()
+      ->getSingleScalarResult();
+    // restituisce dati
+    return $cattedre > 0;
+  }
+
 }

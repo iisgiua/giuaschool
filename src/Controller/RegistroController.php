@@ -301,6 +301,13 @@ class RegistroController extends BaseController
       // mostra messaggio di errore
       $this->addFlash('danger', $controllo['errore']);
       return $this->redirectToRoute('lezioni_registro_firme');
+    } elseif (!empty($controllo['sostituzioneSostegno'])) {
+      // sostituzione su sostegno
+      $materia = $this->em->getRepository(Materia::class)->findOneByTipo('S');
+      if (!$materia) {
+        // errore: dati inconsistenti
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
@@ -325,7 +332,7 @@ class RegistroController extends BaseController
         'choices'  => $oraFine,
         'translation_domain' => false,
         'required' => true]);
-    if (empty($classe->getGruppo()) && !$cattedra) {
+    if (empty($classe->getGruppo()) && !$cattedra && empty($controllo['sostituzioneSostegno'])) {
       // area comune: sostituzione su gruppi religione
       $opzioni = $controllo['sostituzione'];
       $form = $form
@@ -336,7 +343,8 @@ class RegistroController extends BaseController
           'label_attr' => ['class' => 'radio-inline col-sm-2'],
           'required' => true]);
     }
-    if (!$cattedra && empty($controllo['sostituzioneNA']) && empty($controllo['sostituzioneMultipla'])) {
+    if (!$cattedra && empty($controllo['sostituzioneNA']) && empty($controllo['sostituzioneMultipla']) &&
+        empty($controllo['sostituzioneSostegno'])) {
       // sostituzione: imposta materia
       $materie = $this->em->getRepository(Materia::class)->materieClasse($classe, true, true, 'C');
       $form = $form
@@ -380,7 +388,7 @@ class RegistroController extends BaseController
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // legge gruppo e tipo
-      if (!$cattedra && empty($classe->getGruppo())) {
+      if (!$cattedra && empty($classe->getGruppo()) && empty($controllo['sostituzioneSostegno'])) {
         // sostituzione
         $tipoGruppo = $form->get('tipoSostituzione')->getData() == 'T' ? 'N' : 'R';
         $gruppo = $tipoGruppo == 'N' ? '' : $form->get('tipoSostituzione')->getData();
@@ -479,7 +487,7 @@ class RegistroController extends BaseController
           $firma = (new FirmaSostegno())
             ->setLezione($lezione)
             ->setDocente($this->getUser())
-            ->setAlunno($cattedra->getAlunno())
+            ->setAlunno(empty($controllo['sostituzioneSostegno']) ? $cattedra->getAlunno() : null)
             ->setArgomento($form->get('argomento')->getData())
             ->setAttivita($form->get('attivita')->getData());
         } else {
@@ -546,6 +554,7 @@ class RegistroController extends BaseController
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla cattedra
+    $sostituzioneSostegno = false;
     if ($cattedra > 0) {
       // lezioni di una cattedra esistente
       $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
@@ -563,6 +572,8 @@ class RegistroController extends BaseController
         // errore: dati inconsistenti
         throw $this->createNotFoundException('exception.invalid_params');
       }
+      // sostituzione su sostegno
+      $sostituzioneSostegno = $this->em->getRepository(Cattedra::class)->docenteSostegno($this->getUser());
     }
     // controlla data
     $dataObj = DateTime::createFromFormat('Y-m-d', $data);
@@ -717,7 +728,7 @@ class RegistroController extends BaseController
         'data' => ($firmaDocente instanceOf FirmaSostegno) ? $firmaDocente->getAttivita() : $lezioneDocente->getAttivita(),
         'trim' => true,
         'required' => false]);
-    if ($materia->getTipo() != 'S') {
+    if ($materia->getTipo() != 'S' && !$sostituzioneSostegno) {
       // no sostegno
       $form = $form
         ->add('moduloFormativo', ChoiceType::class, ['label' => 'label.modulo_formativo',
@@ -751,7 +762,7 @@ class RegistroController extends BaseController
           ->setAttivita($form->get('attivita')->getData());
         $log['modifica'] = [$vecchiaLezione, $lezioneDocente];
       }
-      if ($materia->getTipo() != 'S') {
+      if ($materia->getTipo() != 'S' && !$sostituzioneSostegno) {
         $lezioneDocente->setModuloFormativo($form->get('moduloFormativo')->getData());
       }
       // altre modifiche
