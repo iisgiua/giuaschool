@@ -44,7 +44,6 @@
         <td><small>{{ (v.attivita|first)|raw }}</small></td>
         {% if alunno.bes == 'H' %}
         <td><small>{{ (v.sostegno|first)|raw }}</small></td>
-        </small></td>
         {% endif %}
       </tr>
         {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
@@ -52,6 +51,7 @@
         <td>
           <strong>{% if g == 'R:S' %}Gruppo: Religione<br>{% elseif g == 'R:N' %}Gruppo: N.A.<br>{% elseif g == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}<br>{% endif %}</strong>
           {{ m }}
+          <br>(<em>{% for d in v.docenti[g] %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</em>)
         </td>
         <td><small>{{ v.argomenti[g]|raw }}</small></td>
         <td><small>{{ v.argomenti[g]|raw }}</small></td>

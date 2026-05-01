@@ -160,26 +160,58 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
     $this->faker->addProvider($this->customProvider);
-    // impostazioni per il driver
+
+
+    $downloadDir = '/var/www/giuaschool/tests/temp/download';
+
     $capabilities = [
-      'prefs' => [
-        'download.default_directory' => '/var/www/giuaschool/tests/temp/download',
-        'download.prompt_for_download' => false,
-        'download.directory_upgrade' => true,
-        'safebrowsing.enabled' => true,
-        'safebrowsing.disable_download_protection' => true,
-        'profile.default_content_settings.popups' => 0,
-        'profile.content_settings.exceptions.automatic_downloads.*.setting' => 1
-      ],
-      'downloadBehavior' => 'allow',
-      'socketTimeout' => 60,
-      'domWaitTimeout' => 10000,
-      'browserConnection' => false,
-      'keepAlive' => false,
-      'requestTimeout' => 30000
+        'goog:chromeOptions' => [
+            'args' => [
+                '--headless=new',
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+            ],
+            'prefs' => [
+                'download.default_directory' => $downloadDir,
+                'download.prompt_for_download' => false,
+                'download.directory_upgrade' => true,
+                'safebrowsing.enabled' => true,
+                'safebrowsing.disable_download_protection' => true,
+                'profile.default_content_settings.popups' => 0,
+                'profile.content_settings.exceptions.automatic_downloads.*.setting' => 1,
+            ],
+        ],
     ];
-    $driver = new ChromeDriver('http://chrome_headless:9222', null,'https://giuaschool_test', $capabilities);
-    $this->session = new Session($driver);
+
+    $driver = new ChromeDriver(
+        'http://chrome_headless:4444/wd/hub', // ⚠️ importante
+        null,
+        'https://giuaschool_test',
+        $capabilities
+    );
+
+    // // impostazioni per il driver
+    // $capabilities = [
+    //   'prefs' => [
+    //     'download.default_directory' => '/var/www/giuaschool/tests/temp/download',
+    //     'download.prompt_for_download' => false,
+    //     'download.directory_upgrade' => true,
+    //     'safebrowsing.enabled' => true,
+    //     'safebrowsing.disable_download_protection' => true,
+    //     'profile.default_content_settings.popups' => 0,
+    //     'profile.content_settings.exceptions.automatic_downloads.*.setting' => 1
+    //   ],
+    //   'downloadBehavior' => 'allow',
+    //   'socketTimeout' => 60,
+    //   'domWaitTimeout' => 10000,
+    //   'browserConnection' => false,
+    //   'keepAlive' => false,
+    //   'requestTimeout' => 30000
+    // ];
+    // $driver = new ChromeDriver('http://chrome_headless:9222', null,'https://giuaschool_test', $capabilities);
+    // $this->session = new Session($driver);
+
+
     // ripulisce sessione
     $this->session->stop();
     $this->session->start();
@@ -221,6 +253,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @BeforeScenario
    */
   public function beforeScenario(BeforeScenarioScope $scope) {
+    // inizializzazione
     $fs = new Filesystem();
     $this->debug = false;
     $this->stepper = false;
