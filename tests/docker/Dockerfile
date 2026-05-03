@@ -125,6 +125,9 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearm
     sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
     # crea directory di ambiente
     mkdir -p var/cache/test var/sessions/test && \
+    # crea directory di download
+    mkdir -p tests/temp/download && \
+    chmod 777 tests/temp/download && \
     # pulizia APT e file inutili
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* var/cache/dev var/sessions/dev && \

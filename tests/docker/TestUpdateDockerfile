@@ -28,6 +28,8 @@ RUN \
   rm -r var/cache/* var/sessions/* tests/temp/* && \
   mkdir -p var/cache/prod && \
   mkdir -p var/sessions/prod && \
+  mkdir -p tests/temp/download && \
+  chmod 777 tests/temp/download && \
   chown -R www-data:www-data src/* public/* tests/* var/* && \
   echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
   service mariadb start && \

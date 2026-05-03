@@ -567,7 +567,6 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
-
     $path = $this->kernel->getProjectDir().'/tests/download/'.$testoParam;
     $this->waitForFile($path);
     $this->assertTrue(file_exists($path));
@@ -577,17 +576,6 @@ class BrowserContext extends BaseContext implements Context {
       $this->assertEquals($dimensione, $size);
     }
     $this->log('DOWNLOAD', 'File '.$testoParam.' ['.$size.' byte]');
-
-    // $headers = array_change_key_case($this->session->getResponseHeaders(), CASE_LOWER);
-    // $this->assertTrue(preg_match("/^(attachment|inline);\s*filename=(.*)$/i", (string) $headers['content-disposition'], $data));
-    // $this->assertEquals($testoParam, $data[2]);
-    // $content = $this->session->getDriver()->getContent();
-    // $size = $headers['content-length'] ?? strlen($content);
-    // if ($dimensione !== null) {
-    //   // se è indicata la dimensione, controlla che sia corretta
-    //   $this->assertEquals($dimensione, $size);
-    // }
-    // $this->log('DOWNLOAD', 'File ('.$data[1].'): '.$data[2].' ['.$size.' byte]');
   }
 
   /**
@@ -825,6 +813,7 @@ class BrowserContext extends BaseContext implements Context {
     }
     $this->assertTrue($trovato, '+++ vediTestoInPDFAnalizzatoInRiga -> '.$ricerca.' | '.$testo);
   }
+
   /**
    * Cerca il testo nel contenuto del PDF analizzato, in più righe successive, dal segnalibro
    *  $ricerca: testo da cercare nel file
