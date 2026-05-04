@@ -91,7 +91,7 @@ Scenario: Controlla form di nuova lezione di sostituzione su classe normale
   Allora vedi errore pagina "200"
   E il campo "registro_add[tipoSostituzione]" è presente
   E il campo "registro_add[materia]" è presente
-  E il campo "registro_add[moduloFormativo]" non è presente
+  E il campo "registro_add[moduloFormativo]" è presente
 
 Scenario: Controlla form di nuova lezione di sostituzione su classe articolata
   Dato login utente "@docente_itp_2:username"
@@ -104,7 +104,7 @@ Scenario: Controlla form di nuova lezione di sostituzione su classe articolata
   Allora vedi errore pagina "200"
   E il campo "registro_add[tipoSostituzione]" non è presente
   E il campo "registro_add[materia]" è presente
-  E il campo "registro_add[moduloFormativo]" non è presente
+  E il campo "registro_add[moduloFormativo]" è presente
 
 Schema dello scenario: Inserisce una nuova lezione curricolare
   Dato login utente "<docente>"
