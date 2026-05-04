@@ -135,7 +135,7 @@ Scenario: controllo foglio firme registro dei voti
   E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in una riga
   E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in una riga
   E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome+ +@docente_religione_1:nome?@docente_nocattedra_1:cognome+ +@docente_nocattedra_1:nome" in PDF analizzato in una riga
-  E vedi testo "@materia_itp_1:nome+, +@materia_EDCIVICA:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome+ +@docente_itp_2:nome" in PDF analizzato in una riga
+  E vedi testo "@materia_itp_1:nome+, +@materia_EDCIVICA:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome" in PDF analizzato in una riga
   E vedi testo "@materia_SOSTEGNO:nome+, +@materia_EDCIVICA:nome?@docente_sostegno_1:cognome+ +@docente_sostegno_1:nome?@docente_sostegno_2:cognome+ +@docente_sostegno_2:nome" in PDF analizzato in una riga
 
 Scenario: controllo foglio firme registro dei voti per la classe articolata

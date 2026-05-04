@@ -567,7 +567,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
-    $path = $this->kernel->getProjectDir().'/tests/download/'.$testoParam;
+    $path = $this->kernel->getProjectDir().'/tests/temp/download/'.$testoParam;
     $this->waitForFile($path);
     $this->assertTrue(file_exists($path));
     $size = filesize($path);
@@ -579,7 +579,7 @@ class BrowserContext extends BaseContext implements Context {
   }
 
   /**
-   * Clicca su pulsante e scarica il file indicato (NB: evita problemi con l'apertura di finestre)
+   * Clicca su pulsante e scarica il file indicato (NB: evita problemi con il download INLINE)
    *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
    *  $testoParam: nome assegnato al file (con parametri)
    *  $dimensione: lunghezza del file in byte
@@ -592,9 +592,24 @@ class BrowserContext extends BaseContext implements Context {
     $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
     $this->assertNotEmpty($links[0]);
     $url = $this->getMinkParameter('base_url').$links[0]->getAttribute('href');
-    // esegue direttamente URL
-    $this->session->visit($url);
-    $this->waitForPage();
+    // scarica direttamente da URL
+    $path = $this->kernel->getProjectDir().'/tests/temp/download/'.$testoParam;
+    $fp = fopen($path, 'w');
+    $cookie = $this->session->getCookie('PHPSESSID');
+    $valori = 'PHPSESSID='.$cookie;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+      CURLOPT_FILE => $fp,                // scrive direttamente su file
+      CURLOPT_FOLLOWLOCATION => true,     // segue redirect
+      CURLOPT_SSL_VERIFYPEER => false,    // per ambiente test
+      CURLOPT_SSL_VERIFYHOST => false,
+      CURLOPT_TIMEOUT => 60,
+      CURLOPT_FAILONERROR => true,
+      CURLOPT_HTTPHEADER => ['Cookie: ' . $valori]]);
+    $result = curl_exec($ch);
+    $this->assertTrue($result);
+    curl_close($ch);
+    fclose($fp);
     // controlla file
     $this->fileScaricatoConNomeEDimensione($testoParam, $dimensione);
   }

@@ -266,6 +266,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
     // abilita download su Chrome
     $this->session->getDriver()->sendCommand('Page.setDownloadBehavior', ['behavior' => 'allow',
       'downloadPath' => dirname(__DIR__).'/temp/download']);
+    $this->session->getDriver()->sendCommand('Browser.setDownloadBehavior', ['behavior' => 'allow',
+      'downloadPath' => dirname(__DIR__).'/temp/download', 'eventsEnabled' => true]);
+    // disabilita il PDF viewer di Chrome
+    $this->session->getDriver()->sendCommand('Page.setBypassCSP', ['enabled' => true]);
     // log scenario
     $this->logDebug('Scenario inizio ['.$scope->getScenario()->getLine().']: '.$scope->getScenario()->getTitle());
   }
