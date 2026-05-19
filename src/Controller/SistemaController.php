@@ -1212,10 +1212,8 @@ class SistemaController extends BaseController {
       $listaClassi[$nome] = $classe;
     }
     $listaCircolari = $this->em->getRepository(Circolare::class)->createQueryBuilder('c')
-      ->where('c.pubblicata=:si AND c.anno=:anno')
+      ->where("c.stato='P' AND c.anno=0")
       ->orderBy('c.numero', 'ASC')
-      ->setParameter('si', 1)
-      ->setParameter('anno', (int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
       ->getQuery()
       ->getResult();
     // form
