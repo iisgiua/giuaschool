@@ -2036,7 +2036,7 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Scrive il registro di classe con ommissioni per la privacy (per accesso agli atti)
+   * Scrive il registro di classe con omissioni per la privacy (per accesso agli atti)
    *
    * @param Classe $classe Classe di cui creare il registro
    * @param Alunno $alunno Alunno che fa accesso agli atti (per omettere i dati degli altri alunni)
@@ -2054,7 +2054,7 @@ class ArchiviazioneUtil {
     $nomefile = 'registro-classe-privacy-'.$classe->getAnno().$classe->getSezione().'-'.$alunno->getId().'.pdf';
     // crea documento
     $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Registro di classe (con ommissioni per la privacy) - '.$classe);
+      'Registro di classe (con omissioni per la privacy) - '.$classe);
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
     $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -2082,7 +2082,7 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Crea la pagina iniziale del registro di classe con ommissioni per la privacy (per accesso agli atti)
+   * Crea la pagina iniziale del registro di classe con omissioni per la privacy (per accesso agli atti)
    *
    * @param Classe $classe Classe di cui creare il registro
    * @param array $periodo Informazioni sul periodo di riferimento
@@ -2108,7 +2108,7 @@ class ArchiviazioneUtil {
     $sede_s = $classe->getSede()->getNomeBreve();
     $html = '<br>
       <p>A.S. '.$annoscolastico.'</p>
-      <p style="font-size:20pt">Registro di classe (con ommissioni per la privacy)</p>
+      <p style="font-size:20pt">Registro di classe (con omissioni per la privacy)</p>
       <p style="font-size:20pt">'.$classe_s.'<br>'.$corso_s.'<br>'.$sede_s.'</p>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     // reset carattere
@@ -2116,7 +2116,7 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Scrive il registro di classe con ommissioni per la privacy (per accesso agli atti)
+   * Scrive il registro di classe con omissioni per la privacy (per accesso agli atti)
    *
    * @param Classe $classe Classe di cui creare il registro
    * @param Alunno $alunno Alunno che fa accesso agli atti (per omettere i dati degli altri alunni)
@@ -2576,7 +2576,7 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Crea i registri dei docenti della classe indicata con ommissioni per la privacy (per accesso agli atti)
+   * Crea i registri dei docenti della classe indicata con omissioni per la privacy (per accesso agli atti)
    *
    * @param Classe $classe Classe di cui creare il registro
    * @param Alunno $alunno Alunno che fa accesso agli atti (per omettere i dati degli altri alunni)
@@ -2635,7 +2635,7 @@ class ArchiviazioneUtil {
     }
     // crea documento
     $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
-      'Registro dei docenti (con ommissioni per la privacy) - '.$classe);
+      'Registro dei docenti (con omissioni per la privacy) - '.$classe);
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
     $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -2674,7 +2674,7 @@ class ArchiviazioneUtil {
   }
 
   /**
-   * Crea la pagina iniziale del registro del docente con ommissioni per la privacy (per accesso agli atti)
+   * Crea la pagina iniziale del registro del docente con omissioni per la privacy (per accesso agli atti)
    *
    * @param Cattedra $cattedra Cattedra del docente
    */
@@ -2699,7 +2699,7 @@ class ArchiviazioneUtil {
     $materia_s = $cattedra->getMateria()->getNome();
     $html = '<br>
            <p>A.S. '.$annoscolastico.'</p>
-           <p style="font-size:15pt">Registro del docente (con ommissioni per la privacy)<br><span style="font-size:20pt">'.$docente_s.'</span></p>
+           <p style="font-size:15pt">Registro del docente (con omissioni per la privacy)<br><span style="font-size:20pt">'.$docente_s.'</span></p>
            <p>Classe '.$classe_s.'<br><span style="font-size:15pt">'.$corso_s.'</span></p>
            <p><i>'.$materia_s.'</i></p>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
