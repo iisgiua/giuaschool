@@ -1058,6 +1058,8 @@ class ScrutinioController extends BaseController {
       $insuff_cont = 0;
       $insuff_religione = false;
       $insuff_condotta = false;
+      $suff_condotta = false;
+      $insuff_gravi = 0;
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo voto
         if ($voto->getUnico() === null || $voto->getUnico() < $dati['valutazioni'][$voto->getMateria()->getTipo()]['min'] ||
@@ -1069,13 +1071,13 @@ class ScrutinioController extends BaseController {
           // voto religione insufficiente
           $insuff_religione = true;
           $insuff_cont++;
-        } elseif ($voto->getMateria()->getTipo() == 'C' && $voto->getUnico() < $dati['valutazioni']['C']['suff']) {
-          // voto condotta insufficiente
-          $insuff_condotta = true;
-          $insuff_cont++;
         } elseif ($voto->getUnico() < $dati['valutazioni'][$voto->getMateria()->getTipo()]['suff']) {
           // voto insufficiente
           $insuff_cont++;
+          if ($voto->getUnico() < $dati['valutazioni'][$voto->getMateria()->getTipo()]['med']) {
+            // voto gravemente insufficiente
+            $insuff_gravi++;
+          }
         }
         if (in_array($periodo, ['G', 'R'])) {
           // legge voto dello scrutinio finale
@@ -1094,6 +1096,14 @@ class ScrutinioController extends BaseController {
             $errore['exception.scrutinio_voto_sospeso_inferiore_a_finale_alunno'] = true;
           }
         }
+      }
+      if ($dati['voto_condotta'] < $dati['valutazioni']['C']['suff']) {
+        // voto condotta insufficiente
+        $insuff_condotta = true;
+        $insuff_cont++;
+      } elseif ($dati['voto_condotta'] == $dati['valutazioni']['C']['suff']) {
+        // voto condotta sufficiente
+        $suff_condotta = true;
       }
       if ($form->get('esito')->getData() === null) {
         // manca esito
@@ -1119,11 +1129,11 @@ class ScrutinioController extends BaseController {
         $errore['exception.insufficienze_ammissione_esito'] = true;
       }
       if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0 && $classe->getAnno() != 5) {
-        // solo sufficienze con non ammissione (escluse quinte)
+        // solo sufficienze con non ammissione (escluse quinte, per altri requisiti)
         $errore['exception.sufficienze_non_ammissione_esito'] = true;
       }
-      if ($form->get('esito')->getData() == 'S' && $insuff_cont == 0) {
-        // solo sufficienze con sospensione
+      if ($form->get('esito')->getData() == 'S' && !$suff_condotta && $insuff_cont == 0) {
+        // solo sufficienze con sospensione (esclusa condotta)
         $errore['exception.sufficienze_sospensione_esito'] = true;
       }
       if ($form->get('esito')->getData() == 'S' && $insuff_religione) {
@@ -1153,6 +1163,18 @@ class ScrutinioController extends BaseController {
                 $insuff_condotta) {
         // ammissione in quinta con una insufficienza in condotta
         $errore['exception.voto_condotta_esito'] = true;
+      } elseif ($form->get('esito')->getData() == 'N' && $classe->getAnno() != 5 &&
+                ($insuff_gravi < 2 || $insuff_cont < 3)) {
+        // non ammissione può essere: min 3 materie di cui due insuff. gravi
+        $errore['exception.criteri_non_ammissione_invalidi'] = true;
+      } elseif ($form->get('esito')->getData() == 'S' && $classe->getAnno() != 5 &&
+                $insuff_gravi >= 2 && $insuff_cont == 3) {
+        // rientra nei criteri di non ammissione
+        $errore['exception.criteri_non_ammissione'] = true;
+      } elseif ($form->get('esito')->getData() == 'A' && $classe->getAnno() != 5 &&
+                $insuff_cont == 0 && $suff_condotta) {
+        // sufficienze con ammissione ma condotta sufficiente: giudizio sospeso
+        $errore['exception.criteri_condotta_6'] = true;
       }
       // imposta eventuali messaggi di errore
       foreach ($errore as $msg=>$v) {

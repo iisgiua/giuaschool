@@ -490,13 +490,12 @@ class ScrutinioUtil {
           break;
         case '8':
           // debiti e carenze
-          if ($classe->getAnno() == 5) {
-            // comunicazione elaborato cittadinanza (solo quinte)
-            $dati = $this->quadroCittadinanza($docente, $classe, $periodo);
-          } else {
+          if ($classe->getAnno() != 5) {
             // debiti e carenze (escluse le quinte)
             $dati = $this->quadroComunicazioni($docente, $classe, $periodo);
           }
+          // dati per elaborati di cittadinanza
+          $dati['cittadinanza'] = $this->quadroCittadinanza($docente, $classe, $periodo);
           break;
         case '9':
           // verbale e fine
@@ -3199,6 +3198,8 @@ class ScrutinioUtil {
       $insuff_cont = 0;
       $insuff_religione = false;
       $insuff_condotta = false;
+      $suff_condotta = false;
+      $insuff_gravi = 0;
       foreach ($dati['voti'] as $key=>$voto) {
         // controllo voto
         if ($voto->getUnico() === null || $voto->getUnico() < $valutazioni[$voto->getMateria()->getTipo()]['min'] ||
@@ -3213,9 +3214,16 @@ class ScrutinioUtil {
           // voto condotta insufficiente
           $insuff_condotta = true;
           $insuff_cont++;
+        } elseif ($voto->getMateria()->getTipo() == 'C' && $voto->getUnico() == $valutazioni['C']['suff']) {
+          // voto condotta sufficiente
+          $suff_condotta = true;
         } elseif ($voto->getUnico() < $valutazioni[$voto->getMateria()->getTipo()]['suff']) {
           // voto insufficiente
           $insuff_cont++;
+          if ($voto->getUnico() < $valutazioni[$voto->getMateria()->getTipo()]['med']) {
+            // voto gravemente insufficiente
+            $insuff_gravi++;
+          }
         }
         // controlli sulla condotta
         if ($voto->getMateria()->getTipo() == 'C') {
@@ -3266,7 +3274,7 @@ class ScrutinioUtil {
         // solo sufficienze con non ammissione (escluse quinte)
         $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
-      if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
+      if ($dati['esito']->getEsito() == 'S' && !$suff_condotta && $insuff_cont == 0) {
         // solo sufficienze con sospensione
         $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
@@ -3297,6 +3305,18 @@ class ScrutinioUtil {
                 $insuff_condotta) {
         // ammissione in quinta con una insufficienza in condotta
         $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['sex' => $sesso, 'alunno' => $nome]);
+      } elseif ($dati['esito']->getEsito() == 'N' && $alunno->getClasse()->getAnno() != 5 &&
+                ($insuff_gravi < 2 || $insuff_cont < 3)) {
+        // non ammissione può essere: min 3 materie di cui due insuff. gravi
+        $errore[] = $this->trans->trans('exception.criteri_non_ammissione_invalidi', ['sex' => $sesso, 'alunno' => $nome]);
+      } elseif ($dati['esito']->getEsito() == 'S' && $alunno->getClasse()->getAnno() != 5 &&
+                $insuff_gravi >= 2 && $insuff_cont == 3) {
+        // rientra nei criteri di non ammissione
+        $errore[] = $this->trans->trans('exception.criteri_non_ammissione', ['sex' => $sesso, 'alunno' => $nome]);
+      } elseif ($dati['esito']->getEsito() == 'A' && $classe->getAnno() != 5 &&
+                $insuff_cont == 0 && $suff_condotta) {
+        // sufficienze con ammissione ma condotta sufficiente: giudizio sospeso
+        $errore[] = $this->trans->trans('exception.criteri_condotta_6', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if (empty($errore) && empty($errore_condotta)) {
         // aggiorna media
@@ -3806,21 +3826,20 @@ class ScrutinioUtil {
     // inizializza
     $errore = [];
     $this->reqstack->getSession()->getFlashBag()->clear();
-    // distingue per classe
-    if ($classe->getAnno() == 5) {
-      // controllo comunicazioni cittadinanza
-      $dati = $this->quadroCittadinanza($docente, $classe, 'F');
-      foreach ($dati['esiti'] as $alu => $e) {
-        $datiEsito = $e->getDati();
-        if (isset($dati['cittadinanza'][$alu]) && (!isset($datiEsito['cittadinanza']) ||
-            empty($datiEsito['cittadinanza']['argomento']) || empty($datiEsito['cittadinanza']['modalita']))) {
-          // alunno senza comunicazione
-          $nome = $dati['cittadinanza'][$alu]['cognome'].' '.$dati['cittadinanza'][$alu]['nome'];
-          $sesso = ($dati['cittadinanza'][$alu]['sesso'] == 'M' ? 'o' : 'a');
-          $errore[] = $this->trans->trans('exception.no_comunicazione_cittadinanza', ['sex' => $sesso, 'alunno' => $nome]);
-        }
+    // controllo comunicazioni cittadinanza
+    $dati = $this->quadroCittadinanza($docente, $classe, 'F');
+    foreach (($dati['esiti'] ?? []) as $alu => $e) {
+      $datiEsito = $e->getDati();
+      if (isset($dati['cittadinanza'][$alu]) && (!isset($datiEsito['cittadinanza']) ||
+          empty($datiEsito['cittadinanza']['argomento']) || empty($datiEsito['cittadinanza']['modalita']))) {
+        // alunno senza comunicazione
+        $nome = $dati['cittadinanza'][$alu]['cognome'].' '.$dati['cittadinanza'][$alu]['nome'];
+        $sesso = ($dati['cittadinanza'][$alu]['sesso'] == 'M' ? 'o' : 'a');
+        $errore[] = $this->trans->trans('exception.no_comunicazione_cittadinanza', ['sex' => $sesso, 'alunno' => $nome]);
       }
-    } else {
+    }
+    // distingue per classe
+    if ($classe->getAnno() < 5) {
       // legge comunicazioni
       $dati = $this->quadroComunicazioni($docente, $classe, 'F');
       // controllo debiti
@@ -5284,18 +5303,17 @@ class ScrutinioUtil {
    */
   public function quadroCittadinanza(Docente $docente, Classe $classe, $periodo) {
     $dati = [];
-    $dati['cittadinanza'] = [];
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
-    if ($periodo == 'F' && $classe->getAnno() == 5) {
-      // alunni di quinta con 6 in condotta
+    if ($periodo == 'F') {
+      // alunni con 6 in condotta
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito')
         ->join(Esito::class, 'e', 'WITH', 'a.id=e.alunno')
         ->join('e.scrutinio', 's')
         ->join(VotoScrutinio::class, 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
         ->join('vs.materia', 'm')
-        ->where("a.id in (:lista) AND e.esito='A' AND s.classe=:classe AND s.periodo=:periodo AND vs.unico=6 AND m.tipo='C'")
+        ->where("a.id in (:lista) AND e.esito!='N' AND s.classe=:classe AND s.periodo=:periodo AND vs.unico=6 AND m.tipo='C'")
         ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
         ->setParameter('lista', $lista)
         ->setParameter('classe', $classe)

@@ -1731,6 +1731,9 @@ exception.voto_condotta: Manca il voto di condotta per uno o più alunni.
 exception.voto_edcivica: Manca il voto di Ed. civica per uno o più alunni.
 exception.voto_errato: Sono presenti uno o più voti con valori non ammessi.
 exception.voto_religione_esito: Il voto insufficiente di religione non è coerente con l'esito dell'alunn{sex} {alunno}.
+exception.criteri_non_ammissione_invalidi: Il numero di insufficienze non rispetta i criteri di non ammissione alla classe successiva per l'alunn{sex} {alunno}.
+exception.criteri_non_ammissione: Il numero di insufficienze rientra nei criteri di non ammissione alla classe successiva per l'alunn{sex} {alunno}.
+exception.criteri_condotta_6: La presenza del 6 in condotta richiede la sospensione del giudizio per l'alunn{sex} {alunno}.
 exception.voto_vuoto: Hai lasciato in bianco sia il voto che il giudizio.
 exception.data_nulla: Non hai indicato la data.
 exception.circolare_numero_esiste: Il numero assegnato alla circolare risulta essere già esistente.
