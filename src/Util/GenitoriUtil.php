@@ -622,8 +622,10 @@ class GenitoriUtil {
     $dati['stat']['brevi'] = $num_brevi;
     $dati['stat']['ritardi'] = $num_ritardi;
     $dati['stat']['ritardi_validi'] = $num_ritardi_validi[$numperiodo];
+    $dati['stat']['conta_ritardi'] = $num_ritardi_validi[1] + $num_ritardi_validi[2] + $num_ritardi_validi[3];
     $dati['stat']['uscite'] = count($uscite);
     $dati['stat']['uscite_valide'] = $num_uscite_valide[$numperiodo];
+    $dati['stat']['conta_uscite'] = $num_uscite_valide[1] + $num_uscite_valide[2] + $num_uscite_valide[3];
     $dati['stat']['ore'] = 0 + $totale;
     $dati['stat']['ore_perc'] = $perc;
     $dati['stat']['livello'] = ($perc < 20 ? 'default' : ($perc < 25 ? 'warning' : 'danger'));
