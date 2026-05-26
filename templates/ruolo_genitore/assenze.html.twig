@@ -56,7 +56,9 @@
     <tbody>
       <tr>
         <th class="gs-big">Totale ore di assenza</th>
-        <td><span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore|number_format(1, ',') }}</span></td>
+        <td><span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore|number_format(1, ',') }}</span>
+          <strong>percentuale sul totale: <span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore_perc|number_format(1, ',') }}%</span></strong>
+        </td>
       </tr>
       <tr>
         <th class="gs-big">Numero di ritardi (oltre {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
