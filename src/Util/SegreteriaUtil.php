@@ -266,25 +266,34 @@ class SegreteriaUtil {
                 $valori['carenze'] && count($valori['carenze_materie']) > 0) {
               $dati['carenze'] = 1;
             }
+            // legge insufficienze
+            $insufficienze = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+              ->select('COUNT(vs.id)')
+              ->join('vs.scrutinio', 's')
+              ->join('vs.materia', 'm')
+              ->where("s.id=:scrutinio AND vs.alunno=:alunno AND m.tipo IN ('N', 'E') AND vs.unico<6")
+              ->setParameter('scrutinio', $scrutinio)
+              ->setParameter('alunno', $alunno)
+              ->getQuery()
+              ->getSingleScalarResult();
+            $dati['insufficienze'] = $insufficienze;
+            // legge voto di condotta
+            $condotta = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+              ->select('COUNT(vs.id)')
+              ->join('vs.scrutinio', 's')
+              ->join('vs.materia', 'm')
+              ->where("s.id=:scrutinio AND vs.alunno=:alunno AND m.tipo='C' AND vs.unico=6")
+              ->setParameter('scrutinio', $scrutinio)
+              ->setParameter('alunno', $alunno)
+              ->getQuery()
+              ->getSingleScalarResult();
+            if ($condotta > 0) {
+              $dati['cittadinanza'] =  true;
+            }
           }
         } else {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
-        }
-        // elaborato di cittadinanza attiva
-        if ($alunno->getClasse()->getAnno() == 5 && $dati['esito']->getEsito() == 'A') {
-          // legge voto di condotta
-          $voto = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
-            ->join('vs.scrutinio', 's')
-            ->join('vs.materia', 'm')
-            ->where("s.id=:scrutinio AND vs.alunno=:alunno AND m.tipo='C' AND vs.unico=6")
-            ->setParameter('scrutinio', $scrutinio)
-            ->setParameter('alunno', $alunno)
-            ->getQuery()
-            ->getResult();
-          if (count($voto) > 0) {
-            $dati['cittadinanza'] =  true;
-          }
         }
       } elseif ($scrutinio->getPeriodo() == 'G') {
         // dati esito

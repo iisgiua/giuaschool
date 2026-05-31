@@ -2105,18 +2105,33 @@ class ScrutinioUtil {
         ->getQuery()
         ->getArrayResult();
       // legge i debiti
-      $dati['debiti']  = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-        ->select('a.id,a.nome,a.cognome,a.dataNascita')
+      $debiti = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,e.dati')
         ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('lista', $lista)
-			->setParameter('sospeso', 'S')
-			->setParameter('classe', $classe)
-			->setParameter('periodo', $periodo)
+        ->setParameter('lista', $lista)
+        ->setParameter('sospeso', 'S')
+        ->setParameter('classe', $classe)
+        ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
+      foreach ($debiti as $deb) {
+        $insuff = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+          ->select('COUNT(vs.id)')
+          ->join('vs.scrutinio', 's')
+          ->join('vs.materia', 'm')
+          ->where("vs.alunno=:alunno AND vs.unico<6 AND s.classe=:classe AND s.periodo=:periodo AND m.tipo IN ('N', 'E')")
+          ->setParameter('alunno', $deb['id'])
+          ->setParameter('classe', $classe)
+          ->setParameter('periodo', $periodo)
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($insuff > 0) {
+          $dati['debiti'][] = $deb;
+        }
+      }
       // legge le carenze
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,e.dati')
@@ -2139,7 +2154,7 @@ class ScrutinioUtil {
       }
       // legge gli elaborati di cittadinanza attiva
       $datiCittadinanza = $this->quadroCittadinanza($docente, $classe, $periodo);
-      $dati['cittadinanza'] = $datiCittadinanza['cittadinanza'];
+      $dati['cittadinanza'] = $datiCittadinanza['cittadinanza'] ?? [];
     } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // legge i non ammessi
       $dati['non_ammessi'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')

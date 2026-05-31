@@ -269,9 +269,9 @@
   </div>
   <table class="table table-bordered table-hover table-striped ">
     <tbody>
-      {% if periodo == 'F' and dati.esito.esito == 'A' and dati.cittadinanza is defined and dati.cittadinanza %}
+      {% if periodo == 'F' and dati.cittadinanza is defined and dati.cittadinanza %}
       <tr class="gs-big">
-        <td class="col-sm-6"><strong>Elaborato di cittadinanza attiva</strong></td>
+        <td class="col-sm-6"><strong>Elaborato di cittadinanza attiva e solidale</strong></td>
         <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'Z', 'periodo': 'F'}) }}" role="button" title="Scarica la comunicazione sull'elaborato di cittadinanza attiva e solidale"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
       {% endif %}
@@ -284,7 +284,7 @@
         <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
           {% endif %}
       </tr>
-          {% if dati.esito.esito == 'S' %}
+          {% if dati.esito.esito == 'S' and dati.insufficienze > 0 %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Comunicazione per il recupero del debito formativo</strong></td>
         <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione per il recupero del debito formativo"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>

@@ -891,6 +891,17 @@ class GenitoriUtil {
               $valori['carenze'] && count($valori['carenze_materie']) > 0) {
             $dati['carenze'] = 1;
           }
+          // insufficienze
+          $dati['insufficienze'] = 0;
+          foreach ($dati['voti'] as $idmat => $v) {
+            if (in_array($dati['materie'][$idmat]['tipo'], ['N', 'E']) && $v['unico'] < 6) {
+              $dati['insufficienze']++;
+            }
+          }
+          // elaborato di cittadinanza attiva
+          if ($dati['voti'][$condotta->getId()]['unico'] == 6) {
+            $dati['cittadinanza'] = true;
+          }
         }
       } else if (in_array($alunno->getId(), $noscrutinati))  {
         // non scrutinato
@@ -898,11 +909,6 @@ class GenitoriUtil {
       } else if (in_array($alunno->getId(), $estero))  {
         // non scrutinato
         $dati['estero'] = 1;
-      }
-      // elaborato di cittadinanza attiva
-      if ($classe->getAnno() == 5 && $dati['esito']->getEsito() == 'A' &&
-          $dati['voti'][$condotta->getId()]['unico'] == 6) {
-        $dati['cittadinanza'] = true;
       }
     } elseif ($periodo == 'G') {
       // scrutinato

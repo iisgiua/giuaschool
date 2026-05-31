@@ -161,7 +161,7 @@
       </tr>
     </thead>
     <tbody>
-      {% if periodo == 'F' and dati.esito.esito == 'A' and dati.cittadinanza is defined and dati.cittadinanza %}
+      {% if periodo == 'F' and dati.cittadinanza is defined and dati.cittadinanza %}
       <tr>
         <td><strong>Elaborato di cittadinanza attiva</strong></td>
         <td><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'Z', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a></td>
@@ -201,12 +201,14 @@
       </tr>
           {% endif %}
         {% elseif dati.esito.esito == 'S' %}
+          {% if dati.insufficienze > 0 %}
       <tr>
         <td><strong>Comunicazione del debito formativo</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
+          {% endif %}
           {% if dati.carenze is defined %}
       <tr>
         <td><strong>Comunicazione per il recupero autonomo</strong></td>

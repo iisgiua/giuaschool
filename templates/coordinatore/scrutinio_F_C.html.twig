@@ -59,7 +59,7 @@
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            <strong>Stampare in un'unica copia</strong> e consegnare in Segreteria Didattica.
+            Documento che rimane agli atti a cura della Segreteria Didattica (<em>non stampare</em>).
           </td>
           <td>
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -115,11 +115,11 @@
       {% endfor %}
           </td>
         </tr>
-    {% else %}
+    {% endif %}
         <tr>
           <td><strong>Elaborato di cittadinanza attiva</strong></td>
           <td>
-            Documento da inviare all'alunno con avviso sul registro elettronico, da parte della Vicepresidenza (<em>non stampare</em>).
+            Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
       {% for a in dati.cittadinanza %}
@@ -129,7 +129,6 @@
       {% endfor %}
           </td>
         </tr>
-    {% endif %}
       </tbody>
     </table>
     {% if dati.precedente %}
