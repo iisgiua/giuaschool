@@ -5335,6 +5335,7 @@ class ScrutinioUtil {
         ->setParameter('periodo', $periodo)
         ->getQuery()
         ->getArrayResult();
+      $dati['cittadinanza'] = [];
       foreach ($alunni as $alu) {
         $dati['cittadinanza'][$alu['id']]  = $alu;
         $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);

@@ -334,3 +334,20 @@ App\Entity\Esito:
       giudizio: '<case(<($current)>, [3], ["Motivazione per la non ammissione..."], null)>'
     scrutinio: '@scrutinio_3CCHI_F'
     alunno: '@alunno_<case(<current()>, [3], [sostegno_3], 3CCHI_<current()>)>'
+
+App\Entity\VotoScrutinio:
+  voto_F_2A_18:
+    scrutinio: '@scrutinio_2A_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_2A_2'
+    unico: 6
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: true
+      contrari:

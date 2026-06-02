@@ -458,41 +458,56 @@ Scenario: terze - memorizzazione dati e passo successivo - credito minimo
     | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | 10 |
     | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | 11 |
 
-# Scenario: terze - memorizzazione dati e passo successivo - credito massimo
-#   Data pagina attiva "coordinatore_scrutinio" con parametri:
-#     | classe        |
-#     | @classe_3A:id |
-#   Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_3:cognome+ +@alunno_3A_3:nome"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_4:cognome+ +@alunno_3A_4:nome"
-#   E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_5:cognome+ +@alunno_3A_5:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Conferma"
-#   E click su "passo precedente"
-#   Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
-#   E vedi la tabella "2" non ordinata senza intestazioni:
-#     | Alunno | Media | Credito |
-#     | @alunno_3A_2:cognome+ +@alunno_3A_2:nome | 6,00 | 8  |
-#     | @alunno_3A_3:cognome+ +@alunno_3A_3:nome | 6,88 | 9  |
-#     | @alunno_3A_4:cognome+ +@alunno_3A_4:nome | 7,63 | 10 |
-#     | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | 11 |
-#     | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | 12 |
+Scenario: terze - memorizzazione dati e passo successivo - credito massimo
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_3A:id |
+  E modifica istanze di tipo "VotoScrutinio":
+    | id               | #unico |
+    | @voto_F_3A_7:id  | 9      |
+    | @voto_F_3A_18:id | 9      |
+    | @voto_F_3A_28:id | 9      |
+    | @voto_F_3A_38:id | 9      |
+    | @voto_F_3A_48:id | 9      |
+    | @voto_F_3A_58:id | 9      |
+    | @voto_F_3A_68:id | 9      |
+  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_2:cognome+ +@alunno_3A_2:nome"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_3:cognome+ +@alunno_3A_3:nome"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_4:cognome+ +@alunno_3A_4:nome"
+  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_5:cognome+ +@alunno_3A_5:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_3A_6:cognome+ +@alunno_3A_6:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Conferma"
+  E click su "passo precedente"
+  Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
+  E vedi la tabella "2" non ordinata senza intestazioni:
+    | Alunno | Media | Credito |
+    | @alunno_3A_2:cognome+ +@alunno_3A_2:nome | 6,00 | 8  |
+    | @alunno_3A_3:cognome+ +@alunno_3A_3:nome | 6,88 | 9  |
+    | @alunno_3A_4:cognome+ +@alunno_3A_4:nome | 7,63 | 10 |
+    | @alunno_3A_5:cognome+ +@alunno_3A_5:nome | 8,38 | 11 |
+    | @alunno_3A_6:cognome+ +@alunno_3A_6:nome | 9,13 | 12 |
+
+Scenario: terze - credito bloccato per condotta
+  Quando vai alla pagina "coordinatore_scrutinio_credito" con parametri:
+    | alunno          | periodo | classe        |
+    | @alunno_3A_2:id | F       | @classe_3A:id |
+  Allora la sezione "form .form-group:nth-child(2)" non contiene "Frequenza assidua"
 
 Scenario: quarte - memorizzazione dati e passo successivo - credito minimo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -519,41 +534,56 @@ Scenario: quarte - memorizzazione dati e passo successivo - credito minimo
     | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | 11 |
     | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | 12 |
 
-# Scenario: quarte - memorizzazione dati e passo successivo - credito massimo
-#   Data pagina attiva "coordinatore_scrutinio" con parametri:
-#     | classe        |
-#     | @classe_4A:id |
-#   Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_3:cognome+ +@alunno_4A_3:nome"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_4:cognome+ +@alunno_4A_4:nome"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_5:cognome+ +@alunno_4A_5:nome"
-#   E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Conferma"
-#   E click su "passo precedente"
-#   Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
-#   E vedi la tabella "2" non ordinata senza intestazioni:
-#     | Alunno | Media | Credito anni precedenti | Credito |
-#     | @alunno_4A_2:cognome+ +@alunno_4A_2:nome | 6,00 | @alunno_4A_2:credito3 | 9  |
-#     | @alunno_4A_3:cognome+ +@alunno_4A_3:nome | 6,88 | @alunno_4A_3:credito3 | 10 |
-#     | @alunno_4A_4:cognome+ +@alunno_4A_4:nome | 7,63 | @alunno_4A_4:credito3 | 11 |
-#     | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | 12 |
-#     | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | 13 |
+Scenario: quarte - memorizzazione dati e passo successivo - credito massimo
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_4A:id |
+  E modifica istanze di tipo "VotoScrutinio":
+    | id               | #unico |
+    | @voto_F_4A_7:id  | 9      |
+    | @voto_F_4A_18:id | 9      |
+    | @voto_F_4A_28:id | 9      |
+    | @voto_F_4A_38:id | 9      |
+    | @voto_F_4A_48:id | 9      |
+    | @voto_F_4A_58:id | 9      |
+    | @voto_F_4A_68:id | 9      |
+  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_2:cognome+ +@alunno_4A_2:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_3:cognome+ +@alunno_4A_3:nome"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_4:cognome+ +@alunno_4A_4:nome"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_5:cognome+ +@alunno_4A_5:nome"
+  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_4A_6:cognome+ +@alunno_4A_6:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Conferma"
+  E click su "passo precedente"
+  Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
+  E vedi la tabella "2" non ordinata senza intestazioni:
+    | Alunno | Media | Credito anni precedenti | Credito |
+    | @alunno_4A_2:cognome+ +@alunno_4A_2:nome | 6,00 | @alunno_4A_2:credito3 | 9  |
+    | @alunno_4A_3:cognome+ +@alunno_4A_3:nome | 6,88 | @alunno_4A_3:credito3 | 10 |
+    | @alunno_4A_4:cognome+ +@alunno_4A_4:nome | 7,63 | @alunno_4A_4:credito3 | 11 |
+    | @alunno_4A_5:cognome+ +@alunno_4A_5:nome | 8,38 | @alunno_4A_5:credito3 | 12 |
+    | @alunno_4A_6:cognome+ +@alunno_4A_6:nome | 9,13 | @alunno_4A_6:credito3 | 13 |
+
+Scenario: quarte - credito bloccato per condotta
+  Quando vai alla pagina "coordinatore_scrutinio_credito" con parametri:
+    | alunno          | periodo | classe        |
+    | @alunno_4A_2:id | F       | @classe_4A:id |
+  Allora la sezione "form .form-group:nth-child(2)" non contiene "Frequenza assidua"
 
 Scenario: quinte - memorizzazione dati e passo successivo - credito minimo
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -583,44 +613,59 @@ Scenario: quinte - memorizzazione dati e passo successivo - credito minimo
     | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | 14 |
     | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | 7  |
 
-# Scenario: quinte - memorizzazione dati e passo successivo - credito massimo
-#   Data pagina attiva "coordinatore_scrutinio" con parametri:
-#     | classe        |
-#     | @classe_5A:id |
-#   Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
-#   E selezioni opzione "O" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "F" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
-#   E selezioni opzione "I" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "P" da checkbox "credito_creditoScolastico"
-#   E selezioni opzione "R" da checkbox "credito_creditoScolastico"
-#   E click su "Conferma"
-#   E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
-#   E click su "Conferma"
-#   E click su "Conferma"
-#   E click su "passo precedente"
-#   Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
-#   E vedi la tabella "2" non ordinata senza intestazioni:
-#     | Alunno | Media | Credito anni precedenti | Credito |
-#     | @alunno_5A_2:cognome+ +@alunno_5A_2:nome | 6,00 | #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) | 10 |
-#     | @alunno_5A_3:cognome+ +@alunno_5A_3:nome | 6,88 | #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) | 11 |
-#     | @alunno_5A_4:cognome+ +@alunno_5A_4:nome | 7,63 | #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) | 12 |
-#     | @alunno_5A_5:cognome+ +@alunno_5A_5:nome | 8,38 | #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) | 14 |
-#     | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | 15 |
-#     | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | 7  |
+Scenario: quinte - memorizzazione dati e passo successivo - credito massimo
+  Data pagina attiva "coordinatore_scrutinio" con parametri:
+    | classe        |
+    | @classe_5A:id |
+  E modifica istanze di tipo "VotoScrutinio":
+    | id               | #unico |
+    | @voto_F_5A_7:id  | 9      |
+    | @voto_F_5A_18:id | 9      |
+    | @voto_F_5A_28:id | 9      |
+    | @voto_F_5A_38:id | 9      |
+    | @voto_F_5A_48:id | 9      |
+    | @voto_F_5A_58:id | 9      |
+    | @voto_F_5A_68:id | 9      |
+  Quando click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_2:cognome+ +@alunno_5A_2:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_3:cognome+ +@alunno_5A_3:nome"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_4:cognome+ +@alunno_5A_4:nome"
+  E selezioni opzione "O" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "F" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_5:cognome+ +@alunno_5A_5:nome"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_6:cognome+ +@alunno_5A_6:nome"
+  E selezioni opzione "I" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "P" da checkbox "credito_creditoScolastico"
+  E selezioni opzione "R" da checkbox "credito_creditoScolastico"
+  E click su "Conferma"
+  E click su "Inserisci il credito" in sezione "#gs-main form table tbody tr" che contiene "@alunno_5A_7:cognome+ +@alunno_5A_7:nome"
+  E click su "Conferma"
+  E click su "Conferma"
+  E click su "passo precedente"
+  Allora la sezione "#gs-main h2" contiene "Attribuzione crediti"
+  E vedi la tabella "2" non ordinata senza intestazioni:
+    | Alunno | Media | Credito anni precedenti | Credito |
+    | @alunno_5A_2:cognome+ +@alunno_5A_2:nome | 6,00 | #sum(@alunno_5A_2:credito3,@alunno_5A_2:credito4) | 10 |
+    | @alunno_5A_3:cognome+ +@alunno_5A_3:nome | 6,88 | #sum(@alunno_5A_3:credito3,@alunno_5A_3:credito4) | 11 |
+    | @alunno_5A_4:cognome+ +@alunno_5A_4:nome | 7,63 | #sum(@alunno_5A_4:credito3,@alunno_5A_4:credito4) | 12 |
+    | @alunno_5A_5:cognome+ +@alunno_5A_5:nome | 8,38 | #sum(@alunno_5A_5:credito3,@alunno_5A_5:credito4) | 14 |
+    | @alunno_5A_6:cognome+ +@alunno_5A_6:nome | 9,13 | #sum(@alunno_5A_6:credito3,@alunno_5A_6:credito4) | 15 |
+    | @alunno_5A_7:cognome+ +@alunno_5A_7:nome | 5,88 | #sum(@alunno_5A_7:credito3,@alunno_5A_7:credito4) | 7  |
+
+Scenario: quinte - credito bloccato per condotta
+  Quando vai alla pagina "coordinatore_scrutinio_credito" con parametri:
+    | alunno          | periodo | classe        |
+    | @alunno_5A_2:id | F       | @classe_5A:id |
+  Allora la sezione "form .form-group:nth-child(2)" non contiene "Frequenza assidua"
 
 
 ###############################################################################

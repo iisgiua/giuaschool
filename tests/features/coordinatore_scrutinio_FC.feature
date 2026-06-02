@@ -23,14 +23,15 @@ Scenario: visualizzazione pagina passo finale
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E la sezione "#gs-main table caption" contiene "Scrutinio finale"
   E vedi la tabella:
-    | Documento                      | Note                                                          | Azioni                                                                                               |
-    | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                              |
-    | Riepilogo voti                 | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                              |
-    | Foglio firme Registro dei voti | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                              |
-    | Tabellone esiti                | pubblicato sul Registro Elettronico                           | Scarica                                                                                              |
-    | Comunicazione Non Ammessi      | pubblicato sul Registro Elettronico                           | ?@alunno_1A_2:cognome+ +@alunno_1A_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome |
-    | Comunicazione Debiti           | pubblicato sul Registro Elettronico                           | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                                                             |
-    | Comunicazione Carenze          | pubblicato sul Registro Elettronico                           | ?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       |
+    | Documento                        | Note                                                          | Azioni                                                                                               |
+    | Verbale                          | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                              |
+    | Riepilogo voti                   | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                              |
+    | Foglio firme Registro dei voti   | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                              |
+    | Tabellone esiti                  | pubblicato sul Registro Elettronico                           | Scarica                                                                                              |
+    | Comunicazione Non Ammessi        | pubblicato sul Registro Elettronico                           | ?@alunno_1A_2:cognome+ +@alunno_1A_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome |
+    | Comunicazione Debiti             | pubblicato sul Registro Elettronico                           | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                                                             |
+    | Comunicazione Carenze            | pubblicato sul Registro Elettronico                           | ?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       |
+    | Elaborato di cittadinanza attiva | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                                                                                |
 
 Scenario: visualizzazione pagina passo finale per le classi seconde
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -39,15 +40,16 @@ Scenario: visualizzazione pagina passo finale per le classi seconde
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E la sezione "#gs-main table caption" contiene "Scrutinio finale"
   E vedi la tabella:
-    | Documento                      | Note                                                          | Azioni                                   |
-    | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                  |
-    | Riepilogo voti                 | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                  |
-    | Foglio firme Registro dei voti | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                  |
-    | Certificazione competenze      | unica copia                                                   | Scarica                                  |
-    | Tabellone esiti                | pubblicato sul Registro Elettronico                           | Scarica                                  |
-    | Comunicazione Non Ammessi      | pubblicato sul Registro Elettronico                           | @alunno_2A_1:cognome+ +@alunno_2A_1:nome |
-    | Comunicazione Debiti           | pubblicato sul Registro Elettronico                           | @alunno_2A_7:cognome+ +@alunno_2A_7:nome |
-    | Comunicazione Carenze          | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                    |
+    | Documento                        | Note                                                          | Azioni                                                                             |
+    | Verbale                          | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                            |
+    | Riepilogo voti                   | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                            |
+    | Foglio firme Registro dei voti   | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                            |
+    | Certificazione competenze        | agli atti                                                     | Scarica                                                                            |
+    | Tabellone esiti                  | pubblicato sul Registro Elettronico                           | Scarica                                                                            |
+    | Comunicazione Non Ammessi        | pubblicato sul Registro Elettronico                           | @alunno_2A_1:cognome+ +@alunno_2A_1:nome                                           |
+    | Comunicazione Debiti             | pubblicato sul Registro Elettronico                           | @alunno_2A_7:cognome+ +@alunno_2A_7:nome                                           |
+    | Comunicazione Carenze            | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                                                              |
+    | Elaborato di cittadinanza attiva | pubblicato sul Registro Elettronico                           | ?@alunno_2A_2:cognome+ +@alunno_2A_2:nome?@alunno_2A_7:cognome+ +@alunno_2A_7:nome |
 
 Scenario: visualizzazione passo precedente
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -90,14 +92,15 @@ Scenario: visualizzazione procedura completa
   E click su "Chiudi lo scrutinio"
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E vedi la tabella:
-    | Documento                      | Note                                                          | Azioni                                                                                               |
-    | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                              |
-    | Riepilogo voti                 | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                              |
-    | Foglio firme Registro dei voti | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                              |
-    | Tabellone esiti                | pubblicato sul Registro Elettronico                           | Scarica                                                                                              |
-    | Comunicazione Non Ammessi      | pubblicato sul Registro Elettronico                           | ?@alunno_1A_2:cognome+ +@alunno_1A_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome |
-    | Comunicazione Debiti           | pubblicato sul Registro Elettronico                           | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                                                             |
-    | Comunicazione Carenze          | pubblicato sul Registro Elettronico                           | ?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       |
+    | Documento                        | Note                                                          | Azioni                                                                                               |
+    | Verbale                          | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                              |
+    | Riepilogo voti                   | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                              |
+    | Foglio firme Registro dei voti   | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                              |
+    | Tabellone esiti                  | pubblicato sul Registro Elettronico                           | Scarica                                                                                              |
+    | Comunicazione Non Ammessi        | pubblicato sul Registro Elettronico                           | ?@alunno_1A_2:cognome+ +@alunno_1A_2:nome?@alunno_alternativa_1:cognome+ +@alunno_alternativa_1:nome |
+    | Comunicazione Debiti             | pubblicato sul Registro Elettronico                           | @alunno_1A_1:cognome+ +@alunno_1A_1:nome                                                             |
+    | Comunicazione Carenze            | pubblicato sul Registro Elettronico                           | ?@alunno_1A_1:cognome+ +@alunno_1A_1:nome?@alunno_sostegno_1:cognome+ +@alunno_sostegno_1:nome       |
+    | Elaborato di cittadinanza attiva | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                                                                                |
 
 
 ################################################################################
@@ -110,14 +113,15 @@ Scenario: visualizzazione classe articolata
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E la sezione "#gs-main table caption" contiene "Scrutinio finale"
   E vedi la tabella:
-    | Documento                      | Note                                                          | Azioni                                                                                         |
-    | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                        |
-    | Riepilogo voti                 | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                        |
-    | Foglio firme Registro dei voti | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                        |
-    | Tabellone esiti                | pubblicato sul Registro Elettronico                           | Scarica                                                                                        |
-    | Comunicazione Non Ammessi      | pubblicato sul Registro Elettronico                           | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome                                           |
-    | Comunicazione Debiti           | pubblicato sul Registro Elettronico                           | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome                                                 |
-    | Comunicazione Carenze          | pubblicato sul Registro Elettronico                           | ?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome |
+    | Documento                        | Note                                                          | Azioni                                                                                         |
+    | Verbale                          | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                        |
+    | Riepilogo voti                   | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                        |
+    | Foglio firme Registro dei voti   | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                        |
+    | Tabellone esiti                  | pubblicato sul Registro Elettronico                           | Scarica                                                                                        |
+    | Comunicazione Non Ammessi        | pubblicato sul Registro Elettronico                           | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome                                           |
+    | Comunicazione Debiti             | pubblicato sul Registro Elettronico                           | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome                                                 |
+    | Comunicazione Carenze            | pubblicato sul Registro Elettronico                           | ?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome |
+    | Elaborato di cittadinanza attiva | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                                                                          |
 
 Scenario: visualizzazione procedura completa
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -153,14 +157,15 @@ Scenario: visualizzazione procedura completa
   E click su "Chiudi lo scrutinio"
   Allora la sezione "#gs-main h2" contiene "Scrutinio chiuso"
   E vedi la tabella:
-    | Documento                      | Note                                                          | Azioni                                                                                         |
-    | Verbale                        | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                        |
-    | Riepilogo voti                 | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                        |
-    | Foglio firme Registro dei voti | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                        |
-    | Tabellone esiti                | pubblicato sul Registro Elettronico                           | Scarica                                                                                        |
-    | Comunicazione Non Ammessi      | pubblicato sul Registro Elettronico                           | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome                                           |
-    | Comunicazione Debiti           | pubblicato sul Registro Elettronico                           | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome                                                 |
-    | Comunicazione Carenze          | pubblicato sul Registro Elettronico                           | ?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome |
+    | Documento                        | Note                                                          | Azioni                                                                                         |
+    | Verbale                          | /duplice copia.*Deve firmare il presidente e il segretario/ui | Scarica                                                                                        |
+    | Riepilogo voti                   | /duplice copia.*Devono firmare tutti i docenti/ui             | Scarica                                                                                        |
+    | Foglio firme Registro dei voti   | /unica copia.*Devono firmare tutti i docenti/ui               | Scarica                                                                                        |
+    | Tabellone esiti                  | pubblicato sul Registro Elettronico                           | Scarica                                                                                        |
+    | Comunicazione Non Ammessi        | pubblicato sul Registro Elettronico                           | @alunno_sostegno_4:cognome+ +@alunno_sostegno_4:nome                                           |
+    | Comunicazione Debiti             | pubblicato sul Registro Elettronico                           | @alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome                                                 |
+    | Comunicazione Carenze            | pubblicato sul Registro Elettronico                           | ?@alunno_3CAMB_1:cognome+ +@alunno_3CAMB_1:nome?@alunno_3CAMB_2:cognome+ +@alunno_3CAMB_2:nome |
+    | Elaborato di cittadinanza attiva | pubblicato sul Registro Elettronico                           | NESSUNA COMUNICAZIONE                                                                          |
 
 
 ################################################################################
@@ -176,7 +181,7 @@ Scenario: controllo riepilogo dei voti
   E vedi testo "@alunno_1A_6:cognome,nome #noc() #str(ANNO)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@alunno_1A_6:dataNascita) #noc() #str(ALL'ESTERO)" in PDF analizzato in una riga
   E vedi testo "@alunno_1A_1:cognome,nome #str(Voto) #cas(@voto_F_1A_0:unico,0,NC,@voto_F_1A_0:unico) #cas(@voto_F_1A_1:unico,0,NC,@voto_F_1A_1:unico) #cas(@voto_F_1A_2:unico,0,NC,@voto_F_1A_2:unico) #cas(@voto_F_1A_3:unico,0,NC,@voto_F_1A_3:unico) #cas(@voto_F_1A_5:unico,0,NC,@voto_F_1A_5:unico) #cas(@voto_F_1A_4:unico,0,NC,@voto_F_1A_4:unico) #cas(@voto_F_1A_6:unico,2,NC,@voto_F_1A_6:unico) #cas(@voto_F_1A_7:unico,4,NC,@voto_F_1A_7:unico) #str(SOSPENSIONE)" in PDF analizzato in una riga
-  E vedi poi testo "#str(///) @voto_F_1A_0:assenze @voto_F_1A_1:assenze @voto_F_1A_2:assenze @voto_F_1A_3:assenze @voto_F_1A_5:assenze @voto_F_1A_4:assenze @voto_F_1A_6:assenze #med(@voto_F_1A_0:unico,@voto_F_1A_1:unico,@voto_F_1A_2:unico,@voto_F_1A_3:unico,@voto_F_1A_4:unico,@voto_F_1A_5:unico,@voto_F_1A_6:unico,@voto_F_1A_7:unico)" in PDF analizzato in una riga
+  E vedi poi testo "#str(///) @voto_F_1A_0:assenze @voto_F_1A_1:assenze @voto_F_1A_2:assenze @voto_F_1A_3:assenze @voto_F_1A_5:assenze @voto_F_1A_4:assenze @voto_F_1A_6:assenze #str(5,75)" in PDF analizzato in una riga
   E vedi testo "@alunno_1A_2:cognome #noc() #str(NON)" in PDF analizzato in una riga
   E vedi poi testo "#str(Ass.) @voto_F_1A_16:assenze @voto_F_1A_10:assenze @voto_F_1A_11:assenze @voto_F_1A_12:assenze @voto_F_1A_13:assenze @voto_F_1A_15:assenze @voto_F_1A_14:assenze @voto_F_1A_17:assenze" in PDF analizzato in una riga
   E vedi testo "@alunno_sostegno_1:cognome,nome #str(Voto) #cas(@voto_F_1A_26:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_F_1A_20:unico,0,NC,@voto_F_1A_20:unico) #cas(@voto_F_1A_21:unico,0,NC,@voto_F_1A_21:unico) #cas(@voto_F_1A_22:unico,0,NC,@voto_F_1A_22:unico) #cas(@voto_F_1A_23:unico,0,NC,@voto_F_1A_23:unico) #cas(@voto_F_1A_25:unico,0,NC,@voto_F_1A_25:unico) #cas(@voto_F_1A_24:unico,0,NC,@voto_F_1A_24:unico) #cas(@voto_F_1A_27:unico,2,NC,@voto_F_1A_27:unico) #cas(@voto_F_1A_28:unico,4,NC,@voto_F_1A_28:unico) #nos(NON)" in PDF analizzato in una riga
@@ -268,7 +273,7 @@ Scenario: controllo riepilogo dei voti per la classe articolata
   E analizzi PDF "archivio/scrutini/finale/3CAMB/3CAMB-scrutinio-finale-riepilogo-voti.pdf"
   Allora vedi testo "RIEPILOGO VOTI 3ª C-AMB" in PDF analizzato alla riga "1"
   E vedi testo "@alunno_3CAMB_1:cognome,nome #str(Voto) #cas(@voto_F_3CAMB_0:unico,0,NC,@voto_F_3CAMB_0:unico) #cas(@voto_F_3CAMB_1:unico,0,NC,@voto_F_3CAMB_1:unico) #cas(@voto_F_3CAMB_2:unico,0,NC,@voto_F_3CAMB_2:unico) #cas(@voto_F_3CAMB_3:unico,0,NC,@voto_F_3CAMB_3:unico) #cas(@voto_F_3CAMB_5:unico,0,NC,@voto_F_3CAMB_5:unico) #cas(@voto_F_3CAMB_4:unico,0,NC,@voto_F_3CAMB_4:unico) #cas(@voto_F_3CAMB_6:unico,0,NC,@voto_F_3CAMB_6:unico) #cas(@voto_F_3CAMB_7:unico,2,NC,@voto_F_3CAMB_7:unico) #str(SOSPENSIONE)" in PDF analizzato in una riga
-  E vedi poi testo "#str(///) @voto_F_3CAMB_0:assenze @voto_F_3CAMB_1:assenze @voto_F_3CAMB_2:assenze @voto_F_3CAMB_3:assenze @voto_F_3CAMB_5:assenze @voto_F_3CAMB_4:assenze @voto_F_3CAMB_6:assenze #med(@voto_F_3CAMB_0:unico,@voto_F_3CAMB_1:unico,@voto_F_3CAMB_2:unico,@voto_F_3CAMB_3:unico,@voto_F_3CAMB_4:unico,@voto_F_3CAMB_5:unico,@voto_F_3CAMB_6:unico,@voto_F_3CAMB_7:unico)" in PDF analizzato in una riga
+  E vedi poi testo "#str(///) @voto_F_3CAMB_0:assenze @voto_F_3CAMB_1:assenze @voto_F_3CAMB_2:assenze @voto_F_3CAMB_3:assenze @voto_F_3CAMB_5:assenze @voto_F_3CAMB_4:assenze @voto_F_3CAMB_6:assenze #str(5,75)" in PDF analizzato in una riga
   E vedi testo "@alunno_3CAMB_2:cognome #str(Voto) #cas(@voto_F_3CAMB_15:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_F_3CAMB_10:unico,0,NC,@voto_F_3CAMB_10:unico) #cas(@voto_F_3CAMB_11:unico,0,NC,@voto_F_3CAMB_11:unico) #cas(@voto_F_3CAMB_12:unico,0,NC,@voto_F_3CAMB_12:unico) #cas(@voto_F_3CAMB_13:unico,0,NC,@voto_F_3CAMB_13:unico) #cas(@voto_F_3CAMB_16:unico,0,NC,@voto_F_3CAMB_16:unico) #cas(@voto_F_3CAMB_14:unico,0,NC,@voto_F_3CAMB_14:unico) #cas(@voto_F_3CAMB_17:unico,0,NC,@voto_F_3CAMB_17:unico) #cas(@voto_F_3CAMB_18:unico,2,NC,@voto_F_3CAMB_18:unico) #nos(NON)" in PDF analizzato in una riga
   E vedi poi testo "#str(Ass.) @voto_F_3CAMB_15:assenze @voto_F_3CAMB_10:assenze @voto_F_3CAMB_11:assenze @voto_F_3CAMB_12:assenze @voto_F_3CAMB_13:assenze @voto_F_3CAMB_16:assenze @voto_F_3CAMB_14:assenze @voto_F_3CAMB_17:assenze #str(10) #med(@voto_F_3CAMB_10:unico,@voto_F_3CAMB_11:unico,@voto_F_3CAMB_12:unico,@voto_F_3CAMB_13:unico,@voto_F_3CAMB_14:unico,@voto_F_3CAMB_16:unico,@voto_F_3CAMB_17:unico,@voto_F_3CAMB_18:unico)" in PDF analizzato in una riga
   E vedi testo "@alunno_sostegno_4:cognome,nome #str(Voto) #cas(@voto_F_3CAMB_25:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_F_3CAMB_20:unico,0,NC,@voto_F_3CAMB_20:unico) #cas(@voto_F_3CAMB_21:unico,0,NC,@voto_F_3CAMB_21:unico) #cas(@voto_F_3CAMB_22:unico,0,NC,@voto_F_3CAMB_22:unico) #cas(@voto_F_3CAMB_23:unico,0,NC,@voto_F_3CAMB_23:unico) #cas(@voto_F_3CAMB_26:unico,0,NC,@voto_F_3CAMB_26:unico) #cas(@voto_F_3CAMB_24:unico,0,NC,@voto_F_3CAMB_24:unico) #cas(@voto_F_3CAMB_27:unico,0,NC,@voto_F_3CAMB_27:unico) #cas(@voto_F_3CAMB_28:unico,2,NC,@voto_F_3CAMB_28:unico) #str(NON)" in PDF analizzato in una riga

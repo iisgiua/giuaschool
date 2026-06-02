@@ -129,50 +129,50 @@ Scenario: pagina dati per non ammissione
     | esiti della classe              | Scarica la comunicazione |
 
 Scenario: pagina dati per ammissione classe terza
-  Dato login utente "@alunno_3A_2:username"
+  Dato login utente "@alunno_3A_3:username"
   Quando vai alla pagina "genitori_pagelle" con parametri:
     | periodo |
     | F       |
   Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main div:nth-child(4)" contiene "Scrutinio finale"
   E la sezione "#gs-main .alert-success" contiene "/Esito dello scrutinio: AMMESS/ui"
-  E la sezione "#gs-main .alert-success" contiene "#str(Media) #med(@voto_F_3A_10:unico,@voto_F_3A_11:unico,@voto_F_3A_12:unico,@voto_F_3A_13:unico,@voto_F_3A_14:unico,@voto_F_3A_15:unico,@voto_F_3A_17:unico,@voto_F_3A_18:unico) #str(Credito) @esito_F_3A_2:credito"
+  E la sezione "#gs-main .alert-success" contiene "#str(Media) #med(@voto_F_3A_20:unico,@voto_F_3A_21:unico,@voto_F_3A_22:unico,@voto_F_3A_23:unico,@voto_F_3A_24:unico,@voto_F_3A_25:unico,@voto_F_3A_27:unico,@voto_F_3A_28:unico) #str(Credito) @esito_F_3A_3:credito"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                     | Ore di assenza        |
-    | Religione                   |	#cas(@voto_F_3A_16:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_F_3A_16:assenze |
-    | @materia_curricolare_1:nome |	#cas(@voto_F_3A_10:unico,0,NC,@voto_F_3A_10:unico)                                                                       | @voto_F_3A_10:assenze |
-    | @materia_curricolare_2:nome |	#cas(@voto_F_3A_11:unico,0,NC,@voto_F_3A_11:unico)                                                                       | @voto_F_3A_11:assenze |
-    | @materia_curricolare_3:nome |	#cas(@voto_F_3A_12:unico,0,NC,@voto_F_3A_12:unico)                                                                       | @voto_F_3A_12:assenze |
-    | @materia_curricolare_4:nome |	#cas(@voto_F_3A_13:unico,0,NC,@voto_F_3A_13:unico)                                                                       | @voto_F_3A_13:assenze |
-    | @materia_itp_1:nome         |	#cas(@voto_F_3A_15:unico,0,NC,@voto_F_3A_15:unico)                                                                       | @voto_F_3A_15:assenze |
-    | @materia_curricolare_5:nome |	#cas(@voto_F_3A_14:unico,0,NC,@voto_F_3A_14:unico)                                                                       | @voto_F_3A_14:assenze |
-    | @materia_EDCIVICA:nome      |	#cas(@voto_F_3A_17:unico,2,NC,@voto_F_3A_17:unico)                                                                       | @voto_F_3A_17:assenze |
-    | @materia_CONDOTTA:nome      |	#cas(@voto_F_3A_18:unico,4,NC,@voto_F_3A_18:unico)                                                                       |                       |
+    | Religione                   |	#cas(@voto_F_3A_26:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_F_3A_26:assenze |
+    | @materia_curricolare_1:nome |	#cas(@voto_F_3A_20:unico,0,NC,@voto_F_3A_20:unico)                                                                       | @voto_F_3A_20:assenze |
+    | @materia_curricolare_2:nome |	#cas(@voto_F_3A_21:unico,0,NC,@voto_F_3A_21:unico)                                                                       | @voto_F_3A_21:assenze |
+    | @materia_curricolare_3:nome |	#cas(@voto_F_3A_22:unico,0,NC,@voto_F_3A_22:unico)                                                                       | @voto_F_3A_22:assenze |
+    | @materia_curricolare_4:nome |	#cas(@voto_F_3A_23:unico,0,NC,@voto_F_3A_23:unico)                                                                       | @voto_F_3A_23:assenze |
+    | @materia_itp_1:nome         |	#cas(@voto_F_3A_25:unico,0,NC,@voto_F_3A_25:unico)                                                                       | @voto_F_3A_25:assenze |
+    | @materia_curricolare_5:nome |	#cas(@voto_F_3A_24:unico,0,NC,@voto_F_3A_24:unico)                                                                       | @voto_F_3A_24:assenze |
+    | @materia_EDCIVICA:nome      |	#cas(@voto_F_3A_27:unico,2,NC,@voto_F_3A_27:unico)                                                                       | @voto_F_3A_27:assenze |
+    | @materia_CONDOTTA:nome      |	#cas(@voto_F_3A_28:unico,4,NC,@voto_F_3A_28:unico)                                                                       |                       |
   E vedi la tabella "2" senza intestazioni:
     | 1                               |	2                        |
     | Comunicazione dei voti          | Scarica la comunicazione |
     | esiti della classe              | Scarica la comunicazione |
 
 Scenario: pagina dati per ammissione classe quarta
-  Dato login utente "@alunno_4A_2:username"
+  Dato login utente "@alunno_4A_3:username"
   Quando vai alla pagina "genitori_pagelle" con parametri:
     | periodo |
     | F       |
   Allora la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
   E la sezione "#gs-main div:nth-child(4)" contiene "Scrutinio finale"
   E la sezione "#gs-main .alert-success" contiene "/Esito dello scrutinio: AMMESS/ui"
-  E la sezione "#gs-main .alert-success" contiene "#str(Media) #med(@voto_F_4A_10:unico,@voto_F_4A_11:unico,@voto_F_4A_12:unico,@voto_F_4A_13:unico,@voto_F_4A_14:unico,@voto_F_4A_15:unico,@voto_F_4A_17:unico,@voto_F_4A_18:unico) #str(Credito) @esito_F_4A_2:credito #str(precedente) @alunno_4A_2:credito3 #str(totale) #sum(@esito_F_4A_2:credito,@alunno_4A_2:credito3)"
+  E la sezione "#gs-main .alert-success" contiene "#str(Media) #med(@voto_F_4A_20:unico,@voto_F_4A_21:unico,@voto_F_4A_22:unico,@voto_F_4A_23:unico,@voto_F_4A_24:unico,@voto_F_4A_25:unico,@voto_F_4A_27:unico,@voto_F_4A_28:unico) #str(Credito) @esito_F_4A_3:credito #str(precedente) @alunno_4A_3:credito3 #str(totale) #sum(@esito_F_4A_3:credito,@alunno_4A_3:credito3)"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                                                                                     | Ore di assenza        |
-    | Religione                   |	#cas(@voto_F_4A_16:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_F_4A_16:assenze |
-    | @materia_curricolare_1:nome |	#cas(@voto_F_4A_10:unico,0,NC,@voto_F_4A_10:unico)                                                                       | @voto_F_4A_10:assenze |
-    | @materia_curricolare_2:nome |	#cas(@voto_F_4A_11:unico,0,NC,@voto_F_4A_11:unico)                                                                       | @voto_F_4A_11:assenze |
-    | @materia_curricolare_3:nome |	#cas(@voto_F_4A_12:unico,0,NC,@voto_F_4A_12:unico)                                                                       | @voto_F_4A_12:assenze |
-    | @materia_curricolare_4:nome |	#cas(@voto_F_4A_13:unico,0,NC,@voto_F_4A_13:unico)                                                                       | @voto_F_4A_13:assenze |
-    | @materia_itp_1:nome         |	#cas(@voto_F_4A_15:unico,0,NC,@voto_F_4A_15:unico)                                                                       | @voto_F_4A_15:assenze |
-    | @materia_curricolare_5:nome |	#cas(@voto_F_4A_14:unico,0,NC,@voto_F_4A_14:unico)                                                                       | @voto_F_4A_14:assenze |
-    | @materia_EDCIVICA:nome      |	#cas(@voto_F_4A_17:unico,2,NC,@voto_F_4A_17:unico)                                                                       | @voto_F_4A_17:assenze |
-    | @materia_CONDOTTA:nome      |	#cas(@voto_F_4A_18:unico,4,NC,@voto_F_4A_18:unico)                                                                       |                       |
+    | Religione                   |	#cas(@voto_F_4A_26:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) | @voto_F_4A_26:assenze |
+    | @materia_curricolare_1:nome |	#cas(@voto_F_4A_20:unico,0,NC,@voto_F_4A_20:unico)                                                                       | @voto_F_4A_20:assenze |
+    | @materia_curricolare_2:nome |	#cas(@voto_F_4A_21:unico,0,NC,@voto_F_4A_21:unico)                                                                       | @voto_F_4A_21:assenze |
+    | @materia_curricolare_3:nome |	#cas(@voto_F_4A_22:unico,0,NC,@voto_F_4A_22:unico)                                                                       | @voto_F_4A_22:assenze |
+    | @materia_curricolare_4:nome |	#cas(@voto_F_4A_23:unico,0,NC,@voto_F_4A_23:unico)                                                                       | @voto_F_4A_23:assenze |
+    | @materia_itp_1:nome         |	#cas(@voto_F_4A_25:unico,0,NC,@voto_F_4A_25:unico)                                                                       | @voto_F_4A_25:assenze |
+    | @materia_curricolare_5:nome |	#cas(@voto_F_4A_24:unico,0,NC,@voto_F_4A_24:unico)                                                                       | @voto_F_4A_24:assenze |
+    | @materia_EDCIVICA:nome      |	#cas(@voto_F_4A_27:unico,2,NC,@voto_F_4A_27:unico)                                                                       | @voto_F_4A_27:assenze |
+    | @materia_CONDOTTA:nome      |	#cas(@voto_F_4A_28:unico,4,NC,@voto_F_4A_28:unico)                                                                       |                       |
   E vedi la tabella "2" senza intestazioni:
     | 1                               |	2                        |
     | Comunicazione dei voti          | Scarica la comunicazione |

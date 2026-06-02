@@ -84,6 +84,10 @@ parameters:
         8: '8'
         9: '9'
         10: '10'
+  delibera:
+    motivazione:
+    unanimita: true
+    contrari:
 
 
 App\Entity\Scrutinio:
@@ -297,3 +301,30 @@ App\Entity\Scrutinio:
       numeroVerbale: 5
     visibile: '<dataFissa("15/06/2020")>'
     sincronizzazione:
+
+
+App\Entity\VotoScrutinio:
+  voto_F_1A_1:
+    scrutinio: '@scrutinio_1A_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_1A_1'
+    unico: 5
+    debito: '@proposta_F_1A_1->debito'
+    recupero: '@proposta_F_1A_1->recupero'
+    assenze: '<numberBetween(0, 10)>'
+    materia: '@proposta_F_1A_1->materia'
+    dati: '<{delibera}>'
+  voto_F_3CAMB_1:
+    scrutinio: '@scrutinio_3CAMB_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@proposta_F_3CAMB_1->alunno'
+    unico: 5
+    debito: '@proposta_F_3CAMB_1->debito'
+    recupero: '@proposta_F_3CAMB_1->recupero'
+    assenze: '<numberBetween(0, 10)>'
+    materia: '@proposta_F_3CAMB_1->materia'
+    dati: '<{delibera}>'

@@ -84,6 +84,10 @@ parameters:
         8: '8'
         9: '9'
         10: '10'
+  delibera:
+    motivazione:
+    unanimita: true
+    contrari:
 
 
 App\Entity\Scrutinio:
@@ -255,3 +259,32 @@ App\Entity\Scrutinio:
       requisitiEsame: 'T'
     visibile:
     sincronizzazione:
+
+App\Entity\VotoScrutinio:
+  voto_F_2A_18:
+    scrutinio: '@scrutinio_2A_F'
+    orale:
+    scritto:
+    pratico:
+    alunno: '@alunno_2A_2'
+    unico: 7
+    debito:
+    recupero:
+    assenze: 0
+    materia: '@materia_CONDOTTA'
+    dati:
+      motivazione: '<text()>'
+      unanimita: true
+      contrari:
+  voto_F_2A_{0..1}:
+    scrutinio: '@scrutinio_2A_F'
+    orale:
+    scritto:
+    pratico:
+    unico: 4
+    debito: '@proposta_F_2A_<current()>->debito'
+    recupero: '@proposta_F_2A_<current()>->recupero'
+    assenze: '<numberBetween(0, 10)>'
+    alunno: '@proposta_F_2A_<current()>->alunno'
+    materia: '@proposta_F_2A_<current()>->materia'
+    dati: '<{delibera}>'
