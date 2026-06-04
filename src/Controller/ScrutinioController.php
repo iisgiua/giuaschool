@@ -524,13 +524,13 @@ class ScrutinioController extends BaseController {
           $this->em->detach($prop);
           continue;
         }
-        if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() !== null &&
-            $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
-          // voto inferiore a quello dello scrutinio finale
-          $this->addFlash('errore', $trans->trans('exception.proposta_sospeso_inferiore_a_finale'));
-          $this->em->detach($prop);
-          continue;
-        }
+        // if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() !== null &&
+        //     $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
+        //   // voto inferiore a quello dello scrutinio finale
+        //   $this->addFlash('errore', $trans->trans('exception.proposta_sospeso_inferiore_a_finale'));
+        //   $this->em->detach($prop);
+        //   continue;
+        // }
         // rimuove info debito
         $prop->setDebito(null);
         // info log
