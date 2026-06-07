@@ -1264,12 +1264,15 @@ class PagelleUtil {
         ->getResult();
       $dati['ammessi'] = 0;
       $dati['non_ammessi'] = 0;
+      $dati['sospesi'] = 0;
       foreach ($esiti as $e) {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
         if ( $e->getEsito() == 'A' ) {
           $dati['ammessi']++;
         } elseif ( $e->getEsito() == 'N' ) {
           $dati['non_ammessi']++;
+        } elseif ( $e->getEsito() == 'S' ) {
+          $dati['sospesi']++;
         }
       }
       // legge debiti
@@ -1315,11 +1318,10 @@ class PagelleUtil {
       $dati['condotta9'] = [];
       if ( $dati['classe']->getAnno() >= 3 ) {
         $condotta = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
-          ->select('vs.id,(vs.alunno) AS alunno')
+          ->select('DISTINCT(vs.alunno) AS alunno')
           ->join('vs.materia', 'm')
           ->join(Esito::class, 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
           ->where("vs.scrutinio=:scrutinio AND m.tipo='C' AND vs.unico<9 AND e.esito='A'")
-          ->groupBy('vs.alunno')
           ->setParameter('scrutinio', $dati['scrutinio'])
           ->getQuery()
           ->getArrayResult();
@@ -1327,26 +1329,32 @@ class PagelleUtil {
           $dati['condotta9'][] = $cond['alunno'];
         }
       }
-      // controlla elaborato cittadinanza
+      // controlla elaborato cittadinanza per alunni con 6 in condotta ammessi/sospesi
+      $dati['cittadinanza'] = [];
+      $alunniCondotta = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito')
+        ->join(Esito::class, 'e', 'WITH', 'a.id=e.alunno')
+        ->join('e.scrutinio', 's')
+        ->join(VotoScrutinio::class, 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
+        ->join('vs.materia', 'm')
+        ->where("a.id in (:lista) AND e.esito!='N' AND s.classe=:classe AND s.periodo='F' AND vs.unico=6 AND m.tipo='C'")
+        ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
+        ->setParameter('lista', $dati['scrutinati'])
+        ->setParameter('classe', $classe)
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($alunniCondotta as $alu) {
+        $dati['cittadinanza'][$alu['id']]['alunno'] = $alu;
+        $dati['cittadinanza'][$alu['id']]['esito'] =
+          $this->em->getRepository(Esito::class)->find($alu['esito']);
+      }
+      // controlla criteri ammissione esame
       if ($classe->getAnno() == 5) {
-        // alunni di quinta con 6 in condotta
-        $dati['cittadinanza'] = [];
-        $alunni5 = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito')
-          ->join(Esito::class, 'e', 'WITH', 'a.id=e.alunno')
-          ->join('e.scrutinio', 's')
-          ->join(VotoScrutinio::class, 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
-          ->join('vs.materia', 'm')
-          ->where("a.id in (:lista) AND e.esito='A' AND s.classe=:classe AND s.periodo='F' AND vs.unico=6 AND m.tipo='C'")
-          ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
-          ->setParameter('lista', $dati['scrutinati'])
-          ->setParameter('classe', $classe)
-          ->getQuery()
-          ->getArrayResult();
-        foreach ($alunni5 as $alu) {
-          $dati['cittadinanza'][$alu['id']]['alunno'] = $alu;
-          $dati['cittadinanza'][$alu['id']]['esito'] =
-            $this->em->getRepository(Esito::class)->find($alu['esito']);
+        $dati['esame_esclusi'] = [];
+        foreach ($dati['scrutinio']->getDato('requisitiAlunni') as $idAlunno => $requisito) {
+          if (!$requisito['invalsi'] || !$requisito['pcto']) {
+            $dati['esame_esclusi'][] = $idAlunno;
+          }
         }
       }
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {

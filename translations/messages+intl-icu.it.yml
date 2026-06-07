@@ -1357,9 +1357,9 @@ benché siano state svolte attività di recupero in orario curricolare ed extrac
 pur essendo stata informata la famiglia,\\n
 considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
 non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
-message.giudizio_non_ammissione_invalsi: "L'alunn{sex} non ha svolto i test INVALSI come previsto per l'ammissione all'Esame di Stato."
-message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL previsto per l'ammissione all'Esame di Stato."
-message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL e i test INVALSI, come previsto per l'ammissione all'Esame di Stato."
+message.giudizio_non_ammissione_invalsi: "L'alunn{sex} non ha svolto le prove INVALSI, come da documentazione agli atti."
+message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL, come da documentazione agli atti."
+message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL e le prove INVALSI, come da documentazione agli atti."
 message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
 con giudizio sospeso nello scrutinio finale di giugno,\\n
 benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
@@ -1369,7 +1369,7 @@ accertato che persistono le gravi carenze segnalate,\\n
 non ha raggiunto gli obiettivi minimi per le discipline indicate
 e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
 message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi, presumibilmente prima dell’inizio delle lezioni.
-message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
+message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di maturità."
 message.otp_abilitato: Codice OTP attivato.
 message.otp_disabilitato: Codice OTP disattivato.
 message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda che è importante che sia un indirizzo valido, in caso contrario non sarà possibile utilizzare la funzione di recupero password.
