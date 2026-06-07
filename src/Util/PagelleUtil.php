@@ -1349,11 +1349,13 @@ class PagelleUtil {
           $this->em->getRepository(Esito::class)->find($alu['esito']);
       }
       // controlla criteri ammissione esame
+      $dati['esame_esclusi'] = [];
       if ($classe->getAnno() == 5) {
-        $dati['esame_esclusi'] = [];
-        foreach ($dati['scrutinio']->getDato('requisitiAlunni') as $idAlunno => $requisito) {
-          if (!$requisito['invalsi'] || !$requisito['pcto']) {
-            $dati['esame_esclusi'][] = $idAlunno;
+        if ($dati['scrutinio']->getDato('requisitiEsame') != 'T') {
+          foreach ($dati['scrutinio']->getDato('requisitiAlunni') as $idAlunno => $requisito) {
+            if (!$requisito['invalsi'] || !$requisito['pcto']) {
+              $dati['esame_esclusi'][] = $idAlunno;
+            }
           }
         }
       }

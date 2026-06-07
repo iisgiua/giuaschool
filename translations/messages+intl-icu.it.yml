@@ -1913,3 +1913,4 @@ exception.autorizzazione_no_partenza: Devi indicare il luogo di partenza per l'u
 exception.autorizzazione_no_rientro: Devi indicare la modalità di rientro dall'uscita didattica o visita guidata
 exception.pdf_import: Impossibile importare il file PDF
 exception.spid_no_client_secret: Devi inserire sia il codice del client che il codice segreto.
+exception.requisiti_esame_incoerenti: L'ammissione non è possibile senza i requisiti previsti per l'alunn{sex} {alunno}.

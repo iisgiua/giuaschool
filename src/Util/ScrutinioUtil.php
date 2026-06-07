@@ -3332,6 +3332,13 @@ class ScrutinioUtil {
                 $insuff_cont == 0 && $suff_condotta) {
         // sufficienze con ammissione ma condotta sufficiente: giudizio sospeso
         $errore[] = $this->trans->trans('exception.criteri_condotta_6', ['sex' => $sesso, 'alunno' => $nome]);
+      } elseif ($classe->getAnno() == 5 && $dati['esito']->getEsito() == 'A' &&
+                $dati['scrutinio']->getDato('requisitiEsame') == 'A' &&
+                isset($dati['scrutinio']->getDato('requisitiAlunni')[$id]) &&
+                (!$dati['scrutinio']->getDato('requisitiAlunni')[$id]['invalsi'] ||
+                 !$dati['scrutinio']->getDato('requisitiAlunni')[$id]['pcto'])) {
+        // requisiti esame quinta: non ammissione se non superati
+        $errore[] = $this->trans->trans('exception.requisiti_esame_incoerenti', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if (empty($errore) && empty($errore_condotta)) {
         // aggiorna media
