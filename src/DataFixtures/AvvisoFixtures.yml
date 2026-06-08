@@ -341,7 +341,7 @@ App\Entity\Avviso:
     firma: false
     stato: 'P'
     titolo: '<substr(<text()>, 0, 255)>'
-    data: '<dateTimeBetween("now", "+1 month")>'
+    data: '<(new DateTime("2023-04-01"))>'
     anno: 0
     autore: '@staff_4'
     allegati: '<collection(@file_avviso_1)>'
