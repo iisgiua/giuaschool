@@ -1,6 +1,6 @@
-# giua@school ![GitHub release (latest by date)](https://img.shields.io/github/v/release/iisgiua/giuaschool)
+# ReGib ![GitHub release (latest by date)](https://img.shields.io/github/v/release/iisgiua/giuaschool)
 
-*Il Registro Elettronico open source dell'Istituto di Istruzione Superiore "Michele Giua"*
+*ReGib - Registro Elettronico open source fork di Giua@school*
 
 [![Test and deploy](https://github.com/iisgiua/giuaschool/actions/workflows/test-deploy.yml/badge.svg?branch=master)](https://github.com/iisgiua/giuaschool/actions/workflows/test-deploy.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/fe9a2c70a8d84667a114fff45e942260)](https://www.codacy.com/gh/iisgiua/giuaschool/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=iisgiua/giuaschool&amp;utm_campaign=Badge_Grade)
