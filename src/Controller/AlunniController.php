@@ -45,7 +45,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
+/* Commento Alunni */
 /**
  * AlunniController - gestione alunni e genitori
  *
