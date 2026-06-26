@@ -1463,7 +1463,6 @@ class PagelleUtil {
           ->join('vs.materia', 'm')
           ->join(Esito::class, 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
           ->where("vs.scrutinio=:scrutinio AND m.tipo='C' AND vs.unico<9 AND e.esito='A'")
-          ->groupBy('vs.alunno')
           ->setParameter('scrutinio', $dati['scrutinio'])
           ->getQuery()
           ->getArrayResult();

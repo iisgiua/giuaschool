@@ -1097,7 +1097,7 @@ class ScrutinioController extends BaseController {
           }
         }
       }
-      if ($dati['voto_condotta'] < $dati['valutazioni']['C']['suff']) {
+      if ($periodo == 'F' && $dati['voto_condotta'] < $dati['valutazioni']['C']['suff']) {
         // voto condotta insufficiente
         $insuff_condotta = true;
         $insuff_cont++;
@@ -1163,15 +1163,15 @@ class ScrutinioController extends BaseController {
                 $insuff_condotta) {
         // ammissione in quinta con una insufficienza in condotta
         $errore['exception.voto_condotta_esito'] = true;
-      } elseif ($form->get('esito')->getData() == 'N' && $classe->getAnno() != 5 &&
+      } elseif ($periodo == 'F' && $form->get('esito')->getData() == 'N' && $classe->getAnno() != 5 &&
                 ($insuff_gravi < 2 || $insuff_cont < 3)) {
         // non ammissione può essere: min 3 materie di cui due insuff. gravi
         $errore['exception.criteri_non_ammissione_invalidi'] = true;
-      } elseif ($form->get('esito')->getData() == 'S' && $classe->getAnno() != 5 &&
+      } elseif ($periodo == 'F' && $form->get('esito')->getData() == 'S' && $classe->getAnno() != 5 &&
                 $insuff_gravi >= 2 && $insuff_cont == 3) {
         // rientra nei criteri di non ammissione
         $errore['exception.criteri_non_ammissione'] = true;
-      } elseif ($form->get('esito')->getData() == 'A' && $classe->getAnno() != 5 &&
+      } elseif ($periodo == 'F' && $form->get('esito')->getData() == 'A' && $classe->getAnno() != 5 &&
                 $insuff_cont == 0 && $suff_condotta) {
         // sufficienze con ammissione ma condotta sufficiente: giudizio sospeso
         $errore['exception.criteri_condotta_6'] = true;
@@ -1271,12 +1271,14 @@ class ScrutinioController extends BaseController {
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     }
     $valori = $dati['esito']->getDati();
+    // evita problemi con media incoerente
+    $media = $dati['esito']->getMedia() <= 10 ? $dati['esito']->getMedia() : 6;
     if ($classe->getAnno() == 5) {
       // classe quinta
-      $m = ($dati['esito']->getMedia() < 6 ? 5 : ceil($dati['esito']->getMedia()));
+      $m = ($media < 6 ? 5 : ceil($media));
     } else {
       // classe terza e quarta
-      $m = ceil($dati['esito']->getMedia());
+      $m = ceil($media);
     }
     $dati['credito'] = $credito[$classe->getAnno()][$m];
     // credito per condotta

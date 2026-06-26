@@ -2002,33 +2002,23 @@ class ArchiviazioneUtil {
       // crea directory
       $fs->mkdir($percorso, 0775);
     }
-    // copia circolare
-    $file = new File($this->dirCircolari.'/'.$circolare->getDocumento());
-    $nuovofile = $percorso.'/circolare-'.str_pad($circolare->getNumero(), 3, '0', STR_PAD_LEFT).
-      '-del-'.$circolare->getData()->format('d-m-Y').'.'.$file->getExtension();
-    $fs->copy($file->getPathname(), $nuovofile, true);
-    // controllo esistenza del file
-    if (!$fs->exists($file)) {
-      // segnala errore
-      $this->reqstack->getSession()->getFlashBag()->add('warning',
-        'Circolare n. '.$circolare->getNumero().' del '.$circolare->getData()->format('d-m-Y').
-        ' non creata.');
-      $num = 0;
-    }
-    // copia allegati
+    // copia circolare e allegati
     foreach ($circolare->getAllegati() as $k=>$allegato) {
-      $file = new File($this->dirCircolari.'/'.$allegato);
+      $vecchiofile = $this->dirCircolari.'/'.$circolare->getAllegati()[$k]->getFile().'.'.
+        $circolare->getAllegati()[$k]->getEstensione();
       $nuovofile = $percorso.'/circolare-'.str_pad($circolare->getNumero(), 3, '0', STR_PAD_LEFT).
         '-del-'.$circolare->getData()->format('d-m-Y').
-        '-allegato-'.($k + 1).'.'.$file->getExtension();
-      $fs->copy($file->getPathname(), $nuovofile, true);
+        ($k > 0 ? '-allegato-'.$k : '').'.'.$circolare->getAllegati()[$k]->getEstensione();
       // controllo esistenza del file
-      if (!$fs->exists($file)) {
+      if (!$fs->exists($vecchiofile)) {
         // segnala errore
         $this->reqstack->getSession()->getFlashBag()->add('warning',
-          'Allegato n. '.($k + 1).' della circolare n. '.$circolare->getNumero().
-          ' non creato.');
+          $k > 0 ? 'Allegato n. '.$k.' della circolare n. '.$circolare->getNumero().' non creato.' :
+          'Circolare n. '.$circolare->getNumero().' del '.$circolare->getData()->format('d-m-Y').' non creata.');
         $num = 0;
+      } else {
+        // copia file
+        $fs->copy($vecchiofile, $nuovofile, true);
       }
     }
     // restituisce numero circolari archiviate
