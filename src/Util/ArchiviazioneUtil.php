@@ -430,7 +430,8 @@ class ArchiviazioneUtil {
     if ($ore > 0 || $votiNoLezione > 0) {
       // legge lezioni del periodo
       $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
+        ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita,mf.nome AS modulo')
+        ->leftJoin('l.moduloFormativo', 'mf', 'WITH', "mf.id=l.moduloFormativo AND mf.tipo='O'")
         ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->join(ScansioneOraria::class, 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
@@ -641,7 +642,9 @@ class ArchiviazioneUtil {
         foreach ($lezioni as $l) {
           $data = $l['data']->format('d/m/Y');
           $dati['argomenti'][$data]['argomento'][] = $this->ripulisceTesto($l['argomento']);
-          $dati['argomenti'][$data]['attivita'][] = $this->ripulisceTesto($l['attivita']);
+          $attivita = $this->ripulisceTesto($l['attivita']);
+          $attivita .= $l['modulo'] ? ($attivita != '' ? "<br>" : '').' [MODULO FORMATIVO: '.$l['modulo'].']' : '';
+          $dati['argomenti'][$data]['attivita'][] = $attivita;
         }
         // scrive argomenti e attività
         $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
