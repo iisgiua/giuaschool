@@ -57,7 +57,7 @@ class ModuloType extends AbstractType {
         ->add('tipo', ChoiceType::class, ['label' => 'label.tipo_archivio',
           'choices' => ['label.registro_docente' => 'D', 'label.registro_sostegno' => 'S',
             'label.registro_classe' => 'C', 'label.documenti_scrutinio' => 'U',
-            'label.archivio_circolari' => 'R'],
+            'label.archivio_classi' => 'L', 'label.archivio_circolari' => 'R'],
           'required' => true])
         ->add('selezione', ChoiceType::class, ['label' => 'label.selezione_archivio',
           'choices' => ['label.tutti' => 'T', 'label.selezionato' => 'S', 'label.da_selezionato' => 'D'],

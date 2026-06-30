@@ -487,6 +487,7 @@ label.esporta: Esporta
 label.credito_integrativo: Credito integrativo
 label.credito_integrativo_si: SI (ha recuperato le carenze dello scorso anno scolastico)
 label.credito_integrativo_no: NO (non ha recuperato le carenze dello scorso anno scolastico)
+label.archivio_classi: Archivio dei documenti di classe
 label.archivio_circolari: Archivio delle circolari
 label.archivio_avvisi: Archivio degli avvisi
 label.filtro_documenti: Filtro documenti
@@ -1455,27 +1456,27 @@ message.nuovo_anno_0: "<strong>Prima di procedere, assicurati di avere effettuat
   2) backup completo (file e database), per poter effettuare il ripristino in caso di problemi;<br>
   3) posto il sito in modalità manutenzione e disconnesso tutti gli altri utenti collegati.</strong><br><br>
   <em>Cliccando sul pulsante INIZIA sarà effettuata la pulizia iniziale dei dati presenti sul database.</em>"
-message.nuovo_anno_1: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_1: "<strong>PASSO 1<br>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero degli esiti degli scrutini;<br>
   * passaggio di classe degli alunni promossi.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_2: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_2: "<strong>PASSO 2<br>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero delle circolari.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_3: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_3: "<strong>PASSO 3<br>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero degli avvisi.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_4: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_4: "<strong>PASSO 4<br>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero dei documenti relativi ai BES.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_5: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_5: "<strong>PASSO 5<br>Verranno ora effettuate le seguenti operazioni:<br>
   * recupero dei documenti degli scrutini.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_6: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_6: "<strong>PASSO 6<br>Verranno ora effettuate le seguenti operazioni:<br>
   * rimozione degli utenti disabilitati;<br>
   * rimozione degli alunni in uscita.</strong><br><br>
   <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
-message.nuovo_anno_7: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+message.nuovo_anno_7: "<strong>PASSO 7<br>Verranno ora effettuate le seguenti operazioni:<br>
   * pulizia finale;<br>
   * impostazione nella configurazione del nuovo anno scolastico;<br>
   * svuotamento della cache di sistema.</strong><br><br>

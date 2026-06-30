@@ -10,6 +10,7 @@ namespace App\Util;
 
 use App\Entity\ComunicazioneUtente;
 use App\Entity\Configurazione;
+use App\Entity\Documento;
 use App\Entity\Lezione;
 use App\Entity\Firma;
 use App\Entity\ScansioneOraria;
@@ -28,7 +29,6 @@ use App\Entity\Entrata;
 use App\Entity\Uscita;
 use App\Entity\Nota;
 use App\Entity\Annotazione;
-use App\Entity\AvvisoUtente;
 use App\Entity\Genitore;
 use App\Entity\Scrutinio;
 use DateTimeZone;
@@ -3475,6 +3475,46 @@ class ArchiviazioneUtil {
       $html .= '</table>';
       $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     }
+  }
+
+  /**
+   * Crea l'archivio dei documenti di tutte le classi
+   *
+   * @param array $classi Lista delle classi di cui creare l'archivio
+   */
+  public function tuttiArchivioClasse($classi) {
+    foreach ($classi as $cl) {
+      $this->archivioClasse($cl);
+    }
+  }
+
+  /**
+   * Crea l'archivio dei documenti di una classe
+   *
+   * @param Classe $classe Classe di cui creare l'archivio
+   */
+  public function archivioClasse(Classe $classe) {
+    $fs = new Filesystem();
+    $dir = $this->root.'/classi/'.$classe->getAnno().$classe->getSezione().$classe->getGruppo().'/';
+    // legge i documenti della classe
+    $documenti = $this->em->getRepository(Documento::class)->createQueryBuilder('d')
+      ->join('d.classe', 'c')
+      ->leftJoin('d.materia', 'm')
+      ->where("d.anno=0 AND d.tipo IN ('L','P','R','M') AND d.stato='P' AND c.id=:classe")
+      ->setParameter('classe', $classe->getId())
+      ->getQuery()
+      ->getResult();
+    foreach ($documenti as $documento) {
+      $allegati = $documento->getAllegati();
+      foreach ($allegati as $allegato) {
+        $vecchioFile = $dir.$allegato->getFile().'.'.$allegato->getEstensione();
+        $nuovoFile = $dir.$allegato->getNome().'.'.$allegato->getEstensione();
+        $allegato->setFile($allegato->getNome());
+        $fs->rename($vecchioFile, $nuovoFile, true);
+      }
+    }
+    // rende permanenti le modifiche al db
+    $this->em->flush();
   }
 
 }
