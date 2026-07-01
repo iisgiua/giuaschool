@@ -37,7 +37,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
-        if: ${{ !github.event.inputs.prerelease }}
+        if: ${{ inputs.prerelease == false }}
         uses: metcalfc/changelog-generator@v4.7.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
         with:
           body: ${{ steps.changelog.outputs.changelog }}
           draft: false
-          prerelease: ${{ github.event.inputs.prerelease }}
+          prerelease: ${{ inputs.prerelease }}
           tag: "v${{ github.event.inputs.version }}"
           name: "Versione ${{ github.event.inputs.version }}"
 
@@ -113,7 +113,7 @@ jobs:
           tag: "v${{ github.event.inputs.version }}"
 
       - name: Create version tag and changelog page
-        if: ${{ !github.event.inputs.prerelease }}
+        if: ${{ inputs.prerelease == false }}
         run: |
           mkdir -p docs/_data
           echo "tag: ${{ github.event.inputs.version }}" > docs/_data/version.yml
@@ -124,7 +124,7 @@ jobs:
           envsubst < .github/templates/latest-build_void.md.tmpl > docs/latest-build.md
 
       - name: Add version tag and changelog pages to documentation
-        if: ${{ !github.event.inputs.prerelease }}
+        if: ${{ inputs.prerelease == false }}
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
