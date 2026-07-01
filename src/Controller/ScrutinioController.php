@@ -1128,7 +1128,8 @@ class ScrutinioController extends BaseController {
         // insufficienze con ammissione (escluse quinte)
         $errore['exception.insufficienze_ammissione_esito'] = true;
       }
-      if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0 && $classe->getAnno() != 5) {
+      if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0 && $classe->getAnno() != 5 &&
+          ($periodo == 'F' || !$suff_condotta)) {
         // solo sufficienze con non ammissione (escluse quinte, per altri requisiti)
         $errore['exception.sufficienze_non_ammissione_esito'] = true;
       }

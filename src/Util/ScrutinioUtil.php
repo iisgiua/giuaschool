@@ -4503,17 +4503,18 @@ class ScrutinioUtil {
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo()];
-    // legge solo i voti con debito
+    // legge solo i voti con debito o di condotta
     $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.materia', 'm')
       ->join(Scrutinio::class, 's', 'WITH', 's.classe=:classe AND s.periodo=:periodo')
       ->join(VotoScrutinio::class, 'vsf', 'WITH', 'vsf.scrutinio=s.id AND vsf.materia=m.id AND vsf.alunno=:alunno')
-      ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vsf.unico<:suff')
+      ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND (vsf.unico<:suff OR m.tipo=:condotta)')
       ->orderBy('m.ordinamento', 'ASC')
 			->setParameter('scrutinio', $scrutinio)
 			->setParameter('alunno', $alunno)
 			->setParameter('classe', $alunno->getClasse())
 			->setParameter('periodo', 'F')
+			->setParameter('condotta', 'C')
 			->setParameter('suff', 6)
       ->getQuery()
       ->getResult();
@@ -4649,6 +4650,9 @@ class ScrutinioUtil {
       $nome = $alunno->getCognome().' '.$alunno->getNome();
       // elenco voti dell'alunno
       $dati = $this->elencoVotiAlunno($docente, $alunno, $scrutinio->getPeriodo());
+      $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
+      $dati['voto_condotta'] = !empty($dati['voti'][$condotta->getId()]) ?
+        $dati['voti'][$condotta->getId()]->getUnico() : null;
       $mediaSomma = 0;
       $mediaNum = 0;
       // controlla errori
@@ -4656,6 +4660,7 @@ class ScrutinioUtil {
       $insuff_cont = 0;
       $insuff_religione = false;
       $insuff_condotta = false;
+      $suff_condotta = false;
       foreach ($dati['voti'] as $key=>$voto) {
         // controllo voto
         if ($voto->getUnico() === null || $voto->getUnico() < $valutazioni[$voto->getMateria()->getTipo()]['min'] ||
@@ -4673,6 +4678,10 @@ class ScrutinioUtil {
         } elseif ($voto->getUnico() < $valutazioni[$voto->getMateria()->getTipo()]['suff']) {
           // voto insufficiente
           $insuff_cont++;
+        }
+        if ($dati['voto_condotta'] == 6) {
+          // voto condotta sufficiente
+          $suff_condotta = true;
         }
         // legge voto dello scrutinio finale (escluso scrutinio rimandato da prec. A.S.)
         $votoFinale = $this->em->getRepository(VotoScrutinio::class)->findOneBy([
@@ -4717,7 +4726,7 @@ class ScrutinioUtil {
         // insufficienze con ammissione
         $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
-      if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0) {
+      if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0 && !$suff_condotta) {
         // solo sufficienze con non ammissione
         $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
