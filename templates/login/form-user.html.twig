@@ -1,0 +1,48 @@
+<div class="panel-heading gs-pt-1 gs-pb-1">
+  <div class="panel-title text-center">
+    <strong>
+      Accesso
+{% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
+  {% set lt = ['A','G','D','T']|filter(e => e not in app.session.get('/CONFIG/ACCESSO/id_provider_tipo')|split('')) %}
+  {% for t in lt %}
+      {% if t == 'A' %}ALUNNI{% elseif t == 'G' %}GENITORI{% elseif t == 'D' %}DOCENTI{% elseif t == 'T' %}PERSONALE ATA{% endif %}{% if not loop.last %},{% endif %}
+  {% endfor %}
+{% else %}
+      al Registro Elettronico
+{% endif %}
+    </strong>
+  </div>
+</div>
+<div class="panel-body gs-pt-1 gs-pb-1">
+  <div class="help-block"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Entra"</strong>.</span></div>
+  <form name="login_form" method="post" class="form-horizontal">
+    <div class="form-group">
+      <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+      <div class="input-group gs-ml-4 gs-mr-4">
+        <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+        <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+      <div class="input-group gs-ml-4 gs-mr-4">
+        <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+        <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+      </div>
+    </div>
+{% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
+    <div class="form-group">
+      <label for="otp" class="col-sm-6 text-primary text-right">{{ 'label.login_otp'|trans|raw }}</label>
+      <div class="col-sm-6 input-group gs-pr-4 gs-pl-4 gs-mb-4">
+        <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
+        <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
+      </div>
+    </div>
+{% endif %}
+    <div class="form-group text-center gs-mb-2">
+      <button type="submit" class="btn btn-info" id="login" name="login"><strong>Entra</strong></button>
+    </div>
+    <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
+    <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
+  </form>
+</div>

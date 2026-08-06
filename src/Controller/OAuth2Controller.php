@@ -81,8 +81,6 @@ class OAuth2Controller extends BaseController {
   /**
    * Esegue l'autenticazione su provider esterno SPID tramite gateway MIM.
    *
-   * @param Request $request Pagina richiesta
-   * @param ClientRegistry $clientRegistry Client che richiede il servizio
    */
   #[Route(path: '/login/mimspid/check', name: 'login_mimspid_check')]
   public function checkMimSpid(): void {

@@ -5,8 +5,12 @@ return [
   ],
   'fileDelete' => [
     'public/install/app.php',
+    'templates/login/form-agid.html.twig',
   ],
   'sqlCommand' => [
+    ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],
+    ["UPDATE gs_configurazione SET descrizione='Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore, U=utente generico)\<br>[testo]' WHERE parametro='id_provider_tipo';", ""],
+    ["UPDATE gs_configurazione SET descrizione='Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all\'uso dell\'OTP (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore, U=utente generico)\<br>[testo]' WHERE parametro='otp_tipo';", ""],
   ],
   'envDelete' => [
   ],

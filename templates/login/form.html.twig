@@ -1,10 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container_fluid gs-mt-4 gs-ml-3 gs-mr-3">
+<div class="container_fluid gs-mt-5 gs-ml-3 gs-mr-3">
+  {# --- banner --- #}
   {% if app.session.get('/CONFIG/SISTEMA/banner_login') %}
   <div class="alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
   {% endif %}
+  {# --- messaggio manutenzione --- #}
   {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}
   <div class="col-sm-12 bg-danger gs-mb-4 text-center">
     <h1 class="gs-h2">ATTENZIONE</h1>
@@ -18,107 +20,61 @@
     </p>
   </div>
   {% endif %}
-  {% if not manutenzione and app.session.get('/CONFIG/ACCESSO/id_provider') %}
-  {% if errore %}<div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>{% endif %}
+  {# --- sito non in manutenzione --- #}
+  {% if not manutenzione %}
+    {% if errore %}
+  <div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
+    {% endif %}
+    {# --- SPID/CIE obbligatorio --- #}
+    {% if app.session.get('/CONFIG/ACCESSO/spid') == 'obbligatorio' %}
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-3">
+      {# --- GOOGLE attivo --- #}
+      {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
+    <div class="panel panel-success gs-mb-3">
+      {{ include('login/form-google.html.twig') }}
+    </div>
+      {% endif %}
+    {# --- SPID/CIE --- #}
+    <div class="panel panel-default _gs-mb-2">
+    {{ include('login/form-spid.html.twig') }}
+    </div>
+  </div>
+    {# --- SPID/CIE non obbligatorio --- #}
+    {% else %}
+      {# --- GOOGLE attivo --- #}
+      {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
   <div class="gs-row-eq-container gs-mb-2">
     <div class="panel panel-success gs-mb-2 gs-row-eq-col2">
-      <div class="panel-heading gs-pt-1 gs-pb-1">
-        <div class="panel-title text-center"><strong>Accesso Alunni e Docenti</strong></div>
-      </div>
-      <div class="panel-body gs-pt-1 gs-pb-1">
-          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Entra con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
-          <div class="text-center gs-mt-5">
-            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Entra con GOOGLE</strong></a>
-          </div>
-          <p class="gs-mt-5 gs-mb-0"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
-      </div>
+      {{ include('login/form-google.html.twig') }}
     </div>
     <div class="gs-row-eq-space">
       &nbsp;
     </div>
     <div class="panel panel-info gs-mb-2 gs-row-eq-col2">
-      <div class="panel-heading gs-pt-1 gs-pb-1">
-        <div class="panel-title text-center"><strong>Accesso Genitori e ATA</strong></div>
-      </div>
-      <div class="panel-body gs-pt-1 gs-pb-1">
-        <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Entra</strong>.</span></div>
-        <form name="login_form" method="post" class="form-horizontal">
-          <div class="form-group">
-            <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
-            <div class="input-group gs-ml-4 gs-mr-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
-              <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
-            <div class="input-group gs-ml-4 gs-mr-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
-              <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
-            </div>
-          </div>
-          <div class="form-group text-center gs-mb-2">
-            <button type="submit" class="btn btn-info" id="login" name="login"><strong>Entra</strong></button>
-          </div>
-          <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
-          <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
-        </form>
-      </div>
+      {{ include('login/form-user.html.twig') }}
     </div>
   </div>
-    {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
-  <div class="panel panel-primary">
-    <div class="panel-body gs-pt-2 gs-pb-2">
+        {# --- SPID/CIE --- #}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+  <div class="panel panel-default">
     {{ include('login/form-spid.html.twig') }}
-    </div>
-    {{ include('login/form-agid.html.twig') }}
   </div>
-    {% endif %}
-  {% elseif not manutenzione %}
+        {% endif %}
+      {# --- GOOGLE non attivo --- #}
+      {% else %}
   <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
     <div class="panel panel-primary" >
-      <div class="panel-heading">
-        <div class="panel-title">Accesso al Registro Elettronico</div>
-      </div>
-      <div class="panel-body">
-        <div class="help-block gs-text-normal">Inserisci il tuo <strong>nome utente</strong> e la tua <strong>password</strong>, quindi clicca sul pulsante <strong>Entra</strong>.</div>
-        {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
-        <form name="login_form" method="post" class="form-horizontal">
-          <div class="form-group">
-            <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
-            <div class="input-group gs-ml-4 gs-mr-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
-              <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
-            <div class="input-group gs-ml-4 gs-mr-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
-              <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="otp" class="col-sm-6 text-primary text-right">{{ 'label.login_otp'|trans|raw }}</label>
-            <div class="col-sm-6 input-group gs-pr-4 gs-pl-4 gs-mb-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
-              <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
-            </div>
-          </div>
-          <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary" id="login" name="login">Entra</button>
-          </div>
-          <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
-        </form>
-        {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
-          {{ include('login/form-spid.html.twig') }}
-        {% endif %}
-      </div>
-      {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
-        {{ include('login/form-agid.html.twig') }}
-      {% endif %}
+      {{ include('login/form-user.html.twig') }}
     </div>
+        {# --- SPID/CIE --- #}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+    <div class="panel panel-default">
+      {{ include('login/form-spid.html.twig') }}
+    </div>
+        {% endif %}
   </div>
+      {% endif %}
+    {% endif %}
   {% endif %}
 </div>
 {% endblock %}

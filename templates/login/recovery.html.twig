@@ -27,11 +27,12 @@
           <span class="gs-text-normal gs-big"><strong>{{ successo|trans }}</strong></span>
         </div>
     {% endif %}
-    {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
         <div class="help-block text-center gs-mb-4">
-          <span class="text-danger gs-big">Il recupero password è attivo solo per i <strong>Genitori</strong> e il <strong>Personale ATA</strong>.</span><br>
-        </div>
+          <span class="text-danger gs-big"><strong>Il recupero password è attivo solo per gli utenti che hanno ricevuto apposite credenziali direttamente dalla Scuola.<strong></span><br>
+    {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
+          <span class="text-normal gs-big">Gli utenti che usano l'accesso tramite GOOGLE devono andare al seguente indirizzo: <a href="https://accounts.google.com/signin/recovery">https://accounts.google.com/signin/recovery</a></span><br>
     {% endif %}
+        </div>
         <div class="help-block">
           <span class="gs-text-normal">Inserisci l'indirizzo di posta elettronica che hai configurato nel Registro Elettronico, quindi clicca sul pulsante <strong>Conferma</strong>.</span><br>
           <span><strong><em>Se non hai configurato il tuo indirizzo email, non potrai usare questo servizio.</em></strong></span>
