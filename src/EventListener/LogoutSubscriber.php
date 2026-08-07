@@ -56,15 +56,6 @@ class LogoutSubscriber implements EventSubscriberInterface {
     $user = $this->security->getUser();
     if ($user) {
       $tipo = $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso');
-      // logout da SPID
-      if ($tipo == 'SPID') {
-        // legge eventuale url per il logut SPID
-        $spidLogout = $this->reqstack->getSession()->get('/APP/UTENTE/spid_logout');
-        if ($spidLogout) {
-          // esegue logout SPID su Identity Provider
-          $response = new RedirectResponse($spidLogout);
-        }
-      }
       // ditrugge la sessione
       $this->reqstack->getSession()->invalidate();
       // log azione

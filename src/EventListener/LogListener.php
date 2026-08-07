@@ -13,7 +13,6 @@ use App\Entity\ComunicazioneClasse;
 use App\Entity\ComunicazioneUtente;
 use App\Entity\Log;
 use App\Entity\Provisioning;
-use App\Entity\Spid;
 use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Common\Collections\Collection;
@@ -49,8 +48,7 @@ class LogListener {
     ComunicazioneClasse::class => true,
     ComunicazioneUtente::class => true,
     Log::class => true,
-    Provisioning::class => true,
-    Spid::class => true];
+    Provisioning::class => true];
 
   /**
    * @const CAMPI_ESCLUSI Lista dei campi da escludere nel log delle modifiche

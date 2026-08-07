@@ -392,7 +392,6 @@ class SistemaController extends BaseController {
             "TRUNCATE TABLE gs_richiesta;",
             "TRUNCATE TABLE gs_richiesta_colloquio;",
             "TRUNCATE TABLE gs_scansione_oraria;",
-            "TRUNCATE TABLE gs_spid;",
             "TRUNCATE TABLE gs_storico_esito;",
             "TRUNCATE TABLE gs_storico_voto;",
             "TRUNCATE TABLE gs_uscita;",

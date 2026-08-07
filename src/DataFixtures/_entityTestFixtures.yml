@@ -58,7 +58,6 @@ include:
   - ScansioneOrariaFixtures.yml
   - ScrutinioFixtures.yml
   - SedeFixtures.yml
-  - SpidFixtures.yml
   - StaffFixtures.yml
   - StoricoEsitoFixtures.yml
   - StoricoVotoFixtures.yml

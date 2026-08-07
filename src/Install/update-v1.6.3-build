@@ -9,6 +9,14 @@ return [
   'fileDelete' => [
     'public/install/app.php',
     'templates/login/form-agid.html.twig',
+    'public/spid-acs.php',
+    'public/spid-login.php',
+    'src/DataFixtures/SpidFixtures.yml',
+    'src/Entity/Spid.php',
+    'src/Repository/SpidRepository.php',
+    'src/Security/SpidAuthenticator.php',
+    'tests/UnitTest/Entity/SpidTest.php',
+    'tests/UnitTest/Security/SpidAuthenticatorTest.php',
   ],
   'sqlCommand' => [
     ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],
