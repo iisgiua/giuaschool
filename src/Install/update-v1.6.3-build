@@ -2,6 +2,8 @@
 
 return [
   'fileCopy' => [
+    'PERSONAL/data/autorizzazioni/',
+    'PERSONAL/data/consultazioni/',
   ],
   'fileDelete' => [
     'public/install/app.php',
