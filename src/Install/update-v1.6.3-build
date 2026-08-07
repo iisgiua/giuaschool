@@ -2,9 +2,9 @@
 
 return [
   'fileCopy' => [
-    'PERSONAL/data/autorizzazioni/.gitkeep',
-    'PERSONAL/data/consultazioni/.gitkeep',
-    'PERSONAL/data/moduli/.gitkeep',
+    ['PERSONAL/data/.gitkeep', 'PERSONAL/data/autorizzazioni/.gitkeep'],
+    ['PERSONAL/data/.gitkeep', 'PERSONAL/data/consultazioni/.gitkeep'],
+    ['PERSONAL/data/.gitkeep', 'PERSONAL/data/moduli/.gitkeep'],
   ],
   'fileDelete' => [
     'public/install/app.php',
