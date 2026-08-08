@@ -17,6 +17,8 @@ return [
     'src/Security/SpidAuthenticator.php',
     'tests/UnitTest/Entity/SpidTest.php',
     'tests/UnitTest/Security/SpidAuthenticatorTest.php',
+    '/config/metadata/',
+    '/public/spid/',
   ],
   'sqlCommand' => [
     ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],

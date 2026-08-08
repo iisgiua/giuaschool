@@ -1,8 +1,6 @@
 /.git/
 /.github/
 /.vscode/
-/config/metadata/*
-!/config/metadata/.gitkeep
 /config/secrets/*
 !/config/secrets/.gitkeep
 /DEV/
@@ -34,7 +32,6 @@
 !/public/app/.gitkeep
 !/public/app/giuaschool-app-v*
 /public/bundles/
-/public/spid/
 /src/Command/Argo/
 /src/Controller/GiuaController.php
 /src/Controller/TestController.php
