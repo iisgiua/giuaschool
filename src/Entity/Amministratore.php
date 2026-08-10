@@ -10,6 +10,7 @@ namespace App\Entity;
 
 use App\Repository\AmministratoreRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
@@ -19,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @author Antonello Dessì
  */
 #[ORM\Entity(repositoryClass: AmministratoreRepository::class)]
+#[UniqueEntity(fields: 'codiceFiscale', message: 'field.unique', entityClass: \App\Entity\Amministratore::class)]
 class Amministratore extends Utente {
 
 
