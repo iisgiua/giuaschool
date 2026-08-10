@@ -9,6 +9,8 @@
     {% include 'ruolo_genitore/menu_alunno.html.twig' with {'attivo': 'bacheca'} %}
   {% elseif is_granted('ROLE_ATA') %}
     {% include 'ruolo_ata/menu.html.twig' with {'attivo': 'bacheca'} %}
+  {% elseif is_granted('ROLE_UTENTE') %}
+    {% include 'ruolo_utente/menu.html.twig' with {'attivo': 'bacheca'} %}
   {% endif %}
 {% endblock %}
 
@@ -17,6 +19,8 @@
     {% include 'ruolo_docente/menu_bacheca.html.twig' %}
   {% elseif is_granted('ROLE_ATA') %}
     {% include 'ruolo_ata/menu_bacheca.html.twig' %}
+  {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
+    {% include 'ruolo_utente/menu_bacheca.html.twig' %}
   {% endif %}
 {% endblock %}
 
@@ -24,7 +28,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_bacheca'|trans({'utente': is_granted('ROLE_DOCENTE') ? 'i docenti' : (is_granted('ROLE_ATA') ? 'il personale ATA' : (is_granted('ROLE_GENITORE') ? 'i genitori' : 'gli studenti'))}) }}</h1>
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_bacheca'|trans({'utente': is_granted('ROLE_DOCENTE') ? 'i docenti' : (is_granted('ROLE_ATA') ? 'il personale ATA' : (is_granted('ROLE_GENITORE') ? 'i genitori' : (is_granted('ROLE_ALUNNO') ? 'gli studenti' : 'gli utenti')))}) }}</h1>
   {% if form_success %}<div class="has-success"><span class="help-block"><strong><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ form_success|trans }}</strong></span></div>{% endif %}
   {% if form_help %}<div class="help-block">{{ form_help|trans }}</div>{% endif %}
   {{ form_start(form, {'attr': {'class': 'form-inline gs-mb-2'}}) }}

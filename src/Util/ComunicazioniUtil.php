@@ -215,7 +215,7 @@ class ComunicazioniUtil {
     }
     if (str_contains($comunicazione->getSpeciali(), 'S')) {
       // aggiunge RSPP
-      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)->getIdRspp());
+      $utenti = array_merge($utenti, $this->em->getRepository(Utente::class)->getIdRspp());
     }
     $rappresentanti = array_intersect(['R', 'I', 'P'], str_split($comunicazione->getSpeciali()));
     if (!empty($rappresentanti)) {
@@ -679,7 +679,7 @@ class ComunicazioniUtil {
         // documento non presente
         $dati[$id]['documento'] = null;
         // genera documento fittizio
-        $documento = (new Documento)
+        $documento = (new Documento())
           ->setTipo('L')
           ->setClasse($this->em->getReference(Classe::class, $cattedra['classe_id']))
           ->setMateria($this->em->getReference(Materia::class, $cattedra['materia_id']));
@@ -716,7 +716,7 @@ class ComunicazioniUtil {
         // documento non presente
         $dati[$id]['documento'] = null;
         // genera documento fittizio
-        $documento = (new Documento)
+        $documento = (new Documento())
           ->setTipo('P')
           ->setClasse($this->em->getReference(Classe::class, $cattedra['classe_id']))
           ->setMateria($this->em->getReference(Materia::class, $cattedra['materia_id']));
@@ -752,7 +752,7 @@ class ComunicazioniUtil {
         // documento non presente
         $dati[$id]['documento'] = null;
         // genera documento fittizio
-        $documento = (new Documento)
+        $documento = (new Documento())
           ->setTipo('R')
           ->setClasse($this->em->getReference(Classe::class, $cattedra['classe_id']))
           ->setMateria($this->em->getReference(Materia::class, $cattedra['materia_id']))
@@ -790,7 +790,7 @@ class ComunicazioniUtil {
         // documento non presente
         $dati[$id]['documento'] = null;
         // genera documento fittizio
-        $documento = (new Documento)
+        $documento = (new Documento())
           ->setTipo('M')
           ->setClasse($this->em->getReference(Classe::class, $classe['classe_id']));
         // controlla azioni

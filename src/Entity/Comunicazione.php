@@ -671,7 +671,7 @@ abstract class Comunicazione implements Stringable {
   /**
    * Modifica i destinatari tra i rappresentanti di classe dei genitori [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @param string|null $genitori Destinatari tra i rappresentanti di classe dei genitori
+   * @param string|null $rappresentantiGenitori Destinatari tra i rappresentanti di classe dei genitori
    *
    * @return self Oggetto modificato
    */

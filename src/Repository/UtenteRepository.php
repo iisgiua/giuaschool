@@ -203,7 +203,7 @@ class UtenteRepository extends EntityRepository {
   /**
    * Restituisce gli utenti relativi ai rappresentanti di classe indicati
    *
-   * @param array $filtro Lista dei destinatari
+   * @param array $destinatari Lista dei destinatari
    * @param array $sedi Sedi di servizio (lista ID di Sede)
    * @param string $tipo Tipo di filtro [T=tutti, C=filtro classe]
    * @param array $filtro Lista di ID per il filtro indicato
@@ -248,6 +248,22 @@ class UtenteRepository extends EntityRepository {
     }
     // restituisce la lista degli ID
     return array_merge(array_column($alunni, 'id'), array_column($genitori, 'id'));
+  }
+
+  /**
+   * Restituisce l'utente RSPP
+   *
+   * @return array ID dell'utente RSPP
+   */
+  public function getIdRspp(): array {
+    $rspp = $this->createQueryBuilder('u')
+      ->select('u.id')
+      ->where('u.abilitato=1 AND u.rspp=1')
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($rspp, 'id');
   }
 
 }

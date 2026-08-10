@@ -131,7 +131,7 @@ class Ata extends Utente {
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
@@ -141,7 +141,7 @@ class Ata extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, E=segreteria
+   * Le possibili funzioni sono: N=nessuna, E=segreteria, I=rappresentante di istituto, R=rappresentante RSU, S=responsabile sicurezza
    *
    * @return array Lista della codifica delle funzioni
    */
@@ -149,6 +149,9 @@ class Ata extends Utente {
     $lista = $this->getRappresentante() ?? [];
     if ($this->segreteria) {
       $lista[] = 'E';
+    }
+    if ($this->getRspp()) {
+      $lista[] = 'S';
     }
     $lista[] = 'N';
     return $lista;

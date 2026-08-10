@@ -9,6 +9,8 @@
     {% include 'ruolo_genitore/menu_genitore.html.twig' %}
   {% elseif is_granted('ROLE_ALUNNO') %}
     {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+  {% elseif is_granted('ROLE_UTENTE') %}
+    {% include 'ruolo_utente/menu.html.twig' %}
   {% endif %}
 {% endblock %}
 
@@ -17,6 +19,8 @@
     {% include 'ruolo_docente/menu_bacheca.html.twig' %}
   {% elseif is_granted('ROLE_ATA') %}
     {% include 'ruolo_ata/menu_bacheca.html.twig' %}
+  {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
+    {% include 'ruolo_utente/menu_bacheca.html.twig' %}
   {% endif %}
 {% endblock %}
 

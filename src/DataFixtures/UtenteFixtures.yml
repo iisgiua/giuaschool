@@ -30,6 +30,7 @@
 #   notifica: lista di parametri di notifica per i servizi esterni
 #   listaProfili: lista di profili per lo stesso utente (dato non persistente)
 #   infoLogin: lista di dati utili in fase di autenticazione (dato non persistente)
+#   rspp: indica se il docente è il resposabile della sicurezza
 #   dati: lista di informazioni per la gestione dell'utente
 ####################
 
@@ -61,4 +62,5 @@ App\Entity\Utente:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(3)>'
     notifica: '<(array())>'
+    rspp: false
     dati: '<(array())>'

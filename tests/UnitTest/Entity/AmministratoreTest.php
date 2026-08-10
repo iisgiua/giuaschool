@@ -28,7 +28,7 @@ class AmministratoreTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Amministratore::class;
     // campi da testare
-    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'dati'];
+    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'dati'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -95,8 +95,9 @@ class AmministratoreTest extends EntityTestCase {
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rspp' ? $this->faker->boolean() :
           ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
-          null)))))))))))))))))))))))))));
+          null))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {

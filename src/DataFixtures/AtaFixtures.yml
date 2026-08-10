@@ -44,6 +44,7 @@ App\Entity\Ata:
     segreteria: true
     sede:
     rappresentante: '<(array())>'
+    rspp: false
     dati: '<(array())>'
   ata_{A, T, C, U}:
     sesso: '<randomElement(["M", "F"])>'
@@ -75,4 +76,5 @@ App\Entity\Ata:
     segreteria: '<($tipo == "A" ? true : false)>'
     sede: '@sede_*'
     rappresentante: '<(array())>'
+    rspp: false
     dati: '<(array())>'

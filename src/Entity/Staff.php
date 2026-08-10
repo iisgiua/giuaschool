@@ -69,7 +69,7 @@ class Staff extends Docente {
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */

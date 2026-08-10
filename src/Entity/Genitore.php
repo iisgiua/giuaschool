@@ -97,7 +97,7 @@ class Genitore extends Utente {
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
@@ -107,12 +107,15 @@ class Genitore extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, C=rappr. classe, I=rappr. istituto
+   * Le possibili funzioni sono: N=nessuna, L=rappresentante di classe, I=rappresentante di istituto, S=responsabile sicurezza
    *
    * @return array Lista della codifica delle funzioni
    */
   public function getCodiceFunzioni(): array {
     $lista = $this->getRappresentante() ?? [];
+    if ($this->getRspp()) {
+      $lista[] = 'S';
+    }
     $lista[] = 'N';
     return $lista;
   }

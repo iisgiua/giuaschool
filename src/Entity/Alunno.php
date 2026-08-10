@@ -485,7 +485,7 @@ class Alunno extends Utente {
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
@@ -495,7 +495,7 @@ class Alunno extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, C=rappr. classe, I=rappr. istituto, P=rappr. consulta prov., M=maggiorenne
+   * Le possibili funzioni sono: N=nessuna, S=rappresentante di classe, I=rappresentante di istituto, P=rappresentante consulta provinciale, M=maggiorenne
    *
    * @return array Lista della codifica delle funzioni
    */

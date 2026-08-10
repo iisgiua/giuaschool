@@ -30,6 +30,7 @@ class MenuOpzione implements Stringable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
   /**
    * @var int|null $id Identificativo univoco
    */
@@ -51,9 +52,7 @@ class MenuOpzione implements Stringable {
   private ?DateTime $modificato = null;
 
   /**
-   * @var string|null $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
-   *
-   *
+   * @var string|null $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
    */
   #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -62,8 +61,6 @@ class MenuOpzione implements Stringable {
 
   /**
    * @var string|null $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 32, nullable: false)]
   #[Assert\Length(max: 32, maxMessage: 'field.maxlength')]
@@ -71,8 +68,6 @@ class MenuOpzione implements Stringable {
 
   /**
    * @var string|null $nome Nome dell'opzione
-   *
-   *
    */
   #[ORM\Column(type: Types::STRING, length: 64, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -81,8 +76,6 @@ class MenuOpzione implements Stringable {
 
   /**
     * @var string|null $descrizione Descrizione dell'opzione
-    *
-    *
     */
    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
    #[Assert\NotBlank(message: 'field.notblank')]
@@ -91,8 +84,6 @@ class MenuOpzione implements Stringable {
 
   /**
     * @var string|null $url Indirizzo pagina (codificato come route)
-    *
-    *
     */
    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
    #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
@@ -112,8 +103,6 @@ class MenuOpzione implements Stringable {
 
   /**
     * @var string!null $icona Nome dell'eventuale icona dell'opzione
-    *
-    *
     */
    #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
    #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
@@ -121,8 +110,6 @@ class MenuOpzione implements Stringable {
 
   /**
    * @var Menu|null $menu Menu a cui appartiene l'opzione
-   *
-   *
    */
   #[ORM\JoinColumn(nullable: false)]
   #[ORM\ManyToOne(targetEntity: \Menu::class, inversedBy: 'opzioni')]

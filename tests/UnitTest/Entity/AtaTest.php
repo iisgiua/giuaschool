@@ -28,7 +28,7 @@ class AtaTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Ata::class;
     // campi da testare
-    $this->fields = ['tipo', 'segreteria', 'sede', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'dati'];
+    $this->fields = ['tipo', 'segreteria', 'sede', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'dati'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -98,8 +98,9 @@ class AtaTest extends EntityTestCase {
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rspp' ? $this->faker->boolean() :
           ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
-          null))))))))))))))))))))))))))))));
+          null)))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -153,8 +154,10 @@ class AtaTest extends EntityTestCase {
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setSegreteria(true);
     $this->assertSame(['E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['I']);
-    $this->assertSame(['I', 'E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRspp(true);
+    $this->assertSame(['E', 'S', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRappresentante(['I', 'R']);
+    $this->assertSame(['I', 'R', 'E', 'S', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

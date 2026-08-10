@@ -31,7 +31,7 @@ class AlunnoTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Alunno::class;
     // campi da testare
-    $this->fields = ['bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero', 'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'dati'];
+    $this->fields = ['bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero', 'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'dati'];
     $this->noStoredFields = ['genitori'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -111,8 +111,9 @@ class AlunnoTest extends EntityTestCase {
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rspp' ? $this->faker->boolean() :
           ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
-          null))))))))))))))))))))))))))))))))))))))));
+          null)))))))))))))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -164,16 +165,10 @@ class AlunnoTest extends EntityTestCase {
     $existent->setDataNascita(new DateTime('today'));
     $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['C']);
-    $this->assertSame(['C', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['I']);
-    $this->assertSame(['I', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['P']);
-    $this->assertSame(['P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['C', 'P']);
-    $this->assertSame(['C', 'P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRappresentante(['S', 'I', 'P']);
+    $this->assertSame(['S', 'I', 'P', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setDataNascita(DateTime::createFromFormat('d/m/Y', '01/01/2000'));
-    $this->assertSame(['C', 'P', 'M', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['S', 'I', 'P', 'M', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getDataNascita()->format('d/m/Y').')', (string) $existent, $this->entity.'::toString');
     // addGenitori

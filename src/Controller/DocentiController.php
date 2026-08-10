@@ -16,6 +16,7 @@ use App\Entity\Materia;
 use App\Entity\Provisioning;
 use App\Entity\Sede;
 use App\Entity\Staff;
+use App\Entity\Utente;
 use App\Event\UtenteCreatoEvent;
 use App\Event\UtenteModificatoEvent;
 use App\Form\CattedraSupplenzaType;
@@ -1355,15 +1356,16 @@ class DocentiController extends BaseController {
     $dati = [];
     $info = [];
     // legge dati
-    $rspp = $this->em->getRepository(Docente::class)->findOneBy(['rspp' => 1]);
+    $rspp = $this->em->getRepository(Utente::class)->findOneBy(['rspp' => 1, 'abilitato' => 1]);
+    $rsppDocente = ($rspp && $rspp instanceOf Docente) ? $rspp : null;
     // form
     $opzioniDocenti = $this->em->getRepository(Docente::class)->opzioni();
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rspp',
       'return_url' => $this->generateUrl('docenti_rspp'),
-      'values' => [$rspp, $opzioniDocenti]]);
+      'values' => [$rsppDocente, $opzioniDocenti]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // cancella precedente rspp
+      // cancella precedente rspp (non necessariamente docente)
       if ($rspp) {
         $rspp->setRspp(false);
       }

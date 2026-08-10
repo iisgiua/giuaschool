@@ -32,4 +32,5 @@ App\Entity\Amministratore:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(3)>'
     notifica: '<(array())>'
+    rspp: false
     dati: '<(array())>'

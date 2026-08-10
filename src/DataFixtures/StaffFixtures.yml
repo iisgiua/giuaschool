@@ -3,7 +3,6 @@
 #
 # dati dei docenti dello staff: gli stessi dei docenti più i seguenti
 #   sede: la sede di riferimento per il ruolo di staff (se definita)
-#   rspp: indica se il docente è il resposabile della sicurezza
 #   rappresentante: indica se il dipendente ATA è eletto come rappresentante [I=di istituto]
 ####################
 

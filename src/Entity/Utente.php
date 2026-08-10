@@ -240,6 +240,12 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?array $rappresentante = [''];
 
   /**
+   * @var bool $rspp Indica se l'utente è il responsabile della sicurezza
+   */
+  #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
+  private bool $rspp = false;
+
+  /**
    * @var array|null $dati Lista di informazioni per la gestione dell'utente
    */
   #[ORM\Column(type: Types::JSON, nullable: false)]
@@ -947,6 +953,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
+   * Restituisce se l'utente è il responsabile della sicurezza
+   *
+   * @return bool Vero se l'utente è il responsabile della sicurezza, falso altrimenti
+   */
+  public function getRspp(): bool {
+    return $this->rspp;
+  }
+
+  /**
+   * Modifica se l'utente è il responsabile della sicurezza
+   *
+   * @param bool $rspp Vero se l'utente è il responsabile della sicurezza, falso altrimenti
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRspp(bool $rspp): self {
+    $this->rspp = $rspp;
+    return $this;
+  }
+
+  /**
    * Restituisce la lista di informazioni per la gestione dell'utente
    *
    * @return array|null Lista di informazioni per la gestione dell'utente
@@ -1015,7 +1042,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
@@ -1026,7 +1053,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   /**
    * Controlla e restituisce il valore vero se l'utente ha un ruolo tra quelli specificati
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente generico, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @param string lista Lista codificata dei ruoli ammessi
    *
@@ -1047,12 +1074,17 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente [N=nessuna]
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente [N=nessuna, S=responsabile sicurezza]
    *
    * @return array Lista della codifica delle funzioni
    */
   public function getCodiceFunzioni(): array {
-    return ['N'];
+    $lista = [];
+    if ($this->getRspp()) {
+      $lista[] = 'S';
+    }
+    $lista[] = 'N';
+    return $lista;
   }
 
   /**

@@ -34,7 +34,7 @@ class UtenteTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Utente::class;
     // campi da testare
-    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'dati'];
+    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'dati'];
     $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
@@ -101,8 +101,9 @@ class UtenteTest extends EntityTestCase {
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rspp' ? $this->faker->boolean() :
           ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
-          null)))))))))))))))))))))))))));
+          null))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -177,6 +178,8 @@ class UtenteTest extends EntityTestCase {
     $this->assertFalse($existent->controllaRuolo(''), $this->entity.'::controllaRuolo');
     // getCodiceFunzioni
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRspp(true);
+    $this->assertSame(['S', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // controllaRuoloFunzione
     $this->assertTrue($existent->controllaRuoloFunzione('TE,UN'), $this->entity.'::controllaRuoloFunzione');
     $this->assertFalse($existent->controllaRuoloFunzione('TE,UX,UZ'), $this->entity.'::controllaRuoloFunzione');

@@ -1,0 +1,4 @@
+<ul class="nav navbar-nav gs-navbar-nav">
+  <li{{ app.request.attributes.get('_route') == 'login_home' ? ' class="active"' }}><a href="{{ path('login_home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
+  <li{{ app.request.attributes.get('_route') in ['circolari_bacheca','avvisi_bacheca','documenti_bacheca'] ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
+</ul>
