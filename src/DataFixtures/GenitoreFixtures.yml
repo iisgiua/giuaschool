@@ -45,6 +45,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_1A_{1..2}:
     sesso: 'F'
@@ -76,6 +77,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_2A_{1..2}:
     sesso: 'M'
@@ -107,6 +109,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_2A_{1..2}:
     sesso: 'F'
@@ -138,6 +141,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- genitori del triennio INF -----
@@ -171,6 +175,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_3A_{1..2}:
     sesso: 'F'
@@ -202,6 +207,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_4A_{1..2}:
     sesso: 'M'
@@ -233,6 +239,7 @@ App\Entity\Genitore:
     alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_4A_{1..2}:
     sesso: 'F'
@@ -264,6 +271,7 @@ App\Entity\Genitore:
     alunno: '@alunno_4A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_5A_{1..2}:
     sesso: 'M'
@@ -295,6 +303,7 @@ App\Entity\Genitore:
     alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_5A_{1..2}:
     sesso: 'F'
@@ -326,6 +335,7 @@ App\Entity\Genitore:
     alunno: '@alunno_5A_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- genitori del quinquennio LSA -----
@@ -359,6 +369,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_1B_{1..2}:
     sesso: 'F'
@@ -390,6 +401,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_2B_{1..2}:
     sesso: 'M'
@@ -421,6 +433,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_2B_{1..2}:
     sesso: 'F'
@@ -452,6 +465,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_3B_{1..2}:
     sesso: 'M'
@@ -483,6 +497,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_3B_{1..2}:
     sesso: 'F'
@@ -514,6 +529,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_4B_{1..2}:
     sesso: 'M'
@@ -545,6 +561,7 @@ App\Entity\Genitore:
     alunno: '@alunno_4B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_4B_{1..2}:
     sesso: 'F'
@@ -576,6 +593,7 @@ App\Entity\Genitore:
     alunno: '@alunno_4B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_5B_{1..2}:
     sesso: 'M'
@@ -607,6 +625,7 @@ App\Entity\Genitore:
     alunno: '@alunno_5B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_5B_{1..2}:
     sesso: 'F'
@@ -638,6 +657,7 @@ App\Entity\Genitore:
     alunno: '@alunno_5B_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- genitori del biennio BCH -----
@@ -671,6 +691,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1C_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_1C_{1..2}:
     sesso: 'F'
@@ -702,6 +723,7 @@ App\Entity\Genitore:
     alunno: '@alunno_1C_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_2C_{1..2}:
     sesso: 'M'
@@ -733,6 +755,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2C_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_2C_{1..2}:
     sesso: 'F'
@@ -764,6 +787,7 @@ App\Entity\Genitore:
     alunno: '@alunno_2C_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
 
@@ -798,6 +822,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3CAMB_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_3CAMB_{1..2}:
     sesso: 'F'
@@ -829,6 +854,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3CAMB_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_3CCHI_{1..2}:
     sesso: 'M'
@@ -860,6 +886,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3CCHI_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_3CCHI_{1..2}:
     sesso: 'F'
@@ -891,6 +918,7 @@ App\Entity\Genitore:
     alunno: '@alunno_3CCHI_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- genitori dell'alunno con sostegno -----
@@ -924,6 +952,7 @@ App\Entity\Genitore:
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_sostegno_{1..2}:
     sesso: 'F'
@@ -955,6 +984,7 @@ App\Entity\Genitore:
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore1_sostegno_{3..4}:
     sesso: 'M'
@@ -986,6 +1016,7 @@ App\Entity\Genitore:
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_sostegno_{3..4}:
     sesso: 'M'
@@ -1017,6 +1048,7 @@ App\Entity\Genitore:
     alunno: '@alunno_sostegno_<current()>'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- genitori dell'alunno con materia alternativa -----
@@ -1050,6 +1082,7 @@ App\Entity\Genitore:
     alunno: '@alunno_alternativa_1'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   genitore2_alternativa_1:
     sesso: 'F'
@@ -1081,4 +1114,5 @@ App\Entity\Genitore:
     alunno: '@alunno_alternativa_1'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'

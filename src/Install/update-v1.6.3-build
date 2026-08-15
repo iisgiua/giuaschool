@@ -27,6 +27,7 @@ return [
     ["UPDATE gs_configurazione SET descrizione='Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all\'uso dell\'OTP (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore, U=utente generico)\<br>[testo]' WHERE parametro='otp_tipo';", ""],
     ["DROP TABLE gs_spid;", "SELECT id FROM gs_spid"],
     ["UPDATE gs_utente SET rspp=false WHERE rspp IS NULL; ALTER TABLE gs_utente CHANGE rspp rspp TINYINT(1) NOT NULL;", ""],
+    ["ALTER TABLE gs_utente ADD login_speciale TINYINT(1) NOT NULL;", "SELECT login_speciale FROM gs_utente UNION SELECT 1 FROM dual;"],
   ],
   'envDelete' => [
   ],

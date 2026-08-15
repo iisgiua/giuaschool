@@ -45,6 +45,7 @@ App\Entity\Ata:
     sede:
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
   ata_{A, T, C, U}:
     sesso: '<randomElement(["M", "F"])>'
@@ -77,4 +78,5 @@ App\Entity\Ata:
     sede: '@sede_*'
     rappresentante: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'

@@ -33,4 +33,5 @@ App\Entity\Amministratore:
     numeriTelefono: '<telefono(3)>'
     notifica: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'

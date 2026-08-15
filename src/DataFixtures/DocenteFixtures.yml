@@ -45,6 +45,7 @@ App\Entity\Docente:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- docenti curricolari ITP -----
@@ -78,6 +79,7 @@ App\Entity\Docente:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- docenti religione -----
@@ -111,6 +113,7 @@ App\Entity\Docente:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- docenti sostegno -----
@@ -144,6 +147,7 @@ App\Entity\Docente:
     responsabileBesSede: '<ife(<current()>==2, @sede_1, <(null)>)>'
     rspp: false
     rappresentante: '<(array())>'
+    login_speciale: false
     dati: '<(array())>'
 
   # ----- docenti senza cattedra -----
@@ -177,4 +181,5 @@ App\Entity\Docente:
     responsabileBesSede:
     rspp: false
     rappresentante: '<(array())>'
+    login_speciale: false
     dati: '<(array())>'

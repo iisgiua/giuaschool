@@ -246,6 +246,12 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private bool $rspp = false;
 
   /**
+   * @var bool $loginSpeciale Indica se l'utente può effettuare il login speciale
+   */
+  #[ORM\Column(name: 'login_speciale', type: Types::BOOLEAN, nullable: false)]
+  private bool $loginSpeciale = false;
+
+  /**
    * @var array|null $dati Lista di informazioni per la gestione dell'utente
    */
   #[ORM\Column(type: Types::JSON, nullable: false)]
@@ -970,6 +976,27 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    */
   public function setRspp(bool $rspp): self {
     $this->rspp = $rspp;
+    return $this;
+  }
+
+  /**
+   * Restituisce se l'utente se l'utente può effettuare il login speciale
+   *
+   * @return bool Vero se l'utente può effettuare il login speciale, falso altrimenti
+   */
+  public function getLoginSpeciale(): bool {
+    return $this->loginSpeciale;
+  }
+
+  /**
+   * Modifica se l'utente se l'utente può effettuare il login speciale
+   *
+   * @param bool $loginSpeciale Vero se l'utente può effettuare il login speciale, falso altrimenti
+   *
+   * @return self Oggetto modificato
+   */
+  public function setLoginSpeciale(bool $loginSpeciale): self {
+    $this->loginSpeciale = $loginSpeciale;
     return $this;
   }
 

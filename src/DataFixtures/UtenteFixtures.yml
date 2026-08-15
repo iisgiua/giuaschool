@@ -31,6 +31,7 @@
 #   listaProfili: lista di profili per lo stesso utente (dato non persistente)
 #   infoLogin: lista di dati utili in fase di autenticazione (dato non persistente)
 #   rspp: indica se il docente è il resposabile della sicurezza
+#   login_speciale: indica se l'utente può effettuare il login speciale
 #   dati: lista di informazioni per la gestione dell'utente
 ####################
 
@@ -63,4 +64,5 @@ App\Entity\Utente:
     numeriTelefono: '<telefono(3)>'
     notifica: '<(array())>'
     rspp: false
+    login_speciale: false
     dati: '<(array())>'
