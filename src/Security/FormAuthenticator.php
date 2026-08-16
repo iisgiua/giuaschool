@@ -81,8 +81,9 @@ class FormAuthenticator extends AbstractAuthenticator {
    * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
   public function supports(Request $request): ?bool {
-    // solo se vero continua con l'autenticazione
-    return ($request->attributes->get('_route') === 'login_form' && $request->isMethod('POST'));
+    $route = $request->attributes->get('_route');
+    // solo se route corretta continua con l'autenticazione
+    return in_array($route, ['login_form', 'login_utente'], true) && $request->isMethod('POST');
   }
 
   /**
@@ -101,12 +102,14 @@ class FormAuthenticator extends AbstractAuthenticator {
     $credentials = [
       'password' => $request->request->get('_password'),
       'otp' => $request->request->get('_otp'),
+      'login_speciale' => ($request->attributes->get('_route') === 'login_utente'),
       'ip' => $request->getClientIp()];
     // salva la username usata
     $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
     // crea e restituisce il passaporto
+    $attributes = ['login_speciale' => $credentials['login_speciale']];
     return new Passport(
-      new UserBadge($username, $this->getUser(...)),
+      new UserBadge($username, $this->getUser(...), $attributes),
       new CustomCredentials($this->checkCredentials(...), $credentials),
       [ new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')) ]);
   }
@@ -115,15 +118,19 @@ class FormAuthenticator extends AbstractAuthenticator {
    * Restituisce l'utente corrispondente all'identificatore fornito
    *
    * @param string $username Identificatore dell'utente
+   * @param array $attributes Informazioni aggiuntive per la ricerca dell'utente
    *
    * @return UserInterface|null L'utente trovato o null se errore
    *
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser(string $username): ?UserInterface {
+  public function getUser(string $username, array $attributes): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $username,
-      'abilitato' => 1]);
+    $params = ['username' => $username, 'abilitato' => 1];
+    if ($attributes['login_speciale']) {
+      $params['loginSpeciale'] = 1;
+    }
+    $user = $this->em->getRepository(Utente::class)->findOneBy($params);
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login.', [
@@ -131,6 +138,10 @@ class FormAuthenticator extends AbstractAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // restituisce profilo attivo
+    if ($attributes['login_speciale']) {
+      // login speciale: non controlla profili
+      return $user;
+    }
     return $this->controllaProfili($user);
   }
 
@@ -149,11 +160,22 @@ class FormAuthenticator extends AbstractAuthenticator {
   public function checkCredentials(mixed $credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
-    // legge configurazione: id_provider
+    // legge configurazione e verifica se si è effettuato il login speciale
     $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
     $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
-    // se id_provider controlla ruolo utente
-    if ($idProvider && $user->controllaRuolo($idProviderTipo)) {
+    $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
+    $loginSpeciale = $credentials['login_speciale'];
+    // se SPID/CIE è obbligatorio e non è stato effettuato il login speciale
+    if ($spid == 'obbligatorio' && !$loginSpeciale) {
+      // errore: utente deve usare accesso SPID/CIE
+      $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite form.', [
+        'username' => $user->getUserIdentifier(),
+        'ruolo' => $user->getCodiceRuolo(),
+        'ip' => $credentials['ip']]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
+    }
+    // se è utilizzato un ID provider per l'utente e non è stato effettuato il login speciale
+    if ($idProvider && $user->controllaRuolo($idProviderTipo) && !$loginSpeciale) {
       // errore: utente deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', [
         'username' => $user->getUserIdentifier(),
@@ -165,7 +187,8 @@ class FormAuthenticator extends AbstractAuthenticator {
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok
       $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
-      if ($user->getOtp() && $user->controllaRuolo($otpTipo)) {
+      // se l'utente ha OTP attivo e il ruolo corretto e non è stato effettuato il login speciale
+      if ($user->getOtp() && $user->controllaRuolo($otpTipo) && !$loginSpeciale) {
         // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
           // otp corretto
@@ -177,7 +200,7 @@ class FormAuthenticator extends AbstractAuthenticator {
             $otp_errore_log = 'OTP riusato (replay attack) nella richiesta di login.';
             $otp_errore_messaggio = 'exception.invalid_credentials';
           }
-        } elseif ($credentials['otp'] == '') {
+        } elseif (empty($credentials['otp'])) {
           // no OTP
           $otp_errore_log = 'OTP non presente nella richiesta di login.';
           $otp_errore_messaggio = 'exception.missing_otp_credentials';
@@ -190,6 +213,7 @@ class FormAuthenticator extends AbstractAuthenticator {
         $this->logger->error($otp_errore_log, [
           'username' => $user->getUserIdentifier(),
           'ruolo' => $user->getCodiceRuolo(),
+          'login_speciale' => $loginSpeciale,
           'ip' => $credentials['ip']]);
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
       }
@@ -200,6 +224,7 @@ class FormAuthenticator extends AbstractAuthenticator {
     $this->logger->error('Password errata nella richiesta di login.', [
       'username' => $user->getUserIdentifier(),
       'ruolo' => $user->getCodiceRuolo(),
+      'login_speciale' => $loginSpeciale,
       'ip' => $credentials['ip']]);
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
@@ -218,10 +243,11 @@ class FormAuthenticator extends AbstractAuthenticator {
     $url = $this->router->generate('login_home');
     // tipo di login
     $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
-    $tipo_accesso = ($token->getUser()->getOtp() && $token->getUser()->controllaRuolo($otpTipo)) ?
-      'form/OTP' : 'form';
+    $loginSpeciale = ($request->attributes->get('_route') === 'login_utente');
+    $tipo_accesso = ($loginSpeciale ? 'form/speciale' :
+      (($token->getUser()->getOtp() && $token->getUser()->controllaRuolo($otpTipo)) ? 'form/OTP' : 'form'));
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
-    if ($tipo_accesso != 'form') {
+    if ($tipo_accesso == 'form/OTP') {
       // memorizza ultimo codice OTP usato (replay attack check)
       $token->getUser()->setUltimoOtp($request->request->get('_otp'));
     }
@@ -259,7 +285,8 @@ class FormAuthenticator extends AbstractAuthenticator {
     // messaggio di errore
     $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_form'));
+    $route = $request->attributes->get('_route');
+    return new RedirectResponse($this->router->generate($route));
   }
 
 }

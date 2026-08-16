@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\Alunno;
+use App\Entity\Amministratore;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
@@ -41,16 +42,16 @@ class UtenteRepository extends EntityRepository {
 
   /**
    * Trova i profili attivi per l'utente indicato tramite codice fiscale, cognome e nome.
-   * NB: non si considera il profilo AMMINISTRATORE per ragioni di sicurezza (si dovrà accedere con apposito login)
+   * NB: la gestione dei profili multipli è attiva solo se è presente il codice fiscale
    *
    * @param string $nome Nome dell'utente
    * @param string $cognome Cognome dell'utente
    * @param string $codiceFiscale Codice fiscale dell'utente
-   * @param boolean $spid Vero per l'accesso tramite SPID
+   * @param bool $spid Vero per l'accesso tramite SPID/CIE
    *
    * @return null|Utente Null se nessun profilo, il primo profilo attivo negli altri casi
    */
-  public function profiliAttivi($nome, $cognome, $codiceFiscale, $spid=false) {
+  public function profiliAttivi(string $nome, string $cognome, string $codiceFiscale, bool $spid=false) {
     // trova profili
     $param = ['nome' => $nome, 'cognome' => $cognome, 'codiceFiscale' => $codiceFiscale, 'abilitato' => 1];
     if ($spid) {
@@ -58,13 +59,13 @@ class UtenteRepository extends EntityRepository {
       $param['spid'] = 1;
     }
     $profili = $this->findBy($param);
-    if (empty($profili) || empty($codiceFiscale)) {
+    if (empty($profili)) {
       // nessun profilo attivo: restituisce null
       return null;
     }
     // controlla se solo un profilo
     if (count($profili) == 1) {
-      // solo un profilo: lo restituisce
+      // solo un profilo: restituisce solo l'utente senza lista di profili
       $profili[0]->setListaProfili([]);
       return $profili[0];
     }
@@ -77,87 +78,33 @@ class UtenteRepository extends EntityRepository {
         // può essercene solo uno
         $dati['ATA'][] = $profilo->getId();
         $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
+        $utente = $utente ?? $profilo;
       } elseif (($profilo instanceOf Docente) && !isset($dati['DOCENTE'])) {
+        // comprende anche STAFF e PRESIDE
         // può essercene solo uno
         $dati['DOCENTE'][] = $profilo->getId();
         $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
+        $utente = $utente ?? $profilo;
       } elseif ($profilo instanceOf Genitore) {
         // ce ne possono essere più di uno (più figli nella stessa scuola)
         $dati['GENITORE'][] = $profilo->getId();
         $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
+        $utente = $utente ?? $profilo;
       } elseif (($profilo instanceOf Alunno) && !isset($dati['ALUNNO'])) {
         // può essercene solo uno
         $dati['ALUNNO'][] = $profilo->getId();
         $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
+        $utente = $utente ?? $profilo;
+      } elseif (($profilo instanceOf Amministratore) && !isset($dati['AMMINISTRATORE'])) {
+        // può essercene solo uno
+        $dati['AMMINISTRATORE'][] = $profilo->getId();
+        $numDati++;
+        $utente = $utente ?? $profilo;
       }
     }
     // restituisce primo profilo utente e memorizza la lista di profili
     if ($utente) {
-      $utente->setListaProfili($numDati > 1 ? $dati : []);
-    }
-    return $utente;
-  }
-
-  /**
-   * Trova i profili attivi per l'utente indicato solo tramite codice fiscale.
-   * NB: non si considera il profilo AMMINISTRATORE per ragioni di sicurezza (si dovrà accedere con apposito login)
-   *
-   * @param string $codiceFiscale Codice fiscale dell'utente
-   * @param boolean $spid Vero per l'accesso tramite SPID
-   *
-   * @return null|Utente Null se nessun profilo, il primo profilo attivo negli altri casi
-   */
-  public function profiliAttiviCodiceFiscale($codiceFiscale, $spid=false): ?Utente {
-    // trova profili
-    $param = ['codiceFiscale' => $codiceFiscale, 'abilitato' => 1];
-    if ($spid) {
-      // accesso SPID: controlla che utente sia abilitato
-      $param['spid'] = 1;
-    }
-    $profili = $this->findBy($param);
-    if (empty($profili) || empty($codiceFiscale)) {
-      // nessun profilo attivo: restituisce null
-      return null;
-    }
-    // controlla se solo un profilo
-    if (count($profili) == 1) {
-      // solo un profilo: lo restituisce
-      $profili[0]->setListaProfili([]);
-      return $profili[0];
-    }
-    // crea un vettore con i dati dei profili e lo restituisce
-    $dati = [];
-    $numDati = 0;
-    $utente = null;
-    foreach ($profili as $profilo) {
-      if (($profilo instanceOf Ata) && !isset($dati['ATA'])) {
-        // può essercene solo uno
-        $dati['ATA'][] = $profilo->getId();
-        $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
-      } elseif (($profilo instanceOf Docente) && !isset($dati['DOCENTE'])) {
-        // può essercene solo uno
-        $dati['DOCENTE'][] = $profilo->getId();
-        $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
-      } elseif ($profilo instanceOf Genitore) {
-        // ce ne possono essere più di uno (più figli nella stessa scuola)
-        $dati['GENITORE'][] = $profilo->getId();
-        $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
-      } elseif (($profilo instanceOf Alunno) && !isset($dati['ALUNNO'])) {
-        // può essercene solo uno
-        $dati['ALUNNO'][] = $profilo->getId();
-        $numDati++;
-        $utente = (!$utente ? $profilo : $utente);
-      }
-    }
-    // restituisce primo profilo utente e memorizza la lista di profili
-    if ($utente) {
+      // solo se esitono più profili
       $utente->setListaProfili($numDati > 1 ? $dati : []);
     }
     return $utente;

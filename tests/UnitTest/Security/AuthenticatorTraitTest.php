@@ -199,7 +199,7 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
   }
 
   /**
-   * Test di utente con profilo unico.
+   * Test di utente con profilo unico e profili multipli.
    *
    */
   #[DataProvider('profiliProvider')]
@@ -222,8 +222,10 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     foreach ($u->getListaProfili() as $key => $array) {
       $listaProfili = array_merge($listaProfili, array_values($array));
     }
+    sort($listaProfili);
     $listaAttesa = array_map(fn($p) => $this->getReference($p)->getId(), $lista);
-    $this->assertSame(sort($listaAttesa), sort($listaProfili));
+    sort($listaAttesa);
+    $this->assertSame($listaAttesa, $listaProfili);
   }
 
   /**
@@ -248,12 +250,14 @@ class AuthenticatorTraitTest extends DatabaseTestCase {
     yield [['staff_1', 'genitore1_1A_1'], 'staff_1', ['staff_1', 'genitore1_1A_1']];
     yield [['preside', 'genitore1_1A_1'], 'preside', ['preside', 'genitore1_1A_1']];
     yield [['ata_A', 'genitore1_1A_1'], 'ata_A', ['ata_A', 'genitore1_1A_1']];
-    yield [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', []];
-    yield [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', []];
-    yield [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', []];
-    yield [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', []];
-    yield [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', []];
+    yield [['genitore1_1A_1', 'amministratore'], 'genitore1_1A_1', ['genitore1_1A_1', 'amministratore']];
+    yield [['genitore1_1A_1', 'ata_A'], 'genitore1_1A_1', ['genitore1_1A_1', 'ata_A']];
+    yield [['genitore1_1A_1', 'docente_curricolare_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'docente_curricolare_1']];
+    yield [['genitore1_1A_1', 'staff_1'], 'genitore1_1A_1', ['genitore1_1A_1', 'staff_1']];
+    yield [['genitore1_1A_1', 'preside'], 'genitore1_1A_1', ['genitore1_1A_1', 'preside']];
     yield [['genitore1_1A_1', 'utente_1', ], 'genitore1_1A_1', []];
-  }
+    yield [['ata_A', 'genitore1_1A_1', 'docente_curricolare_1', 'amministratore'], 'ata_A', ['ata_A', 'genitore1_1A_1', 'docente_curricolare_1', 'amministratore']];
+    yield [['alunno_2A_1', 'ata_A', 'genitore1_1A_1', 'docente_curricolare_1', 'amministratore'], 'alunno_2A_1', []];
+    }
 
 }

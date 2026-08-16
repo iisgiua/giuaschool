@@ -154,8 +154,17 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
-    // richiesta corretta
+    // richiesta corretta: login standard
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
+    $req->setMethod('POST');
+    $res = $fa->supports($req);
+    $this->assertTrue($res);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // richiesta corretta: login speciale
+    $req = new Request([], [], ['_route' => 'login_utente'], [], [], [], null);
     $req->setMethod('POST');
     $res = $fa->supports($req);
     $this->assertTrue($res);
@@ -172,8 +181,17 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // richiesta con metodo errato
+    // richiesta con metodo errato: login standard
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
+    $req->setMethod('GET');
+    $res = $fa->supports($req);
+    $this->assertFalse($res);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // richiesta con metodo errato: login speciale
+    $req = new Request([], [], ['_route' => 'login_utente'], [], [], [], null);
     $req->setMethod('GET');
     $res = $fa->supports($req);
     $this->assertFalse($res);
@@ -194,22 +212,37 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+    $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+    // login standard
     $req = new Request([], ['_username' => 'user', '_password' => 'pass', '_otp' => 'otp', '_csrf_token' => 'TOKEN'],
       ['_route' => 'login_form'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
-    // esegue
     $res = $fa->authenticate($req);
-    // controlla
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(1, $this->session);
     $this->assertSame('user', $this->session[SecurityRequestAttributes::LAST_USERNAME]);
     $passport = new Passport(
-      new UserBadge('user', $fa->getUser(...)),
-      new CustomCredentials($fa->checkCredentials(...), ['password' => 'pass', 'otp' => 'otp', 'ip' => '1.2.3.4']),
+      new UserBadge('user', $fa->getUser(...), ['login_speciale' => false]),
+      new CustomCredentials($fa->checkCredentials(...), ['password' => 'pass', 'otp' => 'otp', 'login_speciale' => false, 'ip' => '1.2.3.4']),
+      [new CsrfTokenBadge('authenticate', 'TOKEN')]);
+    $this->assertEquals($passport, $res);
+    // login speciale
+    $req = new Request([], ['_username' => 'user2', '_password' => 'pass', '_otp' => 'otp', '_csrf_token' => 'TOKEN'],
+      ['_route' => 'login_utente'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
+    $req->setMethod('POST');
+    $req->setSession($this->mockedSession);
+    $res = $fa->authenticate($req);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(1, $this->session);
+    $this->assertSame('user2', $this->session[SecurityRequestAttributes::LAST_USERNAME]);
+    $passport = new Passport(
+      new UserBadge('user2', $fa->getUser(...), ['login_speciale' => true]),
+      new CustomCredentials($fa->checkCredentials(...), ['password' => 'pass', 'otp' => 'otp', 'login_speciale' => true, 'ip' => '1.2.3.4']),
       [new CsrfTokenBadge('authenticate', 'TOKEN')]);
     $this->assertEquals($passport, $res);
   }
@@ -229,7 +262,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente inesistente
     try {
       $exception = null;
-      $res = $fa->getUser('_!_INESISTENTE_!_');
+      $res = $fa->getUser('_!_INESISTENTE_!_', ['login_speciale' => false]);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -246,7 +279,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->em->flush();
     try {
       $exception = null;
-      $res = $fa->getUser($utente->getUsername());
+      $res = $fa->getUser($utente->getUsername(), ['login_speciale' => false]);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -256,14 +289,46 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente abilitato
+    // utente non abilitato al login speciale
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_2');
+    try {
+      $exception = null;
+      $res = $fa->getUser($utente->getUsername(), ['login_speciale' => true]);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertSame('exception.invalid_user', $exception);
+    $this->assertCount(1, $this->logs);
+    $this->assertSame(['username' => $utente->getUsername()], $this->logs['error'][0][1]);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // utente abilitato con login standard
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $utente->setAbilitato(true);
     $this->em->flush();
     try {
       $exception = null;
-      $res = $fa->getUser($utente->getUsername());
+      $res = $fa->getUser($utente->getUsername(), ['login_speciale' => false]);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertNull($exception);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    $this->assertSame($utente, $res);
+    // utente abilitato con login speciale
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_1');
+    $utente->setLoginSpeciale(true);
+    $this->em->flush();
+    try {
+      $exception = null;
+      $res = $fa->getUser($utente->getUsername(), ['login_speciale' => true]);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -287,11 +352,48 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
       $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
-    // utente con id provider attivo
-    $utente = $this->getReference('docente_curricolare_1');
-    $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    // SPID obbligatorio, login standard
+    $utente = $this->getReference('docente_curricolare_1');
+    $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'obbligatorio');
+    try {
+      $exception = null;
+      $res = $fa->checkCredentials($credenziali, $utente);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertSame('exception.invalid_user_type_form', $exception);
+    $this->assertCount(1, $this->logs);
+    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // SPID obbligatorio, login speciale
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_1');
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => null, 'login_speciale' => true, 'ip' => '1.2.3.4'];
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'obbligatorio');
+    $utente->setOtp('otp1234');
+    $utente->setUltimoOtp('');
+    $this->em->flush();
+    try {
+      $exception = null;
+      $res = $fa->checkCredentials($credenziali, $utente);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertNull($exception);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // ID provider attivo e ruolo corrispondente, senza login speciale
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_1');
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => null, 'login_speciale' => false, 'ip' => '1.2.3.4'];
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'no');
     try {
       $exception = null;
       $res = $fa->checkCredentials($credenziali, $utente);
@@ -307,7 +409,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente con password errata
     $this->logs = [];
     $utente = $this->getReference('genitore1_1A_1');
-    $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => 'pass1234', 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     try {
       $exception = null;
       $res = $fa->checkCredentials($credenziali, $utente);
@@ -316,16 +418,16 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     }
     $this->assertSame('exception.invalid_credentials', $exception);
     $this->assertCount(1, $this->logs);
-    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'login_speciale' => false, 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente con password corretta, no OTP generale
+    // utente con password corretta, no OTP per ruolo
     $this->logs = [];
     $utente = $this->getReference('genitore1_1A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', '');
-    $utente->setOtp('otp1234');
+    $utente->setOtp('otp1234-no');
     $this->em->flush();
     try {
       $exception = null;
@@ -341,7 +443,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // utente con password corretta, no OTP attivato per l'utente
     $this->logs = [];
     $utente = $this->getReference('genitore2_1A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
     $utente->setOtp('');
     $this->em->flush();
@@ -356,10 +458,10 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente con password corretta e OTP corretto
+    // utente con password corretta, OTP richiesto e OTP corretto
     $this->logs = [];
     $utente = $this->getReference('genitore1_2A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
     $this->em->flush();
@@ -374,10 +476,10 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente con password corretta e OTP corretto: replay attack
+    // utente con password corretta, OTP richiesto e OTP corretto: replay attack
     $this->logs = [];
     $utente = $this->getReference('genitore1_2A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'otp1234', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('otp1234');
     $this->em->flush();
@@ -389,14 +491,14 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     }
     $this->assertSame('exception.invalid_credentials', $exception);
     $this->assertCount(1, $this->logs);
-    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'login_speciale' => false, 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente con password corretta e OTP vuoto
+    // utente con password corretta, OTP richiesto e OTP vuoto
     $this->logs = [];
     $utente = $this->getReference('genitore1_2A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => '', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => '', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
     $this->em->flush();
@@ -408,14 +510,14 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     }
     $this->assertSame('exception.missing_otp_credentials', $exception);
     $this->assertCount(1, $this->logs);
-    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'login_speciale' => false, 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente con password corretta e OTP errato
+    // utente con password corretta, OTP richiesto e OTP errato
     $this->logs = [];
     $utente = $this->getReference('genitore1_2A_1');
-    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'abc', 'ip' => '1.2.3.4'];
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'abc', 'login_speciale' => false, 'ip' => '1.2.3.4'];
     $utente->setOtp('otp1234');
     $utente->setUltimoOtp('');
     $this->em->flush();
@@ -427,7 +529,25 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     }
     $this->assertSame('exception.invalid_credentials', $exception);
     $this->assertCount(1, $this->logs);
-    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertSame(['username' => $utente->getUsername(), 'ruolo' => $utente->getCodiceRuolo(), 'login_speciale' => false, 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // utente con password corretta, OTP richiesto e non fornito con login speciale
+    $this->logs = [];
+    $utente = $this->getReference('genitore1_2A_1');
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => null, 'login_speciale' => true, 'ip' => '1.2.3.4'];
+    $utente->setOtp('otp1234');
+    $utente->setUltimoOtp('');
+    $this->em->flush();
+    try {
+      $exception = null;
+      $res = $fa->checkCredentials($credenziali, $utente);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertNull($exception);
+    $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
@@ -492,6 +612,33 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
     $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
     $this->assertSame('otp1234', $utente->getUltimoOtp());
+    $this->assertSame('login_home', $res->getTargetUrl());
+    // login speciale, no profili
+    $this->logs = [];
+    $this->dbLogs = [];
+    $this->conf = false;
+    $this->session = [];
+    $req = new Request([], [], ['_route' => 'login_utente'], [], [], [], null);
+    $req->setMethod('POST');
+    $req->setSession($this->mockedSession);
+    $utente = $this->getReference('genitore1_2A_1');
+    $tok = new UsernamePasswordToken($utente, 'fw', []);
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
+    $utente->setOtp('otp1234');
+    $utente->setUltimoOtp('otpALTRO');
+    $this->em->flush();
+    $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
+    $adesso = new DateTime();
+    $res = $fa->onAuthenticationSuccess($req, $tok, 'fw');
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(1, $this->dbLogs);
+    $this->assertSame(['Login', ['Login' => 'form/speciale', 'Username' => $utente->getUsername(), 'Ruolo' => 'ROLE_GENITORE', 'Lista profili' => []]], $this->dbLogs['ACCESSO'][0]);
+    $this->assertTrue($this->conf);
+    $this->assertCount(2, $this->session);
+    $this->assertSame('form/speciale', $this->session['/APP/UTENTE/tipo_accesso']);
+    $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
+    $this->assertSame('otpALTRO', $utente->getUltimoOtp());
     $this->assertSame('login_home', $res->getTargetUrl());
     // login con profili
     $this->logs = [];

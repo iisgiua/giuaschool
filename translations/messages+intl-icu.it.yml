@@ -1595,7 +1595,7 @@ exception.attivazione_email_esistente: L'indirizzo di posta elettronica indicato
 exception.attivazione_esistente: L'utente risulta già attivo.
 exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
 exception.avviso_non_permesso: Spiacente non puoi creare o modificare l'avviso.
-exception.blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
+exception.blocked_login: Non è possibile effettuare l'accesso al registro elettronico perché è in corso un aggiornamento del sistema informatico. Riprovare più tardi.
 exception.blocked_ip: Accesso da una postazione non autorizzata.
 exception.blocked_time: Accesso in orario non autorizzato.
 exception.campo_data_mancante: Il campo {DATA} non è presente nel testo.
@@ -1834,7 +1834,7 @@ exception.info_docente_no_app: Il servizio richiesto non è attivo.
 exception.info_docente_no_ip: L'indirizzo IP non è valido.
 exception.info_docente_no_user: L'utente indicato non esiste.
 exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivolgiti alla Segreteria della scuola per risolvere il problema.
-exception.spid_blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
+exception.spid_blocked_login: Non è possibile effettuare l'accesso al registro elettronico perché è in corso un aggiornamento del sistema informatico. Riprovare più tardi.
 exception.documento_errore_codifica: Si è verificato un errore durante la procedura di codifica del documento.
 exception.dati_non_presenti: Dati non disponibili
 exception.intervallo_date_invalido: La data iniziale è successiva a quella finale

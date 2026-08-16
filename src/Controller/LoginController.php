@@ -366,4 +366,27 @@ class LoginController extends BaseController {
   public function connect(): void {
   }
 
+  /**
+   * Login  speciale dell'utente attraverso username e password
+   *
+   * @param ConfigLoader $config Gestore della configurazione su database
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/login/utente/', name: 'login_utente', methods: ['GET', 'POST'])]
+  public function utente(AuthenticationUtils $auth, ConfigLoader $config): Response {
+    // carica configurazione di sistema
+    $config->carica();
+    // conserva ultimo errore del login, se presente
+    $errore = $auth->getLastAuthenticationError();
+    // conserva ultimo username inserito
+    $username = $auth->getLastUsername();
+    // mostra la pagina di risposta
+    return $this->render('login/utente.html.twig', [
+      'pagina_titolo' => 'page.login',
+      'username' => $username,
+      'errore' => $errore]);
+  }
+
 }
