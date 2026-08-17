@@ -81,6 +81,7 @@ Scenario: scarica da bacheca l'allegato di un avviso
   E click su "Scarica l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
   E click su "Visualizza l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
 
+# NB: questo scenario fallisce se eseguito nei giorni festivi
 Scenario: scarica dal registro di classe l'allegato di un avviso
   Dato login utente "@docente_curricolare_1:username"
   E pagina attiva "lezioni_classe"

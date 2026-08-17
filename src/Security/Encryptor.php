@@ -36,9 +36,8 @@ class Encryptor {
   /**
    * Costruttore
    *
-   * @param string $key Chiave di cifratura
-   * @param string $cypher Algoritmo di cifratura
    * @param LoggerInterface $logger Gestore dei log su file
+   * @param string $key Chiave di cifratura
    */
   public function __construct(
     private LoggerInterface $logger,
