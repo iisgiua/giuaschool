@@ -22,7 +22,7 @@ return [
     'public/spid/',
     'src/Security/AppAuthenticator.php',
     'src/Controller/AppController.php',
-    'templates/app/*
+    'templates/app/'
   ],
   'sqlCommand' => [
     ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],
