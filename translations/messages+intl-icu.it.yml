@@ -961,7 +961,7 @@ page.agenda_verifica: Agenda Verifiche
 page.alias: Alias Utente
 page.alunni: Gestione Alunni
 page.alunno_edit: Modifica Alunno
-page.app_info: App e Servizi
+page.api_infoApp: Informazioni App
 page.app_login: Accesso tramite App
 page.app_telegram: Registrazione per Telegram
 page.app_moodle: Accesso ad APPRENDERE
@@ -1671,8 +1671,9 @@ exception.invalid_params: Dati errati.
 exception.invalid_recovery_email: L'indirizzo email indicato non è presente nel sistema.
 exception.invalid_recovery_type: Utente non abilitato all'utilizzo della procedura di recupero password.
 exception.invalid_user_type: Tipo di utente non valido.
-exception.invalid_user_type_form: "Tipo di utente non valido: usare l'autenticazione tramite GOOGLE."
-exception.invalid_user_type_idprovider: "Tipo di utente non valido per l'autenticazione tramite GOOGLE."
+exception.invalid_user_type_form: "Utente non abilitato all'autenticazione tramite credenziali fornite dalla Scuola."
+exception.invalid_user_type_idprovider: "Utente non abilitato all'autenticazione tramite GOOGLE."
+exception.invalid_user_type_spid: "Utente non abilitato all'autenticazione tramite SPID/CIE."
 exception.invalid_user: Utente sconosciuto.
 exception.manca_esito: Non è stato indicato l'esito dell'alunn{sex} {alunno}.
 exception.missing_otp_credentials: Non hai inserito il codice OTP.
@@ -1830,7 +1831,7 @@ exception.documento_esistente: Il documento inserito esiste già per l'alunno se
 exception.info_studente_no_app: Il servizio richiesto non è attivo.
 exception.info_studente_no_ip: L'indirizzo IP non è valido.
 exception.info_studente_no_user: L'utente indicato non esiste.
-exception.info_docente_no_app: Il servizio richiesto non è attivo.
+exception.info_docente_no_api: Il servizio richiesto non è attivo.
 exception.info_docente_no_ip: L'indirizzo IP non è valido.
 exception.info_docente_no_user: L'utente indicato non esiste.
 exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivolgiti alla Segreteria della scuola per risolvere il problema.
@@ -1914,4 +1915,5 @@ exception.autorizzazione_no_partenza: Devi indicare il luogo di partenza per l'u
 exception.autorizzazione_no_rientro: Devi indicare la modalità di rientro dall'uscita didattica o visita guidata
 exception.pdf_import: Impossibile importare il file PDF
 exception.spid_no_client_secret: Devi inserire sia il codice del client che il codice segreto.
+exception.spid_authenticate: "Errore nella procedura di autenticazione sul server del MIM. Riprova più tardi."
 exception.requisiti_esame_incoerenti: L'ammissione non è possibile senza i requisiti previsti per l'alunn{sex} {alunno}.

@@ -23,7 +23,6 @@ security:
         - 'App\Security\MimSpidAuthenticator'
         - 'App\Security\GSuiteAuthenticator'
         - 'App\Security\FormAuthenticator'
-        - 'App\Security\AppAuthenticator'
         - 'App\Security\TokenAuthenticator'
         - 'App\Security\TokenConnectAuthenticator'
       entry_point: 'App\Security\AuthenticationEntryPoint'

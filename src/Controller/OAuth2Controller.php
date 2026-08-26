@@ -9,12 +9,13 @@
 namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 
 /**
- * OAuth2Controller - gestione dell'autenticazione su provider esterno (Google Workspace e SPID tramite MIM)
+ * OAuth2Controller - gestione dell'autenticazione su provider esterno (Google e SPID/CIE tramite gateway MIM)
  *
  * @author Antonello Dessì
  */
@@ -36,24 +37,6 @@ class OAuth2Controller extends BaseController {
 	}
 
   /**
-   * Avvia l'autenticazione su provider esterno Google Workspace per le app.
-   *
-   * @param ClientRegistry $clientRegistry Client che richiede il servizio
-   * @param string $email Email dell'utente di cui effettuare il login
-   *
-   * @return Response Redirezione al servizio richiesto
-   */
-  #[Route(path: '/login/gsuite/app/{email}', name: 'login_gsuite_app')]
-  public function connectApp(ClientRegistry $clientRegistry, string $email): Response {
-    $options = [];
-    $options['login_hint'] = $email;
-    // redirezione alla GSuite
-    return $clientRegistry
-      ->getClient('gsuite')
-      ->redirect([], $options);
-	}
-
-  /**
    * Esegue autenticazione su Google Workspace tramite GsuiteAuthenticator
    *
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
@@ -65,16 +48,20 @@ class OAuth2Controller extends BaseController {
   /**
    * Avvia l'autenticazione su provider esterno SPID tramite gateway MIM.
    *
+   * @param Request $request Pagina richiesta
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
    *
    * @return Response Redirezione al servizio richiesto
    */
-   #[Route('/login/mimspid', name: 'mimspid_login')]
-  public function loginMimSpid(ClientRegistry $clientRegistry): Response {
-    // redirezione allo SPID MIM
-    return $clientRegistry
-      ->getClient('mimspid')
-      ->redirect(['iam openid gateway'], []);
+   #[Route('/login/mimspid', name: 'login_mimspid')]
+  public function loginMimSpid(Request $request, ClientRegistry $clientRegistry): Response {
+    // genera nonce (stringa casuale e univoca)
+    $nonce = bin2hex(random_bytes(32));
+    $request->getSession()->set('_mim_oidc_nonce', $nonce);
+    // recupera client MIM-SPID gateway
+    $client = $clientRegistry->getClient('mimspid');
+    // redirezione al gateway MIM
+    return $client->redirect([], ['nonce' => $nonce]);
   }
 
   /**

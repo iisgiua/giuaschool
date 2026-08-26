@@ -28,13 +28,5 @@ knpu_oauth2_client:
       redirect_params: {}
       # impostazioni OAuth2 aggiuntive
       use_state: true
-      # classe per il provider standard League OAuth2
-      provider_class: League\OAuth2\Client\Provider\GenericProvider
-      # configurazione del Gateway delle Identità MIM
-      provider_options:
-        # endpoint di autorizzazione
-        urlAuthorize: 'https://eid.istruzione.it/eid-gateway-oidc/oauth2/authorize'
-        # endpoint token
-        urlAccessToken: 'https://eid.istruzione.it/eid-gateway-oidc/oauth2/token'
-        # NON ESISTE userinfo endpoint nel Gateway MIM
-        urlResourceOwnerDetails: ''
+      # classe per il provider per il MIM-SPID gateway
+      provider_class: App\Security\MimSpidProvider

@@ -152,9 +152,9 @@ App\Entity\MenuOpzione:
   menu_opzione_PRINCIPALE3:
     ruolo: 'N'
     funzione: ''
-    nome: 'App&nbsp;e&nbsp;Servizi'
-    descrizione: 'Informazioni su app e servizi disponibili'
-    url: 'app_info'
+    nome: 'App'
+    descrizione: 'Informazioni sulle app disponibili'
+    url: 'api_infoApp'
     ordinamento: 3
     abilitato: true
     icona: ''

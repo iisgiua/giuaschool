@@ -8,12 +8,12 @@
 
 namespace App\Tests\UnitTest\Security;
 
-use Iterator;
-use DateTime;
 use App\Entity\Configurazione;
-use PHPUnit\Framework\Attributes\DataProvider;
 use App\Security\AuthenticatorTrait;
 use App\Tests\DatabaseTestCase;
+use DateTime;
+use Iterator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 

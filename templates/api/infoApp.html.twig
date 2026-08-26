@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="gs-h1 text-center">Applicazioni disponibili per il Registro Elettronico</h1>
+  <p class="gs-big">In questa pagina sono elencate le applicazioni per smartphone disponibili per il Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}.</p>
+  <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il loro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
+  <div id="giuaschool-app" class="alert alert-success gs-mt-5" role="alert">
+    <div class="row text-center"><strong class="gs-big">giua@school/app {{ giuaschoolApp[1] }}</strong></div>
+    <hr class="gs-mt-2 gs-mb-2">
+    <div class="row text-center">
+    </div>
+    <div class="row gs-text-normal">
+      <div class="col-sm-8">
+        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. La possono usare tutti gli utenti.</p>
+        <p><strong>Come si installa?</strong></p>
+        <p>Scarica l'app sul tuo smartphone e procedi all'installazione, attivando l'opzione per l'<em>installazione da fonti sconosciute</em>
+          e ignorando eventuali avvisi di sicurezza.<br>
+        </p>
+        <p><strong>Come si usa?</strong></p>
+        <p>Al termine dell'installazione, avvia l'app e leggi la pagina delle informazioni
+          che descrive la procedura di configurazione.
+        </p>
+      </div>
+      <div class="col-sm-4">
+        <table class="table gs-big ">
+          <tbody>
+            <tr>
+              <td style="width:50%;vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
+              <td style="width:50%" class="gs-noborder">
+                <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row text-center">
+          <a class="btn btn-primary btn-sm" href="{{ asset('app/'~giuaschoolApp[0]) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

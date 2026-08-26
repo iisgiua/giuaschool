@@ -98,3 +98,8 @@ services:
     arguments:
       $key: '%env(APP_SECRET)%'
     public: true
+
+  # usato per il validatore dell'ID Token MIM-SPID gateway
+  App\Security\MimSpidValidator:
+    arguments:
+      $cache: '@mimspid.jwks'

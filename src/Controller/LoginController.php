@@ -114,13 +114,6 @@ class LoginController extends BaseController {
     }
     // legge dati
     $dati = $notifiche->notificheHome($this->getUser());
-    // cerca di identificare l'app GiuaApp
-    if ($request->server->get('HTTP_HOST') === 'registro.giua.edu.it' &&
-        $request->headers->get('user-agent') === 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36') {
-      // connesso tramite GiuaApp: blocca accesso
-      $logger->warning('GiuaApp: blocked FORM login');
-      // dd('ERRORE: GiuaApp non è più supportata.');
-    }
     // visualizza pagina
     return $this->renderHtml('login', 'home', $dati);
   }
@@ -166,12 +159,19 @@ class LoginController extends BaseController {
       // legge configurazione: id_provider
       $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
+      $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'no');
       if (!$utente) {
         // utente non esiste
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
         $errore = 'exception.invalid_recovery_email';
+      } elseif ($spid == 'obbligatorio' && !$utente->controllaRuolo('A')) {
+        // errore: niente recupero password se SPID obbligatorio e utente non alunno
+        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
+          'email' => $email,
+          'ip' => $request->getClientIp()]);
+        $errore = 'exception.invalid_user_type_recovery';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
         // errore: niente recupero password per utente su id provider
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [

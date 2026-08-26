@@ -8,17 +8,16 @@
 
 namespace App\Tests\UnitTest\Security;
 
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Entity\Configurazione;
-use DateTime;
 use App\Security\GSuiteAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
+use DateTime;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
-use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Provider\GoogleUser;
+use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -27,6 +26,7 @@ use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 
 /**
@@ -214,7 +214,6 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $req->setSession($this->mockedSession);
     // esegue
     $res = $ga->authenticate($req);
-    // controlla
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
@@ -321,12 +320,32 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
+    // spid obbligatorio e utente non alunno
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_1');
+    $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'obbligatorio');
+    try {
+      $exception = null;
+      $res = $ga->getUser('1.2.3.4');
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertSame('exception.invalid_user_type_idprovider', $exception);
+    $this->assertCount(1, $this->logs);
+    $this->assertSame(['email' => $this->mockedGoogleUser->getEmail(), 'ruolo' => $utente->getCodiceRuolo(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
     // utente corretto
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'si');
     try {
       $exception = null;
       $res = $ga->getUser('1.2.3.4');

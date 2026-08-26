@@ -33,16 +33,27 @@ framework:
     log: true
   web_link:
     enabled: true
+  cache:
+    pools:
+      doctrine.result_cache_pool:
+        adapter: cache.app
+      doctrine.system_cache_pool:
+        adapter: cache.system
+      mimspid.jwks:
+        adapter: cache.adapter.filesystem
+        default_lifetime: 3600
 
 
-when@prod:
+when@dev:
   framework:
     cache:
       pools:
         doctrine.result_cache_pool:
-          adapter: cache.app
+          adapter: cache.adapter.array
         doctrine.system_cache_pool:
-          adapter: cache.system
+          adapter: cache.adapter.array
+        mimspid.jwks:
+          adapter: cache.adapter.array
 
 
 when@test:

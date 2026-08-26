@@ -123,9 +123,16 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
     // legge configurazione: id_provider
     $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
     $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
+    $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
     if (!$idProvider || !$user->controllaRuolo($idProviderTipo)) {
       // errore: utente non abilitato deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite Google.',
+        ['email' => $user->getEmail(), 'ruolo' => $user->getCodiceRuolo(), 'ip' => $ip]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
+    }
+    if ($spid == 'obbligatorio' && !$user->controllaRuolo('A')) {
+      // errore: SPID/CIE obbligatorio e utente non è alunno
+      $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite Google.',
         ['email' => $user->getEmail(), 'ruolo' => $user->getCodiceRuolo(), 'ip' => $ip]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
     }

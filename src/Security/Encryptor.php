@@ -19,15 +19,19 @@ use RuntimeException;
  */
 class Encryptor {
 
-  //==================== COSTANTI ====================
+  //==================== COSTANTI DELLA CLASSE ====================
 
-  // prefisso per identificare i dati cifrati
-  const ENCRYPTION_PREFIX = '__GS-ENC-v1__';
+  /**
+   * @var string ENCRYPTION_PREFIX Prefisso per identificare i dati cifrati
+   */
+  private const ENCRYPTION_PREFIX = '__GS-ENC-v1__';
 
 
-  //==================== ATTRIBUTI ====================
+  //==================== ATTRIBUTI DELLA CLASSE ====================
 
-  // algoritmo di cifratura
+  /**
+   * @var string $cypher Algoritmo di cifratura
+   */
   private string $cypher = 'aes-256-gcm';
 
 

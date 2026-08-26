@@ -8,14 +8,13 @@
 
 namespace App\Tests\UnitTest\Security;
 
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Entity\Configurazione;
-use DateTime;
 use App\Security\FormAuthenticator;
 use App\Tests\DatabaseTestCase;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
+use DateTime;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -24,8 +23,9 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 
 /**
