@@ -31,6 +31,7 @@ return [
     ["DROP TABLE gs_spid;", "SELECT id FROM gs_spid"],
     ["UPDATE gs_utente SET rspp=false WHERE rspp IS NULL; ALTER TABLE gs_utente CHANGE rspp rspp TINYINT(1) NOT NULL;", ""],
     ["ALTER TABLE gs_utente ADD login_speciale TINYINT(1) NOT NULL;", "SELECT login_speciale FROM gs_utente UNION SELECT 1 FROM dual;"],
+    ["UPDATE gs_utente SET login_speciale=1 WHERE ruolo='AMM';", ""],
     ["UPDATE gs_menu_opzione SET url='api_infoApp',nome='App',descrizione='Informazioni sulle app disponibili' WHERE url='app_info';", ""],
   ],
   'envDelete' => [

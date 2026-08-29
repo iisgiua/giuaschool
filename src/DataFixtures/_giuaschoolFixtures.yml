@@ -22,7 +22,7 @@ App\Entity\Amministratore:
     preloginCreato:
     prelogin: ''
     abilitato: true
-    spid: false
+    spid: true
     ultimoAccesso:
     otp: ''
     ultimoOtp: ''
@@ -35,4 +35,6 @@ App\Entity\Amministratore:
     indirizzo: ''
     numeriTelefono: '<(array())>'
     notifica: '<(array())>'
+    rspp: false
+    login_speciale: true
     dati: '<(array())>'
