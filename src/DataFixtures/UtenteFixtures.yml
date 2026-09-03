@@ -8,14 +8,14 @@
 #   email: indirizzo email dell'utente
 #   token: token generato per la procedura di attivazione o di recupero password
 #   tokenCreato: data/ora di creazione del token
-#   prelogin: codice di pre-login
-#   preloginCreato: data/ora di creazione del codice di pre-login
 #   abilitato: indica se l'utente è abilitato al login o no
 #   spid: indica se l'utente è abilitato all'accesso SPID
 #   ultimoAccesso: data/ora dell'ultimo accesso
 #   otp: codice segreto per accesso con OTP (se vuoto non è attivato)
 #   ultimoOtp: codice OTP usato l'ultima volta (per evitare replay attack)
-#   dispositivo: codice dispositivo
+#   dispositivoId (unique): identificativo univoco per il dispositivo associato all'utente (nullo se non registrato)
+#   dispositivoChiave: chiave pubblica del dispositivo (nullo se non registrato)
+#   dispositivoRegistrato: data e ora di registrazione del dispositivo (nullo se non registrato)
 #   nome: nome dell'utente
 #   cognome: cognome dell'utente
 #   sesso: sesso dell'utente
@@ -46,14 +46,14 @@ App\Entity\Utente:
     email: '$username@lovelace.edu.it'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     provinciaNascita: '50%? <stateAbbr()>: <strval("")>'

@@ -8,7 +8,9 @@ include:
   - AlunnoFixtures.yml
   - AmministratoreFixtures.yml
   - AnnotazioneFixtures.yml
-  - AppFixtures.yml
+  - ApiFixtures.yml
+  - AppChallengeFixtures.yml
+  - AppTicketFixtures.yml
   - AssenzaFixtures.yml
   - AssenzaLezioneFixtures.yml
   - AtaFixtures.yml

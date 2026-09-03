@@ -282,11 +282,13 @@ label.qualsiasi_destinatario: Qualsiasi destinatario
 label.rappresentante: Rappresentante
 label.rappresentante_L: Rappresentante di classe
 label.rappresentante_S: Rappresentante di classe
+label.rappresentante_C: Rappresentante di classe
 label.rappresentante_I: Rappresentante di Istituto
 label.rappresentante_P: Rappresentante Consulta Provinciale
 label.rappresentante_R: Rappresentante RSU
+label.rappresentanti_C: Rappresentanti di classe
 label.rappresentanti_L: Genitori rappresentanti di classe
-label.rappresentanti_S: Alunni rappresentanti di classe
+label.rappresentanti_S: Rappresentanti di classe
 label.rappresentanti_I: Rappresentanti di Istituto
 label.rappresentanti_P: Rappresentanti Consulta Provinciale
 label.rappresentanti_R: RSU

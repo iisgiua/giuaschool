@@ -23,14 +23,14 @@ App\Entity\Ata:
     email: '$username@lovelace.edu.it'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     provinciaNascita: '50%? <stateAbbr()>: <strval("")>'
@@ -56,14 +56,14 @@ App\Entity\Ata:
     email: '$username@lovelace.edu.it'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     provinciaNascita: '50%? <stateAbbr()>: <strval("")>'

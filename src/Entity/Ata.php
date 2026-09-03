@@ -157,4 +157,16 @@ class Ata extends Utente {
     return $lista;
   }
 
+  /**
+   * Modifica il valore che indica se l'utente è eletto come rappresentante [I=di istituto, R=RSU]
+   *
+   * @param array $rappresentante Indica se l'utente è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(array $rappresentante): self {
+    parent::setRappresentante(array_values(array_intersect($rappresentante, ['I', 'R'])));
+    return $this;
+  }
+
 }

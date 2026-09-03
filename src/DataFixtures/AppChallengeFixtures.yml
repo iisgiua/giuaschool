@@ -1,0 +1,21 @@
+####################
+# AppChallengeFixtures - dati di test
+#
+# Dati per la richiesta di autorizzazione:
+#   utente: utente associato al dispositivo autorizzato
+#   nonce: sequenza di byte casuale e univoca associata alla richiesta
+#   scadenza: data e ora della scadenza della richiesta
+#   usato: indica se il ticket è stata già utilizzata
+####################
+
+
+include:
+  - DocenteFixtures.yml
+
+
+App\Entity\AppChallenge:
+  appChallenge_{1..5}:
+    utente: '@docente_*'
+    nonce: '<uuid()>'
+    scadenza: '<dateTimeBetween("-1 days", "now")>'
+    usato: '<boolean(50)>'

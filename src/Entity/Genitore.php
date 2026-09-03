@@ -107,7 +107,7 @@ class Genitore extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, L=rappresentante di classe, I=rappresentante di istituto, S=responsabile sicurezza
+   * Le possibili funzioni sono: N=nessuna, C=rappresentante di classe, I=rappresentante di istituto, S=responsabile sicurezza
    *
    * @return array Lista della codifica delle funzioni
    */
@@ -118,6 +118,18 @@ class Genitore extends Utente {
     }
     $lista[] = 'N';
     return $lista;
+  }
+
+  /**
+   * Modifica il valore che indica se l'utente è eletto come rappresentante [I=rappresentante di istituto, C=rappresentante di classe]
+   *
+   * @param array $rappresentante Indica se l'utente è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(array $rappresentante): self {
+    parent::setRappresentante(array_values(array_intersect($rappresentante, ['I', 'C'])));
+    return $this;
   }
 
 }

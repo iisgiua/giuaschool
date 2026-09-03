@@ -8,6 +8,8 @@
 
 namespace App\EventListener;
 
+use App\Entity\AppChallenge;
+use App\Entity\AppTicket;
 use App\Entity\AssenzaLezione;
 use App\Entity\ComunicazioneClasse;
 use App\Entity\ComunicazioneUtente;
@@ -48,7 +50,9 @@ class LogListener {
     ComunicazioneClasse::class => true,
     ComunicazioneUtente::class => true,
     Log::class => true,
-    Provisioning::class => true];
+    Provisioning::class => true,
+    AppChallenge::class => true,
+    AppTicket::class => true];
 
   /**
    * @const CAMPI_ESCLUSI Lista dei campi da escludere nel log delle modifiche

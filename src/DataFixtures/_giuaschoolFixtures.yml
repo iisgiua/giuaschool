@@ -19,13 +19,14 @@ App\Entity\Amministratore:
     password: '<passwordCodificata($username)>'
     tokenCreato:
     token: ''
-    preloginCreato:
-    prelogin: ''
     abilitato: true
     spid: true
     ultimoAccesso:
     otp: ''
     ultimoOtp: ''
+    dispositivoId (unique):
+    dispositivoChiave:
+    dispositivoRegistrato:
     dataNascita:
     comuneNascita: ''
     provinciaNascita: ''

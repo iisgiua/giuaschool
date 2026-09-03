@@ -9,6 +9,7 @@
 namespace App\Tests;
 
 use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Logging\DebugStack;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
@@ -191,7 +192,7 @@ class EntityTestCase extends DatabaseTestCase {
     } elseif (is_bool($value)) {
       // booleano
       $result = $value ? '1' : '0';
-    } elseif ($value instanceOf DateTime) {
+    } elseif ($value instanceOf DateTimeInterface) {
       // oggetto DateTime
       $result = "'".addslashes($value->format('Y-m-d H:i:s'))."'";
     } elseif (is_object($value)) {

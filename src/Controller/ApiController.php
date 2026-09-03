@@ -8,15 +8,11 @@
 
 namespace App\Controller;
 
-use App\Entity\App;
+use App\Entity\Api;
 use App\Entity\Cattedra;
 use App\Entity\Docente;
-use App\Entity\Log;
 use App\Entity\Utente;
-use App\Util\ConfigLoader;
-use App\Util\LogHandler;
-use DateTime;
-use Exception;
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -63,129 +59,6 @@ class ApiController extends BaseController {
   }
 
   /**
-   * Passo iniziale per la connessione all'app: restituisce il token di sicurezza
-   *
-   * @param Request $request Pagina richiesta
-   *
-   * @return JsonResponse Informazioni di risposta
-   */
-  #[Route(path: '/app/connect/init', name: 'app_connectInit', methods: ['GET'])]
-  #[Route(path: '/api/connect/init', name: 'api_connectInit', methods: ['GET'])]
-  #[IsGranted('ROLE_UTENTE')]
-  public function connectInit(Request $request): JsonResponse {
-    $res = [];
-    // legge dati
-    $userId = $this->getUser()->getId();
-    $ip = $request->getClientIp();
-    $sessionId = session_id();
-    $token = bin2hex(openssl_random_pseudo_bytes(32));
-    // crea token
-    $res['token'] = $token.'-'.$userId;
-    // memorizza token
-    $this->getUser()->setPrelogin($token.'-'.sha1((string) $ip).'-'.$sessionId);
-    $this->getUser()->setPreloginCreato(new DateTime());
-    $this->em->flush();
-    // restituisce risposta
-    return new JsonResponse($res);
-  }
-
-  /**
-   * Connette utente da app, tramite token di sicurezza
-   *
-   * @param Request $request Pagina richiesta
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param LoggerInterface $logger Gestore dei log su file
-   * @param ConfigLoader $config Gestore della configurazione su database
-   * @param string $token Token con le informazioni per la connessione
-   *
-   * @return Response Pagina di risposta
-   */
-  #[Route(path: '/app/connect/{token}', name: 'app_connect', methods: ['GET'])]
-  #[Route(path: '/api/connect/{token}', name: 'api_connect', methods: ['GET'])]
-  public function connect(Request $request, LogHandler $dblogger, LoggerInterface $logger,
-                          ConfigLoader $config, string $token): Response {
-    $errore = null;
-    // carica configurazione di sistema
-    $config->carica();
-    // modalità manutenzione
-    $ora = (new DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $this->reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
-    if (!$manutenzione) {
-      try {
-        // legge dati
-        $ip = $request->getClientIp();
-        [$tokenId, $userId] = explode('-', $token);
-        $user = $this->em->getRepository(Utente::class)->findOneBy(['id' => $userId, 'abilitato' => 1]);
-        if (!$user) {
-          // errore utente
-          $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', [
-            'id' => $userId,
-            'token' => $token]);
-          throw new Exception('exception.invalid_user');
-        }
-        if (substr_count((string) $user->getPrelogin(), '-') != 2) {
-          // errore formato prelogin
-          $logger->error('Formato prelogin errato nella richiesta di connessione da app.', [
-            'id' => $userId,
-            'token' => $token]);
-          throw new Exception('exception.invalid_user');
-        }
-        [$tokenCheck, $hashCheck, $sessionId] = explode('-', (string) $user->getPrelogin());
-        if ($tokenCheck != $tokenId || $hashCheck != sha1((string) $ip)) {
-          // errore token o hash
-          $logger->error('Token o hash errato nella richiesta di connessione da app.', [
-            'id' => $userId,
-            'token' => $token]);
-          throw new Exception('exception.invalid_user');
-        }
-        $now = new DateTime();
-        $timeout = (clone $user->getPreloginCreato())->modify('+2 minutes');
-        if ($now > $timeout) {
-          // errore token scaduto
-          $logger->error('Token scaduto nella richiesta di connessione da app.', [
-            'id' => $userId,
-            'token' => $token]);
-          throw new Exception('exception.token_scaduto');
-        }
-        // ok, resetta token e log azione
-        $user->setPrelogin(null);
-        $user->setPreloginCreato(null);
-        $log = (new Log())
-          ->setUtente($user)
-          ->setUsername($user->getUsername())
-          ->setRuolo($user->getRoles()[0])
-          ->setAlias(null)
-          ->setIp($ip)
-          ->setOrigine($request->attributes->get('_controller'))
-          ->setTipo('A')
-          ->setCategoria('ACCESSO')
-          ->setAzione('Connessione da app')
-          ->setDati(['Token' => $token]);
-        $this->em->persist($log);
-        $this->em->flush();
-        // connette a sessione esistente
-        if (session_status() == PHP_SESSION_ACTIVE) {
-          session_destroy();
-        }
-        session_id($sessionId);
-        session_start();
-        // redirezione a pagina iniziale
-        return $this->redirectToRoute('login_home');
-      } catch (Exception $e) {
-        // errore
-        $errore = $e;
-      }
-    }
-    // mostra la pagina di risposta
-    return $this->render('api/login.html.twig', [
-      'pagina_titolo' => 'page.app_login',
-      'errore' => $errore,
-      'manutenzione' => $manutenzione]);
-  }
-
-  /**
    * Associa l'app di un dispositivo con l'utente corrente.
    *
    * @param Request $request Pagina richiesta
@@ -194,18 +67,22 @@ class ApiController extends BaseController {
    * @return JsonResponse Restituisce il token univoco per l'utente
    */
   #[Route(path: '/app/device', name: 'app_device', methods: ['POST'])]
-  #[Route(path: '/api/device', name: 'api_device', methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
+  //@TODO: DA RIMUOVERE
   public function device(Request $request, LoggerInterface $logger): JsonResponse {
     // inizializza
     $res = [];
+    /**
+     * @var Utente Utente connesso
+     */
+    $utente = $this->getUser();
     // legge dati
     $params = json_decode($request->getContent(), true);
-    $userId = $this->getUser()->getId();
+    $userId = $utente->getId();
     // crea token univoco
     $token = bin2hex(openssl_random_pseudo_bytes(32));
     // memorizza token+deviceId
-    $this->getUser()->setDispositivo($token.'-'.$params['device']);
+    $utente->setDispositivo($token.'-'.$params['device']);
     $this->em->flush();
     // prepara risposta (token+userId)
     $res['token'] = $token.'-'.$userId;
@@ -230,7 +107,7 @@ class ApiController extends BaseController {
     $token = $request->headers->get('X-Giuaschool-Token');
     $email = $request->request->get('email');
     // controlla servizio
-    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $this->em->getRepository(Api::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -268,6 +145,49 @@ class ApiController extends BaseController {
     $dati['stato'] = 'OK';
     // restituisce la risposta
     return new JsonResponse($dati);
+  }
+
+  /**
+   * Registra il dispositivo per l'utente corrente.
+   *
+   * @param Request $request Pagina richiesta
+   * @param LoggerInterface $logger Gestore dei log su file
+   *
+   * @return JsonResponse Restituisce il token univoco per l'utente
+   */
+  #[Route(path: '/api/auth/device', name: 'api_authDevice', methods: ['POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function authDevice(Request $request, LoggerInterface $logger): JsonResponse {
+    // inizializza
+    $risposta = [];
+    /**
+     * @var Utente Utente connesso
+     */
+    $utente = $this->getUser();
+    // legge dati
+    $dati = json_decode($request->getContent(), true);
+    $chiavePubblica = $dati['publicKey'] ?? null;
+    // validazione minima: deve essere una chiave pubblica valida in formato PEM
+    if (!$chiavePubblica || !openssl_pkey_get_public($chiavePubblica)) {
+      // errore: chiave non valida
+      $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida',
+        ['utente' => $utente->getUserIdentifier(), 'chiave' => $chiavePubblica]);
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = 'Chiave pubblica non valida';
+      return new JsonResponse($risposta, 400);
+    }
+    // associa (o sostituisce) il dispositivo dell'utente
+    $utente
+      ->setDispositivoId(Uuid::v7()->toRfc4122())
+      ->setDispositivoChiave($chiavePubblica)
+      ->setDispositivoRegistrato(new DateTimeImmutable());
+    $this->em->flush();
+    // log della registrazione
+    $logger->info('Registrazione dispositivo terminata con successo', ['utente' => $utente->getUserIdentifier()]);
+    // restituisce risposta
+    $risposta['stato'] = 'OK';
+    $risposta['dispositivo'] = $utente->getDispositivoId();
+    return new JsonResponse($risposta, 201);
   }
 
 }

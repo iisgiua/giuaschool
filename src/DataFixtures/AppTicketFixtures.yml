@@ -1,0 +1,21 @@
+####################
+# AppTicketFixtures - dati di test
+#
+# Dati per il ticket di autorizzazione:
+#   utente: utente associato al dispositivo autorizzato
+#   token: il valore del token univoco usato per il ticket di autorizzazione
+#   scadenza: data e ora della scadenza del ticket
+#   usato: indica se il ticket è stato già utilizzato
+####################
+
+
+include:
+  - DocenteFixtures.yml
+
+
+App\Entity\AppTicket:
+  appTicket_{1..5}:
+    utente: '@docente_*'
+    token: '<uuid()>'
+    scadenza: '<dateTimeBetween("-1 days", "now")>'
+    usato: '<boolean(50)>'

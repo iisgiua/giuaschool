@@ -161,11 +161,11 @@ class UtenteRepository extends EntityRepository {
     $alunni = [];
     $genitori = [];
     // rappresentanti alunni
-    if (in_array('S', $destinatari)) {
+    if (in_array('CA', $destinatari)) {
       $alunni = $this->getEntityManager()->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('DISTINCT a.id')
         ->join('a.classe', 'cl')
-        ->where("a.abilitato=1 AND FIND_IN_SET('S', a.rappresentante)>0 AND cl.sede IN (:sedi)")
+        ->where("a.abilitato=1 AND FIND_IN_SET('C', a.rappresentante)>0 AND cl.sede IN (:sedi)")
         ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi
@@ -177,12 +177,12 @@ class UtenteRepository extends EntityRepository {
         ->getArrayResult();
     }
     // rappresentanti genitori
-    if (in_array('L', $destinatari)) {
+    if (in_array('CG', $destinatari)) {
       $genitori = $this->getEntityManager()->getRepository(Genitore::class)->createQueryBuilder('g')
         ->select('DISTINCT g.id')
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')
-        ->where("g.abilitato=1 AND FIND_IN_SET('L', g.rappresentante)>0 AND a.abilitato=1 AND cl.sede IN (:sedi)")
+        ->where("g.abilitato=1 AND FIND_IN_SET('C', g.rappresentante)>0 AND a.abilitato=1 AND cl.sede IN (:sedi)")
         ->setParameter('sedi', $sedi);
       if ($tipo == 'C') {
         // filtro classi
@@ -214,3 +214,49 @@ class UtenteRepository extends EntityRepository {
   }
 
 }
+
+    // /**
+    //  * Vero se l'utente ha un dispositivo attivo e utilizzabile per
+    //  * l'accesso ricorrente. Se falso, l'app deve forzare un nuovo
+    //  * accesso completo tramite SPID/CIE.
+    //  */
+    // public function hasActiveDevice(): bool
+    // {
+    //     return null !== $this->deviceId
+    //         && null !== $this->devicePublicKeyPem
+    //         && !$this->deviceRevoked;
+    // }
+
+
+    // public function findOrCreateByFiscalCode(
+    //     string $fiscalCode,
+    //     string $firstName,
+    //     string $lastName,
+    // ): User {
+    //     $user = $this->findOneBy(['fiscalCode' => $fiscalCode]);
+    //     if ($user) {
+    //         return $user;
+    //     }
+
+    //     $user = new User($fiscalCode, $firstName, $lastName);
+    //     $this->getEntityManager()->persist($user);
+    //     $this->getEntityManager()->flush();
+
+    //     return $user;
+    // }
+
+    // /**
+    //  * Recupera l'utente associato a un dato dispositivo, solo se
+    //  * il dispositivo è attivo (non revocato). Usata dall'endpoint
+    //  * /api/auth/challenge: non rivela se il deviceId esiste ma è
+    //  * revocato o non esiste affatto, per evitare enumeration.
+    //  */
+    // public function findActiveByDeviceId(Uuid $deviceId): ?User
+    // {
+    //     return $this->createQueryBuilder('u')
+    //         ->where('u.deviceId = :deviceId')
+    //         ->andWhere('u.deviceRevoked = false')
+    //         ->setParameter('deviceId', $deviceId, 'uuid')
+    //         ->getQuery()
+    //         ->getOneOrNullResult();
+    // }

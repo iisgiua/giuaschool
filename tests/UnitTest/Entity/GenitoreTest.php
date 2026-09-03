@@ -9,8 +9,9 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\Entity\Genitore;
-use ReflectionClass;
 use App\Tests\EntityTestCase;
+use DateTimeImmutable;
+use ReflectionClass;
 
 
 /**
@@ -28,15 +29,15 @@ class GenitoreTest extends EntityTestCase {
     // nome dell'entità
     $this->entity = Genitore::class;
     // campi da testare
-    $this->fields = ['giustificaOnline', 'alunno', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivo', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'loginSpeciale', 'dati'];
+    $this->fields = ['giustificaOnline', 'alunno', 'username', 'password', 'email', 'token', 'tokenCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'dispositivoId', 'dispositivoChiave', 'dispositivoRegistrato', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'provinciaNascita', 'codiceFiscale', 'citta', 'provincia', 'indirizzo', 'numeriTelefono', 'notifica', 'rappresentante', 'rspp', 'loginSpeciale', 'dati'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_utente' => ['giustifica_online', 'alunno_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'dispositivo', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'provincia_nascita', 'codice_fiscale', 'citta', 'provincia', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'richiesta_certificato', 'foto', 'classe_id', 'ruolo', 'rspp', 'rappresentante', 'login_speciale', 'dati']];
+    $this->canRead = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'dispositivo_id', 'dispositivo_chiave', 'dispositivo_registrato', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'provincia_nascita', 'codice_fiscale', 'citta', 'provincia', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rspp', 'rappresentante', 'login_speciale', 'dati', 'prelogin', 'prelogin_creato', 'dispositivo']];
     // SQL write
-    $this->canWrite = ['gs_utente' => ['giustifica_online', 'alunno_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'dispositivo', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'provincia_nascita', 'codice_fiscale', 'citta', 'provincia', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'richiesta_certificato', 'foto', 'classe_id', 'ruolo', 'rspp', 'rappresentante', 'login_speciale', 'dati']];
+    $this->canWrite = $this->canRead;
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -76,14 +77,14 @@ class GenitoreTest extends EntityTestCase {
           ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'token' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'tokenCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'prelogin' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
-          ($field == 'preloginCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'abilitato' ? $this->faker->boolean() :
           ($field == 'spid' ? $this->faker->boolean() :
           ($field == 'ultimoAccesso' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'otp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
           ($field == 'ultimoOtp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
-          ($field == 'dispositivo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'dispositivoId' ? $this->faker->optional($weight = 50, $default = null)->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'dispositivoChiave' ? $this->faker->optional($weight = 50, $default = null)->uuid() :
+          ($field == 'dispositivoRegistrato' ? $this->faker->optional($weight = 50, $default = null)->passthrough(new DateTimeImmutable()) :
           ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'cognome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'sesso' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
@@ -96,7 +97,7 @@ class GenitoreTest extends EntityTestCase {
           ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
           ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'rappresentante' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'rappresentante' ? $this->faker->randomElements(['I', 'C'], 1) :
           ($field == 'rspp' ? $this->faker->boolean() :
           ($field == 'loginSpeciale' ? $this->faker->boolean() :
           ($field == 'dati' ? array_combine($this->faker->words($i), $this->faker->sentences($i)) :
@@ -151,10 +152,13 @@ class GenitoreTest extends EntityTestCase {
     // getCodiceFunzioni
     $existent->setRappresentante([]);
     $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
-    $existent->setRappresentante(['L', 'I']);
-    $this->assertSame(['L', 'I', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setRappresentante(['C', 'I']);
+    $this->assertSame(['C', 'I', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setRspp(true);
-    $this->assertSame(['L', 'I', 'S', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $this->assertSame(['C', 'I', 'S', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    // setRappresentante
+    $existent->setRappresentante(['A', 'I', 'C', 'P']);
+    $this->assertSame(['I', 'C'], $existent->getRappresentante(), $this->entity.'::setRappresentante');
   }
 
   /**

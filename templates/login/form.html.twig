@@ -90,16 +90,6 @@
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
-  $('form[name="login_form"]').submit(function(e) {
-    $.ajax({
-      url: "{{ path('ajax_token', {'id': 'authenticate'}) }}",
-      success: function(dati) {
-        $('#csrf_token').val(dati.authenticate);
-      },
-      dataType: 'json',
-      async: false
-    });
-  });
 });
 </script>
 {% endblock %}

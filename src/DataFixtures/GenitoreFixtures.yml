@@ -24,14 +24,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -56,14 +56,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -88,14 +88,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -120,14 +120,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -154,14 +154,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -186,14 +186,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -218,14 +218,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -250,14 +250,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -282,14 +282,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -314,14 +314,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -348,14 +348,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -380,14 +380,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -412,14 +412,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -444,14 +444,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -476,14 +476,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -508,14 +508,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -540,14 +540,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -572,14 +572,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -604,14 +604,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -636,14 +636,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -670,14 +670,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -702,14 +702,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -734,14 +734,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -766,14 +766,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -801,14 +801,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -833,14 +833,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -865,14 +865,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -897,14 +897,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -931,14 +931,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -963,14 +963,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -995,14 +995,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -1027,14 +1027,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -1061,14 +1061,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''
@@ -1093,14 +1093,14 @@ App\Entity\Genitore:
     password: '<passwordCodificata($username)>'
     tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
-    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
-    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
     ultimoOtp: ''
-    dispositivo: '<($preloginCreato ? md5($username) : "")>'
+    dispositivoId:
+    dispositivoChiave: '<($dispositivoId ? "FIRMA-PEM" : null)>'
+    dispositivoRegistrato: '<($dispositivoId ? new DateTime("-3 days") : null)>'
     dataNascita: '<(null)>'
     comuneNascita: ''
     provinciaNascita: ''

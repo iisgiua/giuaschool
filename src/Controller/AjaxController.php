@@ -128,26 +128,6 @@ class AjaxController extends BaseController {
   }
 
   /**
-   * Restituisce il token per la validazione CSRF
-   *
-   * @param Request $request Pagina richiesta
-   * @param CsrfTokenManagerInterface $tokenManager Gestione dei token CSRF
-   * @param LoggerInterface $logger Gestore dei log su file
-   * @param string $id Identificativo per il token da generare
-   *
-   * @return JsonResponse Informazioni di risposta
-   */
-  // TODO: da rimuovere, non più necessaria con nuova app
-  #[Route(path: '/ajax/token/{id}', name: 'ajax_token', requirements: ['id' => 'authenticate'], methods: ['GET'])]
-  public function tokenAjax(Request $request, CsrfTokenManagerInterface $tokenManager, LoggerInterface $logger, string $id): JsonResponse {
-    // genera token
-    $dati = [];
-    $dati[$id] = $tokenManager->getToken($id)->getValue();
-    // restituisce dati
-    return new JsonResponse($dati);
-  }
-
-  /**
    * Estende il tempo di scadenza della sessione
    *
    * @return JsonResponse Informazioni di risposta

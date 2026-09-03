@@ -16,7 +16,5 @@ use \Doctrine\ORM\EntityRepository;
  *
  * @author Antonello Dessì
  */
-class AppRepository extends EntityRepository {
-
+class ApiRepository extends EntityRepository {
 }
-

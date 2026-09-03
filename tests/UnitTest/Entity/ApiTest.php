@@ -8,17 +8,17 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Entity\App;
-use ReflectionClass;
+use App\Entity\Api;
 use App\Tests\EntityTestCase;
+use ReflectionClass;
 
 
 /**
- * Unit test dell'entità App
+ * Unit test dell'entità Api
  *
  * @author Antonello Dessì
  */
-class AppTest extends EntityTestCase {
+class ApiTest extends EntityTestCase {
 
  /**
    * Definisce dati per i test.
@@ -26,17 +26,17 @@ class AppTest extends EntityTestCase {
    */
   protected function setUp(): void {
     // nome dell'entità
-    $this->entity = App::class;
+    $this->entity = Api::class;
     // campi da testare
-    $this->fields = ['nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati'];
+    $this->fields = ['nome', 'token', 'attiva', 'dati'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_app' => ['id', 'creato', 'modificato', 'nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati']];
+    $this->canRead = ['gs_api' => ['id', 'creato', 'modificato', 'nome', 'token', 'attiva', 'dati']];
     // SQL write
-    $this->canWrite = ['gs_app' => ['id', 'creato', 'modificato', 'nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati']];
+    $this->canWrite = ['gs_api' => ['id', 'creato', 'modificato', 'nome', 'token', 'attiva', 'dati']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
     // esegue il setup predefinito
@@ -72,12 +72,8 @@ class AppTest extends EntityTestCase {
           ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
           ($field == 'token' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
           ($field == 'attiva' ? $this->faker->boolean() :
-          ($field == 'css' ? $this->faker->boolean() :
-          ($field == 'notifica' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'download' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
-          ($field == 'abilitati' ? $this->faker->passthrough(substr($this->faker->text(), 0, 4)) :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = [])->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          null))))))));
+          null))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -151,19 +147,6 @@ class AppTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Token - MAX LENGTH');
     $existent->setToken(str_repeat('*', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Token - VALID MAX LENGTH');
-    // notifica
-    $existent->setNotifica('*');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Notifica - CHOICE');
-    $existent->setNotifica('N');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Notifica - VALID CHOICE');
-    // abilitati
-    $property = $this->getPrivateProperty(App::class, 'abilitati');
-    $property->setValue($existent, '');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Abilitati - NOT BLANK');
-    $existent->setAbilitati($this->faker->randomLetter());
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Abilitati - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();
     $objects = $this->em->getRepository($this->entity)->findBy([]);
@@ -174,7 +157,7 @@ class AppTest extends EntityTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::token - UNIQUE');
     $objects[1]->setToken($tokenSaved);
     // unique
-    $newObject = new App();
+    $newObject = new Api();
     foreach ($this->fields as $field) {
       $newObject->{'set'.ucfirst((string) $field)}($objects[0]->{'get'.ucfirst((string) $field)}());
     }

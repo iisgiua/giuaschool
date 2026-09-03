@@ -123,7 +123,7 @@ class GenitoreRepository extends BaseRepository {
       // tutti i rappresentanti
       $query = $query
         ->andWhere('FIND_IN_SET(:classe, g.rappresentante)>0 OR FIND_IN_SET(:istituto, g.rappresentante)>0')
-        ->setParameter('classe', 'L')
+        ->setParameter('classe', 'C')
         ->setParameter('istituto', 'I');
     } else {
       // solo tipo selezionato

@@ -8,12 +8,13 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use DateTimeInterface;
 use App\Repository\UtenteRepository;
-use Stringable;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -34,7 +35,99 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(columns: ['ruolo'])]
 #[UniqueEntity(fields: 'username', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 #[UniqueEntity(fields: 'email', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
+#[UniqueEntity(fields: 'dispositivoId', message: 'field.unique', entityClass: \App\Entity\Utente::class)]
 class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Stringable {
+
+  /**
+   * @var string|null $prelogin Codice di pre-login
+   * @TODO RIMUOVERE
+   */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  private ?string $prelogin = '';
+
+  /**
+   * @var DateTimeInterface|null $preloginCreato Data/ora di creazione del codice di pre-login
+   * @TODO RIMUOVERE
+   */
+  #[ORM\Column(name: 'prelogin_creato', type: Types::DATETIME_MUTABLE, nullable: true)]
+  private ?DateTime $preloginCreato = null;
+
+  /**
+   * @var string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   * @TODO RIMUOVERE
+   */
+  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+  private ?string $dispositivo = '';
+
+
+  /**
+   * Restituisce il codice di pre-login
+   *
+   * @return string|null Codice di pre-login
+   * @TODO RIMUOVERE
+   */
+  public function getPrelogin(): ?string {
+    return $this->prelogin;
+  }
+
+  /**
+   * Modifica il codice di pre-login
+   *
+   * @param string|null $prelogin Codice di pre-login
+   *
+   * @return self Oggetto modificato
+   * @TODO RIMUOVERE
+   */
+  public function setPrelogin(?string $prelogin): self {
+    $this->prelogin = $prelogin;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data/ora di creazione del codice di pre-login
+   *
+   * @return DateTime|null Data/ora di creazione del codice di pre-login
+   * @TODO RIMUOVERE
+   */
+  public function getPreloginCreato(): ?DateTime {
+    return $this->preloginCreato;
+  }
+
+  /**
+   * Modifica la data/ora di creazione del codice di pre-login
+   *
+   * @param DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
+   *
+   * @return self Oggetto modificato
+   * @TODO RIMUOVERE
+   */
+  public function setPreloginCreato(?DateTime $preloginCreato): self {
+    $this->preloginCreato = $preloginCreato;
+    return $this;
+  }
+
+  /**
+   * Restituisce il codice univoco del dispositivo associato all'utente
+   *
+   * @return string|null Codice univoco del dispositivo associato all'utente
+   * @TODO RIMUOVERE
+   */
+  public function getDispositivo(): ?string {
+    return $this->dispositivo;
+  }
+
+  /**
+   * Modifica il codice univoco del dispositivo associato all'utente
+   *
+   * @param string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   *
+   * @return self Oggetto modificato
+   * @TODO RIMUOVERE
+   */
+  public function setDispositivo(?string $dispositivo): self {
+    $this->dispositivo = $dispositivo;
+    return $this;
+  }
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -102,18 +195,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?DateTime $tokenCreato = null;
 
   /**
-   * @var string|null $prelogin Codice di pre-login
-   */
-  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-  private ?string $prelogin = '';
-
-  /**
-   * @var DateTimeInterface|null $preloginCreato Data/ora di creazione del codice di pre-login
-   */
-  #[ORM\Column(name: 'prelogin_creato', type: Types::DATETIME_MUTABLE, nullable: true)]
-  private ?DateTime $preloginCreato = null;
-
-  /**
    * @var bool $abilitato Indica se l'utente è abilitato al login o no
    */
   #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
@@ -144,10 +225,22 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?string $ultimoOtp = '';
 
   /**
-   * @var string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   * @var string|null $dispositivoId Identificativo univoco per il dispositivo associato all'utente (nullo se non registrato)
    */
-  #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-  private ?string $dispositivo = '';
+  #[ORM\Column(name: 'dispositivo_id', type: Types::STRING, length: 64, unique: true, nullable: true)]
+  private ?string $dispositivoId = null;
+
+  /**
+   * @var string|null $dispositivoChiave Chiave pubblica del dispositivo (nullo se non registrato)
+   */
+  #[ORM\Column(name: 'dispositivo_chiave', type: Types::TEXT, nullable: true)]
+  private ?string $dispositivoChiave = null;
+
+  /**
+   * @var DateTimeImmutable|null $dispositivoRegistrato Data e ora di registrazione del dispositivo (nullo se non registrato)
+   */
+  #[ORM\Column(name: 'dispositivo_registrato', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+  private ?DateTimeImmutable $dispositivoRegistrato = null;
 
   /**
    * @var string|null $nome Nome dell'utente
@@ -234,7 +327,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   private ?array $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
 
   /**
-   * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
+   * @var array|null $rappresentante Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, C=rappresentanti di classe, R=RSU]
    */
   #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
   private ?array $rappresentante = [''];
@@ -270,6 +363,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
 
 
   //==================== EVENTI ORM ====================
+
   /**
    * Simula un trigger onCreate
    */
@@ -510,48 +604,6 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Restituisce il codice di pre-login
-   *
-   * @return string|null Codice di pre-login
-   */
-  public function getPrelogin(): ?string {
-    return $this->prelogin;
-  }
-
-  /**
-   * Modifica il codice di pre-login
-   *
-   * @param string|null $prelogin Codice di pre-login
-   *
-   * @return self Oggetto modificato
-   */
-  public function setPrelogin(?string $prelogin): self {
-    $this->prelogin = $prelogin;
-    return $this;
-  }
-
-  /**
-   * Restituisce la data/ora di creazione del codice di pre-login
-   *
-   * @return DateTime|null Data/ora di creazione del codice di pre-login
-   */
-  public function getPreloginCreato(): ?DateTime {
-    return $this->preloginCreato;
-  }
-
-  /**
-   * Modifica la data/ora di creazione del codice di pre-login
-   *
-   * @param DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
-   *
-   * @return self Oggetto modificato
-   */
-  public function setPreloginCreato(?DateTime $preloginCreato): self {
-    $this->preloginCreato = $preloginCreato;
-    return $this;
-  }
-
-  /**
    * Indica se l'utente è abilitato al login o no
    *
    * @return bool Vero se l'utente è abilitato al login, falso altrimenti
@@ -605,7 +657,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   /**
    * Modifica la data/ora dell'ultimo accesso
    *
-   * @param \DateTime|null Data/ora dell'ultimo accesso
+   * @param DateTime|null Data/ora dell'ultimo accesso
    *
    * @return self Oggetto modificato
    */
@@ -656,24 +708,66 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
     return $this;
   }
 
-/**
-   * Restituisce il codice univoco del dispositivo associato all'utente
+  /**
+   * Restituisce l'identificativo univoco per il dispositivo associato all'utente (nullo se non registrato)
    *
-   * @return string|null Codice univoco del dispositivo associato all'utente
+   * @return string|null Identificativo univoco del dispositivo
    */
-  public function getDispositivo(): ?string {
-    return $this->dispositivo;
+  public function getDispositivoId(): ?string {
+    return $this->dispositivoId;
   }
 
   /**
-   * Modifica il codice univoco del dispositivo associato all'utente
+   * Modifica l'identificativo univoco per il dispositivo associato all'utente (nullo se non registrato)
    *
-   * @param string|null $dispositivo Codice univoco del dispositivo associato all'utente
+   * @param string|null $dispositivoId Identificativo univoco del dispositivo
    *
    * @return self Oggetto modificato
    */
-  public function setDispositivo(?string $dispositivo): self {
-    $this->dispositivo = $dispositivo;
+  public function setDispositivoId(?string $dispositivoId): self {
+    $this->dispositivoId = $dispositivoId;
+    return $this;
+  }
+
+  /**
+   * Restituisce la chiave pubblica del dispositivo (nullo se non registrato)
+   *
+   * @return string|null Chiave pubblica del dispositivo
+   */
+  public function getDispositivoChiave(): ?string {
+    return $this->dispositivoChiave;
+  }
+
+  /**
+   * Modifica la chiave pubblica del dispositivo (nullo se non registrato)
+   *
+   * @param string|null $dispositivoChiave Chiave pubblica del dispositivo
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDispositivoChiave(?string $dispositivoChiave): self {
+    $this->dispositivoChiave = $dispositivoChiave;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data e ora di registrazione del dispositivo (nullo se non registrato)
+   *
+   * @return DateTimeImmutable|null Data e ora di registrazione del dispositivo
+   */
+  public function getDispositivoRegistrato(): ?DateTimeImmutable {
+    return $this->dispositivoRegistrato;
+  }
+
+  /**
+   * Modifica la data e ora di registrazione del dispositivo (nullo se non registrato)
+   *
+   * @param DateTimeImmutable|null $dispositivoRegistrato Data e ora di registrazione del dispositivo
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDispositivoRegistrato(?DateTimeImmutable $dispositivoRegistrato): self {
+    $this->dispositivoRegistrato = $dispositivoRegistrato;
     return $this;
   }
 
@@ -938,7 +1032,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
+   * Indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, C=rappresentanti di classe, R=RSU]
    *
    * @return array|null Indica se l'utente è eletto come rappresentante
    */
@@ -947,14 +1041,14 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
   }
 
   /**
-   * Modifica il valore che indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, R=RSU, L=genitori rappresentanti di classe, S=alunni rappresentanti di classe]
+   * Modifica il valore che indica se l'utente è eletto come rappresentante [I=di istituto, P=consulta provinciale, C=rappresentanti di classe, R=RSU]
    *
    * @param array $rappresentante Indica se l'utente è eletto come rappresentante
    *
    * @return self Oggetto modificato
    */
   public function setRappresentante(array $rappresentante): self {
-    $this->rappresentante = $rappresentante;
+    $this->rappresentante = array_values(array_intersect($rappresentante, ['I', 'C', 'P', 'R']));
     return $this;
   }
 
@@ -1155,7 +1249,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    *
    */
   public function creaToken(): void {
-    $this->token = bin2hex(openssl_random_pseudo_bytes(16));
+    $this->token = bin2hex(random_bytes(32));
     $this->tokenCreato = new DateTime();
   }
 

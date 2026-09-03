@@ -53,4 +53,16 @@ class Preside extends Staff {
     return ['N'];
   }
 
+  /**
+   * Modifica il valore che indica se l'utente è eletto come rappresentante (non può mai essere eletto)
+   *
+   * @param array $rappresentante Indica se l'utente è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(array $rappresentante): self {
+    parent::setRappresentante([]);
+    return $this;
+  }
+
 }

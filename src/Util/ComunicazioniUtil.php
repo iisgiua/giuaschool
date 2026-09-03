@@ -272,7 +272,7 @@ class ComunicazioniUtil {
     if ($comunicazione->getRappresentantiGenitori() != 'N') {
       // aggiunge rappresentanti genitori
       $utenti = array_merge($utenti, $this->em->getRepository(Utente::class)
-        ->getIdRappresentantiClasse(['L'], $sedi, $comunicazione->getRappresentantiGenitori(),
+        ->getIdRappresentantiClasse(['CG'], $sedi, $comunicazione->getRappresentantiGenitori(),
         $comunicazione->getFiltroRappresentantiGenitori()));
     }
     // alunni
@@ -290,7 +290,7 @@ class ComunicazioniUtil {
     if ($comunicazione->getRappresentantiAlunni() != 'N') {
       // aggiunge rappresentanti alunni
       $utenti = array_merge($utenti, $this->em->getRepository(Utente::class)
-        ->getIdRappresentantiClasse(['S'], $sedi, $comunicazione->getRappresentantiAlunni(),
+        ->getIdRappresentantiClasse(['CA'], $sedi, $comunicazione->getRappresentantiAlunni(),
         $comunicazione->getFiltroRappresentantiAlunni()));
     }
     // imposta utenti destinatari

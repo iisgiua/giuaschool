@@ -332,7 +332,7 @@ class AlunnoRepository extends BaseRepository {
       // tutti i rappresentanti
       $query = $query
         ->andWhere('FIND_IN_SET(:classe, a.rappresentante)>0 OR FIND_IN_SET(:istituto, a.rappresentante)>0 OR FIND_IN_SET(:provincia, a.rappresentante)>0')
-        ->setParameter('classe', 'S')
+        ->setParameter('classe', 'C')
         ->setParameter('istituto', 'I')
         ->setParameter('provincia', 'P');
     } else {

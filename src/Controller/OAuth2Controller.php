@@ -29,20 +29,17 @@ class OAuth2Controller extends BaseController {
    * @return Response Redirezione al servizio richiesto
    */
   #[Route(path: '/login/gsuite', name: 'login_gsuite')]
-  public function connect(ClientRegistry $clientRegistry): Response {
-    // redirezione alla GSuite
-    return $clientRegistry
-      ->getClient('gsuite')
-      ->redirect([], []);
+  public function google(ClientRegistry $clientRegistry): Response {
+    // redirezione all'ID provider di Google
+    return $clientRegistry->getClient('gsuite')->redirect([], []);
 	}
 
   /**
    * Esegue autenticazione su Google Workspace tramite GsuiteAuthenticator
    *
-   * @param ClientRegistry $clientRegistry Client che richiede il servizio
    */
   #[Route(path: '/login/gsuite/check', name: 'login_gsuite_check')]
-  public function check(ClientRegistry $clientRegistry) {
+  public function googleCheck(): void {
   }
 
   /**
@@ -54,7 +51,7 @@ class OAuth2Controller extends BaseController {
    * @return Response Redirezione al servizio richiesto
    */
    #[Route('/login/mimspid', name: 'login_mimspid')]
-  public function loginMimSpid(Request $request, ClientRegistry $clientRegistry): Response {
+  public function mimSpid(Request $request, ClientRegistry $clientRegistry): Response {
     // genera nonce (stringa casuale e univoca)
     $nonce = bin2hex(random_bytes(32));
     $request->getSession()->set('_mim_oidc_nonce', $nonce);
@@ -69,7 +66,7 @@ class OAuth2Controller extends BaseController {
    *
    */
   #[Route(path: '/login/mimspid/check', name: 'login_mimspid_check')]
-  public function checkMimSpid(): void {
+  public function mimSpidCheck(): void {
   }
 
 }
