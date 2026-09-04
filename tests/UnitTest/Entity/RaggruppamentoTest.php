@@ -144,7 +144,7 @@ class RaggruppamentoTest extends EntityTestCase {
     $property->setValue($existent, '');
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
-    $existent->setNome($this->faker->randomLetter());
+    $existent->setNome($this->faker->text(64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID NOT BLANK');
     $existent->setNome(str_repeat('*', 65));
     $err = $this->val->validate($existent);
