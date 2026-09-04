@@ -483,7 +483,7 @@ Scenario: visualizzazione tabellone esiti
   E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #str(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_1A_2:cognome,nome #str(NON)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_alternativa_1:cognome,nome #str(NON)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 

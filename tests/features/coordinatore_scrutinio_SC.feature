@@ -134,9 +134,9 @@ Scenario: controllo foglio firme registro dei voti
   E vedi testo "@materia_curricolare_3:nome @materia_EDCIVICA:nome @docente_curricolare_3:cognome,nome" in PDF analizzato in una riga
   E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in una riga
   E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome+ +@docente_religione_1:nome?@docente_nocattedra_1:cognome+ +@docente_nocattedra_1:nome" in PDF analizzato in una riga
+  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome?@docente_nocattedra_1:cognome" in PDF analizzato in "2" righe
   E vedi testo "@materia_itp_1:nome+, +@materia_EDCIVICA:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome" in PDF analizzato in una riga
-  E vedi testo "@materia_SOSTEGNO:nome+, +@materia_EDCIVICA:nome?@docente_sostegno_1:cognome+ +@docente_sostegno_1:nome?@docente_sostegno_2:cognome+ +@docente_sostegno_2:nome" in PDF analizzato in una riga
+  E vedi testo "@materia_SOSTEGNO:nome+, +@materia_EDCIVICA:nome?@docente_sostegno_1:cognome?@docente_sostegno_2:cognome" in PDF analizzato in una riga
 
 Scenario: controllo foglio firme registro dei voti per la classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -176,7 +176,7 @@ Scenario: controllo verbale
   E vedi testo "@alunno_1A_1:cognome,nome @voto_S_1A_7:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi testo "@alunno_1A_2:cognome,nome @voto_S_1A_18:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi testo "@alunno_sostegno_1:cognome,nome @voto_S_1A_28:unico #str(MAGGIORANZA) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "4" righe
-  E vedi testo "@alunno_sostegno_2:cognome,nome @voto_S_1A_38:unico #str(MAGGIORANZA) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "4" righe
+  E vedi testo "@alunno_sostegno_2:cognome @voto_S_1A_38:unico #str(MAGGIORANZA) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "4" righe
   E vedi testo "@alunno_alternativa_1:cognome,nome @voto_S_1A_48:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi poi testo "@scrutinio_1A_S:dati[argomento][2]" in PDF analizzato in una riga
   E vedi poi testo "#str(Segretario) #str(Presidente) @docente_curricolare_2:cognome,nome #str(Bianchi) #str(Maria)" in PDF analizzato in "2" righe

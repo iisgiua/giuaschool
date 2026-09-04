@@ -349,12 +349,12 @@ Scenario: controllo verbale
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome @voto_F_1A_7:unico #str(MAGGIORANZA) #str(Contrari)" in PDF analizzato in "5" righe
   E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome @voto_F_1A_28:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome @voto_F_1A_38:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome @voto_F_1A_38:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_alternativa_1:cognome,nome @voto_F_1A_48:unico #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi poi testo "ammessi alla classe successiva" in PDF analizzato in una riga
   E imposti segnalibro PDF
-  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #dat(@alunno_sostegno_1:dataNascita) #str(UNANIMITÀ)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #dat(@alunno_sostegno_2:dataNascita) #str(UNANIMITÀ)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #str(UNANIMITÀ)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #str(UNANIMITÀ)" in PDF analizzato in una riga
   E vedi poi testo "sospende la formulazione del giudizio finale" in PDF analizzato in una riga
   E imposti segnalibro PDF
   E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #dat(@alunno_1A_1:dataNascita) #str(maggioranza) #str(Contrari) @docente_curricolare_1:cognome" in PDF analizzato in "2" righe
@@ -589,8 +589,8 @@ Scenario: controllo tabellone esiti
   E vedi da segnalibro il testo "@alunno_1A_6:cognome,nome #str(ALL'ESTERO)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_1A_1:cognome,nome #str(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_1A_2:cognome,nome #str(NON)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
-  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome,nome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_1:cognome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
+  E vedi da segnalibro il testo "@alunno_sostegno_2:cognome #nos(NON) #nos(SOSPENSIONE)" in PDF analizzato in una riga
   E vedi da segnalibro il testo "@alunno_alternativa_1:cognome,nome #str(NON)" in PDF analizzato in una riga
   E vedi poi testo "#dat(@scrutinio_1A_F:data) #str(Dirigente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
