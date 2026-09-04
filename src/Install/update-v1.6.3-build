@@ -6,7 +6,7 @@ return [
     ['PERSONAL/data/.gitkeep', 'PERSONAL/data/consultazioni/.gitkeep'],
     ['PERSONAL/data/.gitkeep', 'PERSONAL/data/moduli/.gitkeep'],
   ],
-  'fileDelete' => [ UNION SELECT 1 FROM dual;
+  'fileDelete' => [
     'config/metadata/.gitkeep',
     'config/metadata/',
     'public/install/app.php',
