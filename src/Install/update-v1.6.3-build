@@ -20,7 +20,7 @@ return [
     'src/Repository/SpidRepository.php',
     'src/Security/AppAuthenticator.php',
     'src/Security/SpidAuthenticator.php',
-    'templates/app/'
+    'templates/app/',
     'templates/login/form-agid.html.twig',
     'tests/UnitTest/Entity/SpidTest.php',
     'tests/UnitTest/Security/SpidAuthenticatorTest.php',
