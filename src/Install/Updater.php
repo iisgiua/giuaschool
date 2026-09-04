@@ -196,6 +196,8 @@ class Updater {
       'OAUTH_GOOGLE_CLIENT_ID' => ['', ],
       'OAUTH_GOOGLE_CLIENT_SECRET' => ['', ],
       'OAUTH_GOOGLE_CLIENT_HD' => ['', ],
+      'MIMSPID_CLIENT_ID' => ['', 'autenticazione SPID/CIE tramite gateway MIM'],
+      'MIMSPID_CLIENT_SECRET' => ['', ],
       'LOG_LEVEL' => ['warning', 'imposta il livello del log del sistema in produzione']];
     // inserisce variabili di ambiente
     $newEnv = '';
