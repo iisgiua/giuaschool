@@ -9,10 +9,9 @@ include:
   - AmministratoreFixtures.yml
   - AnnotazioneFixtures.yml
   - ApiFixtures.yml
-  - AppChallengeFixtures.yml
-  - AppTicketFixtures.yml
   - AssenzaFixtures.yml
   - AssenzaLezioneFixtures.yml
+  - AutenticazioneDispositivoFixtures.yml
   - AtaFixtures.yml
   - AvvisoFixtures.yml
   - CambioClasseFixtures.yml
