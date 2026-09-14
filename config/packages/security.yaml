@@ -25,6 +25,7 @@ security:
         - 'App\Security\FormAuthenticator'
         - 'App\Security\TokenAuthenticator'
         - 'App\Security\TokenConnectAuthenticator'
+        - 'App\Security\AuthConnectAuthenticator'
       entry_point: 'App\Security\AuthenticationEntryPoint'
 
 

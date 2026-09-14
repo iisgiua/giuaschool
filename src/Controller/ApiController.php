@@ -9,10 +9,13 @@
 namespace App\Controller;
 
 use App\Entity\Api;
+use App\Entity\AutenticazioneDispositivo;
 use App\Entity\Cattedra;
 use App\Entity\Docente;
 use App\Entity\Utente;
+use App\Util\LogHandler;
 use DateTimeImmutable;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,7 +23,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use function is_string;
 
 
 /**
@@ -148,16 +153,19 @@ class ApiController extends BaseController {
   }
 
   /**
-   * Registra il dispositivo per l'utente corrente.
+   * Registra il dispositivo associato all'utente corrente.
    *
    * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LoggerInterface $logger Gestore dei log su file
+   * @param LogHandler $dblogger Gestore dei log su database
    *
-   * @return JsonResponse Restituisce il token univoco per l'utente
+   * @return JsonResponse Restituisce la risposta con lo stato della registrazione
    */
-  #[Route(path: '/api/auth/device', name: 'api_authDevice', methods: ['POST'])]
+  #[Route(path: '/api/auth/register', name: 'api_authRegister', methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function authDevice(Request $request, LoggerInterface $logger): JsonResponse {
+  public function authRegister(Request $request, TranslatorInterface $trans, LoggerInterface $logger,
+                               LogHandler $dblogger): JsonResponse {
     // inizializza
     $risposta = [];
     /**
@@ -166,28 +174,263 @@ class ApiController extends BaseController {
     $utente = $this->getUser();
     // legge dati
     $dati = json_decode($request->getContent(), true);
-    $chiavePubblica = $dati['publicKey'] ?? null;
+    $chiavePubblica = (string) ($dati['chiavePubblica'] ?? '');
+    $chiavePem = "-----BEGIN PUBLIC KEY-----\n".chunk_split($chiavePubblica, 64, "\n")."-----END PUBLIC KEY-----\n";
     // validazione minima: deve essere una chiave pubblica valida in formato PEM
-    if (!$chiavePubblica || !openssl_pkey_get_public($chiavePubblica)) {
+    if (!$chiavePubblica || !openssl_pkey_get_public($chiavePem)) {
       // errore: chiave non valida
-      $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida',
-        ['utente' => $utente->getUserIdentifier(), 'chiave' => $chiavePubblica]);
+      $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida.',
+        ['utente' => $utente->getUserIdentifier()]);
       $risposta['stato'] = 'ERRORE';
-      $risposta['errore'] = 'Chiave pubblica non valida';
-      return new JsonResponse($risposta, 400);
+      $risposta['errore'] = $trans->trans('exception.api_auth.chiave_pubblica_invalida');
+      return new JsonResponse($risposta, 422); // 422 Unprocessable Entity
     }
     // associa (o sostituisce) il dispositivo dell'utente
     $utente
-      ->setDispositivoId(Uuid::v7()->toRfc4122())
-      ->setDispositivoChiave($chiavePubblica)
+      ->setDispositivoId(Uuid::v4()->toRfc4122())
+      ->setDispositivoChiave($chiavePem)
       ->setDispositivoRegistrato(new DateTimeImmutable());
     $this->em->flush();
     // log della registrazione
-    $logger->info('Registrazione dispositivo terminata con successo', ['utente' => $utente->getUserIdentifier()]);
+    $logger->info('Registrazione dispositivo terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
+    $dblogger->logAzione('AUTORIZZAZIONE', 'Registrazione dispositivo');
     // restituisce risposta
     $risposta['stato'] = 'OK';
-    $risposta['dispositivo'] = $utente->getDispositivoId();
-    return new JsonResponse($risposta, 201);
+    $risposta['dispositivoId'] = $utente->getDispositivoId();
+    return new JsonResponse($risposta);
+  }
+
+  /**
+   * Revoca il dispositivo associato all'utente corrente.
+   * NB: nessun controllo sulla scadenza dell'autorizzazione del dispositivo: non è necessario.
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return JsonResponse Restituisce la risposta con lo stato della revoca
+   */
+  #[Route(path: '/api/auth/revoke', name: 'api_authRevoke', methods: ['POST'])]
+  #[IsGranted('ROLE_UTENTE')]
+  public function authRevoke(Request $request, TranslatorInterface $trans, LoggerInterface $logger,
+                             LogHandler $dblogger): JsonResponse {
+    // inizializza
+    $risposta = [];
+    /**
+     * @var Utente Utente connesso
+     */
+    $utente = $this->getUser();
+    // legge dati
+    $dati = json_decode($request->getContent(), true);
+    $dispositivoId = (string) ($dati['dispositivoId'] ?? null);
+    // controllo che l'ID dispositivo corrisponda a quello registrato per l'utente
+    if (!$dispositivoId || $dispositivoId !== $utente->getDispositivoId()) {
+      // errore: ID dispositivo non valido
+      $logger->error('Revoca dispositivo non riuscita: ID dispositivo non valido.',
+        ['utente' => $utente->getUserIdentifier(), 'dispositivoId' => $dispositivoId]);
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.id_dispositivo_invalido');
+      return new JsonResponse($risposta, 422); // 422 Unprocessable Entity
+    }
+    // revoca il dispositivo dell'utente
+    $utente
+      ->setDispositivoId(null)
+      ->setDispositivoChiave(null)
+      ->setDispositivoRegistrato(null);
+    $this->em->flush();
+    // log della revoca
+    $logger->info('Revoca dispositivo terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
+    $dblogger->logAzione('AUTORIZZAZIONE', 'Revoca dispositivo');
+    // restituisce risposta
+    $risposta['stato'] = 'OK';
+    return new JsonResponse($risposta);
+  }
+
+  /**
+   * Esegue la richiesta di autenticazione del dispositivo.
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return JsonResponse Restituisce la risposta i dati necessari per la firma
+   */
+  #[Route(path: '/api/auth/request', name: 'api_authRequest', methods: ['POST'])]
+  public function authRequest(Request $request, TranslatorInterface $trans,
+                              LoggerInterface $logger, LogHandler $dblogger): JsonResponse {
+    // inizializza
+    $risposta = [];
+    // legge dati
+    $dati = json_decode($request->getContent(), true);
+    $dispositivoId = (string) ($dati['dispositivoId'] ?? null);
+    // controlla l'ID dispositivo
+    if (!is_string($dispositivoId) || $dispositivoId === '') {
+      // errore: ID dispositivo non presente o non valido
+      $logger->error('Richiesta di autenticazione non riuscita: ID dispositivo non valido.',
+        ['dispositivoId' => $dispositivoId]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // controlla che il dispositivo sia associato ad un utente
+    $utente = $this->em->getRepository(Utente::class)->findOneBy(['dispositivoId' => $dispositivoId,
+      'abilitato' => 1]);
+    if (!$utente) {
+      // errore: utente non trovato o non abilitato
+      $logger->error('Richiesta di autenticazione non riuscita: utente non trovato o disabilitato.',
+        ['dispositivoId' => $dispositivoId]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // controlla se dispositivo è valido
+    if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
+      // errore: dispositivo non valido
+      $logger->error('Richiesta di autenticazione non riuscita: dispositivo non valido.',
+        ['dispositivoId' => $dispositivoId, 'utente' => $utente->getUserIdentifier()]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // crea nuova richiesta di autenticazione (challenge) per il dispositivo
+    $autenticazione = (new AutenticazioneDispositivo())
+      ->setIdPubblico(bin2hex(random_bytes(32)))
+      ->setUtente($utente)
+      ->setCasuale(bin2hex(random_bytes(32)))
+      ->setScadenzaRichiesta(new DateTimeImmutable('+60 seconds'));
+    $this->em->persist($autenticazione);
+    $this->em->flush();
+    // log della richiesta
+    $logger->info('Richiesta di autenticazione terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
+    $dblogger->logAzione('AUTORIZZAZIONE', 'Richiesta di autenticazione');
+    // restituisce risposta
+    $risposta['stato'] = 'OK';
+    $risposta['id'] = $autenticazione->getIdPubblico();
+    $risposta['casuale'] = $autenticazione->getCasuale();
+    return new JsonResponse($risposta);
+  }
+
+  /**
+   * Valida la richiesta di autenticazione del dispositivo.
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return JsonResponse Restituisce il token univoco per l'accesso
+   */
+  #[Route(path: '/api/auth/validate', name: 'api_authValidate', methods: ['POST'])]
+  public function authValidate(Request $request, TranslatorInterface $trans,
+                               LoggerInterface $logger, LogHandler $dblogger): JsonResponse {
+    // inizializza
+    $risposta = [];
+    // legge dati
+    $dati = json_decode($request->getContent(), true);
+    $id = (string) ($dati['id'] ?? '');
+    $firma = (string) ($dati['firma'] ?? '');
+    // inizia transazione per evitare problemi di concorrenza
+    $this->em->beginTransaction();
+    try {
+      // controlla la richiesta di autenticazione (challenge) esistente
+      $autenticazione = $this->em->getRepository(AutenticazioneDispositivo::class)->trovaId($id);
+      if (!$autenticazione) {
+        // errore: richiesta di autenticazione non valida
+        $logger->error('Validazione richiesta di autenticazione non riuscita: richiesta non valida.',
+          ['id' => $id]);
+        throw new Exception('exception.api_auth.richiesta_invalida');
+      }
+      if ($autenticazione->getScadenzaRichiesta() < new DateTimeImmutable() || $autenticazione->getRichiestaUsata()) {
+        // errore: richiesta di autenticazione scaduta o già usata
+        $logger->error('Validazione richiesta di autenticazione non riuscita: richiesta scaduta o già usata.',
+          ['id' => $id, 'scadenza' => $autenticazione->getScadenzaRichiesta()->format('d/m/Y H:i:s'),
+          'usata' => (int) $autenticazione->getRichiestaUsata()]);
+        // non fornisce informazioni sull'errore
+        throw new Exception('exception.api_auth.richiesta_invalida');
+      }
+      // richiesta valida: la segna subito come usata
+      $autenticazione->setRichiestaUsata(true);
+      $this->em->flush();
+      // fine transazione
+      $this->em->commit();
+    } catch (Exception $e) {
+      // elimina eventuali modifiche
+      $this->em->rollback();
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans($e->getMessage());
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // controlla il dispositivo associato all'utente
+    $utente = $autenticazione->getUtente();
+    if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
+      // errore: dispositivo non valido
+      $logger->error('Validazione richiesta di autenticazione non riuscita: dispositivo non valido.',
+        ['id' => $id, 'utente' => $utente->getUserIdentifier()]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // decodifica la firma
+    $firmaBinaria = base64_decode($firma, true);
+    if ($firmaBinaria === false) {
+      // errore: firma non valida (non base64)
+      $logger->error('Validazione richiesta di autenticazione non riuscita: firma non decodificabile.',
+        ['id' => $id, 'utente' => $utente->getUserIdentifier()]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // controlla la chiave pubblica del dispositivo
+    $chiave = openssl_pkey_get_public($utente->getDispositivoChiave());
+    if ($chiave === false) {
+      // errore: chiave pubblica del dispositivo non valida
+      $logger->error('Validazione richiesta di autenticazione non riuscita: chiave pubblica non valida.',
+        ['id' => $id, 'utente' => $utente->getUserIdentifier()]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // validazione della firma
+    $daControllare = "GS-AUTH-v1\n".$autenticazione->getIdPubblico()."\n".$autenticazione->getCasuale();
+    if (openssl_verify($daControllare, $firmaBinaria, $chiave, OPENSSL_ALGO_SHA256) !== 1) {
+      // errore: firma non valida
+      $logger->error('Validazione richiesta di autenticazione non riuscita: firma non valida.',
+        ['id' => $id, 'utente' => $utente->getUserIdentifier()]);
+      // non fornisce informazioni sull'errore
+      $risposta['stato'] = 'ERRORE';
+      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
+      return new JsonResponse($risposta, 404); // 404 Not Found
+    }
+    // firma valida: crea un token di accesso monouso per l'utente
+    $autenticazione->setToken(bin2hex(random_bytes(32)));
+    $autenticazione->setScadenzaToken(new DateTimeImmutable('+30 seconds'));
+    $this->em->flush();
+    // log della validazione
+    $logger->info('Validazione richiesta di autenticazione terminata con successo.',
+      ['utente' => $utente->getUserIdentifier()]);
+    $dblogger->logAzione('AUTORIZZAZIONE', 'Validazione richiesta di autenticazione');
+    // restituisce risposta
+    $risposta['stato'] = 'OK';
+    $risposta['code'] = $autenticazione->getToken();
+    return new JsonResponse($risposta);
+  }
+
+  /**
+   * Connessione al registro tramite token autenticato e monuso.
+   *
+   */
+  #[Route(path: '/api/auth/connect', name: 'api_authConnect', methods: ['GET'])]
+  public function authConnect(): void {
+    // viene intercettato e gestito da AuthConnectAuthenticator
   }
 
 }

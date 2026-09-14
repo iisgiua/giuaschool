@@ -11,9 +11,11 @@ namespace App\Repository;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
 use App\Entity\Ata;
+use App\Entity\Configurazione;
 use App\Entity\Docente;
 use App\Entity\Genitore;
 use App\Entity\Utente;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -213,50 +215,23 @@ class UtenteRepository extends EntityRepository {
     return array_column($rspp, 'id');
   }
 
+  /**
+   * Controlla se esiste un dispositivo registrato per l'utente e se questo è ancora valido.
+   *
+   * @return bool Restituisce vero se il dispositivo è valido, falso altrimenti
+   */
+  public function dispositivoValido(Utente $utente): bool {
+    // controlla se esiste una dispositivo registrato
+    if (!$utente->getAbilitato() || !$utente->getDispositivoId() || !$utente->getDispositivoChiave() ||
+        !$utente->getDispositivoRegistrato()) {
+      // dispositivo non registrato o utente disabilitato
+      return false;
+    }
+    // controlla scadenza
+    $giorni = (int) $this->getEntityManager()->getRepository(Configurazione::class)
+      ->getParametro('durata_registrazione_dispositivo');
+    $scadenza = $utente->getDispositivoRegistrato()->modify('+'.$giorni.' days');
+    return ($scadenza >= new DateTimeImmutable());
+  }
+
 }
-
-    // /**
-    //  * Vero se l'utente ha un dispositivo attivo e utilizzabile per
-    //  * l'accesso ricorrente. Se falso, l'app deve forzare un nuovo
-    //  * accesso completo tramite SPID/CIE.
-    //  */
-    // public function hasActiveDevice(): bool
-    // {
-    //     return null !== $this->deviceId
-    //         && null !== $this->devicePublicKeyPem
-    //         && !$this->deviceRevoked;
-    // }
-
-
-    // public function findOrCreateByFiscalCode(
-    //     string $fiscalCode,
-    //     string $firstName,
-    //     string $lastName,
-    // ): User {
-    //     $user = $this->findOneBy(['fiscalCode' => $fiscalCode]);
-    //     if ($user) {
-    //         return $user;
-    //     }
-
-    //     $user = new User($fiscalCode, $firstName, $lastName);
-    //     $this->getEntityManager()->persist($user);
-    //     $this->getEntityManager()->flush();
-
-    //     return $user;
-    // }
-
-    // /**
-    //  * Recupera l'utente associato a un dato dispositivo, solo se
-    //  * il dispositivo è attivo (non revocato). Usata dall'endpoint
-    //  * /api/auth/challenge: non rivela se il deviceId esiste ma è
-    //  * revocato o non esiste affatto, per evitare enumeration.
-    //  */
-    // public function findActiveByDeviceId(Uuid $deviceId): ?User
-    // {
-    //     return $this->createQueryBuilder('u')
-    //         ->where('u.deviceId = :deviceId')
-    //         ->andWhere('u.deviceRevoked = false')
-    //         ->setParameter('deviceId', $deviceId, 'uuid')
-    //         ->getQuery()
-    //         ->getOneOrNullResult();
-    // }

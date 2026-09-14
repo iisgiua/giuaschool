@@ -325,3 +325,9 @@ App\Entity\Configurazione:
     descrizione: 'Indica la modalit&agrave; dell''accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]'
     valore: 'no'
     gestito: true
+  configurazione_ACCESSO6:
+    categoria: 'ACCESSO'
+    parametro: 'durata_registrazione_dispositivo'
+    descrizione: 'Durata in giorni della registrazione di un dispositivo per l''accesso tramite app.\<br>[numero intero]'
+    valore: '180'
+    gestito: false

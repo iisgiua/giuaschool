@@ -49,9 +49,9 @@ class LogHandler {
     $req = $this->request->getCurrentRequest();
     $tok = $this->token->getToken();
     // dati utente (si presuppone che un utente sia necessariamente connesso)
-    $utente = $tok->getUser();
-    $username = $utente->getUserIdentifier();
-    $ruolo = $utente->getRoles()[0];
+    $utente = $tok ? $tok->getUser() : null;
+    $username = $utente ? $utente->getUserIdentifier() : '--ANONIMO--';
+    $ruolo = $utente ? $utente->getRoles()[0] : '--NESSUNO--';
     $alias = null;
     if ($tok instanceOf SwitchUserToken) {
       $alias = $tok->getOriginalToken()->getUser()->getUserIdentifier();

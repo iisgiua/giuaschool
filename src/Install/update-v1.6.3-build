@@ -26,6 +26,10 @@ return [
     'templates/login/form-agid.html.twig',
     'tests/UnitTest/Entity/SpidTest.php',
     'tests/UnitTest/Security/SpidAuthenticatorTest.php',
+    'src/Entity/AppChallenge.php',
+    'src/Entity/AppTicket.php',
+    'src/Repository/AppChallengeRepository.php',
+    'src/Repository/AppTicketRepository.php',
   ],
   'sqlCommand' => [
     ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],
@@ -41,6 +45,8 @@ return [
     ["CREATE TABLE gs_app_challenge (id INT AUTO_INCREMENT NOT NULL, utente_id INT DEFAULT NULL, creato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', modificato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', nonce VARCHAR(255) NOT NULL, scadenza DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', usato TINYINT(1) NOT NULL, INDEX IDX_3EAF61FF6FD5D2A (utente_id), INDEX IDX_3EAF61FFF36D33B9 (scadenza), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB; ALTER TABLE gs_app_challenge ADD CONSTRAINT FK_3EAF61FF6FD5D2A FOREIGN KEY (utente_id) REFERENCES gs_utente (id) ON DELETE CASCADE;", "SELECT id FROM gs_app_challenge UNION SELECT 1 FROM dual;"],
     ["CREATE TABLE gs_api (id INT AUTO_INCREMENT NOT NULL, creato DATETIME NOT NULL, modificato DATETIME NOT NULL, nome VARCHAR(255) NOT NULL, token VARCHAR(128) NOT NULL, attiva TINYINT(1) NOT NULL, dati LONGTEXT DEFAULT NULL COMMENT '(DC2Type:array)', UNIQUE INDEX UNIQ_DB6B1AB75F37A13B (token), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB;", "SELECT id FROM gs_api UNION SELECT 1 FROM dual; INSERT INTO gs_api (creato, modificato, nome, token, attiva, dati) SELECT NOW(),NOW(),nome,token,attiva,dati FROM gs_app;"],
     ["DROP TABLE IF EXISTS gs_app;", "SELECT 1 FROM DUAL WHERE (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gs_app') = 0;"],
+    ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'ACCESSO', 'durata_registrazione_dispositivo', 'Durata in giorni della registrazione di un dispositivo per l\'accesso tramite app.<br>[numero intero]', '180', 0);", "SELECT valore FROM gs_configurazione WHERE parametro='durata_registrazione_dispositivo';"],
+    ["CREATE TABLE gs_autenticazione_dispositivo (id INT AUTO_INCREMENT NOT NULL, utente_id INT DEFAULT NULL, creato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', modificato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', id_pubblico VARCHAR(128) DEFAULT NULL, casuale VARCHAR(255) DEFAULT NULL, scadenza_richiesta DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', richiesta_usata TINYINT(1) NOT NULL, token VARCHAR(128) DEFAULT NULL, scadenza_token DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', token_usato TINYINT(1) NOT NULL, UNIQUE INDEX UNIQ_D5E097045F37A13B (token), UNIQUE INDEX UNIQ_D5E09704241C2B25 (id_pubblico), INDEX IDX_D5E097046FD5D2A (utente_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB; ALTER TABLE gs_autenticazione_dispositivo ADD CONSTRAINT FK_D5E097046FD5D2A FOREIGN KEY (utente_id) REFERENCES gs_utente (id) ON DELETE CASCADE; ALTER TABLE gs_app_challenge DROP FOREIGN KEY FK_3EAF61FF6FD5D2A; ALTER TABLE gs_app_ticket DROP FOREIGN KEY FK_554F48376FD5D2A; DROP TABLE gs_app_challenge; DROP TABLE gs_app_ticket;", "SELECT id FROM gs_autenticazione_dispositivo UNION SELECT 1 FROM dual;"],
   ],
   'envDelete' => [
   ],

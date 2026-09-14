@@ -1044,6 +1044,12 @@ class SistemaController extends BaseController {
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
         case 8: // pulizia finale
+          // svuota log
+          $sqlCommands = [
+            "TRUNCATE TABLE gs_log;"];
+          foreach ($sqlCommands as $sql) {
+            $connection->executeStatement($sql);
+          }
           // svuota archivio circolari
           $fs->remove($path.'/archivio/circolari');
           $fs->appendToFile($path.'/archivio/circolari/.gitkeep', '');
