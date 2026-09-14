@@ -35,7 +35,7 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_autenticazione_dispositivo' => ['id', 'creato', 'modificato', 'id_pubblico', 'utente', 'casuale', 'scadenza_richiesta', 'richiesta_usata', 'token', 'scadenza_token', 'token_usato']];
+    $this->canRead = ['gs_autenticazione_dispositivo' => ['id', 'creato', 'modificato', 'id_pubblico', 'utente_id', 'casuale', 'scadenza_richiesta', 'richiesta_usata', 'token', 'scadenza_token', 'token_usato']];
     // SQL write
     $this->canWrite = $this->canRead;
     // SQL exec
@@ -77,7 +77,7 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
           ($field == 'richiestaUsata' ? $this->faker->boolean() :
           ($field == 'token' ? $this->faker->uuid() :
           ($field == 'scadenzaToken' ? $this->faker->passthrough(new DateTimeImmutable()) :
-          ($field == 'richiestaToken' ? $this->faker->boolean() :
+          ($field == 'tokenUsato' ? $this->faker->boolean() :
           null))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
@@ -120,7 +120,7 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $this->assertSame('Autorizzazione '.$existent->getId().' del '.$existent->getCreato()->format('d/m/Y H:i:s'), (string) $existent, $this->entity.'::toString');
+    $this->assertSame('Autenticazione '.$existent->getId().' del '.$existent->getCreato()->format('d/m/Y H:i:s'), (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -131,17 +131,18 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // unique idPubblico
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
     $idPubblicoSaved = $objects[1]->getIdPubblico();
-    $objects[1]->setIdPubblicoSaved($objects[0]->getIdPubblicoSaved());
+    $objects[1]->setIdPubblico($objects[0]->getIdPubblico());
     $err = $this->val->validate($objects[1]);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::idPubblicoSaved - UNIQUE');
-    $objects[1]->setCodiceFiscale($idPubblicoSaved);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::idPubblico - UNIQUE');
+    $objects[1]->setIdPubblico($idPubblicoSaved);
     // unique token
     $tokenSaved = $objects[1]->getToken();
     $objects[1]->setToken($objects[0]->getToken());
     $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::token - UNIQUE');
-    $objects[1]->setTokenSaved($idPubblicoSaved);
+    $objects[1]->setTokenSaved($tokenSaved);
   }
 
 }
