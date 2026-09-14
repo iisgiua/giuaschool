@@ -1919,6 +1919,5 @@ exception.pdf_import: Impossibile importare il file PDF
 exception.spid_no_client_secret: Devi inserire sia il codice del client che il codice segreto.
 exception.spid_authenticate: "Errore nella procedura di autenticazione sul server del MIM. Riprova più tardi."
 exception.requisiti_esame_incoerenti: L'ammissione non è possibile senza i requisiti previsti per l'alunn{sex} {alunno}.
-exception.api_auth.chiave_pubblica_invalida: La chiave pubblica non è valida.
 exception.api_auth.id_dispositivo_invalido: Il dispositivo non è stato riconosciuto.
 exception.api_auth.richiesta_invalida: Richiesta di autenticazione scaduta o non valida. Riprova.

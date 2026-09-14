@@ -93,8 +93,8 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['nonce'] = $this->faker->passthrough(substr($this->faker->text(), 0, 64));
-      $o[$i]->setNonce($data[$i]['nonce']);
+      $data[$i]['casuale'] = $this->faker->passthrough(substr($this->faker->text(), 0, 64));
+      $o[$i]->setCasuale($data[$i]['casuale']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -142,7 +142,7 @@ class AutenticazioneDispositivoTest extends EntityTestCase {
     $objects[1]->setToken($objects[0]->getToken());
     $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::token - UNIQUE');
-    $objects[1]->setTokenSaved($tokenSaved);
+    $objects[1]->setToken($tokenSaved);
   }
 
 }

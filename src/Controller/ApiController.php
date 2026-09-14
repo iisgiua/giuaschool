@@ -153,14 +153,14 @@ class ApiController extends BaseController {
   }
 
   /**
-   * Registra il dispositivo associato all'utente corrente.
+   * Registra il dispositivo per l'utente corrente.
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    *
-   * @return JsonResponse Restituisce la risposta con lo stato della registrazione
+   * @return JsonResponse Restituisce l'ID del dispositivo
    */
   #[Route(path: '/api/auth/register', name: 'api_authRegister', methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
@@ -179,11 +179,8 @@ class ApiController extends BaseController {
     // validazione minima: deve essere una chiave pubblica valida in formato PEM
     if (!$chiavePubblica || !openssl_pkey_get_public($chiavePem)) {
       // errore: chiave non valida
-      $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida.',
-        ['utente' => $utente->getUserIdentifier()]);
-      $risposta['stato'] = 'ERRORE';
-      $risposta['errore'] = $trans->trans('exception.api_auth.chiave_pubblica_invalida');
-      return new JsonResponse($risposta, 422); // 422 Unprocessable Entity
+      $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida.');
+      return new JsonResponse('ERRORE', 422); // 422 Unprocessable Entity
     }
     // associa (o sostituisce) il dispositivo dell'utente
     $utente
@@ -192,16 +189,14 @@ class ApiController extends BaseController {
       ->setDispositivoRegistrato(new DateTimeImmutable());
     $this->em->flush();
     // log della registrazione
-    $logger->info('Registrazione dispositivo terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
-    $dblogger->logAzione('AUTORIZZAZIONE', 'Registrazione dispositivo');
+    $dblogger->logAzione('AUTENTICAZIONE', 'Registrazione dispositivo', ['utente' => $utente->getUserIdentifier()]);
     // restituisce risposta
-    $risposta['stato'] = 'OK';
     $risposta['dispositivoId'] = $utente->getDispositivoId();
     return new JsonResponse($risposta);
   }
 
   /**
-   * Revoca il dispositivo associato all'utente corrente.
+   * Revoca il dispositivo registrato dall'utente corrente.
    * NB: nessun controllo sulla scadenza dell'autorizzazione del dispositivo: non è necessario.
    *
    * @param Request $request Pagina richiesta
@@ -241,7 +236,7 @@ class ApiController extends BaseController {
     $this->em->flush();
     // log della revoca
     $logger->info('Revoca dispositivo terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
-    $dblogger->logAzione('AUTORIZZAZIONE', 'Revoca dispositivo');
+    $dblogger->logAzione('AUTENTICAZIONE', 'Revoca dispositivo');
     // restituisce risposta
     $risposta['stato'] = 'OK';
     return new JsonResponse($risposta);
@@ -255,7 +250,7 @@ class ApiController extends BaseController {
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    *
-   * @return JsonResponse Restituisce la risposta i dati necessari per la firma
+   * @return JsonResponse Restituisce l'ID della richiesta e una sequenza casuale
    */
   #[Route(path: '/api/auth/request', name: 'api_authRequest', methods: ['POST'])]
   public function authRequest(Request $request, TranslatorInterface $trans,
@@ -264,30 +259,24 @@ class ApiController extends BaseController {
     $risposta = [];
     // legge dati
     $dati = json_decode($request->getContent(), true);
-    $dispositivoId = (string) ($dati['dispositivoId'] ?? null);
+    $dispositivoId = (string) ($dati['dispositivoId'] ?? '');
     // controlla l'ID dispositivo
-    if (!is_string($dispositivoId) || $dispositivoId === '') {
-      // errore: ID dispositivo non presente o non valido
-      $logger->error('Richiesta di autenticazione non riuscita: ID dispositivo non valido.',
-        ['dispositivoId' => $dispositivoId]);
-      // non fornisce informazioni sull'errore
-      $risposta['stato'] = 'ERRORE';
-      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
-      return new JsonResponse($risposta, 404); // 404 Not Found
+    if ($dispositivoId === '') {
+      // errore: ID dispositivo non valido
+      $logger->error('Richiesta di autenticazione non riuscita: ID dispositivo non valido.');
+      return new JsonResponse('ERRORE', 404); // 404 Not Found
     }
-    // controlla che il dispositivo sia associato ad un utente
+    // controlla che il dispositivo sia associato ad un utente abilitato
     $utente = $this->em->getRepository(Utente::class)->findOneBy(['dispositivoId' => $dispositivoId,
       'abilitato' => 1]);
     if (!$utente) {
-      // errore: utente non trovato o non abilitato
+      // errore: utente non trovato o disabilitato
       $logger->error('Richiesta di autenticazione non riuscita: utente non trovato o disabilitato.',
         ['dispositivoId' => $dispositivoId]);
-      // non fornisce informazioni sull'errore
-      $risposta['stato'] = 'ERRORE';
-      $risposta['errore'] = $trans->trans('exception.api_auth.richiesta_invalida');
       return new JsonResponse($risposta, 404); // 404 Not Found
     }
-    // controlla se dispositivo è valido
+sleep(10);
+    // controlla se dispositivo è ancora valido
     if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
       // errore: dispositivo non valido
       $logger->error('Richiesta di autenticazione non riuscita: dispositivo non valido.',
@@ -307,9 +296,8 @@ class ApiController extends BaseController {
     $this->em->flush();
     // log della richiesta
     $logger->info('Richiesta di autenticazione terminata con successo.', ['utente' => $utente->getUserIdentifier()]);
-    $dblogger->logAzione('AUTORIZZAZIONE', 'Richiesta di autenticazione');
+    $dblogger->logAzione('AUTENTICAZIONE', 'Richiesta di autenticazione');
     // restituisce risposta
-    $risposta['stato'] = 'OK';
     $risposta['id'] = $autenticazione->getIdPubblico();
     $risposta['casuale'] = $autenticazione->getCasuale();
     return new JsonResponse($risposta);
@@ -417,7 +405,7 @@ class ApiController extends BaseController {
     // log della validazione
     $logger->info('Validazione richiesta di autenticazione terminata con successo.',
       ['utente' => $utente->getUserIdentifier()]);
-    $dblogger->logAzione('AUTORIZZAZIONE', 'Validazione richiesta di autenticazione');
+    $dblogger->logAzione('AUTENTICAZIONE', 'Validazione richiesta di autenticazione');
     // restituisce risposta
     $risposta['stato'] = 'OK';
     $risposta['code'] = $autenticazione->getToken();

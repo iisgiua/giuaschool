@@ -221,7 +221,7 @@ class UtenteRepository extends EntityRepository {
    * @return bool Restituisce vero se il dispositivo è valido, falso altrimenti
    */
   public function dispositivoValido(Utente $utente): bool {
-    // controlla se esiste una dispositivo registrato
+    // controlla se esiste un dispositivo registrato
     if (!$utente->getAbilitato() || !$utente->getDispositivoId() || !$utente->getDispositivoChiave() ||
         !$utente->getDispositivoRegistrato()) {
       // dispositivo non registrato o utente disabilitato
