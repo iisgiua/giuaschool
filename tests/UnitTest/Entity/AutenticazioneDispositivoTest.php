@@ -8,7 +8,7 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\Entity\AppChallenge;
+use App\Entity\AutenticazioneDispositivo;
 use App\Tests\EntityTestCase;
 use DateTimeImmutable;
 use ReflectionClass;
@@ -19,7 +19,7 @@ use ReflectionClass;
  *
  * @author Antonello Dessì
  */
-class AppChallengeTest extends EntityTestCase {
+class AutenticazioneDispositivoTest extends EntityTestCase {
 
  /**
    * Definisce dati per i test.
@@ -27,15 +27,15 @@ class AppChallengeTest extends EntityTestCase {
    */
   protected function setUp(): void {
     // nome dell'entità
-    $this->entity = AppChallenge::class;
+    $this->entity = AutenticazioneDispositivo::class;
     // campi da testare'utente', 'token', 'scadenza', 'usato'
-    $this->fields = ['utente', 'nonce', 'scadenza', 'usato'];
+    $this->fields = ['idPubblico', 'utente', 'casuale', 'scadenzaRichiesta', 'richiestaUsata', 'token', 'scadenzaToken', 'tokenUsato'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = '_entityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_app_challenge' => ['id', 'creato', 'modificato', 'utente_id', 'nonce', 'scadenza', 'usato']];
+    $this->canRead = ['gs_autenticazione_dispositivo' => ['id', 'creato', 'modificato', 'id_pubblico', 'utente', 'casuale', 'scadenza_richiesta', 'richiesta_usata', 'token', 'scadenza_token', 'token_usato']];
     // SQL write
     $this->canWrite = $this->canRead;
     // SQL exec
@@ -70,11 +70,15 @@ class AppChallengeTest extends EntityTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
+          ($field == 'idPubblico' ? $this->faker->uuid() :
           ($field == 'utente' ? $this->getReference("docente_curricolare_1") :
-          ($field == 'nonce' ? $this->faker->uuid() :
-          ($field == 'scadenza' ? $this->faker->passthrough(new DateTimeImmutable()) :
-          ($field == 'usato' ? $this->faker->boolean() :
-          null))));
+          ($field == 'casuale' ? $this->faker->uuid() :
+          ($field == 'scadenzaRichiesta' ? $this->faker->passthrough(new DateTimeImmutable()) :
+          ($field == 'richiestaUsata' ? $this->faker->boolean() :
+          ($field == 'token' ? $this->faker->uuid() :
+          ($field == 'scadenzaToken' ? $this->faker->passthrough(new DateTimeImmutable()) :
+          ($field == 'richiestaToken' ? $this->faker->boolean() :
+          null))))))));
         $o[$i]->{'set'.ucfirst((string) $field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -116,7 +120,7 @@ class AppChallengeTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $this->assertSame('Challenge '.$existent->getId().' del '.$existent->getCreato()->format('d/m/Y H:i:s'), (string) $existent, $this->entity.'::toString');
+    $this->assertSame('Autorizzazione '.$existent->getId().' del '.$existent->getCreato()->format('d/m/Y H:i:s'), (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -126,6 +130,18 @@ class AppChallengeTest extends EntityTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
+    // unique idPubblico
+    $idPubblicoSaved = $objects[1]->getIdPubblico();
+    $objects[1]->setIdPubblicoSaved($objects[0]->getIdPubblicoSaved());
+    $err = $this->val->validate($objects[1]);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::idPubblicoSaved - UNIQUE');
+    $objects[1]->setCodiceFiscale($idPubblicoSaved);
+    // unique token
+    $tokenSaved = $objects[1]->getToken();
+    $objects[1]->setToken($objects[0]->getToken());
+    $err = $this->val->validate($objects[1]);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::token - UNIQUE');
+    $objects[1]->setTokenSaved($idPubblicoSaved);
   }
 
 }

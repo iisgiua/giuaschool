@@ -95,7 +95,7 @@ class AutenticazioneDispositivo implements Stringable {
   private ?DateTimeImmutable $scadenzaToken = null;
 
   /**
-   * @var bool $usato Indica se il token di autorizzazione è stato già utilizzato
+   * @var bool $tokenUsato Indica se il token di autorizzazione è stato già utilizzato
    */
   #[ORM\Column(name: 'token_usato', type: Types::BOOLEAN, nullable: false)]
   private bool $tokenUsato = false;

@@ -1,0 +1,29 @@
+####################
+# AutenticazioneDispositivoFixtures - dati di test
+#
+# Dati per la richiesta di autorizzazione:
+#   idPubblico: ID della richiesta di autorizzazione per uso esterno
+#   utente: utente associato al dispositivo autorizzato
+#   casuale: sequenza casuale di byte (nonce) associata alla richiesta di autorizzazione
+#   scadenzaRichiesta: data e ora della scadenza della richiesta di autorizzazione
+#   richiestaUsata: indica se la richiesta di autorizzazione è stata già utilizzata
+#   token: il valore univoco usato per il token di autorizzazione
+#   scadenzaToken: data e ora della scadenza del token di autorizzazione
+#   tokenUsato: indica se il token di autorizzazione è stato già utilizzato
+####################
+
+
+include:
+  - DocenteFixtures.yml
+
+
+App\Entity\AutenticazioneDispositivo:
+  autenticazioneDispositivo_{1..5}:
+    idPubblico: '<uuid()>'
+    utente: '@docente_*'
+    casuale: '<uuid()>'
+    scadenzaRichiesta: '<dateTimeBetween("-1 days", "now")>'
+    richiestaUsata: '<boolean(50)>'
+    token: '<uuid()>'
+    scadenzaToken: '<dateTimeBetween("-1 days", "now")>'
+    tokenUsato: '<boolean(50)>'
