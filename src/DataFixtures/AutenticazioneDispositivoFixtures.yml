@@ -19,11 +19,11 @@ include:
 
 App\Entity\AutenticazioneDispositivo:
   autenticazioneDispositivo_{1..5}:
-    idPubblico: '<uuid()>'
+    idPubblico (unique): '<uuid()>'
     utente: '@docente_*'
     casuale: '<uuid()>'
     scadenzaRichiesta: '<dateTimeBetween("-1 days", "now")>'
     richiestaUsata: '<boolean(50)>'
-    token: '<uuid()>'
+    token (unique): '<uuid()>'
     scadenzaToken: '<dateTimeBetween("-1 days", "now")>'
     tokenUsato: '<boolean(50)>'

@@ -102,28 +102,32 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
   public function getUser(string $token, array $attributes): ?UserInterface {
-    // controlla il token
-    if ($token === '') {
-      // errore: token non presente
-      $this->logger->error('Connessione al registro non riuscita: token nullo.');
-      throw new CustomUserMessageAuthenticationException('exception.api_auth.richiesta_invalida');
-    }
     // inizia transazione per evitare problemi di concorrenza
     $this->em->beginTransaction();
     try {
+      // controlla il token
+      if ($token === '') {
+        // errore: token non presente
+        $this->logger->error('Connessione al registro non riuscita: token nullo.',
+          ['ip' => $attributes['ip']]);
+        throw new Exception();
+      }
       // controlla la richiesta di autenticazione esistente
       $autenticazione = $this->em->getRepository(AutenticazioneDispositivo::class)->trovaToken($token);
       if (!$autenticazione) {
         // errore: token non presente nel sistema
-        $this->logger->error('Connessione al registro non riuscita: token non presente nel sistema.');
-        throw new Exception('exception.api_auth.richiesta_invalida');
+        $this->logger->error('Connessione al registro non riuscita: token non presente nel sistema.',
+          ['ip' => $attributes['ip']]);
+        throw new Exception();
       }
       if ($autenticazione->getScadenzaToken() < new DateTimeImmutable() || $autenticazione->getTokenUsato()) {
         // errore: token scaduto o già usato
         $this->logger->error('Connessione al registro non riuscita: token scaduto o già usato.',
-          ['scadenza' => $autenticazione->getScadenzaToken()->format('d/m/Y H:i:s'),
-          'usato' => (int) $autenticazione->getTokenUsato()]);
-        throw new Exception('exception.api_auth.richiesta_invalida');
+          ['ip' => $attributes['ip'],
+          'utente' => $autenticazione->getUtente() ? $autenticazione->getUtente()->getUserIdentifier() : '---',
+          'scadenza' => $autenticazione->getScadenzaToken()->format('d/m/Y H:i:s'),
+          'usata' => (int) $autenticazione->getTokenUsato(), 'richiesta' => $autenticazione->getid()]);
+        throw new Exception();
       }
       // token valido: lo segna subito come usato
       $autenticazione->setTokenUsato(true);
@@ -133,16 +137,15 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
     } catch (Exception $e) {
       // elimina eventuali modifiche
       $this->em->rollback();
-      // non fornisce informazioni sull'errore
       throw new CustomUserMessageAuthenticationException('exception.api_auth.richiesta_invalida');
     }
     // restituisce l'utente corrispondente
     $utente = $autenticazione->getUtente();
     if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
       // errore: dispositivo non valido
-      $this->logger->error('Connessione al registro non riuscita: dispositivo non valido.',
-        ['autenticazione' => $autenticazione->getId(), 'utente' => $utente->getUserIdentifier(),
-        'ip' => $attributes['ip']]);
+      $this->logger->error('Connessione al registro non riuscita: dispositivo non più valido.',
+        ['ip' => $attributes['ip'], 'utente' => $utente->getUserIdentifier(),
+        'richiesta' => $autenticazione->getid()]);
       throw new CustomUserMessageAuthenticationException('exception.api_auth.richiesta_invalida');
     }
     // controlla modalità manutenzione
@@ -178,10 +181,8 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
       $request->getSession()->set('/APP/UTENTE/lista_profili', $utente->getListaProfili());
     }
     // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Sessione', [
-      'Autenticazione' => 'AUTH-CONNECT',
-      'Username' => $utente->getUserIdentifier(),
-      'Ruolo' => $utente->getRoles()[0],
+    $this->dblogger->logAzione('ACCESSO', 'Rinnovo sessione', ['Autenticazione' => 'AUTH-CONNECT',
+      'Username' => $utente->getUserIdentifier(), 'Ruolo' => $utente->getRoles()[0],
       'Lista profili' => $utente->getListaProfili()]);
     // carica configurazione
     $this->config->carica();
