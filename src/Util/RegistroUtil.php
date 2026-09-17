@@ -3264,7 +3264,7 @@ class RegistroUtil {
     $controllo['N:N']['N:N'] = 'materia';
     $controllo['S:N']['E:N'] = $controllo['S:N']['N:N'] = $controllo['S:N']['U:N'] = 'sostegno';
     $controllo['S:C']['E:N'] = $controllo['S:C']['N:N'] = $controllo['S:C']['U:N'] = 'sostegno';
-    $controllo['U:N']['U:N'] = 'ok';
+    $controllo['U:N']['U:N'] = 'materia';
     $controllo['E:C']['E:C'] = $controllo['E:C']['N:C'] = $controllo['E:C']['U:C'] = 'gruppo';
     $controllo['N:C']['E:C'] = $controllo['N:C']['N:C'] = $controllo['N:C']['U:C'] = 'gruppo';
     $controllo['S:N']['E:C'] = $controllo['S:N']['N:C'] = $controllo['S:N']['U:C'] = 'sostegno';
