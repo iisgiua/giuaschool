@@ -137,7 +137,8 @@ $(document).ready(function() {
   $('#avviso_cattedra').change(function(e) {
     if (cattedre_sost[$(this).val()]) {
       $('#gs-modal-waiting').modal('show');
-      $.post('{{ path('ajax_materie') }}/'+cattedre_classe[$(this).val()], function (data) {
+      alert( "{{ path('ajax_materie') }}/"+cattedre_classe[$(this).val()]  );
+      $.post("{{ path('ajax_materie') }}/"+cattedre_classe[$(this).val()], function (data) {
         var s='';
         $.each(data.lista, function(idx,item){
           s+='<option value="'+item.id+'">'+item.nome+'</option>';
@@ -236,7 +237,7 @@ $(document).ready(function() {
     var idm = $('#avviso_materia').val();
     var idg = $('#avviso_genitori').val();
     $('#gs-modal-waiting').modal('show');
-    $.post('{{ path('ajax_materie') }}/'+cattedre_classe[idc], function (data) {
+    $.post("{{ path('ajax_materie') }}/"+cattedre_classe[idc], function (data) {
       var s='';
       $.each(data.lista, function(idx,item){
         s+='<option value="'+item.id+'">'+item.nome+'</option>';
