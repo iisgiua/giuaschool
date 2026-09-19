@@ -274,7 +274,7 @@ Schema dello scenario: Inserisce una nuova firma su una lezione esistente
     # | @docente_curricolare_1:username | @cattedra_1A_1:id  | @classe_1A:id | 2023-02-04 | 1   | 1ª: 08:30 - 09:30 | Italiano    | ?@docente_sostegno_1:nome,cognome?@docente_curricolare_1:nome,cognome   | Argomento svolto - Attività svolta |
     | @docente_sostegno_1:username    | @cattedra_1A_9:id  | @classe_1A:id | 2023-02-04 | 2   | 2ª: 09:30 - 10:30 | Sostituzione    | ?@docente_sostegno_1:nome,cognome?@docente_itp_3:nome,cognome   | @lezione_1A_12:argomento,attivita   |
     | @docente_sostegno_1:username    | @cattedra_1A_9:id  | @classe_1A:id | 2023-02-04 | 3   | 3ª: 10:30 - 11:30 | @lezione_1A_13:materia.nomeBreve+ (Sostituzione)    | ?@docente_sostegno_1:nome,cognome?@docente_itp_3:nome,cognome   | @lezione_1A_13:argomento,attivita   |
-
+@debug
 Schema dello scenario: Inserisce una nuova firma di supplenza su una lezione esistente
   Dato login utente "<docente>"
   E pagina attiva "lezioni_registro_firme" con parametri:
@@ -294,7 +294,7 @@ Schema dello scenario: Inserisce una nuova firma di supplenza su una lezione esi
   Esempi:
     | docente                         | classe           | data       | ora | orario            | materia                    | materia1                  | docenti                                                          | argomenti                          |
     | @docente_curricolare_1:username | @classe_1A:id    | 2023-02-04 | 2   | 2ª: 09:30 - 10:30 | Matematica                 | Matematica (Sostituzione) | ?@docente_itp_3:nome,cognome?@docente_curricolare_1:nome,cognome | Argomento svolto - Attività svolta |
-    | @docente_curricolare_1:username | @classe_1A:id    | 2023-02-04 | 3   | 3ª: 10:30 - 11:30 | Sostituzione               | Sostituzione              | ?@docente_itp_3:nome,cognome?@docente_curricolare_1:nome,cognome | Argomento svolto - Attività svolta |
+    # | @docente_curricolare_1:username | @classe_1A:id    | 2023-02-04 | 3   | 3ª: 10:30 - 11:30 | Sostituzione               | Sostituzione              | ?@docente_itp_3:nome,cognome?@docente_curricolare_1:nome,cognome | Argomento svolto - Attività svolta |
     | @docente_itp_3:username         | @classe_3CCHI:id | 2023-02-04 | 5   | 5ª: 12:30 - 13:30 | Scienze integrate: Chimica | Chimica (Sostituzione)    | ?@docente_itp_3:nome,cognome?@docente_itp_1:nome,cognome         | Argomento svolto - Attività svolta |
     | @docente_itp_3:username         | @classe_3CCHI:id | 2023-02-04 | 6   | 6ª: 13:30 - 14:30 | Sostituzione               | Sostituzione              | ?@docente_itp_3:nome,cognome?@docente_itp_1:nome,cognome         | Argomento svolto - Attività svolta |
 

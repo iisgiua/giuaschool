@@ -137,7 +137,6 @@ $(document).ready(function() {
   $('#avviso_cattedra').change(function(e) {
     if (cattedre_sost[$(this).val()]) {
       $('#gs-modal-waiting').modal('show');
-      alert( "{{ path('ajax_materie') }}/"+cattedre_classe[$(this).val()]  );
       $.post("{{ path('ajax_materie') }}/"+cattedre_classe[$(this).val()], function (data) {
         var s='';
         $.each(data.lista, function(idx,item){
