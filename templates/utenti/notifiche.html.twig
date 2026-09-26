@@ -13,16 +13,12 @@
     </div>
     <div class="panel-body">
       <div id="notifica_tipo" class="gs-mt-3 gs-mr-4 gs-ml-4">
-        <legend class="gs-h3 gs-mb-0">Canale per l'invio delle notifiche:</legend>
-        <fieldset style="border:1px solid #999;border-radius:5px" class="gs-pt-3 gs-pb-3">
-          {{ form_widget(form[0].tipo) }}
-        </fieldset>
+        <legend class="gs-h3 gs-mb-2">Canale per l'invio delle notifiche:</legend>
+        {{ form_widget(form[0].tipo) }}
       </div>
       <div id="notifica_abilitato" class="gs-mt-5 gs-mr-4 gs-ml-4">
-        <legend class="gs-h3 gs-mb-0">Tipo di evento da notificare:</legend>
-        <fieldset style="border:1px solid #999;border-radius:5px" class="gs-pt-3 gs-pb-3">
-          {{ form_widget(form[0].abilitato) }}
-        </fieldset>
+        <legend class="gs-h3 gs-mb-2">Tipo di evento da notificare:</legend>
+        {{ form_widget(form[0].abilitato) }}
       </div>
     </div>
     <div class="panel-footer text-center">
@@ -39,50 +35,56 @@
 <script>
 $(document).ready(function() {
   $('.gs-row-radio input[type="radio"]').change(function() {
-    $('.gs-row-radio input[type="radio"]').parent().removeClass('active');
-    $(this).parent().addClass('active');
+    $('.gs-row-radio').removeClass('list-group-item-info');
+    $(this).closest('.gs-row-radio').addClass('list-group-item-info');
   });
   $('.gs-row-checkbox input[type="checkbox"]').change(function() {
-    if ($(this).prop('checked')) {
-      $(this).parent().addClass('active');
-    } else {
-      $(this).parent().removeClass('active');
-    }
+    $(this).closest('.gs-row-checkbox').toggleClass('list-group-item-info', $(this).prop('checked'));
   });
   // init
-  $('.gs-row-radio input:checked').parent().addClass('active');
-  $('.gs-row-checkbox input:checked').parent().addClass('active');
+  $('.gs-row-radio:has(input:checked)').addClass('list-group-item-info');
+  $('.gs-row-checkbox:has(input:checked)').addClass('list-group-item-info');
 });
 </script>
 {% endblock %}
 
 {% block _notifica_tipo_widget %}
+<div class="list-group">
   {% for item in form.children %}
-<div style="border-bottom:1px solid #ccc" class="row gs-row-radio gs-ml-4 gs-mr-4 gs-mb-4">
-  <label for="{{ item.vars.id }}" class="col-sm-6 radio-inline gs-big">
-    <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}{{ item.vars.attr['disabled'] is defined ? ' disabled="disabled"'}}> {{ item.vars.label|trans }}
+  <label for="{{ item.vars.id }}" class="list-group-item gs-row-radio">
+    <div class="row">
+      <div class="col-sm-6">
+        <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}{{ item.vars.attr['disabled'] is defined ? ' disabled="disabled"'}}> <strong>{{ item.vars.label|trans }}</strong>
+      </div>
+      <div class="col-sm-6"><em>{{ ('message.tipo_notifica_'~item.vars.value)|trans }}</em></div>
+    </div>
   </label>
-  <div class="col-sm-6 gs-big"><em>{{ ('message.tipo_notifica_'~item.vars.value)|trans }}</em></div>
-</div>
   {% endfor %}
+</div>
 {% endblock %}
 
 {% block _notifica_abilitato_widget %}
+<div class="list-group">
   {% for item in form.children %}
     {% if item.vars.value in ['circolare', 'avviso'] %}
-    <div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
-      <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
-        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
-      </label>
-      <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+  <label for="{{ item.vars.id }}" class="list-group-item gs-row-checkbox">
+    <div class="row">
+      <div class="col-sm-6">
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> <strong>{{ item.vars.label|trans }}</strong>
+      </div>
+      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
     </div>
+  </label>
     {% elseif app.user.controllaRuolo('GA') %}
-    <div style="border-bottom:1px solid #ccc" class="row gs-row-checkbox gs-ml-4 gs-mr-4 gs-mb-4">
-      <label for="{{ item.vars.id }}" class="col-sm-6 gs-checkbox-inline gs-big">
-        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> {{ item.vars.label|trans }}
-      </label>
-      <div class="col-sm-6 gs-big"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+  <label for="{{ item.vars.id }}" class="list-group-item gs-row-checkbox">
+    <div class="row">
+      <div class="col-sm-6">
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> <strong>{{ item.vars.label|trans }}</strong>
+      </div>
+      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
     </div>
+  </label>
     {% endif %}
   {% endfor %}
+</div>
 {% endblock %}
