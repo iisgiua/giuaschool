@@ -1,9 +1,21 @@
+:root {
+  --gs-primary: #00264d;
+  --gs-primary-strong: #0066cc;
+  --gs-primary-soft: #eaf3ff;
+  --gs-surface: #ffffff;
+  --gs-surface-soft: #f5f7fa;
+  --gs-text: #1f2937;
+  --gs-text-muted: #5f6f82;
+  --gs-border: rgba(123, 140, 163, 0.3);
+  --gs-shadow: rgba(0, 38, 77, 0.15);
+}
+
 /*** slim header ***/
 #gs-header .it-header-slim-wrapper {
-  background-color: #00264d; /* colore primario, variante a11 */
+  background-color: var(--gs-primary);
 }
 #gs-header .header-slim-right-zone a.btn-default:hover {
-  background-color: #435a70; /* colore secondario */
+  background-color: #435a70;
 }
 
 
@@ -12,21 +24,48 @@
   margin-top: -1px;
 }
 #gs-header nav button.custom-navbar-toggler {
-  padding: 0.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
   margin-left: 2px;
   margin-top: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px var(--gs-shadow);
+  transition: all 0.2s ease;
+  min-height: 42px;
+}
+#gs-header nav button.custom-navbar-toggler:hover,
+#gs-header nav button.custom-navbar-toggler:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 38, 77, 0.22);
+  filter: brightness(1.04);
+}
+#gs-header nav button.custom-navbar-toggler .custom-navbar-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1;
+}
+#gs-header nav button.custom-navbar-toggler .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: #fff;
 }
 #gs-header.is-sticky nav button.custom-navbar-toggler {
   margin-top: -0.54rem;
 }
 #gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active {
-  background-color: #FFFFFF;
-  color: #0066CC;
-  border-bottom: 2px solid #435A70;
-  border-top: 1px solid #435A70;
+  background-color: var(--gs-surface);
+  color: var(--gs-primary-strong);
+  border-bottom: 2px solid rgba(67, 90, 112, 0.7);
+  border-top: 1px solid rgba(67, 90, 112, 0.7);
 }
 #gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active:hover {
-  color: #0066CC;
+  color: var(--gs-primary-strong);
   text-decoration: underline;
 }
 #gs-header nav.navbar .expanded ul.navbar-nav li.nav-item a.nav-link.active {
@@ -77,6 +116,9 @@
 
 
 /*** footer ***/
+#gs-footer .it-footer-main {
+  background: linear-gradient(180deg, #0d2a4a 0%, #0a2540 100%);
+}
 #gs-footer .it-footer-main h2 {
   font-size: 1.25em;
   font-weight: 600;
