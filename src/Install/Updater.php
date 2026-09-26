@@ -187,7 +187,7 @@ class Updater {
     $vars = [
       'APP_ENV' => ['prod', 'definisce l\'ambiente correntemente utilizzato'],
       'APP_SECRET' => [bin2hex(random_bytes(20)), 'codice segreto univoco usato nella gestione della sicurezza'],
-      'DATABASE_URL' => ['mysql://root:root@localhost:3306/giuaschool', 'parametri di connessione al database'],
+      'DATABASE_URL' => ['mysql://giuaschool:giuaschool@localhost:3306/giuaschool', 'parametri di connessione al database'],
       'MAILER_DSN' => ['null://null', 'parametri di connessione al server email'],
       'MESSENGER_TRANSPORT_DSN' => ['doctrine://default','parametri di configurazione per l\'invio dei messaggi' ],
       'GOOGLE_API_KEY' => ['', 'autenticazione tramite Google Workspace'],

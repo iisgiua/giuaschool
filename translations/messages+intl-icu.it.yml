@@ -208,7 +208,7 @@ label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
 label.invio_notifiche: Invio delle notifiche
 label.leggere_in_classe: Leggere agli alunni
-label.login_otp: Codice OTP<br>(solo per gli utenti abilitati)
+label.login_otp: Codice OTP (solo per gli utenti abilitati)
 label.login: Accedi
 label.logout: Esci
 label.lunedi: Lunedì
