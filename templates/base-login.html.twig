@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html dir="ltr" lang="it" class="lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html dir="ltr" lang="it" class="lt-ie9 lt-ie8"><![endif]-->
+<!--[if IE 8]><html dir="ltr" lang="it" class="lt-ie9"><![endif]-->
+<!--[if gt IE 8]><!-->
+<html dir="ltr" lang="it" class="">
+<!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ pagina_titolo|trans }}</title>
+    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
+    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
+    <meta name="author" content="Antonello Dessì">
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
+    <!--[if IE 10]>
+    <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
+    <![endif]-->
+    <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
+{% block pagina_css %}
+{% endblock %}
+    <!--[if lt IE 9]>
+    <script src="{{ asset('vendor/html5shiv.min.js') }}"></script>
+    <script src="{{ asset('vendor/respond.min.js') }}"></script>
+    <![endif]-->
+{% block pagina_js_inizio %}
+{% endblock %}
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-icon-180x180.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="msapplication-TileColor" content="#00a300">
+    <meta name="msapplication-TileImage" content="{{ asset('ms-icon-144x144.png') }}">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#5bbad5">
+  </head>
+  <body class="gs-login-page">
+    <p class="gs-mb-0">
+      <a href="#gs-main" class="sr-only sr-only-focusable">Vai al contenuto</a>
+    </p>
+
+    <!-- login page container -->
+    <div class="gs-login-container" id="gs-top">
+      
+      <!-- simple header with logo and back button -->
+      <div class="gs-login-header">
+        <div class="gs-login-content-wrapper">
+{% if block('pagina_back_button') is not empty %}
+          <div class="row gs-vertical-center gs-header-spacing">
+            <div class="col-xs-6 col-sm-5">
+{% block pagina_back_button %}
+              <a href="{{ path('login_form') }}" class="btn btn-default gs-back-button">
+                <span class="glyphicon glyphicon-arrow-left gs-mr-2"></span>Torna al Login
+              </a>
+{% endblock %}
+            </div>
+            <div class="col-xs-6 col-sm-7 gs-logo-title-container gs-logo-right">
+              <a href="{{ path('login_form') }}" class="gs-login-logo">
+                <img src="{{ asset('img/logo-giuaschool.png') }}" alt="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}">
+              </a>
+              <h1 class="gs-login-title">{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</h1>
+              {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+              <p class="gs-login-subtitle">{{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</p>
+              {% endif %}
+            </div>
+          </div>
+{% else %}
+          <div class="text-center gs-logo-centered">
+            <a href="{{ path('login_form') }}" class="gs-login-logo">
+              <img src="{{ asset('img/logo-giuaschool.png') }}" alt="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}">
+            </a>
+            <h1 class="gs-login-title">{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</h1>
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <p class="gs-login-subtitle">{{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</p>
+            {% endif %}
+          </div>
+{% endif %}
+        </div>
+      </div>
+
+      <!-- contenuto -->
+      <div class="gs-login-main">
+        <div class="gs-login-content-wrapper">
+          <div id="gs-main">
+{% block pagina_contenuto %}
+{% endblock %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- footer -->
+    <footer class="gs-login-footer">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-12 hidden-xs text-center small">
+            <div class="row">
+              <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <address class="text-center">
+                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_0_telefono') }}
+                </address>
+              </div>
+              {% if app.session.get('/CONFIG/ISTITUTO/num_sedi') > 1 %}
+              <div class="col-sm-6">
+                <address class="text-center">
+                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_1_telefono') }}
+                </address>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid text-center gs-mt-2">
+        <p class="small">
+          <a href="{{ path('info_noteLegali') }}">Note legali</a> |
+          <a href="{{ path('info_privacy') }}">Privacy</a> |
+          <a href="{{ path('info_cookie') }}">Cookie</a> |
+          <a href="{{ path('info_credits') }}">Credits</a>
+        </p>
+      </div>
+    </footer>
+
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+    <!--[if IE 10]>
+    <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
+    <![endif]-->
+    <script src="{{ asset('js/script.js?v='~(filedate('js/script.js')|date('U'))) }}"></script>
+{% block pagina_js_fine %}
+{% endblock %}
+  </body>
+</html>

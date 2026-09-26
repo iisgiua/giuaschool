@@ -1,9 +1,8 @@
-{% extends 'base.html.twig' %}
+{% extends 'base-login.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container_fluid gs-mt-0">
   {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}
-  <div class="col-sm-12 bg-danger gs-mb-4 text-center">
+  <div class="alert alert-danger gs-mb-4 text-center">
     <h1 class="gs-h2">ATTENZIONE</h1>
     <p>
       <span class="gs-big">A causa di una manutenzione programmata del sistema informatico,<br>
@@ -16,8 +15,7 @@
   </div>
   {% endif %}
   {% if not manutenzione %}
-  <div class="col-sm-10 col-sm-offset-1 gs-mt-4">
-    <div class="panel panel-primary" >
+    <div class="panel panel-primary gs-mt-4">
       <div class="panel-heading">
         <div class="panel-title">Recupero della password di accesso</div>
       </div>
@@ -55,7 +53,5 @@
         {{ form_end(form, {'render_rest': false}) }}
       </div>
     </div>
-  </div>
   {% endif %}
-</div>
 {% endblock %}

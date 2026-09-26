@@ -14,7 +14,8 @@
   </div>
 </div>
 <div class="panel-body gs-pt-1 gs-pb-1">
-  <div class="help-block"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Entra"</strong>.</span></div>
+  <div class="help-block"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Accedi"</strong>.</span></div>
+  <p class="gs-mb-0 text-center"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
   <form name="login_form" method="post" class="form-horizontal">
     <div class="form-group">
       <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
@@ -31,18 +32,17 @@
       </div>
     </div>
 {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
-    <div class="form-group">
-      <label for="otp" class="col-sm-6 text-primary text-right">{{ 'label.login_otp'|trans|raw }}</label>
-      <div class="col-sm-6 input-group gs-pr-4 gs-pl-4 gs-mb-4">
+    <div class="form-group gs-pr-4 gs-pl-4 gs-mb-4">
+      <label for="otp" class="control-label text-primary text-left gs-d-block">{{ 'label.login_otp'|trans|raw }}</label>
+      <div class="input-group">
         <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
         <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
       </div>
     </div>
 {% endif %}
-    <div class="form-group text-center gs-mb-2">
-      <button type="submit" class="btn btn-info" id="login" name="login"><strong>Entra</strong></button>
+    <div class="form-group text-center gs-mt-2">
+      <button type="submit" class="btn btn-info" id="login" name="login"><strong>Accedi</strong></button>
     </div>
-    <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
     <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
   </form>
 </div>
